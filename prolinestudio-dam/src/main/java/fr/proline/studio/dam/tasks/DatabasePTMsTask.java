@@ -80,12 +80,12 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
     private int m_action;
     private final static int LOAD_PTMDATASET = 0;
     private final static int FILL_ALL_PTM_SITES_PEPINFO = 1;
-    
+        
     public DatabasePTMsTask(AbstractDatabaseCallback callback) {
         super(callback);
     }
     
-    
+        
     public void initFillPTMSites(long projectId, PTMDataset ptmDS, List<PTMSite> ptmSitesToFill) {
         init(SUB_TASK_COUNT, new TaskInfo("Load peptides of PTM Sites", false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
@@ -236,8 +236,6 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         //Read PTMSite V2      
         List<PTMSite> ptmSites = new ArrayList<>();
         long start = System.currentTimeMillis();
-        m_logger.debug(" START createPTMDatasetPTMSites");
-
 
         //---- Get associated RSM  ProteinMatches
         Long rsmId = m_ptmDataset.getDataset().getResultSummaryId();            
@@ -507,11 +505,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         return ptmMap;
     }
     
-    
-    
-    
-    //-----------------------------
-    private boolean fetchAllPTMSitesPeptideMatches(){
+      private boolean fetchAllPTMSitesPeptideMatches(){
         
         long start = System.currentTimeMillis();       
         m_logger.debug(" START fetchAllPTMSitesPeptideMatches task ");
@@ -539,7 +533,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
             fetchPTMSitesPepInstances(subTask, entityManagerMSI);
             
             long stop = System.currentTimeMillis();
-            m_logger.debug("??/{} PTM Sites filled in {} ms", m_ptmSitesOutput.size(), (stop-start));
+            m_logger.debug("fetchAllPTMSitesPeptideMatches : {} PTM Sites filled in {} ms", m_ptmSitesOutput.size(), (stop-start));
 
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
@@ -572,7 +566,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         HashMap<Long, DPeptideInstance> leafPeptideInstancesById = new HashMap<>();
         HashMap<Long, List<DPeptideInstance>> leafPeptideInstancesByPepId = new HashMap<>();
                 
-         m_logger.debug("fetchPTMSitesData: pepInstanceIds " +sliceOfPeptideInstanceIds.size());
+         m_logger.debug("fetchPTMSitesPepInstances: for nbr " +sliceOfPeptideInstanceIds.size());
         //---- Load Peptide Match + Spectrum / MSQuery information for all peptideInstance of PTMSite
         Query peptidesQuery = entityManagerMSI.createQuery("SELECT pm, pi\n"
                 + "              FROM fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstance pi \n"
@@ -581,7 +575,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         List l = peptidesQuery.getResultList();
         Iterator<Object[]> itPeptidesQuery = l.iterator();
         //---- Create List of DPeptideMatch (linked to DSpectrum + DMsQuery) from query resumlt
-        m_logger.debug("fetchPTMSitesData: query result size "+l.size());
+        m_logger.debug("fetchPTMSitesPepInstances: query result size "+l.size());
         while (itPeptidesQuery.hasNext()) {
             Object[] resCur = itPeptidesQuery.next();
             
@@ -635,7 +629,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
                  leafPeptideInstancesById.get(pi.getId()).setBestPeptideMatch(dpm);
             leafPeptideInstancesById.get(pi.getId()).getPeptideMatches().add(dpm);
         }
-        m_logger.debug(" created leafPeptideInstancesById. Nbr pepIns "+leafPeptideInstancesById.size());
+        m_logger.debug("fetchPTMSitesPepInstances: Created leafPeptideInstancesById. Nbr : "+leafPeptideInstancesById.size());
         //--- Retrieve Parent peptideInstances
         Long rsetId = m_ptmDataset.getDataset().getResultSetId();
         TypedQuery<PeptideInstance> parentPeptideInstanceQuery = entityManagerMSI.createQuery("SELECT pi FROM fr.proline.core.orm.msi.PeptideInstance pi WHERE pi.peptide.id IN (:listId) AND pi.resultSummary.id=:rsmId", PeptideInstance.class);
@@ -649,7 +643,6 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
             dpi.setPeptide(pi.getPeptide());
             parentPeptideInstancesByPepId.put(dpi.getPeptideId(), dpi);
         }
-         m_logger.debug(" parentPeptideInstancesByPepId created ");
         //--- Retrieve PeptideReadablePtmString
         Set<Long> allPeptides = allPeptidesMap.keySet();
         Query ptmStingQuery = entityManagerMSI.createQuery("SELECT p.id, ptmString FROM fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.PeptideReadablePtmString ptmString WHERE p.id IN (:listId) AND ptmString.peptide=p AND ptmString.resultSet.id=:rsetId");
@@ -664,7 +657,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
             Peptide peptide = allPeptidesMap.get(peptideId);
             peptide.getTransientData().setPeptideReadablePtmString(ptmString);
         }
-        m_logger.debug(" PeptideReadablePtmString LOADED");
+
         // fetch Generic PTM Data
         fetchGenericPTMData(entityManagerMSI);
 
@@ -673,7 +666,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         
         
         List<DPeptideMatch> allpeptideMatches = leafPeptideInstancesById.values().stream().flatMap(pi -> pi.getPeptideMatches().stream()).collect(Collectors.toList());
-         m_logger.debug(" allpeptideMatches  "+allpeptideMatches.size());
+         m_logger.debug("fetchPTMSitesPepInstances got PTM info  for all peptideMatches . nbr "+allpeptideMatches.size());
         for (DPeptideMatch pm : allpeptideMatches) {
             Peptide p = pm.getPeptide();
             Long idPeptide = p.getId();
@@ -688,25 +681,6 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
                 p.getTransientData().setDPeptidePtmMap(mapToPtm);
             }
         }
-//        
-//        HashMap<Long, ArrayList<DPeptidePTM>> ptmMap = fetchPeptidePTMForPeptides(entityManagerMSI, new ArrayList<>(pepId));        
-//        for (DPeptideMatch pm : allPepMatches) {
-//            Peptide p = pm.getPeptide();
-//            Long idPeptide = p.getId();
-//            ArrayList<DPeptidePTM> ptmList = ptmMap.get(idPeptide);
-//            pm.setPeptidePTMArray(ptmList);
-//                
-//            HashMap<Integer, DPeptidePTM> mapToPtm = new HashMap<>();
-//            if (ptmList != null) {
-//                for (DPeptidePTM peptidePTM : ptmList) {
-//                    mapToPtm.put((int) peptidePTM.getSeqPosition(), peptidePTM);
-//                }
-//                p.getTransientData().setDPeptidePtmMap(mapToPtm);
-//            }
-//        }
-            
-        
-        
         
         m_logger.info("{} peptides matching to {} peptide matches retrieved", allPeptides.size(), allpeptideMatches.size());
         m_logger.info("{} peptide instances retrieved", parentPeptideInstancesByPepId.size());

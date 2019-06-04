@@ -56,7 +56,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     protected AbstractDataBox m_dataBox;
 
     protected BasePlotPanel m_plotPanel;
-    private boolean _isDoubleYAxis;
+    private boolean m_isDoubleYAxis;
 
     protected boolean m_canChooseColor = false;
     //plot type combo box
@@ -83,7 +83,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     protected JButton m_exportSelectionButton = null;
 
     public MultiGraphicsPanel(boolean dataLocked, boolean canChooseColor, boolean isDoubleYAxis) {
-        _isDoubleYAxis = isDoubleYAxis;
+        m_isDoubleYAxis = isDoubleYAxis;
         columnXYIndex = new int[2];
         m_dataLocked = dataLocked;
         m_canChooseColor = canChooseColor;
@@ -109,7 +109,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(0, 5, 0, 5);
-        if (_isDoubleYAxis) {
+        if (m_isDoubleYAxis) {
             m_plotPanel = new DoubleYAxisPlotPanel();
         } else {
             m_plotPanel = new BasePlotPanel();
@@ -482,7 +482,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         switch (plotType) {
             case LINEAR_PLOT: {
                 m_plotPanel.clearPlots();
-                if (m_valueOn2Yxis != null) {
+                if (m_isDoubleYAxis) {
                     setPlotsWithDoubleYAxis();
                 } else {
                     setPlots();

@@ -1,0 +1,522 @@
+{
+	"ptm_ids": [
+		1,
+		4,
+		27,
+		16
+	],
+	"leaf_result_summary_ids": [
+		4,
+		3
+	],
+	"ptm_sites": [
+		{
+			"id": 0,
+			"protein_match_id": 158262,
+			"ptm_definition_id": 52,
+			"seq_position": 7346,
+			"best_peptide_match_id": 185356,
+			"localization_confidence": 0.97419536,
+			"peptide_ids_by_ptm_position": {
+				"3": [
+					212081,
+					121699
+				]
+			},
+			"isomeric_peptide_ids": []
+		},
+		{
+			"id": 1,
+			"protein_match_id": 157324,
+			"ptm_definition_id": 51,	
+			"seq_position": 1060,
+			"best_peptide_match_id": 317538,
+			"localization_confidence": 0.5,
+			"peptide_ids_by_ptm_position": {
+				"5": [
+					127200
+				]
+			},
+			"isomeric_peptide_ids": []
+		},
+		{
+			"id": 2,
+			"protein_match_id": 162686,
+			"ptm_definition_id": 52,
+			"seq_position": 7,
+			"best_peptide_match_id": 124773,
+			"localization_confidence": 0.7696184,
+			"peptide_ids_by_ptm_position": {
+				"6": [
+					103361
+				]
+			},
+			"isomeric_peptide_ids": []
+		},
+		{
+			"id": 3,
+			"protein_match_id": 164985,
+			"ptm_definition_id": 52,
+			"seq_position": 1071,
+			"best_peptide_match_id": 104130,
+			"localization_confidence": 0.74831855,
+			"peptide_ids_by_ptm_position": {
+				"20": [
+					88955
+				]
+			},
+			"isomeric_peptide_ids": []
+		},
+		{
+			"id": 4,
+			"protein_match_id": 160628,
+			"ptm_definition_id": 52,
+			"seq_position": 249,
+			"best_peptide_match_id": 369140,
+			"localization_confidence": 0.938392,
+			"peptide_ids_by_ptm_position": {
+				"9": [
+					249317,
+					115581
+				]
+			},
+			"isomeric_peptide_ids": []
+		},
+		{
+			"id": 5,
+			"protein_match_id": 161768,
+			"ptm_definition_id": 52,
+			"seq_position": 12,
+			"best_peptide_match_id": 330060,
+			"localization_confidence": 0.93961865,
+			"peptide_ids_by_ptm_position": {
+				"11": [
+					105094
+				]
+			},
+			"isomeric_peptide_ids": []
+		},
+		{
+			"id": 6,
+			"protein_match_id": 164750,
+			"ptm_definition_id": 52,
+			"seq_position": 144,
+			"best_peptide_match_id": 192844,
+			"localization_confidence": 0.9976792,
+			"peptide_ids_by_ptm_position": {
+				"14": [
+					75379
+				]
+			},
+			"isomeric_peptide_ids": []
+		},
+		{
+			"id": 7,
+			"protein_match_id": 160146,
+			"ptm_definition_id": 52,
+			"seq_position": 18,
+			"best_peptide_match_id": 294252,
+			"localization_confidence": 0.8054035,
+			"peptide_ids_by_ptm_position": {
+				"17": [
+					80126
+				]
+			},
+			"isomeric_peptide_ids": [
+				15040,
+				9279,
+				12815,
+				7440
+			]
+		},
+		{
+			"id": 8,
+			"protein_match_id": 159131,
+			"ptm_definition_id": 52,
+			"seq_position": 655,
+			"best_peptide_match_id": 183628,
+			"localization_confidence": 0.98753893,
+			"peptide_ids_by_ptm_position": {
+				"5": [
+					139069
+				]
+			},
+			"isomeric_peptide_ids": [
+				846
+			]
+		},
+		{
+			"id": 9,
+			"protein_match_id": 160362,
+			"ptm_definition_id": 51,
+			"seq_position": 25,
+			"best_peptide_match_id": 335969,
+			"localization_confidence": 0.2917525,
+			"peptide_ids_by_ptm_position": {
+				"8": [
+					76820
+				]
+			},
+			"isomeric_peptide_ids": [
+				18533
+			]
+		},
+		{
+			"id": 10,
+			"protein_match_id": 157877,
+			"ptm_definition_id": 52,
+			"seq_position": 26,
+			"best_peptide_match_id": 361466,
+			"localization_confidence": 0.14978842,
+			"peptide_ids_by_ptm_position": {
+				"26": [
+					245776
+				]
+			},
+			"isomeric_peptide_ids": [
+				14867,
+				11467,
+				10486,
+				1791
+			]
+		},
+		{
+			"id": 11,
+			"protein_match_id": 165196,
+			"ptm_definition_id": 51,
+			"seq_position": 412,
+			"best_peptide_match_id": 399803,
+			"localization_confidence": 0.25,
+			"peptide_ids_by_ptm_position": {
+				"5": [
+					263699
+				]
+			},
+			"isomeric_peptide_ids": []
+		},
+		{
+			"id": 12,
+			"protein_match_id": 164981,
+			"ptm_definition_id": 52,
+			"seq_position": 1137,
+			"best_peptide_match_id": 109373,
+			"localization_confidence": 1.0,
+			"peptide_ids_by_ptm_position": {
+				"2": [
+					92775
+				]
+			},
+			"isomeric_peptide_ids": []
+		},
+		{
+			"id": 13,
+			"protein_match_id": 165258,
+			"ptm_definition_id": 52,
+			"seq_position": 313,
+			"best_peptide_match_id": 403048,
+			"localization_confidence": 0.12685755,
+			"peptide_ids_by_ptm_position": {
+				"12": [
+					265124
+				]
+			},
+			"isomeric_peptide_ids": [
+				12863
+			]
+		},
+		{
+			"id": 14,
+			"protein_match_id": 163503,
+			"ptm_definition_id": 52,
+			"seq_position": 334,
+			"best_peptide_match_id": 339045,
+			"localization_confidence": 0.72984165,
+			"peptide_ids_by_ptm_position": {
+				"7": [
+					235118,
+					234818
+				]
+			},
+			"isomeric_peptide_ids": [
+				15168
+			]
+		},
+		{
+			"id": 15,
+			"protein_match_id": 157380,
+			"ptm_definition_id": 52,
+			"seq_position": 429,
+			"best_peptide_match_id": 198685,
+			"localization_confidence": 0.4954474,
+			"peptide_ids_by_ptm_position": {
+				"14": [
+					78854
+				],
+				"15": [
+					97950,
+					84838
+				]
+			},
+			"isomeric_peptide_ids": [
+				18235,
+				16559,
+				10402,
+				8721,
+				4671,
+				16560,
+				6975,
+				3403
+			]
+		},
+		{
+			"id": 16,
+			"protein_match_id": 165320,
+			"ptm_definition_id": 51,
+			"seq_position": 78,
+			"best_peptide_match_id": 170725,
+			"localization_confidence": 0.28030485,
+			"peptide_ids_by_ptm_position": {
+				"24": [
+					95008,
+					106686
+				]
+			},
+			"isomeric_peptide_ids": [
+				7104,
+				8584,
+				5513
+			]
+		},
+		{
+			"id": 17,
+			"protein_match_id": 160288,
+			"ptm_definition_id": 52,
+			"seq_position": 48,
+			"best_peptide_match_id": 78544,
+			"localization_confidence": 0.9683741,
+			"peptide_ids_by_ptm_position": {
+				"5": [
+					67702
+				]
+			},
+			"isomeric_peptide_ids": []
+		}
+	],
+	"ptm_clusters": [
+		{
+			"ptm_site_locations": [
+				0
+			],
+			"best_peptide_match_id": 185356,
+			"localization_confidence": 0.97419536,
+			"peptide_ids": [
+				212081,
+				121699
+			],
+			"isomeric_peptide_ids": []
+		},
+		{
+			"ptm_site_locations": [
+				1
+			],
+			"best_peptide_match_id": 317538,
+			"localization_confidence": 0.5,
+			"peptide_ids": [
+				127200
+			],
+			"isomeric_peptide_ids": []
+		},
+		{
+			"ptm_site_locations": [
+				2
+			],
+			"best_peptide_match_id": 124773,
+			"localization_confidence": 0.7696184,
+			"peptide_ids": [
+				103361
+			],
+			"isomeric_peptide_ids": []
+		},
+		{
+			"ptm_site_locations": [
+				3
+			],
+			"best_peptide_match_id": 104130,
+			"localization_confidence": 0.74831855,
+			"peptide_ids": [
+				88955
+			],
+			"isomeric_peptide_ids": []
+		},
+		{
+			"ptm_site_locations": [
+				4
+			],
+			"best_peptide_match_id": 369140,
+			"localization_confidence": 0.938392,
+			"peptide_ids": [
+				249317,
+				115581
+			],
+			"isomeric_peptide_ids": []
+		},
+		{
+			"ptm_site_locations": [
+				5
+			],
+			"best_peptide_match_id": 330060,
+			"localization_confidence": 0.93961865,
+			"peptide_ids": [
+				105094
+			],
+			"isomeric_peptide_ids": []
+		},
+		{
+			"ptm_site_locations": [
+				6
+			],
+			"best_peptide_match_id": 192844,
+			"localization_confidence": 0.9976792,
+			"peptide_ids": [
+				75379
+			],
+			"isomeric_peptide_ids": []
+		},
+		{
+			"ptm_site_locations": [
+				7
+			],
+			"best_peptide_match_id": 294252,
+			"localization_confidence": 0.8054035,
+			"peptide_ids": [
+				80126
+			],
+			"isomeric_peptide_ids": []
+		},
+		{
+			"ptm_site_locations": [
+				8
+			],
+			"best_peptide_match_id": 183628,
+			"localization_confidence": 0.98753893,
+			"peptide_ids": [
+				139069
+			],
+			"isomeric_peptide_ids": []
+		},
+		{
+			"ptm_site_locations": [
+				9
+			],
+			"best_peptide_match_id": 335969,
+			"localization_confidence": 0.2917525,
+			"peptide_ids": [
+				76820
+			],
+			"isomeric_peptide_ids": []
+		},
+		{
+			"ptm_site_locations": [
+				10
+			],
+			"best_peptide_match_id": 361466,
+			"localization_confidence": 0.14978842,
+			"peptide_ids": [
+				245776
+			],
+			"isomeric_peptide_ids": []
+		},
+		{
+			"ptm_site_locations": [
+				11
+			],
+			"best_peptide_match_id": 399803,
+			"localization_confidence": 0.25,
+			"peptide_ids": [
+				263699
+			],
+			"isomeric_peptide_ids": []
+		},
+		{
+			"ptm_site_locations": [
+				12
+			],
+			"best_peptide_match_id": 109373,
+			"localization_confidence": 1.0,
+			"peptide_ids": [
+				92775
+			],
+			"isomeric_peptide_ids": []
+		},
+		{
+			"ptm_site_locations": [
+				13
+			],
+			"best_peptide_match_id": 403048,
+			"localization_confidence": 0.12685755,
+			"peptide_ids": [
+				265124
+			],
+			"isomeric_peptide_ids": []
+		},
+		{
+			"ptm_site_locations": [
+				14
+			],
+			"best_peptide_match_id": 339045,
+			"localization_confidence": 0.72984165,
+			"peptide_ids": [
+				235118,
+				234818
+			],
+			"isomeric_peptide_ids": []
+		},
+		{
+			"ptm_site_locations": [
+				15
+			],
+			"best_peptide_match_id": 198685,
+			"localization_confidence": 0.4954474,
+			"peptide_ids": [
+				78854,
+				97950,
+				84838
+			],
+			"isomeric_peptide_ids": []
+		},
+		{
+			"ptm_site_locations": [
+				16
+			],
+			"best_peptide_match_id": 170725,
+			"localization_confidence": 0.28030485,
+			"peptide_ids": [
+				95008,
+				106686
+			],
+			"isomeric_peptide_ids": []
+		},
+		{
+			"ptm_site_locations": [
+				17
+			],
+			"best_peptide_match_id": 78544,
+			"localization_confidence": 0.9683741,
+			"peptide_ids": [
+				67702
+			],
+			"isomeric_peptide_ids": []
+		},
+		{
+			"ptm_site_locations": [
+				18
+			],
+			"best_peptide_match_id": 126140,
+			"localization_confidence": 0.16422951,
+			"peptide_ids": [
+				104266
+			],
+			"isomeric_peptide_ids": []
+		}
+	]
+}

@@ -12,7 +12,7 @@ import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.StringParameter;
 import fr.proline.studio.settings.FilePreferences;
 import fr.proline.studio.settings.SettingsDialog;
-import fr.proline.studio.utils.IconManager;
+
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.io.File;
@@ -22,7 +22,7 @@ import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import org.openide.util.NbBundle;
+
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +67,7 @@ public class Export2MzIdentMLParamPanel extends JPanel {
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
         createParameters();
-        m_parameterList.updateIsUsed(NbPreferences.root());
+        m_parameterList.updateValues(NbPreferences.root());
         
         JLabel cFNameLabel = new JLabel("First Name*:");
         c.gridx = 0;

@@ -81,6 +81,9 @@ public abstract class AbstractLabelFreeMSParamsPanel extends AbstractParamsPanel
             "use_last_peakel_detection": false
 	}
      */
+
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+
     //DEFAULT VALUE should be at index 0 !!     
     protected final static String[] CROSSASSIGN_STRATEGY_VALUES = {"Between all runs", "Within groups only"};
     protected final static String[] CROSSASSIGN_STRATEGY_KEYS = {"BETWEEN_ALL_RUNS", "WITHIN_GROUPS_ONLY"};
@@ -104,37 +107,40 @@ public abstract class AbstractLabelFreeMSParamsPanel extends AbstractParamsPanel
     protected final static String[] DETECTION_METHOD_KEYS = {"DETECT_PEAKELS", "DETECT_FEATURES", "EXTRACT_IONS"};
 
     //Some other default value   
-    protected final Double DEFAULT_EXTRACTION_MOZTOL_VALUE = 5.0;
-    protected final String DEFAULT_MOZTOL_UNIT = "PPM";
+    protected final static Double DEFAULT_EXTRACTION_MOZTOL_VALUE = 5.0;
+    protected final static String DEFAULT_MOZTOL_UNIT = "PPM";
 
-    protected final Double DEFAULT_CLUSTER_MOZTOL_VALUE = 5.0;
-    protected final Double DEFAULT_CLUSTER_TIMETOL_VALUE = 15.0;
-    protected final String DEFAULT_CLUSTER_TIMECOMPUT_VALUE = "MOST_INTENSE";
-    protected final String DEFAULT_CLUSTER_INTENSITYCOMPUT_VALUE = "MOST_INTENSE";
+    protected final static Double DEFAULT_CLUSTER_MOZTOL_VALUE = 5.0;
+    protected final static Double DEFAULT_CLUSTER_TIMETOL_VALUE = 15.0;
+    protected final static String DEFAULT_CLUSTER_TIMECOMPUT_VALUE = "MOST_INTENSE";
+    protected final static String DEFAULT_CLUSTER_INTENSITYCOMPUT_VALUE = "MOST_INTENSE";
 
-    protected final Double DEFAULT_ALIGN_FEATMAP_TIMETOL_VALUE = 600.0;
-    protected final Double DEFAULT_ALIGN_FEATMAP_MOZTOL_VALUE = 5.0;
-    protected final Integer DEFAULT_ALIGN_MAXITE_VALUE = 3;
-    protected final Integer DEFAULT_ALIGN_MASSINTERVAL_VALUE = 20000;
-    protected final Integer DEFAULT_SMOOTH_WINSIZE_VALUE = 200;
-    protected final Integer DEFAULT_SMOOTH_WINOVERLAP_VALUE = 20;
-    protected final Integer DEFAULT_SMOOTH_WINOVERLAP_MAX_VALUE = 100;
-    protected final Integer DEFAULT_SMOOTH_NBRLM_VALUE = 50;
+    protected final static Boolean DEFAULT_ALIGN_VALUE = Boolean.TRUE;
+    protected final static Double DEFAULT_ALIGN_FEATMAP_TIMETOL_VALUE = 600.0;
+    protected final static Double DEFAULT_ALIGN_FEATMAP_MOZTOL_VALUE = 5.0;
+    protected final static Integer DEFAULT_ALIGN_MAXITE_VALUE = 3;
+    protected final static Integer DEFAULT_ALIGN_MASSINTERVAL_VALUE = 20000;
+    protected final static Integer DEFAULT_SMOOTH_WINSIZE_VALUE = 200;
+    protected final static Integer DEFAULT_SMOOTH_WINOVERLAP_VALUE = 20;
+    protected final static Integer DEFAULT_SMOOTH_WINOVERLAP_MAX_VALUE = 100;
+    protected final static Integer DEFAULT_SMOOTH_NBRLM_VALUE = 50;
 
-    protected final Double DEFAULT_CA_FEATMAP_MOZTOL_VALUE = 5.0;
+    protected final static Boolean DEFAULT_CROSS_ASSIGN_VALUE = Boolean.TRUE;
+    protected final static Double DEFAULT_CA_FEATMAP_MOZTOL_VALUE = 5.0;
+    protected final static Boolean DEFAULT_CA_USE_RELIABLE_FEAT = Boolean.TRUE;
     public static final Double DEFAULT_CA_FEATMAP_RTTOL_VALUE = 60.0;
-    protected final String DEFAULT_CA_FILTER_NAME_VALUE = "INTENSITY";
-    protected final String DEFAULT_CA_FILTER_OPERATOR_VALUE = "GT";
-    protected final Double DEFAULT_CA_FILTER_VALUE = 0.0;
+    protected final static String DEFAULT_CA_FILTER_NAME_VALUE = "INTENSITY";
+    protected final static String DEFAULT_CA_FILTER_OPERATOR_VALUE = "GT";
+    protected final static Double DEFAULT_CA_FILTER_VALUE = 0.0;
+    protected final static Boolean DEFAULT_NORMALIZATION_VALUE = Boolean.FALSE;
 
-    public static final String XIC_PARAMS_PREFIX = "XicParameters";
-    public static final String XIC_SIMPLIFIED_PARAMS = XIC_PARAMS_PREFIX + ".isSimplifiedParameters";
-    public static final String XIC_PARAMS_VERSION_KEY = XIC_PARAMS_PREFIX + ".parametersVersion";
+    public final static String XIC_PARAMS_PREFIX = "XicParameters";
+    public final static String XIC_SIMPLIFIED_PARAMS = XIC_PARAMS_PREFIX + ".isSimplifiedParameters";
+    public final static String XIC_PARAMS_VERSION_KEY = XIC_PARAMS_PREFIX + ".parametersVersion";
     public final static String ALIGNMENT_CONFIG = "alignment_config";
     public final static String ALIGNMENT_METHOD_NAME = "method_name";
 
     protected final boolean m_readOnly;
-    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     protected JScrollPane m_scrollPane;
 
     public AbstractLabelFreeMSParamsPanel(boolean readOnly) {

@@ -38,22 +38,18 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
     private JTextField m_extractionMoZTolTF;
     private JTextField m_psmMatchingMoZTolTF;
 
-    //ALIGNEMENT PARAMs
-    JPanel m_alignementSettingsPanel;
-    CheckBoxTitledBorder m_alignmentSettingsCBoxTitle;
+    //ALIGNMENT PARAMs
+    private JPanel m_alignmentSettingsPanel;
+    private CheckBoxTitledBorder m_alignmentSettingsCBoxTitle;
 
-    private JLabel m_algnmentMethodLabel;
     private JComboBox m_alignmentMethodCB;
     private JLabel m_alignmentMaxIteLabel;
     private JLabel m_alignmentFeatureMoZTolLabel;
-    private JLabel m_alignmentFeatureTimeTolLabel;
     private JTextField m_alignmentMaxIterationTF;
-    private JTextField m_alignmentFeatureMappMoZTolTF;
-    private JTextField m_alignmentFeatureMappTimeToleranceTF;
+    private JTextField m_alignmentFeatureMapMoZTolTF;
+    private JTextField m_alignmentFeatureMapTimeToleranceTF;
 
     private JComboBox m_alignmentSmoothingMethodCB;
-    private JLabel m_algnmentFeatureMapMethodLabel;
-    private JLabel m_algnmentSmoothMethodLabel;
     private JLabel m_alignmentSmoothTimeIntervalLabel;
     private JLabel m_alignmentSmoothWinOverlapLabel;
     private JLabel m_alignmentSmoothNbrLMLabel;
@@ -61,19 +57,15 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
     private JTextField m_alignmentSmoothMinWinLMTF;
     private JTextField m_alignmentSmoothWinOverlapTF;
 
-    private JComboBox m_alignmentFeatureMappMethodCB;
+    private JComboBox m_alignmentFeatureMapMethodCB;
 
     //CROSS ASSIGNMENT PARAMs
     private JPanel m_crossAssignSettingsPanel;
-    private JLabel m_allowCrossAssignLabel;
-    private JLabel m_crossAssignFeatureMappRTTolLabel;
-    private JLabel m_crossAssignFeatureMappMoZTolLabel;
     private JTextField m_crossAssignFeatureMappMoZTolTF;
     private JTextField m_crossAssignFeatureMappRTTolTF;
     private CheckBoxTitledBorder m_crossAssignCBoxTitle;
     private JComboBox m_crossAssignStrategyCB;
 
-    private JPanel m_featureFilterPanel;
     private JLabel m_featureFilterNameLabel;
     private JLabel m_featureFilterOperatorLabel;
     private JLabel m_featureFilterValueLabel;
@@ -81,7 +73,7 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
     private JComboBox m_featureFilterNameCB;
     private JComboBox m_featureFilterOperatorCB;
     private JTextField m_featureFilterValueTF;
-    private JCheckBox m_retainOnlyReliableFeatures;
+    private JCheckBox m_retainOnlyReliableFeaturesCB;
 
     //CLUSTERING PARAMs
     private JTextField m_clusteringMoZTolTF;
@@ -90,19 +82,18 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
     private JComboBox m_clusteringIntensityComputationCB;
 
     //NORMALIZATION PARAMs
-    JPanel m_normalizationSettingsPanel;
-    CheckBoxTitledBorder m_normalizationSettingsCBTitle;
+    private JPanel m_normalizationSettingsPanel;
+    private CheckBoxTitledBorder m_normalizationSettingsCBTitle;
     private JComboBox m_normalizationCB;
     private JLabel m_normalizationLabel;
-
-    private JTabbedPane m_tabbedPane;
 
     public LabelFreeMSParamsCompletePanel(boolean readOnly, boolean readValues) {
         super(readOnly);
 
         createParameters();
+
         if (readValues) {
-            m_parameterList.updateIsUsed(NbPreferences.root());
+            m_parameterList.updateValues(NbPreferences.root());
         } else {
             m_parameterList.setDefaultValues();
         }
@@ -154,6 +145,12 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
 
         m_parameterList.add(m_alnIgnoreErrorsParameter);
 
+        m_crossAssignCBoxTitle = new CheckBoxTitledBorder("Cross Assignment", DEFAULT_CROSS_ASSIGN_VALUE);
+        m_crossAssignCBoxTitle.setEnabled(!m_readOnly);
+        m_crossAssignCBoxTitle.addChangeListener(e -> updateCrossAssignment());
+        BooleanParameter crossAssignParameter = new BooleanParameter("crossAssignment", "Cross Assignment", m_crossAssignCBoxTitle.getInternalCheckBox(), DEFAULT_CROSS_ASSIGN_VALUE);
+        m_parameterList.add(crossAssignParameter);
+
         m_crossAssignStrategyCB = new JComboBox(CROSSASSIGN_STRATEGY_VALUES);
         m_crossAssignStrategyParameter = new ObjectParameter<>("crossAssignStrategy", "Cross Assignment Strategy", m_crossAssignStrategyCB, CROSSASSIGN_STRATEGY_VALUES, CROSSASSIGN_STRATEGY_KEYS, 0, null);
         m_parameterList.add(m_crossAssignStrategyParameter);
@@ -173,6 +170,13 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         m_clusteringIntensityComputationCB = new JComboBox(CLUSTERING_INTENSITY_COMPUTATION_VALUES);
         m_clusteringIntensityComputationParameter = new ObjectParameter<>("clusteringIntensityComputation", "Clustering intensity computation", m_clusteringIntensityComputationCB, CLUSTERING_INTENSITY_COMPUTATION_VALUES, CLUSTERING_INTENSITY_COMPUTATION_KEYS, 0, null);
         m_parameterList.add(m_clusteringIntensityComputationParameter);
+
+        m_alignmentSettingsCBoxTitle = new CheckBoxTitledBorder("Map Alignment", true);
+        m_alignmentSettingsCBoxTitle.setEnabled(!m_readOnly);
+        m_alignmentSettingsCBoxTitle.addChangeListener(e -> updateAlignment());
+        BooleanParameter alignRTParameter = new BooleanParameter("alignRT", "Align RT", m_alignmentSettingsCBoxTitle.getInternalCheckBox(), DEFAULT_ALIGN_VALUE);
+        m_parameterList.add(alignRTParameter);
+
 
         m_alignmentMethodCB = new JComboBox(ALIGNMENT_METHOD_VALUES);
         m_alignmentMethodParameter = new ObjectParameter<>("alignmentMethod", "Alignment Method", m_alignmentMethodCB, ALIGNMENT_METHOD_VALUES, ALIGNMENT_METHOD_KEYS, 0, null);
@@ -198,17 +202,24 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         IntegerParameter alignmentSmoothingMinWinlandmarksParameter = new IntegerParameter("smoothingMinimumNumberOfLandmarks", "Smoothing minimum number of landmarks", m_alignmentSmoothMinWinLMTF, DEFAULT_SMOOTH_NBRLM_VALUE, new Integer(1), null);
         m_parameterList.add(alignmentSmoothingMinWinlandmarksParameter);
 
-        m_alignmentFeatureMappMoZTolTF = new JTextField();
-        DoubleParameter alignmentFeatureMappingMoZTolParameter = new DoubleParameter("featureMappingMozTolerance", "Feature Mapping Moz Tolerance", m_alignmentFeatureMappMoZTolTF, DEFAULT_ALIGN_FEATMAP_MOZTOL_VALUE, new Double(0), null);
+        m_alignmentFeatureMapMoZTolTF = new JTextField();
+        DoubleParameter alignmentFeatureMappingMoZTolParameter = new DoubleParameter("featureMappingMozTolerance", "Feature Mapping Moz Tolerance", m_alignmentFeatureMapMoZTolTF, DEFAULT_ALIGN_FEATMAP_MOZTOL_VALUE, new Double(0), null);
         m_parameterList.add(alignmentFeatureMappingMoZTolParameter);
 
-        m_alignmentFeatureMappMethodCB = new JComboBox(FEATURE_MAPPING_METHOD_VALUES);
-        m_alignmentFeatureMappMethodParameter = new ObjectParameter("featureMappingMethod", "Feature Mapping Method", m_alignmentFeatureMappMethodCB, FEATURE_MAPPING_METHOD_VALUES, FEATURE_MAPPING_METHOD_KEYS, 0, null);
+        m_alignmentFeatureMapMethodCB = new JComboBox(FEATURE_MAPPING_METHOD_VALUES);
+        m_alignmentFeatureMappMethodParameter = new ObjectParameter("featureMappingMethod", "Feature Mapping Method", m_alignmentFeatureMapMethodCB, FEATURE_MAPPING_METHOD_VALUES, FEATURE_MAPPING_METHOD_KEYS, 0, null);
         m_parameterList.add(m_alignmentFeatureMappMethodParameter);
 
-        m_alignmentFeatureMappTimeToleranceTF = new JTextField();
-        DoubleParameter alignmentFeatureMappingTimeToleranceParameter = new DoubleParameter("featureMappingTimeTolerance", "Feature Mapping Time Tolerance", m_alignmentFeatureMappTimeToleranceTF, DEFAULT_ALIGN_FEATMAP_TIMETOL_VALUE, new Double(1), null);
+        m_alignmentFeatureMapTimeToleranceTF = new JTextField();
+        DoubleParameter alignmentFeatureMappingTimeToleranceParameter = new DoubleParameter("featureMappingTimeTolerance", "Feature Mapping Time Tolerance", m_alignmentFeatureMapTimeToleranceTF, DEFAULT_ALIGN_FEATMAP_TIMETOL_VALUE, new Double(1), null);
         m_parameterList.add(alignmentFeatureMappingTimeToleranceParameter);
+
+
+        m_featureFilterCBTitle = new CheckBoxTitledBorder("Intensity Filtering", false);
+        m_featureFilterCBTitle.setEnabled(!m_readOnly);
+        m_featureFilterCBTitle.addChangeListener(e -> updateCrossAssignmentSettings());
+        BooleanParameter featureFilteringParameter = new BooleanParameter("intensityFiltering", "Intensity Filtering", m_featureFilterCBTitle.getInternalCheckBox(), Boolean.FALSE);
+        m_parameterList.add(featureFilteringParameter);
 
         m_featureFilterNameCB = new JComboBox(FEATURE_FILTER_NAME_VALUES);
         m_featureFilterNameParameter = new ObjectParameter<>("featureFilterNameParameter ", "Feature Name Parameter", m_featureFilterNameCB, FEATURE_FILTER_NAME_VALUES, FEATURE_FILTER_NAME_KEYS, 0, null);
@@ -230,12 +241,18 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         DoubleParameter featureMappingTimeTolParameter = new DoubleParameter("featureTimeTol", "RT tolerance", m_crossAssignFeatureMappRTTolTF, DEFAULT_CA_FEATMAP_RTTOL_VALUE, new Double(0), null);
         m_parameterList.add(featureMappingTimeTolParameter);
 
+        m_normalizationSettingsCBTitle = new CheckBoxTitledBorder("Map Normalization", DEFAULT_NORMALIZATION_VALUE);
+        m_normalizationSettingsCBTitle.setEnabled(!m_readOnly);
+        m_normalizationSettingsCBTitle.addChangeListener(e -> setEnabled(m_normalizationSettingsPanel, m_normalizationSettingsCBTitle.isSelected()));
+        BooleanParameter normalizationParameter = new BooleanParameter("mapNormalization", "Map Normalization", m_normalizationSettingsCBTitle.getInternalCheckBox(), DEFAULT_NORMALIZATION_VALUE);
+        m_parameterList.add(normalizationParameter);
+
         m_normalizationCB = new JComboBox(FEATURE_NORMALIZATION_VALUES);
         m_normalizationParameter = new ObjectParameter<>("normalization", "Normalization", m_normalizationCB, FEATURE_NORMALIZATION_VALUES, FEATURE_NORMALIZATION_KEYS, 0, null);
         m_parameterList.add(m_normalizationParameter);
 
-        m_retainOnlyReliableFeatures = new JCheckBox("Use only confident features");
-        BooleanParameter retainOnlyReliableFeaturesParameter = new BooleanParameter("restrainCrossAssignmentToReliableFeatures", "Use only confident features", m_retainOnlyReliableFeatures, Boolean.FALSE);
+        m_retainOnlyReliableFeaturesCB = new JCheckBox("Use only confident features");
+        BooleanParameter retainOnlyReliableFeaturesParameter = new BooleanParameter("restrainCrossAssignmentToReliableFeatures", "Use only confident features", m_retainOnlyReliableFeaturesCB, Boolean.TRUE);
         m_parameterList.add(retainOnlyReliableFeaturesParameter);
 
     }
@@ -290,22 +307,17 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
             Map<String, Object> alnFtParams = (Map<String, Object>) alignmentConfig.get("ft_mapping_method_params");
             try {
                 if (alnFtParams.containsKey("moz_tol")) {
-                    m_alignmentFeatureMappMoZTolTF.setText("" + Double.parseDouble(alnFtParams.getOrDefault("moz_tol", DEFAULT_ALIGN_FEATMAP_MOZTOL_VALUE).toString()));
-                    //enableAlignmentFtMapping(true);
-                } else {
-                    //enableAlignmentFtMapping(false);
+                    m_alignmentFeatureMapMoZTolTF.setText("" + Double.parseDouble(alnFtParams.getOrDefault("moz_tol", DEFAULT_ALIGN_FEATMAP_MOZTOL_VALUE).toString()));
                 }
-                m_alignmentFeatureMappTimeToleranceTF.setText("" + Double.parseDouble(alnFtParams.getOrDefault("time_tol", DEFAULT_ALIGN_FEATMAP_TIMETOL_VALUE).toString()));
+                m_alignmentFeatureMapTimeToleranceTF.setText("" + Double.parseDouble(alnFtParams.getOrDefault("time_tol", DEFAULT_ALIGN_FEATMAP_TIMETOL_VALUE).toString()));
             } catch (NumberFormatException ex) {
                 m_logger.error("error while settings ft_mapping_params quanti params " + ex);
-                m_alignmentFeatureMappMoZTolTF.setText(DEFAULT_ALIGN_FEATMAP_MOZTOL_VALUE.toString());
-                m_alignmentFeatureMappTimeToleranceTF.setText(DEFAULT_ALIGN_FEATMAP_TIMETOL_VALUE.toString());
+                m_alignmentFeatureMapMoZTolTF.setText(DEFAULT_ALIGN_FEATMAP_MOZTOL_VALUE.toString());
+                m_alignmentFeatureMapTimeToleranceTF.setText(DEFAULT_ALIGN_FEATMAP_TIMETOL_VALUE.toString());
             }
             m_alignmentSettingsCBoxTitle.setSelected(true);
-            updateAlignment();
         } else {
             m_alignmentSettingsCBoxTitle.setSelected(false);
-            updateAlignment();
         }
 
         //
@@ -338,12 +350,10 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
             } else {
                 m_featureFilterCBTitle.setSelected(false);
             }
-            m_retainOnlyReliableFeatures.setSelected(Boolean.parseBoolean(crossAssignmentConfig.getOrDefault("restrain_to_reliable_features", true).toString()));
+            m_retainOnlyReliableFeaturesCB.setSelected(Boolean.parseBoolean(crossAssignmentConfig.getOrDefault("restrain_to_reliable_features", true).toString()));
             m_crossAssignCBoxTitle.setSelected(true);
-            updateCrossAssignment();
         } else {
             m_crossAssignCBoxTitle.setSelected(false);
-            updateCrossAssignment();
         }
 
         m_useLastPeakelDetectionParam.setValue(quantParams.getOrDefault("use_last_peakel_detection", false).toString());
@@ -368,12 +378,12 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         //
         if (quantParams.containsKey("normalization_method") && quantParams.get("normalization_method")!=null) {
             m_normalizationSettingsCBTitle.setSelected(true);
-            updateNormalizationSettings();
             m_normalizationParameter.setValue((String) quantParams.getOrDefault("normalization_method", FEATURE_NORMALIZATION_VALUES[0]));
         } else {
             m_normalizationSettingsCBTitle.setSelected(false);
-            updateNormalizationSettings();
         }
+
+        updateNormalizationSettings();
         updateAlignmentFeatureMapping();
         updateAlignmentMethod();
         updateAlignmentSmoothing();
@@ -429,9 +439,9 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
             }
             alignmentConfig.put("ft_mapping_method_name", m_alignmentFeatureMappMethodParameter.getStringValue());
             Map<String, Object> alnFtParams = new HashMap<>();
-            alnFtParams.put("time_tol", m_alignmentFeatureMappTimeToleranceTF.getText());
-            if (m_alignmentFeatureMappMethodCB.getSelectedItem().equals(FEATURE_MAPPING_METHOD_VALUES[1])) { //param needed                
-                alnFtParams.put("moz_tol", m_alignmentFeatureMappMoZTolTF.getText());
+            alnFtParams.put("time_tol", m_alignmentFeatureMapTimeToleranceTF.getText());
+            if (m_alignmentFeatureMapMethodCB.getSelectedItem().equals(FEATURE_MAPPING_METHOD_VALUES[1])) { //param needed
+                alnFtParams.put("moz_tol", m_alignmentFeatureMapMoZTolTF.getText());
                 alnFtParams.put("moz_tol_unit", DEFAULT_MOZTOL_UNIT);
             }
             alignmentConfig.put("ft_mapping_method_params", alnFtParams);
@@ -443,7 +453,7 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         if (crossAssignmentEnabled) {
             Map<String, Object> crossAssignmentConfig = new HashMap<>();
             crossAssignmentConfig.put(ALIGNMENT_METHOD_NAME, m_crossAssignStrategyParameter.getStringValue());
-            crossAssignmentConfig.put("restrain_to_reliable_features", m_retainOnlyReliableFeatures.isSelected());
+            crossAssignmentConfig.put("restrain_to_reliable_features", m_retainOnlyReliableFeaturesCB.isSelected());
             Map<String, Object> ftMappingParams = new HashMap<>();
             ftMappingParams.put("moz_tol", m_crossAssignFeatureMappMoZTolTF.getText());
             ftMappingParams.put("moz_tol_unit", DEFAULT_MOZTOL_UNIT);
@@ -474,7 +484,7 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         JPanel mainPanel = new JPanel(new BorderLayout());
 
         // tabbed pane
-        m_tabbedPane = new JTabbedPane();
+        JTabbedPane m_tabbedPane = new JTabbedPane();
         m_tabbedPane.addTab("Detection", null, createDetectionPanel(), "Detection");
         m_tabbedPane.addTab("Clustering", null, createClusteringPanel(), "Feature Clustering");
         m_tabbedPane.addTab("Alignment", null, createAlignmentPanel(), "Map Alignment");
@@ -531,15 +541,6 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
     private JPanel createNormalizationPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         m_normalizationSettingsPanel = new JPanel(new GridBagLayout());
-        m_normalizationSettingsCBTitle = new CheckBoxTitledBorder("Map Normalization", false);
-        m_normalizationSettingsCBTitle.setEnabled(!m_readOnly);
-        m_normalizationSettingsCBTitle.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setEnabled(m_normalizationSettingsPanel, m_normalizationSettingsCBTitle.isSelected());
-            }
-        });
-
         panel.setBorder(m_normalizationSettingsCBTitle);
 
         GridBagConstraints c = new GridBagConstraints();
@@ -635,17 +636,9 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
     private JPanel createAlignmentPanel() {
         ActionListener assActionListener = new AssignementActionListener();
         JPanel panel = new JPanel(new BorderLayout());
-        m_alignmentSettingsCBoxTitle = new CheckBoxTitledBorder("Map Alignment", true);
-        m_alignmentSettingsCBoxTitle.setEnabled(!m_readOnly);
-        m_alignmentSettingsCBoxTitle.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateAlignment();
-            }
-        });
         panel.setBorder(m_alignmentSettingsCBoxTitle);
 
-        m_alignementSettingsPanel = new JPanel(new GridBagLayout());
+        m_alignmentSettingsPanel = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
@@ -653,21 +646,21 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
 
         c.gridx = 0;
         c.gridy = 0;
-        m_algnmentMethodLabel = new JLabel("method:");
-        m_alignementSettingsPanel.add(m_algnmentMethodLabel, c);
+        JLabel m_algnmentMethodLabel = new JLabel("method:");
+        m_alignmentSettingsPanel.add(m_algnmentMethodLabel, c);
         c.gridx++;
         c.weightx = 1;
         m_alignmentMethodCB.addActionListener(assActionListener);
-        m_alignementSettingsPanel.add(m_alignmentMethodCB, c);
+        m_alignmentSettingsPanel.add(m_alignmentMethodCB, c);
         c.weightx = 0;
 
         c.gridy++;
         c.gridx = 0;
         m_alignmentMaxIteLabel = new JLabel("max iteration:");
-        m_alignementSettingsPanel.add(m_alignmentMaxIteLabel, c);
+        m_alignmentSettingsPanel.add(m_alignmentMaxIteLabel, c);
         c.gridx++;
         c.weightx = 1;
-        m_alignementSettingsPanel.add(m_alignmentMaxIterationTF, c);
+        m_alignmentSettingsPanel.add(m_alignmentMaxIterationTF, c);
         c.weightx = 0;
 
         // Add Alignement Smoothing specific params
@@ -680,7 +673,7 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
 
         c1.gridx = 0;
         c1.gridy = 0;
-        m_algnmentSmoothMethodLabel = new JLabel("method:");
+        JLabel m_algnmentSmoothMethodLabel = new JLabel("method:");
         smootingPanel.add(m_algnmentSmoothMethodLabel, c1);
         c1.gridx++;
         c1.weightx = 1;
@@ -719,7 +712,7 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         c.gridx = 0;
         c.weightx = 1.0;
         c.gridwidth = 2;
-        m_alignementSettingsPanel.add(smootingPanel, c);
+        m_alignmentSettingsPanel.add(smootingPanel, c);
 
         // Add Alignement  FT mapping specific params
         JPanel ftParamsPanel = new JPanel(new GridBagLayout());
@@ -731,12 +724,12 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
 
         c1.gridx = 0;
         c1.gridy = 0;
-        m_algnmentFeatureMapMethodLabel = new JLabel("method:");
+        JLabel m_algnmentFeatureMapMethodLabel = new JLabel("method:");
         ftParamsPanel.add(m_algnmentFeatureMapMethodLabel, c1);
         c1.gridx++;
         c1.weightx = 1;
-        m_alignmentFeatureMappMethodCB.addActionListener(assActionListener);
-        ftParamsPanel.add(m_alignmentFeatureMappMethodCB, c1);
+        m_alignmentFeatureMapMethodCB.addActionListener(assActionListener);
+        ftParamsPanel.add(m_alignmentFeatureMapMethodCB, c1);
         c1.weightx = 0;
 
         c1.gridy++;
@@ -745,31 +738,31 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         ftParamsPanel.add(m_alignmentFeatureMoZTolLabel, c1);
         c1.gridx++;
         c1.weightx = 1;
-        ftParamsPanel.add(m_alignmentFeatureMappMoZTolTF, c1);
+        ftParamsPanel.add(m_alignmentFeatureMapMoZTolTF, c1);
         c1.weightx = 0;
 
         c1.gridx = 0;
         c1.gridy++;
-        m_alignmentFeatureTimeTolLabel = new JLabel("time tolerance (s):");
+        JLabel m_alignmentFeatureTimeTolLabel = new JLabel("time tolerance (s):");
         ftParamsPanel.add(m_alignmentFeatureTimeTolLabel, c1);
         c1.gridx++;
         c1.weightx = 1;
-        ftParamsPanel.add(m_alignmentFeatureMappTimeToleranceTF, c1);
+        ftParamsPanel.add(m_alignmentFeatureMapTimeToleranceTF, c1);
         c1.weightx = 0;
 
         c.gridy++;
         c.gridx = 0;
         c.weightx = 1.0;
         c.gridwidth = 2;
-        m_alignementSettingsPanel.add(ftParamsPanel, c);
+        m_alignmentSettingsPanel.add(ftParamsPanel, c);
 
         c.gridy++;
         c.gridx = 0;
         c.weightx = 1.0;
         c.gridwidth = 2;
-        m_alignementSettingsPanel.add(m_alnIgnoreErrorsParameter.getComponent(null), c);
+        m_alignmentSettingsPanel.add(m_alnIgnoreErrorsParameter.getComponent(null), c);
 
-        panel.add(m_alignementSettingsPanel, BorderLayout.NORTH);
+        panel.add(m_alignmentSettingsPanel, BorderLayout.NORTH);
         updateAlignmentFeatureMapping();
         updateAlignmentMethod();
         updateAlignmentSmoothing();
@@ -780,14 +773,7 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
 
     private JPanel createCrossAssignmentPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        m_crossAssignCBoxTitle = new CheckBoxTitledBorder("Cross Assignment", true);
-        m_crossAssignCBoxTitle.setEnabled(!m_readOnly);
-        m_crossAssignCBoxTitle.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateCrossAssignment();
-            }
-        });
+
         panel.setBorder(m_crossAssignCBoxTitle);
 
         m_crossAssignSettingsPanel = new JPanel(new GridBagLayout());
@@ -799,7 +785,7 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         cm.gridx = 0;
         cm.gridy = 0;
         cm.weightx = 0;
-        m_allowCrossAssignLabel = new JLabel("Allow cross assignment ");
+        JLabel m_allowCrossAssignLabel = new JLabel("Allow cross assignment ");
         m_crossAssignSettingsPanel.add(m_allowCrossAssignLabel, cm);
         cm.gridx++;
         cm.weightx = 1;
@@ -816,17 +802,9 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         c.gridy = 0;
         c.gridwidth = 2;
         c.weightx = 1;
-        ftPanel.add(m_retainOnlyReliableFeatures, c);
+        ftPanel.add(m_retainOnlyReliableFeaturesCB, c);
 
-        m_featureFilterPanel = new JPanel(new GridBagLayout());
-        m_featureFilterCBTitle = new CheckBoxTitledBorder("Intensity Filtering", true);
-        m_featureFilterCBTitle.setEnabled(!m_readOnly);
-        m_featureFilterCBTitle.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateCrossAssignmentSettings();
-            }
-        });
+        JPanel m_featureFilterPanel = new JPanel(new GridBagLayout());
         m_featureFilterPanel.setBorder(m_featureFilterCBTitle);
 
         m_featureFilterNameLabel = new JLabel("intensity:");
@@ -880,7 +858,7 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
-        m_crossAssignFeatureMappMoZTolLabel = new JLabel("moz tolerance (ppm):");
+        JLabel m_crossAssignFeatureMappMoZTolLabel = new JLabel("moz tolerance (ppm):");
         c.gridx = 0;
         c.gridy = 0;
         ftParamsPanel.add(m_crossAssignFeatureMappMoZTolLabel, c);
@@ -891,7 +869,7 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
 
         c.gridx = 0;
         c.gridy++;
-        m_crossAssignFeatureMappRTTolLabel = new JLabel("RT tolerance (s):");
+        JLabel m_crossAssignFeatureMappRTTolLabel = new JLabel("RT tolerance (s):");
         ftParamsPanel.add(m_crossAssignFeatureMappRTTolLabel, c);
         c.gridx++;
         c.weightx = 1;
@@ -937,10 +915,10 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
     }
 
     private void updateAlignment() {
-        setEnabled(m_alignementSettingsPanel, !m_readOnly && m_alignmentSettingsCBoxTitle.isSelected());
+        setEnabled(m_alignmentSettingsPanel, !m_readOnly && m_alignmentSettingsCBoxTitle.isSelected());
         updateAlignmentSettings();
         if (m_readOnly) {
-            m_alignementSettingsPanel.setVisible(m_alignmentSettingsCBoxTitle.isSelected());
+            m_alignmentSettingsPanel.setVisible(m_alignmentSettingsCBoxTitle.isSelected());
         }
     }
 
@@ -981,9 +959,9 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
     }
 
     private void updateAlignmentFeatureMapping() {
-        boolean isSettingNeeded = m_alignmentFeatureMappMethodCB.getSelectedItem().equals(FEATURE_MAPPING_METHOD_VALUES[1]);
+        boolean isSettingNeeded = m_alignmentFeatureMapMethodCB.getSelectedItem().equals(FEATURE_MAPPING_METHOD_VALUES[1]);
         m_alignmentFeatureMoZTolLabel.setVisible(isSettingNeeded);
-        m_alignmentFeatureMappMoZTolTF.setVisible(isSettingNeeded);
+        m_alignmentFeatureMapMoZTolTF.setVisible(isSettingNeeded);
     }
 
     private static void setEnabled(Container container, boolean isEnabled) {

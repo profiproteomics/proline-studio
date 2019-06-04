@@ -388,7 +388,7 @@ public class ImportIdentificationPanel extends JPanel implements InternalPanelIn
         parserPanel.add(m_parserComboBox, c);
 
         m_sourceParameterList = createSourceParameters();
-        m_sourceParameterList.updateIsUsed(NbPreferences.root());
+        m_sourceParameterList.updateValues(NbPreferences.root());
 
         c.gridx = 0;
         c.gridwidth = 1;

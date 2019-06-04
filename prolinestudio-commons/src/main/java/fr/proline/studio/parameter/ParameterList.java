@@ -184,7 +184,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
 
 
     
-    public void updateIsUsed(Preferences preferences) {
+    public void updateValues(Preferences preferences) {
         String prefixKey = getPrefixName();
 
         int nbParameters = size();
@@ -311,7 +311,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             }
             parameter.setValue(value);
         }
-        updateIsUsed(preferences);
+        updateValues(preferences);
     }
 
     public HashMap<String, String> getValues() {

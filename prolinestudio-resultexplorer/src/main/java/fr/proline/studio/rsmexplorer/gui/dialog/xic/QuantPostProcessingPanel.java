@@ -138,7 +138,7 @@ public class QuantPostProcessingPanel extends JPanel {
         m_peptideModificationListChB = new ArrayList<>();
         m_peptidesModificationListParameter = new ArrayList<>();
         createParameters();
-        m_parameterList.updateIsUsed(NbPreferences.root());
+        m_parameterList.updateValues(NbPreferences.root());
         for (AbstractParameter param : m_parameterList) {
             param.setUsed(true);
         }

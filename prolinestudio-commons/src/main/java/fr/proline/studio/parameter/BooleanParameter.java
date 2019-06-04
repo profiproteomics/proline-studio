@@ -50,35 +50,21 @@ public class BooleanParameter extends AbstractParameter {
             } catch (NumberFormatException nfe) {
             }
         }
-        if ((m_startValue == null) && (m_parameterComponent == null)) {
+        if ((m_startValue == null)) {
             m_startValue = (m_defaultValue != null) ? m_defaultValue : Boolean.TRUE;
         }
 
-        if (m_parameterComponent != null) {
-            if (m_graphicalType.equals(JCheckBox.class)) {
-                if (m_startValue != null) {
-                    ((JCheckBox) m_parameterComponent).setSelected(m_startValue);
-                    m_valueSet = true;
-                } else {
-                    if (!m_valueSet) {
-                        ((JCheckBox) m_parameterComponent).setSelected(false);
-                        m_valueSet = true;
-                    }
-                }
-                return m_parameterComponent;
-            } else if (m_graphicalType.equals(JRadioButton.class)) {
-                if (m_startValue != null) {
-                    ((JRadioButton) m_parameterComponent).setSelected(m_startValue);
-                    m_valueSet = true;
-                } else {
-                    if (!m_valueSet) {
-                        ((JRadioButton) m_parameterComponent).setSelected(false);
-                        m_valueSet = true;
-                    }
-                }
-                return m_parameterComponent;
-            }
+      if (m_parameterComponent != null) {
+        if (m_graphicalType.equals(JCheckBox.class)) {
+          ((JCheckBox) m_parameterComponent).setSelected(m_startValue);
+          m_valueSet = true;
+          return m_parameterComponent;
+        } else if (m_graphicalType.equals(JRadioButton.class)) {
+          ((JRadioButton) m_parameterComponent).setSelected(m_startValue);
+          m_valueSet = true;
+          return m_parameterComponent;
         }
+      }
 
         if (m_graphicalType.equals(JCheckBox.class)) {
 

@@ -57,7 +57,7 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
 
         m_parameterList = new ParameterList("ProtSet Filtering");
         createParameters();
-        m_parameterList.updateIsUsed(NbPreferences.root());
+        m_parameterList.updateValues(NbPreferences.root());
 
         setInternalComponent(createInternalPanel());
 

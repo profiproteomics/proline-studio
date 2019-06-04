@@ -120,7 +120,7 @@ public class LabelFreeMSParamsPanel extends JPanel {
         if (m_completePanel) {
             return new LabelFreeMSParamsCompletePanel(false, readValues);
         } else {
-            return new LabelFreeMSParamsSimplifiedPanel(false, readValues);
+            return new LabelFreeMSParamsSimplifiedPanel();
         }
     }
 

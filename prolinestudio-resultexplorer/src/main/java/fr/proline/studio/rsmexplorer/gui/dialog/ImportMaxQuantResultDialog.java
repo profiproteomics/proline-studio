@@ -9,8 +9,6 @@ import fr.proline.core.orm.uds.InstrumentConfiguration;
 import fr.proline.core.orm.uds.PeaklistSoftware;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.gui.DefaultDialog;
-import static fr.proline.studio.gui.DefaultDialog.BUTTON_LOAD;
-import static fr.proline.studio.gui.DefaultDialog.BUTTON_SAVE;
 import fr.proline.studio.parameter.AbstractParameterToString;
 import fr.proline.studio.parameter.BooleanParameter;
 import fr.proline.studio.parameter.ObjectParameter;
@@ -249,7 +247,7 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
         allParametersPanel.setBorder(BorderFactory.createTitledBorder(" Parameters "));
 
         m_sourceParameterList = createSourceParameters();
-        m_sourceParameterList.updateIsUsed(NbPreferences.root());
+        m_sourceParameterList.updateValues(NbPreferences.root());
 
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;

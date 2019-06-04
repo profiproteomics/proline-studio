@@ -547,6 +547,9 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
             ResultSummary rsm = entityManagerMSI.find(ResultSummary.class, rsmId);
             // TODO : following line code will fail if ptm sites were not previously identified. Check this first and returns properly
             // 
+            if(rsm.getObjectTreeIdByName().isEmpty() || rsm.getObjectTreeIdByName().get(ObjectTreeSchema.SchemaName.PTM_SITES.toString())==null){
+                throw new RuntimeException("Identify PTM algorythm should be run first !");
+            }
             ObjectTree ot = entityManagerMSI.find(ObjectTree.class, rsm.getObjectTreeIdByName().get(ObjectTreeSchema.SchemaName.PTM_SITES.toString()));
             ObjectMapper mapper = new ObjectMapper();
             mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
@@ -561,7 +564,8 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
             
             HashMap<Long, Peptide> allPeptidesMap = new HashMap();
             ArrayList<DPeptideMatch> peptideMatchArray = new ArrayList<>();
-            
+            Map<Long, DPeptideMatch> peptideMatchById = new HashMap();
+                    
             SubTaskManager subTaskManager = new SubTaskManager(1);
             SubTask subTask = subTaskManager.sliceATaskAndGetFirst(0, bestPeptideMatchIdsArray.length, SLICE_SIZE);
             while (subTask != null) {
@@ -617,7 +621,8 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
                     JsonNode child = node.get("ptm_site_properties");
                     DPtmSiteProperties properties = mapper.treeToValue(child, DPtmSiteProperties.class);
                     pm.setPtmSiteProperties(properties);
-                    
+                    if(!peptideMatchById.containsKey(pmId))
+                        peptideMatchById.put(pmId, pm);
                     peptideMatchArray.add(pm);
 
                     Peptide p = (Peptide) resCur[14];
@@ -694,12 +699,12 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
             
             // create the list of PTMSites            
             Map<Long, DProteinMatch> proteinMatchMap = typicalProteinMatchesArray.stream().collect(Collectors.toMap(item -> item.getId(), item -> item));
-            Map<Long, DPeptideMatch> peptideMatchMap = peptideMatchArray.stream().collect(Collectors.toMap(item -> item.getId(), item -> item));
+           // Map<Long, DPeptideMatch> peptideMatchMap = peptideMatchArray.stream().collect(Collectors.toMap(item -> item.getId(), item -> item));
 
             for (JSONPTMSite jsonSite : values) {
                 PTMSite site = new PTMSite(jsonSite);
                 site.setProteinMatch(proteinMatchMap.get(jsonSite.proteinMatchId));
-                site.setBestPeptideMatch(peptideMatchMap.get(jsonSite.bestPeptideMatchId));
+                site.setBestPeptideMatch(peptideMatchById.get(jsonSite.bestPeptideMatchId));
                 site.setPTMSpecificity(DInfoPTM.getInfoPTMMap().get(jsonSite.ptmDefinitionId));
                 if (site.getProteinMatch() != null) {
                     m_ptmSitesOutput.add(site);

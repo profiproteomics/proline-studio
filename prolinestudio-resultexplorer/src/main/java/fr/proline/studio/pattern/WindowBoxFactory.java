@@ -284,7 +284,7 @@ public class WindowBoxFactory {
     public static WindowBox getXicPTMSitesWindowBoxV2(String dataName) {
 
         AbstractDataBox[] boxes = new AbstractDataBox[6];
-        boxes[0] = new DataBoxPTMSiteProtein();
+        boxes[0] = new DataBoxPTMSiteProtein(true);
         boxes[0].setDataName(dataName);
         ((DataBoxPTMSiteProtein) boxes[0]).setXicResult(true);
 

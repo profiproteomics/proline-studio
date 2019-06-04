@@ -270,6 +270,11 @@ public class DataBoxPTMPeptides extends AbstractDataBox {
                         DatabaseLoadLcMSTask maptask = new DatabaseLoadLcMSTask(mapCallback);
                         maptask.initLoadAlignmentForXic(getProjectId(), m_ptmDataset.getDataset());
                         registerTask(maptask);
+                        if (finished) {
+                            m_previousXICTaskId = null;
+                            setLoaded(loadingId);
+                            unregisterTask(taskId);
+                        }
                         return;
                     }
                 } else {                        

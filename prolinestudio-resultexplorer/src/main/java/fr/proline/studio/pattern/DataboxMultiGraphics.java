@@ -5,6 +5,7 @@ import fr.proline.studio.rsmexplorer.gui.MultiGraphicsPanel;
 import java.util.List;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.SecondAxisTableModelInterface;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +16,9 @@ import org.slf4j.LoggerFactory;
 public class DataboxMultiGraphics extends AbstractDataBox {
 
     private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-    private List<ExtendedTableModelInterface> m_valuesList = null;
+    private List<ExtendedTableModelInterface> m_plotValues = null;
+    private SecondAxisTableModelInterface m_plotSecondAxisValues = null;
+    private List<CrossSelectionInterface> m_crossSelectionValues = null;
 
     private boolean m_defaultLocked = false;
     private boolean m_canChooseColor = false;
@@ -75,17 +78,24 @@ public class DataboxMultiGraphics extends AbstractDataBox {
 
     @Override
     public void dataChanged() {      
-       final List<ExtendedTableModelInterface> dataModelInterfaceSet1 = (List<ExtendedTableModelInterface>) m_previousDataBox.getData(false, ExtendedTableModelInterface.class, true);
+        final List<ExtendedTableModelInterface> dataModelInterfaceSet1 = (List<ExtendedTableModelInterface>) m_previousDataBox.getData(false, ExtendedTableModelInterface.class, true);
         final List<CrossSelectionInterface> crossSelectionInterfaceL =  (List<CrossSelectionInterface>) m_previousDataBox.getData(false, CrossSelectionInterface.class, true);
         SecondAxisTableModelInterface dataModelInterfaceSet2 = m_displayDoubleYAxis ? (SecondAxisTableModelInterface) m_previousDataBox.getData(false, SecondAxisTableModelInterface.class, true) : null;
-        if (dataModelInterfaceSet1 != null)
-            ((MultiGraphicsPanel)getDataBoxPanelInterface()).setData(dataModelInterfaceSet1, crossSelectionInterfaceL,dataModelInterfaceSet2);
+        
+        boolean valueUnchanged  = Objects.equals(dataModelInterfaceSet1, m_plotValues) && Objects.equals(crossSelectionInterfaceL,m_crossSelectionValues) && Objects.equals(dataModelInterfaceSet2,m_plotSecondAxisValues);
+        if(valueUnchanged)
+            return;
+        m_plotValues = dataModelInterfaceSet1;
+        m_crossSelectionValues = crossSelectionInterfaceL;
+        m_plotSecondAxisValues = dataModelInterfaceSet2;
+        if (m_plotValues != null)
+            ((MultiGraphicsPanel)getDataBoxPanelInterface()).setData(m_plotValues, m_crossSelectionValues,m_plotSecondAxisValues);
     }
 
     @Override
     public void setEntryData(Object data) {
-        m_valuesList = (List<ExtendedTableModelInterface>) data;
-        ((MultiGraphicsPanel)getDataBoxPanelInterface()).setData(m_valuesList, null);
+        m_plotValues = (List<ExtendedTableModelInterface>) data;
+        ((MultiGraphicsPanel)getDataBoxPanelInterface()).setData(m_plotValues, null);
     }
 
 }

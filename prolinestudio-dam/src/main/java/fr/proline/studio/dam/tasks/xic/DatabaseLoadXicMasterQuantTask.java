@@ -1417,7 +1417,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
      */
     private boolean fetchProteinSetData(EntityManager entityManagerMSI, List<Long> proteinSetIds) {
         int nbMQP = m_masterQuantProteinSetList.size();
-        m_logger.debug("fetchProteinSetData for " + proteinSetIds.size() + " m_masterQuantProteinSetList " + nbMQP);
+        m_logger.debug("fetchProteinSetData for " + proteinSetIds.size() + " of " +nbMQP+" m_masterQuantProteinSetList ");
         String queryDMasterQuantProteinSet = "SELECT new fr.proline.core.orm.msi.dto.DMasterQuantProteinSet"
                 + "(q.id,  q.selectionLevel, q.objectTreeId,  q.serializedProperties,  p.resultSummary.id,  p.id) "
                 + " FROM MasterQuantComponent q,  ProteinSet p "
@@ -1505,7 +1505,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             }
         }
 
-        m_logger.debug(" -- Get DMasterQuantProteinSet info and associated DQuantProteinSet for each Quant Channel");
+        m_logger.debug(" fetchProteinSetData -- Get DMasterQuantProteinSet info and associated DQuantProteinSet for each Quant Channel");
         int nbrMqPsSet = 0;
         int nbrMqPsupdated = 0;
         //Get DMasterQuantProteinSet info and associated DQuantProteinSet for each Quant Channel
@@ -1603,15 +1603,15 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 }
             }
             nbrMqPsupdated++;
-            if (nbrMqPsupdated != nbrMqPsSet) {
-                m_logger.debug(" REERRR");
-            }
-            if (nbrMqPsSet % 100 == 0) {
-                m_logger.debug("update " + nbrMqPsSet + " m_masterQuantProteinSetList index " + index);
-            }
+//            if (nbrMqPsupdated != nbrMqPsSet) {
+//                m_logger.debug(" REERRR");
+//            }
+//            if (nbrMqPsSet % 100 == 0) {
+//                m_logger.debug("update " + nbrMqPsSet + " m_masterQuantProteinSetList index " + index);
+//            }
             m_masterQuantProteinSetList.set(index, masterQuantProteinSet);
         }
-        m_logger.debug(" GET Through " + nbrMqPsSet + " updated " + nbrMqPsupdated);
+        //m_logger.debug(" GET Through " + nbrMqPsSet + " updated " + nbrMqPsupdated);
         return true;
     }
 

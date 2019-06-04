@@ -266,10 +266,10 @@ public class ProteinPTMSiteTableModel extends LazyTableModel implements GlobalTa
     m_proteinPTMSiteArray = proteinPTMSiteArray;
     m_arrayInUse = m_proteinPTMSiteArray;
     m_taskId = taskId;
-    m_modificationInfo = ProteinPTMSiteTableModelProcessing.calculateDataWORedundance(this, m_modificationsArray, m_residuesArray, m_residuesMap, proteinPTMSiteArray, m_modificationsMap);
-    
-    if (!proteinPTMSiteArray.isEmpty() ) {
-      m_ptmDataset = proteinPTMSiteArray.get(0).getPTMdataset();
+    m_modificationInfo = "";
+    if(proteinPTMSiteArray!=null && !proteinPTMSiteArray.isEmpty()){
+        m_modificationInfo = ProteinPTMSiteTableModelProcessing.calculateDataWORedundance(this, m_modificationsArray, m_residuesArray, m_residuesMap, proteinPTMSiteArray, m_modificationsMap);
+        m_ptmDataset = proteinPTMSiteArray.get(0).getPTMdataset();
     }
     fireTableDataChanged();
   }

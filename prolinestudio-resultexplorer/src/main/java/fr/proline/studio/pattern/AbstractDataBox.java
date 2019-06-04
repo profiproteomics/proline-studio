@@ -365,6 +365,10 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     protected void unregisterTask(Long taskId) {
         m_taskMap.remove(taskId);
     }
+    
+    protected TaskInfo getTaskInfo(Long taskId){        
+        return m_taskMap.get(taskId);        
+    }
 
     protected final void registerInParameter(GroupParameter parameter) {
         m_inParameters.add(parameter);

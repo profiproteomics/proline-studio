@@ -26,6 +26,7 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.SecondAxisTableModelInterface;
 import fr.proline.studio.rsmexplorer.gui.xic.PeptideTableModel;
 import fr.proline.studio.rsmexplorer.gui.xic.XicAbundanceProteinTableModel;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,12 +146,21 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         final boolean allPeptides = (m_previousDataBox == null);
         List<DPeptideInstance> pepInstances = null;
         if (!allPeptides) {
-            m_proteinSet = (DProteinSet) m_previousDataBox.getData(false, DProteinSet.class);
-            m_masterQuantProteinSet = (DMasterQuantProteinSet) m_previousDataBox.getData(false, DMasterQuantProteinSet.class);
-            m_dataset = (DDataset) m_previousDataBox.getData(false, DDataset.class);            
+            DProteinSet newProSet = (DProteinSet) m_previousDataBox.getData(false, DProteinSet.class);
+            DMasterQuantProteinSet newMasterProtSet = (DMasterQuantProteinSet) m_previousDataBox.getData(false, DMasterQuantProteinSet.class);
+            DDataset newDS = (DDataset) m_previousDataBox.getData(false, DDataset.class);            ;
+            
+            boolean valueUnchanged  = Objects.equals(newProSet, m_proteinSet) && Objects.equals(newMasterProtSet,m_masterQuantProteinSet) && Objects.equals(newDS,m_dataset);
+            if(valueUnchanged && !m_displayPeptidesSubList)
+                return;
+            
+            m_proteinSet = newProSet;
+            m_masterQuantProteinSet = newMasterProtSet;
+            m_dataset = newDS;            
             if (m_proteinSet == null) {
                 return;
             }
+            
             m_isXICMode = ((XicMode) m_previousDataBox.getData(false, XicMode.class)).isXicMode();
             m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(false, QuantChannelInfo.class);
             if(m_quantChannelInfo == null)

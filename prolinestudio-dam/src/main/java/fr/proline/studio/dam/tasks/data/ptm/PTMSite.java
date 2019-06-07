@@ -100,16 +100,7 @@ public class PTMSite {
     public void setPeptideInstances(List<DPeptideInstance> parentPeptideInstances, List<DPeptideInstance> leafInstances) {
         m_parentPeptideInstances = parentPeptideInstances;
         m_ptmSitePeptideInstanceByPepId = new HashMap<>();
-        Map<Long, List<DPeptideInstance>> leafPepInstanceByPepId = leafInstances.stream().collect(Collectors.groupingBy(pi -> pi.getPeptideId()));
-        for (DPeptideInstance parentPeptideInstance : parentPeptideInstances) {
-            PTMPeptideInstance ptmPeptide = m_dataset.getPTMPeptideInstance(m_site.proteinMatchId, parentPeptideInstance);
-            Long peptideId = parentPeptideInstance.getPeptideId();
-            ptmPeptide.setStartPosition(getPositionOnProtein() - getPositionOnPeptide(peptideId));
-            ptmPeptide.addPTMSite(this);
-            List<DPeptideInstance> leafPeptideInstances = leafPepInstanceByPepId.get(peptideId);
-            PTMSitePeptideInstance ptmSitePeptideInstance = new PTMSitePeptideInstance(this, ptmPeptide, leafPeptideInstances, getBestPeptideMatch(leafPeptideInstances));
-            m_ptmSitePeptideInstanceByPepId.put(peptideId, ptmSitePeptideInstance);
-        }
+        fillPeptideInstances(parentPeptideInstances, leafInstances);
     }
     
     public void addPeptideInstances(List<DPeptideInstance> parentPeptideInstances, List<DPeptideInstance> leafInstances) {
@@ -119,6 +110,11 @@ public class PTMSite {
         
         if(m_ptmSitePeptideInstanceByPepId ==null)
             m_ptmSitePeptideInstanceByPepId = new HashMap<>();
+        
+        fillPeptideInstances(parentPeptideInstances, leafInstances);      
+    }
+    
+    private void fillPeptideInstances(List<DPeptideInstance> parentPeptideInstances, List<DPeptideInstance> leafInstances){
         Map<Long, List<DPeptideInstance>> leafPepInstanceByPepId = leafInstances.stream().collect(Collectors.groupingBy(pi -> pi.getPeptideId()));
         for (DPeptideInstance parentPeptideInstance : parentPeptideInstances) {
             PTMPeptideInstance ptmPeptide = m_dataset.getPTMPeptideInstance(m_site.proteinMatchId, parentPeptideInstance);

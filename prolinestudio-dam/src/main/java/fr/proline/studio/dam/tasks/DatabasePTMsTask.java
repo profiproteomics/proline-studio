@@ -641,6 +641,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
             PeptideInstance pi = it.next();
             DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptide().getId(), pi.getValidatedProteinSetCount(), pi.getElutionTime());
             dpi.setPeptide(pi.getPeptide());
+            dpi.setPeptideMatches(new ArrayList<>());            
             parentPeptideInstancesByPepId.put(dpi.getPeptideId(), dpi);
         }
         //--- Retrieve PeptideReadablePtmString
@@ -666,6 +667,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         
         
         List<DPeptideMatch> allpeptideMatches = leafPeptideInstancesById.values().stream().flatMap(pi -> pi.getPeptideMatches().stream()).collect(Collectors.toList());
+        allpeptideMatches.addAll(parentPeptideInstancesByPepId.values().stream().flatMap(pi -> pi.getPeptideMatches().stream()).collect(Collectors.toList()));
          m_logger.debug("fetchPTMSitesPepInstances got PTM info  for all peptideMatches . nbr "+allpeptideMatches.size());
         for (DPeptideMatch pm : allpeptideMatches) {
             Peptide p = pm.getPeptide();

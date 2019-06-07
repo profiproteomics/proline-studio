@@ -92,4 +92,20 @@ public class DataBoxPTMPeptidesGraphic extends DataBoxPTMPeptides {
             super.loadPtmSite(notLoadedPtmSite);
  
     }
+    
+    @Override
+    public Object getData(boolean getArray, Class parameterType) {
+        if (parameterType != null) {
+            if (parameterType.equals(PTMPeptideInstance.class)) {
+                PTMPeptideInstance selectedParentPepInstance = ((PTMPeptidesGraphicView) getDataBoxPanelInterface()).getSelectedPeptideInstance();
+                if (selectedParentPepInstance != null) {
+                    return selectedParentPepInstance;
+                }
+                return null;
+            }
+        }
+
+        return super.getData(getArray, parameterType);
+    }
+    
 }

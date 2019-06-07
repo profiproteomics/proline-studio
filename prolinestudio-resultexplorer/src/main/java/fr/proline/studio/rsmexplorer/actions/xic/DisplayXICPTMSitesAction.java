@@ -31,12 +31,12 @@ import org.openide.windows.WindowManager;
 public class DisplayXICPTMSitesAction extends AbstractRSMAction {
 
     public DisplayXICPTMSitesAction(AbstractTree tree) {
-       super(NbBundle.getMessage(DisplayXICPTMSitesAction.class, "CTL_DisplayPtmProteinSite"), tree);
+       super(NbBundle.getMessage(DisplayXICPTMSitesAction.class, "CTL_DisplayPtmSiteProtein"), tree);
     }
     
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
-        int answer= JOptionPane.showConfirmDialog(WindowManager.getDefault().getMainWindow(), "Do you want to \n - View Protein Sites in V2 ? Click on YES \n - View PTM Clusters ? Click on No \n - View PTM Sites in V1 ? Click on Cancel.");
+        int answer= JOptionPane.showConfirmDialog(WindowManager.getDefault().getMainWindow(), "Do you want to view Protein Sites V2 ?");
         int nbNodes = selectedNodes.length;
         for (int i = 0; i < nbNodes; i++) {
             DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
@@ -62,9 +62,9 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
             if(answer == JOptionPane.YES_OPTION){
                 wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV2(dataSet.getName());
             } else if (answer == JOptionPane.NO_OPTION){
-                wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName());            
-            } else {
                 wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV1(dataSet.getName());            
+            } else {
+                return;         
             }
             wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));    
                
@@ -86,15 +86,14 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
 
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                                WindowBox wbox;
-                    if (answer == JOptionPane.YES_OPTION) {
+                    WindowBox wbox;
+                    if(answer == JOptionPane.YES_OPTION){
                         wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV2(dataSet.getName());
-                    } else if (answer == JOptionPane.NO_OPTION) {
-                        wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName());
+                    } else if (answer == JOptionPane.NO_OPTION){
+                        wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV1(dataSet.getName());            
                     } else {
-                        wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV1(dataSet.getName());
-                    }        
-                     
+                        return;         
+                    }
                     // open a window to display the window box
                     DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
                     win.open();
@@ -136,6 +135,11 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
                 setEnabled(false);
                 return;
             }
+             // must be a quantitation XIC
+            if (! dataSetNode.isQuantXIC()) {
+                setEnabled(false);
+                return;
+            }            
         }
 
         

@@ -18,7 +18,9 @@ public class DisplayRsmAction extends AbstractRSMAction {
     private DisplayRsmPSMAction m_displayRsmPSMAction;
     private DisplayRsmPeptidesAction m_displayRsmPeptidesAction;
     private DisplayRsmProteinSetsAction m_displayRsmProteinSetsAction;
-    private DisplayPTMSitesAction m_displayPtmProteinSite;
+    private DisplayPTMSitesAction m_displayPtmSiteProtein;
+    private DisplayPTMClustersAction m_displayPtmClusterProtein;
+    
 
     private DisplayAdjacencyMatrixAction m_displayAdjacencyMatrixAction;
     private DisplayMSQueryAction m_displayMSQueryAction;
@@ -41,8 +43,8 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_displayRsmPSMAction = new DisplayRsmPSMAction(getTree());
         m_displayRsmPeptidesAction = new DisplayRsmPeptidesAction(getTree());
         m_displayRsmProteinSetsAction = new DisplayRsmProteinSetsAction(getTree());
-        m_displayPtmProteinSite = new DisplayPTMSitesAction(getTree());
-        
+        m_displayPtmSiteProtein = new DisplayPTMSitesAction(getTree());
+        m_displayPtmClusterProtein = new DisplayPTMClustersAction(getTree());
         m_displayAdjacencyMatrixAction = new DisplayAdjacencyMatrixAction(getTree());
         
         
@@ -66,7 +68,8 @@ public class DisplayRsmAction extends AbstractRSMAction {
         JMenuItem displayRsmPSMItem = new JMenuItem(m_displayRsmPSMAction);
         JMenuItem displayRsmPeptidesItem = new JMenuItem(m_displayRsmPeptidesAction);
         JMenuItem displayRsmProteinSetsItem = new JMenuItem(m_displayRsmProteinSetsAction);
-        JMenuItem displayPtmProteinSiteItem_V2 = new JMenuItem(m_displayPtmProteinSite);
+        JMenuItem displayPtmSiteProteinItem = new JMenuItem(m_displayPtmSiteProtein);
+        JMenuItem displayPtmClusterProteinItem = new JMenuItem(m_displayPtmClusterProtein);
         JMenuItem displayAdjacencyMatrixItem = new JMenuItem(m_displayAdjacencyMatrixAction);
         JMenuItem displayUserWindowItem = new JMenuItem(m_displayUserWindowAction);
         JMenuItem manageUserWindowsItem = new JMenuItem(m_manageUserWindowsAction);
@@ -74,9 +77,11 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_menu.add(displayMSQueryItem);
         m_menu.add(displayRsmPSMItem);
         m_menu.add(displayRsmPeptidesItem);
-        m_menu.add(displayRsmProteinSetsItem);
-        m_menu.add(displayPtmProteinSiteItem_V2);        
+        m_menu.add(displayRsmProteinSetsItem);        
         m_menu.add(displayAdjacencyMatrixItem);
+        m_menu.addSeparator();
+        m_menu.add(displayPtmSiteProteinItem);        
+        m_menu.add(displayPtmClusterProteinItem);        
         m_menu.addSeparator();
         m_menu.add(displayUserWindowItem);
         m_menu.add(manageUserWindowsItem);
@@ -97,8 +102,8 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_displayRsmPSMAction.updateEnabled(selectedNodes);
         m_displayRsmPeptidesAction.updateEnabled(selectedNodes);
         m_displayRsmProteinSetsAction.updateEnabled(selectedNodes);
-        m_displayPtmProteinSite.updateEnabled(selectedNodes);
-        
+        m_displayPtmSiteProtein.updateEnabled(selectedNodes);
+        m_displayPtmClusterProtein.updateEnabled(selectedNodes);
         m_displayAdjacencyMatrixAction.updateEnabled(selectedNodes);
         m_displayUserWindowAction.updateEnabled(selectedNodes);
         m_manageUserWindowsAction.updateEnabled(selectedNodes);
@@ -110,7 +115,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
             listEnabled |= m_displaySavedWindowActionList.get(i).isEnabled();
         }
 
-        boolean isEnabled = m_displayRsmPSMAction.isEnabled() || m_displayRsmPeptidesAction.isEnabled() || m_displayRsmProteinSetsAction.isEnabled()|| m_displayPtmProteinSite.isEnabled() || m_displayMSQueryAction.isEnabled() || m_displayUserWindowAction.isEnabled()|| m_manageUserWindowsAction.isEnabled() || listEnabled;
+        boolean isEnabled = m_displayRsmPSMAction.isEnabled() || m_displayRsmPeptidesAction.isEnabled() || m_displayPtmClusterProtein.isEnabled() || m_displayRsmProteinSetsAction.isEnabled()|| m_displayPtmSiteProtein.isEnabled() || m_displayMSQueryAction.isEnabled() || m_displayUserWindowAction.isEnabled()|| m_manageUserWindowsAction.isEnabled() || listEnabled;
         setEnabled(isEnabled);
         m_menu.setEnabled(isEnabled);
 

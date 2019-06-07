@@ -248,7 +248,7 @@ public class WindowBoxFactory {
 
     }
 
-    public static WindowBox getPTMSitesWindowBox(String dataName) {
+    public static WindowBox getPTMSitesWindowBoxV1(String dataName) {
 
         AbstractDataBox[] boxes = new AbstractDataBox[5];
         boxes[0] = new DataBoxPTMSiteProtein();
@@ -263,7 +263,38 @@ public class WindowBoxFactory {
         IconManager.IconType iconType = IconManager.IconType.DATASET_RSM;
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
+    
+    public static WindowBox getPTMSitesWindowBoxV2(String dataName) {
 
+        AbstractDataBox[] boxes = new AbstractDataBox[5];
+        boxes[0] = new DataBoxPTMSiteProtein(true);
+        boxes[0].setDataName(dataName);
+        ((DataBoxPTMSiteProtein) boxes[0]).setXicResult(false);
+        boxes[1] = new DataBoxPTMPeptidesGraphic();
+        boxes[2] = new DataBoxPTMSitePeptides();
+        boxes[2].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+        boxes[3] = new DataBoxPTMSitePepMatches();
+        boxes[4] = new DataboxRsetPSMForMsQuery();
+
+        IconManager.IconType iconType = IconManager.IconType.DATASET_RSM;
+        return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+    }
+    
+    public static WindowBox getPTMDataWindowBox(String dataName) {
+        AbstractDataBox[] boxes = new AbstractDataBox[3];
+        boxes[0] = new DataBoxPTMClusters();
+        boxes[0].setDataName(dataName);
+        ((DataBoxPTMClusters) boxes[0]).setXicResult(false); 
+        boxes[1] = new DataBoxPTMPeptidesGraphic();
+        boxes[2] = new DataBoxPTMPeptides(false);
+        //boxes[2].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+        //boxes[3] = new DataBoxPTMSitePepMatches();
+      //  boxes[4] = new DataboxRsetPSMForMsQuery();
+        IconManager.IconType iconType = IconManager.IconType.DATASET_RSM;
+        return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+        
+    }
+    
     public static WindowBox getXicPTMDataWindowBox(String dataName) {
         AbstractDataBox[] boxes = new AbstractDataBox[6];
         boxes[0] = new DataBoxPTMClusters();

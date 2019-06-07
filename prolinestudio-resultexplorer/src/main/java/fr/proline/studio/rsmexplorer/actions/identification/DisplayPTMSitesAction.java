@@ -14,7 +14,9 @@ import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
+import javax.swing.JOptionPane;
 import org.openide.util.NbBundle;
+import org.openide.windows.WindowManager;
 
 /**
  *
@@ -23,22 +25,23 @@ import org.openide.util.NbBundle;
 public class DisplayPTMSitesAction  extends AbstractRSMAction {
 
     public DisplayPTMSitesAction(AbstractTree tree) {
-       super(NbBundle.getMessage(DisplayPTMSitesAction.class, "CTL_PtmProteinSite"), tree);
+       super(NbBundle.getMessage(DisplayPTMSitesAction.class, "CTL_PtmSiteProtein"), tree);
     }
     
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
+        int answer= JOptionPane.showConfirmDialog(WindowManager.getDefault().getMainWindow(), "Do you want to view Protein Sites V2 ?");
 
         int nbNodes = selectedNodes.length;
         for (int i = 0; i < nbNodes; i++) {
             DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
 
-            actionImpl(dataSetNode);
+            actionImpl(dataSetNode, answer);
         }
 
     }
     
-    private void actionImpl(DataSetNode dataSetNode) {
+    private void actionImpl(DataSetNode dataSetNode, int answer) {
         
         final DDataset dataSet = ((DataSetData) dataSetNode.getData()).getDataset();
         
@@ -50,7 +53,14 @@ public class DisplayPTMSitesAction  extends AbstractRSMAction {
         if (rsm != null) {
 
             // prepare window box
-            WindowBox wbox = WindowBoxFactory.getPTMSitesWindowBox(dataSet.getName());
+            WindowBox wbox;
+            if(answer == JOptionPane.YES_OPTION){
+                wbox = WindowBoxFactory.getPTMSitesWindowBoxV2(dataSet.getName());
+            } else if (answer == JOptionPane.NO_OPTION){
+                wbox = WindowBoxFactory.getPTMSitesWindowBoxV1(dataSet.getName());            
+            } else {
+                return;         
+            }                    
             wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));
             
             // open a window to display the window box
@@ -71,7 +81,15 @@ public class DisplayPTMSitesAction  extends AbstractRSMAction {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     
-                    WindowBox wbox = WindowBoxFactory.getPTMSitesWindowBox(dataSet.getName());
+                    WindowBox wbox ;
+                    if(answer == JOptionPane.YES_OPTION){
+                        wbox = WindowBoxFactory.getPTMSitesWindowBoxV2(dataSet.getName());
+                    } else if (answer == JOptionPane.NO_OPTION){
+                        wbox = WindowBoxFactory.getPTMSitesWindowBoxV1(dataSet.getName());            
+                    } else {
+                        return;
+                    }
+                              
                     // open a window to display the window box
                     DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
                     win.open();

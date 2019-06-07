@@ -23,7 +23,8 @@ public class DisplayXICAction extends AbstractRSMAction {
     private DisplayXICProteinSetAction m_displayXICProteinSetAction;
     private DisplayXICPeptideSetAction m_displayXICPeptideSetAction;
     private DisplayXICPeptideIonAction m_displayXICPeptideIonAction;
-    private DisplayXICPTMSitesAction m_displayXICPtmProteinSiteAction;
+    private DisplayXICPTMSitesAction m_displayXICPtmSiteProteinAction;
+    private DisplayXICPTMClusterAction m_displayXICPtmClusterProteinAction;
     private DisplayUserWindowAction m_displayUserWindowAction;
     private ManageUserWindowsAction m_manageUserWindowsAction;
     private ArrayList<DisplaySavedWindowAction> m_displaySavedWindowActionList;
@@ -39,7 +40,8 @@ public class DisplayXICAction extends AbstractRSMAction {
         m_displayXICProteinSetAction = new DisplayXICProteinSetAction(getTree());
         m_displayXICPeptideSetAction = new DisplayXICPeptideSetAction(getTree());
         m_displayXICPeptideIonAction = new DisplayXICPeptideIonAction(getTree());
-        m_displayXICPtmProteinSiteAction = new DisplayXICPTMSitesAction(getTree());
+        m_displayXICPtmSiteProteinAction = new DisplayXICPTMSitesAction(getTree());
+        m_displayXICPtmClusterProteinAction = new DisplayXICPTMClusterAction(getTree());
         m_manageUserWindowsAction = new ManageUserWindowsAction(WindowSavedManager.SAVE_WINDOW_FOR_QUANTI, getTree());
         m_displayUserWindowAction = new DisplayUserWindowAction(WindowSavedManager.SAVE_WINDOW_FOR_QUANTI, getTree());
        
@@ -59,7 +61,8 @@ public class DisplayXICAction extends AbstractRSMAction {
         JMenuItem displayXICProteinSetItem = new JMenuItem(m_displayXICProteinSetAction);
         JMenuItem displayXICPeptideSetItem = new JMenuItem(m_displayXICPeptideSetAction);
         JMenuItem displayXICPeptideIonItem = new JMenuItem(m_displayXICPeptideIonAction);
-        JMenuItem displayXICPtmProteinSiteItem = new JMenuItem(m_displayXICPtmProteinSiteAction);
+        JMenuItem displayXICPtmSiteProteinItem = new JMenuItem(m_displayXICPtmSiteProteinAction);
+        JMenuItem displayXICPtmClusterProteinItem = new JMenuItem(m_displayXICPtmClusterProteinAction);
         
         JMenuItem displayUserWindowItem = new JMenuItem(m_displayUserWindowAction);
         JMenuItem manageUserWindowsItem = new JMenuItem(m_manageUserWindowsAction);
@@ -67,7 +70,9 @@ public class DisplayXICAction extends AbstractRSMAction {
         m_menu.add(displayXICPeptideIonItem);
         m_menu.add(displayXICPeptideSetItem);
         m_menu.add(displayXICProteinSetItem);
-        m_menu.add(displayXICPtmProteinSiteItem);
+        m_menu.addSeparator();
+        m_menu.add(displayXICPtmClusterProteinItem);
+        m_menu.add(displayXICPtmSiteProteinItem);
         m_menu.addSeparator();
         m_menu.add(displayUserWindowItem);
         m_menu.add(manageUserWindowsItem);
@@ -89,7 +94,8 @@ public class DisplayXICAction extends AbstractRSMAction {
         m_displayXICProteinSetAction.updateEnabled(selectedNodes);
         m_displayXICPeptideSetAction.updateEnabled(selectedNodes);
         m_displayXICPeptideIonAction.updateEnabled(selectedNodes);
-        m_displayXICPtmProteinSiteAction.updateEnabled(selectedNodes);
+        m_displayXICPtmSiteProteinAction.updateEnabled(selectedNodes);
+        m_displayXICPtmClusterProteinAction.updateEnabled(selectedNodes);
         m_displayUserWindowAction.updateEnabled(selectedNodes);
         m_manageUserWindowsAction.updateEnabled(selectedNodes);
         
@@ -99,7 +105,7 @@ public class DisplayXICAction extends AbstractRSMAction {
             listEnabled |= m_displaySavedWindowActionList1.isEnabled();
         }
         
-        boolean isEnabled = m_displayXICProteinSetAction.isEnabled() || m_displayXICPtmProteinSiteAction.isEnabled()  || m_displayXICPeptideSetAction.isEnabled() || m_displayXICPeptideIonAction.isEnabled() || m_displayUserWindowAction.isEnabled() || m_manageUserWindowsAction.isEnabled() || listEnabled;
+        boolean isEnabled = m_displayXICProteinSetAction.isEnabled() || m_displayXICPtmSiteProteinAction.isEnabled()|| m_displayXICPtmClusterProteinAction.isEnabled()  || m_displayXICPeptideSetAction.isEnabled() || m_displayXICPeptideIonAction.isEnabled() || m_displayUserWindowAction.isEnabled() || m_manageUserWindowsAction.isEnabled() || listEnabled;
         setEnabled(isEnabled);
         m_menu.setEnabled(isEnabled);
     }

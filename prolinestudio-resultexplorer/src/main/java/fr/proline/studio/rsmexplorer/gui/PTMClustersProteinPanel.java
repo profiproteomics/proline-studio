@@ -437,7 +437,7 @@ public class PTMClustersProteinPanel extends HourglassPanel implements DataBoxPa
                 return;
             }
             //VDS: Order is important ! To be corrected using set of class for propagation
-            m_dataBox.propagateDataChanged(PTMSite.class);
+            //m_dataBox.propagateDataChanged(PTMSite.class);
             m_dataBox.propagateDataChanged(DProteinSet.class);
             m_dataBox.propagateDataChanged(DProteinMatch.class);
             m_dataBox.propagateDataChanged(PTMPeptideInstance.class);

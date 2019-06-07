@@ -161,7 +161,7 @@ public class PeptideView extends ViewPtmAbstract {
         g.setColor(colorOld);
     }
 
-    public Color getColorWithProbability(Color c, Float probability) {
+    public static Color getColorWithProbability(Color c, Float probability) {
         if (probability != null) {
             float[] hsbvals = new float[3];//Hue Saturation Brightness
             Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), hsbvals);

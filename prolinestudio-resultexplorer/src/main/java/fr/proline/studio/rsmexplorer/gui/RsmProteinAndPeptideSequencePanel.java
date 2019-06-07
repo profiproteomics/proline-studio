@@ -25,9 +25,10 @@ import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
-
 /**
- * Panel to display the sequence of a Protein and the sequences of its Peptides found
+ * Panel to display the sequence of a Protein and the sequences of its Peptides
+ * found
+ *
  * @author JM235353
  */
 public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements DataBoxPanelInterface {
@@ -37,26 +38,25 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
     private AbstractDataBox m_dataBox;
     private JEditorPane m_editorPane;
     private JScrollPane m_sequenceScrollPane;
-     
+    private RsmProteinAndPeptideSequencePlotPanel m_sequencePoltPane;
+
     private JPanel m_sequencePanel;
 
     public RsmProteinAndPeptideSequencePanel() {
 
         setLayout(new BorderLayout());
-        
         m_sequencePanel = createSequencePanel();
         add(m_sequencePanel, BorderLayout.CENTER);
 
         JToolBar toolbar = initToolbar();
         add(toolbar, BorderLayout.WEST);
-   
-    }
 
+    }
 
     private JPanel createSequencePanel() {
 
         JPanel sequencePanel = new JPanel(new BorderLayout());
-
+        m_sequencePoltPane = new RsmProteinAndPeptideSequencePlotPanel();
         m_sequenceScrollPane = new javax.swing.JScrollPane();
         m_editorPane = new javax.swing.JEditorPane();
         m_sequenceScrollPane.setViewportView(m_editorPane);
@@ -64,57 +64,51 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
         m_editorPane.setEditable(false);
         m_editorPane.setContentType("text/html");
 
-        
         HTMLEditorKit kit = new HTMLEditorKit();
         m_editorPane.setEditorKit(kit);
-        
+
         StyleSheet styleSheet = kit.getStyleSheet();
 
-        
-        Color selectionColor = UIManager.getColor ("Table.selectionBackground");
+        Color selectionColor = UIManager.getColor("Table.selectionBackground");
 
         styleSheet.addRule("p.body {color:black; font: bold 10px monospace; margin: 4px; }"); // JPM.HACK : this rule was for the body, but there is a Java bug, and it was later used for all html display
-        styleSheet.addRule("span.peptidesel {background-color:#"+Integer.toHexString(selectionColor.getRGB() & 0xffffff)+"; color:white;}");
+        styleSheet.addRule("span.peptidesel {background-color:#" + Integer.toHexString(selectionColor.getRGB() & 0xffffff) + "; color:white;}");
         styleSheet.addRule("span.onepeptide {background-color: #DDDDDD;}");
         styleSheet.addRule("span.multipeptides {background-color: #C0C0C0;}");
-        styleSheet.addRule("span.modif_nter_cter {background-color: "+GlobalValues.HTML_COLOR_VIOLET+"}");
-        styleSheet.addRule("span.modif {background-color: "+GlobalValues.HTML_COLOR_ORANGE+"}");
-        styleSheet.addRule("span.nter_cter {background-color: "+GlobalValues.HTML_COLOR_GREEN+"}");
-        
+        styleSheet.addRule("span.modif_nter_cter {background-color: " + GlobalValues.HTML_COLOR_VIOLET + "}");
+        styleSheet.addRule("span.modif {background-color: " + GlobalValues.HTML_COLOR_ORANGE + "}");
+        styleSheet.addRule("span.nter_cter {background-color: " + GlobalValues.HTML_COLOR_GREEN + "}");
 
         Document doc = kit.createDefaultDocument();
-        m_editorPane.setDocument(doc);   
-        
+        m_editorPane.setDocument(doc);
+
         sequencePanel.add(m_sequenceScrollPane, BorderLayout.CENTER);
-        
+        sequencePanel.add(m_sequencePoltPane, BorderLayout.SOUTH);
         return sequencePanel;
     }
 
     public final JToolBar initToolbar() {
-            
+
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
         ExportButton exportImageButton = new ExportButton("Protein Sequence", m_sequencePanel);
 
-        
         toolbar.add(exportImageButton);
 
         return toolbar;
 
     }
-    
 
-    private final int HIGHLIGHT_NONE                       = 0x00;
-    private final int HIGHLIGHT_PEPTIDE_SELECTED           = 0x01;
-    private final int HIGHLIGHT_PEPTIDE_NOT_SELECTED       = 0x02;
+    private final int HIGHLIGHT_NONE = 0x00;
+    private final int HIGHLIGHT_PEPTIDE_SELECTED = 0x01;
+    private final int HIGHLIGHT_PEPTIDE_NOT_SELECTED = 0x02;
     private final int HIGHLIGHT_MULTI_PEPTIDE_NOT_SELECTED = 0x04;
-    private final int HIGHLIGHT_NTER_OR_CTER_MODIFICATION  = 0x08;
-    private final int HIGHLIGHT_OTHER_MODIFICATION         = 0x10;
-    
+    private final int HIGHLIGHT_NTER_OR_CTER_MODIFICATION = 0x08;
+    private final int HIGHLIGHT_OTHER_MODIFICATION = 0x10;
 
     public void setData(Long projectId, DProteinMatch pm, DPeptideInstance selectedPeptide, DPeptideInstance[] peptideInstances) {
-        
+
         if (pm == null) {
             m_editorPane.setText("");
             return;
@@ -124,16 +118,16 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
             m_editorPane.setText("");
             return;
         }
-        
-         if (! DatabaseDataManager.getDatabaseDataManager().isSeqDatabaseExists()) {
+
+        if (!DatabaseDataManager.getDatabaseDataManager().isSeqDatabaseExists()) {
             // Seq Database does not exists : no data is available
-             m_editorPane.setText("There is no Protein Sequence Database available. Please contact your IT Administrator to install it.");
+            m_editorPane.setText("There is no Protein Sequence Database available. Please contact your IT Administrator to install it.");
             return;
         }
 
-        if ( !pm.isDBiosequenceSet() && projectId != null) {
+        if (!pm.isDBiosequenceSet() && projectId != null) {
             m_logger.info("BioSequence is absent from the protein match, trying to load it ...");
-            DatabaseBioSequenceTask.fetchData( Collections.singletonList(pm), projectId);
+            DatabaseBioSequenceTask.fetchData(Collections.singletonList(pm), projectId);
         }
 
         if (pm.isDBiosequenceSet()) {
@@ -175,81 +169,79 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
 
             m_editorPane.setText(constructDisplayedSequence(pm, sequence, highlights, coverageFormatted));
             m_editorPane.setCaretPosition(0);
+            m_sequencePoltPane.setData(sequence, selectedPeptide, peptideInstances);
         } else {
             m_editorPane.setText("Protein Sequence not available in database");
             return;
         }
+
     }
 
     private void hightlight(DPeptideMatch p, boolean selectedPeptide, int[] highlights) {
-                   
 
-            SequenceMatchPK smpk = p.getSequenceMatch().getId();
-            
-            
-            int start = smpk.getStart();
-            int stop = smpk.getStop();
-            
-            if (selectedPeptide) {
-                for (int j=start;j<=stop;j++) {
-                    highlights[j-1] = HIGHLIGHT_PEPTIDE_SELECTED;
-                }
-            } else {
-                for (int j=start;j<=stop;j++) {
-                    if ((highlights[j-1] & HIGHLIGHT_PEPTIDE_NOT_SELECTED) == HIGHLIGHT_PEPTIDE_NOT_SELECTED) {
-                        highlights[j-1] |= HIGHLIGHT_MULTI_PEPTIDE_NOT_SELECTED;
-                    } else {
-                        highlights[j-1] |= HIGHLIGHT_PEPTIDE_NOT_SELECTED;
-                    }
+        SequenceMatchPK smpk = p.getSequenceMatch().getId();
+
+        int start = smpk.getStart();
+        int stop = smpk.getStop();
+
+        if (selectedPeptide) {
+            for (int j = start; j <= stop; j++) {
+                highlights[j - 1] = HIGHLIGHT_PEPTIDE_SELECTED;
+            }
+        } else {
+            for (int j = start; j <= stop; j++) {
+                if ((highlights[j - 1] & HIGHLIGHT_PEPTIDE_NOT_SELECTED) == HIGHLIGHT_PEPTIDE_NOT_SELECTED) {
+                    highlights[j - 1] |= HIGHLIGHT_MULTI_PEPTIDE_NOT_SELECTED;
+                } else {
+                    highlights[j - 1] |= HIGHLIGHT_PEPTIDE_NOT_SELECTED;
                 }
             }
-            
-            HashMap<Integer,DPeptidePTM> ptmMap = p.getPeptide().getTransientData().getDPeptidePtmMap();
-            if (ptmMap != null) {
-                Collection<DPeptidePTM> peptidePtms = ptmMap.values();
-                Iterator<DPeptidePTM> it = peptidePtms.iterator();
-                while (it.hasNext()) {
-                    DPeptidePTM ptm = it.next();
-                    int pos = (int) ptm.getSeqPosition();
-                    if (pos == 0){
-                        // Nter
-                        highlights[start-1] |= HIGHLIGHT_NTER_OR_CTER_MODIFICATION;
-                    } else if (pos==-1) {
-                        // Cter
-                        highlights[stop-1] |= HIGHLIGHT_NTER_OR_CTER_MODIFICATION;
-                    } else {
-                        highlights[start-1+pos-1] |= HIGHLIGHT_OTHER_MODIFICATION; 
-                    }
+        }
+
+        HashMap<Integer, DPeptidePTM> ptmMap = p.getPeptide().getTransientData().getDPeptidePtmMap();
+        if (ptmMap != null) {
+            Collection<DPeptidePTM> peptidePtms = ptmMap.values();
+            Iterator<DPeptidePTM> it = peptidePtms.iterator();
+            while (it.hasNext()) {
+                DPeptidePTM ptm = it.next();
+                int pos = (int) ptm.getSeqPosition();
+                if (pos == 0) {
+                    // Nter
+                    highlights[start - 1] |= HIGHLIGHT_NTER_OR_CTER_MODIFICATION;
+                } else if (pos == -1) {
+                    // Cter
+                    highlights[stop - 1] |= HIGHLIGHT_NTER_OR_CTER_MODIFICATION;
+                } else {
+                    highlights[start - 1 + pos - 1] |= HIGHLIGHT_OTHER_MODIFICATION;
                 }
             }
+        }
     }
-    
+
     private String constructDisplayedSequence(DProteinMatch pm, String sequence, int[] highlights, String coverageFormatted) {
-
-
 
         StringBuilder sb = new StringBuilder();
 
         sb.append("<html><body><p class='body'>");
-        
+
         int previousState = HIGHLIGHT_NONE;
 
         int nb = sequence.length();
         for (int i = 0; i < nb; i++) {
             char c = sequence.charAt(i);
-            
+
             int state = highlights[i];
 
             if (state != previousState) {
                 if (previousState != HIGHLIGHT_NONE) {
                     sb.append("</span>");
                 }
-                
+
                 // add a blank space every ten characters
                 if (i % 10 == 0) {
                     sb.append(' ');
                 }
-                
+
                 if ((state & HIGHLIGHT_OTHER_MODIFICATION) == HIGHLIGHT_OTHER_MODIFICATION) {
                     if ((state & HIGHLIGHT_NTER_OR_CTER_MODIFICATION) == HIGHLIGHT_NTER_OR_CTER_MODIFICATION) {
                         // Modification and (nter or cter) in the same time
@@ -257,7 +249,7 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
                     } else {
                         sb.append("<span class='modif'>");
                     }
-                } else  if ((state & HIGHLIGHT_NTER_OR_CTER_MODIFICATION) == HIGHLIGHT_NTER_OR_CTER_MODIFICATION) {
+                } else if ((state & HIGHLIGHT_NTER_OR_CTER_MODIFICATION) == HIGHLIGHT_NTER_OR_CTER_MODIFICATION) {
                     sb.append("<span class='nter_cter'>");
                 } else if ((state & HIGHLIGHT_PEPTIDE_SELECTED) == HIGHLIGHT_PEPTIDE_SELECTED) {
                     sb.append("<span class='peptidesel'>");
@@ -274,8 +266,6 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
             }
 
             sb.append(c);
-
-            
 
             previousState = state;
         }
@@ -294,25 +284,25 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
         sb.append("<br><br>");
         sb.append(pm.getAccession()).append(" : ").append(pm.getDescription());
         sb.append("</p></body></html>");
-        
+
         return sb.toString();
     }
-
 
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
     }
+
     @Override
     public AbstractDataBox getDataBox() {
         return m_dataBox;
     }
-    
+
     @Override
     public void addSingleValue(Object v) {
         // should not be used
     }
-    
+
     @Override
     public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getRemoveAction(splittedPanel);
@@ -327,7 +317,5 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
     public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getSaveAction(splittedPanel);
     }
-
-    
 
 }

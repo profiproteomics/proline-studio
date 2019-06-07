@@ -95,7 +95,6 @@ public class QCMappingTransferHandler extends AbstractTreeTransferHandler {
                 return false;
             }
             AbstractNode dropChannelTreeNode = dropNode;
-            ArrayList<DataSetData> transferedChannel = new ArrayList();
             for (AbstractNode dsNode : transferDsNodesList) {
                 switch (dsNode.getType()) {
                     case BIOLOGICAL_GROUP:
@@ -104,9 +103,7 @@ public class QCMappingTransferHandler extends AbstractTreeTransferHandler {
                         DQuantitationChannelMapping dropLocationMapping = m_treeTableModel.getMapping().get(dropChannelTreeNode);
                         if (dropLocationMapping != null) {
                             DataSetData userObject = (DataSetData) dsNode.getData();
-                            String dropedObjectName = userObject.getName();
                             dropLocationMapping.put(dropLocationDs, userObject.getChannelNumber());
-                            transferedChannel.add(userObject);
                         }
                         dropChannelTreeNode = this.m_treeTableModel.getNextChannelNode((XICBiologicalSampleAnalysisNode) dropChannelTreeNode);
                         if (dropChannelTreeNode == null) {

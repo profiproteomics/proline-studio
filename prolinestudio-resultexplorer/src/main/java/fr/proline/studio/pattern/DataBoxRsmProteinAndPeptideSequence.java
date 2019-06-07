@@ -1,6 +1,5 @@
 package fr.proline.studio.pattern;
 
-
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideSet;
@@ -20,14 +19,13 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
         // Name of this databox
         m_typeName = "Protein Sequence";
         m_description = "Protein Sequence and its Peptides Sequences";
-        
+
         // Register in parameters
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(DProteinMatch.class, false);
-        inParameter.addParameter(DPeptideInstance.class, false, false /* parameter is not compulsory */); 
+        inParameter.addParameter(DPeptideInstance.class, false, false /* parameter is not compulsory */);
         inParameter.addParameter(ResultSummary.class, false); // needs a ProteinMatch and a ResultSummary (PeptideInstance is optionnal)
         registerInParameter(inParameter);
-
 
         // Register possible out parameters
         // none
@@ -46,8 +44,7 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
         DProteinMatch proteinMatch = (DProteinMatch) m_previousDataBox.getData(false, DProteinMatch.class);
         DPeptideInstance selectedPeptide = (DPeptideInstance) m_previousDataBox.getData(false, DPeptideInstance.class);
         ResultSummary resultSummary = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
-       
-        
+
         if ((proteinMatch == null) || (resultSummary == null)) {
             ((RsmProteinAndPeptideSequencePanel) getDataBoxPanelInterface()).setData(null, null, null, null);
             return;
@@ -58,15 +55,15 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
             ((RsmProteinAndPeptideSequencePanel) getDataBoxPanelInterface()).setData(null, null, null, null);
             return;
         }
-        
+
         DPeptideInstance[] peptideInstances = peptideSet.getPeptideInstances();
-        
+
         // check that the selectedPeptide found in previous databox is really a peptide of the proteinMatch (they
         // can come from different databoxes)
         if (peptideInstances == null) {
             selectedPeptide = null;
         } else if (selectedPeptide!=null) {
-        
+
             boolean foundPeptide = false;
             for (int i=0;i<peptideInstances.length;i++) {
                 if (peptideInstances[i].getId() == selectedPeptide.getId()) {
@@ -77,7 +74,7 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
             if (!foundPeptide) {
                 selectedPeptide = null;
             }
-        } 
+        }
 
         Long projectId = resultSummary.getTransientData().getDDataset() == null ? null : resultSummary.getTransientData().getDDataset().getProject().getId();
 

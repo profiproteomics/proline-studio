@@ -66,9 +66,11 @@ import org.slf4j.LoggerFactory;
         DPeptideInstance selectedInsts = (DPeptideInstance) m_previousDataBox.getData(false, DPeptideInstance.class);
         //m_logger.debug("selected peptide Match, ptm {}", m_selecedDPeptideMatch.getPeptide().getTransientData().getPeptideReadablePtmString().getReadablePtmString());
         m_ptmDataset = (PTMDataset) m_previousDataBox.getData(false, PTMDataset.class);
-        m_rsm = m_ptmDataset.getDataset().getResultSummary();
+        m_rsm = null;
+        if(m_ptmDataset != null )
+            m_rsm = m_ptmDataset.getDataset().getResultSummary();
 
-        if (m_currentPtmSite == null) {
+        if (m_currentPtmSite == null || m_rsm == null) {
             panel.setData(null, null);
             return;
         }

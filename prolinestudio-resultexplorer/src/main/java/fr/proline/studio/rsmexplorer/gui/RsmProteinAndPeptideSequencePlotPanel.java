@@ -62,10 +62,10 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
         initComponent();
     }
 
-    private void initComponent(){
-        this.setBorder( BorderFactory.createTitledBorder("Protein Sequence Coverage"));
+    private void initComponent() {
+        this.setBorder(BorderFactory.createTitledBorder("Protein Sequence Coverage"));
     }
-    
+
     public void setData(String sequence, DPeptideInstance selectedPeptide, DPeptideInstance[] peptideInstances) {
         int proteinLength = sequence.length();
         m_logger.debug("length: {} Amino Acid", proteinLength);
@@ -73,11 +73,12 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
         createSequenceBloc(proteinLength);
         createPtmBloc(proteinLength);
         ChartPanel seqPlot = getSequencePlot(m_sequenceBlocList, m_sequenceTipsGenerator, true, true);
-        ChartPanel ptmPlot = getSequencePlot(m_sequenceBlocList, m_sequenceTipsGenerator, false, false);
-        seqPlot.setPreferredSize(new java.awt.Dimension(this.getWidth() - 40, this.getHeight() / 2));
-        ptmPlot.setPreferredSize(new java.awt.Dimension(this.getWidth() - 40, this.getHeight() / 2));
-         String title = "Protein Sequence Coverage, " + proteinLength + " amino acid";
+        ChartPanel ptmPlot = getSequencePlot(m_ptmBlocList, m_ptmTipsGenerator, false, false);
+        ptmPlot.setPreferredSize(new java.awt.Dimension(this.getWidth() - 40, 10));
+        seqPlot.setPreferredSize(new java.awt.Dimension(this.getWidth() - 40, 20));
+        String title = "Protein Sequence Coverage, " + proteinLength + " amino acid";
         ((TitledBorder) getBorder()).setTitle(title);
+        this.removeAll();
         this.add(ptmPlot, BorderLayout.NORTH);
         this.add(seqPlot, BorderLayout.CENTER);
         this.repaint();

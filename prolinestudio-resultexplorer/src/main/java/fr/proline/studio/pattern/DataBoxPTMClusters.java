@@ -35,10 +35,12 @@ import fr.proline.studio.rsmexplorer.gui.PTMClustersProteinPanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.types.XicMode;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.persistence.EntityManager;
@@ -384,7 +386,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
 
                     float[] protAbundances = new float[masterQC.getGroupsCount()];
                     for (PTMCluster currentCluster : proteinPTMClusters) {
-                        // by default set to null
+                      // by default set to null
                         currentCluster.setExpressionValue(Double.NaN);
                         if (currentCluster.getMasterQuantProteinSet() != null) {
 
@@ -393,7 +395,10 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                                 protAbundances[groupNumber] = stream.collect(Collectors.averagingDouble(dqps -> dqps.getAbundance())).floatValue();
                             }
 
-                            for (DPeptideInstance pep : currentCluster.getParentPeptideInstances()) {
+                            List<DPeptideInstance> parentPeptideInstances = currentCluster.getParentPeptideInstances();
+                            List<Double> expressionValues = new ArrayList<>(parentPeptideInstances.size());
+
+                            for (DPeptideInstance pep : parentPeptideInstances) {
                                 DMasterQuantPeptide mqPep = mqPepById.get(pep.getId());
                                 if (mqPep != null) {
                                     float[] pepAbundances = new float[masterQC.getGroupsCount()];
@@ -403,17 +408,26 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                                     }
                                     // Compute an expression metric from protAbundances and pepAbundances and set this value
                                     // to PTMSite expression value
-                                    double expression = Double.isNaN((Double)currentCluster.getExpressionValue()) ? 0.0 : (Double)currentCluster.getExpressionValue();
                                     for (int groupNumber = 1 ; groupNumber < masterQC.getGroupsCount(); groupNumber++) {
                                         double pepFC = Math.log(pepAbundances[groupNumber]/pepAbundances[groupNumber-1])/Math.log(2);
                                         double protFC = Math.log(protAbundances[groupNumber]/protAbundances[groupNumber-1])/Math.log(2);
                                         double diffFC = protFC - pepFC;
-                                        if (Math.abs(diffFC) > Math.abs(expression)) {
-                                            expression = diffFC;
-                                        }
+                                        expressionValues.add(diffFC);
                                     }
-                                    currentCluster.setExpressionValue(expression);
                                 }
+                            }
+                            
+                            Optional<Double> maxFinite = expressionValues.stream().filter( d -> Double.isFinite(d) ).max(Comparator.comparingDouble(Math::abs));
+                            Optional<Double> max = expressionValues.stream().max(Comparator.comparingDouble(Math::abs));
+
+                            if (maxFinite.isPresent()) {
+                                if (max.isPresent() && !Double.isNaN(max.get())) {
+                                    currentCluster.setExpressionValue(Math.max(maxFinite.get(), max.get()));
+                                } else {
+                                    currentCluster.setExpressionValue(maxFinite.get());
+                                }
+                            } else {
+                                currentCluster.setExpressionValue(max.get());
                             }
                         }
                     }
@@ -492,10 +506,10 @@ public class DataBoxPTMClusters extends AbstractDataBox {
             if(m_loadPepMatchOnGoing)
                 return null;
             PTMCluster cluster = ((PTMClustersProteinPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
-            List<PTMPeptideInstance> sitePtmPepInstance =  new ArrayList<>();
+            List<PTMPeptideInstance> ptmPeptideInstances =  new ArrayList<>();
             if(cluster != null)
-                sitePtmPepInstance = cluster.getPTMPeptideInstances();
-            return sitePtmPepInstance;
+                ptmPeptideInstances = cluster.getPTMPeptideInstances();
+            return ptmPeptideInstances;
         }
         return super.getData(getArray, parameterType, isList);
     }

@@ -342,7 +342,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
 
                     float[] protAbundances = new float[masterQC.getGroupsCount()];
                     for (PTMSite currentSite : proteinPTMSiteArray) {
-                        // by default set to null
+                        // by default set expression to null
                         currentSite.setExpressionValue(Double.NaN);
                         if (currentSite.getMasterQuantProteinSet() != null) {
 
@@ -351,7 +351,10 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
                                 protAbundances[groupNumber] = stream.collect(Collectors.averagingDouble(dqps -> dqps.getAbundance())).floatValue();
                             }
 
-                            for (DPeptideInstance pep : currentSite.getParentPeptideInstances()) {
+                            List<DPeptideInstance> parentPeptideInstances = currentSite.getParentPeptideInstances();
+                            List<Double> expressionValues = new ArrayList<>(parentPeptideInstances.size());
+
+                            for (DPeptideInstance pep : parentPeptideInstances) {
                                 DMasterQuantPeptide mqPep = mqPepById.get(pep.getId());
                                 if (mqPep != null) {
                                     float[] pepAbundances = new float[masterQC.getGroupsCount()];
@@ -361,18 +364,28 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
                                     }
                                     // Compute an expression metric from protAbundances and pepAbundances and set this value
                                     // to PTMSite expression value
-                                    double expression = Double.isNaN((Double)currentSite.getExpressionValue()) ? 0.0 : (Double)currentSite.getExpressionValue();
                                     for (int groupNumber = 1 ; groupNumber < masterQC.getGroupsCount(); groupNumber++) {
                                         double pepFC = Math.log(pepAbundances[groupNumber]/pepAbundances[groupNumber-1])/Math.log(2);
                                         double protFC = Math.log(protAbundances[groupNumber]/protAbundances[groupNumber-1])/Math.log(2);
                                         double diffFC = protFC - pepFC;
-                                        if (Math.abs(diffFC) > Math.abs(expression)) {
-                                            expression = diffFC;
-                                        }
+                                        expressionValues.add(diffFC);                                    
                                     }
-                                    currentSite.setExpressionValue(expression);
                                 }
                             }
+
+                            Optional<Double> maxFinite = expressionValues.stream().filter( d -> Double.isFinite(d) ).max(Comparator.comparingDouble(Math::abs));
+                            Optional<Double> max = expressionValues.stream().max(Comparator.comparingDouble(Math::abs));
+
+                            if (maxFinite.isPresent()) {
+                                if (max.isPresent() && !Double.isNaN(max.get())) {
+                                    currentSite.setExpressionValue(Math.max(maxFinite.get(), max.get()));
+                                } else {
+                                    currentSite.setExpressionValue(maxFinite.get());
+                                }
+                            } else {
+                                currentSite.setExpressionValue(max.get());
+                            }
+
                         }
                     }
                 }

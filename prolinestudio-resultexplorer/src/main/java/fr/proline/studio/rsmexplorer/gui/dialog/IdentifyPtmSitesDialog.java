@@ -27,9 +27,9 @@ public class IdentifyPtmSitesDialog extends DefaultDialog {
 
     setTitle("Identify Ptm sites");
     setHelpHeaderText("Select the Ptm identification service: v1.0 generates a list of all identified <br> sites while v2.0 generates a Ptm dataset in which sites are clusterized.<br>"+
-            " &bull;v2.0 parameters: Select the list of modifications of interest <br>" +
+            " <ul><li>v2.0 parameters: Select the list of modifications of interest <br>" +
             "(other modifications will be ignored during clustering) and the name <br>" +
-            "of the method that will be used to clusterize modification sites.");
+            "of the method that will be used to clusterize modification sites.</li></ul>");
     initInternalPanel();
     pack();
   }
@@ -74,14 +74,6 @@ public class IdentifyPtmSitesDialog extends DefaultDialog {
       });
       parametersV2Panel.add(checkbox, c);
     }
-
-//    JPanel marginPanel = new JPanel();
-//    marginPanel.setLayout(new GridBagLayout());
-//    c.fill = GridBagConstraints.HORIZONTAL;
-//    c.insets = new java.awt.Insets(15, 15, 15, 15);
-//    c.gridx = 0;
-//    c.gridy = 0;
-//    marginPanel.add(parametersV2Panel, c);
 
     final JPanel parametersPanel = new JPanel(new CardLayout());
 

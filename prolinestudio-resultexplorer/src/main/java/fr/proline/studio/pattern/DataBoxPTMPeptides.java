@@ -104,7 +104,7 @@ public class DataBoxPTMPeptides extends AbstractDataBox {
         
         PTMPeptidesTablePanel panel = (PTMPeptidesTablePanel) getDataBoxPanelInterface();
         
-        //Get information from prevous box:     
+        //Get information from previous box:
         // -- PTM Dataset & RSM the ptm peptides belong to
         // -- List of PTM Peptides to display
         PTMDataset newPtmDataset = (PTMDataset) m_previousDataBox.getData(false, PTMDataset.class);        
@@ -114,9 +114,7 @@ public class DataBoxPTMPeptides extends AbstractDataBox {
 //        if(newPtmPepInstancesPtmSite == null || newPtmPepInstancesPtmSite.isEmpty()){
 //            
 //        }
-        
-        
-        
+
         boolean valueUnchanged  = Objects.equals(newPtmDataset, m_ptmDataset) && Objects.equals(newPtmPepInstancesPtmSite,m_ptmPepInstancesPtmSite);
         
         if(valueUnchanged){

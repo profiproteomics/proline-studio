@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -24,14 +26,17 @@ import java.util.stream.Collectors;
  */
 public class PTMCluster {
     
+      private final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ptm");
+
     private List<PTMSite> m_sites;
     private JSONPTMCluster m_jsonCluster;
     
     private DProteinMatch m_proteinMatch;    
     private DMasterQuantProteinSet m_masterQuantProteinSet;
-
     private DPeptideMatch m_bestPeptideMatch;
-    
+    private List<PTMPeptideInstance> m_ptmPeptideInstances;
+    private List<DPeptideInstance> m_parentPeptideInstances;
+
 //    //PeptideInstance of parent dataset
 //    private List<DPeptideInstance> m_parentPeptideInstances;
 //    //PTMPeptideInstance of leaf dataset by peptideId
@@ -99,9 +104,15 @@ public class PTMCluster {
 //           // m_ptmSitePeptideInstanceByPepId.put(peptideId, ptmSitePeptideInstance);
 //        }
 //    }
-    
+
     public List<DPeptideInstance> getParentPeptideInstances() {
-        return m_sites.stream().flatMap(site -> site.getParentPeptideInstances().stream()).collect(Collectors.toList());        
+        if (m_sites == null || m_sites.isEmpty())
+            return null;
+        if (m_parentPeptideInstances == null) {
+            List<Long> pepIds = Arrays.asList(m_jsonCluster.peptideIds);
+            m_parentPeptideInstances = m_sites.stream().flatMap(site -> site.getParentPeptideInstances().stream()).distinct().filter(pi -> pepIds.contains(pi.getPeptideId())).collect(Collectors.toList());
+        }
+        return m_parentPeptideInstances;
     }
     
     public PTMPeptideInstance getPTMPeptideInstance(Long peptideId) {
@@ -113,16 +124,19 @@ public class PTMCluster {
     public List<PTMPeptideInstance> getPTMPeptideInstances() {
         if(m_sites == null || m_sites.isEmpty())
             return null;
-        Collection<PTMPeptideInstance> ptmPeptides = m_ptmDataset.getPTMPeptideInstance(m_proteinMatch.getId());
-        List<Long> pepIds =  Arrays.asList(m_jsonCluster.peptideIds);
-        List<PTMPeptideInstance> ptmPepIList = new ArrayList<>();
-        for(PTMPeptideInstance ptmPepI : ptmPeptides){
-            if(pepIds.contains(ptmPepI.getPeptideInstance().getPeptideId()) && !ptmPepIList.contains(ptmPepI))
-                ptmPepIList.add(ptmPepI);                        
+        if (m_ptmPeptideInstances == null) {
+            Collection<PTMPeptideInstance> ptmPeptides = m_ptmDataset.getPTMPeptideInstance(m_proteinMatch.getId());
+            List<Long> pepIds = Arrays.asList(m_jsonCluster.peptideIds);
+            List<PTMPeptideInstance> ptmPepIList = new ArrayList<>();
+            for (PTMPeptideInstance ptmPepI : ptmPeptides) {
+                if (pepIds.contains(ptmPepI.getPeptideInstance().getPeptideId()) && !ptmPepIList.contains(ptmPepI))
+                    ptmPepIList.add(ptmPepI);
+            }
+            m_ptmPeptideInstances = ptmPepIList;
         }
-        
-        return ptmPepIList;
+        return m_ptmPeptideInstances;
     }
+
     public List<PTMSite> getClusteredSites(){
         return m_sites;
     }
@@ -134,8 +148,7 @@ public class PTMCluster {
     public void setQuantProteinSet(DMasterQuantProteinSet mqps) {
         m_masterQuantProteinSet = mqps;
     }
-    
-    
+
     public DMasterQuantProteinSet getMasterQuantProteinSet() {
         return m_masterQuantProteinSet;
     }
@@ -145,6 +158,6 @@ public class PTMCluster {
     }
 
     public Object getExpressionValue() {
-        return m_expressionValue;
+      return m_expressionValue;
     }
 }

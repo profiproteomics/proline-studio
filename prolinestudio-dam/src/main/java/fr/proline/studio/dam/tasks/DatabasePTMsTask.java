@@ -616,7 +616,11 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
             if (!leafPeptideInstancesByPepId.containsKey(p.getId())) 
                 leafPeptideInstancesByPepId.put(p.getId(),new ArrayList<DPeptideInstance>());
             List<DPeptideInstance> pepInsts = leafPeptideInstancesByPepId.get(p.getId());
-            if(!pepInsts.contains(pi)){
+            boolean alreadyread = false;
+            for(DPeptideInstance readPepI : pepInsts)
+                if(readPepI.getId() == pi.getId())
+                    alreadyread = true;
+            if(!alreadyread){
                 DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptide().getId(), pi.getValidatedProteinSetCount(), pi.getElutionTime());
                 dpi.setResultSummary(pi.getResultSummary());
                 dpi.setPeptide(p);

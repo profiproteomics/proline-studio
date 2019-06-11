@@ -311,7 +311,7 @@ public class ProteinPTMClusterTableModel extends LazyTableModel implements Globa
         return protPTMCluster.getPeptideCount();
 
       case COLTYPE_PTMSITE_COUNT:
-        return protPTMCluster.getClusteredSites();
+        return protPTMCluster.getClusteredSites().size();
                 
 //      case COLTYPE_RESIDUE_AA: 
 //        return infoPtm.getResidueAASpecificity();

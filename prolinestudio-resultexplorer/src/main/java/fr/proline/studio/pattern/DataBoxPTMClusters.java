@@ -188,6 +188,9 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                         ((PTMClustersProteinPanel)getDataBoxPanelInterface()).dataUpdated(subTask, finished);                    
                     }   
                 } else{
+                    TaskInfo ti =  getTaskInfo(taskId);
+                    String message = (ti != null && ti.hasTaskError()) ? ti.getTaskError().getErrorText() : "Error loading PTM Cluster";
+                    JOptionPane.showMessageDialog(((JPanel) getDataBoxPanelInterface()), message,"PTM Cluster loading error", JOptionPane.ERROR_MESSAGE);                    
                     ((PTMClustersProteinPanel) getDataBoxPanelInterface()).setData(taskId, null, finished); 
                 }
                 if (finished) {

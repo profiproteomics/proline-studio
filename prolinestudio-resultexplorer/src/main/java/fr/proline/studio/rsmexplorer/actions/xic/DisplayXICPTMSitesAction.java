@@ -13,6 +13,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
+import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
@@ -20,7 +21,12 @@ import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
-import javax.swing.JOptionPane;
+import java.awt.Dialog;
+import java.awt.GridBagConstraints;
+import java.awt.Window;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
@@ -36,17 +42,22 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
     
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
-        int answer= JOptionPane.showConfirmDialog(WindowManager.getDefault().getMainWindow(), "Do you want to view Protein Sites V2 ?");
-        int nbNodes = selectedNodes.length;
-        for (int i = 0; i < nbNodes; i++) {
-            DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
-
-            actionImpl(dataSetNode, answer);
+//        DisplayXICPTMSiteDialog
+        DisplayXICPTMSiteDialog dialog = new DisplayXICPTMSiteDialog(WindowManager.getDefault().getMainWindow());
+        dialog.setLocation(x, y);
+        dialog.setVisible(true);        
+        if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+            int nbNodes = selectedNodes.length;
+            for (int i = 0; i < nbNodes; i++) {
+                DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
+                actionImpl(dataSetNode, dialog.getServiceVersion());
+            }
         }
+        
 
     }
     
-    private void actionImpl(DataSetNode dataSetNode, int answer) {
+    private void actionImpl(DataSetNode dataSetNode, String serviceVersion) {
         
         final DDataset dataSet = ((DataSetData) dataSetNode.getData()).getDataset();
         
@@ -59,13 +70,11 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
 
             // prepare window box
             WindowBox wbox;
-            if(answer == JOptionPane.YES_OPTION){
+             if (serviceVersion.equals("2.0")) {
                 wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV2(dataSet.getName());
-            } else if (answer == JOptionPane.NO_OPTION){
-                wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV1(dataSet.getName());            
             } else {
-                return;         
-            }
+                wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV1(dataSet.getName());            
+            } 
             wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));    
                
             // open a window to display the window box
@@ -87,13 +96,11 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     WindowBox wbox;
-                    if(answer == JOptionPane.YES_OPTION){
+                     if (serviceVersion.equals("2.0")) {
                         wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV2(dataSet.getName());
-                    } else if (answer == JOptionPane.NO_OPTION){
-                        wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV1(dataSet.getName());            
                     } else {
-                        return;         
-                    }
+                        wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV1(dataSet.getName());            
+                    } 
                     // open a window to display the window box
                     DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
                     win.open();
@@ -146,5 +153,42 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
         setEnabled(true);
     }
     
-    
+    class DisplayXICPTMSiteDialog extends DefaultDialog {
+        
+       JComboBox<String>  m_serviceVersionCbx;
+                
+        public DisplayXICPTMSiteDialog(Window parent){
+           super(parent, Dialog.ModalityType.APPLICATION_MODAL); 
+            setTitle("Display PTM sites");
+            setHelpHeaderText("Select the version of PTM identification service that was used: \n<br>"+
+            " &bull; v1.0 a list of all identified sites was generated \n"+
+            " &bull; v2.0 a PTM dataset in which sites are clusterized has been generated.\n<br>");
+            initInternalPanel();
+            pack();           
+        }
+        
+        private void initInternalPanel() {
+            JPanel internalPanel = new JPanel();    
+            internalPanel.setLayout(new java.awt.GridBagLayout());
+            GridBagConstraints c = new GridBagConstraints();
+            c.anchor = GridBagConstraints.NORTHWEST;
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.insets = new java.awt.Insets(15, 15, 15, 15);
+            c.gridx = 0;
+            c.gridy = 0;            
+            
+            JLabel label = new JLabel("Service version:");     
+            internalPanel.add(label, c);
+            String[] versions = new String[] {"Ptm Sites (v1.0)", "Ptm Dataset (v2.0)"};
+            m_serviceVersionCbx = new JComboBox(versions);
+             c.gridx++;
+            internalPanel.add(m_serviceVersionCbx, c);
+            setInternalComponent(internalPanel);            
+        }
+        
+        public String getServiceVersion() {
+            return m_serviceVersionCbx.getItemAt(m_serviceVersionCbx.getSelectedIndex()).contains("2.0") ? "2.0" : "1.0";
+        }
+        
+    }
 }

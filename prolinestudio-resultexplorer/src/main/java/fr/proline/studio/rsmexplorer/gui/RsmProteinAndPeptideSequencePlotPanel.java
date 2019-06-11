@@ -10,6 +10,7 @@ import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewSetting;
+import fr.proline.studio.rsmexplorer.gui.ptm.pep.PeptideView;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.swing.JPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -32,75 +34,83 @@ import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.awt.BorderLayout;
+import javax.swing.BorderFactory;
+import javax.swing.border.TitledBorder;
 
 /**
  * reference : Vaudel et al. Nature Biotechnol. 2015 Jan;33(1):22–24. Projet
  * PeptideShaker: OverviewPanel.java, ProteinSequencePanel.java
  *
- * @author KX257079
+ * @author Karine XUE
  */
 public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
 
     private static final Logger m_logger = LoggerFactory.getLogger(RsmProteinAndPeptideSequencePlotPanel.class);
-    private static Color DEFALUT_COLOR = Color.GREEN;
 
-    /**
-     * bloc start position map to BlocData
-     */
-    private HashMap<Integer, BlocData> m_startBlocMap;
+    private Color NON_COLOR = this.getBackground();
     private BlocToolTipGenerator m_sequenceTipsGenerator;
     private BlocToolTipGenerator m_ptmTipsGenerator;
+    HashMap<Integer, ArrayList<DPeptideMatch>> m_AAPeptideMap;
+    HashMap<Integer, AminoAcidPtmData> m_AAPtmMap;
+    ArrayList<BlocData> m_sequenceBlocList;
+    ArrayList<BlocData> m_ptmBlocList;
 
+    public RsmProteinAndPeptideSequencePlotPanel() {
+        super();
+        this.setLayout(new BorderLayout());
+        initComponent();
+    }
+
+    private void initComponent(){
+        this.setBorder( BorderFactory.createTitledBorder("Protein Sequence Coverage"));
+    }
+    
     public void setData(String sequence, DPeptideInstance selectedPeptide, DPeptideInstance[] peptideInstances) {
         int proteinLength = sequence.length();
         m_logger.debug("length: {} Amino Acid", proteinLength);
-        //getBlocFromMap(proteinLength, selectedPeptide, peptideInstances);
-        getBlocFromMap(proteinLength, selectedPeptide, peptideInstances);
+        createAADataMap(proteinLength, peptideInstances);
+        createSequenceBloc(proteinLength);
+        createPtmBloc(proteinLength);
+        ChartPanel seqPlot = getSequencePlot(m_sequenceBlocList, m_sequenceTipsGenerator, true, true);
+        ChartPanel ptmPlot = getSequencePlot(m_sequenceBlocList, m_sequenceTipsGenerator, false, false);
+        seqPlot.setPreferredSize(new java.awt.Dimension(this.getWidth() - 40, this.getHeight() / 2));
+        ptmPlot.setPreferredSize(new java.awt.Dimension(this.getWidth() - 40, this.getHeight() / 2));
+         String title = "Protein Sequence Coverage, " + proteinLength + " amino acid";
+        ((TitledBorder) getBorder()).setTitle(title);
+        this.add(ptmPlot, BorderLayout.NORTH);
+        this.add(seqPlot, BorderLayout.CENTER);
+        this.repaint();
     }
 
-    private void getBlocFromMap(int nbAminoAcid, DPeptideInstance selectedPeptide, DPeptideInstance[] peptideInstances) {
-        HashMap<Integer, AminoAcidData> AAMap = createAADataMap(nbAminoAcid, peptideInstances);
-//        for (Integer key : AAMap.keySet()) {
-//            AminoAcidData value = AAMap.get(key);
-//            ArrayList ptm = value.getPtmBlocList();
-//            if (!ptm.isEmpty()) {
-//                m_logger.debug("key: {}, ptm : {}", key, ptm);
-//            }
-//        }
+    private void createSequenceBloc(int nbAminoAcid) {
         m_sequenceTipsGenerator = new BlocToolTipGenerator();
         //m_logger.debug("Map {}", AAMap);
-        ArrayList<BlocData> sequenceBlocList = new ArrayList();
-
-        AminoAcidData aminoAcideData;
+        m_sequenceBlocList = new ArrayList();
         int newIndex;
-        AminoAcidData newAA, previousAA;
         ArrayList<DPeptideMatch> newPepList, previousPepList = new ArrayList();
-
         int seqBlocIndex = 0;
         BlocData seqBlocData = null;
 
-        ArrayList<BlocData> ptmBlocList = new ArrayList();
         for (int i = 1; i <= nbAminoAcid; i++) {//index from 1
             newIndex = i;
-            aminoAcideData = AAMap.get(newIndex);
+            newPepList = m_AAPeptideMap.get(newIndex);
 
-            if (aminoAcideData != null) {
-                if (!aminoAcideData.getPtmBlocList().isEmpty()) {
-                    ptmBlocList.addAll(aminoAcideData.getPtmBlocList());
-                }
+            if (newPepList != null) {
+
                 //1. create peptide bloc from peptide info
-                newPepList = aminoAcideData.getPeptideList();
                 if (newPepList.equals(previousPepList)) {
                     seqBlocData.addLength();
                 } else {
                     if (seqBlocData != null) {
                         //perhaps this bloc is non covrage bloc
-                        if (m_sequenceTipsGenerator.isNullTips(seqBlocData._blocIndex)) {
-                            int start = seqBlocData._startPosition;
-                            int stop = seqBlocData._startPosition + seqBlocData._length - 1;
-                            m_sequenceTipsGenerator.addTooltips(seqBlocData._blocIndex, "(" + start + "," + stop + ") non covered ");
+                        if (m_sequenceTipsGenerator.isNullTips(seqBlocData.getIndex())) {
+                            int start = seqBlocData.getStartPosition();
+                            int stop = seqBlocData.getStartPosition() + seqBlocData._length - 1;
+                            seqBlocData.setColor(NON_COLOR);
+                            m_sequenceTipsGenerator.addTooltips(seqBlocData.getIndex(), "(" + start + " - " + stop + ") no covered ");
                         }
-                        sequenceBlocList.add(seqBlocData);//one bloc terminate
+                        m_sequenceBlocList.add(seqBlocData);//one bloc terminate
                     }
                     seqBlocData = new BlocData(newIndex, seqBlocIndex++);//new bloc begin.
                     float maxScore = 0;
@@ -110,48 +120,41 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
                         String sequence = pep.getPeptide().getSequence();
                         String tips = "" + start + "-" + sequence + "-" + stop;
                         maxScore = Math.max(maxScore, pep.getScore());//to transfer to Color
-                        m_sequenceTipsGenerator.addTooltips(seqBlocData._blocIndex, tips);
+                        m_sequenceTipsGenerator.addTooltips(seqBlocData.getIndex(), tips);
                     }
+                    seqBlocData.setScore(maxScore);
                 }
             } else {//aminoAcideData==null
-                newPepList = null;
+
                 if (previousPepList != newPepList) {
                     if (seqBlocData != null) {
-                        sequenceBlocList.add(seqBlocData);
+                        m_sequenceBlocList.add(seqBlocData);
                     }
                     seqBlocData = new BlocData(newIndex, seqBlocIndex++);
                 } else {
                     seqBlocData.addLength(); //bloc peptideList.size == 0,peptide withoutColor
-                    if (newIndex == nbAminoAcid) {
-                        int start = seqBlocData._startPosition;
-                        int stop = seqBlocData._startPosition + seqBlocData._length - 1;
-                        m_sequenceTipsGenerator.addTooltips(seqBlocData._blocIndex, "(" + start + "," + stop + ") non covered ");
-                        sequenceBlocList.add(seqBlocData);
+                    if (newIndex == nbAminoAcid) {//last bloc
+                        int start = seqBlocData.getStartPosition();
+                        int stop = seqBlocData.getStartPosition() + seqBlocData._length - 1;
+                        m_sequenceTipsGenerator.addTooltips(seqBlocData.getIndex(), "(" + start + " - " + stop + ") no covered ");
+                        seqBlocData.setColor(NON_COLOR);
+                        m_sequenceBlocList.add(seqBlocData);
                     }
 
                 }
             }
             previousPepList = newPepList;
         }
-//        m_logger.debug("ptm bloc result: ");
-//        showSeqBloc(sequenceBlocList, m_sequenceTipsGenerator);
-        getPtmBlocFromMap(nbAminoAcid, ptmBlocList);
-    }
-
-    private void showSeqBloc(ArrayList<BlocData> sequenceBlocList, BlocToolTipGenerator tipsGenerator) {
-        for (BlocData d : sequenceBlocList) {
-            if (d == null) {
-                continue;
-            }
-            m_logger.debug("{},{}", d, tipsGenerator.getTipsAt(d._blocIndex));
-        }
+//        m_logger.debug("sequence bloc result: ");
+//        showSeqBloc(m_sequenceBlocList, m_sequenceTipsGenerator);
 
     }
 
-    private void getPtmBlocFromMap(int nbAminoAcid, ArrayList<BlocData> ptmBlocList) {
-        List<BlocData> sortedPtm = ptmBlocList.stream().sorted(Comparator.comparing(BlocData::getStartPosition)).collect(Collectors.toList());
+    private void createPtmBloc(int nbAminoAcid) {
+        Stream<BlocData> ptmStream = m_AAPtmMap.values().stream().map(bloc -> bloc.getPtmBlocList()).flatMap(Collection::stream);
+        List<BlocData> sortedPtm = ptmStream.sorted(Comparator.comparing(BlocData::getStartPosition)).collect(Collectors.toList());
         //m_logger.debug(" sorted ptm {}", sortedPtm);
-        ArrayList<BlocData> resultPtmBlocList = new ArrayList();
+        m_ptmBlocList = new ArrayList();
 
         int newIndex = 1, previousIndex = 1;//1er positoin index = 1;
         int ptmBlocIndex = 0;
@@ -162,36 +165,53 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
             if (newIndex != previousIndex) {
                 if (!ptmBloc.isCovered()) {//first one is empty
                     ptmBloc.setLength(newIndex - previousIndex);//empty bloc
+                    ptmBloc.setColor(NON_COLOR);
                 } else if (ptmBloc.isCovered() && (newIndex - previousIndex > 1)) { //
-                    resultPtmBlocList.add(ptmBloc);//save previous bloc
+                    m_ptmBlocList.add(ptmBloc);//save previous bloc
                     ptmBloc = new BlocData(previousIndex + 1, ptmBlocIndex++);//empty bloc       
                     ptmBloc.setLength(newIndex - previousIndex - 1);
+                    ptmBloc.setColor(NON_COLOR);
                 }
-                resultPtmBlocList.add(ptmBloc);//save previous bloc
+                m_ptmBlocList.add(ptmBloc);//save previous bloc
                 ptmBloc = new BlocData(newIndex, ptmBlocIndex++);//new length=1 bloc
-                m_ptmTipsGenerator.addPtmTooltips(ptmBloc._blocIndex, onePtm._tooltips);
+                m_ptmTipsGenerator.addPtmTooltips(ptmBloc.getIndex(), onePtm.getTooltips());
+                ptmBloc.setColor(onePtm.getColor());
                 ptmBloc.setCovered();
             } else {//newIndex = previousIndex 1. first one is ptm, 2. mutliple ptm at a AA
                 if (!ptmBloc.isCovered()) {//first is ptm
                     ptmBloc.setCovered();
                 }
-                m_ptmTipsGenerator.addPtmTooltips(ptmBloc._blocIndex, onePtm._tooltips);
+                m_ptmTipsGenerator.addPtmTooltips(ptmBloc.getIndex(), onePtm.getTooltips());
+                ptmBloc.setColor(onePtm.getColor());
             }
             previousIndex = newIndex;
         }
-        resultPtmBlocList.add(ptmBloc);
+        m_ptmBlocList.add(ptmBloc);
         if (previousIndex != nbAminoAcid) {//last null bloc
             ptmBloc = new BlocData(previousIndex + 1, ptmBlocIndex++);//empty bloc       
             ptmBloc.setLength(nbAminoAcid - previousIndex - 1);
-            resultPtmBlocList.add(ptmBloc);
+            ptmBloc.setColor(NON_COLOR);
+            m_ptmBlocList.add(ptmBloc);
         }
 //        m_logger.debug("ptm bloc result: ");
-//        showSeqBloc(resultPtmBlocList, m_ptmTipsGenerator);
+//        showSeqBloc(m_ptmBlocList, m_ptmTipsGenerator);
     }
 
-    private HashMap<Integer, AminoAcidData> createAADataMap(int nbAminoAcid, DPeptideInstance[] peptideInstances) {
-        HashMap<Integer, AminoAcidData> AADataMap = new HashMap();
-        AminoAcidData aData;
+    private void showSeqBloc(ArrayList<BlocData> sequenceBlocList, BlocToolTipGenerator tipsGenerator) {
+        for (BlocData d : sequenceBlocList) {
+            if (d == null) {
+                continue;
+            }
+            m_logger.debug("{},{}", d, tipsGenerator.getTipsAt(d.getIndex()));
+        }
+
+    }
+
+    private void createAADataMap(int nbAminoAcid, DPeptideInstance[] peptideInstances) {
+        m_AAPeptideMap = new HashMap();
+        m_AAPtmMap = new HashMap();
+        ArrayList<DPeptideMatch> pepMatchList;
+        AminoAcidPtmData ptmOnAA;
         for (DPeptideInstance pep : peptideInstances) {
             int start = 0, stop = 0;
             try {
@@ -201,12 +221,13 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
                     start = bestPeptideMatch.getSequenceMatch().getId().getStart();
                     stop = bestPeptideMatch.getSequenceMatch().getId().getStop();
                     for (int i = start; i <= stop; i++) {
-                        aData = AADataMap.get(i);
-                        aData = (aData == null ? new AminoAcidData() : aData);
-                        aData.addPeptide(bestPeptideMatch);
-                        AADataMap.put(i, aData);
+                        pepMatchList = m_AAPeptideMap.get(i);
+                        pepMatchList = (pepMatchList == null ? new ArrayList() : pepMatchList);
+                        pepMatchList.add(bestPeptideMatch);
+                        m_AAPeptideMap.put(i, pepMatchList);
                     }
                 }
+
                 //create ptm
                 Collection<DPeptidePTM> allPtm = bestPeptideMatch.getPeptide().getTransientData().getDPeptidePtmMap().values();
                 for (DPeptidePTM ptm : allPtm) {
@@ -223,19 +244,18 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
                     int position = (int) ptm.getSeqPosition() + start - 1;//position convert to int
                     String tooltips = ptmTypeInfo.getPtmShortName() + "(" + ptmTypeInfo.getResidueAASpecificity() + position + ")";
                     m_logger.debug("ptm{}", tooltips);
-                    aData = AADataMap.get(position);
-                    aData = (aData == null ? new AminoAcidData() : aData);
-                    aData.addPtm(ptm);
+                    ptmOnAA = m_AAPtmMap.get(position);
+                    ptmOnAA = (ptmOnAA == null ? new AminoAcidPtmData() : ptmOnAA);
+
                     Color c = ViewSetting.getColor(ptmType);
-                    aData.addPtmBloc(position, c, tooltips);
-                    AADataMap.put(position, aData);
+                    ptmOnAA.addPtmBloc(position, c, tooltips);
+                    m_AAPtmMap.put(position, ptmOnAA);
                 }
                 //need to know ptm caractor, type , position
             } catch (NullPointerException nullE) {
                 //has not peptide information, skip                
             }
         }
-        return AADataMap;
     }
 
     /**
@@ -248,18 +268,18 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
     private Color referenceLineColor = Color.BLACK;
     private Color backgroundColor = Color.white;
 
-    public ChartPanel getSequencePlot(ArrayList<Integer> peptide, ArrayList pepToolTips,
+    public ChartPanel getSequencePlot(ArrayList<BlocData> bloc, CategoryToolTipGenerator tipsGenerator,
             boolean addReferenceLine, boolean allowZooming) {
         DefaultCategoryDataset barChartDataset = new DefaultCategoryDataset();
         StackedBarRenderer renderer = new StackedBarRenderer();
         renderer.setShadowVisible(false);
 
         // add the data
-        for (int i = 0; i < peptide.size(); i++) {
-            barChartDataset.addValue(peptide.get(i), Integer.valueOf(i), Integer.valueOf(0)); //data, length pep, index start, 0
+        for (int i = 0; i < bloc.size(); i++) {
+            barChartDataset.addValue(Integer.valueOf(bloc.get(i).getLength()), Integer.valueOf(bloc.get(i).getIndex()), Integer.valueOf(0)); //data, length pep, index start, 0
 
-            renderer.setSeriesPaint(i, Color.GREEN); //@todo according score color
-            renderer.setSeriesToolTipGenerator(i, m_sequenceTipsGenerator); //tooltips
+            renderer.setSeriesPaint(i, bloc.get(i).getColor()); //@todo according score color
+            renderer.setSeriesToolTipGenerator(i, tipsGenerator); //tooltips
         }
 
         // create the chart
@@ -324,24 +344,12 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
 
     }
 
-    private class AminoAcidData {
+    private class AminoAcidPtmData {
 
-        private ArrayList<DPeptideMatch> _peptideList;
-        private ArrayList<DPeptidePTM> _ptmList;
         private ArrayList<BlocData> _ptmBlocList;
 
-        AminoAcidData() {
-            _peptideList = new ArrayList();
-            _ptmList = new ArrayList();
+        AminoAcidPtmData() {
             _ptmBlocList = new ArrayList();
-        }
-
-        void addPeptide(DPeptideMatch pep) {
-            this._peptideList.add(pep);
-        }
-
-        void addPtm(DPeptidePTM ptm) {
-            this._ptmList.add(ptm);
         }
 
         void addPtmBloc(int ptmPositionInProt, Color color, String message) {
@@ -354,24 +362,8 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
             this._ptmBlocList.add(bd);
         }
 
-        public ArrayList<DPeptideMatch> getPeptideList() {
-            return _peptideList;
-        }
-
         public ArrayList<BlocData> getPtmBlocList() {
             return _ptmBlocList;
-        }
-
-        @Override
-        public String toString() {
-            String peptideInfo = "";
-            for (DPeptideMatch pep : _peptideList) {
-                peptideInfo += "{" + pep.getPeptide().getSequence()
-                        + " pos:(" + pep.getSequenceMatch().getId().getStart() + ","
-                        + pep.getSequenceMatch().getId().getStop() + ")}";
-            }
-
-            return "AminoAcidData{" + "_peptideList=" + peptideInfo + ", _ptmBlocList=" + _ptmBlocList + '}';
         }
 
     }
@@ -381,6 +373,7 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
         private int _length;
         private int _startPosition;
         private Color _color;
+        private float _score;
         private ArrayList<String> _tooltips;
         private boolean _isCovered;
         private int _blocIndex;
@@ -407,6 +400,35 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
             _color = color;
             _tooltips = new ArrayList<>();
             _tooltips.add(message);
+        }
+
+        public ArrayList<String> getTooltips() {
+            return _tooltips;
+        }
+
+        public int getIndex() {
+            return _blocIndex;
+        }
+
+        public void setColorWithScore(float Score) {
+            this._color = null;
+        }
+
+        public Color getColor() {
+            if (this._score != 0f) {
+                //return PeptideView.getColorWithProbability(ViewSetting.PEPTIDE_COLOR, (float) Math.min((Math.max(_score, 15f) - 15) / 100.0, 1.0));
+                return PeptideView.getColorWithProbability(Color.BLUE, (float) Math.min((Math.max(_score, 15f) - 15) / 100.0, 1.0));
+            } else {
+                return _color;
+            }
+        }
+
+        public void setColor(Color color) {
+            this._color = color;
+        }
+
+        public void setScore(float newScore) {
+            this._score = Math.max(_score, newScore);
         }
 
         @Override
@@ -472,6 +494,7 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
         public String toString() {
             return "BlocData{" + _blocIndex + ",start=" + _startPosition + ", length=" + _length + ", tooltips=" + _tooltips + '}';
         }
+
     }
 
     private class BlocToolTipGenerator implements CategoryToolTipGenerator {
@@ -554,7 +577,5 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
         }
 
     }
-
- 
 
 }

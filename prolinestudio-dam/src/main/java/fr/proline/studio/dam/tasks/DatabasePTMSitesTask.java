@@ -23,9 +23,7 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import fr.proline.studio.dam.tasks.data.ptm.JSONPTMDataset;
 import fr.proline.studio.dam.tasks.data.ptm.JSONPTMSite;
-import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -386,11 +384,35 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
     private void fetchPTMSiteData(PTMSite siteToFill, EntityManager entityManagerMSI, ObjectMapper mapper) throws IOException {
         HashMap<Long, Peptide> allPeptidesMap = new HashMap();
         HashMap<Long, DPeptideInstance> leafPeptideInstancesById = new HashMap<>();
+        
+        //Get PeptideInstance id : IF PTM v1 : data exist in PTMSite othewise we need to load them 
+        ArrayList<Long> peptideInstanceIds = new ArrayList<>();
+        Long[] pepInst  = siteToFill.getPeptideInstanceIds();
+        if(pepInst == null){
+            ArrayList<Long> allPepIds = siteToFill.getPeptideIds();
+            Query peptidesQuery = entityManagerMSI.createQuery("SELECT pi.id FROM fr.proline.core.orm.msi.PeptideInstance pi"
+                        + "   WHERE pi.peptide.id IN (:peptideIdsList) AND pi.resultSummary.id in (:rmsIds)");
+            peptidesQuery.setParameter("peptideIdsList", allPepIds);
+            List<Long> rsmIds = siteToFill.getPTMdataset().getLeafResultSummaryIds();
+            rsmIds.add(siteToFill.getPTMdataset().getDataset().getResultSummaryId());
+            peptidesQuery.setParameter("rmsIds", rsmIds);        
+            
+//            Iterator<Long> itPeptidesQuery = peptidesQuery.getResultList().iterator();                        
+//            while (itPeptidesQuery.hasNext()) {            
+                peptideInstanceIds.addAll(  peptidesQuery.getResultList());
+//            }            
+        } else {
+            for(Long pepIId: pepInst){
+                peptideInstanceIds.add(pepIId);
+            }
+        }
+        
+        
         //---- Load Peptide Match + Spectrum / MSQuery information for all peptideInstance of PTMSite
         Query peptidesQuery = entityManagerMSI.createQuery("SELECT pm, pi\n"
                 + "              FROM fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstance pi \n"
                 + "              WHERE pipm.id.peptideInstanceId IN ( :peptideInstanceList ) AND pipm.id.peptideInstanceId=pi.id AND pipm.id.peptideMatchId=pm.id ");
-        peptidesQuery.setParameter("peptideInstanceList",Arrays.asList(siteToFill.getPeptideInstanceIds()));
+        peptidesQuery.setParameter("peptideInstanceList",peptideInstanceIds);
         List l = peptidesQuery.getResultList();
         Iterator<Object[]> itPeptidesQuery = l.iterator();
         //---- Create List of DPeptideMatch (linked to DSpectrum + DMsQuery) from query resumlt

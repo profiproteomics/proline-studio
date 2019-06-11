@@ -1,9 +1,11 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DInfoPTM;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.rsmexplorer.gui.RsmProteinAndPeptideSequencePanel;
 
 /**
@@ -77,7 +79,12 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
         }
 
         Long projectId = resultSummary.getTransientData().getDDataset() == null ? null : resultSummary.getTransientData().getDDataset().getProject().getId();
-
+        //retrive all DPTMInfo map
+        if (DInfoPTM.getInfoPTMMap().isEmpty()) {
+            DatabasePTMsTask ptmTask = new DatabasePTMsTask(null);
+            ptmTask.initFillPTMInfo(projectId);
+            ptmTask.fetchData();
+        }
         ((RsmProteinAndPeptideSequencePanel) getDataBoxPanelInterface()).setData(projectId , proteinMatch, selectedPeptide, peptideInstances);
     }
 

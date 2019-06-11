@@ -129,7 +129,7 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
             m_logger.info("BioSequence is absent from the protein match, trying to load it ...");
             DatabaseBioSequenceTask.fetchData(Collections.singletonList(pm), projectId);
         }
-
+        
         if (pm.isDBiosequenceSet()) {
             String sequence = pm.getDBioSequence().getSequence();
             int sequenceLength = sequence.length();

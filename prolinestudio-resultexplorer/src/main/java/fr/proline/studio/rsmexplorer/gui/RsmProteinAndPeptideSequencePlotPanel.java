@@ -37,6 +37,8 @@ import org.slf4j.LoggerFactory;
 import java.awt.BorderLayout;
 import javax.swing.BorderFactory;
 import javax.swing.border.TitledBorder;
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.renderer.category.StandardBarPainter;
 
 /**
  * reference : Vaudel et al. Nature Biotechnol. 2015 Jan;33(1):22–24. Projet
@@ -323,6 +325,7 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
 
         // set up the chart renderer
         plot.setRenderer(0, renderer);
+        ((BarRenderer) plot.getRenderer()).setBarPainter(new StandardBarPainter());
 
         // hide the outline
         chart.getPlot().setOutlineVisible(false);

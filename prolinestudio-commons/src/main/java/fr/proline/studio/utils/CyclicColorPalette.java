@@ -86,7 +86,7 @@ public class CyclicColorPalette {
      * Make a color darker.
      *
      * @param color     Color to make darker.
-     * @param fraction  Darkness fraction.
+     * @param fraction  Darkness fraction. betxeen 0-1
      * @return          Darker color.
      */
     public static Color getDarkerColor(Color color, double fraction)

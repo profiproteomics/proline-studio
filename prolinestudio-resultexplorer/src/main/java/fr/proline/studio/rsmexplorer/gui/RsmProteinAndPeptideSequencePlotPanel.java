@@ -37,8 +37,11 @@ import org.slf4j.LoggerFactory;
 import java.awt.BorderLayout;
 import javax.swing.BorderFactory;
 import javax.swing.border.TitledBorder;
+import org.jfree.chart.event.ChartChangeEvent;
+import org.jfree.chart.event.ChartChangeListener;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.StandardBarPainter;
+import org.jfree.data.Range;
 
 /**
  * reference : Vaudel et al. Nature Biotechnol. 2015 Jan;33(1):22–24. Projet
@@ -50,7 +53,16 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
 
     private static final Logger m_logger = LoggerFactory.getLogger(RsmProteinAndPeptideSequencePlotPanel.class);
 
-    private Color NON_COLOR = this.getBackground();
+    private Color NON_COLOR;
+    private Color SELECTED_COLOR = Color.blue;
+    private Color PEPTIDE_COLOR = Color.GREEN;
+
+    {
+        float[] hsbvals = new float[3];//Hue Saturation Brightness
+        Color c = this.getBackground();
+        Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), hsbvals);
+        NON_COLOR = Color.getHSBColor(hsbvals[0], hsbvals[1], 1);//transparent
+    }
     private BlocToolTipGenerator m_sequenceTipsGenerator;
     private BlocToolTipGenerator m_ptmTipsGenerator;
     HashMap<Integer, ArrayList<DPeptideMatch>> m_AAPeptideMap;
@@ -72,12 +84,24 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
         int proteinLength = sequence.length();
         m_logger.debug("length: {} Amino Acid", proteinLength);
         createAADataMap(proteinLength, peptideInstances);
-        createSequenceBloc(proteinLength);
+        createSequenceBloc(proteinLength, selectedPeptide);
         createPtmBloc(proteinLength);
         ChartPanel seqPlot = getSequencePlot(m_sequenceBlocList, m_sequenceTipsGenerator, true, true);
         ChartPanel ptmPlot = getSequencePlot(m_ptmBlocList, m_ptmTipsGenerator, false, false);
         ptmPlot.setPreferredSize(new java.awt.Dimension(this.getWidth() - 40, 10));
         seqPlot.setPreferredSize(new java.awt.Dimension(this.getWidth() - 40, 20));
+        seqPlot.getChart().addChangeListener(new ChartChangeListener() {
+            @Override
+            public void chartChanged(ChartChangeEvent cce) {
+                if (ptmPlot != null) {
+                    Range range = ((CategoryPlot) seqPlot.getChart().getPlot()).getRangeAxis().getRange();
+                    ((CategoryPlot) ptmPlot.getChart().getPlot()).getRangeAxis().setRange(range);
+                    ptmPlot.revalidate();
+                    ptmPlot.repaint();
+                }
+            }
+        });
+
         String title = "Protein Sequence Coverage, " + proteinLength + " amino acid";
         ((TitledBorder) getBorder()).setTitle(title);
         this.removeAll();
@@ -86,7 +110,13 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
         this.repaint();
     }
 
-    private void createSequenceBloc(int nbAminoAcid) {
+    private void createSequenceBloc(int nbAminoAcid, DPeptideInstance selectedPeptide) {
+        int selectStart = -1, selectStop = -1;
+        if (selectedPeptide != null) {
+            DPeptideMatch selectBestPeptideMatch = selectedPeptide.getBestPeptideMatch();
+            selectStart = selectBestPeptideMatch.getSequenceMatch().getId().getStart();
+            selectStop = selectBestPeptideMatch.getSequenceMatch().getId().getStop();
+        }
         m_sequenceTipsGenerator = new BlocToolTipGenerator();
         //m_logger.debug("Map {}", AAMap);
         m_sequenceBlocList = new ArrayList();
@@ -116,12 +146,16 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
                         m_sequenceBlocList.add(seqBlocData);//one bloc terminate
                     }
                     seqBlocData = new BlocData(newIndex, seqBlocIndex++);//new bloc begin.
+                    if (newIndex >= selectStart && newIndex <= selectStop) {
+                        seqBlocData.setColor(SELECTED_COLOR);
+                    }
                     float maxScore = 0;
                     for (DPeptideMatch pep : newPepList) {
                         int start = pep.getSequenceMatch().getId().getStart();
                         int stop = pep.getSequenceMatch().getId().getStop();
                         String sequence = pep.getPeptide().getSequence();
-                        String tips = "" + start + "-" + sequence + "-" + stop;
+                        float score = pep.getScore();
+                        String tips = String.format("%d -%s- %d, score: %.2f", start, sequence, stop, score);
                         maxScore = Math.max(maxScore, pep.getScore());//to transfer to Color
                         m_sequenceTipsGenerator.addTooltips(seqBlocData.getIndex(), tips);
                     }
@@ -245,8 +279,8 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
                     //m_logger.debug("all ptm type: {}", mapOverview);
                     DInfoPTM ptmTypeInfo = DInfoPTM.getInfoPTMMap().get(ptmType);
                     int position = (int) ptm.getSeqPosition() + start - 1;//position convert to int
-                    String tooltips = ptmTypeInfo.getPtmShortName() + "(" + ptmTypeInfo.getResidueAASpecificity() + position + ")";
-                    m_logger.debug("ptm{}", tooltips);
+                    String tooltips = ptmTypeInfo.toReadablePtmString(position);
+                    //m_logger.debug("ptm{}", tooltips);
                     ptmOnAA = m_AAPtmMap.get(position);
                     ptmOnAA = (ptmOnAA == null ? new AminoAcidPtmData() : ptmOnAA);
 
@@ -261,14 +295,6 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
         }
     }
 
-    /**
-     * The reference line width.
-     */
-    private double referenceLineWidth = 0.03;
-    /**
-     * The reference line color.
-     */
-    private Color referenceLineColor = Color.BLACK;
     private Color backgroundColor = Color.white;
 
     public ChartPanel getSequencePlot(ArrayList<BlocData> bloc, CategoryToolTipGenerator tipsGenerator,
@@ -313,6 +339,9 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
 
         // add a reference line in the middle of the dataset
         if (addReferenceLine) { //PTM don't need a line in middle
+            double referenceLineWidth = 0.03;
+            Color referenceLineColor = Color.RED;
+            Color backgroundColor = Color.white;
             DefaultCategoryDataset referenceLineDataset = new DefaultCategoryDataset();
             referenceLineDataset.addValue(1.0, "A", "B");
             plot.setDataset(1, referenceLineDataset);
@@ -414,17 +443,15 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
             return _blocIndex;
         }
 
-        public void setColorWithScore(float Score) {
-            this._color = null;
-        }
-
         public Color getColor() {
-            if (this._score != 0f) {
-                //return PeptideView.getColorWithProbability(ViewSetting.PEPTIDE_COLOR, (float) Math.min((Math.max(_score, 15f) - 15) / 100.0, 1.0));
-                return PeptideView.getColorWithProbability(Color.BLUE, (float) Math.min((Math.max(_score, 15f) - 15) / 100.0, 1.0));
+            if (this._color == null) {
+                if (this._score != 0f) {//for peptide sequence
+                    return PeptideView.getColorWithProbability(PEPTIDE_COLOR, (float) Math.min((Math.max(_score, 15f)) / 100.0, 1.0));
+                }
             } else {
                 return _color;
             }
+            return NON_COLOR;
         }
 
         public void setColor(Color color) {

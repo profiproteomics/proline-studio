@@ -69,7 +69,7 @@ public class ViewSetting {
     public static final Color getColor(Long specificityId) {
         Color c = PTM_COLORS.get(specificityId);
         if (c == null) {
-            c = CyclicColorPalette.getColor(PTM_COLORS.size());
+            c = CyclicColorPalette.getColor(PTM_COLORS.size()+1); //in order to skip the first color Yellow, this is not very visible
             PTM_COLORS.put(specificityId, c);
         }
         return c;

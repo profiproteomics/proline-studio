@@ -11,6 +11,7 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewSetting;
 import fr.proline.studio.rsmexplorer.gui.ptm.pep.PeptideView;
+import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -145,13 +146,21 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
                     }
                     float maxScore = 0;
                     for (DPeptideMatch pep : newPepList) {
+
                         int start = pep.getSequenceMatch().getId().getStart();
                         int stop = pep.getSequenceMatch().getId().getStop();
-                        String sequence = pep.getPeptide().getSequence();
+                        //String sequence = pep.getPeptide().getSequence();
+                        String sequence = PeptideRenderer.constructPeptideDisplay(pep.getPeptide())
+                                .replaceAll(PeptideRenderer.HTML_BEGIN, "")
+                                .replaceAll(PeptideRenderer.HTML_END, "");
                         float score = pep.getScore();
                         String tips = String.format("%d -%s- %d, score: %.2f", start, sequence, stop, score);
-                        maxScore = Math.max(maxScore, pep.getScore());//to transfer to Color
+                        if (sequence.contains(PeptideRenderer.SPAN_END)) {
+                            tips = PeptideRenderer.HTML_BEGIN + "<body>" + tips + "</body>" + PeptideRenderer.HTML_END;
+                        }
                         m_sequenceTipsGenerator.addTooltips(seqBlocData.getIndex(), tips);
+                        
+                        maxScore = Math.max(maxScore, pep.getScore());//to transfer to Color
                     }
                     seqBlocData.setScore(maxScore);
                 }

@@ -15,7 +15,6 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import fr.proline.studio.table.renderer.GrayableTableCellRenderer;
 
-
 /**
  * Renderer for a Peptide in a Table Cell
  *
@@ -24,7 +23,6 @@ import fr.proline.studio.table.renderer.GrayableTableCellRenderer;
 public class PeptideRenderer extends DefaultTableCellRenderer implements GrayableTableCellRenderer {
 
     private boolean m_grayed = false;
-
 
     public PeptideRenderer() {
 
@@ -35,12 +33,12 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements Grayabl
 
         String displayString;
 
-        if ((value == null) || !( DPeptideMatch.class.isAssignableFrom(value.getClass()) || Peptide.class.isAssignableFrom(value.getClass()) )){
+        if ((value == null) || !(DPeptideMatch.class.isAssignableFrom(value.getClass()) || Peptide.class.isAssignableFrom(value.getClass()))) {
             displayString = "";
         } else if (DPeptideMatch.class.isAssignableFrom(value.getClass())) {
-            displayString = constructPeptideDisplay(((DPeptideMatch)value).getPeptide());
+            displayString = constructPeptideDisplay(((DPeptideMatch) value).getPeptide());
         } else {
-            displayString = constructPeptideDisplay((Peptide)value);            
+            displayString = constructPeptideDisplay((Peptide) value);
         }
 
         JLabel l = (JLabel) super.getTableCellRendererComponent(table, displayString, isSelected, hasFocus, row, column);
@@ -48,26 +46,26 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements Grayabl
             l.setFont(l.getFont().deriveFont(Font.ITALIC));
             l.setForeground(Color.lightGray);
         }
-        
+
         return l;
     }
-
-    private String constructPeptideDisplay(Peptide peptide) {
-
+    public static final String HTML_BEGIN = "<HTML>";
+    public static final String HTML_END = "</HTML>";
+    public static final String SPAN_END = "</span>";
+    public static String constructPeptideDisplay(Peptide peptide) {
+        StringBuilder m_displaySB = new StringBuilder();
+        StringBuilder m_exportSB = new StringBuilder();
         String textToExport;
-        
-        
-        if ((peptide!=null) && (peptide.getTransientData() != null)) {
+
+        if ((peptide != null) && (peptide.getTransientData() != null)) {
 
             HashMap<Integer, DPeptidePTM> ptmMap = peptide.getTransientData().getDPeptidePtmMap();
             if (ptmMap != null) {
-                m_displaySB.append("<HTML>");
+                m_displaySB.append(HTML_BEGIN);
             }
 
             String sequence = peptide.getSequence();
 
-            
-            
             if (ptmMap == null) {
                 m_displaySB.append(sequence);
                 m_exportSB.append(sequence);
@@ -95,20 +93,16 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements Grayabl
                     if (nTerOrCterModification || aminoAcidModification) {
 
                         if (nTerOrCterModification && aminoAcidModification) {
-                            m_displaySB.append("<span style='color:").append(GlobalValues.HTML_COLOR_VIOLET).append("'>"); 
-                            
+                            m_displaySB.append("<span style='color:").append(GlobalValues.HTML_COLOR_VIOLET).append("'>");
+
                         } else if (nTerOrCterModification) {
                             m_displaySB.append("<span style='color:").append(GlobalValues.HTML_COLOR_GREEN).append("'>");
 
                         } else if (aminoAcidModification) {
                             m_displaySB.append("<span style='color:").append(GlobalValues.HTML_COLOR_ORANGE).append("'>");
 
-                            
                         }
-                        
-                        
-                        
-                        
+
                         m_displaySB.append(sequence.charAt(i));
                         m_displaySB.append("</span>");
 
@@ -116,13 +110,11 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements Grayabl
                         m_displaySB.append(sequence.charAt(i));
                     }
                     m_exportSB.append(sequence.charAt(i));
-
                 }
-
             }
 
             if (ptmMap != null) {
-                m_displaySB.append("</HTML>");
+                m_displaySB.append(HTML_END);
             }
 
             textToExport = m_exportSB.toString();
@@ -138,14 +130,8 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements Grayabl
         } else {
             textToExport = peptide.getSequence();
         }
-
         return textToExport;
-
     }
-    private final StringBuilder m_displaySB = new StringBuilder();
-    private final StringBuilder m_exportSB = new StringBuilder();
-
-    
 
     @Override
     public void setGrayed(boolean v) {

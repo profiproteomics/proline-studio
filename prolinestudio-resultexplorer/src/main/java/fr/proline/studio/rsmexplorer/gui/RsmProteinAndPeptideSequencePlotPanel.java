@@ -12,6 +12,7 @@ import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewSetting;
 import fr.proline.studio.rsmexplorer.gui.ptm.pep.PeptideView;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
+import fr.proline.studio.utils.DataFormat;
 import fr.proline.studio.utils.GlobalValues;
 import java.awt.Color;
 import java.util.ArrayList;
@@ -180,8 +181,8 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
                         String sequence = PeptideRenderer.constructPeptideDisplay(pep.getPeptide())
                                 .replaceAll(GlobalValues.HTML_TAG_BEGIN, "")
                                 .replaceAll(GlobalValues.HTML_TAG_END, "");
-                        float score = pep.getScore();
-                        String tips = String.format("%d -%s- %d, score: %.2f", start, sequence, stop, score);
+                        String score = DataFormat.format(pep.getScore(),2);
+                        String tips = String.format("%d -%s- %d, score: %s", start, sequence, stop, score);
                         if (sequence.contains(GlobalValues.HTML_TAG_SPAN_END)) {
                             tips = GlobalValues.HTML_TAG_BEGIN + "<body>" + tips + "</body>" + GlobalValues.HTML_TAG_END;
                         }

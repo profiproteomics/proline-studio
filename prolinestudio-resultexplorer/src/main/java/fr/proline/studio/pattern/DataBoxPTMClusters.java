@@ -429,7 +429,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                                 } else {
                                     currentCluster.setExpressionValue(maxFinite.get());
                                 }
-                            } else {
+                            } else if (max.isPresent()) {
                                 currentCluster.setExpressionValue(max.get());
                             }
                         }

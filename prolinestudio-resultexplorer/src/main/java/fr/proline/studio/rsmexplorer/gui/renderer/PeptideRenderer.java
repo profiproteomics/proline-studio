@@ -49,9 +49,7 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements Grayabl
 
         return l;
     }
-    public static final String HTML_BEGIN = "<HTML>";
-    public static final String HTML_END = "</HTML>";
-    public static final String SPAN_END = "</span>";
+    
     public static String constructPeptideDisplay(Peptide peptide) {
         StringBuilder m_displaySB = new StringBuilder();
         StringBuilder m_exportSB = new StringBuilder();
@@ -61,7 +59,7 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements Grayabl
 
             HashMap<Integer, DPeptidePTM> ptmMap = peptide.getTransientData().getDPeptidePtmMap();
             if (ptmMap != null) {
-                m_displaySB.append(HTML_BEGIN);
+                m_displaySB.append(GlobalValues.HTML_TAG_BEGIN);
             }
 
             String sequence = peptide.getSequence();
@@ -104,7 +102,7 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements Grayabl
                         }
 
                         m_displaySB.append(sequence.charAt(i));
-                        m_displaySB.append("</span>");
+                        m_displaySB.append(GlobalValues.HTML_TAG_SPAN_END);
 
                     } else {
                         m_displaySB.append(sequence.charAt(i));
@@ -114,7 +112,7 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements Grayabl
             }
 
             if (ptmMap != null) {
-                m_displaySB.append(HTML_END);
+                m_displaySB.append(GlobalValues.HTML_TAG_END);
             }
 
             textToExport = m_exportSB.toString();

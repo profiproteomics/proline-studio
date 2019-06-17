@@ -58,7 +58,7 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
     private Color SELECTED_COLOR = Color.blue;
     private Color PEPTIDE_COLOR = new Color(0, 200, 0);//green
     private Color TRANSPARENT_COLOR = new Color(0, 0, 0, 0);//transparent
-
+    private String TITLE = "Protein Sequence Coverage";
     private BlocToolTipGenerator m_sequenceTipsGenerator;
     private BlocToolTipGenerator m_ptmTipsGenerator;
     HashMap<Integer, ArrayList<DPeptideMatch>> m_AAPeptideMap;
@@ -76,10 +76,15 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
     }
 
     private void initComponent() {
-        this.setBorder(BorderFactory.createTitledBorder("Protein Sequence Coverage"));
+        this.setBorder(BorderFactory.createTitledBorder(TITLE));
     }
 
-    public void setData(String sequence, DPeptideInstance selectedPeptide, DPeptideInstance[] peptideInstances) {
+    public void setEmpty(String proteinName) {
+        this.setBorder(BorderFactory.createTitledBorder(proteinName+" "+TITLE));
+        this.removeAll();
+    }
+
+    public void setData(String proteinName, String sequence, DPeptideInstance selectedPeptide, DPeptideInstance[] peptideInstances) {
         boolean isNew = true;
         if (m_sequence != null && m_sequence.equals(sequence)) {
             if (m_peptideInstances.equals(peptideInstances)) {
@@ -119,17 +124,13 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
                 }
                 );
 
-        String title = "Protein Sequence Coverage, " + proteinLength + " amino acid";
+        String title = proteinName+" "+TITLE+" " + proteinLength + " amino acid";
 
         ((TitledBorder) getBorder()).setTitle(title);
-
         this.removeAll();
-
         this.add(ptmPlot, BorderLayout.NORTH);
-
         this.add(seqPlot, BorderLayout.CENTER);
 
-        this.repaint();
     }
 
     private void createSequenceBloc(int nbAminoAcid, DPeptideInstance selectedPeptide) {
@@ -148,7 +149,7 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
         int seqBlocIndex = 0;
         BlocData seqBlocData = null;
 
-        for (int i = 1; i <= nbAminoAcid; i++) {//index from 1
+        for (int i = 0; i <= nbAminoAcid + 1; i++) {//index from 1
             newIndex = i;
             newPepList = m_AAPeptideMap.get(newIndex);
 
@@ -181,7 +182,7 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
                         String sequence = PeptideRenderer.constructPeptideDisplay(pep.getPeptide())
                                 .replaceAll(GlobalValues.HTML_TAG_BEGIN, "")
                                 .replaceAll(GlobalValues.HTML_TAG_END, "");
-                        String score = DataFormat.format(pep.getScore(),2);
+                        String score = DataFormat.format(pep.getScore(), 2);
                         String tips = String.format("%d -%s- %d, score: %s", start, sequence, stop, score);
                         if (sequence.contains(GlobalValues.HTML_TAG_SPAN_END)) {
                             tips = GlobalValues.HTML_TAG_BEGIN + "<body>" + tips + "</body>" + GlobalValues.HTML_TAG_END;

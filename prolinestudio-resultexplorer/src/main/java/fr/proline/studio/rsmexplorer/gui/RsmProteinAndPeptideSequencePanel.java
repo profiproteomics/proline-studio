@@ -169,10 +169,10 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
 
             m_editorPane.setText(constructDisplayedSequence(pm, sequence, highlights, coverageFormatted));
             m_editorPane.setCaretPosition(0);
-            m_sequencePoltPane.setData(sequence, selectedPeptide, peptideInstances);
+            m_sequencePoltPane.setData(pm.getAccession(), sequence, selectedPeptide, peptideInstances);
         } else {
             m_editorPane.setText("Protein Sequence not available in database");
-            return;
+            m_sequencePoltPane.setEmpty(pm.getAccession());
         }
 
     }

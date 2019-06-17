@@ -150,7 +150,7 @@ public class DisplayPTMSitesAction  extends AbstractRSMAction {
            super(parent, Dialog.ModalityType.APPLICATION_MODAL); 
             setTitle("Display PTM sites");
             setHelpHeaderText("Select the version of PTM identification service that was used: \n<br>"+
-            " &bull; v1.0 a list of all identified sites was generated \n"+
+            " &bull; v1.0 a list of all identified sites was generated \n<br>"+
             " &bull; v2.0 a PTM dataset in which sites are clusterized has been generated.\n<br>");
             initInternalPanel();
             pack();           

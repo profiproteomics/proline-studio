@@ -568,6 +568,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
         filtersMap.put(COLTYPE_PROTEIN_SET_NAME, new StringDiffFilter(getColumnNameForFilter(COLTYPE_PROTEIN_SET_NAME), null, COLTYPE_PROTEIN_SET_NAME));
+        filtersMap.put(COLTYPE_DESCRIPTION, new StringDiffFilter(getColumnNameForFilter(COLTYPE_DESCRIPTION), null, COLTYPE_DESCRIPTION));
         filtersMap.put(COLTYPE_NB_PEPTIDE, new IntegerFilter(getColumnNameForFilter(COLTYPE_NB_PEPTIDE), null, COLTYPE_NB_PEPTIDE));
         filtersMap.put(COLTYPE_NB_QUANT_PEPTIDE, new IntegerFilter(getColumnNameForFilter(COLTYPE_NB_QUANT_PEPTIDE), null, COLTYPE_NB_QUANT_PEPTIDE));
         int nbCol = getColumnCount();

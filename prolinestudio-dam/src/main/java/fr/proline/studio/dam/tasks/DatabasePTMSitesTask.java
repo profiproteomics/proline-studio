@@ -678,8 +678,7 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
            // Map<Long, DPeptideMatch> peptideMatchMap = peptideMatchArray.stream().collect(Collectors.toMap(item -> item.getId(), item -> item));
 
             for (JSONPTMSite jsonSite : values) {
-                PTMSite site = new PTMSite(jsonSite);
-                site.setProteinMatch(proteinMatchMap.get(jsonSite.proteinMatchId));
+                PTMSite site = new PTMSite(jsonSite,proteinMatchMap.get(jsonSite.proteinMatchId) );
                 site.setBestPeptideMatch(peptideMatchById.get(jsonSite.bestPeptideMatchId));
                 site.setPTMSpecificity(DInfoPTM.getInfoPTMMap().get(jsonSite.ptmDefinitionId));
                 if (site.getProteinMatch() != null) {

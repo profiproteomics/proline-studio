@@ -141,11 +141,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
                 // put protein in sub set
                 subSet.add(proteinMatch);
             }
-
-
         }
-
-        
         
         // retrieve biosequence
         DatabaseBioSequenceTask.fetchData(proteinMatchList, projectId);

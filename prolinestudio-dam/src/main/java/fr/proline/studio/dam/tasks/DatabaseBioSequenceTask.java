@@ -8,11 +8,9 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.module.seq.BioSequenceProvider;
 import fr.proline.studio.dam.DatabaseDataManager;
-import fr.proline.studio.dam.taskinfo.TaskInfo;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import javax.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;

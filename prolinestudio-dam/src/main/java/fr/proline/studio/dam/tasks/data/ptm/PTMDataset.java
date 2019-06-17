@@ -1,13 +1,12 @@
 package fr.proline.studio.dam.tasks.data.ptm;
 
+import fr.proline.core.orm.msi.SequenceMatch;
 import fr.proline.core.orm.msi.dto.DInfoPTM;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.uds.dto.DDataset;
-import java.sql.Array;
-import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -15,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,8 @@ public class PTMDataset {
     private List<DInfoPTM> m_ptmOfInterest;
     private List<PTMCluster> m_ptmClusters;
     
-    private Map<Long, Map<Long, PTMPeptideInstance>> m_ptmPeptideByPeptideIdByProtMatchId = new HashMap<>();
+    private Map<Long, Map<Long, List<PTMPeptideInstance>>> m_ptmPeptideByPeptideIdByProtMatchId = new HashMap<>();
+    
     private Boolean m_isVersion2;
     
     public PTMDataset(DDataset dataset) {
@@ -135,18 +136,13 @@ public class PTMDataset {
     }
 
     public Collection<PTMPeptideInstance> getPTMPeptideInstance(Long proteinMatchId) {
-        Map m =  m_ptmPeptideByPeptideIdByProtMatchId.get(proteinMatchId);
+        Map<Long, List<PTMPeptideInstance>> m =  m_ptmPeptideByPeptideIdByProtMatchId.get(proteinMatchId);
         if(m != null)
-            return m.values();
+            return m.values().stream().flatMap(entry -> entry.stream()).collect(Collectors.toList());           
         else
            return Collections.EMPTY_LIST;
     }
 
-    public PTMPeptideInstance getPTMPeptideInstance(Long proteinMatchId, Long peptideId) {
-        if (!m_ptmPeptideByPeptideIdByProtMatchId.containsKey(proteinMatchId))
-            return null;
-        return m_ptmPeptideByPeptideIdByProtMatchId.get(proteinMatchId).get(peptideId);
-    }
 
     /**
      * return the PTMPeptideInstance corresponding to the specified peptideId identifying specified ProteinMatch
@@ -155,20 +151,44 @@ public class PTMDataset {
      * @param peptideInstance
      * @return
      */
-    public PTMPeptideInstance getPTMPeptideInstance(Long proteinMatchId, DPeptideInstance peptideInstance) {
+    public PTMPeptideInstance getPTMPeptideInstance(DProteinMatch proteinMatch, DPeptideInstance peptideInstance, Integer protPosition) {
 
+        Long proteinMatchId = proteinMatch.getId();
         if (!m_ptmPeptideByPeptideIdByProtMatchId.containsKey(proteinMatchId)) {
             m_ptmPeptideByPeptideIdByProtMatchId.put(proteinMatchId, new HashMap<>());
         }
 
-        Map<Long, PTMPeptideInstance> map = m_ptmPeptideByPeptideIdByProtMatchId.get(proteinMatchId);
-
-        if (! map.containsKey(peptideInstance.getPeptideId())) {
-            PTMPeptideInstance ptmPeptide = new PTMPeptideInstance(peptideInstance);
-            map.put(peptideInstance.getPeptideId(), ptmPeptide);
+        Map<Long, List<PTMPeptideInstance>> ptmPepInstanceByPepId = m_ptmPeptideByPeptideIdByProtMatchId.get(proteinMatchId);
+        PTMPeptideInstance foundPtmPepIns = null;
+        
+        List<PTMPeptideInstance> registeredPtmPepInsts =  ptmPepInstanceByPepId.get(peptideInstance.getPeptideId());
+        
+        if(registeredPtmPepInsts == null)
+            registeredPtmPepInsts = new ArrayList<>();
+        
+        List<PTMPeptideInstance> potentialPtmPepInsts = registeredPtmPepInsts.stream().filter(ptmPepInst ->( protPosition >= ptmPepInst.getStartPosition() &&  protPosition <=ptmPepInst.getStopPosition())).collect(Collectors.toList());
+        
+        if (potentialPtmPepInsts.isEmpty()) {
+            foundPtmPepIns = new PTMPeptideInstance(peptideInstance);
+            registeredPtmPepInsts.add(foundPtmPepIns);
+            
+            //Get correct start position           
+            List<SequenceMatch> pepInsSequenceMatches = peptideInstance.getPeptideMatches().stream().map(pepM -> pepM.getSequenceMatch()).collect(Collectors.toList());
+            for(SequenceMatch sm : pepInsSequenceMatches){
+                if(protPosition >= sm.getId().getStart() && protPosition <= sm.getId().getStop()){
+                    //found correct sm
+                    foundPtmPepIns.setStartPosition(sm.getId().getStart() );
+                    break;
+                }
+            }
+            ptmPepInstanceByPepId.put(peptideInstance.getPeptideId(), registeredPtmPepInsts);
+        } else {
+            foundPtmPepIns = potentialPtmPepInsts.get(0);
+            if(potentialPtmPepInsts.size() > 1)
+                m_logger.warn(" ----- GET PTMPeptideInstance for Prot id "+proteinMatchId+" pep "+peptideInstance.getPeptide().getSequence()+" at position "+protPosition+" FOUND "+potentialPtmPepInsts.size() );
         }
 
-        return map.get(peptideInstance.getPeptideId());
+        return foundPtmPepIns;
     }
     
 }

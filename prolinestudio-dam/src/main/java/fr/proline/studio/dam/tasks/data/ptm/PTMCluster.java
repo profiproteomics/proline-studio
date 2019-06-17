@@ -124,13 +124,20 @@ public class PTMCluster {
     public List<PTMPeptideInstance> getPTMPeptideInstances() {
         if(m_sites == null || m_sites.isEmpty())
             return null;
+        List<Integer> sitesPosition = m_sites.stream().map(site -> site.getPositionOnProtein()).collect(Collectors.toList());
         if (m_ptmPeptideInstances == null) {
             Collection<PTMPeptideInstance> ptmPeptides = m_ptmDataset.getPTMPeptideInstance(m_proteinMatch.getId());
             List<Long> pepIds = Arrays.asList(m_jsonCluster.peptideIds);
             List<PTMPeptideInstance> ptmPepIList = new ArrayList<>();
             for (PTMPeptideInstance ptmPepI : ptmPeptides) {
-                if (pepIds.contains(ptmPepI.getPeptideInstance().getPeptideId()) && !ptmPepIList.contains(ptmPepI))
-                    ptmPepIList.add(ptmPepI);
+                if (pepIds.contains(ptmPepI.getPeptideInstance().getPeptideId()) && !ptmPepIList.contains(ptmPepI) ){
+                    for(Integer sitePos : sitesPosition){
+                        if(sitePos >= ptmPepI.getStartPosition() && sitePos <=ptmPepI.getStopPosition()){
+                            ptmPepIList.add(ptmPepI);
+                            break;
+                        }
+                    }                    
+                }
             }
             m_ptmPeptideInstances = ptmPepIList;
         }

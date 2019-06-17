@@ -130,7 +130,7 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
         this.removeAll();
         this.add(ptmPlot, BorderLayout.NORTH);
         this.add(seqPlot, BorderLayout.CENTER);
-
+        repaint();
     }
 
     private void createSequenceBloc(int nbAminoAcid, DPeptideInstance selectedPeptide) {

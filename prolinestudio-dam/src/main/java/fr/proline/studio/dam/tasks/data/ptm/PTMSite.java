@@ -42,9 +42,10 @@ public class PTMSite {
     private PTMDataset m_dataset;
     private Object m_expressionValue;
 
-    public PTMSite(AbstractJSONPTMSite jsonSite) {
+    public PTMSite(AbstractJSONPTMSite jsonSite, DProteinMatch proteinMatch) {
         m_site = jsonSite;
-         m_id = -1l;
+        this.m_proteinMatch = proteinMatch;
+        m_id = -1l;
         if(JSONPTMSite2.class.isInstance(m_site))
             m_id = ((JSONPTMSite2)m_site).id;
     }
@@ -117,7 +118,7 @@ public class PTMSite {
     private void fillPeptideInstances(List<DPeptideInstance> parentPeptideInstances, List<DPeptideInstance> leafInstances){
         Map<Long, List<DPeptideInstance>> leafPepInstanceByPepId = leafInstances.stream().collect(Collectors.groupingBy(pi -> pi.getPeptideId()));
         for (DPeptideInstance parentPeptideInstance : parentPeptideInstances) {
-            PTMPeptideInstance ptmPeptide = m_dataset.getPTMPeptideInstance(m_site.proteinMatchId, parentPeptideInstance);
+            PTMPeptideInstance ptmPeptide = m_dataset.getPTMPeptideInstance(m_proteinMatch, parentPeptideInstance, m_site.seqPosition);
             Long peptideId = parentPeptideInstance.getPeptideId();
             ptmPeptide.setStartPosition(getPositionOnProtein() - getPositionOnPeptide(peptideId));
             ptmPeptide.addPTMSite(this);

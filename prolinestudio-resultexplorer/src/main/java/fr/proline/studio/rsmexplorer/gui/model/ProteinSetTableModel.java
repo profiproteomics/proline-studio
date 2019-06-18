@@ -1,6 +1,5 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
-import fr.proline.core.orm.msi.dto.DBioSequence;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.table.LazyTable;
@@ -333,7 +332,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
                     givePriorityTo(m_taskId, row, col);
                 } else {
                     if (proteinMatch.getDBioSequence() == null) {
-                        lazyData.setData(null);
+                        lazyData.setData("");
                     } else {
                         lazyData.setData(Double.valueOf(proteinMatch.getDBioSequence().getMass()));
                     }

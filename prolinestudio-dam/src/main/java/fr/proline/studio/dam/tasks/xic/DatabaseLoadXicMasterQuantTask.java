@@ -461,6 +461,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 MasterQuantitationChannel masterQuantitationChannel = listMasterQuantitationChannels.get(0);
                 Long resultSummaryId = masterQuantitationChannel.getQuantResultSummaryId();
                 ResultSummary rsm = entityManagerMSI.find(ResultSummary.class, resultSummaryId);
+                Set<String> objTreeByName = rsm.getObjectTreeIdByName().keySet(); //to init Lazy map
                 dataset.setResultSummaryId(resultSummaryId);
                 dataset.setResultSummary(rsm);
                 dataset.setResultSet(rsm.getResultSet());

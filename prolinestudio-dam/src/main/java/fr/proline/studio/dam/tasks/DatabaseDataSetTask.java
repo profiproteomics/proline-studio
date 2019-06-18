@@ -899,7 +899,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
             // load ObjectTree linked to the dataset
             setDDatasetQuantProperties(m_dataset, datasetDB.getObjectTreeIdByName(), entityManagerUDS);
-
+            
             entityManagerUDS.getTransaction().commit();
             entityManagerMSI.getTransaction().commit();
             entityManagerLCMS.getTransaction().commit();
@@ -967,7 +967,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         Long rsmId = d.getResultSummaryId();
         if (rsmId != null) {
             ResultSummary rsmFound = entityManagerMSI.find(ResultSummary.class, rsmId);
-
+            Set<String> objTreeByName = rsmFound.getObjectTreeIdByName().keySet(); //to init Lazy map
+            
             rsmFound.getTransientData().setDDataset(d);
             d.setResultSummary(rsmFound);
         }

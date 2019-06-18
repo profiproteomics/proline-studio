@@ -684,6 +684,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
         private static final int ROW_COUNT = 6; // get in sync
         private final Color GROUP_COLOR_BACKGROUND = new Color(71, 163, 254);
 
+        //For extra dynamic information 
         private ArrayList<String> m_valuesName = new ArrayList<String>();
         private HashMap<Integer, HashMap<String, String>> m_valuesMap = new HashMap<>();
 
@@ -701,16 +702,24 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                     if (rsm == null) {
                         continue;
                     }
+                    
+                    //GET Properties Specific informations
                     Map<String, Object> map = dataset.getResultSummary().getSerializedPropertiesAsMap();
-
                     HashMap<String, String> propertiesList = new HashMap<String, String>();
                     SerializedPropertiesUtil.getProperties(propertiesList, "Identification Summary Information", map);
-
                     m_valuesMap.put(Integer.valueOf(i), propertiesList);
-
                     for (String key : propertiesList.keySet()) {
                         if (!key.contains("validation_properties / results /") && !key.contains("validation_properties / params /")) {
                             keysSet.add(key);
+                        }
+                    }
+                    
+                    //GET SchemaName Specific information
+                    Map<String, Long> schemaNames = rsm.getObjectTreeIdByName();
+                    if(schemaNames != null && !schemaNames.isEmpty()){
+                        for(String nextSchName : schemaNames.keySet()){
+                            propertiesList.put(nextSchName, "defined");
+                            keysSet.add(nextSchName);
                         }
                     }
                 }

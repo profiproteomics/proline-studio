@@ -95,7 +95,7 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
             
             int startRow = 0;
             DataGroup group = new GeneralInformationGroup(startRow); m_dataGroupList.add(group); startRow += group.getRowCount();
-            group = new IdentificationSummaryGroup(startRow); m_dataGroupList.add(group); startRow += group.getRowCount();
+            group = new IdentificationSummaryGroup(startRow, datasetArrayList); m_dataGroupList.add(group); startRow += group.getRowCount();
             group = new QuantProcessingConfigGroup(startRow, datasetArrayList, false); m_dataGroupList.add(group); startRow+=group.getRowCount();
 
             // check if we have a Post Quant Processing Config
@@ -195,8 +195,54 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
         private static final int ROW_COUNT = 3; // get in sync
         private final Color GROUP_COLOR_BACKGROUND = new Color(254,163,71);
 
-        public IdentificationSummaryGroup(int rowStart) {
+        //For extra dynamic information 
+        private ArrayList<String> m_valuesName = new ArrayList<String>();
+        private HashMap<Integer, HashMap<String, String>> m_valuesMap = new HashMap<>();
+
+        
+        public IdentificationSummaryGroup(int rowStart, ArrayList<DDataset> datasetArrayList) {
             super("Identification Summary", rowStart);
+            
+            TreeSet<String> keysSet = new TreeSet<String>();
+            int nbDataset = datasetArrayList.size();
+            
+            try {
+                for (int i = 0; i < nbDataset; i++) {
+                    DDataset dataset = datasetArrayList.get(i);
+                    ResultSummary rsm = dataset.getResultSummary();
+                    if (rsm == null) {
+                        continue;
+                    }
+                    
+                    //GET Properties Specific informations
+//                    Map<String, Object> map = dataset.getResultSummary().getSerializedPropertiesAsMap();
+                   
+//                    SerializedPropertiesUtil.getProperties(propertiesList, "Identification Summary Information", map);
+//                    m_valuesMap.put(Integer.valueOf(i), propertiesList);
+//                    for (String key : propertiesList.keySet()) {
+//                        if (!key.contains("validation_properties / results /") && !key.contains("validation_properties / params /")) {
+//                            keysSet.add(key);
+//                        }
+//                    }
+//                    
+                    //GET SchemaName Specific information
+                    HashMap<String, String> propertiesList = new HashMap<String, String>();                    
+                    m_valuesMap.put(Integer.valueOf(i), propertiesList);                    
+                    Map<String, Long> schemaNames = rsm.getObjectTreeIdByName();
+                    if(schemaNames != null && !schemaNames.isEmpty()){
+                        for(String nextSchName : schemaNames.keySet()){
+                            propertiesList.put(nextSchName, "defined");
+                            keysSet.add(nextSchName);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // should not happen
+            }   
+            
+            for (String key : keysSet) {
+                m_valuesName.add(key);
+            }
         }
 
         @Override
@@ -208,9 +254,10 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
                     return new GroupObject("Description", this);
                 case ROWTYPE_DATE:
                     return new GroupObject("Date", this);
+                default:
+                    return new GroupObject(m_valuesName.get(rowIndex - ROW_COUNT), this);                    
             }
-
-            return null;
+            
         }
 
         @Override
@@ -231,9 +278,17 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
                     Timestamp timeStamp = rsm.getModificationTimestamp();
                     DateFormat df = DateFormat.getDateInstance(DateFormat.LONG, Locale.getDefault());
                     return new GroupObject(df.format(timeStamp), this);
+                default: {
+                    String key = m_valuesName.get(rowIndex - ROW_COUNT);
+                    String value = m_valuesMap.get(columnIndex).get(key);
+                    if (value == null) {
+                        value = "";
+                    }
+                    return new GroupObject(value, this);
+                }
+                    
             }
 
-            return null;
         }
 
         @Override
@@ -243,7 +298,7 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
 
         @Override
         public int getRowCountImpl() {
-            return ROW_COUNT;
+            return ROW_COUNT+ m_valuesName.size();
         }
 
     }

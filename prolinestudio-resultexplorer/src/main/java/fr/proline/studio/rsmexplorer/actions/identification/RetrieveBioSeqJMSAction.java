@@ -12,6 +12,7 @@ import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.RetrieveBioSeqTask;
+import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
+import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,8 +32,9 @@ import org.slf4j.LoggerFactory;
  * @author VD225637
  */
 public class RetrieveBioSeqJMSAction extends AbstractRSMAction {
+
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-    
+
     public RetrieveBioSeqJMSAction(AbstractTree tree) {
         super(NbBundle.getMessage(RetrieveBioSeqJMSAction.class, "CTL_RetrieveBioSeq"), tree);
     }
@@ -76,7 +79,7 @@ public class RetrieveBioSeqJMSAction extends AbstractRSMAction {
 
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
-       
+
         DefaultTreeModel treeModel = (DefaultTreeModel) getTree().getModel();
         List<DataSetNode> datasets = new ArrayList<>();
         List<Long> rsmIds = new ArrayList<>();
@@ -92,8 +95,9 @@ public class RetrieveBioSeqJMSAction extends AbstractRSMAction {
 
             final DDataset d = dataSetNode.getDataset();
             ResultSummary rsm = d.getResultSummary();
-            if(rsm != null)
+            if (rsm != null) {
                 rsms2Clean.add(rsm);
+            }
             rsmIds.add(d.getResultSummaryId());
         }
 
@@ -108,20 +112,30 @@ public class RetrieveBioSeqJMSAction extends AbstractRSMAction {
 
             @Override
             public void run(boolean success) {
+                if (!success) {
+                    String msg = this.getTaskError().getErrorTitle();
+
+                    InfoDialog errorDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "JMSTask Error",
+                            "Error: " + msg + "\nBio Sequence can't be retrived. " + "\nVerify if the Sequence Repository Server is installed ou started");
+                    errorDialog.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
+                    errorDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
+                    errorDialog.setVisible(true);
+                }
                 IdentificationTree tree = IdentificationTree.getCurrentTree();
                 DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
                 for (DataSetNode dataSetNode : datasets) {
                     dataSetNode.setIsChanging(false);
                     treeModel.nodeChanged(dataSetNode);
                 }
-                
-                for (ResultSummary rsm : rsms2Clean)
+
+                for (ResultSummary rsm : rsms2Clean) {
                     rsm.getTransientData().setProteinSetArray(null);
+                }
 
             }
         };
 
-        RetrieveBioSeqTask task = new RetrieveBioSeqTask(callback,rsmIds, projectId, true);
+        RetrieveBioSeqTask task = new RetrieveBioSeqTask(callback, rsmIds, projectId, true);
         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
     }

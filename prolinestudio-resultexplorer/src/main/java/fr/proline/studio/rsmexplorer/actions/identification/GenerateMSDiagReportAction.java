@@ -24,6 +24,8 @@ import org.openide.windows.WindowManager;
 
 /**
  * Action to launch the msdiag generation of the report. action
+ * Display (Result Set) - Quality Control
+ *
  * @author AW
  */
 public class GenerateMSDiagReportAction extends AbstractRSMAction {
@@ -34,72 +36,55 @@ public class GenerateMSDiagReportAction extends AbstractRSMAction {
 
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
-
-        
         int nbNodes = selectedNodes.length;
+        //dialog for  parameter section
+        MSDiagDialog dialog = MSDiagDialog.getDialog(WindowManager.getDefault().getMainWindow());
+        dialog.setLocation(x, y);
+        dialog.setVisible(true);
+
+        HashMap<String, String> msdiagParams = null;
+        if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+            // retrieve parameters
+            msdiagParams = dialog.getMSDiagSettings();
+        } else {
+            return;
+        }
+        ArrayList resultMessages = new ArrayList(0);
+        resultMessages.add(msdiagParams);
+        //display action
         for (int i = 0; i < nbNodes; i++) {
             final DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
-
-            MSDiagDialog dialog = MSDiagDialog.getDialog(WindowManager.getDefault().getMainWindow());
-            dialog.setLocation(x, y);
-            dialog.setVisible(true);
-            
-            HashMap<String,String> msdiagParams = null;
-            if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
-                
-                 // retrieve parameters
-            	
-               msdiagParams = dialog.getMSDiagSettings();
-              
-            } else
-            {
-            	return;
-            }
-            
-            ArrayList resultMessages = new ArrayList(0);
-            resultMessages.add(msdiagParams);
-            
-           
-            actionImpl(dataSetNode,resultMessages);
-            
-            // ---------------------------
+            actionImpl(dataSetNode, resultMessages);
         }
-
     }
-    
+
     private void actionImpl(DataSetNode dataSetNode, ArrayList resultMessages) {
-        
         final DDataset dataSet = ((DataSetData) dataSetNode.getData()).getDataset();
-        
-        if (! dataSetNode.hasResultSet()) {
+        if (!dataSetNode.hasResultSet()) {
             return; // should not happen
         }
-        
+
         ResultSet rset = dataSetNode.getResultSet();
-       // final boolean hasResultSummary = dataSetNode.hasResultSummary();
-        
-        
-       
-        
+        // final boolean hasResultSummary = dataSetNode.hasResultSummary();
+
         if (rset != null) {
-        
             // prepare window box
             //WindowBox wbox = WindowBoxFactory.getMSDiagWindowBox(dataSet.getName()+" MSDiag" , resultMessages.get(0).toString());
-        	WindowBox wbox = WindowBoxFactory.getMSDiagWindowBox(dataSet.getName()+" Quality Control" , (HashMap<String,String>) resultMessages.get(0));
-            wbox.setEntryData(dataSet.getProject().getId(), rset); 
-            
+            WindowBox wbox = WindowBoxFactory.getMSDiagWindowBox(dataSet.getName() + " Quality Control", (HashMap<String, String>) resultMessages.get(0));
+            wbox.setEntryData(dataSet.getProject().getId(), rset);
+
             // open a window to display the window box
             DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
             win.open();
             win.requestActive();
         } else {
-            
-            final WindowBox wbox = WindowBoxFactory.getMSDiagWindowBox(dataSet.getName()+" Quality Control" , (HashMap<String,String>) resultMessages.get(0)); 
+
+            final WindowBox wbox = WindowBoxFactory.getMSDiagWindowBox(dataSet.getName() + " Quality Control", (HashMap<String, String>) resultMessages.get(0));
             // open a window to display the window box
             DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
             win.open();
             win.requestActive();
-            
+
             // we have to load the result set
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -111,32 +96,28 @@ public class GenerateMSDiagReportAction extends AbstractRSMAction {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     // prepare window box
-                     wbox.setEntryData(dataSet.getProject().getId(), dataSet.getResultSet());
+                    wbox.setEntryData(dataSet.getProject().getId(), dataSet.getResultSet());
                 }
             };
-
-
             // ask asynchronous loading of data
             DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
             task.initLoadRsetAndRsm(dataSet);
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-            
 
         }
     }
-   
+
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
 
         int nbSelectedNodes = selectedNodes.length;
-        
 
-        if (nbSelectedNodes <0) {
+        if (nbSelectedNodes < 0) {
             setEnabled(false);
             return;
         }
-        
-        for (int i=0;i<nbSelectedNodes;i++) {
+
+        for (int i = 0; i < nbSelectedNodes; i++) {
             AbstractNode node = selectedNodes[i];
             if (node.getType() != AbstractNode.NodeTypes.DATA_SET && node.getType() != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
                 setEnabled(false);
@@ -144,21 +125,19 @@ public class GenerateMSDiagReportAction extends AbstractRSMAction {
             }
 
             DataSetNode dataSetNode = (DataSetNode) node;
-            if (! dataSetNode.hasResultSet()) {
+            if (!dataSetNode.hasResultSet()) {
                 setEnabled(false);
                 return;
             }
-            
+
             if (node.getType() == AbstractNode.NodeTypes.DATA_SET && !dataSetNode.isLeaf()) {
                 setEnabled(false);
                 return;
             }
-            
+
         }
 
-        
         setEnabled(true);
 
     }
 }
-

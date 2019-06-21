@@ -12,6 +12,8 @@ import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.data.ProjectToDBs;
 import java.math.BigInteger;
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -171,49 +173,82 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
         try {
             entityManagerUDS.getTransaction().begin();
 
-            Query querySize =  entityManagerUDS.createNativeQuery(" SELECT p.id, p.name, p.description, p.owner, d.size, p.db_name\n" +
-"FROM  (SELECT \n" +
-"  project.id as id, \n" +
-"  project.name as name, \n" +
-"  project.description as description, \n" +
-"  user_account.login as owner, \n" +
-"  external_db.name as db_name\n" +
-"FROM \n" +
-"  public.project, \n" +
-"  public.project_db_map, \n" +
-"  public.external_db, \n" +
-"  public.user_account\n" +
-"WHERE \n" +
-"  project.owner_id = user_account.id AND\n" +
-"  project_db_map.project_id = project.id AND\n" +
-"  project_db_map.external_db_id = external_db.id) p\n" +
-"INNER JOIN (SELECT \n" +
-"  pg_database.datname as db_name,\n" +
-"  pg_database_size(pg_database.datname) AS size,\n" + // pg_size_pretty( ...  )
-"  pg_database_size(pg_database.datname) as raw_size\n" +
-"FROM pg_database) d\n" +
-"ON p.db_name = d.db_name\n" +
-"ORDER BY d.raw_size DESC");
-            List<Object[]> results = querySize.getResultList();
+//            Query querySize =  entityManagerUDS.createNativeQuery(" SELECT p.id, p.name, p.description, p.owner, d.size, p.db_name\n" +
+//"FROM  (SELECT \n" +
+//"  project.id as id, \n" +
+//"  project.name as name, \n" +
+//"  project.description as description, \n" +
+//"  user_account.login as owner, \n" +
+//"  external_db.name as db_name\n" +
+//"FROM \n" +
+//"  public.project, \n" +
+//"  public.project_db_map, \n" +
+//"  public.external_db, \n" +
+//"  public.user_account\n" +
+//"WHERE \n" +
+//"  project.owner_id = user_account.id AND\n" +
+//"  project_db_map.project_id = project.id AND\n" +
+//"  project_db_map.external_db_id = external_db.id) p\n" +
+//"INNER JOIN (SELECT \n" +
+//"  pg_database.datname as db_name,\n" +
+//"  pg_database_size(pg_database.datname) AS size,\n" + // pg_size_pretty( ...  )
+//"  pg_database_size(pg_database.datname) as raw_size\n" +
+//"FROM pg_database) d\n" +
+//"ON p.db_name = d.db_name\n" +
+//"ORDER BY d.raw_size DESC");
 
-            
+            Query querySize = entityManagerUDS.createNativeQuery("" +
+                    "SELECT p.id, p.name, p.description, p.serialized_properties, p.owner, d.size, p.db_name, p.last_dataset_date, raw_files_count\n" +
+                    "FROM  (\n" +
+                    "SELECT \n" +
+                    "project.id as id, \n" +
+                    "project.name as name, \n" +
+                    "project.description as description, \n" +
+                    "project.serialized_properties AS serialized_properties,\n" +
+                    "user_account.login as owner, \n" +
+                    "external_db.name as db_name,\n" +
+                    "max(dataset.creation_timestamp) AS last_dataset_date,\n" +
+                    "count(DISTINCT(run_identification.raw_file_identifier)) AS raw_files_count\n" +
+                    "FROM \n" +
+                    "  public.project_db_map, \n" +
+                    "  public.external_db, \n" +
+                    "  public.user_account,\n" +
+                    "  public.project\n" +
+                    "LEFT JOIN public.data_set dataset ON dataset.project_id = project.id\n" +
+                    "LEFT JOIN public.run_identification ON dataset.id = run_identification.id\n" +
+                    "WHERE \n" +
+                    "  project.owner_id = user_account.id AND\n" +
+                    "  project_db_map.project_id = project.id AND\n" +
+                    "  project_db_map.external_db_id = external_db.id\n" +
+                    "GROUP BY \n" +
+                    "  project.id, user_account.login, external_db.name\n" +
+                    ") p\n" +
+                    "LEFT JOIN (SELECT \n" +
+                    "  pg_database.datname as db_name,\n" +
+                    "  pg_database_size(pg_database.datname) AS size, \n" +
+                    "  pg_database_size(pg_database.datname) as raw_size\n" +
+                    "FROM pg_database) d\n" +
+                    "ON p.db_name = d.db_name\n" +
+                    "ORDER BY p.id -- d.raw_size DESC");
+
+            List<Object[]> results = querySize.getResultList();
             HashMap<Long, ProjectToDBs> projectMap = new HashMap<>();
             Iterator<Object[]> it = results.iterator();
             while (it.hasNext()) {
                 Object[] resCur = it.next();
-                long id = ((BigInteger) resCur[0]).longValue();
-                BigInteger sizeInBits = (BigInteger) resCur[4];
+                long id = ((BigInteger)resCur[0]).longValue();
+                BigInteger sizeInBits = (BigInteger) resCur[5];
                 double sizeInMB = sizeInBits.doubleValue()/(1024*1024);
-                
+                Timestamp lastDatasetDate = (Timestamp) resCur[7];
                 ProjectToDBs projectToDB = projectMap.get(id);
                 if (projectToDB == null) {
-                    projectToDB = new ProjectToDBs(id, (String) resCur[1],(String) resCur[2],(String) resCur[3],sizeInMB,(String) resCur[5]);
+                    projectToDB = new ProjectToDBs(id, (String) resCur[1],(String) resCur[2],(String) resCur[3], (String)resCur[4]);
                     projectMap.put(id, projectToDB);
                     m_resultProjectsList.add(projectToDB);
-                } else {
-                    projectToDB.addDb((String) resCur[5], sizeInMB);
                 }
-                
+                projectToDB.addDb((String) resCur[6], sizeInMB);
+                projectToDB.setLastDatasetDate(lastDatasetDate);
+                projectToDB.setRawFilesCount(((BigInteger)resCur[8]).intValue());
             }
 
             entityManagerUDS.getTransaction().commit();

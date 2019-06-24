@@ -116,7 +116,7 @@ public class RetrieveBioSeqJMSAction extends AbstractRSMAction {
                     String msg = this.getTaskError().getErrorTitle();
 
                     InfoDialog errorDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "JMSTask Error",
-                            "Error: " + msg + "\nBio Sequence can't be retrived. " + "\nVerify if the Sequence Repository Server is installed ou started");
+                            "Error: " + msg + "\nnProtein Sequence can't be retrived, verify that the Sequence Repository module is installed and started");
                     errorDialog.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
                     errorDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
                     errorDialog.setVisible(true);

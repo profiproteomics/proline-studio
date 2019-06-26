@@ -94,28 +94,29 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
         int proteinLength = sequence.length();
         //m_logger.debug("length: {} Amino Acid", proteinLength);
         if (isNew) {//if is not new, don't need to updata map
-            createAADataMap(proteinLength, peptideInstances);
+            createAADataMap(peptideInstances);
             createPtmBloc(proteinLength);
         }
-        createSequenceBloc(proteinLength, selectedPeptide);
+        createSequenceBloc(proteinLength, selectedPeptide);//update any way the selected peptide
 
         m_sequence = sequence;
         m_peptideInstances = peptideInstances;
 
-        ChartPanel seqPlot = getSequencePlot(m_sequenceBlocList, m_sequenceTipsGenerator, true, true);
+        ChartPanel sequencePlot = getSequencePlot(m_sequenceBlocList, m_sequenceTipsGenerator, true, true);
         ChartPanel ptmPlot = getSequencePlot(m_ptmBlocList, m_ptmTipsGenerator, false, false);
 
         ptmPlot.setPreferredSize(
                 new java.awt.Dimension(this.getWidth() - 40, 10));
-        seqPlot.setPreferredSize(
+        sequencePlot.setPreferredSize(
                 new java.awt.Dimension(this.getWidth() - 40, 20));
-        seqPlot.getChart()
+        sequencePlot.getChart()
                 .addChangeListener(new ChartChangeListener() {
+                    //force ptmPlot change with the same range when the scale of the sequencePlot change
                     @Override
                     public void chartChanged(ChartChangeEvent cce
                     ) {
                         if (ptmPlot != null) {
-                            Range range = ((CategoryPlot) seqPlot.getChart().getPlot()).getRangeAxis().getRange();
+                            Range range = ((CategoryPlot) sequencePlot.getChart().getPlot()).getRangeAxis().getRange();
                             ((CategoryPlot) ptmPlot.getChart().getPlot()).getRangeAxis().setRange(range);
                             ptmPlot.revalidate();
                             ptmPlot.repaint();
@@ -129,7 +130,7 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
         ((TitledBorder) getBorder()).setTitle(title);
         this.removeAll();
         this.add(ptmPlot, BorderLayout.NORTH);
-        this.add(seqPlot, BorderLayout.CENTER);
+        this.add(sequencePlot, BorderLayout.CENTER);
         repaint();
     }
 
@@ -278,7 +279,7 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
 
     }
 
-    private void createAADataMap(int nbAminoAcid, DPeptideInstance[] peptideInstances) {
+    private void createAADataMap(DPeptideInstance[] peptideInstances) {
         //long beginTime = System.currentTimeMillis();
         m_AAPeptideMap = new HashMap();
         m_AAPtmMap = new HashMap();
@@ -560,7 +561,9 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
     }
 
     private class BlocToolTipGenerator implements CategoryToolTipGenerator {
-
+        /**
+         * HashMap<BlocIndex, a List of tooltips>
+         */
         private HashMap<Integer, ArrayList<String>> _blocIndexPeptideMap;
 
         public BlocToolTipGenerator(HashMap<Integer, ArrayList<String>> blocIndexPeptideMap) {
@@ -574,9 +577,9 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
         public boolean isNullTips(int blocIndex) {
             ArrayList<String> tips = this._blocIndexPeptideMap.get(blocIndex);
             return (tips == null);
-
         }
-
+        
+        //debug use utility
         public String getTipsAt(Integer blocIndex) {
             ArrayList<String> tips = this._blocIndexPeptideMap.get(blocIndex);
             return tips == null ? "null" : tips.toString();

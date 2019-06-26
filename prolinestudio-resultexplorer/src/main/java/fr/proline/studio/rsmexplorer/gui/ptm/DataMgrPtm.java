@@ -90,7 +90,7 @@ public class DataMgrPtm {
             //retrive all ptm in string format
             if (m_currentPtmSite.isProteinNTermWithOutM()) {//@todo verify N-term
                 m_beginBestFit = 0;
-            } else if (m_beginBestFit > ptmPepInstance.getPTMPeptideInstance().getStartPosition()) {
+            } else if (ptmPepInstance!= null && m_beginBestFit > ptmPepInstance.getPTMPeptideInstance().getStartPosition()) {
                 m_beginBestFit = ptmPepInstance.getPTMPeptideInstance().getStartPosition();
             }
 //create PTMMark, take all of the site(position, type of modification) from this peptide, in order to create a PTMMark list

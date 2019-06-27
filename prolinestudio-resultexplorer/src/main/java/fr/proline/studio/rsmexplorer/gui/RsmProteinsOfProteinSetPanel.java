@@ -304,6 +304,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
         }
 
         m_proteinTable.getSelectionModel().setSelectionInterval(row, row);
+        //@kx here sometimes null exception,  m_sameSetCount==null  m_subSetCount ==null
         m_markerContainerPanel.setMaxLineNumber(proteinSet.getSameSetCount()+proteinSet.getSubSetCount());
         m_markerContainerPanel.removeAllMarkers();
 

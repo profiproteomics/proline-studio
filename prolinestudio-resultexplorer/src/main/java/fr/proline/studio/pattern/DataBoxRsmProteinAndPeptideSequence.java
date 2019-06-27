@@ -11,6 +11,7 @@ import fr.proline.studio.rsmexplorer.gui.RsmProteinAndPeptideSequencePanel;
 /**
  * Databox : Protein Sequence + inner peptide sequence when peptide are given by
  * a previous databox.
+ *
  * @author JM235353
  */
 public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
@@ -64,10 +65,10 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
         // can come from different databoxes)
         if (peptideInstances == null) {
             selectedPeptide = null;
-        } else if (selectedPeptide!=null) {
+        } else if (selectedPeptide != null) {
 
             boolean foundPeptide = false;
-            for (int i=0;i<peptideInstances.length;i++) {
+            for (int i = 0; i < peptideInstances.length; i++) {
                 if (peptideInstances[i].getId() == selectedPeptide.getId()) {
                     foundPeptide = true;
                     break;
@@ -77,15 +78,14 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
                 selectedPeptide = null;
             }
         }
-
-        Long projectId = resultSummary.getTransientData().getDDataset() == null ? null : resultSummary.getTransientData().getDDataset().getProject().getId();
+        Long projectId = getProjectId();
         //retrive all DPTMInfo map
         if (DInfoPTM.getInfoPTMMap().isEmpty()) {
             DatabasePTMsTask ptmTask = new DatabasePTMsTask(null);
             ptmTask.initFillPTMInfo(projectId);
             ptmTask.fetchData();
         }
-        ((RsmProteinAndPeptideSequencePanel) getDataBoxPanelInterface()).setData(projectId , proteinMatch, selectedPeptide, peptideInstances);
+        ((RsmProteinAndPeptideSequencePanel) getDataBoxPanelInterface()).setData(projectId, proteinMatch, selectedPeptide, peptideInstances);
     }
 
 }

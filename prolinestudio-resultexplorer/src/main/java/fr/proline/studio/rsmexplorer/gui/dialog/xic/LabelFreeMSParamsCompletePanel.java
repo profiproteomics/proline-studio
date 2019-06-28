@@ -91,18 +91,8 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         super(readOnly);
 
         createParameters();
-
-        if (readValues) {
-            m_parameterList.updateValues(NbPreferences.root());
-        } else {
-            m_parameterList.setDefaultValues();
-        }
-        for (AbstractParameter param : m_parameterList) {
-            param.setUsed(true);
-        }
-
         setLayout(new GridBagLayout());
-
+        
         final GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
@@ -117,6 +107,17 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         c.weightx = 1;
         c.weighty = 1;
         add(m_scrollPane, c);
+        
+        if (readValues) {
+            m_parameterList.updateValues(NbPreferences.root());
+        } else {
+            m_parameterList.setDefaultValues();
+        }
+        for (AbstractParameter param : m_parameterList) {
+            param.setUsed(true);
+        }
+
+
     }
 
     @Override

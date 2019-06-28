@@ -5,7 +5,7 @@ import java.io.FileWriter;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
-import fr.proline.mzscope.model.Chromatogram;
+import fr.proline.mzscope.model.IChromatogram;
 
 public class Main {
 
@@ -23,7 +23,7 @@ public class Main {
       System.out.println(scans.size() + " scans read in :: " + (System.currentTimeMillis() - start) + " ms");
 
       start = System.currentTimeMillis();
-      Chromatogram chromato = null;
+      IChromatogram chromato = null;
       int maxIter = 100;
       for (int k = 0; k < maxIter; k++) {
          float v = (float) Math.random() * (1200.0f) + 400.0f;
@@ -36,8 +36,8 @@ public class Main {
       chromato = XICExtractor.extract(scans, 435.71f, 435.85f);
       System.out.println(maxIter + " ions chromatogram extracted in :: " + (System.currentTimeMillis() - start) + " ms");
 
-      System.out.println("mzML Chromatogram length " + chromato.intensities.length);
-      JFrame frame = new JFrame("mzML Chromatogram Viewer");
+      System.out.println("mzML IChromatogram length " + chromato.getIntensities().length);
+      JFrame frame = new JFrame("mzML IChromatogram Viewer");
       frame.setSize(800, 600);
       frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -45,8 +45,8 @@ public class Main {
          BufferedWriter output = new BufferedWriter(new FileWriter("extracted_xic.tab"));
          output.write("index, rt, intensity \n");
 
-         for (int count = 0; count < chromato.intensities.length; count++) {
-            output.write(count + "," + chromato.time[count] + "," + chromato.intensities[count] + "\n");
+         for (int count = 0; count < chromato.getIntensities().length; count++) {
+            output.write(count + "," + chromato.getTime()[count] + "," + chromato.getIntensities()[count] + "\n");
          }
          output.close();
 

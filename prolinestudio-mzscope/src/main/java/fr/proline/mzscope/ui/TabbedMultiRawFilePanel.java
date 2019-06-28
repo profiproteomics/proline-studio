@@ -1,11 +1,8 @@
 package fr.proline.mzscope.ui;
 
-import fr.proline.mzscope.model.Chromatogram;
-import fr.proline.mzscope.model.IFeature;
-import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.model.MsnExtractionRequest;
+import fr.proline.mzscope.model.*;
+import fr.proline.mzscope.model.IChromatogram;
 import fr.proline.mzscope.utils.MzScopeCallback;
-import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.ui.event.AxisRangeChromatogramListener;
 import fr.proline.mzscope.utils.ButtonTabComponent;
 import fr.proline.mzscope.utils.Display;
@@ -64,7 +61,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     private final static String tooltipZoom = "Remove zoom synchronization on all plots";
 
     private final List<IRawFile> rawfiles;
-    private final Map<IRawFile, Chromatogram> mapChromatogramForRawFile;
+    private final Map<IRawFile, IChromatogram> mapChromatogramForRawFile;
     
     private final Map<IRawFile, IRawFileLoading> mapRawFileLoading;
     private boolean isZoomSynchronized = true;
@@ -131,7 +128,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
             
             m_toolbarPanel.addSeparator();
             JButton displayTICbtn = new JButton("TIC");
-            displayTICbtn.setToolTipText("Display TIC Chromatogram");
+            displayTICbtn.setToolTipText("Display TIC IChromatogram");
             displayTICbtn.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -141,7 +138,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
             m_toolbarPanel.add(displayTICbtn);
             
             JButton displayBPIbtn = new JButton("BPC");
-            displayBPIbtn.setToolTipText("Display Base Peak Chromatogram");
+            displayBPIbtn.setToolTipText("Display Base Peak IChromatogram");
             displayBPIbtn.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -254,9 +251,9 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
 
     @Override
     public IRawFile getCurrentRawfile() {
-        Chromatogram c = getCurrentChromatogram();
+        IChromatogram c = getCurrentChromatogram();
         if (c != null) {
-            for (Map.Entry<IRawFile, Chromatogram> entrySet : mapChromatogramForRawFile.entrySet()) {
+            for (Map.Entry<IRawFile, IChromatogram> entrySet : mapChromatogramForRawFile.entrySet()) {
                 if (c.equals(entrySet.getValue())) {
                     return entrySet.getKey();
                 }
@@ -267,8 +264,8 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
 
     @Override
     public void extractAndDisplayChromatogram(final MsnExtractionRequest params, Display display, MzScopeCallback callback) {
-        // in this implementation displayMode is ignored : always REPLACE since we will extract one Chromatogram per RawFile
-        SwingWorker worker = new SwingWorker<Integer, Chromatogram>() {
+        // in this implementation displayMode is ignored : always REPLACE since we will extract one IChromatogram per RawFile
+        SwingWorker worker = new SwingWorker<Integer, IChromatogram>() {
             int count = 0;
 
             @Override
@@ -276,7 +273,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
 
                 for (IRawFile rawFile : rawfiles) {
                     mapRawFileLoading.get(rawFile).setWaitingState(true);
-                    Chromatogram c = rawFile.getXIC(params);
+                    IChromatogram c = rawFile.getXIC(params);
                     count++;
                     publish(c);
                 }
@@ -284,7 +281,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
             }
 
             @Override
-            protected void process(List<Chromatogram> chunks) {
+            protected void process(List<IChromatogram> chunks) {
                 for (int k = 0; k < chunks.size(); k++) {
                     displayChromatogram(chunks.get(k), display);
                 }
@@ -308,8 +305,8 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     }
 
     @Override
-    public Color displayChromatogram(Chromatogram chromato, Display display) {
-        String rawFileName = chromato.rawFilename;
+    public Color displayChromatogram(IChromatogram chromato, Display display) {
+        String rawFileName = chromato.getRawFilename();
         int nbTab = chromatogramContainerPanel.getTabCount();
         Color c = null;
         for (int t = 0; t < nbTab; t++) {
@@ -362,14 +359,14 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     }
 
     @Override
-    public Chromatogram getCurrentChromatogram() {
+    public IChromatogram getCurrentChromatogram() {
         return (currentChromatogramPanel == null) ? null : currentChromatogramPanel.getCurrentChromatogram();
     }
 
     @Override
-    public Iterable<Chromatogram> getAllChromatograms() {
+    public Iterable<IChromatogram> getAllChromatograms() {
         int nbTab = chromatogramContainerPanel.getTabCount();
-        List<Chromatogram> list = new ArrayList<>();
+        List<IChromatogram> list = new ArrayList<>();
         for (int t = 0; t < nbTab; t++) {
            ChromatogramPanel chromatoPanel = (ChromatogramPanel) chromatogramContainerPanel.getComponentAt(t);
            chromatoPanel.getChromatograms().forEach(c -> list.add(c));
@@ -380,7 +377,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     
     private void displayTIC() {
 
-        SwingWorker worker = new SwingWorker<Integer, Chromatogram>() {
+        SwingWorker worker = new SwingWorker<Integer, IChromatogram>() {
             int count = 0;
 
             @Override
@@ -388,7 +385,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
                     
                 for (IRawFile rawFile : rawfiles) {
                     mapRawFileLoading.get(rawFile).setWaitingState(true);
-                    Chromatogram c = rawFile.getTIC();
+                    IChromatogram c = rawFile.getTIC();
                     count++;
                     publish(c);
                 }
@@ -396,7 +393,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
             }
 
             @Override
-            protected void process(List<Chromatogram> chunks) {
+            protected void process(List<IChromatogram> chunks) {
                 for (int k = 0; k < chunks.size(); k++) {
                     logger.info("display  chromato");
                     displayChromatogram(chunks.get(k), new Display(Display.Mode.REPLACE));
@@ -422,7 +419,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     
     private void displayBPI() {
 
-        SwingWorker worker = new SwingWorker<Integer, Chromatogram>() {
+        SwingWorker worker = new SwingWorker<Integer, IChromatogram>() {
             int count = 0;
 
             @Override
@@ -430,7 +427,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
                     
                 for (IRawFile rawFile : rawfiles) {
                     mapRawFileLoading.get(rawFile).setWaitingState(true);
-                    Chromatogram c = rawFile.getBPI();
+                    IChromatogram c = rawFile.getBPI();
                     count++;
                     publish(c);
                 }
@@ -438,7 +435,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
             }
 
             @Override
-            protected void process(List<Chromatogram> chunks) {
+            protected void process(List<IChromatogram> chunks) {
                 for (int k = 0; k < chunks.size(); k++) {
                     logger.info("display  chromato");
                     displayChromatogram(chunks.get(k), new Display(Display.Mode.REPLACE));
@@ -462,11 +459,11 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
         worker.execute();
     }
     
-    public void displayChromatograms(Map<IRawFile, Chromatogram> chromatogramByRawFile) {
+    public void displayChromatograms(Map<IRawFile, IChromatogram> chromatogramByRawFile) {
         int nbTab = chromatogramContainerPanel.getTabCount();
-        for (Map.Entry<IRawFile, Chromatogram> entrySet : chromatogramByRawFile.entrySet()) {
+        for (Map.Entry<IRawFile, IChromatogram> entrySet : chromatogramByRawFile.entrySet()) {
             IRawFile rawFile = entrySet.getKey();
-            Chromatogram chromato = entrySet.getValue();
+            IChromatogram chromato = entrySet.getValue();
             for (int t = 0; t < nbTab; t++) {
                 String tabTitle = chromatogramContainerPanel.getTitleAt(t);
                 if (tabTitle.equals(rawFile.getName())) {  // see how to better get the tabComponent linked to a rawFile
@@ -539,7 +536,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
             double newMaxY = newY[1];
             
             int nbTab = chromatogramContainerPanel.getTabCount();
-            Chromatogram referenceChromato = null;
+            IChromatogram referenceChromato = null;
             for (int t = 0; t < nbTab; t++) {
                 String tabTitle = chromatogramContainerPanel.getTitleAt(t);
                 if (tabTitle.equals(rawFile.getName())) {  // see how to better get the tabComponent linked to a rawFile
@@ -550,7 +547,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
             
 //            logger.debug("moving to min={}, max={} ", newMinX, newMaxX);
             double zoomXRange = (double)(newMaxX - newMinX);
-            double relativeXMinPosition = (double)(newMinX/(referenceChromato.elutionEndTime - referenceChromato.elutionStartTime));
+            double relativeXMinPosition = (double)(newMinX/(referenceChromato.getElutionEndTime() - referenceChromato.getElutionStartTime()));
 
             zoomYLevel = (double)((newMaxY - newMinY)*100.0/(oldMaxY - oldMinY));
             relativeYValue = (double)(100.0 * ((newMinY+((newMaxY-newMinY) /2.0)) - oldMinY)/(oldMaxY - oldMinY));

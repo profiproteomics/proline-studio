@@ -1,6 +1,6 @@
 package fr.proline.mzscope.ui;
 
-import fr.proline.mzscope.model.Chromatogram;
+import fr.proline.mzscope.model.IChromatogram;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.Signal;
 import fr.proline.mzscope.processing.SpectrumUtils;
@@ -53,7 +53,7 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
       chromatogramToolbar.addSeparator();
       JButton editFeatureBtn = new JButton();
       editFeatureBtn.setIcon(IconManager.getIcon(IconManager.IconType.SIGNAL));
-      editFeatureBtn.setToolTipText("Chromatogram signal processing dialog");
+      editFeatureBtn.setToolTipText("IChromatogram signal processing dialog");
       editFeatureBtn.addActionListener(new ActionListener() {
          @Override
          public void actionPerformed(ActionEvent e) {
@@ -69,11 +69,11 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
       double min = chromatogramPanel.getChromatogramPlotPanel().getXAxis().getMinValue();
       double max = chromatogramPanel.getChromatogramPlotPanel().getXAxis().getMaxValue();
       List<Signal> signals = new ArrayList<>();
-      Iterable<Chromatogram> chromatograms = getAllChromatograms();
-      for (Chromatogram chrom : chromatograms) {
-        int minIdx = SpectrumUtils.getNearestPeakIndex(chrom.time, min);
-        int maxIdx = Math.min(SpectrumUtils.getNearestPeakIndex(chrom.time, max)+1, chrom.time.length);
-        Signal signal = new Signal(Arrays.copyOfRange(chrom.time, minIdx, maxIdx), Arrays.copyOfRange(chrom.intensities, minIdx, maxIdx));
+      Iterable<IChromatogram> chromatograms = getAllChromatograms();
+      for (IChromatogram chrom : chromatograms) {
+        int minIdx = SpectrumUtils.getNearestPeakIndex(chrom.getTime(), min);
+        int maxIdx = Math.min(SpectrumUtils.getNearestPeakIndex(chrom.getTime(), max)+1, chrom.getTime().length);
+        Signal signal = new Signal(Arrays.copyOfRange(chrom.getTime(), minIdx, maxIdx), Arrays.copyOfRange(chrom.getIntensities(), minIdx, maxIdx));
         signals.add(signal);
       }
       JDialog dialog = new JDialog((JFrame)this.getTopLevelAncestor(), "Feature editor", true);
@@ -90,9 +90,9 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
         rawFileLoading.setWaitingState(true);
       }
       logger.info("Display single TIC chromatogram");
-      SwingWorker worker = new SwingWorker<Chromatogram, Void>() {
+      SwingWorker worker = new SwingWorker<IChromatogram, Void>() {
          @Override
-         protected Chromatogram doInBackground() throws Exception {
+         protected IChromatogram doInBackground() throws Exception {
             return rawFile.getTIC();
          }
 
@@ -120,9 +120,9 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
        }
       final IRawFile rawFile = this.rawfile;
       logger.info("Display single base peak chromatogram");
-      SwingWorker worker = new SwingWorker<Chromatogram, Void>() {
+      SwingWorker worker = new SwingWorker<IChromatogram, Void>() {
          @Override
-         protected Chromatogram doInBackground() throws Exception {
+         protected IChromatogram doInBackground() throws Exception {
             return rawFile.getBPI();
          }
 

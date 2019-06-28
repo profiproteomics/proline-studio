@@ -69,6 +69,11 @@ public class ExtractionRequest {
             return self();
         }
 
+        public T setElutionTime(float rt) {
+            this.elutionTime = rt;
+            return self();
+        }
+
         public T setMz(double mz) {
             this.mz = mz;
             return self();
@@ -188,5 +193,6 @@ public class ExtractionRequest {
     public boolean isMsnExtraction() {
         return msLevel > 1;
     }
+
 
 }

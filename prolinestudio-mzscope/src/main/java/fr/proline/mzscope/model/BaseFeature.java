@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Basic implementation of IFeature interface. Allows to create IFeatures "by hands"
  *
  * @author CB205360
  */

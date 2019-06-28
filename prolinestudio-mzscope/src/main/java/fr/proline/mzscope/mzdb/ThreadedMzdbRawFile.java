@@ -1,17 +1,11 @@
 package fr.proline.mzscope.mzdb;
 
-import fr.proline.mzscope.model.Chromatogram;
-import fr.proline.mzscope.model.FeaturesExtractionRequest;
-import fr.proline.mzscope.model.IExportParameters;
-import fr.proline.mzscope.model.IFeature;
-import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.model.MsnExtractionRequest;
-import fr.proline.mzscope.model.QCMetrics;
-import fr.proline.mzscope.model.Spectrum;
+import fr.proline.mzscope.model.*;
+import fr.proline.mzscope.model.IChromatogram;
+
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -39,11 +33,8 @@ public class ThreadedMzdbRawFile implements IRawFile {
 
    private void init() {
       try {
-         Future future = service.submit(new Runnable() {
-            @Override
-            public void run() {
-               mzdbRawFile = new MzdbRawFile(file);
-            }
+         Future future = service.submit(() -> {
+            mzdbRawFile = new MzdbRawFile(file);
          });
          future.get();
       } catch (InterruptedException | ExecutionException ex) {
@@ -70,12 +61,7 @@ public class ThreadedMzdbRawFile implements IRawFile {
    @Override
    public int getPreviousSpectrumId(final int spectrumIndex, final int msLevel) {
       try {
-         return service.submit(new Callable<Integer>() {
-            @Override
-            public Integer call() {
-               return mzdbRawFile.getPreviousSpectrumId(spectrumIndex, msLevel);
-            }
-         }).get();
+         return service.submit(() -> mzdbRawFile.getPreviousSpectrumId(spectrumIndex, msLevel)).get();
       } catch (InterruptedException | ExecutionException ex ) {
          logger.error("getPreviousSpectrumId call fail", ex);
       } 
@@ -85,12 +71,7 @@ public class ThreadedMzdbRawFile implements IRawFile {
    @Override
    public int getSpectrumCount() {
       try {
-         return service.submit(new Callable<Integer>() {
-            @Override
-            public Integer call() {
-               return mzdbRawFile.getSpectrumCount();
-            }
-         }).get();
+         return service.submit(() -> mzdbRawFile.getSpectrumCount()).get();
       } catch (InterruptedException | ExecutionException ex ) {
          logger.error("getPreviousSpectrumId call fail", ex);
       } 
@@ -100,12 +81,7 @@ public class ThreadedMzdbRawFile implements IRawFile {
    @Override
    public int getNextSpectrumId(final int spectrumIndex, final int msLevel) {
       try {
-         return service.submit(new Callable<Integer>() {
-            @Override
-            public Integer call() {
-               return mzdbRawFile.getNextSpectrumId(spectrumIndex, msLevel);
-            }
-         }).get();
+         return service.submit(() -> mzdbRawFile.getNextSpectrumId(spectrumIndex, msLevel)).get();
       } catch (InterruptedException | ExecutionException ex ) {
          logger.error("getNextSpectrumId call fail", ex);
       } 
@@ -115,27 +91,37 @@ public class ThreadedMzdbRawFile implements IRawFile {
    @Override
    public int getSpectrumId(final double retentionTime) {
       try {
-         return service.submit(new Callable<Integer>() {
-            @Override
-            public Integer call() {
-               return mzdbRawFile.getSpectrumId(retentionTime);
-            }
-         }).get();
+         return service.submit(() -> mzdbRawFile.getSpectrumId(retentionTime)).get();
       } catch (InterruptedException | ExecutionException ex ) {
           logger.error("getSpectrumId call fail", ex);
       } 
       return -1;
    }
 
-   @Override
+  @Override
+  public double[] getElutionTimes(int msLevel) {
+    try {
+      return service.submit(() -> mzdbRawFile.getElutionTimes(msLevel)).get();
+    } catch (InterruptedException | ExecutionException ex ) {
+      logger.error("getElutionTimes call fail", ex);
+    }
+    return null;
+  }
+
+  @Override
+  public double getSpectrumElutionTime(int spectrumIndex) {
+    try {
+      return service.submit(() -> mzdbRawFile.getSpectrumElutionTime(spectrumIndex)).get();
+    } catch (InterruptedException | ExecutionException ex ) {
+      logger.error("getSpectrumElutionTime call fail", ex);
+    }
+    return -1.0;
+  }
+
+  @Override
    public Spectrum getSpectrum(final int spectrumIndex) {
       try {
-         return service.submit(new Callable<Spectrum>() {
-            @Override
-            public Spectrum call() {
-               return mzdbRawFile.getSpectrum(spectrumIndex);
-            }
-         }).get();
+         return service.submit(() -> mzdbRawFile.getSpectrum(spectrumIndex)).get();
       } catch (InterruptedException | ExecutionException ex ) {
          logger.error("getSpectrum call fail", ex);
       } 
@@ -146,13 +132,10 @@ public class ThreadedMzdbRawFile implements IRawFile {
    public List<IFeature> extractFeatures(final FeaturesExtractionRequest params) {
      try {
          logger.info("extract feature starting");
-         Future<List<IFeature>> future = service.submit(new Callable<List<IFeature>>() {
-            @Override
-            public List<IFeature> call() {
-               List<IFeature> result = mzdbRawFile.extractFeatures(params);
-               result.stream().forEach( f -> f.setRawFile(ThreadedMzdbRawFile.this));
-               return result;
-            }
+         Future<List<IFeature>> future = service.submit(() -> {
+            List<IFeature> result = mzdbRawFile.extractFeatures(params);
+            result.stream().forEach( f -> f.setRawFile(ThreadedMzdbRawFile.this));
+            return result;
          });
          logger.info("waiting for feature extraction ... ");
          return future.get();
@@ -163,14 +146,11 @@ public class ThreadedMzdbRawFile implements IRawFile {
    }
    
    @Override
-   public Chromatogram getBPI() {
+   public IChromatogram getBPI() {
       try {
-         return service.submit(new Callable<Chromatogram>() {
-            @Override
-            public Chromatogram call() {
-               Chromatogram chromatogram = mzdbRawFile.getBPI();
-               return chromatogram;
-            }
+         return service.submit(() -> {
+            IChromatogram chromatogram = mzdbRawFile.getBPI();
+            return chromatogram;
          }).get();
       } catch (InterruptedException | ExecutionException ex ) {
          logger.error("getBPI call fail", ex);
@@ -179,14 +159,11 @@ public class ThreadedMzdbRawFile implements IRawFile {
    }
    
    @Override
-    public Chromatogram getXIC(final MsnExtractionRequest params) {
+    public IChromatogram getXIC(final MsnExtractionRequest params) {
       try {
-         return service.submit(new Callable<Chromatogram>() {
-            @Override
-            public Chromatogram call() {
-               Chromatogram chromatogram = mzdbRawFile.getXIC(params);
-               return chromatogram;
-            }
+         return service.submit(() -> {
+            IChromatogram chromatogram = mzdbRawFile.getXIC(params);
+            return chromatogram;
          }).get();
       } catch (InterruptedException | ExecutionException ex ) {
          logger.error("getXIC call fail", ex);
@@ -195,14 +172,11 @@ public class ThreadedMzdbRawFile implements IRawFile {
    }
    
    @Override
-    public Chromatogram getTIC() {
+    public IChromatogram getTIC() {
       try {
-         return service.submit(new Callable<Chromatogram>() {
-            @Override
-            public Chromatogram call() {
-               Chromatogram chromatogram =  mzdbRawFile.getTIC();
-               return chromatogram;
-            }
+         return service.submit(() -> {
+            IChromatogram chromatogram =  mzdbRawFile.getTIC();
+            return chromatogram;
          }).get();
       } catch (InterruptedException | ExecutionException ex ) {
          logger.error("getTIC call fail", ex);
@@ -233,12 +207,9 @@ public class ThreadedMzdbRawFile implements IRawFile {
     @Override
     public Map<String, Object> getFileProperties() {
               try {
-         return service.submit(new Callable<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> call() {
-               Map<String, Object> data =  mzdbRawFile.getFileProperties();
-               return data;
-            }
+         return service.submit(() -> {
+            Map<String, Object> data =  mzdbRawFile.getFileProperties();
+            return data;
          }).get();
       } catch (InterruptedException | ExecutionException ex ) {
          logger.error("getFileMetaData call fail", ex);
@@ -249,13 +220,10 @@ public class ThreadedMzdbRawFile implements IRawFile {
     @Override
     public QCMetrics getFileMetrics() {
       try {
-         return service.submit(new Callable<QCMetrics>() {
-            @Override
-            public QCMetrics call() {
-               QCMetrics metrics = mzdbRawFile.getFileMetrics();
-               metrics.setRawFile(ThreadedMzdbRawFile.this);
-               return metrics;
-            }
+         return service.submit(() -> {
+            QCMetrics metrics = mzdbRawFile.getFileMetrics();
+            metrics.setRawFile(ThreadedMzdbRawFile.this);
+            return metrics;
          }).get();
       } catch (InterruptedException | ExecutionException ex ) {
          logger.error("getFileMetaData call fail", ex);

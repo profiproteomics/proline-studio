@@ -1,11 +1,8 @@
 package fr.proline.mzscope.ui;
 
-import fr.proline.mzscope.model.Chromatogram;
-import fr.proline.mzscope.model.IFeature;
-import fr.proline.mzscope.model.MsnExtractionRequest;
+import fr.proline.mzscope.model.*;
 import fr.proline.mzscope.utils.MzScopeCallback;
 import fr.proline.mzscope.ui.model.MzScopePreferences;
-import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.utils.Display;
 import fr.proline.mzscope.utils.KeyEventDispatcherDecorator;
 import fr.proline.studio.export.ExportButton;
@@ -21,7 +18,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -163,7 +159,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
         chromatogramToolbar.add(exportImageButton);
 
         JButton displayTICbtn = new JButton("TIC");
-        displayTICbtn.setToolTipText("Display TIC Chromatogram");
+        displayTICbtn.setToolTipText("Display TIC IChromatogram");
         displayTICbtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -173,7 +169,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
         chromatogramToolbar.add(displayTICbtn);
 
         JButton displayBPIbtn = new JButton("BPC");
-        displayBPIbtn.setToolTipText("Display Base Peak Chromatogram");
+        displayBPIbtn.setToolTipText("Display Base Peak IChromatogram");
         displayBPIbtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -245,8 +241,8 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
         if (chromatogramPanel.getCurrentChromatogram() == null) {
             return;
         }
-        final double minMz = chromatogramPanel.getCurrentChromatogram().minMz;
-        final double maxMz = chromatogramPanel.getCurrentChromatogram().maxMz;
+        final double minMz = chromatogramPanel.getCurrentChromatogram().getMinMz();
+        final double maxMz = chromatogramPanel.getCurrentChromatogram().getMaxMz();
 
         SwingWorker worker = new SwingWorker<List<Float>, Void>() {
             @Override
@@ -271,7 +267,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
     }
 
     @Override
-    public Color displayChromatogram(Chromatogram chromato, Display display) {
+    public Color displayChromatogram(IChromatogram chromato, Display display) {
         setMsMsEventButtonEnabled(display.getMode() == Display.Mode.REPLACE);
         Color plotColor = chromatogramPanel.displayChromatogram(chromato, display);
         displayMsMsEvents(showMS2EventsButton.isSelected());
@@ -287,7 +283,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
             @Override
             protected void done() {
                 try {
-                    Chromatogram c = get();
+                    IChromatogram c = get();
                     if (c != null) {
                         displayChromatogram(c, display);
                         setMsMsEventButtonEnabled(true);
@@ -296,7 +292,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
                         }
                     } else {
                         String msg = StringUtils.formatString(params.toString(), 60);
-                        JOptionPane.showMessageDialog(null, "The following extraction request did not produce any data: \n"+msg, "Chromatogram Extraction failure", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(null, "The following extraction request did not produce any data: \n"+msg, "IChromatogram Extraction failure", JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (InterruptedException | ExecutionException e) {
                     logger.error("Error while extraction chromatogram", e);
@@ -332,9 +328,9 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
         if (rawFileLoading != null) {
             rawFileLoading.setWaitingState(true);
         }
-        SwingWorker worker = new SwingWorker<Chromatogram, Void>() {
+        SwingWorker worker = new SwingWorker<IChromatogram, Void>() {
             @Override
-            protected Chromatogram doInBackground() throws Exception {
+            protected IChromatogram doInBackground() throws Exception {
                 return getCurrentRawfile().getXIC(builder.build());
             }
 
@@ -369,9 +365,9 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
                 chromatogramPanel.setCurrentScanTime(currentScan.getRetentionTime());
                 if (displayScan) {
                     spectrumContainerPanel.displayScan(currentScan);
-                    for (Chromatogram chromato : chromatogramPanel.getChromatograms()) {
-                        if ((chromato.minMz != -1) && (chromato.maxMz != -1) && (currentScan.getMsLevel() == 1)) {
-                            spectrumContainerPanel.addMarkerRange(chromato.minMz, chromato.maxMz);
+                    for (IChromatogram chromato : chromatogramPanel.getChromatograms()) {
+                        if ((chromato.getMinMz() != -1) && (chromato.getMaxMz() != -1) && (currentScan.getMsLevel() == 1)) {
+                            spectrumContainerPanel.addMarkerRange(chromato.getMinMz(), chromato.getMaxMz());
                         }
                     }
 
@@ -384,12 +380,12 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
     }
 
     @Override
-    public Chromatogram getCurrentChromatogram() {
+    public IChromatogram getCurrentChromatogram() {
         return chromatogramPanel.getCurrentChromatogram();
     }
 
     @Override
-    public Iterable<Chromatogram> getAllChromatograms() {
+    public Iterable<IChromatogram> getAllChromatograms() {
         return chromatogramPanel.getChromatograms();
     }
     

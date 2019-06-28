@@ -42,6 +42,6 @@ public interface IFeature {
    
    double getParentMz();
    
-   public Peakel[] getPeakels();
+   Peakel[] getPeakels();
 
 }

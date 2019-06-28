@@ -1,6 +1,7 @@
 package fr.proline.mzscope.mzml;
 
 import fr.proline.mzscope.model.Chromatogram;
+import fr.proline.mzscope.model.IChromatogram;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -22,7 +23,7 @@ public class XICExtractor {
       logger.debug("average iterations " + (bs.getIterations()));
    }
 
-   static Chromatogram extract(List<Scan> scans, float vmin, float vmax) {
+   static IChromatogram extract(List<Scan> scans, float vmin, float vmax) {
 
       BinarySearch bs = new BinarySearch();
       long start = System.currentTimeMillis();
@@ -57,15 +58,11 @@ public class XICExtractor {
 
       // WARN : setting rawFilename of Chromato to null is not recommanded : becareful to set a real rawFilename
       
-      Chromatogram chromatogram = new Chromatogram(null);
-      chromatogram.time = XItime;
-      chromatogram.intensities = XIintensities;
-      chromatogram.minMz = (double) vmin;
-      chromatogram.maxMz = (double) vmax;
+      Chromatogram chromatogram = new Chromatogram(null, null, XItime, XIintensities);
+      chromatogram.setMinMz((double) vmin);
+      chromatogram.setMaxMz((double) vmax);
       StringBuilder builder = new StringBuilder("Mass range: ");
-      builder.append(massFormatter.format(chromatogram.minMz)).append("-").append(massFormatter.format(chromatogram.maxMz));
-
-         
+      builder.append(massFormatter.format(chromatogram.getMinMz())).append("-").append(massFormatter.format(chromatogram.getMaxMz()));
 
       return chromatogram;
    }

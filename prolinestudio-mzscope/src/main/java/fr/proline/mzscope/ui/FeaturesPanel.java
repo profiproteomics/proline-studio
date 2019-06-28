@@ -170,12 +170,16 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
             int selectedRow = featureTable.getSelectedRow();
             f = features.get(getModelRowId(selectedRow));
             graphPlot.clearPlots();
+            float maxY = 0.0f;
             int index = 0;
             for (Peakel p : f.getPeakels()) {
+                maxY = Math.max(p.getApexIntensity(), maxY);
                 PlotLinear plot = new PlotLinear(graphPlot, new PeakelWrapper(p, index++), null, 0, 1);
                 graphPlot.addPlot(plot);
             }
-             graphPlot.repaint();
+            graphPlot.getYAxis().setRange(0, maxY);
+            graphPlot.lockMinYValue();
+            graphPlot.repaint();
         }
         return f;
     }
@@ -373,7 +377,7 @@ class PeakelWrapper implements ExtendedTableModelInterface {
 
    @Override
    public Object getDataValueAt(int rowIndex, int columnIndex) {
-      return (columnIndex == 0) ? peakel.getElutionTimes()[rowIndex] : peakel.getIntensityValues()[rowIndex];
+      return (columnIndex == 0) ? peakel.getElutionTimes()[rowIndex]/60.0f : peakel.getIntensityValues()[rowIndex];
    }
 
    @Override

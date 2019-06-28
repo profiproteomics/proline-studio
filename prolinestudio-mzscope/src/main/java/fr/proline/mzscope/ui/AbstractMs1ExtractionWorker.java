@@ -1,6 +1,6 @@
 package fr.proline.mzscope.ui;
 
-import fr.proline.mzscope.model.Chromatogram;
+import fr.proline.mzscope.model.IChromatogram;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.MsnExtractionRequest;
 import javax.swing.SwingWorker;
@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author CB205360
  */
-abstract class AbstractMs1ExtractionWorker extends SwingWorker<Chromatogram, Void> {
+abstract class AbstractMs1ExtractionWorker extends SwingWorker<IChromatogram, Void> {
 
    private static Logger logger = LoggerFactory.getLogger(AbstractMs1ExtractionWorker.class);
    
@@ -28,7 +28,7 @@ abstract class AbstractMs1ExtractionWorker extends SwingWorker<Chromatogram, Voi
    }
 
    @Override
-   protected Chromatogram doInBackground() throws Exception {
+   protected IChromatogram doInBackground() throws Exception {
       return rawFile.getXIC(parameters);
    }
 

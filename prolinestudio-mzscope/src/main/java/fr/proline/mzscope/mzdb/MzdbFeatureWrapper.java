@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Adaptor that convert fr.profi.mzdb.model.Feature object to IFeature implementation
  *
  * @author CB205360
  */

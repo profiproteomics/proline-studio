@@ -1,9 +1,6 @@
 package fr.proline.mzscope.ui;
 
-import fr.proline.mzscope.model.Chromatogram;
-import fr.proline.mzscope.model.IFeature;
-import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.model.MsnExtractionRequest;
+import fr.proline.mzscope.model.*;
 import fr.proline.mzscope.utils.MzScopeCallback;
 import fr.proline.mzscope.ui.model.MzScopePreferences;
 import fr.proline.mzscope.utils.Display;
@@ -37,7 +34,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
     final private static Logger logger = LoggerFactory.getLogger(MultiRawFilePanel.class);
 
     private final List<IRawFile> rawfiles;
-    private final Map<IRawFile, Chromatogram> chromatogramByRawFile;
+    private final Map<IRawFile, IChromatogram> chromatogramByRawFile;
     private final Map<String, Color> colorByRawFilename;
 
     private IRawFile currentRawFile;
@@ -68,14 +65,14 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
 
     @Override
     public void extractAndDisplayChromatogram(final MsnExtractionRequest params, Display display, MzScopeCallback callback) {
-       // in this implementation display is ignored : always REPLACE since we will extract one Chromatogram per RawFile
-        SwingWorker worker = new SwingWorker<Integer, Chromatogram>() {
+       // in this implementation display is ignored : always REPLACE since we will extract one IChromatogram per RawFile
+        SwingWorker worker = new SwingWorker<Integer, IChromatogram>() {
             Display display = new Display(Display.Mode.SERIES);
             @Override
             protected Integer doInBackground() throws Exception {
                 int count = 0;
                 for (IRawFile rawFile : rawfiles) {
-                    Chromatogram c = rawFile.getXIC(params);
+                    IChromatogram c = rawFile.getXIC(params);
                     count++;
                     publish(c);
                 }
@@ -83,7 +80,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             }
 
             @Override
-            protected void process(List<Chromatogram> chunks) {
+            protected void process(List<IChromatogram> chunks) {
                 for (int k = 0; k < chunks.size(); k++) {
                     logger.info("display chromato number {}",k);
                     displayChromatogram(chunks.get(k), display);
@@ -105,15 +102,15 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
     }
 
     @Override
-    public Chromatogram getCurrentChromatogram() {
+    public IChromatogram getCurrentChromatogram() {
         return chromatogramByRawFile.get(currentRawFile);
     }
     
     @Override
-    public Color displayChromatogram(Chromatogram chromato, Display display) {
+    public Color displayChromatogram(IChromatogram chromato, Display display) {
        setMsMsEventButtonEnabled(true);
        Color plotColor = super.displayChromatogram(chromato, display);
-       colorByRawFilename.put(chromato.rawFilename, plotColor);
+       colorByRawFilename.put(chromato.getRawFilename(), plotColor);
        return plotColor ;
     }
     
@@ -124,7 +121,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             rawFileLoading.setWaitingState(true);
         }
         logger.info("Display {} TIC chromatograms", rawFiles.size());
-        SwingWorker worker = new SwingWorker<Integer, Chromatogram>() {
+        SwingWorker worker = new SwingWorker<Integer, IChromatogram>() {
 
             Display display = new Display(Display.Mode.SERIES);
             
@@ -132,7 +129,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             protected Integer doInBackground() throws Exception {
                 int count = 0;    
                 for (IRawFile rawFile : rawFiles) {
-                    Chromatogram c = rawFile.getTIC();
+                    IChromatogram c = rawFile.getTIC();
                     chromatogramByRawFile.put(rawFile, c);
                     publish(c);
                 }
@@ -140,7 +137,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             }
 
             @Override
-            protected void process(List<Chromatogram> chunks) {
+            protected void process(List<IChromatogram> chunks) {
                 for (int k = 0; k < chunks.size(); k++) {
                     logger.info("diplay TIC number {}",k);
                     displayChromatogram(chunks.get(k), display);
@@ -174,7 +171,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
         final double minMz = f.getMz() - f.getMz() * ppm / 1e6;
 
         final List<IRawFile> rawFiles = new ArrayList<>(rawfiles);
-        SwingWorker worker = new SwingWorker<Integer, Chromatogram>() {
+        SwingWorker worker = new SwingWorker<Integer, IChromatogram>() {
             int count = 0;
             boolean isFirstProcessCall = true;
                 
@@ -183,7 +180,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
                 //return getCurrentRawfile().getXIC(minMz, maxMz);
                 for (IRawFile rawFile : rawFiles) {
                     MsnExtractionRequest params = MsnExtractionRequest.builder().setMaxMz(maxMz).setMinMz(minMz).build();
-                    Chromatogram c = rawFile.getXIC(params);
+                    IChromatogram c = rawFile.getXIC(params);
                     count++;
                     publish(c);
                 }
@@ -191,10 +188,10 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             }
             
             @Override
-            protected void process(List<Chromatogram> chunks) {
+            protected void process(List<IChromatogram> chunks) {
                 int k = 0;
                 Display display = new Display(Collections
-                    .singletonList(new IntervalMarker(null, Color.ORANGE, Color.RED, f.getFirstElutionTime() / 60.0, f.getLastElutionTime() / 60.0)));
+                    .singletonList(new IntervalMarker(null, Color.ORANGE, Color.RED, f.getFirstElutionTime(), f.getLastElutionTime())));
                 if (isFirstProcessCall) {
                     logger.info("display first chromato");
                     isFirstProcessCall = false;
@@ -229,7 +226,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
     protected void displayBPI() {
         final List<IRawFile> rawFiles = new ArrayList<>(rawfiles);
         logger.info("Display {} BPI chromatogram", rawFiles.size());
-        SwingWorker worker = new SwingWorker<Integer, Chromatogram>() {
+        SwingWorker worker = new SwingWorker<Integer, IChromatogram>() {
             
             Display display = new Display(Display.Mode.SERIES);
             
@@ -237,7 +234,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             protected Integer doInBackground() throws Exception {
                 int count = 0;
                 for (IRawFile rawFile : rawFiles) {
-                    Chromatogram c = rawFile.getBPI();
+                    IChromatogram c = rawFile.getBPI();
                     count++;
                     publish(c);
                 }
@@ -245,7 +242,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             }
 
             @Override
-            protected void process(List<Chromatogram> chunks) {
+            protected void process(List<IChromatogram> chunks) {
                 for (int k = 0; k < chunks.size(); k++) {
                     logger.info("display BPI chromato number {}", k);
                     displayChromatogram(chunks.get(k), display);
@@ -328,7 +325,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
         }
         ((JRadioButtonMenuItem)popupMenu.getComponent(0)).setSelected(true);
         final JButton currentChromatoBtn = new JButton("Chr");
-        setToolTipText("Display TIC Chromatogram");
+        setToolTipText("Display TIC IChromatogram");
         currentChromatoBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

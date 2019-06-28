@@ -30,20 +30,20 @@ public interface IRawFile {
     * @param params
     * @return 
     */
-   public Chromatogram getXIC(MsnExtractionRequest params);
+   public IChromatogram getXIC(MsnExtractionRequest params);
    
    /**
-    * Returns the Total Ion Chromatogram of this rax file.
+    * Returns the Total Ion IChromatogram of this rax file.
     * @return 
     */
-   public Chromatogram getTIC();
+   public IChromatogram getTIC();
 
    /**
-    * Returns the Base Peak Chromatogram.
+    * Returns the Base Peak IChromatogram.
     * 
     * @return 
     */
-   public Chromatogram getBPI();
+   public IChromatogram getBPI();
 
    /**
     * Extract the features list from this raw file.
@@ -76,14 +76,18 @@ public interface IRawFile {
     * @return the spectrum Id corresponding to the specified retention time.
     */
    public int getSpectrumId(double retentionTime);
-   
-   /**
-    * Returns the index of the spectrum following the spectrumIndex and corresponding to the specified MS level.
-    * 
-    * @param spectrumIndex
-    * @param msLevel
-    * @return The Index of the following spectrum 
-    */
+
+   public double[] getElutionTimes(int msLevel);
+
+   public double getSpectrumElutionTime(int spectrumIndex);
+
+      /**
+       * Returns the index of the spectrum following the spectrumIndex and corresponding to the specified MS level.
+       *
+       * @param spectrumIndex
+       * @param msLevel
+       * @return The Index of the following spectrum
+       */
    public int getNextSpectrumId(int spectrumIndex, int msLevel);
    
    /**

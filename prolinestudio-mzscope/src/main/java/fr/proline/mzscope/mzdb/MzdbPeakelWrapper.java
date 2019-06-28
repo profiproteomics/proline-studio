@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ *  Adaptor that convert a fr.profi.mzdb.model.Peakel object to IFeature implementation.
  *
  * @author CB205360
  */

@@ -5,7 +5,7 @@
  */
 package fr.proline.mzscope.ui;
 
-import fr.proline.mzscope.model.Chromatogram;
+import fr.proline.mzscope.model.IChromatogram;
 import fr.proline.mzscope.model.IRawFile;
 import java.util.Map;
 
@@ -13,9 +13,9 @@ import java.util.Map;
  *
  * @author MB243701
  */
-public interface IExtractionResultsViewer {
+public interface IExtractionResultsViewer extends IFeatureViewer {
     
-    public void displayChromatogramAsSingleView(IRawFile rawfile, Chromatogram c);
+    public void displayChromatogramAsSingleView(IRawFile rawfile, IChromatogram c);
     
-    public void displayChromatogramAsMultiView(Map<IRawFile, Chromatogram> chromatogramByRawFile);
+    public void displayChromatogramAsMultiView(Map<IRawFile, IChromatogram> chromatogramByRawFile);
 }

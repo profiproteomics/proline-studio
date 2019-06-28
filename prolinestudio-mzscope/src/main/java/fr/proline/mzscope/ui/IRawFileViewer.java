@@ -1,9 +1,6 @@
 package fr.proline.mzscope.ui;
 
-import fr.proline.mzscope.model.Chromatogram;
-import fr.proline.mzscope.model.IFeature;
-import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.model.MsnExtractionRequest;
+import fr.proline.mzscope.model.*;
 import fr.proline.mzscope.utils.Display;
 import fr.proline.mzscope.utils.MzScopeCallback;
 import java.awt.Color;
@@ -15,7 +12,7 @@ import java.awt.Color;
 public interface IRawFileViewer {
    
    /**
-    * Extract a Chromatogram according to the specified parameters and display the results in this panel. The specified 
+    * Extract a IChromatogram according to the specified parameters and display the results in this panel. The specified 
     * callback is called in the AWT event dispatch thread when the display finished.
     * 
     * @param params the XIC extraction parameters 
@@ -30,7 +27,7 @@ public interface IRawFileViewer {
     * @param display parameters used to display the specified chromatogram
     * @return the color used to display the sepecified c
     */ 
-   public Color displayChromatogram(Chromatogram chromato, Display display);
+   public Color displayChromatogram(IChromatogram chromato, Display display);
    
    /**
     * Display the specified Feature in this component.
@@ -47,18 +44,18 @@ public interface IRawFileViewer {
    public void displayScan(long index);
 
    /**
-    * Returns the current RawFile ie the the raw file associated with the current Chromatogram  (see below)
+    * Returns the current RawFile ie the the raw file associated with the current IChromatogram  (see below)
     * 
     * @return 
     */
    public IRawFile getCurrentRawfile();
 
    /**
-    * Returns the active Chromatogram ie the chromatogram that will be used to select or iterate over scans.
+    * Returns the active IChromatogram ie the chromatogram that will be used to select or iterate over scans.
     * 
     * @return 
     */
-   public Chromatogram getCurrentChromatogram();
+   public IChromatogram getCurrentChromatogram();
    
    /**
     * Returns the color associated with the specified rawFilename
@@ -80,6 +77,6 @@ public interface IRawFileViewer {
     * 
     * @return an iterator over all Chromatograms displayed by this component
     */
-   public Iterable<Chromatogram> getAllChromatograms();
+   public Iterable<IChromatogram> getAllChromatograms();
    
 }

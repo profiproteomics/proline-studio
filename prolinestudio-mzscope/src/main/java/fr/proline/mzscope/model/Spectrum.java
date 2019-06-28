@@ -4,7 +4,7 @@ import fr.profi.mzdb.model.SpectrumData;
 
 public class Spectrum {
 
-   public static enum ScanType {
+   public enum ScanType {
 
       CENTROID, PROFILE
    }
@@ -16,8 +16,6 @@ public class Spectrum {
    private double[] masses;
    private float[] intensities;
    private SpectrumData spectrumData;
-//   private double[] peaksMz = null;
-//   private float[] peaksIntensities = null;
 
    // msLevel2 only
    private Double precursorMz;

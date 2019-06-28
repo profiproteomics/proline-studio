@@ -2,6 +2,7 @@ package fr.proline.mzscope.ui;
 
 import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
+import fr.proline.mzscope.model.*;
 import fr.proline.mzscope.utils.ButtonTabComponent;
 import com.google.common.base.Strings;
 import fr.profi.mzdb.peakeldb.io.PeakelDbReader;
@@ -10,14 +11,6 @@ import fr.proline.mzscope.map.LcMsMap;
 import fr.proline.mzscope.map.LcMsViewer;
 import fr.proline.mzscope.map.LcMsViewport;
 import fr.proline.mzscope.map.ui.LcMsViewerUI;
-import fr.proline.mzscope.model.BaseFeature;
-import fr.proline.mzscope.model.Chromatogram;
-import fr.proline.mzscope.model.FeaturesExtractionRequest;
-import fr.proline.mzscope.model.IExportParameters;
-import fr.proline.mzscope.model.IFeature;
-import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.model.MsnExtractionRequest;
-import fr.proline.mzscope.model.QCMetrics;
 import fr.proline.mzscope.mzdb.MzdbPeakelWrapper;
 import fr.proline.mzscope.utils.MzScopeCallback;
 import fr.proline.mzscope.ui.model.MzScopePreferences;
@@ -712,7 +705,7 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
     }
 
     @Override
-    public void displayChromatogramAsSingleView(IRawFile rawfile, Chromatogram c) {
+    public void displayChromatogramAsSingleView(IRawFile rawfile, IChromatogram c) {
         displayRaw(rawfile, false);
         List<AbstractRawFilePanel> list = mapRawFilePanelRawFile.get(rawfile);
         if (list != null) {
@@ -726,7 +719,7 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
     }
 
     @Override
-    public void displayChromatogramAsMultiView(Map<IRawFile, Chromatogram> chromatogramByRawFile) {
+    public void displayChromatogramAsMultiView(Map<IRawFile, IChromatogram> chromatogramByRawFile) {
         TabbedMultiRawFilePanel panel = getTabbedMultiRawFilePanel();
         if (panel == null) {
             displayAllRaw();

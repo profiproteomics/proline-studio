@@ -6,6 +6,7 @@
 package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.model.Chromatogram;
+import fr.proline.mzscope.model.IChromatogram;
 import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.ui.event.AxisRangeChromatogramListener;
 import fr.proline.mzscope.ui.model.ChromatogramTableModel;
@@ -18,7 +19,6 @@ import fr.proline.studio.graphics.PlotPanelListener;
 import fr.proline.studio.graphics.marker.AbstractMarker;
 import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.graphics.measurement.IntegralMeasurement;
-import fr.proline.studio.graphics.measurement.WidthMeasurement;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -43,8 +43,8 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
 
    protected BasePlotPanel chromatogramPlotPanel;
    protected List<PlotLinear> chromatogramPlots;
-   protected Chromatogram currentChromatogram;
-   protected List<Chromatogram> listChromatogram;
+   protected IChromatogram currentChromatogram;
+   protected List<IChromatogram> listChromatogram;
    protected List<LineMarker> listMsMsMarkers;
    protected LineMarker currentScanMarker;
    protected Float currentScanTime = null;
@@ -101,11 +101,11 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
       listMsMsMarkers = new ArrayList();
    }
 
-   public Color displayChromatogram(Chromatogram chromato, Display display) {
+   public Color displayChromatogram(IChromatogram chromato, Display display) {
       if (display.getMode() == Display.Mode.REPLACE || ((display.getMode() == Display.Mode.SERIES) && !display.getIdentifier().equals(lastDisplayIdentifier))) {
          currentChromatogram = chromato;
          listChromatogram = new ArrayList();
-         chromatogramPlotPanel.setPlotTitle(chromato.title);
+         chromatogramPlotPanel.setPlotTitle(chromato.getTitle());
          chromatogramPlotPanel.clearPlots();
          PlotLinear chromatogramPlot = chromatogramPlots.isEmpty() ? null : chromatogramPlots.get(0);
          if (chromatogramPlot != null) {
@@ -129,9 +129,9 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
       // if a previous chromatogram was plotted, compute new bounds, otherwise set bounds to chromato start / end time
       if (chromatogramPlotPanel.hasPlots()) {
         double[] bounds = chromatogramPlotPanel.getXAxisBounds();
-        chromatogramPlotPanel.setXAxisBounds(Math.min(chromato.elutionStartTime, bounds[0]) , Math.max(chromato.elutionEndTime, bounds[1]));
+        chromatogramPlotPanel.setXAxisBounds(Math.min(chromato.getElutionStartTime(), bounds[0]) , Math.max(chromato.getElutionEndTime(), bounds[1]));
       } else {
-        chromatogramPlotPanel.setXAxisBounds(chromato.elutionStartTime, chromato.elutionEndTime);
+        chromatogramPlotPanel.setXAxisBounds(chromato.getElutionStartTime(), chromato.getElutionEndTime());
       }
 
       Color plotColor = CyclicColorPalette.getColor(chromatogramPlots.size() + 1);
@@ -190,7 +190,7 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
       }
    }
 
-   public Chromatogram getCurrentChromatogram() {
+   public IChromatogram getCurrentChromatogram() {
       return currentChromatogram;
    }
 
@@ -221,7 +221,7 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
       }
    }
 
-   Iterable<Chromatogram> getChromatograms() {
+   Iterable<IChromatogram> getChromatograms() {
       return listChromatogram;
    }
 
@@ -229,7 +229,7 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
       return chromatogramPlotPanel;
    }
 
-   void setCurrentChromatogram(Chromatogram chromatogram) {
+   void setCurrentChromatogram(IChromatogram chromatogram) {
       if (listChromatogram.contains(chromatogram)) {
          currentChromatogram = chromatogram;
       } else {
@@ -274,7 +274,7 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
         double newXMax = x + (double)(newRangeX / 2.0);
         double newYMin = y - (double)(newRangeY / 2.0);
         double newYMax = y + (double)(newRangeY / 2.0);
-        logger.debug("{} move from min={}, max={} to min={}, max={}", currentChromatogram.rawFilename, oldXMin, oldXMax, newXMin, newXMax);
+        logger.debug("{} move from min={}, max={} to min={}, max={}", currentChromatogram.getRawFilename(), oldXMin, oldXMax, newXMin, newXMax);
         chromatogramPlotPanel.getXAxis().setRange(newXMin, newXMax);
         chromatogramPlotPanel.getYAxis().setRange(newYMin, newYMax);
         chromatogramPlotPanel.repaintUpdateDoubleBuffer();
@@ -289,7 +289,7 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
         double newRangeY = (double)(zoomYLevel * (oldYMax - oldYMin) / 100.0);
         double y =   (double)(oldYMin + (relativeYValue * (oldYMax - oldYMin) / 100.0));
 
-        double newXMin = (double)((relativeXPosition * (currentChromatogram.elutionEndTime - currentChromatogram.elutionStartTime)));
+        double newXMin = (double)((relativeXPosition * (currentChromatogram.getElutionEndTime() - currentChromatogram.getElutionStartTime())));
         double newXMax = newXMin + zoomXRange;
         double newYMin = y - (double)(newRangeY / 2.0);
         double newYMax = y + (double)(newRangeY / 2.0);

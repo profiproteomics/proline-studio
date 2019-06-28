@@ -23,11 +23,13 @@ public class ExtractionResult {
    };
 
    private MsnExtractionRequest request;
-   private Map<IRawFile, Chromatogram> chromatograms;
+   private Integer expectedCharge;
+   private Map<IRawFile, AnnotatedChromatogram> chromatograms;
    private Status status = Status.NONE;
 
-   public ExtractionResult(MsnExtractionRequest request) {
+   public ExtractionResult(MsnExtractionRequest request, Integer expectedCharge) {
       this.request = request;
+      this.expectedCharge = expectedCharge;
    }
    
    public float getMzTolPPM() {
@@ -58,6 +60,10 @@ public class ExtractionResult {
       return request.getElutionTime();
    }
 
+   public Integer getExpectedCharge() {
+      return expectedCharge;
+   }
+
    public Status getStatus() {
       return status;
    }
@@ -66,7 +72,7 @@ public class ExtractionResult {
       this.status = status;
    }
    
-   public boolean addChromatogram(IRawFile rawFile, Chromatogram chromato) {
+   public boolean addChromatogram(IRawFile rawFile, AnnotatedChromatogram chromato) {
       if (chromatograms == null) {
          chromatograms = new HashMap<>();
       }
@@ -74,10 +80,18 @@ public class ExtractionResult {
       return true;
    }
 
-   public Map<IRawFile, Chromatogram> getChromatograms() {
-      return chromatograms;
+   public Map<IRawFile, IChromatogram> getChromatogramsMap() {
+      Map<IRawFile, IChromatogram> result = new HashMap<>();
+      for (Map.Entry<IRawFile, AnnotatedChromatogram> entry : chromatograms.entrySet()) {
+         result.put(entry.getKey(), entry.getValue());
+      }
+      return result;
    }
-   
+
+   public IChromatogram getChromatogram(IRawFile rawFile) {
+      return ((chromatograms != null) && (chromatograms.containsKey(rawFile))) ? chromatograms.get(rawFile) : null;
+   }
+
    public MsnExtractionRequest getRequest() {
       return request;
    }

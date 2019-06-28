@@ -1,6 +1,6 @@
 package fr.proline.mzscope.ui.model;
 
-import fr.proline.mzscope.model.Chromatogram;
+import fr.proline.mzscope.model.IChromatogram;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.graphics.PlotInformation;
 import java.awt.Color;
@@ -21,22 +21,22 @@ public class ChromatogramTableModel  extends AbstractTableModel implements Exten
     public static final int COLTYPE_CHROMATOGRAM_XIC_TIME = 0;
     public static final int COLTYPE_CHROMATOGRAM_XIC_INTENSITIES = 1;
     
-    private Chromatogram chromato;
+    private IChromatogram chromato;
     
     private String m_modelName;
     
     private Color chromatoColor;
 
-    public ChromatogramTableModel(Chromatogram chromato) {
+    public ChromatogramTableModel(IChromatogram chromato) {
         this.chromato = chromato;
         plotInformation = new PlotInformation();
         plotInformation.setPlotColor(chromatoColor);
-        plotInformation.setPlotTitle(chromato.title);
+        plotInformation.setPlotTitle(chromato.getTitle());
     }
     
     @Override
     public int getRowCount() {
-        return (chromato == null) ? 0 : chromato.time.length;
+        return (chromato == null) ? 0 : chromato.getTime().length;
     }
 
     @Override
@@ -54,10 +54,10 @@ public class ChromatogramTableModel  extends AbstractTableModel implements Exten
        
         switch (columnIndex) {
             case COLTYPE_CHROMATOGRAM_XIC_TIME: {
-                return chromato.time[rowIndex];
+                return chromato.getTime()[rowIndex];
             }
             case COLTYPE_CHROMATOGRAM_XIC_INTENSITIES:{
-                return chromato.intensities[rowIndex];
+                return chromato.getIntensities()[rowIndex];
             }
         }
         return null; // should never happen

@@ -1,6 +1,7 @@
 package fr.proline.mzscope.ui.model;
 
-import fr.proline.mzscope.model.Chromatogram;
+import fr.proline.mzscope.model.AnnotatedChromatogram;
+import fr.proline.mzscope.model.IChromatogram;
 import fr.proline.mzscope.model.ExtractionResult;
 import fr.proline.mzscope.model.ExtractionResult.Status;
 import fr.proline.mzscope.model.IRawFile;
@@ -20,6 +21,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.table.TableCellRenderer;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +38,12 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
     
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
     private List<IRawFile> m_rawFiles = new ArrayList<>();
-    
+
+    public enum EColumn {
+        INTENSITY,
+        SCANS_COUNT
+    }
+
     public enum Column {
 
         MZ(0, "m/z", "m/z extration value"),
@@ -44,7 +53,7 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
         private final String tooltip;
         private final int id;
 
-        private Column(int id, String name, String tooltip) {
+        Column(int id, String name, String tooltip) {
             this.id = id;
             this.name = name;
             this.tooltip = tooltip;
@@ -84,6 +93,16 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
         fireTableDataChanged();
     }
 
+    private Pair<IRawFile, EColumn> getColumnContent(int columnIndex) {
+        int eCount = EColumn.values().length;
+        int cCount = Column.values().length;
+
+        int rawFileIdx = (columnIndex - cCount) / eCount;
+        int columnIdx = (columnIndex - cCount - rawFileIdx*eCount) % eCount;
+
+        return new ImmutablePair(m_rawFiles.get(rawFileIdx), EColumn.values()[columnIdx]);
+    }
+
     @Override
     public int getRowCount() {
         return m_extractionResults.size();
@@ -91,23 +110,28 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
 
     @Override
     public int getColumnCount() {
-        return Column.values().length + m_rawFiles.size();
+        return Column.values().length + m_rawFiles.size()*EColumn.values().length;
     } 
 
     @Override
     public String getColumnName(int column) {
-        int valuesCount = Column.values().length;
-        return (column < valuesCount) ? Column.values()[column].getName() : m_rawFiles.get(column - valuesCount).getName();
+        if (column < Column.values().length)
+            return Column.values()[column].getName();
+        Pair<IRawFile, EColumn> index = getColumnContent(column);
+        return index.getLeft().getName()+"-"+index.getRight().name();
     }
 
     @Override
     public Class getColumnClass(int col) {
         if (col == Column.MZ.id) {
-            return Long.class;
+            return Double.class;
         } else if (col == Column.STATUS.id) {
             return Status.class;
         }
-        return Double.class;
+        Pair<IRawFile, EColumn> index = getColumnContent(col);
+        if (index.getRight() == EColumn.INTENSITY)
+            return Double.class;
+        return Integer.class;
     }
 
     @Override
@@ -121,17 +145,31 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
                 return m_extractionResults.get(rowIndex).getStatus();
         }
         } else {
-            IRawFile rawFile = m_rawFiles.get(columnIndex - valuesCount);
-            Map<IRawFile, Chromatogram> map = m_extractionResults.get(rowIndex).getChromatograms();
-            return ((map != null) && (map.containsKey(rawFile))) ? map.get(rawFile).getMaxIntensity() : null;
+            Pair<IRawFile, EColumn> index = getColumnContent(columnIndex);
+            AnnotatedChromatogram chromatogram = (AnnotatedChromatogram)m_extractionResults.get(rowIndex).getChromatogram(index.getLeft());
+            if (chromatogram == null)
+                return null;
+            if (index.getRight() == EColumn.INTENSITY) {
+                if (chromatogram.getAnnotation() != null)
+                    return chromatogram.getAnnotation().getApexIntensity();
+
+                return chromatogram.getMaxIntensity();
+            } else {
+                if (chromatogram.getAnnotation() != null)
+                    return chromatogram.getAnnotation().getScanCount();
+                else
+                    return null;
+            }
         }
         return null;
     }
 
     @Override
-    public String getToolTipForHeader(int columnIndex) {
-        int valuesCount = Column.values().length;
-        return (columnIndex < valuesCount) ? Column.values()[columnIndex].getTooltip() : "Intensity";
+    public String getToolTipForHeader(int column) {
+        if (column < Column.values().length)
+            return Column.values()[column].getTooltip();
+        Pair<IRawFile, EColumn> index = getColumnContent(column);
+        return index.getRight().name()+" value from "+index.getLeft().getName();
     }
 
     @Override
@@ -193,12 +231,7 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
 
     @Override
     public Class getDataColumnClass(int columnIndex) {
-        if (columnIndex == Column.MZ.id) {
-            return Double.class;
-        } else if (columnIndex == Column.STATUS.id) {
-            return Status.class;
-        }
-        return Double.class;
+        return getColumnClass(columnIndex);
     }
 
     @Override

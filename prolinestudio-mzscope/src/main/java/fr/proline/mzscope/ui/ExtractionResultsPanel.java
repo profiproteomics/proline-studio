@@ -5,11 +5,10 @@
  */
 package fr.proline.mzscope.ui;
 
-import fr.proline.mzscope.model.Chromatogram;
+import fr.proline.mzscope.model.*;
+import fr.proline.mzscope.processing.IAnnotator;
+import fr.proline.mzscope.processing.PeakelAnnotator;
 import fr.proline.mzscope.ui.model.ExtractionResultsTableModel;
-import fr.proline.mzscope.model.ExtractionResult;
-import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.mzscope.ui.model.MzScopePreferences;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
@@ -30,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.prefs.Preferences;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -40,6 +40,8 @@ import javax.swing.JToolBar;
 import javax.swing.SwingWorker;
 import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.AbstractTableModel;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +53,7 @@ import org.slf4j.LoggerFactory;
 public class ExtractionResultsPanel extends JPanel {
 
     final private static Logger logger = LoggerFactory.getLogger(ExtractionResultsPanel.class);
+    private final static String LAST_DIR = "mzscope.last.csv.extraction.directory";
 
     private List<ExtractionResult> m_extractions;
     private ExtractionResultsTableModel m_extractionResultsTableModel;
@@ -124,7 +127,7 @@ public class ExtractionResultsPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 m_importedTableModel = null;
-                setExtractions(buildIRTRequest());
+                setExtractions(buildIRTRequest(), null);
             }
 
         });
@@ -133,13 +136,7 @@ public class ExtractionResultsPanel extends JPanel {
         JButton extractBtn = new JButton();
         extractBtn.setIcon(IconManager.getIcon(IconManager.IconType.EXECUTE));
         extractBtn.setToolTipText("Start Extractions on all files");
-        extractBtn.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                startExtractions();
-            }
-        });
+        extractBtn.addActionListener(e -> startExtractions());
         toolbar.add(extractBtn);
         
         toolbar.addSeparator();
@@ -167,52 +164,62 @@ public class ExtractionResultsPanel extends JPanel {
     }
 
     private void importCSVExtractions() {
-        int result = m_fchooser.showOpenDialog(this);
-        if (result == JFileChooser.APPROVE_OPTION) {
+      Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+      String directory = prefs.get(LAST_DIR, m_fchooser.getCurrentDirectory().getAbsolutePath());
+      m_fchooser.setCurrentDirectory(new File(directory));
+      int result = m_fchooser.showOpenDialog(this);
+      if (result == JFileChooser.APPROVE_OPTION) {
             File csvFile = m_fchooser.getSelectedFile();
             String fileName = csvFile.getName();
             if (!fileName.endsWith(".csv")){
                 JOptionPane.showMessageDialog(this, "The file must be a csv file", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            prefs.put(LAST_DIR, csvFile.getParentFile().getAbsolutePath());
             m_importedTableModel = new ImportedDataTableModel();
             ImportedDataTableModel.loadFile(m_importedTableModel, csvFile.getAbsolutePath(), ';', true, false);
-            int mzColumnIdx = m_importedTableModel.findColumn("moz");
-            if (mzColumnIdx == -1) {
-                mzColumnIdx = m_importedTableModel.findColumn("m/z");
-                if (mzColumnIdx == -1) {
-                    mzColumnIdx = m_importedTableModel.findColumn("mz");
-                }
-            }
+            int mzColumnIdx = findColumn(m_importedTableModel, new String[]{"moz", "m/z", "mz"});
+            int rtColumnIdx = findColumn(m_importedTableModel, new String[]{"rt", "retention_time", "retention time", "elution_time", "elution time", "time"});
+            int zColumnIdx = findColumn(m_importedTableModel, new String[]{"charge", "z"});
+
             if (mzColumnIdx != -1) {
                 List<Double> mzValues = new ArrayList<>();
+                List<Double> rtValues = new ArrayList<>();
+                List<Integer> zValues = new ArrayList<>();
                 for (int k = 0; k < m_importedTableModel.getRowCount(); k++) {
                     mzValues.add((Double) m_importedTableModel.getValueAt(k, mzColumnIdx));
+                    rtValues.add((rtColumnIdx != -1) ? (Double) m_importedTableModel.getValueAt(k, rtColumnIdx) : -1.0);
+                    zValues.add((zColumnIdx != -1) ? ((Long) m_importedTableModel.getValueAt(k, zColumnIdx)).intValue() : 0);
                 }
-                setExtractionsValues(mzValues);
+
+                float moztol = MzScopePreferences.getInstance().getMzPPMTolerance();
+                List<MsnExtractionRequest> list = new ArrayList<>();
+                for (int k = 0; k < mzValues.size(); k++) {
+                    list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(mzValues.get(k)).setElutionTime(rtValues.get(k).floatValue()).build());
+                }
+                setExtractions(list, zValues);
             } else {
                 JOptionPane.showMessageDialog(this, "No column named \"mz\",\"moz\" or \"m/z\" detected in the imported file.\n Verify the column headers (the column separator must be \";\")", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
-    private void setExtractionsValues(List<Double> values) {
-        float moztol = (float)MzScopePreferences.getInstance().getMzPPMTolerance();
-        List<MsnExtractionRequest> list = new ArrayList<>();
-        for (Double v : values) {
-            list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(v).build());
+    private int findColumn(AbstractTableModel tableModel, String[] alternativeNames) {
+        int columnIdx = -1;
+        for(String name : alternativeNames) {
+            columnIdx = tableModel.findColumn(name);
+            if (columnIdx != -1) {
+                break;
+            }
         }
-        setExtractions(list);
+        return columnIdx;
     }
 
-    public List<ExtractionResult> getExtractions() {
-        return m_extractions;
-    }
-
-    private void setExtractions(List<MsnExtractionRequest> extractionRequests) {
+    private void setExtractions(List<MsnExtractionRequest> extractionRequests, List<Integer> expectedCharge) {
         List<ExtractionResult> results = new ArrayList<>();
-        for (MsnExtractionRequest request : extractionRequests) {
-            ExtractionResult extractionResult = new ExtractionResult(request);
+        for (int k = 0; k < extractionRequests.size(); k++) {
+            MsnExtractionRequest request = extractionRequests.get(k);
+            ExtractionResult extractionResult = new ExtractionResult(request, (expectedCharge !=null) ? expectedCharge.get(k) : 0);
             results.add(extractionResult);
         }
         m_extractionResultsTableModel.setExtractions(results);
@@ -231,6 +238,10 @@ public class ExtractionResultsPanel extends JPanel {
             return;
         }
         final List<IRawFile> rawfiles = RawFileManager.getInstance().getAllFiles();
+
+        //final ChromatogramAnnotator annotator = new ChromatogramAnnotator();
+        final IAnnotator annotator = new PeakelAnnotator();
+
         m_extractionResultsTableModel.setRawFiles(rawfiles);
         
         if ((m_extractionWorker == null) || m_extractionWorker.isDone()) {
@@ -240,15 +251,16 @@ public class ExtractionResultsPanel extends JPanel {
             m_extractionResultsTableModel.fireTableStructureChanged();
             m_extractionWorker = new SwingWorker<Integer, List<Object>>() {
                 @Override
-                protected Integer doInBackground() throws Exception {
+                protected Integer doInBackground() {
                     int count = 0;
                     for (ExtractionResult extraction : m_extractions) {
                         for (IRawFile rawFile : rawfiles) {
                             long start = System.currentTimeMillis();
-                            Chromatogram c = rawFile.getXIC(extraction.getRequest());
+                            IChromatogram c = rawFile.getXIC(extraction.getRequest());
                             count++;
                             List<Object> o = new ArrayList();
-                            o.add(c);
+                            AnnotatedChromatogram ac = (extraction.getElutionTime() > 0) ?  annotator.annotate(rawFile, c, extraction.getRequest(), extraction.getExpectedCharge()) :  new AnnotatedChromatogram(c, null);
+                            o.add(ac);
                             o.add(rawFile);
                             o.add(extraction);
                             publish(o);
@@ -262,10 +274,10 @@ public class ExtractionResultsPanel extends JPanel {
                 @Override
                 protected void process(List<List<Object>> chunks) {
                     for (List<Object> o : chunks) {
-                        Chromatogram c = (Chromatogram)o.get(0);
+                        AnnotatedChromatogram ac = (AnnotatedChromatogram)o.get(0);
                         IRawFile rf = (IRawFile)o.get(1);
                         ExtractionResult extraction = (ExtractionResult)o.get(2);
-                        extraction.addChromatogram(rf, c);
+                        extraction.addChromatogram(rf, ac);
                     }
                     m_extractionResultsTableModel.fireTableDataChanged();
                 }
@@ -275,7 +287,7 @@ public class ExtractionResultsPanel extends JPanel {
                     try {
                         logger.info("{} MS1 extraction done", get());
                     } catch (InterruptedException | ExecutionException e) {
-                        logger.error("Error while extracting chromatograms");
+                        logger.error("Error while extracting chromatograms", e);
                     }
                 }
             };
@@ -297,17 +309,24 @@ public class ExtractionResultsPanel extends JPanel {
                 if (evt.getClickCount() == 2) {
                 int selRow = m_extractionResultsTable.getSelectedRow();
                 if (selRow != -1){
-                    
                     ExtractionResult extraction = m_extractionResultsTableModel.getExtractionResultAt(getModelRowId(selRow));
                     //logger.debug("mouse clicked on Extraction Result "+extraction);
-                    if (extraction != null){
-                        Map<IRawFile, Chromatogram> mapChr = extraction.getChromatograms();
+                    if (extraction != null && extraction.getStatus() == ExtractionResult.Status.DONE){
+                        Map<IRawFile, IChromatogram> mapChr = extraction.getChromatogramsMap();
                         final List<IRawFile> rawfiles = RawFileManager.getInstance().getAllFiles();
                         int nbFiles = rawfiles.size();
                         if (nbFiles == 1){
                             // view singleRawFile
                             if (mapChr.containsKey(rawfiles.get(0))){
-                                m_extractionResultsViewer.displayChromatogramAsSingleView(rawfiles.get(0), mapChr.get(rawfiles.get(0)));
+                                AnnotatedChromatogram chr = (AnnotatedChromatogram )mapChr.get(rawfiles.get(0));
+                                if (chr != null) {
+                                    if (chr.getAnnotation() != null) {
+                                        // because displayFeature will re-extract the XIC of the feature moz ... find a better solution
+                                        m_extractionResultsViewer.displayFeatureInCurrentRawFile(chr.getAnnotation());
+                                    } else {
+                                        m_extractionResultsViewer.displayChromatogramAsSingleView(rawfiles.get(0), chr);
+                                    }
+                                }
                             }
                         }else{
                             // view all file
@@ -359,7 +378,7 @@ public class ExtractionResultsPanel extends JPanel {
     }
 
     private static List<MsnExtractionRequest> buildIRTRequest() {
-        float moztol = (float)MzScopePreferences.getInstance().getMzPPMTolerance();
+        float moztol = MzScopePreferences.getInstance().getMzPPMTolerance();
         List<MsnExtractionRequest> list = new ArrayList<>();
         list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(487.257).build());
         list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(547.297).build());

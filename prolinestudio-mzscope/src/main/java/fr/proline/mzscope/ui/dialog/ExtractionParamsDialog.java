@@ -2,38 +2,17 @@ package fr.proline.mzscope.ui.dialog;
 
 import fr.proline.mzscope.model.FeaturesExtractionRequest;
 import fr.proline.mzscope.ui.model.MzScopePreferences;
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Component;
-import java.awt.EventQueue;
-import java.awt.FlowLayout;
-import java.awt.Frame;
+
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 import javax.swing.border.TitledBorder;
 
 /**
@@ -48,24 +27,23 @@ public class ExtractionParamsDialog extends JDialog {
 
     // extraction parameters
     private FeaturesExtractionRequest.Builder extractionParams;
+    private boolean showMS2Option;
+
 
     private JScrollPane scrollPane;
     private JPanel mainPanel;
-    private JPanel cardPanel;
-    private MzBoundsPanel precursorMzBoundsPanel;
-    private Ms2Panel ms2Panel;
-    private JPanel msLevelPanel;
-    private JComboBox msLevelCbx;
-    private JPanel buttonsPanel;
-    private JButton cancelBtn;
-    private JButton okBtn;
-    private JTextField mzTF;
-    private JPanel removeBaselinePanel;
+    private JPanel mzBoundsCardPanel;
+    private MS1MzBoundsPanel ms1MzBoundsPanel;
+    private MS2MzBoundsPanel ms2MzBoundsPanel;
+    private JComboBox msLevelCB;
     private JCheckBox removeBaselineCB;
-    
-    
-    private boolean showMS2Option;
-    
+    private JCheckBox useSmoothingCB;
+    private JTextField intensityPercentileTF;
+    private JTextField minPeaksCountTF;
+    private JTextField minMaxDistanceTF;
+    private JTextField minMaxRatioTF;
+    private JTextField maxConsecutiveGapsTF;
+
 
     public ExtractionParamsDialog(Frame parent, boolean modal) {
         this(parent, modal, true);
@@ -80,8 +58,14 @@ public class ExtractionParamsDialog extends JDialog {
         super(parent, modal);
         this.showMS2Option = showMS2Option;
         initComponents();
-        precursorMzBoundsPanel.getToleranceTF().setText(Float.toString(MzScopePreferences.getInstance().getMzPPMTolerance()));
-        getRootPane().setDefaultButton(okBtn);
+        ms1MzBoundsPanel.getToleranceTF().setText(Float.toString(MzScopePreferences.getInstance().getMzPPMTolerance()));
+        removeBaselineCB.setSelected(FeaturesExtractionRequest.REMOVE_BASELINE);
+        useSmoothingCB.setSelected(FeaturesExtractionRequest.USE_SMOOTHING);
+        intensityPercentileTF.setText(Float.toString(FeaturesExtractionRequest.INTENSITY_PERCENTILE));
+        minMaxRatioTF.setText(Float.toString(FeaturesExtractionRequest.MIN_MAX_RATIO));
+        minMaxDistanceTF.setText(Integer.toString(FeaturesExtractionRequest.MIN_MAX_DISTANCE));
+        minPeaksCountTF.setText(Integer.toString(FeaturesExtractionRequest.MIN_PEAKS_COUNT));
+        maxConsecutiveGapsTF.setText(Integer.toString(FeaturesExtractionRequest.MAX_CONSECUTIVE_GAPS));
         pack();
     }
 
@@ -106,120 +90,140 @@ public class ExtractionParamsDialog extends JDialog {
             mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
             if (showMS2Option)
                 mainPanel.add(getMsLevelPanel());
-            mainPanel.add(getBaselineRemoverPanel());
+            mainPanel.add(getConfigurationPanel());
             mainPanel.add(getMzBoundsPanel());
             mainPanel.add(getButtonPanel());
         }
         return mainPanel;
     }
-  
-    private JPanel getMsLevelPanel(){
-        if (msLevelPanel == null) {
-            msLevelPanel = new JPanel();
-            msLevelPanel.setLayout(new FlowLayout(FlowLayout.LEADING,5,5));
-            JLabel label = new JLabel();
-            label.setText("MS level: ");
-            msLevelPanel.add(label);
-            msLevelPanel.add(getMsLevelCbx());
-        }
+
+    private JPanel getMsLevelPanel() {
+        JPanel msLevelPanel = new JPanel();
+        msLevelPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 5, 5));
+        JLabel label = new JLabel();
+        label.setText("MS level: ");
+        msLevelPanel.add(label);
+        msLevelPanel.add(getMsLevelCB());
         return msLevelPanel;
     }
 
-    private JComboBox getMsLevelCbx(){
-        if (msLevelCbx == null) {
+    private JComboBox getMsLevelCB(){
+        if (msLevelCB == null) {
             String[] items = {MS1, MS2};
-            msLevelCbx = new JComboBox(items);
-            msLevelCbx.addItemListener(new ItemListener() {
-                @Override
-                public void itemStateChanged(ItemEvent e) {
-                    CardLayout layout = (CardLayout)cardPanel.getLayout();
-                    layout.show(cardPanel, (String)e.getItem());
-                }
+            msLevelCB = new JComboBox(items);
+            msLevelCB.addItemListener(e -> {
+                CardLayout layout = (CardLayout) mzBoundsCardPanel.getLayout();
+                layout.show(mzBoundsCardPanel, (String)e.getItem());
             });
         }
-        return msLevelCbx;
+        return msLevelCB;
     }
 
     private JPanel getMzBoundsPanel() {
-        if (cardPanel == null) {
-            cardPanel = new JPanel();
-            cardPanel.setLayout(new CardLayout());
-            JPanel innerPanel = new JPanel();
-            innerPanel.setLayout(new FlowLayout());
-            precursorMzBoundsPanel = new MzBoundsPanel("Precursor mz");
-            innerPanel.add(precursorMzBoundsPanel);
-            cardPanel.add(MS1, innerPanel);
-            cardPanel.add(MS2, getMs2Panel());
+        if (mzBoundsCardPanel == null) {
+            mzBoundsCardPanel = new JPanel();
+            mzBoundsCardPanel.setLayout(new CardLayout());
+            ms1MzBoundsPanel = new MS1MzBoundsPanel("Precursor mz");
+            mzBoundsCardPanel.add(MS1, ms1MzBoundsPanel);
+            ms2MzBoundsPanel = new MS2MzBoundsPanel();
+            mzBoundsCardPanel.add(MS2, ms2MzBoundsPanel);
         }
-        return cardPanel;
+        return mzBoundsCardPanel;
     }
-    
-    
-    private Component getMs2Panel() {
-        if (ms2Panel == null) {
-            ms2Panel = new Ms2Panel();
-        }
-        
-        return ms2Panel;
-    }
-      
-    private JPanel getBaselineRemoverPanel() {
-        if (removeBaselinePanel == null) {
-            removeBaselinePanel = new JPanel();
-            removeBaselinePanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-            removeBaselinePanel.add(getBaselineCB());
-        }
-        return removeBaselinePanel;
+
+    private JPanel getConfigurationPanel() {
+        JPanel configurationPanel = new JPanel();
+        configurationPanel.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 0;
+        c.insets = new Insets(5, 5, 5, 5);
+        c.anchor = GridBagConstraints.WEST;
+
+        JLabel label = new JLabel("Intensity percentile:");
+        configurationPanel.add(label, c);
+        c.gridx++;
+        intensityPercentileTF = new JTextField(10);
+        configurationPanel.add(intensityPercentileTF, c);
+
+        c.gridx = 0;
+        c.gridy++;
+        label = new JLabel("min peaks count:");
+        configurationPanel.add(label, c);
+        c.gridx++;
+        minPeaksCountTF = new JTextField(10);
+        configurationPanel.add(minPeaksCountTF, c);
+
+        c.gridx = 0;
+        c.gridy++;
+        label = new JLabel("max consecutive gaps:");
+        configurationPanel.add(label, c);
+        c.gridx++;
+        maxConsecutiveGapsTF = new JTextField(10);
+        configurationPanel.add(maxConsecutiveGapsTF, c);
+
+        c.gridx = 0;
+        c.gridy++;
+        label = new JLabel("min/max distance (count):");
+        configurationPanel.add(label, c);
+        c.gridx++;
+        minMaxDistanceTF = new JTextField(10);
+        configurationPanel.add(minMaxDistanceTF, c);
+
+        c.gridx = 0;
+        c.gridy++;
+        label = new JLabel("min/max ratio (0-1):");
+        configurationPanel.add(label, c);
+        c.gridx++;
+        minMaxRatioTF = new JTextField(10);
+        configurationPanel.add(minMaxRatioTF, c);
+
+        c.gridx = 0;
+        c.gridy++;
+        removeBaselineCB = new JCheckBox();
+        removeBaselineCB.setToolTipText("Remove peakels baseline during peakel detection");
+        removeBaselineCB.setText("remove baseline");
+        configurationPanel.add(removeBaselineCB, c);
+
+        c.gridx++;
+        useSmoothingCB = new JCheckBox();
+        useSmoothingCB.setToolTipText("Use smoothing to find peakel local min/min");
+        useSmoothingCB.setText("smooth peakels");
+        configurationPanel.add(useSmoothingCB, c);
+
+
+        configurationPanel.setBorder(new TitledBorder("Processing Parameters"));
+        return configurationPanel;
     }
 
 
-    private JCheckBox getBaselineCB() {
-        if (removeBaselineCB == null) {
-            removeBaselineCB = new JCheckBox();
-            removeBaselineCB.setToolTipText("Remove peakels baseline during peakel detection");
-            removeBaselineCB.setText("use baseline remover");
-        }
-        return removeBaselineCB;
-    }
-
-  
     private JPanel getButtonPanel() {
-        if (buttonsPanel == null) {
-            buttonsPanel = new JPanel();
-            buttonsPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-            buttonsPanel.add(getOkButton());
-            buttonsPanel.add(getCancelButton());
+        JPanel buttonsPanel = new JPanel();
+        buttonsPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
 
-        }
+        JButton okBtn = new JButton();
+        okBtn.setText("Ok");
+        okBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                okBtnActionPerformed(evt);
+            }
+        });
+        getRootPane().setDefaultButton(okBtn);
+        buttonsPanel.add(okBtn);
+
+        JButton cancelBtn = new JButton();
+        cancelBtn.setText("Cancel");
+        cancelBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                cancelBtnActionPerformed(evt);
+            }
+        });
+
+        buttonsPanel.add(cancelBtn);
+
         return buttonsPanel;
-    }
-
-    private JButton getCancelButton() {
-        if (cancelBtn == null) {
-            cancelBtn = new JButton();
-            cancelBtn.setText("Cancel");
-            cancelBtn.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent evt) {
-                    cancelBtnActionPerformed(evt);
-                }
-            });
-        }
-        return cancelBtn;
-    }
-
-    private JButton getOkButton() {
-        if (okBtn == null) {
-            okBtn = new JButton();
-            okBtn.setText("Ok");
-            okBtn.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent evt) {
-                    okBtnActionPerformed(evt);
-                }
-            });
-        }
-        return okBtn;
     }
 
     public void setExtractionParamsTitle(String title) {
@@ -237,46 +241,78 @@ public class ExtractionParamsDialog extends JDialog {
     private void okBtnActionPerformed(ActionEvent evt) {
         this.extractionParams = FeaturesExtractionRequest.builder();
 
-        if (!showMS2Option || getMsLevelCbx().getSelectedItem().equals(MS1)) {
+        if (!showMS2Option || getMsLevelCB().getSelectedItem().equals(MS1)) {
 
             try {
-                extractionParams.setMzTolPPM(Float.parseFloat(precursorMzBoundsPanel.getToleranceTF().getText()));
+                extractionParams.setMzTolPPM(Float.parseFloat(ms1MzBoundsPanel.getToleranceTF().getText()));
             } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "tolerance value is incorrect: " + precursorMzBoundsPanel.getToleranceTF().getText());
+                JOptionPane.showMessageDialog(this, "tolerance value is incorrect: " + ms1MzBoundsPanel.getToleranceTF().getText());
                 return;
             }
             try {
-                extractionParams.setMinMz((precursorMzBoundsPanel.getMzBoundsRB().isSelected()) ? Double.parseDouble(precursorMzBoundsPanel.getMinMzTF().getText()) : 0.0);
+                extractionParams.setIntensityPercentile(Float.parseFloat(intensityPercentileTF.getText()));
             } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "min m/z value is incorrect: " + precursorMzBoundsPanel.getMinMzTF().getText());
+                JOptionPane.showMessageDialog(this, "Intensity percentile value is incorrect: " + intensityPercentileTF.getText());
                 return;
             }
             try {
-                extractionParams.setMaxMz((precursorMzBoundsPanel.getMzBoundsRB().isSelected()) ? Double.parseDouble(precursorMzBoundsPanel.getMaxMzTF().getText()) : 0.0);
+                extractionParams.setMinPeaksCount(Integer.parseInt(minPeaksCountTF.getText()));
             } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "max m/z value is incorrect: " + precursorMzBoundsPanel.getMaxMzTF().getText());
+                JOptionPane.showMessageDialog(this, "Min peaks count value is incorrect: " + minPeaksCountTF.getText());
                 return;
             }
-            if (precursorMzBoundsPanel.getMzBoundsRB().isSelected() && extractionParams.getMinMz() > extractionParams.getMaxMz()) {
+            try {
+                extractionParams.setMaxConsecutiveGaps(Integer.parseInt(maxConsecutiveGapsTF.getText()));
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Max consecutive gaps value is incorrect: " + maxConsecutiveGapsTF.getText());
+                return;
+            }
+            try {
+                extractionParams.setMinmaxDistanceThreshold(Integer.parseInt(minMaxDistanceTF.getText()));
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Min/max distance value is incorrect: " + minMaxDistanceTF.getText());
+                return;
+            }
+            try {
+                extractionParams.setMaxIntensityRelativeThreshold(Float.parseFloat(minMaxRatioTF.getText()));
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Min/max relative intensities ratio value is incorrect: " + minMaxRatioTF.getText());
+                return;
+            }
+            try {
+                extractionParams.setMinMz((ms1MzBoundsPanel.getMzBoundsRB().isSelected()) ? Double.parseDouble(ms1MzBoundsPanel.getMinMzTF().getText()) : 0.0);
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "min m/z value is incorrect: " + ms1MzBoundsPanel.getMinMzTF().getText());
+                return;
+            }
+            try {
+                extractionParams.setMaxMz((ms1MzBoundsPanel.getMzBoundsRB().isSelected()) ? Double.parseDouble(ms1MzBoundsPanel.getMaxMzTF().getText()) : 0.0);
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "max m/z value is incorrect: " + ms1MzBoundsPanel.getMaxMzTF().getText());
+                return;
+            }
+            if (ms1MzBoundsPanel.getMzBoundsRB().isSelected() && extractionParams.getMinMz() > extractionParams.getMaxMz()) {
                 JOptionPane.showMessageDialog(this, "The min m/z value must be lower than max m/z");
                 return;
             }
-            if (precursorMzBoundsPanel.getMzRB().isSelected()) {
+            if (ms1MzBoundsPanel.getMzRB().isSelected()) {
                 try {
-                    double m = Double.parseDouble(precursorMzBoundsPanel.getMzTF().getText());
+                    double m = Double.parseDouble(ms1MzBoundsPanel.getMzTF().getText());
                     extractionParams.setMz(m);
                 } catch (NumberFormatException e) {
-                    JOptionPane.showMessageDialog(this, "m/z value is incorrect: " + precursorMzBoundsPanel.getMzTF().getText());
+                    JOptionPane.showMessageDialog(this, "m/z value is incorrect: " + ms1MzBoundsPanel.getMzTF().getText());
                     return;
                 }
             }
         }
 
         extractionParams.setRemoveBaseline(removeBaselineCB.isSelected());
-        extractionParams.setMsLevel(getMsLevelCbx().getSelectedIndex()+1);
+        extractionParams.setUseSmoothing(useSmoothingCB.isSelected());
+
+        extractionParams.setMsLevel(getMsLevelCB().getSelectedIndex()+1);
         
-        if (showMS2Option && getMsLevelCbx().getSelectedItem().equals(MS2)) {
-            ms2Panel.getExtractionParameters(this.extractionParams);
+        if (showMS2Option && getMsLevelCB().getSelectedItem().equals(MS2)) {
+            ms2MzBoundsPanel.getExtractionParameters(this.extractionParams);
         }
         
         setVisible(false);
@@ -309,30 +345,41 @@ public class ExtractionParamsDialog extends JDialog {
         EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                ExtractionParamsDialog dialog = new ExtractionParamsDialog(new JFrame(), true);
+                final ExtractionParamsDialog dialog = new ExtractionParamsDialog(new JFrame(), true);
                 dialog.setExtractionParamsTitle("Extraction Parameters");
                 dialog.addWindowListener(new WindowAdapter() {
                     @Override
                     public void windowClosing(WindowEvent e) {
+                        FeaturesExtractionRequest.Builder builder= dialog.getExtractionParams();
+                        if (builder != null) {
+                            FeaturesExtractionRequest params = builder.build();
+                            System.out.println(params.toString());
+                        }
                         System.exit(0);
                     }
                 });
                 //dialog.setSize(300, 300);
-                dialog.setVisible(true);
+                dialog.showExtractionParamsDialog();
+                FeaturesExtractionRequest.Builder builder= dialog.getExtractionParams();
+                if (builder != null) {
+                    FeaturesExtractionRequest params = builder.build();
+                    System.out.println(params.toString());
+                }
+                System.exit(0);
             }
         });
     }
 
 }
 
-class Ms2Panel extends JPanel {
+class MS2MzBoundsPanel extends JPanel {
    
     private JTextField mzTF;
-    private MzBoundsPanel fragmentMzBoundsPanel;
+    private MS1MzBoundsPanel fragmentMzBoundsPanel;
     private JPanel tolerancePanel;
     private JTextField toleranceTF;
     
-    public Ms2Panel() {
+    public MS2MzBoundsPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         JPanel innerPanel = new JPanel();
         innerPanel.setBorder(new TitledBorder("Precursor mz"));
@@ -347,7 +394,7 @@ class Ms2Panel extends JPanel {
         innerPanel.add(innerPanel2);
         add(innerPanel);
         
-        fragmentMzBoundsPanel = new MzBoundsPanel("Fragment mz");
+        fragmentMzBoundsPanel = new MS1MzBoundsPanel("Fragment mz");
         add(fragmentMzBoundsPanel);
 
         fragmentMzBoundsPanel.getToleranceTF().setText(Float.toString(MzScopePreferences.getInstance().getFragmentMzPPMTolerance()));
@@ -431,7 +478,7 @@ class Ms2Panel extends JPanel {
 
 }
 
-class MzBoundsPanel extends JPanel {
+class MS1MzBoundsPanel extends JPanel {
 
     private JPanel noBoundsPanel;
     private JRadioButton noBoundsRB;
@@ -445,7 +492,7 @@ class MzBoundsPanel extends JPanel {
     private JPanel tolerancePanel;
     private JTextField toleranceTF;
     
-    public MzBoundsPanel(String title) {
+    public MS1MzBoundsPanel(String title) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(new TitledBorder(title));
         add(getTolerancePanel());

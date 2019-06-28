@@ -1,14 +1,10 @@
 package fr.proline.mzscope.mzml;
 
-import fr.proline.mzscope.model.Chromatogram;
-import fr.proline.mzscope.model.FeaturesExtractionRequest;
-import fr.proline.mzscope.model.IExportParameters;
-import fr.proline.mzscope.model.IFeature;
-import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.model.MsnExtractionRequest;
-import fr.proline.mzscope.model.QCMetrics;
-import fr.proline.mzscope.model.Spectrum;
+import fr.proline.mzscope.model.*;
+import fr.proline.mzscope.model.IChromatogram;
+
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -51,18 +47,18 @@ public class MzMLRawFile implements IRawFile {
     }
 
    
-    public Chromatogram getTIC() {
+    public IChromatogram getTIC() {
       throw new UnsupportedOperationException("Not supported yet.");      
    }
     
    @Override
-   public Chromatogram getBPI() {
+   public IChromatogram getBPI() {
       throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
    }
     
    @Override
-   public Chromatogram getXIC(MsnExtractionRequest params) {
-      Chromatogram chromatogram  = XICExtractor.extract(scans, (float)params.getMinMz(), (float)params.getMaxMz());      
+   public IChromatogram getXIC(MsnExtractionRequest params) {
+      IChromatogram chromatogram  = XICExtractor.extract(scans, (float)params.getMinMz(), (float)params.getMaxMz());      
       return chromatogram;      
    }
   
@@ -74,13 +70,24 @@ public class MzMLRawFile implements IRawFile {
    @Override
    public int getSpectrumId(double retentionTime) {
       for (Scan s : scans) {
-         if (Math.abs(s.getRetentionTime() - retentionTime) < 0.001) 
+         if (Math.abs(s.getRetentionTime() - retentionTime) < 0.001)
             return s.getIndex();
       }
       return 0;
    }
 
-   @Override
+  @Override
+  public double[] getElutionTimes(int msLevel) {
+    return scans.stream().mapToDouble(s -> s.getRetentionTime()/60.0).toArray();
+  }
+
+
+  @Override
+  public double getSpectrumElutionTime(int spectrumIndex) {
+    return scans.get(spectrumIndex).getRetentionTime();
+  }
+
+  @Override
    public int getNextSpectrumId(int spectrumIndex, int msLevel) {
       return (int)Math.min(spectrumIndex+1, scans.size());
    }

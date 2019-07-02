@@ -56,7 +56,7 @@ public class PTMDataset {
     public List<Long> getLeafResultSummaryIds(){
         if(!isV2() || m_leafRSMIds == null)
             return Collections.<Long>emptyList();
-        return m_leafRSMIds;
+        return new ArrayList(m_leafRSMIds);
     }
     
     public void setLeafResultSummaryIds(List<Long> l){

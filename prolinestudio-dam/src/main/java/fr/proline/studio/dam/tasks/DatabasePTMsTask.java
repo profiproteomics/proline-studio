@@ -571,14 +571,21 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
         
         int nbrPepIds = sliceOfPeptideIds.size();
-        Long rsetId = m_ptmDataset.getDataset().getResultSetId();        
-        
+        Long rsetId = m_ptmDataset.getDataset().getResultSetId();
+        Long dsRsmId = m_ptmDataset.getDataset().getResultSummaryId();
+        List<Long> allRsmIds = m_ptmDataset.getLeafResultSummaryIds();
+        boolean datasetIsLeaf = (allRsmIds.size() == 1 && m_ptmDataset.getLeafResultSummaryIds().get(0).equals(dsRsmId));
+
+        //Test if dataset is also the leaf dataset
+        if(!datasetIsLeaf){
+            allRsmIds.add(dsRsmId);
+        }
+
+
         Query peptidesQuery = entityManagerMSI.createQuery("SELECT pi.id FROM fr.proline.core.orm.msi.PeptideInstance pi"
                 + "   WHERE pi.peptide.id IN (:peptideIdsList) AND pi.resultSummary.id in (:rmsIds)");
         peptidesQuery.setParameter("peptideIdsList", sliceOfPeptideIds);
-        List<Long> rsmIds = m_ptmDataset.getLeafResultSummaryIds();
-        rsmIds.add(m_ptmDataset.getDataset().getResultSummaryId());
-        peptidesQuery.setParameter("rmsIds", rsmIds);
+        peptidesQuery.setParameter("rmsIds", allRsmIds);
 
         Iterator<Long> itPeptidesQuery = peptidesQuery.getResultList().iterator();
         List<Long> peptideInstanceIds = new ArrayList<>();
@@ -644,7 +651,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
 
 
             //TEST IF Leaf or Parent 
-            if(m_ptmDataset.getDataset().getResultSummaryId().equals(pi.getResultSummary().getId()) ) {                 
+            if(dsRsmId.equals(pi.getResultSummary().getId()) ) {
                 //PARENT PepInstance
                 if(!parentPeptideInstancesByPepId.containsKey(p.getId())){                 
                     DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptide().getId(), pi.getValidatedProteinSetCount(), pi.getElutionTime());
@@ -658,7 +665,8 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
                 }
                 parentPeptideInstancesByPepId.get(p.getId()).getPeptideMatches().add(dpm);
                 
-            } else {
+            }
+            if( (!dsRsmId.equals(pi.getResultSummary().getId())) || datasetIsLeaf ) {
                 //LEAF PeptideInstance
                 if (!leafPeptideInstancesByPepId.containsKey(p.getId())) {
                     leafPeptideInstancesByPepId.put(p.getId(), new ArrayList<>());

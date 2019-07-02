@@ -188,11 +188,9 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                         ((PTMClustersProteinPanel)getDataBoxPanelInterface()).dataUpdated(subTask, finished);                    
                     }   
                 } else{
-                    TaskInfo ti =  getTaskInfo(taskId);
-                    String message = (ti != null && ti.hasTaskError()) ? ti.getTaskError().getErrorText() : "Error loading PTM Cluster";
-                    JOptionPane.showMessageDialog(((JPanel) getDataBoxPanelInterface()), message,"PTM Cluster loading error", JOptionPane.ERROR_MESSAGE);                    
-                    ((PTMClustersProteinPanel) getDataBoxPanelInterface()).setData(taskId, null, finished); 
+                    displayLoadError(taskId, finished);
                 }
+
                 if (finished) {
                     setLoaded(loadingId);
                     unregisterTask(taskId);
@@ -211,6 +209,14 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         registerTask(task);
        
           
+    }
+
+    private void displayLoadError(long taskId, boolean isFinished){
+        TaskInfo ti =  getTaskInfo(taskId);
+        String message = (ti != null && ti.hasTaskError()) ? ti.getTaskError().getErrorText() : "Error loading PTM Cluster";
+        JOptionPane.showMessageDialog(((JPanel) getDataBoxPanelInterface()), message,"PTM Cluster loading error", JOptionPane.ERROR_MESSAGE);
+        ((PTMClustersProteinPanel) getDataBoxPanelInterface()).setData(taskId, null, isFinished);
+
     }
     
     private boolean m_loadPepMatchOnGoing = false;
@@ -238,11 +244,8 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                         m_logger.debug(" PTMCluster PepInstance on going .. subtask");
                         ((PTMClustersProteinPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);               
                     }   
-                } else{                    
-                    TaskInfo ti =  getTaskInfo(taskId);
-                    String message = (ti != null && ti.hasTaskError()) ? ti.getTaskError().getErrorText() : "Error loading PTM Cluster";
-                    JOptionPane.showMessageDialog(((JPanel) getDataBoxPanelInterface()), message,"PTM Cluster loading error", JOptionPane.ERROR_MESSAGE);                    
-                    ((PTMClustersProteinPanel) getDataBoxPanelInterface()).setData(taskId, null, finished); 
+                } else{
+                    displayLoadError(taskId, finished);
                 }
                 
                 if (finished) {

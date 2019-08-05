@@ -254,6 +254,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                         loadXicData(loadingId);
                     } else {
                         setLoaded(loadingId);
+                        propagateDataChanged(PTMPeptideInstance.class);
                         propagateDataChanged(ExtendedTableModelInterface.class);
                     }
                     unregisterTask(taskId);

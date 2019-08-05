@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
@@ -406,6 +407,7 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
 //                m_dataBox.propagateDataChanged(DPeptideMatch.class);
 //                m_dataBox.propagateDataChanged(MsQueryInfoRset.class);
 //            } else {
+                m_dataBox.propagateDataChanged(DPeptideMatch.class);
                 m_dataBox.propagateDataChanged(PTMPeptideInstance.class);
 //            }
         }

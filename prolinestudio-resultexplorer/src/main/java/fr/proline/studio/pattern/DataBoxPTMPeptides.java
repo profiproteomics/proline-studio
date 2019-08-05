@@ -9,6 +9,7 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
@@ -86,6 +87,7 @@ public class DataBoxPTMPeptides extends AbstractDataBox {
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(PTMPeptideInstance.class, true);
         outParameter.addParameter(DPeptideInstance.class, true);
+        outParameter.addParameter(DPeptideMatch.class, false);
         outParameter.addParameter(ResultSummary.class, false);
         outParameter.addParameter(PTMDataset.class, false);
         registerOutParameter(outParameter);
@@ -323,6 +325,13 @@ public class DataBoxPTMPeptides extends AbstractDataBox {
                 PTMPeptideInstance selectedParentPepInstance = ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).getSelectedPTMPeptideInstance();
                 if (selectedParentPepInstance != null) {
                     return selectedParentPepInstance;
+                }
+            }
+
+            if (parameterType.equals(DPeptideMatch.class)) {
+                PTMPeptideInstance selectedParentPepInstance = ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).getSelectedPTMPeptideInstance();
+                if (selectedParentPepInstance != null) {
+                    return selectedParentPepInstance.getBestPepMatch();
                 }
             }
 

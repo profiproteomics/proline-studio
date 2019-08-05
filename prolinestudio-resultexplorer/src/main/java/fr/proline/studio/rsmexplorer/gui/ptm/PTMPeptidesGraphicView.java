@@ -147,7 +147,7 @@ public class PTMPeptidesGraphicView extends JPanel implements DataBoxPanelInterf
     /**
      * used to set next Data Box
      */
-    public PTMPeptideInstance getSelectedPeptideInstance() {
+    public PTMPeptideInstance getSelectedPTMPeptideInstance() {
         int selectedRowIndex = this.m_internalPanel.getSelectedPeptideIndex();
         if(m_dataModel.getRowCount() > 0 && selectedRowIndex < m_dataModel.getRowCount())
             return this.m_dataModel.getPeptideAt(selectedRowIndex);

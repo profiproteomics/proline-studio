@@ -65,12 +65,12 @@ public class ProteinPTMSiteTableModel extends LazyTableModel implements GlobalTa
   public static final int COLTYPE_DELTA_MASS_PTM = 13;
   public static final int COLTYPE_PTM_PROBA = 14;
 
-  public static final int COLTYPE_QUERY_TITLE = 15;
+  public static final int COLTYPE_SPECTRUM_TITLE = 15;
   public static final int COLTYPE_EXPRESSION = 16;
   public static final int COLTYPE_HIDDEN_PROTEIN_PTM = 17; // hidden column, must be the last
 
-  private static final String[] m_columnNames = {"Id", "Protein", "Peptide", "Score", "Modification", "Residue", "Site Probability", "Modification D.Mass", "Modification Loc.", "Protein Loc.", "Protein N/C-term", "Peptide count", "PTM", "PTM D.Mass", "PTM Probability", "Query title", "FC dist."};
-  private static final String[] m_columnTooltips = {"Protein Id", "Protein", "Peptide", "Score of the peptide match", "Modification", "Modified residue", "Modification probability", "Delta mass of the given modification", "Position of the modification on the peptide sequence", "Position of the modification on the protein sequence", "Protein N/C-term", "Number of peptides matching the modification site", "PTM modifications associated with this peptide", "PTMs delta mass", "PTMs probability", "Peptide match query title", "Fold change distance"};
+  private static final String[] m_columnNames = {"Id", "Protein", "Peptide", "Score", "Modification", "Residue", "Site Probability", "Modification D.Mass", "Modification Loc.", "Protein Loc.", "Protein N/C-term", "Peptide count", "PTM", "PTM D.Mass", "PTM Probability", "Spectrum title", "FC dist."};
+  private static final String[] m_columnTooltips = {"Protein Id", "Protein", "Peptide", "Score of the peptide match", "Modification", "Modified residue", "Modification probability", "Delta mass of the given modification", "Position of the modification on the peptide sequence", "Position of the modification on the protein sequence", "Protein N/C-term", "Number of peptides matching the modification site", "PTM modifications associated with this peptide", "PTMs delta mass", "PTMs probability", "Peptide match spectrum title", "Fold change distance"};
 
   private ArrayList<PTMSite> m_arrayInUse = null;
   private ArrayList<PTMSite> m_proteinPTMSiteArray = new ArrayList<>();
@@ -127,7 +127,7 @@ public class ProteinPTMSiteTableModel extends LazyTableModel implements GlobalTa
       case COLTYPE_MODIFICATION:
       case COLTYPE_MODIFICATION_LOC:
       case COLTYPE_PROTEIN_NTERM_CTERM:
-      case COLTYPE_QUERY_TITLE:
+      case COLTYPE_SPECTRUM_TITLE:
         return String.class;
       case COLTYPE_PROTEIN_LOC:
       case COLTYPE_PEPTIDE_COUNT:
@@ -252,7 +252,7 @@ public class ProteinPTMSiteTableModel extends LazyTableModel implements GlobalTa
         return infoPtm.getResidueAASpecificity();
       case COLTYPE_HIDDEN_PROTEIN_PTM:
         return proteinPTMSite;
-      case COLTYPE_QUERY_TITLE:
+      case COLTYPE_SPECTRUM_TITLE:
         return proteinPTMSite.getBestPeptideMatch().getMsQuery().getDSpectrum().getTitle();
       case COLTYPE_EXPRESSION:
         return proteinPTMSite.getExpressionValue();
@@ -395,7 +395,7 @@ public class ProteinPTMSiteTableModel extends LazyTableModel implements GlobalTa
     filtersMap.put(COLTYPE_PROTEIN_NTERM_CTERM, new StringFilter(getColumnName(COLTYPE_PROTEIN_NTERM_CTERM), null, COLTYPE_PROTEIN_NTERM_CTERM));
     filtersMap.put(COLTYPE_PEPTIDE_COUNT, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_COUNT), null, COLTYPE_PEPTIDE_COUNT));
     filtersMap.put(COLTYPE_MODIFICATION_PROBA, new DoubleFilter(getColumnName(COLTYPE_MODIFICATION_PROBA), null, COLTYPE_MODIFICATION_PROBA));
-    filtersMap.put(COLTYPE_QUERY_TITLE, new StringFilter(getColumnName(COLTYPE_QUERY_TITLE), null, COLTYPE_QUERY_TITLE));
+    filtersMap.put(COLTYPE_SPECTRUM_TITLE, new StringFilter(getColumnName(COLTYPE_SPECTRUM_TITLE), null, COLTYPE_SPECTRUM_TITLE));
 
   }
 
@@ -444,7 +444,7 @@ public class ProteinPTMSiteTableModel extends LazyTableModel implements GlobalTa
       }
       case COLTYPE_PROTEIN_NAME:
       case COLTYPE_PEPTIDE_PTM:
-      case COLTYPE_QUERY_TITLE:
+      case COLTYPE_SPECTRUM_TITLE:
       case COLTYPE_MODIFICATION: {
         renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
         break;

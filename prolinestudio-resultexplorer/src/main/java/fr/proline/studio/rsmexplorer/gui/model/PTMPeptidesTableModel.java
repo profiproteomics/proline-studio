@@ -63,10 +63,10 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     public static final int COLTYPE_PEPTIDE_PTM = 3;    
     public static final int COLTYPE_DELTA_MASS_PTM = 4;
     public static final int COLTYPE_PTM_PROBA = 5;
-    public static final int COLTYPE_QUERY_TITLE = 6;   
-    public static final int LAST_STATIC_COLUMN = COLTYPE_QUERY_TITLE;
+    public static final int COLTYPE_SPECTRUM_TITLE = 6;   
+    public static final int LAST_STATIC_COLUMN = COLTYPE_SPECTRUM_TITLE;
     
-    private static final String[] m_columnNames = {"Id", "Peptide", "Score", "PTM", "PTM D.Mass", "PTM Probability", "Query title"};
+    private static final String[] m_columnNames = {"Id", "Peptide", "Score", "PTM", "PTM D.Mass", "PTM Probability", "Spectrum title"};
     private static final String[] m_columnTooltips = {"Peptide Id (Instance Id)", "Peptide Sequence", "Score of the peptide match", "All PTMs modifications associated with this peptide", "All PTMs delta mass", "All PTMs probability", "Peptide match query title"};
 
     // Dynamic columns list 1
@@ -370,7 +370,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
 //                }
 //                return lazyData;
             }
-            case COLTYPE_QUERY_TITLE: {
+            case COLTYPE_SPECTRUM_TITLE: {
                 return (pepMatch==null) ?  "UNKNOWN" : pepMatch.getMsQuery().getDSpectrum().getTitle();    
             }
             default: {                
@@ -515,7 +515,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
                 break;
             }
             case COLTYPE_PEPTIDE_PTM:
-            case COLTYPE_QUERY_TITLE: {
+            case COLTYPE_SPECTRUM_TITLE: {
                 renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
                 break;
             }
@@ -592,7 +592,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
                 return Long.class;
             case COLTYPE_PEPTIDE_NAME:
             case COLTYPE_PEPTIDE_PTM:
-            case COLTYPE_QUERY_TITLE:
+            case COLTYPE_SPECTRUM_TITLE:
                 return String.class;            
             case COLTYPE_DELTA_MASS_PTM:
                 return Double.class;
@@ -635,7 +635,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
             case COLTYPE_PEPTIDE_NAME:
                 return DPeptideMatch.class;
             case COLTYPE_PEPTIDE_PTM:
-            case COLTYPE_QUERY_TITLE:
+            case COLTYPE_SPECTRUM_TITLE:
                 return String.class;
             case COLTYPE_DELTA_MASS_PTM:
                 return Double.class;
@@ -745,7 +745,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
 
         filtersMap.put(COLTYPE_DELTA_MASS_PTM, new DoubleFilter(getColumnName(COLTYPE_DELTA_MASS_PTM), null, COLTYPE_DELTA_MASS_PTM));
         filtersMap.put(COLTYPE_PTM_PROBA, new DoubleFilter(getColumnName(COLTYPE_PTM_PROBA), null, COLTYPE_PTM_PROBA));
-        filtersMap.put(COLTYPE_QUERY_TITLE, new StringDiffFilter(getColumnName(COLTYPE_QUERY_TITLE), null, COLTYPE_QUERY_TITLE));
+        filtersMap.put(COLTYPE_SPECTRUM_TITLE, new StringDiffFilter(getColumnName(COLTYPE_SPECTRUM_TITLE), null, COLTYPE_SPECTRUM_TITLE));
     }
 
     @Override

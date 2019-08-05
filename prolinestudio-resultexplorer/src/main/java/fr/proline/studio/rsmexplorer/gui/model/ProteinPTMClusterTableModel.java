@@ -67,12 +67,12 @@ public class ProteinPTMClusterTableModel extends LazyTableModel implements Globa
   public static final int COLTYPE_DELTA_MASS_PTM = 7;
   public static final int COLTYPE_PTM_PROBA = 8;
 
-  public static final int COLTYPE_QUERY_TITLE = 9;
+  public static final int COLTYPE_SPECTRUM_TITLE = 9;
   public static final int COLTYPE_EXPRESSION = 10;
   public static final int COLTYPE_HIDDEN_PROTEIN_PTM = 11; // hidden column, must be the last
 
-  private static final String[] m_columnNames = {"Id", "Protein", "Peptide", "Score", "Peptide count",  "PTM Site count", "PTM", "PTM D.Mass", "PTM Probability", "Query title", "FC dist."};
-  private static final String[] m_columnTooltips = {"Protein Id", "Protein", "Peptide", "Score of the peptide match", "Number of peptides matching the modification site", "Number of PTM modifications sites clustered", "PTM modifications associated with this peptide", "PTMs delta mass", "PTMs probability", "Peptide match query title", "Fold change distance"};
+  private static final String[] m_columnNames = {"Id", "Protein", "Peptide", "Score", "Peptide count",  "PTM Site count", "PTM", "PTM D.Mass", "PTM Probability", "Spectrum title", "FC dist."};
+  private static final String[] m_columnTooltips = {"Protein Id", "Protein", "Peptide", "Score of the peptide match", "Number of peptides matching the modification site", "Number of PTM modifications sites clustered", "PTM modifications associated with this peptide", "PTMs delta mass", "PTMs probability", "Peptide match spectrum title", "Fold change distance"};
 
   private ArrayList<PTMCluster> m_ptmClusters = null;
 
@@ -130,7 +130,7 @@ public class ProteinPTMClusterTableModel extends LazyTableModel implements Globa
         return Double.class;      
       case COLTYPE_PEPTIDE_NAME:
       case COLTYPE_PEPTIDE_PTM:          
-      case COLTYPE_QUERY_TITLE:     
+      case COLTYPE_SPECTRUM_TITLE:     
       case COLTYPE_PTM_PROBA:  
       case COLTYPE_DELTA_MASS_PTM:
       case COLTYPE_PEPTIDE_SCORE:        
@@ -145,7 +145,7 @@ public class ProteinPTMClusterTableModel extends LazyTableModel implements Globa
     switch (col) {
       case COLTYPE_PEPTIDE_NAME:
       case COLTYPE_PEPTIDE_PTM:          
-      case COLTYPE_QUERY_TITLE:           
+      case COLTYPE_SPECTRUM_TITLE:           
       case COLTYPE_PTM_PROBA:    
       case COLTYPE_DELTA_MASS_PTM:
       case COLTYPE_PEPTIDE_SCORE:          
@@ -319,7 +319,7 @@ public class ProteinPTMClusterTableModel extends LazyTableModel implements Globa
       case COLTYPE_HIDDEN_PROTEIN_PTM:
         return protPTMCluster;
         
-      case COLTYPE_QUERY_TITLE: {
+      case COLTYPE_SPECTRUM_TITLE: {
         if (peptideMatch == null) {            
             lazyData.setData(null);
             givePriorityTo(m_taskId, row, col);
@@ -384,7 +384,7 @@ public class ProteinPTMClusterTableModel extends LazyTableModel implements Globa
           case COLTYPE_PEPTIDE_NAME: 
               return DPeptideMatch.class;
           case COLTYPE_PEPTIDE_PTM:   
-          case COLTYPE_QUERY_TITLE:     
+          case COLTYPE_SPECTRUM_TITLE:     
             return String.class;               
           case COLTYPE_DELTA_MASS_PTM:
             return Double.class;        
@@ -481,7 +481,7 @@ public class ProteinPTMClusterTableModel extends LazyTableModel implements Globa
     filtersMap.put(COLTYPE_PEPTIDE_COUNT, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_COUNT), null, COLTYPE_PEPTIDE_COUNT));
     filtersMap.put(COLTYPE_PTMSITE_COUNT, new IntegerFilter(getColumnName(COLTYPE_PTMSITE_COUNT), null, COLTYPE_PTMSITE_COUNT));
 //    filtersMap.put(COLTYPE_MODIFICATION_PROBA, new DoubleFilter(getColumnName(COLTYPE_MODIFICATION_PROBA), null, COLTYPE_MODIFICATION_PROBA));
-    filtersMap.put(COLTYPE_QUERY_TITLE, new StringFilter(getColumnName(COLTYPE_QUERY_TITLE), null, COLTYPE_QUERY_TITLE));
+    filtersMap.put(COLTYPE_SPECTRUM_TITLE, new StringFilter(getColumnName(COLTYPE_SPECTRUM_TITLE), null, COLTYPE_SPECTRUM_TITLE));
 
   }
 
@@ -530,7 +530,7 @@ public class ProteinPTMClusterTableModel extends LazyTableModel implements Globa
       }
       case COLTYPE_PROTEIN_NAME:
       case COLTYPE_PEPTIDE_PTM:
-      case COLTYPE_QUERY_TITLE: {
+      case COLTYPE_SPECTRUM_TITLE: {
         renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
         break;
       }

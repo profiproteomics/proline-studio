@@ -58,7 +58,7 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
     public static final int COLTYPE_PEPTIDE_PTM = 10;
     public static final int COLTYPE_DELTA_MASS_PTM = 11;
     public static final int COLTYPE_PTM_PROBA = 12;
-    public static final int COLTYPE_QUERY_TITLE = 13;
+    public static final int COLTYPE_SPECTRUM_TITLE = 13;
 
     static class Row {
 
@@ -73,8 +73,8 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
     }
 //    public static final int COLTYPE_HIDDEN_PROTEIN_PTM = 16; // hidden column, must be the last
 
-    private static final String[] m_columnNames = {"Id", "Peptide", "Score", "Modification", "Residue", "Site Probability", "Modification D.Mass", "Modification Loc.", "Protein Loc.", "Protein N/C-term", "PTM", "PTM D.Mass", "PTM Probability", "Query title"};
-    private static final String[] m_columnTooltips = {"Peptide Id (Instance Id)", "Peptide", "Score of the peptide match", "Modification", "Modified residue", "Site probability", "Delta mass of the given modification", "Position of the modification on the peptide sequence", "Position of the modification on the protein sequence", "Protein N/C-term", "PTM modifications associated with this peptide", "PTMs delta mass", "PTMs probability", "Peptide match query title"};
+    private static final String[] m_columnNames = {"Id", "Peptide", "Score", "Modification", "Residue", "Site Probability", "Modification D.Mass", "Modification Loc.", "Protein Loc.", "Protein N/C-term", "PTM", "PTM D.Mass", "PTM Probability", "Spectrum title"};
+    private static final String[] m_columnTooltips = {"Peptide Id (Instance Id)", "Peptide", "Score of the peptide match", "Modification", "Modified residue", "Site probability", "Delta mass of the given modification", "Position of the modification on the peptide sequence", "Position of the modification on the protein sequence", "Protein N/C-term", "PTM modifications associated with this peptide", "PTMs delta mass", "PTMs probability", "Peptide match spectrum title"};
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
 
     private PTMSite m_currentPtmSite;
@@ -282,7 +282,7 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
             case COLTYPE_RESIDUE_AA: {
                 return m_currentPtmSite.getPTMSpecificity().getResidueAASpecificity();
             }
-            case COLTYPE_QUERY_TITLE: {
+            case COLTYPE_SPECTRUM_TITLE: {
                 return pepMatch.getMsQuery().getDSpectrum().getTitle();
             }
         }
@@ -317,7 +317,7 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
                 break;
             }
             case COLTYPE_PEPTIDE_PTM:
-            case COLTYPE_QUERY_TITLE:
+            case COLTYPE_SPECTRUM_TITLE:
             case COLTYPE_MODIFICATION: {
                 renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
                 break;
@@ -407,7 +407,7 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
             case COLTYPE_MODIFICATION:
             case COLTYPE_MODIFICATION_LOC:
             case COLTYPE_PROTEIN_NTERM_CTERM:
-            case COLTYPE_QUERY_TITLE:
+            case COLTYPE_SPECTRUM_TITLE:
                 return String.class;
             case COLTYPE_PROTEIN_LOC:
                 return Integer.class;
@@ -533,7 +533,7 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
 
         filtersMap.put(COLTYPE_DELTA_MASS_PTM, new DoubleFilter(getColumnName(COLTYPE_DELTA_MASS_PTM), null, COLTYPE_DELTA_MASS_PTM));
         filtersMap.put(COLTYPE_PTM_PROBA, new DoubleFilter(getColumnName(COLTYPE_PTM_PROBA), null, COLTYPE_PTM_PROBA));
-        filtersMap.put(COLTYPE_QUERY_TITLE, new StringDiffFilter(getColumnName(COLTYPE_QUERY_TITLE), null, COLTYPE_QUERY_TITLE));
+        filtersMap.put(COLTYPE_SPECTRUM_TITLE, new StringDiffFilter(getColumnName(COLTYPE_SPECTRUM_TITLE), null, COLTYPE_SPECTRUM_TITLE));
     }
 
     @Override

@@ -208,7 +208,8 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
 
     // Entry point for this Database tasks. 
     private boolean fetchPTMDatasetMainTask() {
-
+        long start = System.currentTimeMillis();
+        m_logger.debug(" START fetchPTMDatasetMainTask task ");
         EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
 
@@ -250,7 +251,8 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         } finally {
             entityManagerMSI.close();
         }
-
+        long end = System.currentTimeMillis();
+        m_logger.debug(" END fetchPTMDatasetMainTask task "+(end-start)+" ms");
         return true;
     }
 
@@ -272,14 +274,11 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         typicalProteinQuery.setParameter("rsmId", rsmId);
         List<DProteinMatch> typicalProteinMatchesArray = typicalProteinQuery.getResultList();
         long stop = System.currentTimeMillis();
-        m_logger.debug("{} typical ProtMatches and {} PTMSites loaded in {} ms", typicalProteinMatchesArray.size(), jsonDataset.ptmSites.length, (stop - start));
+        m_logger.debug(" ** {} typical ProtMatches and {} PTMSites loaded in {} ms", typicalProteinMatchesArray.size(), jsonDataset.ptmSites.length, (stop - start));
         start = stop;
 
         //----  fetch Generic PTM Data
         fetchGenericPTMData(entityManagerMSI);
-        stop = System.currentTimeMillis();
-        m_logger.debug("Generic PTM data loaded in {} ms", (stop - start));
-        start = stop;
 
         m_ptmSitesByBestPepMatchId = new HashMap<>();
         //---- Create the list of PTMSites            
@@ -298,7 +297,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
             m_ptmSitesByBestPepMatchId.get(jsonSite.bestPeptideMatchId).add(site);
         }
         stop = System.currentTimeMillis();
-        m_logger.debug("{} PTM Sites built in {} ms", ptmSites.size(), (stop - start));
+        m_logger.debug(" ** {} PTM Sites built in {} ms", ptmSites.size(), (stop - start));
         start = stop;
         m_ptmDataset.setPTMSites(ptmSites);
 
@@ -308,8 +307,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_PTMSITE_PEPTIDES, m_bestSitesPepMatchIds.size(), SLICE_SIZE);
         fetchSiteBestPeptideMatches(subTask, entityManagerMSI); //get first slice            
         stop = System.currentTimeMillis();
-        m_logger.debug("First {} Best PSM + Peptide + Spectrum + Query from PepInstances created in {} ms", SLICE_SIZE, (stop - start));
-        start = stop;
+        m_logger.debug(" ** First {} Best PSM + Peptide + Spectrum + Query from PepInstances created in {} ms", SLICE_SIZE, (stop - start));
 
         return true;
     }
@@ -338,7 +336,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         }
         m_ptmDataset.setPTMClusters(allClusters);
         long stop = System.currentTimeMillis();
-        m_logger.debug("Created {} Cluster in {} ms", allClusters.size(), (stop - start));
+        m_logger.debug(" -- Created {} Cluster in {} ms", allClusters.size(), (stop - start));
         start = stop;
 
         //---- Runs subtasks to get peptide matches
@@ -346,7 +344,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_PTMCLUSTER_PEPTIDES, m_bestClustersPepMatchIds.size(), SLICE_SIZE);
         fetchClusterBestPeptideMatches(subTask, entityManagerMSI); //get first slice                    
         stop = System.currentTimeMillis();
-        m_logger.debug("First {} Best PSM + Peptide + Spectrum + Query from PepInstances created in {} ms", SLICE_SIZE, (stop - start));
+        m_logger.debug(" -- First {} Best PSM + Peptide + Spectrum + Query from PepInstances created in {} ms", SLICE_SIZE, (stop - start));
         return true;
     }
 
@@ -474,7 +472,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         }
 
         long stop = System.currentTimeMillis();
-        m_logger.debug("{} PeptideMatches loaded in {} ms", sliceOfPeptideMatchIds.size(), (stop - start));
+        m_logger.debug("  --- {} PeptideMatches loaded in {} ms", sliceOfPeptideMatchIds.size(), (stop - start));
         start = stop;
 
         //--  fetch Specific PTM Data for the Peptides Found
@@ -497,7 +495,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         }
 
         stop = System.currentTimeMillis();
-        m_logger.debug("PTM data for peptides loaded in {} ms", (stop - start));
+        m_logger.debug(" --- Associated PTM data loaded in {} ms", (stop - start));
         return true;
     }
 
@@ -542,7 +540,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
             fetchPTMSitesPepInstances(subTask, entityManagerMSI);
 
             long stop = System.currentTimeMillis();
-            m_logger.debug("fetchAllPTMSitesPeptideMatches : {} PTM Sites filled in {} ms", m_ptmSitesOutput.size(), (stop - start));
+            m_logger.debug(" fetchAllPTMSitesPeptideMatches :{} of {} PTM Sites filled in {} ms", SLICE_SIZE, m_ptmSitesOutput.size(), (stop - start));
 
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
@@ -566,7 +564,8 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
     }
 
     private boolean fetchPTMSitesPepInstances(List<Long> sliceOfPeptideIds, EntityManager entityManagerMSI) throws IOException {
-
+        long start = System.currentTimeMillis();
+        m_logger.debug(" @@ START fetchPTMSitesPepInstances SUBTASK ");
         ObjectMapper mapper = new ObjectMapper();
         mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
         
@@ -596,8 +595,9 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         
         int nbrPepInstIds = peptideInstanceIds.size();
         
-      
-        m_logger.debug("fetchPTMSitesPepInstances: Read pep match, pep instances and seq matches for nbr " + nbrPepIds+" peptides corresponding to "+nbrPepInstIds+" peptide instances." );                       
+        long end = System.currentTimeMillis();
+        m_logger.debug(" @@ fetchPTMSitesPepInstances: Read "+nbrPepInstIds+" pep instances corresponding to " + nbrPepIds+" peptides in "+(end-start)+" ms" );
+        start = end;
         
         HashMap<Long, Peptide> allPeptidesMap = new HashMap();
         HashMap<Long, DPeptideInstance> leafPeptideInstancesById = new HashMap<>();
@@ -616,7 +616,10 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         
         
         //---- Create List of DPeptideMatch (linked to DSpectrum + DMsQuery) from query resumlt
-        m_logger.debug("fetchPTMSitesPepInstances: query result size " + l.size());
+        end = System.currentTimeMillis();
+        m_logger.debug(" @@ fetchPTMSitesPepInstances: query result size " + l.size()+" in "+(end-start)+" ms" );
+        start= end;
+        
         while (itPeptidesMatchesQuery.hasNext()) {
             Object[] resCur = itPeptidesMatchesQuery.next();
 
@@ -693,8 +696,10 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
                 leafPeptideInstancesById.get(pi.getId()).getPeptideMatches().add(dpm);
             }
         }
-        m_logger.debug("fetchPTMSitesPepInstances: Created leafPeptideInstancesById. Nbr : " + leafPeptideInstancesById.size());
-        
+        end = System.currentTimeMillis();
+        m_logger.debug(" @@ fetchPTMSitesPepInstances: Created leafPeptideInstancesById. Nbr : " + leafPeptideInstancesById.size()+" in "+(end-start)+" ms");
+        start= end;
+              
         //--- Retrieve PeptideReadablePtmString
         
         Set<Long> allPeptides = allPeptidesMap.keySet();
@@ -719,7 +724,9 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
 
         List<DPeptideMatch> allpeptideMatches = leafPeptideInstancesById.values().stream().flatMap(pi -> pi.getPeptideMatches().stream()).collect(Collectors.toList());
         allpeptideMatches.addAll(parentPeptideInstancesByPepId.values().stream().flatMap(pi -> pi.getPeptideMatches().stream()).collect(Collectors.toList()));
-        m_logger.debug("fetchPTMSitesPepInstances got PTM info  for all peptideMatches . nbr " + allpeptideMatches.size());
+        end = System.currentTimeMillis();        
+        m_logger.debug(" @@ fetchPTMSitesPepInstances got PTM info  for all peptideMatches . nbr " + allpeptideMatches.size()+" in "+(end-start)+" ms");
+        start= end;
         for (DPeptideMatch pm : allpeptideMatches) {
             Peptide p = pm.getPeptide();
             Long idPeptide = p.getId();
@@ -735,8 +742,8 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
             }
         }
 
-        m_logger.info("{} peptides matching to {} peptide matches retrieved", allPeptides.size(), allpeptideMatches.size());
-        m_logger.info("{} peptide instances retrieved", parentPeptideInstancesByPepId.size());
+        m_logger.info(" @@ {} peptides matching to {} peptide matches retrieved", allPeptides.size(), allpeptideMatches.size());
+        m_logger.info(" @@ {} peptide instances retrieved", parentPeptideInstancesByPepId.size());
         for (PTMSite site : m_ptmSitesOutput) {
             //Verify if PTM site has at least one pep in this 'subtask'
             List<DPeptideInstance> leafPeptideInstances = new ArrayList<>();
@@ -755,6 +762,8 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
                 site.addPeptideInstances(parentPeptideInstances, leafPeptideInstances);
             }
         }
+        end = System.currentTimeMillis(); 
+        m_logger.debug(" @@ END fetchPTMSitesPepInstances subtask "+" in "+(end-start)+" ms");
         return true;
     }
 

@@ -48,7 +48,6 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
     private long m_projectId = -1;
     private ResultSummary m_rsm = null;
     private List<Long> m_rsmIds = null;
-    private DDataset m_dataset = null;
     
     //attributes to initialize when data is retrieve
     private PTMSite m_ptmSiteOutput = null;
@@ -402,9 +401,7 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
                 peptideInstanceIds.addAll(  peptidesQuery.getResultList());
 //            }            
         } else {
-            for(Long pepIId: pepInst){
-                peptideInstanceIds.add(pepIId);
-            }
+            peptideInstanceIds.addAll(Arrays.asList(pepInst));
         }
         
         

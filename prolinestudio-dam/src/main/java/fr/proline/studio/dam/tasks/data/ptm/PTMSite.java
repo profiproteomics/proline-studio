@@ -118,12 +118,12 @@ public class PTMSite {
     private void fillPeptideInstances(List<DPeptideInstance> parentPeptideInstances, List<DPeptideInstance> leafInstances){
         Map<Long, List<DPeptideInstance>> leafPepInstanceByPepId = leafInstances.stream().collect(Collectors.groupingBy(pi -> pi.getPeptideId()));
         for (DPeptideInstance parentPeptideInstance : parentPeptideInstances) {
-            PTMPeptideInstance ptmPeptide = m_dataset.getPTMPeptideInstance(m_proteinMatch, parentPeptideInstance, m_site.seqPosition);
+            PTMPeptideInstance parentPTMPeptideInst = m_dataset.getPTMPeptideInstance(m_proteinMatch, parentPeptideInstance, m_site.seqPosition);
             Long peptideId = parentPeptideInstance.getPeptideId();
-            ptmPeptide.setStartPosition(getPositionOnProtein() - getPositionOnPeptide(peptideId));
-            ptmPeptide.addPTMSite(this);
+            parentPTMPeptideInst.setStartPosition(getPositionOnProtein() - getPositionOnPeptide(peptideId));
+            parentPTMPeptideInst.addPTMSite(this);
             List<DPeptideInstance> leafPeptideInstances = leafPepInstanceByPepId.get(peptideId);
-            PTMSitePeptideInstance ptmSitePeptideInstance = new PTMSitePeptideInstance(this, ptmPeptide, leafPeptideInstances, getBestPeptideMatch(leafPeptideInstances));
+            PTMSitePeptideInstance ptmSitePeptideInstance = new PTMSitePeptideInstance(this, parentPTMPeptideInst, leafPeptideInstances, getBestPeptideMatch(leafPeptideInstances));
             m_ptmSitePeptideInstanceByPepId.put(peptideId, ptmSitePeptideInstance);
         }
     }
@@ -138,6 +138,10 @@ public class PTMSite {
 
     public PTMSitePeptideInstance getPTMSitePeptideInstance(Long peptideId) {
         return m_ptmSitePeptideInstanceByPepId.get(peptideId);
+    }
+    
+    public List<PTMSitePeptideInstance> getPTMSitePeptideInstances() {
+        return new ArrayList<>(m_ptmSitePeptideInstanceByPepId.values());
     }
 
     public Integer getPeptideCount() {
@@ -188,7 +192,7 @@ public class PTMSite {
     }
 
     public List<PTMPeptideInstance> getAssociatedPTMPeptideInstances(){
-        List<PTMPeptideInstance> res = m_ptmSitePeptideInstanceByPepId.values().stream().map(ptmSitePepInst -> ptmSitePepInst.getPTMPeptideInstance()).collect(Collectors.toList());
+        List<PTMPeptideInstance> res = m_ptmSitePeptideInstanceByPepId.values().stream().map(ptmSitePepInst -> ptmSitePepInst.getParentPTMPeptideInstance()).collect(Collectors.toList());
         return res;
     }
     
@@ -268,11 +272,7 @@ public class PTMSite {
     }
     
     public boolean isProteinNTermWithOutM() {
-        if (m_ptmSpecificity.getLocationSpecificity().endsWith("N-term") && getPositionOnProtein() == 1) {
-            return true;
-        } else {
-            return false;
-        }
+        return m_ptmSpecificity.getLocationSpecificity().endsWith("N-term") && getPositionOnProtein() == 1;
     }
 
 }

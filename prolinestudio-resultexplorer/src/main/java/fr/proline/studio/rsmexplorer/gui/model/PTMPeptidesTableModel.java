@@ -8,7 +8,6 @@ package fr.proline.studio.rsmexplorer.gui.model;
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.dto.DInfoPTM;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
-import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DPtmSiteProperties;
@@ -45,6 +44,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.swing.table.TableCellRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,12 +69,12 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     private static final String[] m_columnNames = {"Id", "Peptide", "Score", "PTM", "PTM D.Mass", "PTM Probability", "Spectrum title"};
     private static final String[] m_columnTooltips = {"Peptide Id (Instance Id)", "Peptide Sequence", "Score of the peptide match", "All PTMs modifications associated with this peptide", "All PTMs delta mass", "All PTMs probability", "Peptide match query title"};
 
-    // Dynamic columns list 1
+    // Dynamic columns list 1 : PTM Probability related
     private static final String COLTYPE_SITE_PROBA_SUFFIX = "Probability";
     private static final String COLTYPE_SITE_PROBA_TOOLTIP = "Probability of the specific site for this peptide";
     private int m_ptmSiteCount;
     
-    // Dynamic columns list 2 
+    // Dynamic columns list 2 : quantitation related
     public static final int DYNAMIC_COLTYPE_SELECTION_LEVEL = 0;
     public static final int DYNAMIC_COLTYPE_IDENT_PSM = 1;
     public static final int DYNAMIC_COLTYPE_PSM = 2;
@@ -82,7 +82,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     public static final int DYNAMIC_COLTYPE_ABUNDANCE = 4;
     public static final int DYNAMIC_COLTYPE_RETENTION_TIME = 5;
     private int m_quantChannelCount =0;
-    private boolean m_isXicResult;
+    private final boolean m_isXicResult;
     
     private static final String[] m_columnNamesQC = {"Sel. level", "Ident. Pep. match count", "Pep. match count", "Raw abundance", "Abundance", "Retention time"};
     private static final String[] m_toolTipQC = {"Selection level", "Identification peptides match count", "Peptides match count", "Raw abundance", "Abundance", "Retention time"};
@@ -90,20 +90,37 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
 
     private List<PTMPeptideInstance> m_ptmPepInstances = new ArrayList<>();
-    private Map<Long, DMasterQuantPeptide> m_quantPeptidesByPepInsId = new HashMap<Long, DMasterQuantPeptide>();
+    static class Row {
+        PTMPeptideInstance ptmPeptideInstance;
+        DPeptideMatch peptideMatch;
+
+        public Row(PTMPeptideInstance peptideInstance, DPeptideMatch peptideMatch) {
+            this.ptmPeptideInstance = peptideInstance;
+            this.peptideMatch = peptideMatch;
+        }
+    }
+    private ArrayList<Row> m_ptmPepInstancesAsRow = new ArrayList<>();
+    
+    private Map<Long, DMasterQuantPeptide> m_quantPeptidesByPepInsId = new HashMap<>();
     private Map<String, Map<Long,Float>> m_pepMatchProbaByIdByPTMSite = new HashMap<>();
     private TreeMap<Integer, String> m_dynamiqueColumnNamesByProtLoc = new TreeMap<>();
 
-    private ScoreRenderer m_scoreRenderer = new ScoreRenderer();
+    private final ScoreRenderer m_scoreRenderer = new ScoreRenderer();
 
     private String m_modelName;
     private boolean m_showPeptideMatches = false;
 
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     
-    public PTMPeptidesTableModel(LazyTable table, boolean isXicResult){
+   /*
+    * @param table : associated LazyTable
+    * @param isXicResult : specify if quantitation data exist and should be displayed
+    * @param showPeptideMatches : specify if all peptide matches should be displayed or only best ones   
+    */
+    public PTMPeptidesTableModel(LazyTable table, boolean isXicResult, boolean showPepMatches){
         super(table);
         m_isXicResult = isXicResult;
+        m_showPeptideMatches = showPepMatches;
     }
     
     /**
@@ -113,14 +130,8 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
      * @param ptmPeptides : List of the PTMPeptideInstance to display 
      * @param Map<Long, DMasterQuantPeptide> quantPeptidesByPepInsId : DMasterQuantPeptide associated to PTMPeptideInstance to get Quant info for.
      * May be null if TableModel was not initialized with isXicResult = true.
-     * NOT USED showPeptideMatches : specify if all peptide matches should be
-     * displayed or only best ones
-     * @param parentPepInstance : NOT USED  Specify the peptide instance ID to display
-     * peptide matches for. This parameter is only used if showPeptideMatches =
-     * true     
      */
-    public void setData(Long taskId, List<PTMPeptideInstance> ptmPeptides, Map<Long, DMasterQuantPeptide> quantPeptidesByPepInsId , DPeptideInstance parentPepInstance) {       
-        //m_showPeptideMatches = showPeptideMatches;
+    public void setData(Long taskId, List<PTMPeptideInstance> ptmPeptides, Map<Long, DMasterQuantPeptide> quantPeptidesByPepInsId) {       
 
         m_taskId = taskId;
        
@@ -129,52 +140,63 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
            return;
        
         m_quantPeptidesByPepInsId = quantPeptidesByPepInsId;    
-         m_quantChannelCount = 0;
-        boolean structureIdentical = true;
+        
+        //Update Quant Channel info
         if(m_isXicResult){
             QuantChannelInfo qcInfo = ((QuantChannelInfo) getSingleValue(QuantChannelInfo.class));
             int qcCount = 0;
             if(qcInfo != null)
-                qcCount = qcInfo.getQuantChannels().length;
-            structureIdentical = (qcCount == m_quantChannelCount);
+                qcCount = qcInfo.getQuantChannels().length;            
             m_quantChannelCount = qcCount;       
         }
 
-        //-- Create column and data for probalibilites for all PTM Sites of peptides 
+        //-- Create column and data for probabilities for all PTM Sites of peptides 
         m_pepMatchProbaByIdByPTMSite = new HashMap<>();
         m_dynamiqueColumnNamesByProtLoc = new TreeMap<>();
         m_ptmPepInstances = ptmPeptides != null ? ptmPeptides : new ArrayList<>();
+        m_ptmPepInstancesAsRow = new ArrayList<>();        
         m_ptmPepInstances.forEach(ptmPI -> {
+            Long protMatchIdOfInterest = ptmPI.getSites().size() >0 ? ptmPI.getSites().get(0).getProteinMatch().getId() : ptmPI.getBestPepMatch().getSequenceMatch().getId().getProteinMatchId() ;
+            //Create PeptideMatch List to display according to m_showPeptideMatches
+            List<DPeptideMatch> pepMatches = new ArrayList<>();
+            if(m_showPeptideMatches){
+                pepMatches.addAll( ptmPI.getPeptideInstance().getPeptideMatches().stream().filter(dpm -> protMatchIdOfInterest.equals(dpm.getSequenceMatch().getId().getProteinMatchId())).collect(Collectors.toList()));
+            } else {                 
+                pepMatches.add(ptmPI.getBestPepMatch());
+            }
+            
             ptmPI.getSites().forEach(site -> { 
-                // For each PTMSite of each peptide instance
+                // For each PTMSite of each peptide instance : 
+                // - get PTMSite display name
                 String colName = site.toProteinReadablePtmString();
                 Integer protLoc = site.getPositionOnProtein();
                 m_dynamiqueColumnNamesByProtLoc.put(protLoc, colName);
 
-                Map<Long,Float> probaByPepMatchd= m_pepMatchProbaByIdByPTMSite.get(colName);
-                if(probaByPepMatchd == null) {
-                    probaByPepMatchd = new HashMap<Long,Float>();
-                }
-                //Get PTM Site proba for current site for best PSM of Peptide Instance
-                // VDS Workaround test for issue #16643  (Still needed ?)
-                Float proba = getSiteProba(ptmPI, site.toReadablePtmString(ptmPI.getPeptideInstance().getPeptideId()));
-                if(proba==null)
-                    proba = getSiteProba(ptmPI, site.toOtherReadablePtmString(ptmPI.getPeptideInstance().getPeptideId()));
-                DPeptideMatch pepMatch = ptmPI.getBestPepMatch();
-                if(pepMatch != null)
-                    probaByPepMatchd.put(pepMatch.getId(), proba);
+                // - Get proba for pep matches
+                final Map<Long,Float> probaByPepMatchd =  (m_pepMatchProbaByIdByPTMSite.get(colName) == null ) ? new HashMap<>() : m_pepMatchProbaByIdByPTMSite.get(colName);
+
+                //Get PTM Site proba for current site : for best PSM or all depending on parameter
+                // VDS Workaround test for issue #16643  (Still needed ?)                
+                pepMatches.forEach(pepMatch -> {
+                    if(pepMatch != null) {
+                        Float proba = getSiteProba(pepMatch, site.toReadablePtmString(ptmPI.getPeptideInstance().getPeptideId()));
+                        if(proba==null) 
+                            proba = getSiteProba(pepMatch, site.toOtherReadablePtmString(ptmPI.getPeptideInstance().getPeptideId()));                                    
+                        probaByPepMatchd.put(pepMatch.getId(), proba);
+                    }                   
+                });
+                                    
                 m_pepMatchProbaByIdByPTMSite.put(colName, probaByPepMatchd);
-            });
-        });
-        // Test if structure changed since last display
-        structureIdentical = structureIdentical && (m_ptmSiteCount==m_pepMatchProbaByIdByPTMSite.size());
-        m_ptmSiteCount = m_pepMatchProbaByIdByPTMSite.size();
-        if(!structureIdentical){
-            setDefaultColumnToHide();
-            m_rendererMap.clear();
-            fireTableStructureChanged();            
-        }
+            }); //End for all PTMPepInstance PTMSites
+            
+            pepMatches.forEach( pepM -> {m_ptmPepInstancesAsRow.add(new Row(ptmPI, pepM));});            
+        }); //END For all PTMPeptideInstancs
         
+        // Test if structure changed since last display
+        m_ptmSiteCount = m_pepMatchProbaByIdByPTMSite.size();
+        setDefaultColumnToHide();
+        m_rendererMap.clear();
+        fireTableStructureChanged();                    
         fireTableDataChanged();
     }
     
@@ -200,10 +222,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
         fireTableDataChanged();
     }
     
-    private Float getSiteProba(PTMPeptideInstance ptmPepInstance, String readablePTM){
-        
-        DPeptideMatch pepMatch = ptmPepInstance.getBestPepMatch();
-        
+    private Float getSiteProba(DPeptideMatch pepMatch, String readablePTM){
         if(pepMatch == null){ 
             return null;
         }
@@ -220,7 +239,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
         if(col>=m_dynamiqueColumnNamesByProtLoc.size())
             return "";
         Iterator<Integer> keys = m_dynamiqueColumnNamesByProtLoc.keySet().iterator();
-        Integer keyCol = null;
+        Integer keyCol;
         for(int i=0; i<col; i++){
             keys.next();// Just go to the expected column (tree map index)
         }
@@ -232,16 +251,27 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
         if (row < 0 || (row >= getRowCount())) {
             return null;
         }
-        return m_ptmPepInstances.get(row);
+        return m_ptmPepInstancesAsRow.get(row).ptmPeptideInstance;
     }
 
+    //Return first row where a peptideMatch of PTMPeptideInstance is displayed
     public int getPeptideInstanceIndex(PTMPeptideInstance pep) {
-        return m_ptmPepInstances.indexOf(pep);        
+        if(pep == null)
+            return -1;
+        PTMPeptideInstance comparePep;        
+        for (int row = 0; row < m_ptmPepInstancesAsRow.size(); row++) {
+            comparePep = m_ptmPepInstancesAsRow.get(row).ptmPeptideInstance;
+            if (pep.equals(comparePep)) {
+               return row;
+            }
+        }
+        return -1;
+        //return m_ptmPepInstances.indexOf(pep);        
     }
 
     @Override
     public int getRowCount() {
-        return m_ptmPepInstances.size();
+        return m_ptmPepInstancesAsRow.size();
     }
 
     @Override
@@ -280,16 +310,16 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
 
-        PTMPeptideInstance ptmPepInstance = m_ptmPepInstances.get(rowIndex);
-        DPeptideMatch pepMatch = ptmPepInstance.getBestPepMatch();
+        PTMPeptideInstance ptmPepInstance = m_ptmPepInstancesAsRow.get(rowIndex).ptmPeptideInstance;
+        DPeptideMatch pepMatch = m_ptmPepInstancesAsRow.get(rowIndex).peptideMatch;
         
         switch (columnIndex) {
             case COLTYPE_PEPTIDE_ID:
-//                if (m_showPeptideMatches) {
-//                    return pepMatch.getId();
-//                } else {
+                if (m_showPeptideMatches) {
+                    return pepMatch.getId();
+                } else {
                     return ptmPepInstance.getPeptideInstance().getId();
-//                }
+                }
             case COLTYPE_PEPTIDE_NAME:{
                 return pepMatch;
             }
@@ -379,7 +409,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
                     //PTM Proba data 
                     String colName = getPtmSiteProbaColNameAt(columnIndex-m_columnNames.length);
                     Map<Long,Float> probaByPepMatchId = m_pepMatchProbaByIdByPTMSite.get(colName);
-                    if(probaByPepMatchId == null)
+                    if(probaByPepMatchId == null || pepMatch == null)
                         return Float.NaN;
                     return probaByPepMatchId.getOrDefault(pepMatch.getId(), Float.NaN);
                 } else {
@@ -668,7 +698,11 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
             return ((DPeptideMatch) getValueAt(rowIndex, columnIndex)).getPeptide().getSequence();
         }
         if (columnIndex == COLTYPE_PEPTIDE_ID) {
-            return m_ptmPepInstances.get(rowIndex).getPeptideInstance().getId();
+            if(m_showPeptideMatches)
+            //return m_ptmPepInstances.get(rowIndex).getPeptideInstance().getId();
+                return m_ptmPepInstancesAsRow.get(rowIndex).peptideMatch.getId();
+            else
+                return m_ptmPepInstancesAsRow.get(rowIndex).ptmPeptideInstance.getPeptideInstance().getId();
         }
         return data;
     }
@@ -776,7 +810,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     @Override
     public ArrayList<ExportFontData> getExportFonts(int row, int col) {
         if (col == COLTYPE_PEPTIDE_NAME) {
-            PTMPeptideInstance peptide = m_ptmPepInstances.get(row);
+            PTMPeptideInstance peptide = m_ptmPepInstancesAsRow.get(row).ptmPeptideInstance;
             return ExportModelUtilities.getExportFonts(peptide.getPeptideInstance());
         }
         return null;

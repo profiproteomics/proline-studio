@@ -307,6 +307,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
                     unregisterTask(taskId);
                     setLoaded(loadingId);
                     startLoadingMasterQuantPeptides(proteinPTMSiteArray);
+                    propagateDataChanged(PTMPeptideInstance.class);
                     propagateDataChanged(ExtendedTableModelInterface.class);
                 }
             }
@@ -501,6 +502,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
                         loadXicData(loadingId, taskId, (ArrayList) m_ptmDataset.getPTMSites(), finished);
                     } else {
                         setLoaded(loadingId);
+                        propagateDataChanged(PTMPeptideInstance.class);
                         propagateDataChanged(ExtendedTableModelInterface.class);
                     }
                     unregisterTask(taskId);

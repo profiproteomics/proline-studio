@@ -1346,6 +1346,8 @@ public class SplittedPanelContainer extends JPanel {
     
     public interface ReactiveTabbedComponent {
         public void setShowed(boolean showed);
+        
+        public boolean isShowed();
     }
     
     public static class ReactiveTabbedPane extends JTabbedPane {

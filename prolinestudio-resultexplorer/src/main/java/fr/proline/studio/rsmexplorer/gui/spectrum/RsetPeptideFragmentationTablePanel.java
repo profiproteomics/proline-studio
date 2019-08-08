@@ -27,7 +27,7 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
 
     private RsetPeptideFragmentationTable m_fragmentationTable = null;
     private HideFragmentsTableIntensityButton m_hideFragIntensityButton = null;
-    private JTextArea m_descriptionTA;
+    private final JTextArea m_descriptionTA;
     
     public RsetPeptideFragmentationTablePanel() {
         setLayout(new BorderLayout());
@@ -131,6 +131,11 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
             return;
         }
         m_isDisplayed = showed;
+    }
+
+    @Override
+    public boolean isShowed() {
+        return m_isDisplayed;
     }
 
 }

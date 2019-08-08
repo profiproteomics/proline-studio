@@ -124,4 +124,9 @@ public class RsetPeptideSpectrumErrorPanel extends AbstractPeptideSpectrumPanel 
             }
         }
     }
+
+    @Override
+    public boolean isShowed() {
+        return m_isDisplayed;
+    }
 }

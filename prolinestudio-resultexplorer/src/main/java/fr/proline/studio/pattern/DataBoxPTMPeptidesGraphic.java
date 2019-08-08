@@ -25,7 +25,7 @@ public class DataBoxPTMPeptidesGraphic extends DataBoxPTMPeptides {
      * Create a DataBoxPTMPeptidesGraphic : graphical view of PTMPeptideInstances. 
     */
     public DataBoxPTMPeptidesGraphic() {
-        super(false);
+        super(false,false);
 
         // Name of this databox
         m_typeName = "PTM Site's Peptides";
@@ -54,7 +54,7 @@ public class DataBoxPTMPeptidesGraphic extends DataBoxPTMPeptides {
         PTMDataset newPtmDataset = (PTMDataset) m_previousDataBox.getData(false, PTMDataset.class);
         List<PTMPeptideInstance> newPtmPepInstancesPtmSite = (List<PTMPeptideInstance> ) m_previousDataBox.getData(false, PTMPeptideInstance.class, true);
         
-        boolean valueUnchanged  = Objects.equals(newPtmDataset, m_ptmDataset) && Objects.equals(newPtmPepInstancesPtmSite,m_ptmPepInstancesPtmSite);
+        boolean valueUnchanged  = Objects.equals(newPtmDataset, m_ptmDataset) && Objects.equals(newPtmPepInstancesPtmSite,m_ptmPepInstances);
         
         if(valueUnchanged){       
             //selection may have changed 
@@ -64,20 +64,20 @@ public class DataBoxPTMPeptidesGraphic extends DataBoxPTMPeptides {
         }
 
         m_ptmDataset = newPtmDataset;
-        m_ptmPepInstancesPtmSite = newPtmPepInstancesPtmSite;        
+        m_ptmPepInstances = newPtmPepInstancesPtmSite;        
 
         // -- Selected PTM Peptide
         //DPeptideInstance selectedInsts = (DPeptideInstance) m_previousDataBox.getData(false, DPeptideInstance.class);
         //m_logger.debug("selected peptide Match, ptm {}", m_selecedDPeptideMatch.getPeptide().getTransientData().getPeptideReadablePtmString().getReadablePtmString());
         
-        if (m_ptmPepInstancesPtmSite == null || m_ptmPepInstancesPtmSite.isEmpty()) {
+        if (m_ptmPepInstances == null || m_ptmPepInstances.isEmpty()) {
             graphicView.setData(null);
             return;
         }
 
         //Get QuantInfo        
         final List<PTMSite> notLoadedPtmSite = new ArrayList<>();
-        for(PTMPeptideInstance ptmPepInst : m_ptmPepInstancesPtmSite){
+        for(PTMPeptideInstance ptmPepInst : m_ptmPepInstances){
             ptmPepInst.getSites().stream().forEach(ptmSite -> {
                 if(!ptmSite.isLoaded())
                    notLoadedPtmSite.add(ptmSite); 
@@ -86,7 +86,7 @@ public class DataBoxPTMPeptidesGraphic extends DataBoxPTMPeptides {
         
         if (notLoadedPtmSite.isEmpty()) {
             resetPrevPTMTaskId();
-            graphicView.setData(m_ptmPepInstancesPtmSite); 
+            graphicView.setData(m_ptmPepInstances); 
             propagateDataChanged(PTMPeptideInstance.class);                
             
         } else

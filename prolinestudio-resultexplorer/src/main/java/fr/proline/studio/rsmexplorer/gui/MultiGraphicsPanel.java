@@ -56,7 +56,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     protected AbstractDataBox m_dataBox;
 
     protected BasePlotPanel m_plotPanel;
-    private boolean m_isDoubleYAxis;
+    private final boolean m_isDoubleYAxis;
 
     protected boolean m_canChooseColor = false;
     //plot type combo box
@@ -91,7 +91,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         initComponent();
     }
 
-    protected void initComponent() {
+    private void initComponent() {
         JPanel internalPanel = createInternalPanel();
         JToolBar toolbar = initToolbar();
 

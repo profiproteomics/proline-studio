@@ -174,4 +174,9 @@ public class RsetPeptideSpectrumPanel extends AbstractPeptideSpectrumPanel {
   public void setShowed(boolean showed) {
 
   }
+  
+    @Override
+    public boolean isShowed() {
+        return true;
+    }
 }

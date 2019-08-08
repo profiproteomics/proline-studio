@@ -43,7 +43,7 @@ public class PeptideView extends ViewPtmAbstract {
         this.x0 = 0;
         this.y0 = 0;
         this.m_ptmSitePeptideInst = pep;
-        m_ptmPeptideInst = pep.getPTMPeptideInstance();
+        m_ptmPeptideInst = pep.getParentPTMPeptideInstance();
         String sequence = m_ptmPeptideInst.getSequence();
         if (sequence != null) {
             this.m_length = m_ptmPeptideInst.getSequence().length();

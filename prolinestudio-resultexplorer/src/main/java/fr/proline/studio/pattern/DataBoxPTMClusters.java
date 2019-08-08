@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DataBoxPTMClusters extends AbstractDataBox {
     
-    private final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ptm");
+    private final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.ptm");
     private long logStartTime;
     
     private PTMDataset m_ptmDataset;
@@ -163,7 +163,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         
             
         final int loadingId = setLoading();
-       
+        final long logStartTimelocal = System.currentTimeMillis();
         List<PTMDataset> ptmDS = new ArrayList<>();
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -174,19 +174,17 @@ public class DataBoxPTMClusters extends AbstractDataBox {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {                   
-                m_logger.debug("**** Callback task "+taskId+" with subtask ? "+subTask+" is finished ? "+finished); 
+                m_logger.debug("DataBoxPTMClusters : **** Callback task "+taskId+", success "+success+", finished "+finished+"; with subtask : "+(subTask != null)+". Duration: "+(System.currentTimeMillis()-logStartTimelocal)+" TimeMillis"); 
                 if(success) {
                     if(subTask == null){
                         //Main task callback!
                         m_ptmDataset = ptmDS.get(0);
-                        m_logger.debug(" Add PTMCluster "+ptmDS.get(0).getPTMClusters().size());
+                        m_logger.debug("  -- created "+m_ptmDataset.getPTMClusters().size()+" PTMCluster.");
+                        m_loadPepMatchOnGoing=true;
+                        ((PTMClustersProteinPanel) getDataBoxPanelInterface()).setData(taskId, (ArrayList) m_ptmDataset.getPTMClusters(), finished);
                         loadPeptideMatches();
 
-                    } else  {
-                        //In subtask, update data! 
-                        m_logger.debug(" Should update PTMSites table "+ptmDS.get(0).getPTMSites().size());
-                        ((PTMClustersProteinPanel)getDataBoxPanelInterface()).dataUpdated(subTask, finished);                    
-                    }   
+                    }
                 } else{
                     displayLoadError(taskId, finished);
                 }
@@ -194,7 +192,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                 if (finished) {
                     setLoaded(loadingId);
                     unregisterTask(taskId);
-                    m_logger.debug(" DONE Should propagate changes ");
+                    m_logger.debug(" Task "+taskId+" DONE. Should propagate changes ");
                     propagateDataChanged(ExtendedTableModelInterface.class);
                 }
             }
@@ -204,8 +202,8 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         // ask asynchronous loading of data
         
         DatabasePTMsTask task = new DatabasePTMsTask(callback);
-        task.initLoadPTMDataset(getProjectId(), m_ptmDataset.getDataset(), ptmDS);
-        m_logger.debug("**** Register task DatabasePTMsTask.initLoadPTMDataset "+task.getId()+" : "+task.toString());
+        task.initLoadPTMDataset(getProjectId(), m_ptmDataset.getDataset(), ptmDS);       
+        m_logger.debug("DataBoxPTMClusters : **** Register task DatabasePTMsTask.initLoadPTMDataset. ID= "+task.getId());
         registerTask(task);
        
           
@@ -232,28 +230,18 @@ public class DataBoxPTMClusters extends AbstractDataBox {
 
             @Override
             public void run(boolean success, final long taskId, SubTask subTask, boolean finished) {
-                m_logger.debug("**** --- CallbAck task "+taskId+ ". Sucess :  "+success+" if finished ("+finished+") subtask "+ subTask+" duration "+ (System.currentTimeMillis()-logStartTime)+" TimeMillis"); 
-                if(success){
-                    if(subTask == null){
-                        //Main task callback!                    
-                        m_logger.debug(" PTMCluster PepInstance on going ... first iteration");
-                        ((PTMClustersProteinPanel) getDataBoxPanelInterface()).setData(taskId, (ArrayList) m_ptmDataset.getPTMClusters(), finished);
-
-                    } else  {
-                        //In subtask, update data! 
-                        m_logger.debug(" PTMCluster PepInstance on going .. subtask");
-                        ((PTMClustersProteinPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);               
-                    }   
-                } else{
+                m_logger.debug("DataBoxPTMClusters : **** Callback task "+taskId+", success "+success+", finished "+finished+"; with subtask : "+subTask+". Duration: "+(System.currentTimeMillis()-logStartTime)+" TimeMillis");
+                if(!success){
                     displayLoadError(taskId, finished);
                 }
                 
                 if (finished) {
                     m_loadPepMatchOnGoing = false;
+                    m_logger.debug(" Task "+taskId+" DONE. Should propagate changes or get Xic DATA ");
                     if(isXicResult()){
                         loadXicData(loadingId);
                     } else {
-                        setLoaded(loadingId);
+                        setLoaded(loadingId);                        
                         propagateDataChanged(PTMPeptideInstance.class);
                         propagateDataChanged(ExtendedTableModelInterface.class);
                     }
@@ -264,9 +252,8 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         
         DatabasePTMsTask task = new DatabasePTMsTask(callback);
         task.initFillPTMSites(getProjectId(), m_ptmDataset, m_ptmDataset.getPTMSites());
-        m_loadPepMatchOnGoing=true;
         logStartTime = System.currentTimeMillis();
-        m_logger.debug("**** --- Register task DatabasePTMsTask.initFillPTMSites " +task.getId()+" : "+task.toString());
+        m_logger.debug("DataBoxPTMClusters : **** Register task DatabasePTMsTask.initFillPTMSites. ID= " +task.getId());
         registerTask(task);        
     }
     
@@ -280,8 +267,8 @@ public class DataBoxPTMClusters extends AbstractDataBox {
             }
 
             @Override
-            public void run(boolean success, final long taskId, SubTask subTask, boolean finished) {
-                m_logger.info(" **** +++ END task  "+taskId+" : is finished ? (unregister) "+finished+"; subtask ? "+subTask+"; sucess ? "+success+"; found "+m_masterQuantProteinSetList.size()+" mqPrS");
+            public void run(boolean success, final long taskId, SubTask subTask, boolean finished) {               
+                m_logger.debug("DataBoxPTMClusters : **** Callback task "+taskId+", success "+success+", finished "+finished+"; with subtask : "+subTask+"; found "+m_masterQuantProteinSetList.size()+" mqPrS Duration: "+(System.currentTimeMillis()-logStartTime)+" TimeMillis");                
                 if (subTask == null) {
                     //Do at Main task return. 
                     m_quantChannelInfo = new QuantChannelInfo(m_ptmDataset.getDataset());
@@ -294,7 +281,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
 
                         @Override
                         public void run(boolean success, long task2Id, SubTask subTask, boolean finished) {
-                            m_logger.info("**** +++ --- END  task "+task2Id+" if finished ? "+finished+" unregister");
+                            m_logger.info("**** +++ END task "+task2Id+" if finished ? "+finished);
                             if (finished) {                                                               
 //                                m_quantChannelInfo = new QuantChannelInfo(m_ptmDataset.getDataset());
                                 getDataBoxPanelInterface().addSingleValue(m_quantChannelInfo);
@@ -306,18 +293,17 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                     // ask asynchronous loading of data
                     DatabaseLoadLcMSTask taskMap = new DatabaseLoadLcMSTask(mapCallback);
                     taskMap.initLoadAlignmentForXic(getProjectId(), m_ptmDataset.getDataset());
-                    m_logger.info("**** +++ --- Register taskMap DatabaseLoadLcMSTask.initLoadAlignmentForXic "+taskMap.getId()+" : "+taskMap.toString());
+                    m_logger.info("DataBoxPTMClusters **** +++ Register task DatabaseLoadLcMSTask.initLoadAlignmentForXic "+taskMap.getId());
                     registerTask(taskMap);
 
                 }
 
                 if (finished) {        
-                    m_logger.info(" **** +++ Unregister "+taskId+" loadProteinMatchMapping + propagate and set Loaded ");
+                    m_logger.info(" **** +++ Unregister "+taskId+" + loadProteinMatchMapping + propagate and set Loaded +dataUpdated");
                     setLoaded(loadingId);                    
                     Map<Long, Long> typicalProteinMatchIdByProteinMatchId = loadProteinMatchMapping();
                     m_ptmDataset.setQuantProteinSets(m_masterQuantProteinSetList, typicalProteinMatchIdByProteinMatchId);
-                    m_logger.info("{} mq proteinset assigned", m_masterQuantProteinSetList.size());
-                    ((PTMClustersProteinPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished); //.setData(taskId, m_ptmDataset.getPTMClusters(), finished);
+                    ((PTMClustersProteinPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                     unregisterTask(taskId);
                     setLoaded(loadingId);
                     startLoadingMasterQuantPeptides(m_ptmDataset.getPTMClusters());
@@ -329,7 +315,8 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         // ask asynchronous loading of data        
         DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
         task.initLoadProteinSets(getProjectId(), m_ptmDataset.getDataset(), m_masterQuantProteinSetList);
-        m_logger.debug("**** +++ Register task XicMasterQuantTask - initLoadProteinSets "+task.getId());        
+        logStartTime = System.currentTimeMillis();        
+        m_logger.debug("DataBoxPTMClusters : ****Register task XicMasterQuantTask - initLoadProteinSets. ID=  "+task.getId());        
         registerTask(task);
     }    
     
@@ -509,14 +496,28 @@ public class DataBoxPTMClusters extends AbstractDataBox {
  
     @Override
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
-        if(parameterType.equals(PTMPeptideInstance.class) && isList){
-            if(m_loadPepMatchOnGoing)
-                return null;
-            PTMCluster cluster = ((PTMClustersProteinPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
-            List<PTMPeptideInstance> ptmPeptideInstances =  new ArrayList<>();
-            if(cluster != null)
-                ptmPeptideInstances = cluster.getPTMPeptideInstances();
-            return ptmPeptideInstances;
+        if (parameterType != null && isList) {
+            if(parameterType.equals(PTMPeptideInstance.class) && !getArray){
+                if(m_loadPepMatchOnGoing)
+                    return null;
+                PTMCluster cluster = ((PTMClustersProteinPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
+                List<PTMPeptideInstance> ptmPeptideInstances =  new ArrayList<>();
+                if(cluster != null)
+                    ptmPeptideInstances = cluster.getParentPTMPeptideInstances();
+                return ptmPeptideInstances;
+            } 
+            
+            //FIXME TODO  !!! VDS BIG WART !!! TO BE REMOVED WITH Propagate refactoring
+            // Use "getArray" to specify parent or leaf PTMPeptideInstance...
+            if(parameterType.equals(PTMPeptideInstance.class) && getArray){
+                if(m_loadPepMatchOnGoing)
+                    return null;
+                PTMCluster cluster = ((PTMClustersProteinPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
+                List<PTMPeptideInstance> ptmPeptideInstances =  new ArrayList<>();
+                if(cluster != null)
+                    ptmPeptideInstances = cluster.getLeafPTMPeptideInstances();
+                return ptmPeptideInstances;
+            } 
         }
         return super.getData(getArray, parameterType, isList);
     }

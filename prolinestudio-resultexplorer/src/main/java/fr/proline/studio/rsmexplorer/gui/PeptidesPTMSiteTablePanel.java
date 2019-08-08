@@ -112,6 +112,9 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
         // Retrieve ProteinPTMSite selected
         PeptidesOfPTMSiteTableModel tableModel = (PeptidesOfPTMSiteTableModel) compoundTableModel.getBaseModel();
 
+        if(tableModel.getRowCount()<=0)
+            return null;
+        
         // Retrieve Selected Row
         int selectedRow = getSelectedTableModelRow();
 

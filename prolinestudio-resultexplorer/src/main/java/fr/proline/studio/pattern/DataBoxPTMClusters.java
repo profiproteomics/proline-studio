@@ -68,8 +68,8 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         super(AbstractDataBox.DataboxType.DataBoxPTMClusters, AbstractDataBox.DataboxStyle.STYLE_RSM);
         
        // Name of this databox
-        m_typeName = "Dataset PTM Clusters"; //May be Quant PTM Protein Sites... 
-        m_description = "PTM Clusters of a dataset";//May be Ident or Quant dataset... 
+        m_typeName = "Dataset PTMs Clusters"; //May be Quant PTM Protein Sites... 
+        m_description = "Clusters of Modification Sites of a Dataset";//May be Ident or Quant dataset... 
 
         // Register Possible in parameters
         // One PTMDatasert ResultSummary
@@ -500,23 +500,39 @@ public class DataBoxPTMClusters extends AbstractDataBox {
             if(parameterType.equals(PTMPeptideInstance.class) && !getArray){
                 if(m_loadPepMatchOnGoing)
                     return null;
-                PTMCluster cluster = ((PTMClustersProteinPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
+                List<PTMCluster> clusters = ((PTMClustersProteinPanel) getDataBoxPanelInterface()).getSelectedProteinPTMClusters();
                 List<PTMPeptideInstance> ptmPeptideInstances =  new ArrayList<>();
-                if(cluster != null)
-                    ptmPeptideInstances = cluster.getParentPTMPeptideInstances();
+                if(!clusters.isEmpty()){
+                    //get First Selected Cluster, and consider only PTMCluster on same protein match
+                    Long protMatchId = ((PTMClustersProteinPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster().getProteinMatch().getId();
+                    clusters.stream().filter(cluster -> protMatchId.equals(cluster.getProteinMatch().getId())).forEach(cluster -> {ptmPeptideInstances.addAll(cluster.getParentPTMPeptideInstances()); });                    
+                }
                 return ptmPeptideInstances;
-            } 
+//                PTMCluster cluster = ((PTMClustersProteinPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
+//                List<PTMPeptideInstance> ptmPeptideInstances =  new ArrayList<>();
+//                if(cluster != null)
+//                    ptmPeptideInstances = cluster.getParentPTMPeptideInstances();
+//                return ptmPeptideInstances;
+            }
             
             //FIXME TODO  !!! VDS BIG WART !!! TO BE REMOVED WITH Propagate refactoring
             // Use "getArray" to specify parent or leaf PTMPeptideInstance...
             if(parameterType.equals(PTMPeptideInstance.class) && getArray){
                 if(m_loadPepMatchOnGoing)
                     return null;
-                PTMCluster cluster = ((PTMClustersProteinPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
+                List<PTMCluster> clusters = ((PTMClustersProteinPanel) getDataBoxPanelInterface()).getSelectedProteinPTMClusters();
                 List<PTMPeptideInstance> ptmPeptideInstances =  new ArrayList<>();
-                if(cluster != null)
-                    ptmPeptideInstances = cluster.getLeafPTMPeptideInstances();
-                return ptmPeptideInstances;
+                if(!clusters.isEmpty()) { 
+                    //get First Selected Cluster, and consider only PTMCluster on same protein match
+                    Long protMatchId = ((PTMClustersProteinPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster().getProteinMatch().getId();
+                    clusters.stream().filter(cluster -> protMatchId.equals(cluster.getProteinMatch().getId())).forEach(cluster -> {ptmPeptideInstances.addAll(cluster.getLeafPTMPeptideInstances()); });               
+                }
+                return ptmPeptideInstances;  
+//                PTMCluster cluster = ((PTMClustersProteinPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
+//                List<PTMPeptideInstance> ptmPeptideInstances =  new ArrayList<>();
+//                if(cluster != null)
+//                    ptmPeptideInstances = cluster.getLeafPTMPeptideInstances();
+//                return ptmPeptideInstances;
             } 
         }
         return super.getData(getArray, parameterType, isList);

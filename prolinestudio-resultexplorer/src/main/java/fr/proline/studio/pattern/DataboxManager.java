@@ -21,25 +21,45 @@ public class DataboxManager {
     private final AbstractDataBox[] m_dataBoxStartingArray = {new DataBoxRsetAll(), new DataBoxRsetPSM(), new DataBoxRsetAllProteinMatch(),
         new DataBoxRsmPSM(), new DataBoxRsmPeptideInstances(), new DataBoxAdjacencyMatrixChoice(),
         new DataBoxRsmAllProteinSet(), new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxXicProteinSet(),
-        new DataBoxMSQueriesForRSM(), new DataBoxMSQueriesForRset(), new DataBoxPTMSiteProtein()};
+        new DataBoxMSQueriesForRSM(), new DataBoxMSQueriesForRset(), new DataBoxPTMSiteProtein(), new DataBoxPTMClusters()};
 
     //VDS : If some databox takes parameter in constructor : config will be lost when adding the databox : newInstance called in AddDataBoxActionListener
     // Added specific code in AddDataBoxActionListener to configure these specific databox !
-    private final AbstractDataBox[] m_dataBoxContinuingArray = {new DataBoxRsetPeptideSpectrum(), new DataBoxRsetPeptideSpectrumValues(),
+    private final AbstractDataBox[] m_dataBoxContinuingArray = {
+        new DataBoxRsetPeptideSpectrum(), 
+        new DataBoxRsetPeptideSpectrumValues(),
         new DataBoxRsetProteinsForPeptideMatch(),
         new DataboxRsetPeptidesOfProtein(),
-        new DataBoxRsmPeptidesOfProtein(), new DataBoxRsmProteinAndPeptideSequence(),
-        new DataBoxRsmProteinSetOfPeptides(), new DataBoxRsmProteinsOfProteinSet(),
-        new DataBoxTaskDescription()/*, new DataBoxStatisticsFrequencyResponse()*/, new DataBoxRsetPeptideFragmentation(),
-        new DataBoxRsetPeptideSpectrumError(), new DataboxRsmPSMOfProteinSet(), new DataboxRsmPSMOfPeptide(),
-        new DataboxGraphics(false), new DataboxPSMOfMasterQuantPeptide(),
-        new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxChildFeature(),
-        new DataboxMultiGraphics(false, false,true), new DataboxMultiGraphics(false, false),
+        new DataBoxRsmPeptidesOfProtein(), 
+        new DataBoxRsmProteinAndPeptideSequence(),
+        new DataBoxRsmProteinSetOfPeptides(), 
+        new DataBoxRsmProteinsOfProteinSet(),
+        new DataBoxTaskDescription()/*, new DataBoxStatisticsFrequencyResponse()*/, 
+        new DataBoxRsetPeptideFragmentation(),
+        new DataBoxRsetPeptideSpectrumError(), 
+        new DataboxRsmPSMOfProteinSet(), 
+        new DataboxRsmPSMOfPeptide(),
+        new DataboxGraphics(false), 
+        new DataboxPSMOfMasterQuantPeptide(),
+        new DataboxXicPeptideSet(), 
+        new DataboxXicPeptideIon(), 
+        new DataboxChildFeature(),
+        new DataboxMultiGraphics(false, false,true), 
+        new DataboxMultiGraphics(false, false),
         new DataboxMapAlignment(),
-        new DataBoxAdjacencyMatrixChoice(), new DataBoxAdjacencyMatrix(),
-        new DataBoxRsmPSMForMsQuery(), new DataboxRsetPSMForMsQuery(),
-        new DataBoxPTMSitePeptides(), new DataBoxPTMSitePeptidesGraphic(),
-        new DataBoxPTMSitePepMatches()
+        new DataBoxAdjacencyMatrixChoice(), 
+        new DataBoxAdjacencyMatrix(),
+        new DataBoxRsmPSMForMsQuery(), 
+        new DataboxRsetPSMForMsQuery(),
+        new DataBoxPTMSitePeptides(), 
+        new DataBoxPTMSitePeptidesGraphic(),
+        new DataBoxPTMSitePepMatches(),
+        new DataBoxPTMPeptides(false, false), // Ident PTMs Peptides
+        new DataBoxPTMPeptides(true, false),  // Quanti PTMs Peptides
+        new DataBoxPTMPeptides(false, true),  // Ident PTMs Peptides Matches
+        new DataBoxPTMPeptides(true, true),    // Quanti PTMs Peptides Matches
+        new DataBoxPTMPeptidesGraphic()        
+        
     };
 
     private DataboxManager() {
@@ -90,7 +110,7 @@ public class DataboxManager {
             for (int i = 0; i < m_dataBoxContinuingArray.length; i++) {
 
                 AbstractDataBox databox = m_dataBoxContinuingArray[i];
-                if (databox.getClass().equals(previousDatabox.getClass())) {
+                if (databox.m_type.equals(previousDatabox.m_type)) {
                     // do not allow the same databox twice
                     continue;
                 }

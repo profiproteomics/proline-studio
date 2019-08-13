@@ -8,7 +8,6 @@ import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
-import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.graphics.CrossSelectionInterface;
@@ -56,6 +55,7 @@ import javax.swing.table.TableRowSorter;
 import org.jdesktop.swingx.JXTable;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinPTMClusterTableModel;
+import java.util.List;
 
 /**
  *
@@ -143,9 +143,34 @@ public class PTMClustersProteinPanel extends HourglassPanel implements DataBoxPa
         ProteinPTMClusterTableModel tableModel = (ProteinPTMClusterTableModel) compoundTableModel.getBaseModel();    
         return tableModel.getProteinPTMCluster(selectedRow);
     }
+    
+     public List<PTMCluster> getSelectedProteinPTMClusters() {
+
+        // Retrieve Selected Row
+        int[] selectedRows = m_ptmClusterProteinTable.getSelectedRows();
+        int nbSelectedRows = selectedRows.length;
+        List<PTMCluster> selectedPtmCluser= new ArrayList<>(nbSelectedRows);
+        // nothing selected
+        if (nbSelectedRows == 0) {
+            return selectedPtmCluser;
+        }
+       
+        // convert according to the sorting
+        CompoundTableModel compoundTableModel = ((CompoundTableModel)m_ptmClusterProteinTable.getModel());        
+        ProteinPTMClusterTableModel tableModel = (ProteinPTMClusterTableModel) compoundTableModel.getBaseModel();           
+        for(int i=0; i<nbSelectedRows; i++){
+            int rowModelIndex  = m_ptmClusterProteinTable.convertRowIndexToModel(selectedRows[i]);            
+            int convertedSelectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(rowModelIndex);
+            
+            // Retrieve ProteinPTMSite selected
+            selectedPtmCluser.add(tableModel.getProteinPTMCluster(convertedSelectedRow));
+        }
+        
+        return selectedPtmCluser;
+    }
 
     @Override
-    public void setDataBox(AbstractDataBox dataBox) {
+    public void setDataBox(AbstractDataBox dataBox) { 
         m_dataBox = dataBox;
     }
     
@@ -438,6 +463,7 @@ public class PTMClustersProteinPanel extends HourglassPanel implements DataBoxPa
             }
             //VDS: Order is important ! To be corrected using set of class for propagation
             //m_dataBox.propagateDataChanged(PTMSite.class);
+            //m_dataBox.propagateDataChanged(DPeptideMatch.class);
             m_dataBox.propagateDataChanged(DProteinSet.class);
             m_dataBox.propagateDataChanged(DProteinMatch.class);
             m_dataBox.propagateDataChanged(PTMPeptideInstance.class);

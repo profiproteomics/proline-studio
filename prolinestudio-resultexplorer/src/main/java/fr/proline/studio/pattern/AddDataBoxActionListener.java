@@ -15,8 +15,8 @@ import org.openide.windows.WindowManager;
  */
 public class AddDataBoxActionListener implements ActionListener {
 
-    private SplittedPanelContainer m_splittedPanel;
-    private AbstractDataBox m_previousDatabox;
+    private final SplittedPanelContainer m_splittedPanel;
+    private final AbstractDataBox m_previousDatabox;
 
     public AddDataBoxActionListener(SplittedPanelContainer splittedPanel, AbstractDataBox previousDatabox) {
         m_splittedPanel = splittedPanel;
@@ -34,11 +34,14 @@ public class AddDataBoxActionListener implements ActionListener {
             try {
                 AbstractDataBox newGenericDatabox = (AbstractDataBox) genericDatabox.getClass().newInstance(); // copy the databox
                 
-                //Some databox must be specifically configured ...  VDS : To be more generic ?!
+                //Some databox must be specifically configured ...  
+                // FIXME VDS : To be more generic ?!
                 if(DataboxGraphics.class.isInstance(newGenericDatabox)) {
                     ((DataboxGraphics)newGenericDatabox).setDefaultLocked(((DataboxGraphics)genericDatabox).isDefaultLocked());
                 } else if (DataboxMultiGraphics.class.isInstance(newGenericDatabox) ){                    
                     newGenericDatabox = new DataboxMultiGraphics(false, false, ((DataboxMultiGraphics)genericDatabox).isDoubleYAxis());                    
+                } else if (DataBoxPTMPeptides.class.equals(newGenericDatabox.getClass())){                    
+                    newGenericDatabox = new DataBoxPTMPeptides(((DataBoxPTMPeptides)genericDatabox).isQuantiResult(), ((DataBoxPTMPeptides)genericDatabox).isAllPSMsDisplayed());
                 }
                 genericDatabox = newGenericDatabox;
             } catch (InstantiationException | IllegalAccessException e) {

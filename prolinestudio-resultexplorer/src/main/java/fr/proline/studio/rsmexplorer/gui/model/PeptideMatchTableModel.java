@@ -69,7 +69,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
     public static final int COLTYPE_SRC_DAT_FILE = 22;
     public static final int COLTYPE_SPECTRUM_TITLE = 23;
 
-    private static final String[] m_columnNames = {"Id", "Prev. AA", "Peptide", "Next AA", "Length", "PTM", "Score", "Start", "Stop", "Calc. Mass", "Exp. MoZ", "Ppm", "Charge", "Missed Cl.", "Rank", "RT", "Protein Set Count", "Protein Sets", "Ion Parent Int.", "Decoy", "Validated", "MsQuery", ".dat File", "Spectrum Title"};
+    private static final String[] m_columnNames = {"Id", "Prev. AA", "Peptide", "Next AA", "Length", "PTMs", "Score", "Start", "Stop", "Calc. Mass", "Exp. MoZ", "Ppm", "Charge", "Missed Cl.", "Rank", "RT", "Protein Set Count", "Protein Sets", "Ion Parent Int.", "Decoy", "Validated", "MsQuery", ".dat File", "Spectrum Title"};
     private static final String[] m_columnTooltips = {"PeptideMatch Id", "Previous Amino Acid", "Peptide", "Next Amino Acid", "Length", "Post Translational Modifications", "Score", "Start", "Stop", "Calculated Mass", "Experimental Mass to Charge Ratio", "parts-per-million", "Charge", "Missed Clivage", "Pretty Rank", "Retention Time (min)", "Potein Set Count", "Protein Sets", "Ion Parent Intensity", "Is Decoy", "Is Validated", "MsQuery", ".dat file of best PSM", "Spectrum Title"};
 
     private final ArrayList<Integer> m_colUsed = new ArrayList<>();

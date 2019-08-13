@@ -38,8 +38,8 @@ public class DataboxRsetPSMForMsQuery extends AbstractDataBox{
         m_mergedData = mergedData;
         
         // Name of this databox
-        m_typeName = "PSM";
-        m_description = "All PSM corresponding to a MsQuery for a Search Result";
+        m_typeName = "PSMs";
+        m_description = "All PSMs corresponding to a MsQuery for a Search Result";
         
         
         // Register Possible in parameters

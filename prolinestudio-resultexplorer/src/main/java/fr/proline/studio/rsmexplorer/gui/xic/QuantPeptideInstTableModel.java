@@ -81,7 +81,7 @@ public class QuantPeptideInstTableModel  extends LazyTableModel implements Globa
     public static final int COLTYPE_PEPTIDE_CLUSTER = 11;
     public static final int COLTYPE_PEPTIDE_INST_ID = 12;
     public static final int LAST_STATIC_COLUMN = COLTYPE_PEPTIDE_INST_ID;
-    private static final String[] m_columnNames = {"Id", "Validate/Invalidate", "Peptide Sequence", "PTM", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets", "Overview", "Cluster","Pep. Instance Id"};
+    private static final String[] m_columnNames = {"Id", "Validate/Invalidate", "Peptide Sequence", "PTMs", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets", "Overview", "Cluster","Pep. Instance Id"};
     private static final String[] m_toolTipColumns = {"MasterQuantPeptide Id", "Validate or Invalidate Peptide", "Identified Peptide Sequence", "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Retention Time (min)", "Protein Set Count", "Protein Sets", "Overview", "Cluster Number","Peptide Instance ID"};
 
     public static final int COLTYPE_SELECTION_LEVEL = 0;
@@ -92,11 +92,11 @@ public class QuantPeptideInstTableModel  extends LazyTableModel implements Globa
 
     private int m_overviewType;
 
-    private static final String[] m_columnNamesQC = {"Sel. level", "Ident. Pep. match count", "Pep. match count", "Raw abundance", "Abundance"};
-    private static final String[] m_toolTipQC = {"Selection level", "Identification peptides match count", "Peptides match count", "Raw abundance", "Abundance"};
+    private static final String[] m_columnNamesQC = {"Sel. level", "Ident. PSMs count", "PSMs count", "Raw abundance", "Abundance"};
+    private static final String[] m_toolTipQC = {"Selection level", "Identification peptides matches count", "Peptides matches count", "Raw abundance", "Abundance"};
 
-    private static final String[] m_columnNamesQC_SC = {"Sel. level", "Ident. Pep. match count", "Basic SC", "Specific SC"};
-    private static final String[] m_toolTipQC_SC = {"Selection level", "Identification peptides match count", "Basic Spectral Count", "Specific Spectral Count"};
+    private static final String[] m_columnNamesQC_SC = {"Sel. level", "Ident. PSMs count", "Basic SC", "Specific SC"};
+    private static final String[] m_toolTipQC_SC = {"Selection level", "Identification peptides matches count", "Basic Spectral Count", "Specific Spectral Count"};
 
     private List<DMasterQuantPeptide> m_quantPeptides = null;
     private DQuantitationChannel[] m_quantChannels = null;

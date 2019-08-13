@@ -34,8 +34,8 @@ public class DataBoxRsmPSM extends AbstractDataBox {
         m_mergedData = mergedData;
         
         // Name of this databox
-        m_typeName = "PSM";
-        m_description = "All PSM of an Identification Summary or corresponding to a Peptide Instance";
+        m_typeName = "PSMs";
+        m_description = "All PSMs of an Identification Summary or corresponding to a Peptide Instance";
         
         // Register Possible in parameters
         // One ResultSummary

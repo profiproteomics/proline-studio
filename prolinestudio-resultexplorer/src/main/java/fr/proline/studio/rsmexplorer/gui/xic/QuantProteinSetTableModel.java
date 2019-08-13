@@ -70,8 +70,8 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     public static final int COLTYPE_RAW_ABUNDANCE = 4;
     public static final int COLTYPE_ABUNDANCE = 5;
 
-    private static final String[] m_columnNamesQC = {"Status", "Peptides Count", "Sel. level", "Pep. match count", "Raw abundance", "Abundance"};
-    private static final String[] m_toolTipQC = {"Status (typical, subset or sameset) of the protein in this condition", "Number of different peptides for this condition", "Selection level", "Peptides match count", "Raw abundance", "Abundance"};
+    private static final String[] m_columnNamesQC = {"Status", "Peptides Count", "Sel. level", "PSMs count", "Raw abundance", "Abundance"};
+    private static final String[] m_toolTipQC = {"Status (typical, subset or sameset) of the protein in this condition", "Number of different peptides for this condition", "Selection level", "Peptides matches count", "Raw abundance", "Abundance"};
 
     private static final String[] m_columnNamesQC_SC = {"Status", "Peptides Count", "Sel. level", "Basic SC", "Specific SC", "Weighted SC",};
     private static final String[] m_toolTipQC_SC = {"Status (typical, subset or sameset) of the protein in this condition", "Number of different peptides for this condition", "Selection level", "Basic Spectral Count", "Specific Spectral Count", "Weighted Spectral Count",};

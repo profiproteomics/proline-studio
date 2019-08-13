@@ -44,8 +44,8 @@ public class DataBoxRsmPSMForMsQuery extends AbstractDataBox{
         m_mergedData = mergedData;
         
         // Name of this databox
-        m_typeName = "PSM";
-        m_description = "All PSM corresponding to a MsQuery for an Identification Summary";
+        m_typeName = "PSMs";
+        m_description = "All PSMs corresponding to a MsQuery for an Identification Summary";
         
         
         // Register Possible in parameters

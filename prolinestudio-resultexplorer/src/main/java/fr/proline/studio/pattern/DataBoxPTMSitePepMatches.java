@@ -25,8 +25,8 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
         super(DataboxType.DataBoxPTMSitePepMatches, DataboxStyle.STYLE_RSM);
          
         // Name of this databox
-        m_typeName = "PTM Site's Peptide Matches";
-        m_description = "All Peptide Matches of a PTM Site.";
+        m_typeName = "Modification Site's PSMs";
+        m_description = "All PSMs of a Modification Site.";
 
         // Register Possible in parameters
         // One ResultSummary

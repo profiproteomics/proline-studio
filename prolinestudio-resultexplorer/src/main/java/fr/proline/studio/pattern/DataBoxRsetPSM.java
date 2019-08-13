@@ -34,8 +34,8 @@ public class DataBoxRsetPSM extends AbstractDataBox {
         m_mergedData = mergedData;
         
         // Name of this databox
-        m_typeName = "PSM";
-        m_description = "All PSM of a Search Result";
+        m_typeName = "PSMs";
+        m_description = "All PSMs of a Search Result";
         
         // Register Possible in parameters
         // One ResultSummary

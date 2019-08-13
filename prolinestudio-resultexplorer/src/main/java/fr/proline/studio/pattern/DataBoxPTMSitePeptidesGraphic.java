@@ -21,8 +21,8 @@ public class DataBoxPTMSitePeptidesGraphic extends DataBoxPTMSitePeptides {
         super();//VDS: could use RSM even in XIC ?
 
         // Name of this databox
-        m_typeName = "PTM Site's Peptides";
-        m_description = "Peptides of a PTM Protein Sites graphical display.";
+        m_typeName = "Modification Site's Peptides";
+        m_description = "Peptides of a Modification Sites using graphical display.";
     }
 
     @Override

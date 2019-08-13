@@ -71,8 +71,8 @@ public class ProteinPTMClusterTableModel extends LazyTableModel implements Globa
   public static final int COLTYPE_EXPRESSION = 10;
   public static final int COLTYPE_HIDDEN_PROTEIN_PTM = 11; // hidden column, must be the last
 
-  private static final String[] m_columnNames = {"Id", "Protein", "Peptide", "Score", "Peptide count",  "PTM Site count", "PTM", "PTM D.Mass", "PTM Probability", "Spectrum title", "FC dist."};
-  private static final String[] m_columnTooltips = {"Protein Id", "Protein", "Peptide", "Score of the peptide match", "Number of peptides matching the modification site", "Number of PTM modifications sites clustered", "PTM modifications associated with this peptide", "PTMs delta mass", "PTMs probability", "Peptide match spectrum title", "Fold change distance"};
+  private static final String[] m_columnNames = {"Id", "Protein", "Peptide", "Score", "Peptide count",  "Modif. Site count", "PTMs", "PTM D.Mass", "PTM Probability", "Spectrum title", "FC dist."};
+  private static final String[] m_columnTooltips = {"Protein Id", "Protein", "Peptide", "Score of the peptide match", "Number of peptides matching the modification site", "Number of Modification sites clustered", "Post Translational Modifications of this peptide", "PTMs delta mass", "PTMs probability", "Peptide match spectrum title", "Fold change distance"};
 
   private ArrayList<PTMCluster> m_ptmClusters = null;
 

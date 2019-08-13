@@ -79,7 +79,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     public static final int COLTYPE_OVERVIEW = 10;
     public static final int COLTYPE_PEPTIDE_CLUSTER = 11;
     public static final int LAST_STATIC_COLUMN = COLTYPE_PEPTIDE_CLUSTER;
-    private static final String[] m_columnNames = {"Id", "Validate/Invalidate", "Peptide Sequence", "PTM", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets", "Overview", "Cluster"};
+    private static final String[] m_columnNames = {"Id", "Validate/Invalidate", "Peptide Sequence", "PTMs", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets", "Overview", "Cluster"};
     private static final String[] m_toolTipColumns = {"MasterQuantPeptide Id", "Validate or Invalidate Peptide", "Identified Peptide Sequence", "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Retention Time (min)", "Protein Set Count", "Protein Sets", "Overview", "Cluster Number"};
 
     public static final int COLTYPE_SELECTION_LEVEL = 0;
@@ -91,8 +91,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
     private int m_overviewType;
 
-    private static final String[] m_columnNamesQC = {"Sel. level", "Ident. Pep. match count", "Pep. match count", "Raw abundance", "Abundance", "Retention time"};
-    private static final String[] m_toolTipQC = {"Selection level", "Identification peptides match count", "Peptides match count", "Raw abundance", "Abundance", "Retention time"};
+    private static final String[] m_columnNamesQC = {"Sel. level", "Ident. PSMs count", "PSMs count", "Raw abundance", "Abundance", "Retention time"};
+    private static final String[] m_toolTipQC = {"Selection level", "Identification peptides matches count", "Peptides matches count", "Raw abundance", "Abundance", "Retention time"};
 
     private static final String[] m_columnNamesQC_SC = {"Sel. level", "Ident. Pep. match count", "Basic SC", "Specific SC"};
     private static final String[] m_toolTipQC_SC = {"Selection level", "Identification peptides match count", "Basic Spectral Count", "Specific Spectral Count"};

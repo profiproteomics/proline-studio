@@ -31,8 +31,8 @@ public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
         m_mergedData = mergedData;
         
         // Name of this databox
-        m_typeName = "PSM";
-        m_description = "All PSM of a Protein Set";
+        m_typeName = "PSMs";
+        m_description = "All PSMs of a Protein Set";
         
         // Register Possible in parameters
         // One ResultSummary

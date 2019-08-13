@@ -73,7 +73,7 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
     }
 //    public static final int COLTYPE_HIDDEN_PROTEIN_PTM = 16; // hidden column, must be the last
 
-    private static final String[] m_columnNames = {"Id", "Peptide", "Score", "Modification", "Residue", "Site Probability", "Modification D.Mass", "Modification Loc.", "Protein Loc.", "Protein N/C-term", "PTM", "PTM D.Mass", "PTM Probability", "Spectrum title"};
+    private static final String[] m_columnNames = {"Id", "Peptide", "Score", "Modification", "Residue", "Site Probability", "Modification D.Mass", "Modification Loc.", "Protein Loc.", "Protein N/C-term", "PTMs", "PTMs D.Mass", "PTMs Probability", "Spectrum title"};
     private static final String[] m_columnTooltips = {"Peptide Id (Instance Id)", "Peptide", "Score of the peptide match", "Modification", "Modified residue", "Site probability", "Delta mass of the given modification", "Position of the modification on the peptide sequence", "Position of the modification on the protein sequence", "Protein N/C-term", "PTM modifications associated with this peptide", "PTMs delta mass", "PTMs probability", "Peptide match spectrum title"};
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
 

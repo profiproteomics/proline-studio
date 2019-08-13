@@ -48,7 +48,7 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
     public static final int COLTYPE_MSQUERY_LAST_TIME = 8;
     public static final int COLTYPE_MSQUERY_SPECTRUM_TITLE = 9;
     
-    private static final String[] m_columnNames =  {"Id", "Initial Id", "Charge", "m/z", "#Peptide Matches", "First Scan", "Last Scan", "First Time", "Last Time", "Spectrum Title"};
+    private static final String[] m_columnNames =  {"Id", "Initial Id", "Charge", "m/z", "#PSMs", "First Scan", "Last Scan", "First Time", "Last Time", "Spectrum Title"};
     private static final String[] m_columnTooltips = {"MS Query Id", "Initial Id", "Charge", "m/z", "Peptide Matches count", "First Scan", "Last Scan", "First Time", "Last Time", "Spectrum Title"};
     
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();

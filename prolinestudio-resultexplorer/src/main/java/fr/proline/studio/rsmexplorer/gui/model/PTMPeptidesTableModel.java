@@ -66,7 +66,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     public static final int COLTYPE_SPECTRUM_TITLE = 6;   
     public static final int LAST_STATIC_COLUMN = COLTYPE_SPECTRUM_TITLE;
     
-    private static final String[] m_columnNames = {"Id", "Peptide", "Score", "PTM", "PTM D.Mass", "PTM Probability", "Spectrum title"};
+    private static final String[] m_columnNames = {"Id", "Peptide", "Score", "PTMs", "PTMs D.Mass", "PTMs Probability", "Spectrum title"};
     private static final String[] m_columnTooltips = {"Peptide Id (Instance Id)", "Peptide Sequence", "Score of the peptide match", "All PTMs modifications associated with this peptide", "All PTMs delta mass", "All PTMs probability", "Peptide match query title"};
 
     // Dynamic columns list 1 : PTM Probability related

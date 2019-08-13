@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PTMDataset {
     
-    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.DAM.Task");
+    protected static final Logger LOG = LoggerFactory.getLogger("ProlineStudio.DAM.Task");
 
     private DDataset m_dataset;
 
@@ -188,7 +188,7 @@ public class PTMDataset {
         } else {
             foundPtmPepIns = potentialPtmPepInsts.get(0);
             if(potentialPtmPepInsts.size() > 1)
-                m_logger.warn(" ----- GET PTMPeptideInstance for Prot id "+proteinMatchId+" pep "+peptideInstance.getPeptide().getSequence()+" at position "+protPosition+" FOUND "+potentialPtmPepInsts.size() );
+                LOG.warn(" ----- GET PTMPeptideInstance for Prot id "+proteinMatchId+" pep "+peptideInstance.getPeptide().getSequence()+" at position "+protPosition+" FOUND "+potentialPtmPepInsts.size() );
         }
 
         return foundPtmPepIns;

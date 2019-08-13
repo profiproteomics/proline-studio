@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface, SplittedPanelContainer.ReactiveTabbedComponent {
 
-    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.ptm");     
+    protected static final Logger LOG = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.ptm");     
     protected AbstractDataBox m_dataBox;
 
     private JScrollPane m_ptmPeptidesScrollPane;
@@ -157,7 +157,7 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
     }
 
     public void setData(Long taskId, List<PTMPeptideInstance> ptmPeptides, Map<Long, DMasterQuantPeptide> quantPeptidesByPepInsId,  boolean finished) {        
-        m_logger.debug(" PANEL setData called for "+ (m_displayPeptidesMatches?" leaf ": " parent"));
+        LOG.debug(" PANEL setData called for "+ (m_displayPeptidesMatches?" leaf ": " parent"));
  
         if(Objects.equals(ptmPeptides,m_ptmPeptideInstances)){
             return;           

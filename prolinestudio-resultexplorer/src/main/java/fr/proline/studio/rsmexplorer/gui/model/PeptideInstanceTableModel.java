@@ -62,7 +62,7 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
     public static final int COLTYPE_SPECTRUM_TITLE = 15;
     public static final int COLTYPE_PEPTIDE_MATCH_COUNT = 16;
 
-    private static final String[] m_columnNames = {"Id", "Peptide", "Length", "PTM", "Score", "Calc. Mass", "Exp. MoZ", "Ppm", "Charge", "Missed Cl.",
+    private static final String[] m_columnNames = {"Id", "Peptide", "Length", "PTMs", "Score", "Calc. Mass", "Exp. MoZ", "Ppm", "Charge", "Missed Cl.",
         "Rank", "RT", "Protein Set Count", "Protein Sets", "MsQuery", "Spectrum Title", "PSM Count"};
     private static final String[] m_columnTooltips = {"Peptide Id", "Peptide", "Length", "Post Translational Modifications", "Score", "Calculated Mass",
         "Experimental Mass to Charge Ratio", "parts-per-million", "Charge", "Missed Clivage", "Best Peptide Match Pretty Rank", "Retention Time (min)",

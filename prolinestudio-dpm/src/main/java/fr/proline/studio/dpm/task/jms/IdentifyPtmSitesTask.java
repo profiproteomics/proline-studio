@@ -31,7 +31,7 @@ public class IdentifyPtmSitesTask extends AbstractJMSTask {
     private String m_clusteringMethodName;
 
     public IdentifyPtmSitesTask(AbstractJMSCallback callback, String datasetName, Long projectId, Long resultSummaryId, Boolean force) {
-        super(callback, new TaskInfo( ((datasetName != null) ? "Identify PTM sites for "+datasetName : "Identify PTM sites"), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
+        super(callback, new TaskInfo( ((datasetName != null) ? "Identify Modification sites for "+datasetName : "Identify Modification sites"), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_projectId = projectId;
         m_resultSummaryId = resultSummaryId;
         m_forceAction = force;

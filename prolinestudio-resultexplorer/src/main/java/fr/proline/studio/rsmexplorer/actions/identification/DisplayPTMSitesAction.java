@@ -148,10 +148,10 @@ public class DisplayPTMSitesAction  extends AbstractRSMAction {
                 
         public DisplayPTMSiteDialog(Window parent){
            super(parent, Dialog.ModalityType.APPLICATION_MODAL); 
-            setTitle("Display PTM sites");
-            setHelpHeaderText("Select the version of PTM identification service that was used: \n<br>"+
+            setTitle("Display Modification Sites");
+            setHelpHeaderText("Select the version of PTMs identification service that was used: \n<br>"+
             " &bull; v1.0 a list of all identified sites was generated \n<br>"+
-            " &bull; v2.0 a PTM dataset in which sites are clusterized has been generated.\n<br>");
+            " &bull; v2.0 a PTMs Dataset in which sites are clusterized has been generated.\n<br>");
             initInternalPanel();
             pack();           
         }
@@ -168,7 +168,7 @@ public class DisplayPTMSitesAction  extends AbstractRSMAction {
             
             JLabel label = new JLabel("Service version:");     
             internalPanel.add(label, c);
-            String[] versions = new String[] {"Ptm Sites (v1.0)", "Ptm Dataset (v2.0)"};
+            String[] versions = new String[] {"Modification Sites (v1.0)", "PTMs Dataset (v2.0)"};
             m_serviceVersionCbx = new JComboBox(versions);
              c.gridx++;
             internalPanel.add(m_serviceVersionCbx, c);

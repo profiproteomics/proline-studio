@@ -109,6 +109,9 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
         // Retrieve ProteinPTMSite selected
         PTMPeptidesTableModel tableModel = (PTMPeptidesTableModel) compoundTableModel.getBaseModel();
 
+        if(tableModel.getRowCount()<=0)
+            return null;
+        
         // Retrieve Selected Row
         int selectedRow = getSelectedRowInTableModel();
 

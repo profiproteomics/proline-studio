@@ -67,7 +67,6 @@ public class ProteinPTMSiteTableModel extends LazyTableModel implements GlobalTa
 
   public static final int COLTYPE_SPECTRUM_TITLE = 15;
   public static final int COLTYPE_EXPRESSION = 16;
-  public static final int COLTYPE_HIDDEN_PROTEIN_PTM = 17; // hidden column, must be the last
 
   private static final String[] m_columnNames = {"Id", "Protein", "Peptide", "Score", "Modification", "Residue", "Site Probability", "Modification D.Mass", "Modification Loc.", "Protein Loc.", "Protein N/C-term", "Peptide count", "PTMs", "PTMs D.Mass", "PTMs Probability", "Spectrum title", "FC dist."};
   private static final String[] m_columnTooltips = {"Protein Id", "Protein", "Peptide", "Score of the peptide match", "Modification", "Modified residue", "Modification probability", "Delta mass of the given modification", "Position of the modification on the peptide sequence", "Position of the modification on the protein sequence", "Protein N/C-term", "Number of peptides matching the modification site", "Post Translational Modifications of this peptide", "PTMs delta mass", "PTMs probability", "Peptide match spectrum title", "Fold change distance"};
@@ -250,8 +249,6 @@ public class ProteinPTMSiteTableModel extends LazyTableModel implements GlobalTa
         return proteinPTMSite.getPeptideCount();
       case COLTYPE_RESIDUE_AA: 
         return infoPtm.getResidueAASpecificity();
-      case COLTYPE_HIDDEN_PROTEIN_PTM:
-        return proteinPTMSite;
       case COLTYPE_SPECTRUM_TITLE:
         return proteinPTMSite.getBestPeptideMatch().getMsQuery().getDSpectrum().getTitle();
       case COLTYPE_EXPRESSION:

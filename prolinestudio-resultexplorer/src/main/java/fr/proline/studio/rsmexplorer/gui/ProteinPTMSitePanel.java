@@ -414,7 +414,7 @@ public class ProteinPTMSitePanel extends HourglassPanel implements DataBoxPanelI
                     
                     int nbRows = model.getRowCount(); // loop through filtered DProteinPTMSite
                     for (int i = 0; i < nbRows; i++) {
-                        proteinPTMSiteArray.add((PTMSite) model.getValueAt(i, ProteinPTMSiteTableModel.COLTYPE_HIDDEN_PROTEIN_PTM));
+                        proteinPTMSiteArray.add((PTMSite) model.getRowValue(PTMSite.class, i));
                     }  
                     
                     String modification =  ProteinPTMSiteTableModelProcessing.calculateDataWORedundance(model, new ArrayList<>(), new ArrayList<>(), new HashMap<>(), proteinPTMSiteArray,  new HashMap<>());        

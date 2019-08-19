@@ -39,7 +39,7 @@ public class PeptideView extends ViewPtmAbstract {
     private int m_beginIndex;
 
     public PeptideView(PTMSitePeptideInstance pep) {
-        isPtmSiteView = true;    
+        isPtmSiteView = true;
         this.x0 = 0;
         this.y0 = 0;
         this.m_ptmSitePeptideInst = pep;
@@ -86,7 +86,29 @@ public class PeptideView extends ViewPtmAbstract {
         }
         m_isSelected = false;
     }
+    
+    public PeptideView(PTMPeptideInstance pep, boolean displayProtWithOutNtermM) {
+        isPtmSiteView = false;
+        x0 = 0;
+        y0 = 0;
+        m_isSelected = false;
+        m_ptmPeptideInst = pep;
+        m_ptmSitePeptideInst = null;
+        m_length = 0;
+        m_beginIndex = 0;
+        
+        if (pep != null ) {
+            if(pep.getSequence()!=null) 
+                m_length = pep.getSequence().length();
+                    
+            m_beginIndex = pep.getStartPosition();
 
+            if ((m_beginIndex == 1) && displayProtWithOutNtermM)
+                m_beginIndex = 0;   
+        }
+        m_isSelected = false;
+    }
+    
     private Map<Integer, DPeptidePTM> getPosPtmMap() {
         return m_ptmPeptideInst.getPeptideInstance().getPeptide().getTransientData().getDPeptidePtmMap();
     }

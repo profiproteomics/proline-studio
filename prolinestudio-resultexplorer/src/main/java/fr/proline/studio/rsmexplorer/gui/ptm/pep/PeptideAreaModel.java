@@ -1,9 +1,12 @@
 package fr.proline.studio.rsmexplorer.gui.ptm.pep;
 
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
+import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSitePeptideInstance;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /*
  * @cea 
@@ -51,8 +54,15 @@ public class PeptideAreaModel {
      */
     public void setPTMPeptides(List<PTMPeptideInstance> pPeptide) {
         m_viewPeptideList = new ArrayList<>();
+        boolean onlyProtNtermWO_M = true;
+        //Identify if PTMPeptideInstance are all Protein NTerm peptide with missing 'M'
+        List<PTMSite> allSites = pPeptide.stream().flatMap(pi -> pi.getSites().stream()).collect(Collectors.toList());
+        for(PTMSite site : allSites) {           
+            onlyProtNtermWO_M = onlyProtNtermWO_M && site.isProteinNTermWithOutM();
+        }
+        
         for (PTMPeptideInstance pep : pPeptide) {
-            PeptideView p = new PeptideView(pep);
+            PeptideView p = new PeptideView(pep, onlyProtNtermWO_M);
             m_viewPeptideList.add(p);
         }
     }

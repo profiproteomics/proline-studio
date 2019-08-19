@@ -17,7 +17,6 @@ import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.rsmexplorer.DataBoxViewerManager;
 import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;

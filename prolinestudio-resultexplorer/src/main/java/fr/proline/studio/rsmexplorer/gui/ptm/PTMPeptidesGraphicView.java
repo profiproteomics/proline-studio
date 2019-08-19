@@ -159,7 +159,7 @@ public class PTMPeptidesGraphicView extends JPanel implements DataBoxPanelInterf
     }
 
 
-    public void setData(List<PTMPeptideInstance> peptidesInstances ) {       
+    public void setData(List<PTMPeptideInstance> peptidesInstances ) {
         m_dataModel.setData(peptidesInstances, m_dataBox.getProjectId());
         if (peptidesInstances == null) {
             this.m_internalPanel.clean();
@@ -226,7 +226,7 @@ private class PTMPeptidesGraphicPanel extends JPanel  {
     }
 
 
-    public void setAjustedLocation(int ajustedLocation) {
+    private void setAjustedLocation(int ajustedLocation) {
         this.m_ajustedStartLocation = ajustedLocation;
         if (ajustedLocation >= AJUSTE_GAP) {
             m_ajustedStartLocation -= AJUSTE_GAP;

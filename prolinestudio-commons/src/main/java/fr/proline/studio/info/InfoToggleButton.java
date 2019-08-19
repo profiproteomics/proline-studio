@@ -9,7 +9,7 @@ import javax.swing.JToggleButton;
 import org.openide.windows.WindowManager;
 
 /**
- * Button to access to an info floating panel
+ * Button to access to an info floating panelo
  * 
  * @author JM235353
  */

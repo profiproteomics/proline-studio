@@ -2,15 +2,19 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.dto.DInfoPTM;
+import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DPtmSiteProperties;
+import fr.proline.core.orm.msi.dto.DQuantPeptide;
+import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
 import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
+import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.table.ExportModelUtilities;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.ConvertValueInterface;
@@ -25,15 +29,19 @@ import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PercentageRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.utils.CyclicColorPalette;
+import fr.proline.studio.utils.StringUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import javax.swing.table.TableCellRenderer;
 import org.slf4j.Logger;
@@ -51,43 +59,41 @@ public class ProteinPTMClusterTableModel extends LazyTableModel implements Globa
   public static final int COLTYPE_PROTEIN_NAME = 1;
   public static final int COLTYPE_PEPTIDE_NAME = 2;
   public static final int COLTYPE_PEPTIDE_SCORE = 3;
-
-//  public static final int COLTYPE_MODIFICATION = 4;
-//  public static final int COLTYPE_RESIDUE_AA = 5;
-//  public static final int COLTYPE_MODIFICATION_PROBA = 6;
-//  public static final int COLTYPE_DELTA_MASS_MODIFICATION = 7;
-//  public static final int COLTYPE_MODIFICATION_LOC = 8;
-//  public static final int COLTYPE_PROTEIN_LOC = 9;
-//  public static final int COLTYPE_PROTEIN_NTERM_CTERM = 10;
   public static final int COLTYPE_PEPTIDE_COUNT = 4;
   public static final int COLTYPE_PTMSITE_COUNT = 5;
-  
-
   public static final int COLTYPE_PEPTIDE_PTM = 6;
   public static final int COLTYPE_DELTA_MASS_PTM = 7;
   public static final int COLTYPE_PTM_PROBA = 8;
-
   public static final int COLTYPE_SPECTRUM_TITLE = 9;
-  public static final int COLTYPE_EXPRESSION = 10;
-  public static final int COLTYPE_HIDDEN_PROTEIN_PTM = 11; // hidden column, must be the last
+  public static final int LAST_STATIC_COLUMN = COLTYPE_SPECTRUM_TITLE;
+  
+  private static final String[] m_columnNames = {"Id", "Protein", "Peptide", "Score", "Peptide count",  "Modif. Site count", "PTMs", "PTM D.Mass", "PTM Probability", "Spectrum title"};
+  private static final String[] m_columnTooltips = {"Protein Id", "Protein", "Peptide", "Score of the peptide match", "Number of peptides matching the modification site", "Number of Modification sites clustered", "Post Translational Modifications of this peptide", "PTMs delta mass", "PTMs probability", "Peptide match spectrum title"};
+     
+  //Dynamique columns  
+  //In case of xic data only
+  public static final int COLTYPE_EXPRESSION = LAST_STATIC_COLUMN +1;
+  public static final String COLTYPE_EXPRESSION_TITLE ="FC dist.";
+  public static final String COLTYPE_EXPRESSION_TOOLTIP ="Fold change distance";
+  
+  //One per QuantChannel 
+  public static final int COLTYPE_START_QUANT_INDEX = COLTYPE_EXPRESSION+1;
+  public static final int COLTYPE_RAW_ABUNDANCE = 0;
+  public static final int COLTYPE_ABUNDANCE = 1;
 
-  private static final String[] m_columnNames = {"Id", "Protein", "Peptide", "Score", "Peptide count",  "Modif. Site count", "PTMs", "PTM D.Mass", "PTM Probability", "Spectrum title", "FC dist."};
-  private static final String[] m_columnTooltips = {"Protein Id", "Protein", "Peptide", "Score of the peptide match", "Number of peptides matching the modification site", "Number of Modification sites clustered", "Post Translational Modifications of this peptide", "PTMs delta mass", "PTMs probability", "Peptide match spectrum title", "Fold change distance"};
-
+  private static final String[] m_columnNamesQC = {"Raw abundance", "Abundance"};
+  private static final String[] m_columnTooltipsQC = {"Raw abundance", "Abundance"};
+   //Data initialized only if Quantitation data
+  private DQuantitationChannel[] m_quantChannels = null;
+  private int m_quantChannelNumber = 0;
+  private boolean m_isQuantitationDS = false;
+  
+  //Model data
   private ArrayList<PTMCluster> m_ptmClusters = null;
 
-  private final ArrayList<String> m_modificationsArray = new ArrayList<>();
-  private final HashMap<String, Integer> m_modificationsMap = new HashMap<>();
-
-  private final ArrayList<Character> m_residuesArray = new ArrayList<>();
-  private final HashMap<Character, Integer> m_residuesMap = new HashMap<>();
-
   private String m_modelName;
-  private PTMDataset m_ptmDataset = null;
   private String m_modificationInfo = "";
-
-  private final boolean m_hideRedundantPeptides = false;
-
+  
   private final ScoreRenderer m_scoreRenderer = new ScoreRenderer();
 
   public ProteinPTMClusterTableModel(LazyTable table) {
@@ -97,24 +103,81 @@ public class ProteinPTMClusterTableModel extends LazyTableModel implements Globa
   @Override
   public int getColumnCount() {
     // remove last column for identification datasets
-    return m_columnNames.length - ((m_ptmDataset != null) && (m_ptmDataset.isIdentification()) ? 1 : 0);
+    int nbrCol = m_columnNames.length;
+    if(m_isQuantitationDS){
+       nbrCol= nbrCol + 1 + m_quantChannelNumber * m_columnNamesQC.length;
+    }
+    return nbrCol;
   }
 
-  @Override
-  public String getColumnName(int col) {
-    return m_columnNames[col];
-  }
+    @Override
+    public String getColumnName(int col) {
+        if (col <= LAST_STATIC_COLUMN) {
+            return m_columnNames[col];
+        } else {
+            if (col == COLTYPE_EXPRESSION) {
+                return COLTYPE_EXPRESSION_TITLE;
+            } else {
+                int nbQc = (col - COLTYPE_START_QUANT_INDEX) / m_columnNamesQC.length;
+                int id = col - COLTYPE_START_QUANT_INDEX - (nbQc * m_columnNamesQC.length);
+
+                StringBuilder sb = new StringBuilder();
+                String rsmHtmlColor = CyclicColorPalette.getHTMLColor(nbQc);
+                sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
+                sb.append(m_columnNamesQC[id]);
+                sb.append("<br/>");
+                sb.append(m_quantChannels[nbQc].getName());
+                sb.append("</html>");
+                return sb.toString();
+            }
+        }
+    }
 
   @Override
-  public String getToolTipForHeader(int col) {
-    return m_columnTooltips[col];
+    public String getToolTipForHeader(int col) {
+        if (col <= LAST_STATIC_COLUMN) {
+            return m_columnTooltips[col];
+        } else {
+            if (col == COLTYPE_EXPRESSION) {
+                return COLTYPE_EXPRESSION_TOOLTIP;
+            } else {
+                int nbQc = (col - COLTYPE_START_QUANT_INDEX) / m_columnNamesQC.length;
+                int id = col - COLTYPE_START_QUANT_INDEX - (nbQc * m_columnNamesQC.length);
+                String rawFilePath = StringUtils.truncate(m_quantChannels[nbQc].getRawFilePath(), 50);
+
+                StringBuilder sb = new StringBuilder();
+                String rsmHtmlColor = CyclicColorPalette.getHTMLColor(nbQc);
+                sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
+                sb.append(m_columnTooltipsQC[id]);
+                
+                sb.append("<br/>");
+                sb.append(m_quantChannels[nbQc].getFullName());
+                sb.append("<br/>");
+                sb.append(rawFilePath);
+
+                sb.append("</html>");
+                return sb.toString();
+            }
+        }
   }
 
   @Override
   public String getTootlTipValue(int row, int col) {
     return null;
   }
-
+  
+  
+  public List<Integer> getDefaultColumnsToHide() {  
+    List<Integer> listIds = new ArrayList();
+    listIds.add(COLTYPE_PROTEIN_ID);
+    if(m_isQuantitationDS){
+        for (int i = m_quantChannels.length - 1; i >= 0; i--) {
+            listIds.add(COLTYPE_START_QUANT_INDEX + COLTYPE_RAW_ABUNDANCE + (i * m_columnNamesQC.length));            
+        }
+    }
+    return listIds;
+  }
+  
   @Override
   public Class getColumnClass(int col) {
 
@@ -125,19 +188,20 @@ public class ProteinPTMClusterTableModel extends LazyTableModel implements Globa
         return String.class;
       case COLTYPE_PEPTIDE_COUNT: 
       case COLTYPE_PTMSITE_COUNT:
-        return Integer.class;      
-      case COLTYPE_EXPRESSION:        
-        return Double.class;      
+        return Integer.class;         
       case COLTYPE_PEPTIDE_NAME:
       case COLTYPE_PEPTIDE_PTM:          
       case COLTYPE_SPECTRUM_TITLE:     
       case COLTYPE_PTM_PROBA:  
       case COLTYPE_DELTA_MASS_PTM:
-      case COLTYPE_PEPTIDE_SCORE:        
-        return LazyData.class;        
+      case COLTYPE_PEPTIDE_SCORE:
+        return LazyData.class;     
+      case COLTYPE_EXPRESSION:        
+        return Double.class;   
+    default: 
+        return LazyData.class;
     }
 
-    return null;
   }
 
   @Override
@@ -150,6 +214,9 @@ public class ProteinPTMClusterTableModel extends LazyTableModel implements Globa
       case COLTYPE_DELTA_MASS_PTM:
       case COLTYPE_PEPTIDE_SCORE:          
         return DatabasePTMsTask.SUB_TASK_PTMCLUSTER_PEPTIDES;
+      case COLTYPE_EXPRESSION:
+          if(m_isQuantitationDS)
+            return DatabaseLoadXicMasterQuantTask.SUB_TASK_PEPTIDE_INSTANCE;
     }
     return -1;
   }
@@ -210,38 +277,6 @@ public class ProteinPTMClusterTableModel extends LazyTableModel implements Globa
         }
         lazyData.setData(ptm);
         return lazyData;
-
-//      case COLTYPE_MODIFICATION: {
-//        return infoPtm.getPtmShortName();
-//      }
-//      
-//      case COLTYPE_MODIFICATION_LOC: {
-//        if (peptideMatch == null) {            
-//            lazyData.setData(null);
-//            givePriorityTo(m_taskId, row, col);
-//            return lazyData;
-//        } 
-//        String locationSpecitifcity = infoPtm.getLocationSpecificity();
-//        if (locationSpecitifcity.contains("N-term")) {
-//          return "N-term";
-//        } else if (locationSpecitifcity.contains("C-term")) {
-//          return "C-term";
-//        }
-//        lazyData.setData(String.valueOf((int) protPTMCluster.getPositionOnPeptide(peptideMatch.getPeptide().getId())));
-//        return lazyData;
-//      }
-//      
-//      case COLTYPE_PROTEIN_LOC: {
-//        return protPTMCluster.getPositionOnProtein();
-//      }
-//      
-//      case COLTYPE_PROTEIN_NTERM_CTERM: {
-//        String locationSpecitifcity = infoPtm.getLocationSpecificity();
-//        if (locationSpecitifcity.contains("-term")) {
-//          return locationSpecitifcity;
-//        }
-//        return "";
-//      }
       
       case COLTYPE_PTM_PROBA: {
         if (peptideMatch == null) {            
@@ -258,35 +293,8 @@ public class ProteinPTMClusterTableModel extends LazyTableModel implements Globa
         return lazyData;
       }
       
-//      case COLTYPE_MODIFICATION_PROBA: {
-//        if (peptideMatch == null) {            
-//            lazyData.setData(null);
-//            givePriorityTo(m_taskId, row, col);
-//            return lazyData;
-//        }           
-//        DPtmSiteProperties properties = peptideMatch.getPtmSiteProperties();
-//        Float proba = Float.NaN;
-//        if (properties != null) {
-//          // VDS Workaround test for issue #16643   
-//          proba = properties.getMascotProbabilityBySite().get(protPTMCluster.toReadablePtmString(peptideMatch.getPeptide().getId()));
-//          if (proba == null) {
-//            proba = (properties.getMascotProbabilityBySite().get(protPTMCluster.toOtherReadablePtmString(peptideMatch.getPeptide().getId()))) * 100;
-//          }
-//          //END VDS Workaround
-//        }
-//        lazyData.setData(proba);
-//        return lazyData;        
-//      }
-      
       case COLTYPE_DELTA_MASS_PTM: {
-//                return 0.0;                
-        //return proteinPTMSite.getDeltaMassPTM();
-        //Previously (Version 1) was : 
-//                double deltaMass = 0;                
-//                for (DPeptidePTM peptidePTM : peptidePTMArray) {
-//                    DInfoPTM infoPtm = DInfoPTM.getInfoPTMMap().get(peptidePTM.getIdPtmSpecificity());
-//                    deltaMass += infoPtm.getMonoMass();
-//                }
+
         if (peptideMatch == null) {            
             lazyData.setData(null);
             givePriorityTo(m_taskId, row, col);
@@ -304,21 +312,13 @@ public class ProteinPTMClusterTableModel extends LazyTableModel implements Globa
         return lazyData;
       }
 
-//      case COLTYPE_DELTA_MASS_MODIFICATION:
-//        return infoPtm.getMonoMass();
-//        
+ 
       case COLTYPE_PEPTIDE_COUNT:
         return protPTMCluster.getPeptideCount();
 
       case COLTYPE_PTMSITE_COUNT:
         return protPTMCluster.getClusteredSites().size();
                 
-//      case COLTYPE_RESIDUE_AA: 
-//        return infoPtm.getResidueAASpecificity();
-//        
-      case COLTYPE_HIDDEN_PROTEIN_PTM:
-        return protPTMCluster;
-        
       case COLTYPE_SPECTRUM_TITLE: {
         if (peptideMatch == null) {            
             lazyData.setData(null);
@@ -331,22 +331,74 @@ public class ProteinPTMClusterTableModel extends LazyTableModel implements Globa
       
       case COLTYPE_EXPRESSION:
         return protPTMCluster.getExpressionValue();
+        
+      default: 
+        // Quant Channel columns       
+        if (protPTMCluster.getBestQuantPeptideMatch() == null) {            
+            lazyData.setData(null);
+            givePriorityTo(m_taskId, row, col);
+            return lazyData;
+        }  
+        
+        DMasterQuantPeptide masterQuantPep = protPTMCluster.getBestQuantPeptideMatch();
+        int dynQchIndex = col - (COLTYPE_START_QUANT_INDEX); 
+        int nbQc = dynQchIndex / m_columnNamesQC.length;
+        int id = dynQchIndex - (nbQc * m_columnNamesQC.length);                        
+        Map<Long, DQuantPeptide> quantPeptideByQchIds = masterQuantPep.getQuantPeptideByQchIds();   
+        if (quantPeptideByQchIds == null) {
+            switch (id) {
+                case COLTYPE_RAW_ABUNDANCE:
+                    lazyData.setData(Integer.valueOf(0));
+                    break;
+                case COLTYPE_ABUNDANCE:
+                    lazyData.setData(Float.valueOf(0));
+                    break;
+            }
+        } else {
+            QuantChannelInfo qcinfo = (QuantChannelInfo)getSingleValue(QuantChannelInfo.class);
+            DQuantPeptide quantPeptide = quantPeptideByQchIds.get(qcinfo.getQuantChannels()[nbQc].getId());
+            if (quantPeptide == null) {
+                switch (id) {
+                    case COLTYPE_RAW_ABUNDANCE:
+                        lazyData.setData(Integer.valueOf(0));
+                        break;
+                    case COLTYPE_ABUNDANCE:
+                        lazyData.setData(Float.valueOf(0));
+                        break;
+                }   
+            } else {
+                switch (id) {
+                    case COLTYPE_ABUNDANCE:
+                        lazyData.setData((quantPeptide.getAbundance() == null || quantPeptide.getAbundance().isNaN()) ? Float.valueOf(0) : quantPeptide.getAbundance());
+                        break;
+                    case COLTYPE_RAW_ABUNDANCE:
+                        lazyData.setData((quantPeptide.getRawAbundance() == null || quantPeptide.getRawAbundance().isNaN()) ? Float.valueOf(0) : quantPeptide.getRawAbundance());
+                        break;                                   
+                }
+            }
+        }
+       return lazyData;
     }
 
-    return null; // should never happen
+    
   }
   
 
   public void setData(Long taskId, ArrayList<PTMCluster> proteinPTMClusterArray) {
     m_ptmClusters = proteinPTMClusterArray;
     m_taskId = taskId;
-    if(m_ptmClusters != null && !m_ptmClusters.isEmpty()){
-        m_ptmDataset = m_ptmClusters.get(0).getPTMDataset();
-    } 
-    
     m_modificationInfo ="";
-
-    fireTableDataChanged();
+    QuantChannelInfo qcInfo = (QuantChannelInfo) getSingleValue(QuantChannelInfo.class);
+    m_isQuantitationDS = qcInfo != null;
+    if(qcInfo != null) {
+        m_quantChannelNumber = qcInfo.getQuantChannels().length;            
+        m_quantChannels = qcInfo.getQuantChannels(); 
+    } else {
+        //reset value
+        m_quantChannelNumber = 0;
+        m_quantChannels = null;
+    }
+    fireTableStructureChanged();
   }
 
   public String getModificationsInfo() {
@@ -354,8 +406,27 @@ public class ProteinPTMClusterTableModel extends LazyTableModel implements Globa
   }
 
   public void dataUpdated() {
-    
+        //Verify if strructure changed
+        QuantChannelInfo qcInfo = (QuantChannelInfo) getSingleValue(QuantChannelInfo.class);
+        boolean isQuandDS = qcInfo != null;        
+        boolean structChanged = false;
+        if((isQuandDS && m_isQuantitationDS) || (!isQuandDS && !m_isQuantitationDS)){
+            if(m_quantChannelNumber != qcInfo.getQuantChannels().length ){                
+                m_quantChannelNumber = qcInfo.getQuantChannels().length; 
+                m_quantChannels = qcInfo.getQuantChannels();
+                structChanged = true;
+            }
+                
+        } else {
+            m_isQuantitationDS = isQuandDS;
+            m_quantChannelNumber = qcInfo.getQuantChannels().length;            
+            m_quantChannels = qcInfo.getQuantChannels(); 
+            structChanged = true;
+        }
+        
     fireTableDataChanged();
+    if(structChanged)
+        fireTableStructureChanged();
 
   }
 
@@ -512,7 +583,21 @@ public class ProteinPTMClusterTableModel extends LazyTableModel implements Globa
 
   @Override
   public String getExportColumnName(int col) {
-    return getColumnName(col);
+    if (col <= LAST_STATIC_COLUMN+1) {
+        return getColumnName(col);
+    } else if (m_isQuantitationDS) {
+       int nbQc = (col - COLTYPE_START_QUANT_INDEX) / m_columnNamesQC.length;
+            int id = col - COLTYPE_START_QUANT_INDEX - (nbQc * m_columnNamesQC.length);
+
+            StringBuilder sb = new StringBuilder();
+            sb.append(m_columnNamesQC[id]);
+            sb.append(" ");
+            sb.append(m_quantChannels[nbQc].getName());
+
+            return sb.toString();
+    } else {
+        return ""; // should not happen
+    }
   }
 
   @Override

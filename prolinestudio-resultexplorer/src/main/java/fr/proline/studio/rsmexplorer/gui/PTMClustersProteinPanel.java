@@ -56,6 +56,8 @@ import org.jdesktop.swingx.JXTable;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinPTMClusterTableModel;
 import java.util.List;
+import javax.swing.table.TableColumn;
+import org.jdesktop.swingx.table.TableColumnExt;
 
 /**
  *
@@ -89,7 +91,8 @@ public class PTMClustersProteinPanel extends HourglassPanel implements DataBoxPa
 
     }
 
-    //VDS TODO : Get PTMDataset or clusters
+    
+    private boolean m_hideFirstTime = true;
     public void setData(Long taskId, ArrayList<PTMCluster> ptmClusters, boolean finished) {
 
 
@@ -100,6 +103,10 @@ public class PTMClustersProteinPanel extends HourglassPanel implements DataBoxPa
         if ((ptmClusters != null) && (ptmClusters.size() > 0)) {
             m_ptmClusterProteinTable.getSelectionModel().setSelectionInterval(0, 0);
             m_markerContainerPanel.setMaxLineNumber(ptmClusters.size());
+            if (m_hideFirstTime) {
+                setColumnsVisibility();
+                m_hideFirstTime = false;
+            }
 
         }
         
@@ -115,7 +122,7 @@ public class PTMClustersProteinPanel extends HourglassPanel implements DataBoxPa
 
     public void dataUpdated(SubTask subTask, boolean finished) {
         m_ptmClusterProteinTable.dataUpdated(subTask, finished);
-        ProteinPTMClusterTableModel model = ((ProteinPTMClusterTableModel) ((CompoundTableModel)m_ptmClusterProteinTable.getModel()).getBaseModel());
+        ProteinPTMClusterTableModel model = ((ProteinPTMClusterTableModel) ((CompoundTableModel)m_ptmClusterProteinTable.getModel()).getBaseModel());        
         m_countModificationTextField.setText(model.getModificationsInfo());
     }
 
@@ -253,9 +260,20 @@ public class PTMClustersProteinPanel extends HourglassPanel implements DataBoxPa
         layeredPane.add(proteinPTMClusterPanel, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(m_infoToggleButton.getInfoPanel(), JLayeredPane.PALETTE_LAYER);  
         layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER+1));
-
+        setColumnsVisibility();
     }
     
+    private void setColumnsVisibility() {
+        // hide the rawAbundance  and selectionLevel columns
+        List<Integer> listIdsToHide = ((ProteinPTMClusterTableModel) ((CompoundTableModel) m_ptmClusterProteinTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
+        List<TableColumn> columns = m_ptmClusterProteinTable.getColumns(true);
+        for (Integer id : listIdsToHide) {
+            boolean columnVisible = ((TableColumnExt) columns.get(id)).isVisible();
+            if (columnVisible) {
+                m_ptmClusterProteinTable.getColumnExt(m_ptmClusterProteinTable.convertColumnIndexToView(id)).setVisible(false);
+            }
+        }
+    }
     
     private JPanel createProteinPTMClusterPanel() {
         
@@ -433,7 +451,7 @@ public class PTMClustersProteinPanel extends HourglassPanel implements DataBoxPa
 
                     int nbRows = model.getRowCount(); // loop through filtered DProteinPTMSite
                     for (int i = 0; i < nbRows; i++) {
-                        proteinPTMCluster.add((PTMCluster) model.getValueAt(i, ProteinPTMClusterTableModel.COLTYPE_HIDDEN_PROTEIN_PTM));
+                        proteinPTMCluster.add((PTMCluster) model.getRowValue(PTMCluster.class, i));
                     }  
 
 //                    String modification =  ProteinPTMSiteTableModelProcessing.calculateDataWORedundance(model, new ArrayList<>(), new ArrayList<>(), new HashMap<>(), proteinPTMCluster,  new HashMap<>());        
@@ -487,6 +505,7 @@ public class PTMClustersProteinPanel extends HourglassPanel implements DataBoxPa
             selectionWillBeRestored(true);
             try {
                 ((ProteinPTMClusterTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
+                setColumnsVisibility();
             } finally {
                 selectionWillBeRestored(false);
             }
@@ -502,10 +521,9 @@ public class PTMClustersProteinPanel extends HourglassPanel implements DataBoxPa
                 
                 // if the subtask correspond to the loading of the data of the sorted column,
                 // we keep the row selected visible
-                //VDS TODO: get SubTask info 
-//                if (((keepLastAction == LazyTable.LastAction.ACTION_SELECTING ) || (keepLastAction == LazyTable.LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((CompoundTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
-//                    scrollRowToVisible(rowSelectedInView);
-//                }
+                if (((keepLastAction == LazyTable.LastAction.ACTION_SELECTING ) || (keepLastAction == LazyTable.LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((CompoundTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
+                    scrollRowToVisible(rowSelectedInView);
+                }
                     
             }
 

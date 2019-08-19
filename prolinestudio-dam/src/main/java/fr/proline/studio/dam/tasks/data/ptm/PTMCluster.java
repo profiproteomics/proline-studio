@@ -5,6 +5,7 @@
  */
 package fr.proline.studio.dam.tasks.data.ptm;
 
+import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
@@ -33,6 +34,7 @@ public class PTMCluster {
     private DProteinMatch m_proteinMatch;    
     private DMasterQuantProteinSet m_masterQuantProteinSet;
     private DPeptideMatch m_bestPeptideMatch;
+    private DMasterQuantPeptide m_bestQuantPeptideMatch;
     private List<PTMPeptideInstance> m_parentPTMPeptideInstances;
     private List<PTMPeptideInstance> m_leafPTMPeptideInstances;
     private List<DPeptideInstance> m_parentPeptideInstances;
@@ -75,6 +77,14 @@ public class PTMCluster {
 
     public DPeptideMatch getBestPeptideMatch() {
         return m_bestPeptideMatch;
+    }
+    
+    public void setBestQuantPeptideMatch(DMasterQuantPeptide quantPeptideMatch) {
+        m_bestQuantPeptideMatch = quantPeptideMatch;
+    }
+
+    public DMasterQuantPeptide getBestQuantPeptideMatch() {
+        return m_bestQuantPeptideMatch;
     }
 
     public List<DPeptideInstance> getParentPeptideInstances() {

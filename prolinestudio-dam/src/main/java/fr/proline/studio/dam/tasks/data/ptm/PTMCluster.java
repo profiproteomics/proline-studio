@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -24,7 +25,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author VD225637
  */
-public class PTMCluster {
+public class PTMCluster implements Comparable<PTMCluster>{
     
       private final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ptm");
 
@@ -205,5 +206,24 @@ public class PTMCluster {
 
     public Object getExpressionValue() {
       return m_expressionValue;
+    }
+
+    @Override
+    public int compareTo(PTMCluster o) {                                 
+        if(o == null)
+            return 1;
+                            
+        Integer start = Integer.MAX_VALUE;
+        Optional<Integer> optStart = getParentPTMPeptideInstances().stream().map( pi -> pi.getStartPosition()).sorted().findFirst();                            
+        if(optStart.isPresent())
+            start = optStart.get();
+                            
+        Integer o2Start = Integer.MAX_VALUE;
+        Optional<Integer> o2OptStart = o.getParentPTMPeptideInstances().stream().map( pi -> pi.getStartPosition()).sorted().findFirst();
+        if(o2OptStart.isPresent())
+            o2Start = o2OptStart.get();
+                            
+                            
+        return Integer.compare(start, o2Start);        
     }
 }

@@ -35,6 +35,7 @@ import fr.proline.studio.rsmexplorer.gui.PTMClustersProteinPanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.types.XicMode;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -517,6 +518,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                 List<PTMCluster> clusters = ((PTMClustersProteinPanel) getDataBoxPanelInterface()).getSelectedProteinPTMClusters();
                 List<PTMPeptideInstance> ptmPeptideInstances =  new ArrayList<>();
                 if(!clusters.isEmpty()){
+                    Collections.sort(clusters);                    
                     //get First Selected Cluster, and consider only PTMCluster on same protein match
                     Long protMatchId = ((PTMClustersProteinPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster().getProteinMatch().getId();
                     clusters.stream().filter(cluster -> protMatchId.equals(cluster.getProteinMatch().getId())).forEach(cluster -> {ptmPeptideInstances.addAll(cluster.getParentPTMPeptideInstances()); });                    

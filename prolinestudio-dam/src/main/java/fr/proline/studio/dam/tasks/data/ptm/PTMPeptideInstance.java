@@ -10,8 +10,9 @@ import java.util.List;
 
 public class PTMPeptideInstance {
 
-  private DPeptideInstance m_peptideInstance;
-  private List<PTMSite> m_sites = new ArrayList<>();
+  private final DPeptideInstance m_peptideInstance;
+  private final List<PTMSite> m_sites = new ArrayList<>();
+  private final List<PTMCluster> m_clusters = new ArrayList<>();
   private Integer m_startPosition;
 
   public PTMPeptideInstance(DPeptideInstance peptideInstance) {
@@ -47,6 +48,14 @@ public class PTMPeptideInstance {
 
   public List<PTMSite> getSites() {
     return m_sites;
+  }
+   
+  public void addCluster(PTMCluster cluster){
+      m_clusters.add(cluster);
+  }
+   
+  public List<PTMCluster> getClusters(){
+      return m_clusters;
   }
 
   // !! VDS FIXME Add better solution to get Info ==> lazy data upload !!!

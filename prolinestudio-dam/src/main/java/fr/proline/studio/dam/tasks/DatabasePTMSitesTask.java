@@ -19,7 +19,6 @@ import fr.proline.core.orm.msi.dto.DInfoPTM;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DPtmSiteProperties;
-import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;

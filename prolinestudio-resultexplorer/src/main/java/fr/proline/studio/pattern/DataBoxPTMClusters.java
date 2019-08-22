@@ -238,6 +238,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                 if (finished) {
                     m_loadPepMatchOnGoing = false;
                     m_logger.debug(" Task "+taskId+" DONE. Should propagate changes or get Xic DATA ");
+                    m_ptmDataset.updateParentPTMPeptideInstanceClusters();
                     if(isXicResult()){
                         loadXicData(loadingId);
                     } else {

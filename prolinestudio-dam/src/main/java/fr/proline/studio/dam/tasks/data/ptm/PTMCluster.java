@@ -121,7 +121,7 @@ public class PTMCluster {
             return null;
         if (m_parentPTMPeptideInstances == null) {
             List<Integer> sitesPosition = m_sites.stream().map(site -> site.getPositionOnProtein()).collect(Collectors.toList());            
-            Collection<PTMPeptideInstance> ptmPeptides = m_ptmDataset.getPTMPeptideInstance(m_proteinMatch.getId());
+            Collection<PTMPeptideInstance> ptmPeptides = m_ptmDataset.getPTMPeptideInstances(m_proteinMatch.getId());
             List<Long> pepIds = Arrays.asList(m_jsonCluster.peptideIds);
             m_parentPTMPeptideInstances = new ArrayList<>();
             for (PTMPeptideInstance ptmPepI : ptmPeptides) {
@@ -146,7 +146,7 @@ public class PTMCluster {
         if(m_sites == null || m_sites.isEmpty())
             return null;
         if (m_leafPTMPeptideInstances == null) {
-            m_leafPTMPeptideInstances = new ArrayList<>();
+            m_leafPTMPeptideInstances = new ArrayList<>();            
             Set<PTMSitePeptideInstance> allPTMSitePepInst = new HashSet<>();
             List<Long> pepIds = Arrays.asList(m_jsonCluster.peptideIds);   
             
@@ -160,11 +160,20 @@ public class PTMCluster {
             allPTMSitePepInst.forEach(ptmSitePepIns -> {
                 if(!parentPTMPepInstanceDone.contains(ptmSitePepIns.getParentPTMPeptideInstance())){
                     ptmSitePepIns.getLeafPepInstances().forEach(pepI -> { 
+                        List<PTMPeptideInstance> dsPtmPepIns = m_ptmDataset.getLeafPTMPeptideInstances(m_proteinMatch.getId(),pepI.getId());
                         PTMPeptideInstance associatedParentPTMPepInst = ptmSitePepIns.getParentPTMPeptideInstance();
-                        PTMPeptideInstance leafPtmPepI = new PTMPeptideInstance(pepI); 
-                        leafPtmPepI.setStartPosition(associatedParentPTMPepInst.getStartPosition());
-                        associatedParentPTMPepInst.getSites().forEach(parentSite -> leafPtmPepI.addPTMSite(parentSite) );
-                        m_leafPTMPeptideInstances.add(leafPtmPepI);                        
+                        PTMPeptideInstance finalLeafPtmPepI = null;
+                        if(dsPtmPepIns == null || dsPtmPepIns.isEmpty()){
+                            finalLeafPtmPepI = new PTMPeptideInstance(pepI); 
+                            finalLeafPtmPepI.setStartPosition(associatedParentPTMPepInst.getStartPosition());
+                            finalLeafPtmPepI.addCluster(this);
+                            final PTMPeptideInstance leafPtmPepI = finalLeafPtmPepI;
+                            associatedParentPTMPepInst.getSites().forEach(parentSite -> leafPtmPepI.addPTMSite(parentSite) );
+                            m_leafPTMPeptideInstances.add(finalLeafPtmPepI); 
+                            m_ptmDataset.addLeafPTMPeptideInstance(leafPtmPepI, m_proteinMatch.getId());
+                        } else {
+                            m_leafPTMPeptideInstances.addAll(dsPtmPepIns);
+                        }
                     });
                     parentPTMPepInstanceDone.add(ptmSitePepIns.getParentPTMPeptideInstance());
                 }
@@ -172,7 +181,7 @@ public class PTMCluster {
                           
         }
         return m_leafPTMPeptideInstances;
-    }    
+    }
 
     public List<PTMSite> getClusteredSites(){
         return m_sites;

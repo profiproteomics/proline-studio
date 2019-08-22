@@ -36,8 +36,9 @@ public class PTMDataset {
     private List<DInfoPTM> m_ptmOfInterest;
     private List<PTMCluster> m_ptmClusters;
     
-    private final Map<Long, Map<Long, List<PTMPeptideInstance>>> m_ptmPeptideByPeptideIdByProtMatchId = new HashMap<>();
-    
+    private final Map<Long, Map<Long, List<PTMPeptideInstance>>> m_parentPtmPepInstByPepIdByProtMatchId = new HashMap<>();
+    private final Map<Long, Map<Long, List<PTMPeptideInstance>>> m_leafPtmPepInstByPepInstIdByProtMatchId = new HashMap<>();
+        
     private Boolean m_isVersion2;
     
     public PTMDataset(DDataset dataset) {
@@ -135,8 +136,51 @@ public class PTMDataset {
         }
     }
 
-    public Collection<PTMPeptideInstance> getPTMPeptideInstance(Long proteinMatchId) {
-        Map<Long, List<PTMPeptideInstance>> m =  m_ptmPeptideByPeptideIdByProtMatchId.get(proteinMatchId);
+    
+    /**
+     * Get all PTMPeptideInstance defined for specified protein match Id.
+     * The returned PTMPeptideInstance correspond to parent PTMPeptideInstance
+     * 
+     * @param proteinMatchId
+     * @return 
+     */
+    public List<PTMPeptideInstance> getLeafPTMPeptideInstances(Long proteinMatchId, Long pepInstId) {
+        Map<Long, List<PTMPeptideInstance>> m =  m_leafPtmPepInstByPepInstIdByProtMatchId.get(proteinMatchId);
+        if(m != null)
+            return m.get(pepInstId);
+        else
+           return Collections.EMPTY_LIST;
+    }
+    
+    public void addLeafPTMPeptideInstance(PTMPeptideInstance pepInst, Long proteinMatchId){
+        Map<Long, List<PTMPeptideInstance>> m =  m_leafPtmPepInstByPepInstIdByProtMatchId.get(proteinMatchId);
+        if(m == null){
+            m = new HashMap<>();
+            List<PTMPeptideInstance> ptmPepInst = new ArrayList<>();
+            ptmPepInst.add(pepInst);
+            m.put( pepInst.getPeptideInstance().getId(), ptmPepInst );
+        } else if (m.get(pepInst.getPeptideInstance().getId()) == null){
+            List<PTMPeptideInstance> ptmPepInst = new ArrayList<>();
+            ptmPepInst.add(pepInst);            
+            m.put( pepInst.getPeptideInstance().getId(), ptmPepInst );
+        } else {
+            m.get(pepInst.getPeptideInstance().getId()).add(pepInst);
+        }
+            
+        
+        m_leafPtmPepInstByPepInstIdByProtMatchId.put(proteinMatchId,m);
+    }
+
+    
+    /**
+     * Get all PTMPeptideInstance defined for specified protein match Id.
+     * The returned PTMPeptideInstance correspond to parent PTMPeptideInstance
+     * 
+     * @param proteinMatchId
+     * @return 
+     */
+    public Collection<PTMPeptideInstance> getPTMPeptideInstances(Long proteinMatchId) {
+        Map<Long, List<PTMPeptideInstance>> m =  m_parentPtmPepInstByPepIdByProtMatchId.get(proteinMatchId);
         if(m != null)
             return m.values().stream().flatMap(entry -> entry.stream()).collect(Collectors.toList());           
         else
@@ -145,7 +189,7 @@ public class PTMDataset {
 
 
     /**
-     * return the PTMPeptideInstance corresponding to the specified peptide instance identifying specified ProteinMatch
+     * Get the parent PTMPeptideInstance corresponding to the specified peptide instance identifying specified ProteinMatch
      * If not yet defined, create a new PTMPeptideInstance
      * @param proteinMatch
      * @param peptideInstance
@@ -155,11 +199,11 @@ public class PTMDataset {
     public PTMPeptideInstance getPTMPeptideInstance(DProteinMatch proteinMatch, DPeptideInstance peptideInstance, Integer protPosition) {
 
         Long proteinMatchId = proteinMatch.getId();
-        if (!m_ptmPeptideByPeptideIdByProtMatchId.containsKey(proteinMatchId)) {
-            m_ptmPeptideByPeptideIdByProtMatchId.put(proteinMatchId, new HashMap<>());
+        if (!m_parentPtmPepInstByPepIdByProtMatchId.containsKey(proteinMatchId)) {
+            m_parentPtmPepInstByPepIdByProtMatchId.put(proteinMatchId, new HashMap<>());
         }
 
-        Map<Long, List<PTMPeptideInstance>> ptmPepInstanceByPepId = m_ptmPeptideByPeptideIdByProtMatchId.get(proteinMatchId);
+        Map<Long, List<PTMPeptideInstance>> ptmPepInstanceByPepId = m_parentPtmPepInstByPepIdByProtMatchId.get(proteinMatchId);
         PTMPeptideInstance foundPtmPepIns;
         
         List<PTMPeptideInstance> registeredPtmPepInsts =  ptmPepInstanceByPepId.get(peptideInstance.getPeptideId());
@@ -192,6 +236,17 @@ public class PTMDataset {
         }
 
         return foundPtmPepIns;
+    }
+    
+    public void updateParentPTMPeptideInstanceClusters(){
+        if(m_ptmClusters != null && !m_ptmClusters.isEmpty()){
+            m_ptmClusters.forEach( ptmC -> {
+                List<PTMPeptideInstance> ptmPepInsForCluster = ptmC.getParentPTMPeptideInstances();
+                ptmPepInsForCluster.forEach( peI -> peI.addCluster(ptmC));
+            } );
+            
+        }
+                
     }
     
 }

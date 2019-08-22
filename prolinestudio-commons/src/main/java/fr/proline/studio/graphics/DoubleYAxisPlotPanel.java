@@ -42,13 +42,13 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
     private ArrayList<PlotBaseAbstract> m_mainPlots;
     private ArrayList<PlotBaseAbstract> m_secondPlots;
 
-    private XAxis m_secondXAxis;
-    private YAxis m_secondYAxis;
+    private final XAxis m_secondXAxis;
+    private final YAxis m_secondYAxis;
 
     /**
      * second XAxis min max
      */
-    private double[] m_secondXBounds;
+    private final double[] m_secondXBounds;
     /**
      * second Yaxis min max
      */
@@ -58,9 +58,9 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
 
     public DoubleYAxisPlotPanel() {
         super();
-        m_plots = new ArrayList<PlotBaseAbstract>();
-        m_mainPlots = new ArrayList<PlotBaseAbstract>();
-        m_secondPlots = new ArrayList<PlotBaseAbstract>();
+        m_plots = new ArrayList<>();
+        m_mainPlots = new ArrayList<>();
+        m_secondPlots = new ArrayList<>();
         m_secondXAxis = new XAxis(this);
         m_secondYAxis = new YAxis(this);
         m_secondYAxis.setSecondAxis();
@@ -120,6 +120,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         m_secondYAxisColor = color;
     }
 
+    @Override
     public void setAxisXSpecificities(boolean isIntegerY, boolean isEnum, boolean isPixel) {
         if (m_xAxis != null) {
             this.m_xAxis.setSpecificities(isIntegerY, isEnum, isPixel);
@@ -138,6 +139,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         }
     }
 
+    @Override
     public void setYAxisBounds(double min, double max) {
         super.setYAxisBounds(min, max);
         if (m_plots != null && !m_plots.isEmpty()) {
@@ -177,6 +179,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         m_isMainPlotEmpty = (getMinMaxPlots(m_mainPlots)[3] == 0);//YAxis, max =0
     }
 
+    @Override
     public void updatePlots(int[] cols, String parameterZ) {
         for (PlotBaseAbstract plot : m_mainPlots) {
             plot.update(cols, parameterZ);

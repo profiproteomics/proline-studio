@@ -42,6 +42,7 @@ public class YAxis extends Axis {
 
     }
 
+    @Override
     public void setSize(int x, int y, int width, int height) {
         super.setSize(x, y, width, height);
         calculLineXStart();
@@ -107,7 +108,7 @@ public class YAxis extends Axis {
             g.drawString(m_title, baseline, m_y + (m_height + titleWidth) / 2);
             // restore font (necessary due to affine transform
             g.setFont(prevFont);
-        }
+        }               
     }
 
     @Override

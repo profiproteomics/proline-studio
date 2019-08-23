@@ -21,6 +21,7 @@ public class YAxis extends Axis {
     private int m_lastHeight;
     private boolean m_isLeftAxis;
     private int m_lineXStart;
+    private Color m_rightRefColor;
 
     public YAxis(BasePlotPanel p) {
         super(p);
@@ -31,6 +32,10 @@ public class YAxis extends Axis {
     public void setSecondAxis() {
         this.m_isLeftAxis = false;
 
+    }
+
+    public void setColorOnTitle(Color color) {
+        m_rightRefColor = color;
     }
 
     private void calculLineXStart() {
@@ -99,16 +104,26 @@ public class YAxis extends Axis {
                 g.setColor(Color.black);
             }
             int titleWidth = m_titleFontMetrics.stringWidth(m_title);
-
+            int width = BasePlotPanel.GAP_AXIS_TITLE;
             int ascent = m_titleFontMetrics.getAscent();
             int descent = m_titleFontMetrics.getDescent();
+
             int bottom = (m_isLeftAxis) ? m_x : m_lineXStart + BasePlotPanel.GAP_FIGURES_Y;
-            int top = bottom + BasePlotPanel.GAP_AXIS_TITLE;
+            int top = bottom + width;
             int baseline = top + ((bottom - top) / 2) - ((ascent + descent) / 2) + ascent;
-            g.drawString(m_title, baseline, m_y + (m_height + titleWidth) / 2);
+            int sideLength = width / 2;
+            if (!m_isLeftAxis && m_rightRefColor != null) {
+                Color txtColor = g.getColor();
+                g.setColor(m_rightRefColor);
+                int bx = bottom + width / 3;
+                int by = m_y + (m_height - titleWidth - sideLength) / 2;
+                g.fillRect(bx, by, sideLength, sideLength);//draw a colored square
+                g.setColor(txtColor);
+            }
+            g.drawString(m_title, baseline, m_y + (m_height + titleWidth + sideLength) / 2);
             // restore font (necessary due to affine transform
             g.setFont(prevFont);
-        }               
+        }
     }
 
     @Override
@@ -182,6 +197,7 @@ public class YAxis extends Axis {
 
     /**
      * paint linear axis with ticks
+     *
      * @param g
      * @param ticks
      */

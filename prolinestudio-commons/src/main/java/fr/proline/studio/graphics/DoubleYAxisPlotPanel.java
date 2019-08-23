@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 public class DoubleYAxisPlotPanel extends BasePlotPanel {
 
     private static final Logger m_logger = LoggerFactory.getLogger(DoubleYAxisPlotPanel.class);
-    
+
     String m_secondYAxisTitle = "";
     private Color m_secondYAxisColor;
     private ArrayList<PlotBaseAbstract> m_mainPlots;
@@ -81,13 +81,13 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
     }
 
     public boolean hasMainPlots() {
-      return m_mainPlots.size() > 0;
+        return m_mainPlots.size() > 0;
     }
-    
+
     public boolean hasAuxiliaryPlots() {
-      return m_secondPlots.size() > 0;
+        return m_secondPlots.size() > 0;
     }
-    
+
     public void addAuxiliaryPlot(PlotXYAbstract plot) {
         this.m_secondPlots.add(plot);
         this.m_plots.add(plot);
@@ -143,20 +143,21 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
     public void setYAxisBounds(double min, double max) {
         super.setYAxisBounds(min, max);
         if (m_plots != null && !m_plots.isEmpty()) {
-          preparePaint();
+            preparePaint();
         }
     }
 
     public void setSecondaryYAxisBounds(double min, double max) {
         m_secondYBounds = new double[]{min, max};
         if (m_secondPlots != null & !m_secondPlots.isEmpty()) {
-          preparePaint();
+            preparePaint();
         }
     }
 
     public void preparePaint() {
         updateAxis();
         m_secondYAxis.setTitle(m_secondYAxisTitle);
+        m_secondYAxis.setColorOnTitle(m_secondYAxisColor);
     }
 
     private void updateAxis() {
@@ -187,16 +188,6 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         for (PlotBaseAbstract plot : m_secondPlots) {
             plot.update(cols, parameterZ);
         }
-        //setAxisTitle();
-
-    }
-
-    private void setAxisTitle() {
-        if (!(m_mainPlots == null || m_mainPlots.isEmpty())) {
-            this.m_xAxis.setTitle(m_mainPlots.get(0).getXAxisTitle());
-            this.m_yAxis.setTitle(m_mainPlots.get(0).getYAxisTitle());
-        }
-        this.m_secondYAxis.setTitle(m_secondPlots.get(0).getXAxisTitle());
     }
 
     /**
@@ -370,12 +361,6 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
                     //m_logger.debug("->seconde Axis Y");                    
                     m_secondYAxis.setSize(m_plotArea.width + yAxisWidth, yAxisY, yAxisWidth, yAxisHeight);
                     m_secondYAxis.paint(g2d);
-//                    int x = m_plotArea.x + m_plotArea.width + BasePlotPanel.GAP_FIGURES_Y;
-//                    int y = m_plotArea.y;
-//                    if (m_secondYAxisColor != null) {
-//                        g2d.setColor(m_secondYAxisColor);
-//                    }
-//                    g2d.fillRect(x, y, 10, 10);  //paint a rectangle to indicate the plot color on 2nd Axis Y
                 }
             }
             //4 paint plot with grid
@@ -513,7 +498,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         int x = e.getX();
         int y = e.getY();
         //if (m_plots.get(0).inside(x, y)) {
-        if (insidePlotArea(x, y, m_xAxis, m_yAxis) ||insidePlotArea(x, y, m_secondXAxis, m_secondYAxis) ) {
+        if (insidePlotArea(x, y, m_xAxis, m_yAxis) || insidePlotArea(x, y, m_secondXAxis, m_secondYAxis)) {
             // Mouse Pressed in the plot area
 
             // deselect axis
@@ -849,8 +834,11 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
                 }
 
                 if (nbPlotTooltip < 3) {
+                    if (nbPlotTooltip != 0) {
+                        m_sbTooltip.append("<br>");
+                    }
                     m_sbTooltip.append(toolTipForPlot);
-                    m_sbTooltip.append("<br/>");
+                    m_sbTooltip.append("<br>");
                 }
 
                 nbPlotTooltip++;
@@ -872,8 +860,11 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
                 }
 
                 if (nbPlotTooltip < 3) {
+                    if (nbPlotTooltip != 0) {
+                        m_sbTooltip.append("<br>");
+                    }
                     m_sbTooltip.append(toolTipForPlot);
-                    m_sbTooltip.append("<br/>");
+                    m_sbTooltip.append("<br>");
                 }
 
                 nbPlotTooltip++;
@@ -914,7 +905,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         double oldMaxX = m_xAxis.getMaxValue();
         double oldMinY = m_yAxis.getMinValue();
         double oldMaxY = m_yAxis.getMaxValue();
-        
+
         double factor = 0.20;
         double xValue = m_xAxis.pixelToValue(e.getX());
         double x2Value = m_secondXAxis.pixelToValue(e.getX());
@@ -930,7 +921,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         double newY2Min = m_secondYAxis.getMinValue() + (m_secondYAxis.getMinValue() - y2Value) * factor * e.getWheelRotation();
         double newY2Max = m_secondYAxis.getMaxValue() - (y2Value - m_secondYAxis.getMaxValue()) * factor * e.getWheelRotation();
         //if (m_plots.get(0).inside(e.getX(), e.getY())) {//mouse wheel move on m_plotArea
-        if (insidePlotArea(e.getX(), e.getY(),m_xAxis, m_yAxis) || insidePlotArea(e.getX(), e.getY(),m_secondXAxis, m_secondYAxis)) {//mouse wheel move on m_plotArea
+        if (insidePlotArea(e.getX(), e.getY(), m_xAxis, m_yAxis) || insidePlotArea(e.getX(), e.getY(), m_secondXAxis, m_secondYAxis)) {//mouse wheel move on m_plotArea
             m_xAxis.setRange(newXmin, newXmax);
             m_secondXAxis.setRange(newX2Min, newX2Max);
             m_yAxis.setRange(newYmin, newYmax);
@@ -949,5 +940,5 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         }
         fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY, oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue());
     }
-    
+
 }

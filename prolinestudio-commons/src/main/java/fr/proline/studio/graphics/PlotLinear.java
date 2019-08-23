@@ -52,7 +52,7 @@ public class PlotLinear extends PlotXYAbstract {
     // could be an imposed color to display data, a title...
     private PlotInformation m_plotInformation = null;
 
-    private static final int SELECT_SENSIBILITY = 8;
+    private static final int SELECT_SENSIBILITY = 2;
     private static final int SELECT_SENSIBILITY_POW = SELECT_SENSIBILITY * SELECT_SENSIBILITY;
 
     private static final String PLOT_SCATTER_COLOR_KEY = "PLOT_SCATTER_COLOR";
@@ -148,7 +148,6 @@ public class PlotLinear extends PlotXYAbstract {
         }
         if (m_plotInformation != null && m_plotInformation.getPlotTitle() != null && !m_plotInformation.getPlotTitle().isEmpty()) {
             m_sb.append(m_plotInformation.getPlotTitle());
-            m_sb.append("<BR>");
         } else {
             m_sb.append(m_compareDataInterface.getDataValueAt(indexFound, m_compareDataInterface.getInfoColumn()).toString());
         }
@@ -159,9 +158,9 @@ public class PlotLinear extends PlotXYAbstract {
                 m_sb.append(key);
                 m_sb.append(": ");
                 m_sb.append(value);
-                m_sb.append("<BR>");
+                m_sb.append("<br>");
             }
-            m_sb.append("<BR>");
+            m_sb.append("<br>");
         }
         String labelX;
         if (m_plotPanel.getXAxis().isEnum()) {

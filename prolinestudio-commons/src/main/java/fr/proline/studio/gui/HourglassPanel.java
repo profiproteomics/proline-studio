@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 /**
- * Panel being able to display a loading message
+ * Panel being able to display a ""Calculating.../Loading..." message
  * @author JM235353
  */
 public class HourglassPanel extends JPanel implements ActionListener {

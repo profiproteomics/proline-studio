@@ -12,6 +12,6 @@ import fr.proline.studio.table.LazyTableModelInterface;
  * Interface of Type Table Model which offers all the functionnalities of other defined interfaces
  * @author JM235353
  */
-public interface GlobalTableModelInterface extends LazyTableModelInterface, DecoratedTableModelInterface, ExtendedTableModelInterface, ExtraDataForTableModelInterface, TableModel, FilterProviderInterface, ProgressInterface, BestGraphicsInterface, ExportModelInterface {
+public interface GlobalTableModelInterface extends LazyTableModelInterface, DecoratedTableModelInterface, ExtendedTableModelInterface, TableModel, FilterProviderInterface, ProgressInterface, BestGraphicsInterface, ExportModelInterface {
     public GlobalTableModelInterface getFrozzenModel();
 }

@@ -25,6 +25,8 @@ import java.util.Iterator;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.jdesktop.swingx.JXTable;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -36,7 +38,7 @@ import org.jdesktop.swingx.JXTable;
  * @author JM235353
  */
 public abstract class AbstractDataBox implements ChangeListener, ProgressInterface, SplittedPanelContainer.UserActions {
-
+    //private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.AbstractDataBox");
     // Panel corresponding to this box
     private DataBoxPanelInterface m_panel;
 
@@ -526,7 +528,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     public void propagateDataChanged(Class dataType) {
         if (m_nextDataBoxArray != null) {
             for (AbstractDataBox nextDataBox : m_nextDataBoxArray) {
-                if (nextDataBox.isDataDependant(dataType)) {
+                if (nextDataBox.isDataDependant(dataType)) { 
+                    //m_logger.debug("nexDataBox:{} isDataDependant for datatype: {}",nextDataBox.getTypeName(), dataType.getName());
                     nextDataBox.dataChanged();
                 }
                 nextDataBox.propagateDataChanged(dataType);

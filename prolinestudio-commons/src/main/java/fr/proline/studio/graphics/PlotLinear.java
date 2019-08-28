@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import java.awt.Stroke;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,10 +58,6 @@ public class PlotLinear extends PlotXYAbstract {
 
     private static final String PLOT_SCATTER_COLOR_KEY = "PLOT_SCATTER_COLOR";
 
-    private static final BasicStroke STROKE_1 = new BasicStroke(1.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
-    private static final BasicStroke STROKE_2 = new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
-    private boolean strokeFixed = false;
-
     private ColorOrGradientParameter m_colorParameter;
 
     // for linear plots, draw (or not) the points
@@ -69,10 +66,16 @@ public class PlotLinear extends PlotXYAbstract {
     // draw a line between points, even if there is a missing value
     private boolean m_isDrawGap = true;
 
+    private static final BasicStroke STROKE_1 = new BasicStroke(1.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+    private static final BasicStroke STROKE_2 = new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+    private boolean strokeFixed = false;
+
     private BasicStroke m_strokeLine = STROKE_1;
     private BasicStroke m_userStrock = null;
-    private BasicStroke m_edgeStrock = new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
-    ;
+    private static final BasicStroke EDGE_STROKE = new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+    private static final BasicStroke SELECTED_STROCK = new BasicStroke(4f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+    private static final Color SELECTED_COLOR = new Color(0,120,215); //= JTable default getSelectionColor, blue
+     
     private ArrayList<ParameterList> m_parameterListArray = null;
 
     private boolean displayAntiAliasing = true;
@@ -680,6 +683,9 @@ public class PlotLinear extends PlotXYAbstract {
 
         int size = m_dataX == null ? 0 : m_dataX.length;
         if (size > 0) {
+            if (this.getPlotInformation().isSelected()) {
+                paintExtendedLinear(g, SELECTED_COLOR, SELECTED_STROCK, 0);
+            }
             int x0 = xAxis.valueToPixel(m_dataX[0]);
             int y0 = yAxis.valueToPixel(m_dataY[0]);
             boolean isDef0 = !Double.valueOf(m_dataX[0]).isNaN() && !Double.valueOf(m_dataY[0]).isNaN();
@@ -711,11 +717,11 @@ public class PlotLinear extends PlotXYAbstract {
                 y0 = y;
                 isDef0 = isDef;
             }
-            if (m_tolerance != 0) {
-                paintEdge(g, plotColor, m_tolerance);
-                paintEdge(g, plotColor, -m_tolerance);
-            }
 
+            if (m_tolerance != 0) {
+                paintExtendedLinear(g, plotColor, EDGE_STROKE, m_tolerance);
+                paintExtendedLinear(g, plotColor, EDGE_STROKE, -m_tolerance);
+            }
         }
     }
 
@@ -726,7 +732,14 @@ public class PlotLinear extends PlotXYAbstract {
         this.paint(g, xAxis, yAxis);
     }
 
-    private void paintEdge(Graphics2D g, Color color, double tolerance) {
+    /**
+     * if tolerance is not 0, draw a line parallel with the main curve
+     *
+     * @param g
+     * @param color
+     * @param tolerance, the distance to de main curve
+     */
+    private void paintExtendedLinear(Graphics2D g, Color color, Stroke strock, double tolerance) {
         int x0, y0;
         int x, y;
         XAxis xAxis = m_plotPanel.getXAxis();
@@ -740,17 +753,9 @@ public class PlotLinear extends PlotXYAbstract {
             boolean isDef = !Double.valueOf(m_dataX[i]).isNaN() && !Double.valueOf(m_dataY[i]).isNaN();
             x = xAxis.valueToPixel(m_dataX[i]);
             y = yAxis.valueToPixel(m_dataY[i] + tolerance);
-
-            g.setStroke(m_edgeStrock);
+            g.setStroke(strock);
             g.setColor(color);
-
-            if (m_isDrawPoints && isDef) {
-                g.fillOval(x - 3, y - 3, 6, 6);
-            }
-            if (m_isDrawGap || (!m_isDrawGap && isDef && isDef0)) {
-                g.drawLine(x0, y0, x, y);
-            }
-
+            g.drawLine(x0, y0, x, y);
             x0 = x;
             y0 = y;
             isDef0 = isDef;
@@ -804,6 +809,14 @@ public class PlotLinear extends PlotXYAbstract {
         return this.m_plotInformation;
     }
 
+    /**
+     * Change stroke. when isPaintMarker, the strock is more wide. exemple:
+     * called by mouseMoved, if Plotis Selected, then this linear plot paint a
+     * wider stroke
+     *
+     * @param isPaintMarker
+     * @return
+     */
     @Override
     public boolean setIsPaintMarker(boolean isPaintMarker) {
         if (strokeFixed) {

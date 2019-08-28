@@ -50,6 +50,7 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
     protected String m_modelName;
 
     protected boolean m_isXICMode = true;
+    private boolean m_isSelected = false;
 
     public PeptideTableModel(LazyTable table) {
         super(table);
@@ -132,7 +133,6 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
         this.m_isXICMode = isXICMode;
 
         fireTableDataChanged();
-
     }
 
     public void dataUpdated() {
@@ -228,6 +228,7 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
     @Override
     public PlotInformation getPlotInformation() {
         PlotInformation plotInformation = new PlotInformation();
+        plotInformation.setSelected(m_isSelected);
         if (m_quantPeptide.getPeptideInstance() != null && m_quantPeptide.getPeptideInstance().getBestPeptideMatch() != null) {
             Peptide peptide = m_quantPeptide.getPeptideInstance().getBestPeptideMatch().getPeptide();
             StringBuilder sb = new StringBuilder(peptide.getSequence());
@@ -355,7 +356,7 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
     @Override
     public String toString() {
         String lineString = "\n";
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < m_columnNames.length; i++) {
             lineString += this.getColumnName(i) + "; ";
         }
         for (int row = 0; row < this.getRowCount(); row++) {
@@ -365,6 +366,10 @@ public class PeptideTableModel extends LazyTableModel implements GlobalTableMode
             }
         }
         return lineString;
+    }
+
+    public void setSelected(boolean isSelected) {
+        m_isSelected = isSelected;
     }
 
 }

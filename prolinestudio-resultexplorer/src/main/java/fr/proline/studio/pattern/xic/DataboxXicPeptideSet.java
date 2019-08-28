@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.SecondAxisTableModelInterface;
-import fr.proline.studio.rsmexplorer.gui.xic.PeptideTableModel;
+import fr.proline.studio.rsmexplorer.gui.xic.XICComparePeptideTableModel;
 import fr.proline.studio.rsmexplorer.gui.xic.XicAbundanceProteinTableModel;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -46,24 +46,24 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
 
     private boolean m_isXICMode = true;
     //Display only a subList of peptides instances not all from Peptide/ProteinSet
-    private boolean m_displayPeptidesSubList = false; 
+    private boolean m_displayPeptidesSubList = false;
 
     public DataboxXicPeptideSet() {
         this(false);
     }
-    
+
     public DataboxXicPeptideSet(boolean displayPeptidesSubList) {
         super((displayPeptidesSubList ? DataboxType.DataboxXicPeptideSetShortList : DataboxType.DataboxXicPeptideSet), DataboxStyle.STYLE_XIC);
-        
+
         m_displayPeptidesSubList = displayPeptidesSubList;
 
         // Name of this databox
-        if(!m_displayPeptidesSubList) {
+        if (!m_displayPeptidesSubList) {
             m_typeName = "Quanti Peptides";
             m_description = "All Quanti. Peptides of a ProteinSet";
         } else {
             m_typeName = "Quanti Peptides";
-            m_description = "Short list of Quanti. Peptides";            
+            m_description = "Short list of Quanti. Peptides";
         }
 
         // Register Possible in parameters
@@ -148,26 +148,28 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         if (!allPeptides) {
             DProteinSet newProSet = (DProteinSet) m_previousDataBox.getData(false, DProteinSet.class);
             DMasterQuantProteinSet newMasterProtSet = (DMasterQuantProteinSet) m_previousDataBox.getData(false, DMasterQuantProteinSet.class);
-            DDataset newDS = (DDataset) m_previousDataBox.getData(false, DDataset.class);            ;
-            
-            boolean valueUnchanged  = Objects.equals(newProSet, m_proteinSet) && Objects.equals(newMasterProtSet,m_masterQuantProteinSet) && Objects.equals(newDS,m_dataset);
-            if(valueUnchanged && !m_displayPeptidesSubList)
+            DDataset newDS = (DDataset) m_previousDataBox.getData(false, DDataset.class);;
+
+            boolean valueUnchanged = Objects.equals(newProSet, m_proteinSet) && Objects.equals(newMasterProtSet, m_masterQuantProteinSet) && Objects.equals(newDS, m_dataset);
+            if (valueUnchanged && !m_displayPeptidesSubList) {
                 return;
-            
+            }
             m_proteinSet = newProSet;
             m_masterQuantProteinSet = newMasterProtSet;
-            m_dataset = newDS;            
+            m_dataset = newDS;
             if (m_proteinSet == null) {
                 return;
             }
-            
+
             m_isXICMode = ((XicMode) m_previousDataBox.getData(false, XicMode.class)).isXicMode();
             m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(false, QuantChannelInfo.class);
-            if(m_quantChannelInfo == null)
+            if (m_quantChannelInfo == null) {
                 throw new RuntimeException("Xic PeptideSet : Can't get QuantChannelInfo from previous databox");
+            }
 
-            if(m_displayPeptidesSubList)
+            if (m_displayPeptidesSubList) {
                 pepInstances = (List<DPeptideInstance>) m_previousDataBox.getData(false, DPeptideInstance.class, true);
+            }
         }
 
         final int loadingId = setLoading();
@@ -287,9 +289,10 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
         if (parameterType != null && isList) {
             if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                return getTableModelInterfaceList();
+                ArrayList<Long> selectedRowSet = (((XicPeptidePanel) this.getDataBoxPanelInterface()).getCrossSelectionInterface()).getSelection();
+                return getTableModelInterfaceList(selectedRowSet);
             }
-            
+
             if (parameterType.equals(SecondAxisTableModelInterface.class)) {
                 if (m_quantChannelInfo == null || m_masterQuantProteinSet == null) {
                     return null;
@@ -308,7 +311,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         return m_dataset.getName() + " " + getTypeName();
     }
 
-    private List<ExtendedTableModelInterface> getTableModelInterfaceList() {
+    private List<ExtendedTableModelInterface> getTableModelInterfaceList(ArrayList<Long> selectedRowSet) {
         if (m_quantChannelInfo == null) {
             if (m_previousDataBox != null) {
                 m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(false, QuantChannelInfo.class);
@@ -318,12 +321,21 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                 }
             }
         }
+
         List<ExtendedTableModelInterface> list = new ArrayList();
         if (m_masterQuantPeptideList != null) {
-            for (DMasterQuantPeptide quantPeptide : m_masterQuantPeptideList) {
-                PeptideTableModel peptideTableModel = new PeptideTableModel(null);
-                peptideTableModel.setData(m_quantChannelInfo.getQuantChannels(), quantPeptide, m_isXICMode);
-                list.add(peptideTableModel);
+            //for (DMasterQuantPeptide quantPeptide : m_masterQuantPeptideList) {
+            for (int i = 0; i < m_masterQuantPeptideList.size(); i++) {
+
+                DMasterQuantPeptide quantPeptide = m_masterQuantPeptideList.get(i);
+                XICComparePeptideTableModel peptideData = new XICComparePeptideTableModel();
+                peptideData.setData(m_quantChannelInfo.getQuantChannels(), quantPeptide, m_isXICMode);
+                if (selectedRowSet != null && !selectedRowSet.isEmpty()) {
+                    if (selectedRowSet.contains(new Long(i))) {
+                        peptideData.setSelected(true);
+                    }
+                }
+                list.add(peptideData);
             }
         }
         return list;

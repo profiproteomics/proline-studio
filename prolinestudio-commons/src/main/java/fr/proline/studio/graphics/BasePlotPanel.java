@@ -288,7 +288,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                         if ((m_plotHorizontalGrid) && (m_yAxis.displayAxis())) {
                             m_yAxis.paintGrid(graphicBufferG2d, m_plotArea.x, m_plotArea.width, m_plotArea.y, m_plotArea.height);
                         }
-                        //paint plot them selves
+                        ////*****paint plot them selves*****////
                         for (PlotBaseAbstract plot : m_plots) {
                             plot.paint(graphicBufferG2d);
                         }
@@ -310,7 +310,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                     if ((m_plotHorizontalGrid) && (m_yAxis != null) && (m_yAxis.displayAxis())) {
                         m_yAxis.paintGrid(g2d, m_plotArea.x, m_plotArea.width, m_plotArea.y, m_plotArea.height);
                     }
-                    //paint plot themselves
+                    ////*****paint plot themselves*****////
                     for (PlotBaseAbstract plot : m_plots) {
                         plot.paint(g2d);
                     }
@@ -993,8 +993,9 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         int nbPlotTooltip = 0;
         boolean repaintNeeded = false;
         for (PlotBaseAbstract plot : m_plots) {
-
+            
             boolean isPlotSelected = plot.isMouseOnPlot(xValue, yValue);
+            //by mouseMoved, if isPlotSelected, then plot paint a marker effet
             repaintNeeded |= plot.setIsPaintMarker(isPlotSelected);
 
             String toolTipForPlot = plot.getToolTipText(xValue, yValue);

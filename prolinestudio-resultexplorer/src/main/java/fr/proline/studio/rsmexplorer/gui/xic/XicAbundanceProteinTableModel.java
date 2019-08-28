@@ -18,12 +18,12 @@ import java.util.Map;
  * @author Karine XUE
  */
 //VDS FIXME : Pas vraiment un modele pour les abondance de Proteines.... A Renommer ! 
-public class XicAbundanceProteinTableModel extends PeptideTableModel implements SecondAxisTableModelInterface{
+public class XicAbundanceProteinTableModel extends XICComparePeptideTableModel implements SecondAxisTableModelInterface{
 
     private DMasterQuantProteinSet m_proteinSet = null;
 
     public XicAbundanceProteinTableModel() {
-        super(null);
+        super();
     }
 
     public void setData(DQuantitationChannel[] quantChannels, DMasterQuantProteinSet proteinSet) {
@@ -91,19 +91,15 @@ public class XicAbundanceProteinTableModel extends PeptideTableModel implements 
         return plotInformation;
     }
 
-    @Override
-    public GlobalTableModelInterface getFrozzenModel() {
-        return this;
-    }
 
-    @Override
-    public ArrayList<ExtraDataType> getExtraDataTypes() {
-        ArrayList<ExtraDataType> list = new ArrayList<>();
-        list.add(new ExtraDataType(DQuantitationChannel.class, true));
-        list.add(new ExtraDataType(DMasterQuantProteinSet.class, false));
-        registerSingleValuesAsExtraTypes(list);
-        return list;
-    }
+//    @Override
+//    public ArrayList<ExtraDataType> getExtraDataTypes() {
+//        ArrayList<ExtraDataType> list = new ArrayList<>();
+//        list.add(new ExtraDataType(DQuantitationChannel.class, true));
+//        list.add(new ExtraDataType(DMasterQuantProteinSet.class, false));
+//        registerSingleValuesAsExtraTypes(list);
+//        return list;
+//    }
 
     @Override
     public Object getValue(Class c) {

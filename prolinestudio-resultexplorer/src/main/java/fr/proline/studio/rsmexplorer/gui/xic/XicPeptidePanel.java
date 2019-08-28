@@ -65,13 +65,15 @@ import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.openide.windows.WindowManager;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author JM235353
  */
 public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
-
+ private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private AbstractDataBox m_dataBox;
 
     private JScrollPane m_peptideScrollPane;
@@ -319,9 +321,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         c.weighty = 1;
         c.gridwidth = 3;
         internalPanel.add(m_markerContainerPanel, c);
-        
-
-        
+                
         return internalPanel;
     }                 
     

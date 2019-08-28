@@ -1,5 +1,6 @@
 package fr.proline.studio.pattern;
 
+import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.MultiGraphicsPanel;
 import java.util.List;
@@ -23,13 +24,13 @@ public class DataboxMultiGraphics extends AbstractDataBox {
     private boolean m_defaultLocked = false;
     private boolean m_canChooseColor = false;
     private boolean m_displayDoubleYAxis = false;
-    
+
     public DataboxMultiGraphics() {
         this(false, false, false);
     }
-    
+
     public DataboxMultiGraphics(boolean defaultLocked, boolean canChooseColor) {
-         this(defaultLocked, canChooseColor, false);
+        this(defaultLocked, canChooseColor, false);
     }
 
     public DataboxMultiGraphics(boolean defaultLocked, boolean canChooseColor, boolean displayDoubleYAxis) {
@@ -38,18 +39,17 @@ public class DataboxMultiGraphics extends AbstractDataBox {
         m_defaultLocked = defaultLocked;
         m_canChooseColor = canChooseColor;
         m_displayDoubleYAxis = displayDoubleYAxis;
-        
         // Name of this databox
-        if(m_displayDoubleYAxis) {
-            m_typeName = "Linear Plot (two axis)";
+        if (m_displayDoubleYAxis) {
+            m_typeName = "Graphic Linear Plot (two axis)";
             m_description = "Display two sets of data as linear plot using 2 axis";
         } else {
-            m_typeName = "Linear Plot";
-            m_description = "Display data as linear plot";            
+            m_typeName = "Graphic Linear Plot";
+            m_description = "Display data as linear plot";
         }
 
         // Register Possible in parameters
-        if(! m_displayDoubleYAxis) {
+        if (!m_displayDoubleYAxis) {
             GroupParameter inParameter = new GroupParameter();
             inParameter.addParameter(ExtendedTableModelInterface.class, true);
             inParameter.addParameter(CrossSelectionInterface.class, true);
@@ -59,12 +59,13 @@ public class DataboxMultiGraphics extends AbstractDataBox {
             inParameter.addParameter(ExtendedTableModelInterface.class, true);
             inParameter.addParameter(CrossSelectionInterface.class, true);
             inParameter.addParameter(SecondAxisTableModelInterface.class, true);
+            inParameter.addParameter(DMasterQuantPeptide.class, true);//for DataBoxXicPeptideSet.propagate
             registerInParameter(inParameter);
         }
-        
+
     }
-    
-    protected boolean isDoubleYAxis(){
+
+    protected boolean isDoubleYAxis() {
         return m_displayDoubleYAxis;
     }
 
@@ -77,7 +78,7 @@ public class DataboxMultiGraphics extends AbstractDataBox {
     }
 
     @Override
-    public void dataChanged() {      
+    public void dataChanged() {
         final List<ExtendedTableModelInterface> dataModelInterfaceSet1 = (List<ExtendedTableModelInterface>) m_previousDataBox.getData(false, ExtendedTableModelInterface.class, true);
         final List<CrossSelectionInterface> crossSelectionInterfaceL =  (List<CrossSelectionInterface>) m_previousDataBox.getData(false, CrossSelectionInterface.class, true);
         SecondAxisTableModelInterface dataModelInterfaceSet2 = m_displayDoubleYAxis ? (SecondAxisTableModelInterface) m_previousDataBox.getData(false, SecondAxisTableModelInterface.class, true) : null;
@@ -90,12 +91,12 @@ public class DataboxMultiGraphics extends AbstractDataBox {
         m_plotSecondAxisValues = dataModelInterfaceSet2;
         if (m_plotValues != null)
             ((MultiGraphicsPanel)getDataBoxPanelInterface()).setData(m_plotValues, m_crossSelectionValues,m_plotSecondAxisValues);
-    }
+        }
 
     @Override
     public void setEntryData(Object data) {
         m_plotValues = (List<ExtendedTableModelInterface>) data;
-        ((MultiGraphicsPanel)getDataBoxPanelInterface()).setData(m_plotValues, null);
+        ((MultiGraphicsPanel) getDataBoxPanelInterface()).setData(m_plotValues, null);
     }
 
 }

@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.util.HashMap;
 
 /**
- * plot information: color, title,...
+ * a data class which contains the information for the plot: color, title,...
  * @author MB243701
  */
 public class PlotInformation {
@@ -12,6 +12,8 @@ public class PlotInformation {
     private Color plotColor ;
     
     private String plotTitle;
+    
+    private boolean m_isSelected;
     
     // draw the points for a linear plot
     private boolean isDrawPoints;
@@ -83,5 +85,11 @@ public class PlotInformation {
         this.isDrawGap = drawGap ;
     }
     
+    public boolean isSelected(){
+        return this.m_isSelected;
+    }
+    public void setSelected(boolean option){
+        this.m_isSelected = option;
+    }
 }
 

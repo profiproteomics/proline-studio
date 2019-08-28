@@ -8,7 +8,7 @@ package fr.proline.studio.graphics;
 import java.awt.Color;
 
 /**
- *
+ * a Data Class for each data in a plot
  * @author Karine XUE
  */
 public class PlotDataSpec {

@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 public class PlotLinear extends PlotXYAbstract {
 
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+    private static final int DEFAULT_POINT_RADIUS = 3;
     private double m_xMin;
     private double m_xMax;
     private double m_yMin;
@@ -74,8 +75,8 @@ public class PlotLinear extends PlotXYAbstract {
     private BasicStroke m_userStrock = null;
     private static final BasicStroke EDGE_STROKE = new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
     private static final BasicStroke SELECTED_STROCK = new BasicStroke(4f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
-    private static final Color SELECTED_COLOR = new Color(0,120,215); //= JTable default getSelectionColor, blue
-     
+    private static final Color SELECTED_COLOR = new Color(0, 120, 215); //= JTable default getSelectionColor, blue
+
     private ArrayList<ParameterList> m_parameterListArray = null;
 
     private boolean displayAntiAliasing = true;
@@ -704,10 +705,11 @@ public class PlotLinear extends PlotXYAbstract {
                     g.setStroke(m_strokeLine);
                 }
                 if (m_isDrawPoints && isDef) {
+                    int radius = DEFAULT_POINT_RADIUS;
                     if (m_dataSpec[i].getFill().equals(PlotDataSpec.FILL.EMPTY)) {
-                        g.drawOval(x - 3, y - 3, 6, 6);
+                        g.drawOval(x - radius, y - radius, radius * 2, radius * 2);
                     } else {
-                        g.fillOval(x - 3, y - 3, 6, 6);
+                        g.fillOval(x - radius, y - radius, radius * 2, radius * 2);
                     }
                 }
                 if (m_isDrawGap || (!m_isDrawGap && isDef && isDef0)) {
@@ -748,14 +750,20 @@ public class PlotLinear extends PlotXYAbstract {
         x0 = xAxis.valueToPixel(m_dataX[0]);
         y0 = yAxis.valueToPixel(m_dataY[0] + tolerance);
         boolean isDef0 = !Double.valueOf(m_dataX[0]).isNaN() && !Double.valueOf(m_dataY[0]).isNaN();
-
+        int radius = (m_isDrawPoints) ? DEFAULT_POINT_RADIUS:0;
         for (int i = 0; i < size; i++) {
             boolean isDef = !Double.valueOf(m_dataX[i]).isNaN() && !Double.valueOf(m_dataY[i]).isNaN();
             x = xAxis.valueToPixel(m_dataX[i]);
             y = yAxis.valueToPixel(m_dataY[i] + tolerance);
             g.setStroke(strock);
             g.setColor(color);
-            g.drawLine(x0, y0, x, y);
+            if (m_isDrawGap || (!m_isDrawGap && isDef && isDef0)) {
+                g.drawLine(x0 + radius, y0, x, y);
+            }
+            if (m_isDrawPoints && isDef) {
+                g.setColor(m_plotPanel.getBackground());
+                g.fillOval(x - radius, y - radius, radius * 2, radius * 2);//reserve an empty zone
+            }
             x0 = x;
             y0 = y;
             isDef0 = isDef;

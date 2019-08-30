@@ -19,8 +19,8 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.SecondAxisTableModelInterface;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.rsmexplorer.gui.PTMPeptidesTablePanel;
-import fr.proline.studio.rsmexplorer.gui.xic.PeptideTableModel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
+import fr.proline.studio.rsmexplorer.gui.xic.XICComparePeptideTableModel;
 import fr.proline.studio.rsmexplorer.gui.xic.XicAbundanceProteinTableModel;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -275,9 +275,9 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
 
         if (m_quantChannelInfo != null && m_masterQuantPeptideList != null) {
             for (DMasterQuantPeptide quantPeptide : m_masterQuantPeptideList) {
-                PeptideTableModel peptideTableModel = new PeptideTableModel(null);
-                peptideTableModel.setData(m_quantChannelInfo.getQuantChannels(), quantPeptide, true);
-                list.add(peptideTableModel);
+                XICComparePeptideTableModel peptideData = new XICComparePeptideTableModel();
+                peptideData.setData(m_quantChannelInfo.getQuantChannels(), quantPeptide, true);
+                list.add(peptideData);
             }
         }
 

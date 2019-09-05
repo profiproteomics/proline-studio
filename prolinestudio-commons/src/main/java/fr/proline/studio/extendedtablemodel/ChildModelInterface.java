@@ -1,6 +1,5 @@
 package fr.proline.studio.extendedtablemodel;
 
-import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import javax.swing.event.TableModelListener;
 
 /**

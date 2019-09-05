@@ -1,7 +1,5 @@
 package fr.proline.studio.extendedtablemodel;
 
-import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
-import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterTableModelInterface;

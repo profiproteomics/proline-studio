@@ -26,7 +26,6 @@ import javax.swing.event.TableModelListener;
 /**
  *
  * @author Karine XUE at CEA
- * Attention: compare wtih PeptideTableModel, delete PeptideTableModel.java in future
  */
 public class XICComparePeptideTableModel implements ExtendedTableModelInterface,TableModel {
 

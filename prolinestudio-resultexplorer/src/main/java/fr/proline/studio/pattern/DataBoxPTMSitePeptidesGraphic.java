@@ -6,7 +6,7 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.studio.rsmexplorer.gui.ptm.PanelPeptidesPTMSiteGraphic;
+import fr.proline.studio.rsmexplorer.gui.ptm.PTMSitePeptidesGraphicCtrlPanel;
 
 /**
  * This class is very similaire as DataBoxPTMSitePeptides
@@ -27,7 +27,7 @@ public class DataBoxPTMSitePeptidesGraphic extends DataBoxPTMSitePeptides {
 
     @Override
     public void createPanel() {
-        PanelPeptidesPTMSiteGraphic p = new PanelPeptidesPTMSiteGraphic();
+        PTMSitePeptidesGraphicCtrlPanel p = new PTMSitePeptidesGraphicCtrlPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);

@@ -42,7 +42,7 @@ public class ViewSetting {
     public static final BasicStroke STROKE_PEP = new BasicStroke(1.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
 
     public static Map<Long, Color> PTM_COLORS = new HashMap<>();
-
+    
     static {
         AffineTransform affinetransform = new AffineTransform();
         FontRenderContext frc = new FontRenderContext(affinetransform, false, true);
@@ -69,7 +69,7 @@ public class ViewSetting {
     public static final Color getColor(Long specificityId) {
         Color c = PTM_COLORS.get(specificityId);
         if (c == null) {
-            c = CyclicColorPalette.getColor(PTM_COLORS.size()+1); //in order to skip the first color Yellow, this is not very visible
+            c = CyclicColorPalette.getColor(PTM_COLORS.size() + 1); //in order to skip the first color Yellow, this is not very visible
             PTM_COLORS.put(specificityId, c);
         }
         return c;

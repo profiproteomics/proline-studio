@@ -30,13 +30,13 @@ public class PeptideView extends ViewPtmAbstract {
 
     private static Logger logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
 
-    private int m_length;
+    protected int m_length;
      // VDS FIXME: One or the other may be specified : PTMPeptideInstance or PTMSitePeptideInstance
     private boolean isPtmSiteView;
     private PTMSitePeptideInstance m_ptmSitePeptideInst;
     private PTMPeptideInstance m_ptmPeptideInst; 
-    private boolean m_isSelected;
-    private int m_beginIndex;
+    protected boolean m_isSelected;
+    protected int m_beginIndex;
 
     public PeptideView(PTMSitePeptideInstance pep) {
         isPtmSiteView = true;
@@ -113,7 +113,7 @@ public class PeptideView extends ViewPtmAbstract {
         return m_ptmPeptideInst.getPeptideInstance().getPeptide().getTransientData().getDPeptidePtmMap();
     }
 
-    private float getScore() {
+    protected float getScore() {
         if(isPtmSiteView)
             return m_ptmSitePeptideInst.getBestPeptideMatch().getScore();
         else

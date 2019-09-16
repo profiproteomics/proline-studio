@@ -271,6 +271,7 @@ public class WindowBoxFactory {
         boxes[0].setDataName(dataName);
         ((DataBoxPTMSiteProtein) boxes[0]).setXicResult(false);
         boxes[1] = new DataBoxPTMPeptidesGraphic();
+        ((DataBoxPTMPeptidesGraphic)boxes[1]).setIsClusterData(false);
         boxes[2] = new DataBoxPTMSitePeptides();
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
         boxes[3] = new DataBoxPTMSitePepMatches();
@@ -279,13 +280,18 @@ public class WindowBoxFactory {
         IconManager.IconType iconType = IconManager.IconType.DATASET_RSM;
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
-    
+    /**
+     * PTM cluster databox
+     * @param dataName
+     * @return 
+     */
     public static WindowBox getPTMDataWindowBox(String dataName) {
         AbstractDataBox[] boxes = new AbstractDataBox[4];
         boxes[0] = new DataBoxPTMClusters();
         boxes[0].setDataName(dataName);
         ((DataBoxPTMClusters) boxes[0]).setXicResult(false); 
         boxes[1] = new DataBoxPTMPeptidesGraphic();
+         ((DataBoxPTMPeptidesGraphic)boxes[1]).setIsClusterData(true);
         boxes[2] = new DataBoxPTMPeptides(false, false);
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
         boxes[3] = new DataBoxPTMPeptides(false,true);
@@ -296,6 +302,11 @@ public class WindowBoxFactory {
         
     }
     
+    /**
+     * XIC PTM cluster databox
+     * @param dataName
+     * @return 
+     */
     public static WindowBox getXicPTMDataWindowBox(String dataName) {
         AbstractDataBox[] boxes = new AbstractDataBox[7];
         boxes[0] = new DataBoxPTMClusters();
@@ -305,6 +316,7 @@ public class WindowBoxFactory {
         boxes[2] = new DataBoxPTMPeptides(true,true);
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);        
         boxes[3] = new DataBoxPTMPeptidesGraphic();
+        ((DataBoxPTMPeptidesGraphic)boxes[3]).setIsClusterData(true);
         boxes[4] = new DataboxMultiGraphics(false,false,true);//associate a graphic databox for DataboxXicPeptideSet
         boxes[4].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);      
         boxes[5] = new DataboxXicPeptideSet(false);//display the selected peptideMatch in each chanel
@@ -324,6 +336,7 @@ public class WindowBoxFactory {
 
         boxes[1] = new DataBoxPTMPeptides();
         boxes[2] = new DataBoxPTMPeptidesGraphic();
+        ((DataBoxPTMPeptidesGraphic)boxes[2]).setIsClusterData(false);
         //boxes[2].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
 
        // boxes[3] = new DataboxXicPeptideSet(true);//display the selected peptide in each chanel

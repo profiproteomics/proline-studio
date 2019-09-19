@@ -34,14 +34,14 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
     private static Logger logger = LoggerFactory.getLogger(PTMGraphicCtrlPanel.class);
     private boolean m_isClusterData;
     private PTMPeptidesGraphicView m_ptmPeptideAreaCtrl;
-    private PeptideOnProteinOverviwPanel m_proteinOvervewCtrl;
+    private PeptideOnProteinOverviewPanel m_proteinOvervewCtrl;
 
     protected AbstractDataBox m_dataBox;
 
     public PTMGraphicCtrlPanel(boolean isClusterData) {
         super();
         m_ptmPeptideAreaCtrl = new PTMPeptidesGraphicView(isClusterData);
-        m_proteinOvervewCtrl = new PeptideOnProteinOverviwPanel(this);
+        m_proteinOvervewCtrl = new PeptideOnProteinOverviewPanel(this);
         m_isClusterData = isClusterData;
         initComponents();
     }

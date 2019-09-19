@@ -28,7 +28,6 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import javax.swing.BorderFactory;
 import javax.swing.SwingUtilities;
@@ -54,7 +53,8 @@ public class PeptideOnProteinOverviwPanel extends JPanel {
     private List<PTMPeptideInstance> m_peptideInstances;
     private PTMPeptideInstance m_selectedPeptideInstance;
     private int m_selectedPosition;
-    private float m_aaWidth;//width of an amino acid
+    private double m_aaWidth;//width of an amino acid
+    private double m_aaWidthOriginal;
     private int m_startPositionProtein = 0;
     private int m_x0 = 10, m_y0 = 10;
     private final int m_height = 30;
@@ -76,8 +76,11 @@ public class PeptideOnProteinOverviwPanel extends JPanel {
 
     private void initComponent() {
         this.setBorder(BorderFactory.createTitledBorder(TITLE));
-        this.addMouseListener(new SelectedMouseAdapter());
-        this.addMouseMotionListener(new ToolTipMouseListener());
+
+        ProteinMouseAdapter mouseAdapter = new ProteinMouseAdapter();
+        this.addMouseListener(mouseAdapter);
+        this.addMouseMotionListener(mouseAdapter);
+        this.addMouseWheelListener(mouseAdapter);
     }
 
     public void setSelectedPeptide(PTMPeptideInstance selectedPTMPeptideInstance) {
@@ -86,28 +89,6 @@ public class PeptideOnProteinOverviwPanel extends JPanel {
 
     public int getSelectedProteinPosition() {
         return this.m_selectedPosition;
-    }
-
-    private class ToolTipMouseListener implements MouseMotionListener {
-
-        ToolTipMouseListener() {
-            super();
-        }
-
-        @Override
-        public void mouseMoved(MouseEvent e) {//for tooltips
-            int x = e.getX();
-            int y = e.getY();
-            String tips = getTooltips(x, y);
-            setToolTipText(tips);//null will turn off tooltip
-        }
-
-        @Override
-        public void mouseDragged(MouseEvent e
-        ) {
-            // TODO Auto-generated method stub
-
-        }
     }
 
     /**
@@ -127,30 +108,8 @@ public class PeptideOnProteinOverviwPanel extends JPanel {
         }
     }
 
-    private int getPosition(int x) {
-        return (int) ((x - m_x0) / m_aaWidth);
-    }
-
-    private class SelectedMouseAdapter extends MouseAdapter {
-
-        SelectedMouseAdapter() {
-            super();
-        }
-
-        public void mouseClicked(MouseEvent e) {
-            requestFocusInWindow();
-            if (SwingUtilities.isLeftMouseButton(e)) {
-                List<PTMPeptideInstance> peptides;
-                AminoAcidPtm ptms;
-                int x = e.getX();
-                int y = e.getY();
-                if (y > m_ptm_y0 && y < m_ptm_y0 + m_height) {
-                    int positionOnProtein = getPosition(x);
-                    setSelectedOnProtein(positionOnProtein);
-                    m_superCtrl.onMessage(PTMGraphicCtrlPanel.Source.SEQUENCE, PTMGraphicCtrlPanel.Message.SELECTED);
-                }
-            }
-        }
+    private int getPosOnProtein(int x) {
+        return m_startPositionProtein + (int) ((x - m_x0) / m_aaWidth);
     }
 
     private enum ZoomMouseAction {
@@ -158,55 +117,6 @@ public class PeptideOnProteinOverviwPanel extends JPanel {
         ZOOM_OUT,
         UN_ZOOM,
         MOVE_HORIZONTAL
-    }
-
-    private class ZoomMouseAdapter extends MouseAdapter {
-
-        int currentX, currentY, startX, startY;
-        boolean dragging = false;
-        ZoomMouseAction action=null;
-        
-        ZoomMouseAdapter() {
-            super();
-        }
-
-        public void mousePressed(MouseEvent event) {
-            Point point = event.getPoint();
-            startX = point.x;
-            startY = point.y;
-            dragging = true;
-        }
-
-        public void mouseReleased(MouseEvent event) {
-
-        }
-
-        public void mouseDragged(MouseEvent event) {
-            Point p = event.getPoint();
-            currentX = p.x;
-            currentY = p.y;
-            if (action == ZoomMouseAction.MOVE_HORIZONTAL){
-                int distance = currentX-startX;
-                int position = m_startPositionProtein + getPosition(distance);
-                position = Math.max(0, position);
-                m_startPositionProtein = Math.min(position, m_sequence.length());
-                repaint();
-                //move droit, gauch
-            }
-        }
-
-        public void mouseWheelMoved(MouseWheelEvent e) {
-
-            int nb = e.getWheelRotation();
-            if (nb < 0) {
-                // "Mouse wheel moved UP " zoom+
-
-            } else {
-                // "Mouse wheel moved DOWN "zoom -
-
-            }
-
-        }
     }
 
     public void setEmpty(String proteinName) {
@@ -226,7 +136,9 @@ public class PeptideOnProteinOverviwPanel extends JPanel {
         m_peptideInstances = peptideInstances;
         m_sequence = sequence;
         m_selectedPeptideInstance = selectedPeptide;
-        m_aaWidth = ((float) (this.getWidth() - 20) / m_sequence.length());
+        m_aaWidthOriginal = ((double) (this.getWidth() - 20) / m_sequence.length());
+        m_startPositionProtein = 0;
+        m_aaWidth = m_aaWidthOriginal;
         String width = "" + m_aaWidth;
         m_logger.debug("Context width is {},protein length is {},  aaWidth is {}", this.getWidth(), m_sequence.length(), width);
         int proteinLength = sequence.length();
@@ -250,7 +162,7 @@ public class PeptideOnProteinOverviwPanel extends JPanel {
         Graphics2D g2 = (Graphics2D) g;
         if (m_peptideInstances != null && !m_peptideInstances.isEmpty()) {
             paintPTM(g2);
-            paintPeptideOnSequence(g2);
+            paintPeptideListOnSequence(g2);
         }
     }
 
@@ -269,7 +181,7 @@ public class PeptideOnProteinOverviwPanel extends JPanel {
         int x0, y0;
         Color color;
         for (PTMSite ptm : sortedPtm) {
-            x0 = (int) (m_x0 + m_aaWidth * ptm.getPositionOnProtein());
+            x0 = (int) (m_x0 + m_aaWidth * (ptm.getPositionOnProtein() - m_startPositionProtein));
             y0 = m_ptm_y0;
             color = ViewSetting.getColor(ptm);
             g.setColor(color);
@@ -277,7 +189,7 @@ public class PeptideOnProteinOverviwPanel extends JPanel {
         }
     }
 
-    private void paintPeptideOnSequence(Graphics2D g) {
+    private void paintPeptideListOnSequence(Graphics2D g) {
         if (m_peptideInstances.isEmpty()) {
             return;
         }
@@ -303,7 +215,7 @@ public class PeptideOnProteinOverviwPanel extends JPanel {
         int start = pep.getStartPosition();
         int stop = pep.getStopPosition();
         int width = (int) ((float) (stop - start + 1) * m_aaWidth);
-        int x0 = (int) (m_x0 + (m_aaWidth * start));
+        int x0 = (int) (m_x0 + (m_aaWidth * (start - m_startPositionProtein)));
         g.fillRoundRect(x0, m_protein_y0, width, m_protein_height, m_protein_height, m_protein_height);
     }
 
@@ -322,7 +234,7 @@ public class PeptideOnProteinOverviwPanel extends JPanel {
         int yRangZ = yRangA + m_protein_height;
         List<PTMPeptideInstance> peptides;
         AminoAcidPtm ptms;
-        int positionOnProtein = getPosition(x);
+        int positionOnProtein = getPosOnProtein(x);
         if (y > yRangPTM && y < yRangPTM + m_ptm_height) {
             ptms = this.m_PTMMap.get(positionOnProtein);
             if (ptms == null) {
@@ -410,4 +322,143 @@ public class PeptideOnProteinOverviwPanel extends JPanel {
         }
     }
 
+    private class ProteinMouseAdapter extends MouseAdapter {
+
+        int currentX, currentY, startX, startY;
+        ZoomMouseAction _action = null;
+
+        ProteinMouseAdapter() {
+            super();
+        }
+
+        public void mouseClicked(MouseEvent e) {//for selected on the protein, _action will be transfer to superCtrl
+            requestFocusInWindow();
+            if (SwingUtilities.isLeftMouseButton(e)) {
+                List<PTMPeptideInstance> peptides;
+                AminoAcidPtm ptms;
+                int x = e.getX();
+                int y = e.getY();
+                if (y > m_ptm_y0 && y < m_ptm_y0 + m_height) {
+                    int positionOnProtein = getPosOnProtein(x);
+                    setSelectedOnProtein(positionOnProtein);
+                    m_superCtrl.onMessage(PTMGraphicCtrlPanel.Source.SEQUENCE, PTMGraphicCtrlPanel.Message.SELECTED);
+                }
+            }
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {//for tooltips
+            int x = e.getX();
+            int y = e.getY();
+            String tips = getTooltips(x, y);
+            setToolTipText(tips);//null will turn off tooltip
+        }
+
+        public void mousePressed(MouseEvent event) {
+            _action = null;
+            Point point = event.getPoint();
+            startX = point.x;
+            startY = point.y;
+        }
+
+        public void mouseReleased(MouseEvent event) {
+            Point p = event.getPoint();
+            currentX = p.x;
+            currentY = p.y;
+            switch (_action) {
+                case ZOOM_IN: //will not be presente
+                    //m_logger.debug("release, ZOOM_IN");
+                    break;
+                case ZOOM_OUT:
+                    //m_logger.debug("release, zoom out");
+                    double scale = 1 + 0.2 * (Math.max((currentX - startX) / m_height, 1));
+                    this.zoom(startX, scale);
+                    break;
+                case UN_ZOOM:
+                    //m_logger.debug("release, un zoom");
+                    m_startPositionProtein = 0;
+                    m_aaWidth = m_aaWidthOriginal;
+                    repaint();
+                    break;
+                case MOVE_HORIZONTAL:
+                    //m_logger.debug("release, MOVE_HORIZONTAL");
+                    move();
+                    break;
+                default:
+                    throw new AssertionError(_action.name());
+            }
+
+            startX = currentX;
+            startY = currentY;
+        }
+
+        public void mouseDragged(MouseEvent event) {
+            Point p = event.getPoint();
+            currentX = p.x;
+            currentY = p.y;
+            if (SwingUtilities.isRightMouseButton(event)) {
+                if (currentX - startX < 0) {
+                    _action = ZoomMouseAction.UN_ZOOM;
+                    //m_logger.debug("Un Zoom");
+                } else {
+                    _action = ZoomMouseAction.ZOOM_OUT;
+                    //m_logger.debug(" Zoom out");
+                }
+
+            } else if (SwingUtilities.isLeftMouseButton(event) && (currentX - startX != 0)) {
+                _action = ZoomMouseAction.MOVE_HORIZONTAL;
+            }
+            if (_action == ZoomMouseAction.MOVE_HORIZONTAL) {//move droit, gauch
+                move();
+            }
+        }
+
+        public void mouseWheelMoved(MouseWheelEvent event) {
+            Point p = event.getPoint();
+            currentX = p.x;
+            int nbWheel = event.getWheelRotation();
+            double scale = 1.2;
+            if (nbWheel < 0) { // "Mouse wheel moved UP " zoom+   
+                _action = ZoomMouseAction.ZOOM_OUT;
+                zoom(currentX, scale);
+            } else {
+                _action = ZoomMouseAction.ZOOM_IN;
+                zoom(currentX, scale);
+            }
+        }
+
+        private void zoom(int x, double scale) {
+            int currentPos = getPosOnProtein(x);
+            if (_action == ZoomMouseAction.ZOOM_OUT) { // "Mouse wheel moved UP " zoom+
+                m_aaWidth = m_aaWidth * scale;
+            } else if (_action == ZoomMouseAction.ZOOM_IN) {
+                m_aaWidth = m_aaWidth / scale;
+                if (m_aaWidth < m_aaWidthOriginal) {
+                    m_aaWidth = m_aaWidthOriginal;
+                    m_startPositionProtein = 0;
+                }
+            }
+            int nbAA = (int) (currentX / m_aaWidth);
+            m_startPositionProtein = currentPos - nbAA;
+            if (m_startPositionProtein < 0) {
+                m_startPositionProtein = 0;
+            }
+            // m_logger.debug("ZZZZZZZ Zoom scale={},_action={},aaWidth={},distance2Start={}, start={}", scale, _action, m_aaWidth, nbAA, m_startPositionProtein);
+            repaint();
+        }
+
+        private void move() {
+            int distance = currentX - startX;
+            //m_logger.debug("MMMMMMMM Move currentX = {} startX = {}", currentX, startX);
+            int startPosition = getPosOnProtein(startX);
+            int currentPosition = getPosOnProtein(currentX);
+            distance = currentPosition -startPosition;
+            //m_logger.debug("MMMMMMMM Move horizontal move distance = {} positionOld = {},positionCurrent = {}, ", distance, startPosition, currentPosition);
+            m_startPositionProtein = Math.min(m_startPositionProtein-distance, m_sequence.length());
+            m_startPositionProtein = Math.max(m_startPositionProtein, 0);
+            startX = currentX;
+            startY = currentY;
+            repaint();
+        }
+    }
 }

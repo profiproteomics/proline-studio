@@ -7,6 +7,7 @@ package fr.proline.studio.pattern;
 
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
+import fr.proline.studio.rsmexplorer.gui.ptm.PTMGraphicCtrlPanel;
 import fr.proline.studio.rsmexplorer.gui.ptm.PTMPeptidesGraphicView;
 import java.util.List;
 
@@ -43,7 +44,8 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
 
     @Override
     public void createPanel() {
-        PTMPeptidesGraphicView p = new PTMPeptidesGraphicView(m_isClusterData);
+        //PTMPeptidesGraphicView p = new PTMPeptidesGraphicView(m_isClusterData);
+        PTMGraphicCtrlPanel p = new PTMGraphicCtrlPanel(m_isClusterData);
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);
@@ -52,8 +54,8 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
     @Override
     public void updateData() {
 
-        PTMPeptidesGraphicView graphicView = (PTMPeptidesGraphicView) getDataBoxPanelInterface();
-
+        // PTMPeptidesGraphicView graphicView = (PTMPeptidesGraphicView) getDataBoxPanelInterface();
+        PTMGraphicCtrlPanel graphicView = (PTMGraphicCtrlPanel) getDataBoxPanelInterface();
         if (m_ptmPepInstances == null || m_ptmPepInstances.isEmpty()) {
             graphicView.setData(null);
             return;
@@ -74,12 +76,14 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
 
     @Override
     protected void setSelectedPTMPeptide(PTMPeptideInstance pepInstance) {
-        ((PTMPeptidesGraphicView) getDataBoxPanelInterface()).setSelectedPTMPeptide(pepInstance);
+        //((PTMPeptidesGraphicView) getDataBoxPanelInterface()).setSelectedPTMPeptide(pepInstance);
+        ((PTMGraphicCtrlPanel) getDataBoxPanelInterface()).setSelectedPTMPeptide(pepInstance);
     }
 
     @Override
     protected PTMPeptideInstance getSelectedPTMPeptide() {
-        return ((PTMPeptidesGraphicView) getDataBoxPanelInterface()).getSelectedPTMPeptideInstance();
+        //return ((PTMPeptidesGraphicView) getDataBoxPanelInterface()).getSelectedPTMPeptideInstance();
+        return ((PTMGraphicCtrlPanel) getDataBoxPanelInterface()).getSelectedPTMPeptideInstance();
     }
 
     @Override

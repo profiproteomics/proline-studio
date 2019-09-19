@@ -8,10 +8,7 @@ package fr.proline.studio.rsmexplorer.gui.ptm;
 import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
-import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.ptm.mark.ProteinSequenceCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.mark.PTMMarkCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.pep.PeptideAreaCtrl;
@@ -22,7 +19,7 @@ import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.event.ActionListener;
+import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -35,7 +32,6 @@ import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JToolBar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,16 +39,27 @@ import org.slf4j.LoggerFactory;
  *
  * @author VD225637
  */
-public class PTMPeptidesGraphicView extends JPanel implements DataBoxPanelInterface, SplittedPanelContainer.UserActions {
+public class PTMPeptidesGraphicView extends JPanel {
 
     private static Logger m_logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
     protected AbstractDataBox m_dataBox;
 
     private PTMPeptidesGraphicPanel m_internalPanel;
     private PTMPeptidesGraphicModel m_dataModel;
+    private PTMGraphicCtrlPanel m_superCtrl;
+
+    public void setSuperCtrl(PTMGraphicCtrlPanel superCtrl) {
+        this.m_superCtrl = superCtrl;
+    }
+
+    public void setAjustedLocation(int ajustedLocation) {
+        this.m_internalPanel.setAjustedLocation(ajustedLocation);
+        repaint();
+    }
 
     public PTMPeptidesGraphicView(boolean isClusterData) {
         super();
+        m_superCtrl = null;
         m_internalPanel = new PTMPeptidesGraphicPanel(isClusterData);
         m_dataModel = new PTMPeptidesGraphicModel();
         m_internalPanel.setModel(m_dataModel);
@@ -66,71 +73,8 @@ public class PTMPeptidesGraphicView extends JPanel implements DataBoxPanelInterf
         setLayout(new BorderLayout());
 
         m_internalPanel.setSize(WIDTH - 30, HEIGHT);
-        JToolBar toolbar = initToolbar();
-        this.add(toolbar, BorderLayout.WEST);
         this.add(m_internalPanel, BorderLayout.CENTER);
 
-    }
-
-    /**
-     * Export image button in ToolBar
-     *
-     * @return
-     */
-    private JToolBar initToolbar() {
-        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
-        toolbar.setFloatable(false);
-        ExportButton exportImageButton = new ExportButton("Graphic", this);
-        toolbar.add(exportImageButton);
-
-        return toolbar;
-    }
-
-    @Override
-    public void addSingleValue(Object v) {
-        if (PTMSite.class.isInstance(v)) {
-            m_dataModel.setData((PTMSite) v);
-        }
-    }
-
-    @Override
-    public void setDataBox(AbstractDataBox dataBox) {
-        this.m_dataBox = dataBox;
-    }
-
-    @Override
-    public AbstractDataBox getDataBox() {
-        return m_dataBox;
-    }
-
-    @Override
-    public void setLoading(int id) {
-        //Nothing to do
-    }
-
-    @Override
-    public void setLoading(int id, boolean calculating) {
-        //Nothing to do
-    }
-
-    @Override
-    public void setLoaded(int id) {
-        //Nothing to do
-    }
-
-    @Override
-    public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
-        return m_dataBox.getRemoveAction(splittedPanel);
-    }
-
-    @Override
-    public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
-        return m_dataBox.getAddAction(splittedPanel);
-    }
-
-    @Override
-    public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
-        return m_dataBox.getSaveAction(splittedPanel);
     }
 
     /**
@@ -172,6 +116,10 @@ public class PTMPeptidesGraphicView extends JPanel implements DataBoxPanelInterf
             m_dataBox.propagateDataChanged(PTMPeptideInstance.class);
         }
         this.repaint();
+    }
+
+    void setDataBox(AbstractDataBox dataBox) {
+        this.m_dataBox = dataBox;
     }
 
     private class PTMPeptidesGraphicPanel extends JPanel {
@@ -247,6 +195,10 @@ public class PTMPeptidesGraphicView extends JPanel implements DataBoxPanelInterf
         @Override
         public void paint(Graphics g) {
             this.m_scrollPane.getViewport().revalidate();//
+            Point p = m_scrollPane.getViewport().getViewPosition();
+            int y = p.y;
+            int x = (int)((float)this.getWidth() / m_sequenceLength* m_ajustedStartLocation);
+            m_scrollPane.getViewport().setViewPosition(new java.awt.Point(x,y));
             super.paint(g);
         }
 
@@ -360,6 +312,9 @@ public class PTMPeptidesGraphicView extends JPanel implements DataBoxPanelInterf
                         int selectedIndex = m_ctrlPeptideArea.getSelectedIndex(e.getX(), e.getY());
                         if (selectedIndex != oldSelected && (selectedIndex != -1) && (m_dataBox != null)) {
                             repaint(); //VDS : Should Graphic view repaint ?! m_dataBox DataBoxPanelInterface repaint ? 
+                            if (m_superCtrl != null) {
+                                m_superCtrl.onMessage(PTMGraphicCtrlPanel.Source.PEPTIDE_AREA, PTMGraphicCtrlPanel.Message.SELECTED);
+                            }
                             m_dataBox.propagateDataChanged(PTMPeptideInstance.class);
                         }
                     }
@@ -393,6 +348,9 @@ public class PTMPeptidesGraphicView extends JPanel implements DataBoxPanelInterf
                         }
                         int selectedIndex = m_ctrlPeptideArea.getSelectedIndex();
                         if (oldSelected != selectedIndex) {
+                            if (m_superCtrl != null) {
+                                m_superCtrl.onMessage(PTMGraphicCtrlPanel.Source.PEPTIDE_AREA, PTMGraphicCtrlPanel.Message.SELECTED);
+                            }
                             m_dataBox.propagateDataChanged(PTMPeptideInstance.class);
                             repaint();
                         }
@@ -517,7 +475,6 @@ public class PTMPeptidesGraphicView extends JPanel implements DataBoxPanelInterf
                     PTM_CLUSTER_COLORS.put(cluster, c);
                     int num = ('A') + PTM_CLUSTER_COLORS.size() - 1;
                     String s = String.valueOf((char) num);
-                    m_logger.debug("colorid, size is {}, num is {} , sting is {}", PTM_CLUSTER_COLORS.size(), num, s);
                     PTM_CLUSTER_ID.put(cluster, s);// give it a color id, A,B, C...
 
                 }
@@ -576,7 +533,6 @@ public class PTMPeptidesGraphicView extends JPanel implements DataBoxPanelInterf
                                 g2.fillRect(m_x0, y0, colorWidth, ViewSetting.WIDTH_AA);
                             }
                             colorId = getColorId(clusters.get(0));//only the first
-                            m_logger.debug("Color id is {}", colorId);
                         }
 
                         stringWidth = f.stringWidth(colorId);

@@ -125,7 +125,7 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox{
 
     @Override
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
-        LOG.debug("getData called for "+ (m_displayAllPepMatches?" leaf ": " parent")+" with var array/list :  " +getArray+" - "+isList);        
+        //LOG.debug("getData called for "+ (m_displayAllPepMatches?" leaf ": " parent")+" with var array/list :  " +getArray+" - "+isList);        
         DataBoxPanelInterface panel = getDataBoxPanelInterface();
     
         if (parameterType != null && isList &&  ( !(panel instanceof SplittedPanelContainer.ReactiveTabbedComponent) ||
@@ -152,7 +152,7 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox{
     
     @Override
     public void dataChanged() {
-        LOG.debug("dataChanged called for "+ (m_displayAllPepMatches?" leaf ": " parent"));
+        //LOG.debug("dataChanged called for "+ (m_displayAllPepMatches?" leaf ": " parent"));
         //Get information from previous box:
         // -- PTM Dataset & RSM the ptm peptides belong to
         // -- List of PTM Peptides to display

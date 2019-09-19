@@ -152,11 +152,11 @@ public class PTMPeptidesGraphicModel {
                 if(onlyProtNTermPTMWithOutMExist) //Sequence of Protein displayed without M : shift location on prot
                     protLocation = protLocation-1;  
                 PTMMark mark = new PTMMark(ptm, protLocation, protLocToDisplay,currentPTMisNCterm);
-                LOG.debug(" PTMPepGraphicModel setData add PTMMark at " + protLocation +" show " + protLocToDisplay +" symb " + mark.getPtmSymbol());                  
+                //LOG.debug(" PTMPepGraphicModel setData add PTMMark at " + protLocation +" show " + protLocToDisplay +" symb " + mark.getPtmSymbol());                  
                 m_allPtmMarks.put(protLocation, mark);                    
             }
 //            }
-            LOG.trace(" PTMPepGraphicModel setData m_lowerStartLocation" + m_lowerStartLocation+" nbr m_allPtmMarks "+m_allPtmMarks.size());  
+            //LOG.trace(" PTMPepGraphicModel setData m_lowerStartLocation" + m_lowerStartLocation+" nbr m_allPtmMarks "+m_allPtmMarks.size());  
         }
         
         //create sequence         

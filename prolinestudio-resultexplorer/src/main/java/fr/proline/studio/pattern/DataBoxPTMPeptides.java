@@ -116,7 +116,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
     
     @Override
     public void updateData(){
-        LOG.debug("updateData called for "+ (m_displayAllPepMatches?" leaf ": " parent"));
+        //LOG.debug("updateData called for "+ (m_displayAllPepMatches?" leaf ": " parent"));
         PTMPeptidesTablePanel panel = (PTMPeptidesTablePanel) getDataBoxPanelInterface();        
 
         if(panel.isShowed()) {

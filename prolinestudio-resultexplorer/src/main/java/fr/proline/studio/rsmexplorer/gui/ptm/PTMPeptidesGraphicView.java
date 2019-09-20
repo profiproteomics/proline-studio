@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,8 +53,8 @@ public class PTMPeptidesGraphicView extends JPanel {
         this.m_superCtrl = superCtrl;
     }
 
-    public void setAjustedLocation(int ajustedLocation) {
-        this.m_internalPanel.setAjustedLocation(ajustedLocation);
+    public void setScrollLocation(int ajustedLocation) {
+        this.m_internalPanel.setScrollLocation(ajustedLocation);
         repaint();
     }
 
@@ -195,6 +196,14 @@ public class PTMPeptidesGraphicView extends JPanel {
             int x = (int) ((float) this.getWidth() / m_sequenceLength * m_ajustedStartLocation);
             m_scrollPane.getViewport().setViewPosition(new java.awt.Point(x, y));
 
+        }
+
+        private void setScrollLocation(int ajustedLocation) {
+            JScrollBar bar = this.m_scrollPane.getHorizontalScrollBar();
+            int max = bar.getMaximum();
+            this.m_scrollPane.getHorizontalScrollBar().setValue(WIDTH);
+            int x = (int) ((float) max / m_sequenceLength * ajustedLocation);
+            bar.setValue(x);
         }
 
         /**

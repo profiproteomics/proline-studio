@@ -118,8 +118,12 @@ public class PTMPeptidesGraphicView extends JPanel {
         this.repaint();
     }
 
-    void setDataBox(AbstractDataBox dataBox) {
+    public void setDataBox(AbstractDataBox dataBox) {
         this.m_dataBox = dataBox;
+    }
+
+    public String getSequence() {
+        return this.m_dataModel.getProteinSequence();
     }
 
     private class PTMPeptidesGraphicPanel extends JPanel {
@@ -185,6 +189,12 @@ public class PTMPeptidesGraphicView extends JPanel {
             if (ajustedLocation >= AJUSTE_GAP) {
                 m_ajustedStartLocation -= AJUSTE_GAP;
             }
+            m_logger.debug("adjust start location ={}", m_ajustedStartLocation);
+            Point p = m_scrollPane.getViewport().getViewPosition();
+            int y = p.y;
+            int x = (int) ((float) this.getWidth() / m_sequenceLength * m_ajustedStartLocation);
+            m_scrollPane.getViewport().setViewPosition(new java.awt.Point(x, y));
+
         }
 
         /**
@@ -195,10 +205,6 @@ public class PTMPeptidesGraphicView extends JPanel {
         @Override
         public void paint(Graphics g) {
             this.m_scrollPane.getViewport().revalidate();//
-            Point p = m_scrollPane.getViewport().getViewPosition();
-            int y = p.y;
-            int x = (int)((float)this.getWidth() / m_sequenceLength* m_ajustedStartLocation);
-            m_scrollPane.getViewport().setViewPosition(new java.awt.Point(x,y));
             super.paint(g);
         }
 

@@ -65,7 +65,6 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
     private final String TITLE = "Protein Sequence Coverage";
     private final Color SELECTED_COLOR = new Color(0, 0, 150, 100);//blue
     private final Color PEPTIDE_COLOR = new Color(0, 200, 0, 100);//green
-    //private Color TRANSPARENT_COLOR = new Color(0, 0, 0, 0);//transparent
 
     public PeptideOnProteinOverviewPanel(PTMGraphicCtrlPanel superCtrl) {
         super();
@@ -100,12 +99,13 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
         this.m_selectedPosition = position;
         List<PTMPeptideInstance> pepList = this.m_AAPeptideMap.get(position);
         if (pepList != null) {
-            int begin = 0;
+            int begin = position;
             for (PTMPeptideInstance pep : pepList) {
-                begin = Math.max(pep.getStartPosition(), begin);
+                begin = Math.min(pep.getStartPosition(), begin);
             }
             this.m_selectedPosition = begin;
         }
+        m_logger.debug("selected positon en protein is : {}", m_selectedPosition);
     }
 
     private int getPosOnProtein(int x) {
@@ -140,14 +140,14 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
         m_startPositionProtein = 0;
         m_aaWidth = m_aaWidthOriginal;
         String width = "" + m_aaWidth;
-        m_logger.debug("Context width is {},protein length is {},  aaWidth is {}", this.getWidth(), m_sequence.length(), width);
-        int proteinLength = sequence.length();
+        //m_logger.debug("Context width is {},protein length is {},  aaWidth is {}", this.getWidth(), m_sequence.length(), width);
+
         //m_logger.debug("length: {} Amino Acid", proteinLength);
         if (isNew) {//if is not new, don't need to updata map
             createPTMPeptideMap(peptideInstances);
         }
 
-        String title = proteinName + " " + TITLE + " " + proteinLength + " amino acid";
+        String title = proteinName + " " + TITLE + " " + m_sequence.length() + " amino acid";
 
         ((TitledBorder) getBorder()).setTitle(title);
         this.removeAll();
@@ -365,6 +365,9 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
             Point p = event.getPoint();
             currentX = p.x;
             currentY = p.y;
+            if (_action == null) {
+                return;
+            }
             switch (_action) {
                 case ZOOM_IN: //will not be presente
                     //m_logger.debug("release, ZOOM_IN");
@@ -372,7 +375,7 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
                 case ZOOM_OUT:
                     //m_logger.debug("release, zoom out");
                     double scale = 1 + 0.2 * (Math.max((currentX - startX) / m_height, 1));
-                    this.zoom(startX, scale);
+                    this.zoom(currentX, scale);
                     break;
                 case UN_ZOOM:
                     //m_logger.debug("release, un zoom");
@@ -428,7 +431,7 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
         }
 
         private void zoom(int x, double scale) {
-            int currentPos = getPosOnProtein(x);
+            int startNb = (int) (x / m_aaWidth);;
             if (_action == ZoomMouseAction.ZOOM_OUT) { // "Mouse wheel moved UP " zoom+
                 m_aaWidth = m_aaWidth * scale;
             } else if (_action == ZoomMouseAction.ZOOM_IN) {
@@ -438,8 +441,8 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
                     m_startPositionProtein = 0;
                 }
             }
-            int nbAA = (int) (currentX / m_aaWidth);
-            m_startPositionProtein = currentPos - nbAA;
+            int currentNB = (int) (currentX / m_aaWidth);
+            m_startPositionProtein = m_startPositionProtein + startNb - currentNB;
             if (m_startPositionProtein < 0) {
                 m_startPositionProtein = 0;
             }
@@ -452,9 +455,9 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
             //m_logger.debug("MMMMMMMM Move currentX = {} startX = {}", currentX, startX);
             int startPosition = getPosOnProtein(startX);
             int currentPosition = getPosOnProtein(currentX);
-            distance = currentPosition -startPosition;
+            distance = currentPosition - startPosition;
             //m_logger.debug("MMMMMMMM Move horizontal move distance = {} positionOld = {},positionCurrent = {}, ", distance, startPosition, currentPosition);
-            m_startPositionProtein = Math.min(m_startPositionProtein-distance, m_sequence.length());
+            m_startPositionProtein = Math.min(m_startPositionProtein - distance, m_sequence.length());
             m_startPositionProtein = Math.max(m_startPositionProtein, 0);
             startX = currentX;
             startY = currentY;

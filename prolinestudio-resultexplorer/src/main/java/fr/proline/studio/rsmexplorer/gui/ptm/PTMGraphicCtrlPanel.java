@@ -85,10 +85,11 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
         } else {
             protein = peptidesInstances.get(0).getSites().get(0).getProteinMatch();
         }
-        double proteinLength = 0;
+        int proteinLength = 0;
         if (protein.getDBioSequence() != null) {
-            proteinLength = protein.getDBioSequence().getSequence().length();
             m_proteinOvervewCtrl.setData(protein.getAccession(), protein.getDBioSequence().getSequence(), peptidesInstances.get(0), peptidesInstances);
+        }else{
+            m_proteinOvervewCtrl.setData(protein.getAccession(), m_ptmPeptideAreaCtrl.getSequence(), peptidesInstances.get(0), peptidesInstances);
         }
 
         this.repaint();

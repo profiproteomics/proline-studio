@@ -29,8 +29,9 @@ public class PTMMarkSetView extends ViewPtmAbstract {
     }
 
     void setPtmMarkList(List<PTMMarkView> ptmMarkList) {
-        if(ptmMarkList == null)
+        if (ptmMarkList == null) {
             ptmMarkList = new ArrayList<>();
+        }
         this.m_ptmMarkList = ptmMarkList;
     }
 
@@ -41,14 +42,19 @@ public class PTMMarkSetView extends ViewPtmAbstract {
     }
 
     protected String getToolTipText(int x, int y, int ajustedLocation) {
+        int index = (x - this.m_x) / ViewSetting.WIDTH_AA + ajustedLocation;
         if (y >= this.m_y && y <= (this.m_y + ViewSetting.HEIGHT_AA * 3) && m_ptmMarkList != null) {
-            int index = (x - this.m_x) / ViewSetting.WIDTH_AA + ajustedLocation;
+
             for (PTMMarkView pm : m_ptmMarkList) {
-                if (pm.getLocationProtein()== index) {
-                    
-                    return pm.getPTMShortName()+"(Protein Loc. " + pm.getDisplayedLocationProtein()+")";
-                } 
+                if (pm.getLocationProtein() == index) {
+
+                    return pm.getPTMShortName() + "(Protein Loc. " + pm.getDisplayedLocationProtein() + ")";
+                } else {
+                    return null;
+                }
             }
+        } else if (y > (this.m_y + ViewSetting.HEIGHT_AA * 3)) {
+            return ""+index;
         }
         return null;
     }

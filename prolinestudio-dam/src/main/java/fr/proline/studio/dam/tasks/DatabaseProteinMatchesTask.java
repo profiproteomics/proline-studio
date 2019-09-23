@@ -17,42 +17,27 @@ import javax.persistence.TypedQuery;
  * Load Protein Matches for a Rset or for a PeptideMatch
  * @author JM235353
  */
-public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
-    
-    // used to slice the task in sub tasks
-    private static final int SLICE_SIZE = 1000;
-    
-        // different possible subtasks
-    public static final int SUB_TASK_BIOSEQUENCE = 0;
-    public static final int SUB_TASK_COUNT = 1; // <<----- get in sync
-    
-        // data kept for sub tasks
-    private ArrayList<Long> m_proteinMatchIds = null;
-    private HashMap<Long, DProteinMatch> m_proteinMatchMap = null;
+public class DatabaseProteinMatchesTask extends AbstractDatabaseTask {
     
     private long m_projectId = -1;
     private DPeptideMatch m_peptideMatch = null;
     private ResultSet m_rset = null;
 
-
-    
-    private int m_action;
+    private final int m_action;
     
     private final static int LOAD_PROTEINS_FROM_PEPTIDE_MATCH  = 0;
     private final static int LOAD_ALL_PROTEINS_OF_RSET = 1;
     
     
     public DatabaseProteinMatchesTask(AbstractDatabaseCallback callback, long projectId, DPeptideMatch peptideMatch) {
-        super(callback);
-        init(SLICE_SIZE, new TaskInfo("Load Proteins for a Peptide Match "+getPeptideName(peptideMatch), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
+        super(callback, new TaskInfo("Load Proteins for a Peptide Match "+getPeptideName(peptideMatch), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));        
         m_projectId = projectId;
         m_peptideMatch = peptideMatch;     
         m_action = LOAD_PROTEINS_FROM_PEPTIDE_MATCH;
     }
     
     public DatabaseProteinMatchesTask(AbstractDatabaseCallback callback, long projectId, ResultSet rset) {
-        super(callback);
-        init(SLICE_SIZE, new TaskInfo("Load Proteins of Search Result "+rset.getId(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
+        super(callback, new TaskInfo("Load Proteins of Search Result "+rset.getId(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));        
         m_projectId = projectId;
         m_rset = rset;        
         m_action = LOAD_ALL_PROTEINS_OF_RSET;
@@ -108,51 +93,15 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
             case LOAD_ALL_PROTEINS_OF_RSET:
                 if (needToFetch()) {
                     return fechDataForRset();
-                } else {
-                    // fetch data of SubTasks
-                    return fetchDataSubTask();
                 }
             case LOAD_PROTEINS_FROM_PEPTIDE_MATCH:
                 if (needToFetch()) {
                     return fetchDataForPeptideMatch();
-                }  else {
-                    // fetch data of SubTasks
-                    return fetchDataSubTask();
                 }
         }
         return true; // should not happen
     }
-    
-    /**
-     * Fetch data of a Subtask
-     *
-     * @return
-     */
-    private boolean fetchDataSubTask() {
-        SubTask slice = m_subTaskManager.getNextSubTask();
-        if (slice == null) {
-            return true; // nothing to do : should not happen
-        }
-
-        try {
-
-
-            switch (slice.getSubTaskId()) {
-                case SUB_TASK_BIOSEQUENCE:
-                    fetchBiosequence(slice);
-                    break;
-
-            }
-
-        } catch (Exception e) {
-            m_logger.error(getClass().getSimpleName() + " failed", e);
-            m_taskError = new TaskError(e);
-            return false;
-        }
-
-        return true;
-    }
-
+   
     private boolean fechDataForRset() {
         EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
@@ -167,29 +116,10 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
             
             int nbProteins = proteinMatchList.size();
             DProteinMatch[] proteins = proteinMatchList.toArray(new DProteinMatch[nbProteins]);
-
             m_rset.getTransientData().setProteinMatches(proteins);
-
-            m_proteinMatchIds = new ArrayList<>(nbProteins);
-            m_proteinMatchMap = new HashMap<>(nbProteins);
-            for (int i=0;i<nbProteins;i++) {
-                DProteinMatch pm = proteins[i];
-                Long id = Long.valueOf(pm.getId());
-                m_proteinMatchIds.add(id);
-                m_proteinMatchMap.put(id, pm);
-            }
             
-            /**
-             * Biosequence for each Protein Match
-             *
-             */
-            // slice the task and get the first one
-            SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_BIOSEQUENCE, m_proteinMatchIds.size(), SLICE_SIZE);
-
-            // execute the first slice now
-            fetchBiosequence(subTask);
-
-            
+            // Biosequence for each Protein Match
+            DatabaseBioSequenceTask.fetchData(proteinMatchList, m_projectId);            
             
             entityManagerMSI.getTransaction().commit();
         } catch (RuntimeException e) {
@@ -220,30 +150,11 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
             List<DProteinMatch> proteinMatchList = proteinMatchQuery.getResultList();
 
             int nbProteins = proteinMatchList.size();
-            DProteinMatch[] proteins = proteinMatchList.toArray(new DProteinMatch[nbProteins]);
-            
+            DProteinMatch[] proteins = proteinMatchList.toArray(new DProteinMatch[nbProteins]);            
             m_peptideMatch.setProteinMatches(proteins);
-            
-            m_proteinMatchIds = new ArrayList<>(nbProteins);
-            m_proteinMatchMap = new HashMap<>(nbProteins);
-            for (int i=0;i<nbProteins;i++) {
-                DProteinMatch pm = proteins[i];
-                Long id = Long.valueOf(pm.getId());
-                m_proteinMatchIds.add(id);
-                m_proteinMatchMap.put(id, pm);
-            }
-            
-           /**
-             * Biosequence for each Protein Match
-             *
-             */
-            // slice the task and get the first one
-            SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_BIOSEQUENCE, m_proteinMatchIds.size(), SLICE_SIZE);
 
-            // execute the first slice now
-            fetchBiosequence(subTask);
-
-            
+             // Biosequence for each Protein Match
+            DatabaseBioSequenceTask.fetchData(proteinMatchList, m_projectId);            
             
             entityManagerMSI.getTransaction().commit();
         } catch  (RuntimeException e) {
@@ -262,25 +173,6 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
         
         return true;
     }
-    
-    private void fetchBiosequence(SubTask subTask) {
-        
-        List sliceOfProteinMatchIds = subTask.getSubList(m_proteinMatchIds);
-        
-        ArrayList<DProteinMatch> proteinMatchList = new ArrayList<>(sliceOfProteinMatchIds.size());
-        
-        Iterator<Long> itId = sliceOfProteinMatchIds.iterator();
-        while (itId.hasNext()) {
-            Long proteinMatchId =  itId.next();
-            DProteinMatch proteinMatch = m_proteinMatchMap.get(proteinMatchId);
-            proteinMatchList.add(proteinMatch);
-
-        }
-        
-        DatabaseBioSequenceTask.fetchData(proteinMatchList, m_projectId);
-
-    }
-    
     
     
 }

@@ -6,8 +6,6 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DBioSequence;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.table.LazyTable;
-import fr.proline.studio.table.LazyTableModel;
-import fr.proline.studio.dam.tasks.DatabaseProteinMatchesTask;
 import fr.proline.studio.export.ExportModelUtilities;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.DoubleFilter;
@@ -19,13 +17,12 @@ import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
-import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.utils.URLCellRenderer;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.HashMap;
@@ -35,7 +32,7 @@ import javax.swing.table.TableCellRenderer;
  * Table Model for Peptide Matches
  * @author JM235353
  */
-public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements GlobalTableModelInterface {
+public class ProteinsOfPeptideMatchTableModel extends DecoratedTableModel implements GlobalTableModelInterface {
 
     public static final int COLTYPE_PROTEIN_ID             = 0;
     public static final int COLTYPE_PROTEIN_NAME           = 1;
@@ -51,7 +48,7 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
     private ScoreRenderer m_scoreRenderer = new ScoreRenderer();
     
     public ProteinsOfPeptideMatchTableModel(LazyTable table) {
-        super(table);
+
     }
     
     public DProteinMatch getProteinMatch(int row) {
@@ -91,7 +88,7 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
             case COLTYPE_PROTEIN_PEPTIDES_COUNT:
                 return Integer.class;
             case COLTYPE_PROTEIN_MASS:
-                return LazyData.class;
+                return Float.class;
         }
         return null;
     }
@@ -119,31 +116,20 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
                 return proteinMatch.getScore();
             case COLTYPE_PROTEIN_PEPTIDES_COUNT:
                 return proteinMatch.getPeptideCount();
-            case COLTYPE_PROTEIN_MASS:
-                LazyData lazyData = getLazyData(row,col);
-                
+            case COLTYPE_PROTEIN_MASS:               
                 DBioSequence bioSequence = proteinMatch.getDBioSequence();
-                if (bioSequence != null) {
-                    lazyData.setData(new Float(bioSequence.getMass()));
-                    return lazyData;
-                } else if (proteinMatch.isDBiosequenceSet()) {
-                    lazyData.setData(Float.NaN); // unknown
-                    return lazyData;
-                }
-                
-                lazyData.setData(null);
-                    
-                givePriorityTo(m_taskId, row, col);
-                
-                return lazyData;
-                
-        }
+                if (bioSequence != null) {                    
+                    return new Float(bioSequence.getMass());
+                } else 
+                    return Float.NaN; // unknown
+            }
+                                        
         return null; // should never happen
     }
 
     public void setData(DProteinMatch[] proteinMatchArray) {
         m_proteinMatchArray = proteinMatchArray;
-
+       
         updateMinMax();
 
         fireTableDataChanged();
@@ -202,14 +188,7 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
 
     }
     
-    @Override
-    public int getSubTaskId(int col) {
-        switch (col) {
-            case COLTYPE_PROTEIN_MASS:
-                return DatabaseProteinMatchesTask.SUB_TASK_BIOSEQUENCE;
-        }
-        return -1;
-    }
+
     
     public void dataUpdated() {
         // no need to do an updateMinMax : scores are known at once
@@ -219,30 +198,30 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
     }
 
     
-    public void sortAccordingToModel(ArrayList<Long> proteinMatchIds, CompoundTableModel compoundTableModel) {
-        
-        if (m_proteinMatchArray == null) {
-            // data not loaded 
-            return;
-        }
-        
-        HashSet<Long> proteinMatchIdMap = new HashSet<>(proteinMatchIds.size());
-        proteinMatchIdMap.addAll(proteinMatchIds);
-
-        int nb = m_table.getRowCount();
-        int iCur = 0;
-        for (int iView = 0; iView < nb; iView++) {
-            int iModel = m_table.convertRowIndexToModel(iView);
-            if (compoundTableModel != null) {
-                iModel = compoundTableModel.convertCompoundRowToBaseModelRow(iModel);
-            }
-            DProteinMatch pm = m_proteinMatchArray[iModel];
-            if (proteinMatchIdMap.contains(pm.getId())) {
-                proteinMatchIds.set(iCur++, pm.getId());
-            }
-        }
-
-    }
+//    public void sortAccordingToModel(ArrayList<Long> proteinMatchIds, CompoundTableModel compoundTableModel) {
+//        
+//        if (m_proteinMatchArray == null) {
+//            // data not loaded 
+//            return;
+//        }
+//        
+//        HashSet<Long> proteinMatchIdMap = new HashSet<>(proteinMatchIds.size());
+//        proteinMatchIdMap.addAll(proteinMatchIds);
+//
+//        int nb = m_table.getRowCount();
+//        int iCur = 0;
+//        for (int iView = 0; iView < nb; iView++) {
+//            int iModel = m_table.convertRowIndexToModel(iView);
+//            if (compoundTableModel != null) {
+//                iModel = compoundTableModel.convertCompoundRowToBaseModelRow(iModel);
+//            }
+//            DProteinMatch pm = m_proteinMatchArray[iModel];
+//            if (proteinMatchIdMap.contains(pm.getId())) {
+//                proteinMatchIds.set(iCur++, pm.getId());
+//            }
+//        }
+//
+//    }
 
     
 
@@ -258,12 +237,12 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
 
     @Override
     public boolean isLoaded() {
-        return m_table.isSortable();
+        return true;
     }
 
     @Override
     public int getLoadingPercentage() {
-        return m_table.getLoadingPercentage();
+        return 100;
     }
 
     @Override
@@ -273,19 +252,12 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
 
     @Override
     public Class getDataColumnClass(int columnIndex) {
-        if (columnIndex == COLTYPE_PROTEIN_MASS) {
-                return Float.class;
-        }
         return getColumnClass(columnIndex);
     }
 
     @Override
     public Object getDataValueAt(int rowIndex, int columnIndex) {
-        Object data = getValueAt(rowIndex, columnIndex);
-        if (data instanceof LazyData) {
-            data = ((LazyData) data).getData();
-        }
-        return data;
+        return getValueAt(rowIndex, columnIndex);
     }
 
     @Override
@@ -408,4 +380,28 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
         return null;
     }
  
+        @Override
+    public Long getTaskId() {
+        return -1L; // not needed
+    }
+
+    @Override
+    public LazyData getLazyData(int row, int col) {
+        return null; // not needed
+    }
+
+    @Override
+    public void givePriorityTo(Long taskId, int row, int col) {
+        // not needed
+    }
+
+    @Override
+    public void sortingChanged(int col) {
+        // not needed
+    }
+
+    @Override
+    public int getSubTaskId(int col) {
+        return -1; // not needed
+    }
 }

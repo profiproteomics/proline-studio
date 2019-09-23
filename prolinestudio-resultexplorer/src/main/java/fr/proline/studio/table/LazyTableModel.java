@@ -31,6 +31,7 @@ public abstract class LazyTableModel extends DecoratedTableModel implements Lazy
      * @param col
      * @return
      */
+    @Override
     public LazyData getLazyData(int row, int col) {
 
         int nb = getRowCount();
@@ -56,6 +57,7 @@ public abstract class LazyTableModel extends DecoratedTableModel implements Lazy
      * @param row
      * @param col
      */
+    @Override
     public void givePriorityTo(Long taskId, int row, int col) {
         int sortedCol = m_table.getSortedColumnIndex();
         if (sortedCol == -1) {
@@ -72,6 +74,7 @@ public abstract class LazyTableModel extends DecoratedTableModel implements Lazy
      *
      * @param col
      */
+    @Override
     public void sortingChanged(int col) {
         int subTaskId = getSubTaskId(col);
         if (subTaskId != -1) {
@@ -86,8 +89,10 @@ public abstract class LazyTableModel extends DecoratedTableModel implements Lazy
      * @param col
      * @return
      */
+    @Override
     public abstract int getSubTaskId(int col);
 
+    @Override
     public PlotDataSpec getDataSpecAt(int row) {
         return null;
     }

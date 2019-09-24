@@ -116,6 +116,7 @@ public class PTMPeptidesGraphicView extends JPanel {
             this.m_internalPanel.updateData();
             m_dataBox.propagateDataChanged(PTMPeptideInstance.class);
         }
+        setScrollLocation(this.m_dataModel.getLowerStartInProtSeq());
         this.repaint();
     }
 
@@ -201,7 +202,6 @@ public class PTMPeptidesGraphicView extends JPanel {
         private void setScrollLocation(int ajustedLocation) {
             JScrollBar bar = this.m_scrollPane.getHorizontalScrollBar();
             int max = bar.getMaximum();
-            this.m_scrollPane.getHorizontalScrollBar().setValue(WIDTH);
             int x = (int) ((float) max / m_sequenceLength * ajustedLocation);
             bar.setValue(x);
         }
@@ -233,7 +233,8 @@ public class PTMPeptidesGraphicView extends JPanel {
             m_titlePane.updateData();
             m_peptidesPane.updateData();
 
-            int ajustedLocation = m_dataModel.getLowerStartInProtSeq();
+            //int ajustedLocation = m_dataModel.getLowerStartInProtSeq();
+            int ajustedLocation = 0;
             m_isDataNull = false;
             m_sequenceLength = m_dataModel.getProteinSequence().length();
             setAjustedLocation(ajustedLocation);
@@ -298,12 +299,13 @@ public class PTMPeptidesGraphicView extends JPanel {
                 super.paintComponent(g);
                 if (!m_isDataNull) {
                     ViewContext viewContext = new ViewContext();
-                    viewContext.setAjustedStartLocation(m_ajustedStartLocation);
+                    //viewContext.setAjustedStartLocation(m_ajustedStartLocation);
                     int adjustedEndLoc = m_dataModel.getHigherEndInProtSeq();
                     if (m_sequenceLength > (adjustedEndLoc + AJUSTE_GAP)) {
                         adjustedEndLoc = m_dataModel.getHigherEndInProtSeq() + AJUSTE_GAP;
                     }
-                    viewContext.setAjustedEndLocation(adjustedEndLoc).setShowNCtermIndex(false);
+                    //viewContext.setAjustedEndLocation(adjustedEndLoc).setShowNCtermIndex(false);
+                    viewContext.setShowNCtermIndex(false);
                     Graphics2D g2 = (Graphics2D) g;
                     m_ctrlMark.paint(g2, viewContext);
                     m_ctrlSequence.paint(g2, viewContext);
@@ -409,7 +411,8 @@ public class PTMPeptidesGraphicView extends JPanel {
                 super.paintComponent(g);
                 if (!m_isDataNull) {
                     ViewContext viewContext = new ViewContext();
-                    viewContext.setAjustedStartLocation(m_ajustedStartLocation).setAreaWidth(this.getWidth());
+                    //viewContext.setAjustedStartLocation(m_ajustedStartLocation).setAreaWidth(this.getWidth());
+                    viewContext.setAreaWidth(this.getWidth());
                     Graphics2D g2 = (Graphics2D) g;
                     m_ctrlPeptideArea.paint(g2, viewContext);
                 }

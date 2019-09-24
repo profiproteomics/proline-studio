@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.ptm;
 
+import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.export.ExportButton;
@@ -21,6 +22,9 @@ import org.slf4j.LoggerFactory;
  */
 public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface, SplittedPanelContainer.UserActions {
 
+    DProteinMatch m_selectedProteinMatch;
+    List<PTMPeptideInstance> m_ptmPeptideInstances;
+
     public enum Source {
         PEPTIDE_AREA,
         SEQUENCE
@@ -29,7 +33,6 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
     public enum Message {
         SELECTED
     }
-
 
     private static Logger logger = LoggerFactory.getLogger(PTMGraphicCtrlPanel.class);
     private boolean m_isClusterData;
@@ -74,22 +77,29 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
         return toolbar;
     }
 
-    public void setData(List<PTMPeptideInstance> peptidesInstances) {
-        if (peptidesInstances == null || peptidesInstances.isEmpty()) {
+    public void setSelectedProtein(DProteinMatch proteinMatch) {
+        m_selectedProteinMatch = proteinMatch;
+        setData(m_ptmPeptideInstances);
+    }
+
+    public void setData(List<PTMPeptideInstance> ptmPepInstances) {
+        if (ptmPepInstances == null || ptmPepInstances.isEmpty()) {
             return;
         }
-        m_ptmPeptideAreaCtrl.setData(peptidesInstances);
-        DProteinMatch protein;
-        if (m_isClusterData) {
-            protein = peptidesInstances.get(0).getClusters().get(0).getProteinMatch();
+        m_ptmPeptideAreaCtrl.setData(ptmPepInstances);
+        m_ptmPeptideInstances = ptmPepInstances;
+        m_dataBox.getData(true, DPeptideInstance.class);
+
+        if (m_selectedProteinMatch == null) {
+            return;
         } else {
-            protein = peptidesInstances.get(0).getSites().get(0).getProteinMatch();
-        }
-        int proteinLength = 0;
-        if (protein.getDBioSequence() != null) {
-            m_proteinOvervewCtrl.setData(protein.getAccession(), protein.getDBioSequence().getSequence(), peptidesInstances.get(0), peptidesInstances);
-        }else{
-            m_proteinOvervewCtrl.setData(protein.getAccession(), m_ptmPeptideAreaCtrl.getSequence(), peptidesInstances.get(0), peptidesInstances);
+            DPeptideInstance[] peptideInstances = m_selectedProteinMatch.getPeptideSet(this.m_dataBox.getRsmId()).getPeptideInstances();
+
+            if (m_selectedProteinMatch.getDBioSequence() != null) {
+                m_proteinOvervewCtrl.setData(m_selectedProteinMatch.getAccession(), m_selectedProteinMatch.getDBioSequence().getSequence(), ptmPepInstances.get(0), ptmPepInstances, peptideInstances);
+            } else {
+                m_proteinOvervewCtrl.setData(m_selectedProteinMatch.getAccession(), m_ptmPeptideAreaCtrl.getSequence(), ptmPepInstances.get(0), ptmPepInstances, peptideInstances);
+            }
         }
 
         this.repaint();

@@ -5,10 +5,15 @@
  */
 package fr.proline.studio.pattern;
 
+import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
+import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.rsmexplorer.gui.ptm.PTMGraphicCtrlPanel;
-import fr.proline.studio.rsmexplorer.gui.ptm.PTMPeptidesGraphicView;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -51,16 +56,47 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
         setDataBoxPanelInterface(p);
     }
 
+    private void loadPeptidesInstances() {
+        DProteinMatch proteinMatch = (DProteinMatch) m_previousDataBox.getData(false, DProteinMatch.class);
+
+        ArrayList<ResultSummary> rsmList = new ArrayList<>(1);
+        rsmList.add(m_rsm);
+        final int loadingId = setLoading();
+
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                setLoaded(loadingId);
+                if (success) {
+                    ((PTMGraphicCtrlPanel) getDataBoxPanelInterface()).setSelectedProtein(proteinMatch);
+                } else {
+                }
+                if (finished) {
+                    unregisterTask(taskId);
+                }
+            }
+        };
+        DatabaseLoadPeptidesInstancesTask task = new DatabaseLoadPeptidesInstancesTask(callback, getProjectId(), proteinMatch, rsmList);
+        Long taskId = task.getId();
+       
+        registerTask(task);
+    }
+    
+
     @Override
     public void updateData() {
-
         // PTMPeptidesGraphicView graphicView = (PTMPeptidesGraphicView) getDataBoxPanelInterface();
         PTMGraphicCtrlPanel graphicView = (PTMGraphicCtrlPanel) getDataBoxPanelInterface();
         if (m_ptmPepInstances == null || m_ptmPepInstances.isEmpty()) {
             graphicView.setData(null);
             return;
         }
-
+        loadPeptidesInstances();
         final List<PTMSite> notLoadedPtmSite = getNotLoadedPTMSite();
 
         if (notLoadedPtmSite.isEmpty()) {
@@ -69,6 +105,7 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
             propagateDataChanged(PTMPeptideInstance.class);
 
         } else {
+
             loadPtmSite(notLoadedPtmSite);
         }
 

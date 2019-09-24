@@ -132,7 +132,7 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
                     return pi.getBestPeptideMatch();
                 }
             }
-            if (parameterType.equals(ExtendedTableModelInterface.class)) {
+            if (parameterType.equals(ExtendedTableModelInterface.class)) {//get all peptide instances
                 return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {

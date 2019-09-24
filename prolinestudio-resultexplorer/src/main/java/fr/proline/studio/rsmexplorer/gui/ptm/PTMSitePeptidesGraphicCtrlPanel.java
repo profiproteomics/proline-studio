@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Karine XUE
  */
-
 public class PTMSitePeptidesGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface, SplittedPanelContainer.UserActions, PeptidesPTMSitePanelInterface {
 
     private static Logger logger = LoggerFactory.getLogger(PTMSitePeptidesGraphicCtrlPanel.class);
@@ -73,7 +72,6 @@ public class PTMSitePeptidesGraphicCtrlPanel extends JPanel implements DataBoxPa
         return toolbar;
     }
 
-    
     @Override
     public void setData(PTMSite peptidesPTMSite, DPeptideInstance pepInst) {
         //logger.debug(this.getClass().getName() + " setData ->");
@@ -93,14 +91,17 @@ public class PTMSitePeptidesGraphicCtrlPanel extends JPanel implements DataBoxPa
             this.m_ctrlSequence.setPTMSequencePosition(m_dataMgr.getPTMSiteSeqPos());
             this.m_ctrlMark.setData(m_dataMgr.getAllPtmMarks());
             this.m_ctrlPeptideArea.setData(m_dataMgr.getPTMSitePeptideInstances());
-            int ajustedLocation = m_dataMgr.getBeginBestFit();
+
             this.m_ctrlPeptideArea.setSelectedIndex(0);
             this.m_paintArea.setIsDataLoaded(true);
             this.m_paintArea.setRowCount(this.m_dataMgr.getRowCount());
             this.m_paintArea.setSequenceLength(m_dataMgr.getProteinSequence().length());
-            this.m_paintArea.setAjustedLocation(ajustedLocation);
+            int ajustedLocation = m_dataMgr.getBeginBestFit();
+            this.m_paintArea.setScrollLocation(ajustedLocation);
+            //this.m_paintArea.setAdjust(ajustedLocation);
             valueChanged();
         }
+
         this.repaint();
     }
 
@@ -119,12 +120,11 @@ public class PTMSitePeptidesGraphicCtrlPanel extends JPanel implements DataBoxPa
     }
 
     @Override
-    public void setSelectedPeptide(DPeptideInstance pep){
+    public void setSelectedPeptide(DPeptideInstance pep) {
         int row = this.m_dataMgr.getPeptideIndex(pep);
         this.m_paintArea.setSelectedPeptideIndex(row);
         repaint();
     }
-
 
     /**
      * when selected petptied change, change next databox and table selected row

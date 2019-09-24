@@ -20,23 +20,6 @@ public class ViewContext {
     return this;
   }
 
-  public int getAjustedStartLocation() {
-    return m_ajustedStartLocation;
-  }
-
-  public ViewContext setAjustedStartLocation(int ajustedLocation) {
-    this.m_ajustedStartLocation = ajustedLocation;
-    return this;
-  }
-
-    public int getAjustedEndLocation() {
-        return m_ajustedEndLocation;
-    }
-
-    public ViewContext setAjustedEndLocation(int ajustedLocation) {
-        this.m_ajustedEndLocation = ajustedLocation;
-        return this;
-    }
 
     public boolean isNCtermIndexShown() {
         return m_showNCtermIndex;

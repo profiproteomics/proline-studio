@@ -49,8 +49,8 @@ public class ProteinSequenceView extends ViewPtmAbstract {
 
         int aaWidth = ViewSetting.WIDTH_AA;
         int aaHeight = ViewSetting.HEIGHT_AA;
-        int adjusteStartLoc = Math.max(0,viewContext.getAjustedStartLocation());        
-        int adjusteEndLoc = viewContext.getAjustedEndLocation();
+        int adjusteStartLoc = 0;        
+        int adjusteEndLoc = m_sequence.length();
         if(adjusteEndLoc >= m_sequence.length() || adjusteEndLoc <=0)
             adjusteEndLoc = m_sequence.length();
         

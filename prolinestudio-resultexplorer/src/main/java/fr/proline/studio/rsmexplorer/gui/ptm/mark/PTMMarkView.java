@@ -70,7 +70,8 @@ public class PTMMarkView extends ViewPtmAbstract {
         
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         
-        this.x0 = this.m_x + (getLocationProtein() - viewContext.getAjustedStartLocation()) * ViewSetting.WIDTH_AA;
+        //this.x0 = this.m_x + (getLocationProtein() - viewContext.getAjustedStartLocation()) * ViewSetting.WIDTH_AA;
+        this.x0 = this.m_x + getLocationProtein() * ViewSetting.WIDTH_AA;
         this.y0 = this.m_y + ViewSetting.HEIGHT_AA; //reserve location line        
         int xWidthAA = x0+ViewSetting.WIDTH_AA;
         int yHeightAA = y0 + ViewSetting.HEIGHT_AA;

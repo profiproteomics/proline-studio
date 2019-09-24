@@ -21,6 +21,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 
 import org.slf4j.Logger;
@@ -32,10 +33,8 @@ import org.slf4j.LoggerFactory;
  */
 public class PTMSitePeptidesGraphicViewPanel extends JPanel {
 
-    private static Logger logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
-    private static final int INITIAL_WIDTH = 1200;
-    private static final int INITIAL_HEIGHT = 250;
-    private static final int AJUSTE_GAP = 3;
+    private static Logger m_logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
+    private static final int AJUSTE_GAP = 2;//one space before, one after
     private boolean m_isDataLoaded;
     private TitlePane m_titlePane;
     private PeptidePane m_peptidePane;
@@ -66,7 +65,7 @@ public class PTMSitePeptidesGraphicViewPanel extends JPanel {
         m_peptidePane.setBeginPoint(ViewSetting.BORDER_GAP, ViewSetting.BORDER_GAP);
         m_numberPane.setBeginPoint(ViewSetting.BORDER_GAP, ViewSetting.BORDER_GAP);
         //first setPreferredSize to guarantee the height
-        m_titlePane.setPreferredSize(new Dimension(INITIAL_WIDTH, ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE));
+        m_titlePane.setPreferredSize(new Dimension(this.getWidth(), ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE));
         m_titlePane.setBackground(Color.WHITE);
         m_peptidePane.setBackground(Color.WHITE);
         m_titlePane.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, CyclicColorPalette.GRAY_GRID));
@@ -86,11 +85,22 @@ public class PTMSitePeptidesGraphicViewPanel extends JPanel {
         this.m_isDataLoaded = isDataLoaded;
     }
 
-    public void setAjustedLocation(int ajustedLocation) {
-        this.m_ajustedLocation = ajustedLocation;
-        if (ajustedLocation >= AJUSTE_GAP) {
-            m_ajustedLocation -= AJUSTE_GAP;
-        }
+//    public void setAjustedLocation(int ajustedLocation) {
+//        this.m_ajustedLocation = ajustedLocation;
+//        if (ajustedLocation >= AJUSTE_GAP) {
+//            m_ajustedLocation -= AJUSTE_GAP;
+//        }
+//    }
+    public void setScrollLocation(int ajustedLocation) {
+        JScrollBar bar = this.m_scrollPane.getHorizontalScrollBar();
+        int max = bar.getMaximum();
+        float unit = (float) (max) / m_sequenceLength;
+        m_logger.debug("SSSSSSSSSSSSSSSSSS setScrollLocation, getValue={}, unit={},max={} ", bar.getValue(), unit, max);
+        int x = (int) (unit * (ajustedLocation + AJUSTE_GAP));//relative in the scroll bar
+        m_logger.debug("SSSSSSSSSSSSSSSSSS setScrollLocation, adjusted locaiton ={}, value to set ={} , sequence Length ={}", ajustedLocation + AJUSTE_GAP, x, m_sequenceLength);
+        bar.setValue(x);
+        m_logger.debug("SSSSSSSSSSSSSSSSSS setScrollLocation, getValue 2={} ", bar.getValue());
+
     }
 
     void setRowCount(int rowCount) {
@@ -162,7 +172,8 @@ public class PTMSitePeptidesGraphicViewPanel extends JPanel {
 
         @Override
         public Dimension getPreferredSize() {
-            return new Dimension((int) ((m_sequenceLength + AJUSTE_GAP - m_ajustedLocation) * ViewSetting.WIDTH_AA), ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE);
+            //return new Dimension((int) ((m_sequenceLength + AJUSTE_GAP - m_ajustedLocation) * ViewSetting.WIDTH_AA), ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE);
+            return new Dimension((int) ((m_sequenceLength + AJUSTE_GAP) * ViewSetting.WIDTH_AA), ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE);
         }
 
         @Override
@@ -171,7 +182,7 @@ public class PTMSitePeptidesGraphicViewPanel extends JPanel {
             super.paintComponent(g);
             if (!m_isDataNull) {
                 ViewContext viewContext = new ViewContext();
-                viewContext.setAjustedStartLocation(m_ajustedLocation);
+                // viewContext.setAjustedStartLocation(m_ajustedLocation);
                 if (m_isDataLoaded) {
                     Graphics2D g2 = (Graphics2D) g;
                     m_ctrlMark.paint(g2, viewContext);
@@ -253,7 +264,8 @@ public class PTMSitePeptidesGraphicViewPanel extends JPanel {
 
         @Override
         public Dimension getPreferredSize() {
-            int width = (int) ((m_sequenceLength + AJUSTE_GAP - m_ajustedLocation) * ViewSetting.WIDTH_AA);
+            // int width = (int) ((m_sequenceLength + AJUSTE_GAP - m_ajustedLocation) * ViewSetting.WIDTH_AA);
+            int width = (int) ((m_sequenceLength + AJUSTE_GAP) * ViewSetting.WIDTH_AA);
             int height = m_rowCount * (ViewSetting.HEIGHT_AA * 2 - ViewSetting.HEIGHT_AA / 2);
             if (height == 0) {
                 height = 5 * ViewSetting.HEIGHT_AA;
@@ -268,7 +280,8 @@ public class PTMSitePeptidesGraphicViewPanel extends JPanel {
             super.paintComponent(g);
             if (!m_isDataNull) {
                 ViewContext viewContext = new ViewContext();
-                viewContext.setAjustedStartLocation(m_ajustedLocation).setAreaWidth(this.getWidth());
+                //viewContext.setAjustedStartLocation(m_ajustedLocation).setAreaWidth(this.getWidth());
+                viewContext.setAreaWidth(this.getWidth());
                 if (m_isDataLoaded) {
                     Graphics2D g2 = (Graphics2D) g;
                     m_ctrlPeptideArea.paint(g2, viewContext);

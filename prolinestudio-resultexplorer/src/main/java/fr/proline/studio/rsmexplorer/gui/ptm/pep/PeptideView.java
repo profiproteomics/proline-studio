@@ -129,7 +129,8 @@ public class PeptideView extends ViewPtmAbstract {
     public void paint(Graphics2D g, ViewContext viewContext) {
         int aaWidth = ViewSetting.WIDTH_AA;
 
-        this.x0 = (this.m_x + aaWidth + (this.m_beginIndex - viewContext.getAjustedStartLocation()) * aaWidth);
+        //this.x0 = (this.m_x + aaWidth + (this.m_beginIndex - viewContext.getAjustedStartLocation()) * aaWidth);
+        this.x0 = (this.m_x + aaWidth + this.m_beginIndex * aaWidth);
         this.y0 = this.m_y+1;
         int width = (this.m_length * aaWidth);
         int height = ViewSetting.HEIGHT_AA-1;       

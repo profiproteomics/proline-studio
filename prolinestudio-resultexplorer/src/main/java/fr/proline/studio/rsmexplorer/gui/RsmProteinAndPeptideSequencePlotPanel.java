@@ -306,12 +306,12 @@ public class RsmProteinAndPeptideSequencePlotPanel extends JPanel {
                 for (DPeptidePTM ptm : allPtm) {
                     long ptmType = ptm.getIdPtmSpecificity();
                     HashMap<Long, DInfoPTM> map2Debug = DInfoPTM.getInfoPTMMap();
-                    String mapOverview = "";
-                    for (Long type : map2Debug.keySet()) {
-                        DInfoPTM info = map2Debug.get(type);
-                        mapOverview += info.getPtmShortName() + String.valueOf(info.getResidueAASpecificity()) + '\n';
-
-                    }
+//                    String mapOverview = "";
+//                    for (Long type : map2Debug.keySet()) {
+//                        DInfoPTM info = map2Debug.get(type);
+//                        mapOverview += info.getPtmShortName() + String.valueOf(info.getResidueAASpecificity()) + '\n';
+//
+//                    }
                     //m_logger.debug("all ptm type: {}", mapOverview);
                     DInfoPTM ptmTypeInfo = DInfoPTM.getInfoPTMMap().get(ptmType);
                     int position = (int) ptm.getSeqPosition() + start - 1;//position convert to int

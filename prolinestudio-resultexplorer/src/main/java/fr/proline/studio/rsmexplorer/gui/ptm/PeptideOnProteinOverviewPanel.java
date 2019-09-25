@@ -78,6 +78,7 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
     private final Color SELECTED_COLOR = Color.black;//blue
     private final Color PEPTIDE_COLOR = new Color(0, 200, 0, 100);//green with transparence
     private final Color PTM_PEPTIDE_COLOR = Color.red;
+    private int m_oldWidth;
 
     public PeptideOnProteinOverviewPanel(PTMGraphicCtrlPanel superCtrl) {
         super();
@@ -88,7 +89,7 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
 
     private void initComponent() {
         this.setBorder(BorderFactory.createTitledBorder(TITLE));
-
+        m_oldWidth = this.getWidth();
         ProteinMouseAdapter mouseAdapter = new ProteinMouseAdapter();
         this.addMouseListener(mouseAdapter);
         this.addMouseMotionListener(mouseAdapter);
@@ -151,10 +152,10 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
         m_sequence = sequence;
         m_selectedPeptideInstance = selectedPeptide;
         m_aaWidthOriginal = ((double) (this.getWidth() - 20) / m_sequence.length());
-        m_startPositionProtein = 0;
         m_aaWidth = m_aaWidthOriginal;
-        //m_logger.debug("Context width is {},protein length is {},  aaWidth is {}", this.getWidth(), m_sequence.length(), width);
+        m_startPositionProtein = 0;
 
+        //m_logger.debug("Context width is {},protein length is {},  aaWidth is {}", this.getWidth(), m_sequence.length(), width);
         m_logger.debug("Context width is {},protein length is {},  aaWidth is {}", this.getWidth(), m_sequence.length(), m_aaWidth);
 
         //m_logger.debug("length: {} Amino Acid", proteinLength);
@@ -174,13 +175,19 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         this.setSize(this.getWidth(), 90);
+        if (this.getWidth() != m_oldWidth) {
+            if (m_sequence != null && m_aaWidth == m_aaWidthOriginal) {
+                m_aaWidthOriginal = ((double) (this.getWidth() - 20) / m_sequence.length());
+                m_aaWidth = m_aaWidthOriginal;
+                m_oldWidth = this.getWidth();
+            }
+        }
         Graphics2D g2 = (Graphics2D) g;
         if (m_PTMPeptideInstances != null && !m_PTMPeptideInstances.isEmpty()) {
             paintPTM(g2);
             paintPeptideListOnSequence(g2);
         }
     }
-    
 
     /**
      * paint PTMSite in increasing order
@@ -219,7 +226,7 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
         g.drawLine(m_x0 - startPos, m_protein_y0, m_x0 - startPos, m_protein_y0 + m_protein_height);//mark protein begin
         int endPos = (int) (m_sequence.length() * m_aaWidth);
         g.drawLine(m_x0 - startPos + endPos, m_protein_y0, m_x0 - startPos + endPos, m_protein_y0 + m_protein_height);//mark protein end
-        g.drawLine(m_x0, m_protein_y0 + m_protein_height / 2, m_x0 + width, m_protein_y0 + m_protein_height / 2); //middle  height
+        g.drawLine(m_x0, m_protein_y0 + m_protein_height / 2, m_x0 - startPos + endPos, m_protein_y0 + m_protein_height / 2); //draw protein length in middle
 
         g.setColor(PEPTIDE_COLOR);
         for (DPeptideInstance pep : m_peptideInstances) {

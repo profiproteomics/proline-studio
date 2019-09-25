@@ -59,7 +59,7 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
     HashMap<Integer, AminoAcidPtm> m_PTMMap;
     HashMap<Integer, ArrayList<String>> m_PTMTooltipsMap;
 
-    private String m_sequence;
+    private int m_proteinLengh;
     private List<PTMPeptideInstance> m_PTMPeptideInstances;
     private DPeptideInstance[] m_peptideInstances;
     private PTMPeptideInstance m_selectedPeptideInstance;
@@ -74,6 +74,8 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
     private final int m_ptm_height = m_height / 2;
     private final int m_protein_y0 = m_ptm_y0 + m_ptm_height;
     private final int m_protein_height = m_height - m_ptm_height;
+    private final BasicStroke STROKE_PROTEINE_LINE = new BasicStroke(3, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND);
+    private final BasicStroke STROKE_NORMAL = new BasicStroke(2, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND);
     private final String TITLE = "Protein Sequence Coverage";
     private final Color SELECTED_COLOR = Color.black;//blue
     private final Color PEPTIDE_COLOR = new Color(0, 200, 0, 100);//green with transparence
@@ -138,35 +140,20 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
         this.removeAll();
     }
 
-    public void setData(String proteinName, String sequence, PTMPeptideInstance selectedPeptide, List<PTMPeptideInstance> ptmPeptideInstances, DPeptideInstance[] peptideInstances) {
-
-        boolean isNew = true;
-
-        if (m_sequence != null && m_sequence.equals(sequence)) {
-            if (m_PTMPeptideInstances.equals(ptmPeptideInstances)) {
-                isNew = false;
-            }
-        }
+    public void setData(String proteinName, int proteinLength, PTMPeptideInstance selectedPeptide, List<PTMPeptideInstance> ptmPeptideInstances, DPeptideInstance[] peptideInstances) {
         m_PTMPeptideInstances = ptmPeptideInstances;
         m_peptideInstances = peptideInstances;
-        m_sequence = sequence;
+        m_proteinLengh = proteinLength;
         m_selectedPeptideInstance = selectedPeptide;
-        m_aaWidthOriginal = ((double) (this.getWidth() - 20) / m_sequence.length());
-        m_aaWidth = m_aaWidthOriginal;
         m_startPositionProtein = 0;
 
-        //m_logger.debug("Context width is {},protein length is {},  aaWidth is {}", this.getWidth(), m_sequence.length(), width);
-        m_logger.debug("Context width is {},protein length is {},  aaWidth is {}", this.getWidth(), m_sequence.length(), m_aaWidth);
-
-        //m_logger.debug("length: {} Amino Acid", proteinLength);
-        if (isNew) {//if is not new, don't need to updata map
-            createPTMPeptideMap(ptmPeptideInstances);
-            createAADataMap(peptideInstances);
-        }
-
-        String title = proteinName + " " + TITLE + " " + m_sequence.length() + " amino acid";
-
-        ((TitledBorder) getBorder()).setTitle(title);
+        createPTMPeptideMap(ptmPeptideInstances);
+        createAADataMap(peptideInstances);
+        //m_proteinLengh may be changed after calculating, so m_aaWidthOriginal is calcul after above create
+        m_aaWidthOriginal = ((double) (this.getWidth() - 20) / m_proteinLengh);
+        m_aaWidth = m_aaWidthOriginal;
+        String title = proteinName + " " + TITLE + " " + m_proteinLengh + " amino acid";
+        ((TitledBorder) this.getBorder()).setTitle(title);
         this.removeAll();
 
         repaint();
@@ -175,9 +162,11 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         this.setSize(this.getWidth(), 90);
+        g.setColor(Color.white);
+        g.fillRect(0, 0, this.getWidth(), this.getHeight());
         if (this.getWidth() != m_oldWidth) {
-            if (m_sequence != null && m_aaWidth == m_aaWidthOriginal) {
-                m_aaWidthOriginal = ((double) (this.getWidth() - 20) / m_sequence.length());
+            if (m_proteinLengh != 0 && m_aaWidth == m_aaWidthOriginal) {
+                m_aaWidthOriginal = ((double) (this.getWidth() - 20) / m_proteinLengh);
                 m_aaWidth = m_aaWidthOriginal;
                 m_oldWidth = this.getWidth();
             }
@@ -216,18 +205,16 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
         if (m_PTMPeptideInstances.isEmpty()) {
             return;
         }
-        int width = this.getWidth();
 
-        float referenceLineWidth = (float) (0.1 * m_protein_height); //10% of height
-        BasicStroke refStroke = new BasicStroke(referenceLineWidth, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND);
-        g.setColor(Color.LIGHT_GRAY);
-        g.setStroke(refStroke);
         int startPos = (int) (this.m_startPositionProtein * m_aaWidth);
+        int endPos = (int) ((m_proteinLengh + 1) * m_aaWidth);
+        g.setColor(Color.LIGHT_GRAY);
+        g.setStroke(STROKE_PROTEINE_LINE);
+        g.drawLine(m_x0 - startPos, m_protein_y0 + m_protein_height / 2, m_x0 - startPos + endPos, m_protein_y0 + m_protein_height / 2); //draw protein length in middle
         g.drawLine(m_x0 - startPos, m_protein_y0, m_x0 - startPos, m_protein_y0 + m_protein_height);//mark protein begin
-        int endPos = (int) (m_sequence.length() * m_aaWidth);
         g.drawLine(m_x0 - startPos + endPos, m_protein_y0, m_x0 - startPos + endPos, m_protein_y0 + m_protein_height);//mark protein end
-        g.drawLine(m_x0, m_protein_y0 + m_protein_height / 2, m_x0 - startPos + endPos, m_protein_y0 + m_protein_height / 2); //draw protein length in middle
 
+        g.setStroke(STROKE_NORMAL);
         g.setColor(PEPTIDE_COLOR);
         for (DPeptideInstance pep : m_peptideInstances) {
             paintPeptide(g, pep);
@@ -378,6 +365,9 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
         for (PTMPeptideInstance pep : peptideInstances) {
             start = pep.getStartPosition();
             stop = pep.getStopPosition();
+            if (stop > m_proteinLengh) {
+                m_proteinLengh = stop;
+            }
             for (int i = start; i <= stop; i++) {
                 pepList = m_postionPTMPeptideMap.get(i);
                 pepList = (pepList == null ? new ArrayList() : pepList);
@@ -415,6 +405,9 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
                 if (bestPeptideMatch != null) {
                     start = bestPeptideMatch.getSequenceMatch().getId().getStart();
                     stop = bestPeptideMatch.getSequenceMatch().getId().getStop();
+                    if (stop > m_proteinLengh) {
+                        m_proteinLengh = stop;
+                    }
                     for (int i = start; i <= stop; i++) {
                         pepList = m_postionPeptideMap.get(i);
                         pepList = (pepList == null ? new ArrayList() : pepList);
@@ -614,7 +607,7 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
             int currentPosition = getPosOnProtein(currentX);
             distance = currentPosition - startPosition;
             //m_logger.debug("MMMMMMMM Move horizontal move distance = {} positionOld = {},positionCurrent = {}, ", distance, startPosition, currentPosition);
-            m_startPositionProtein = Math.min(m_startPositionProtein - distance, m_sequence.length() - (int) ((getWidth() - 20) / m_aaWidth));
+            m_startPositionProtein = Math.min(m_startPositionProtein - distance, m_proteinLengh - (int) ((getWidth() - 20) / m_aaWidth));
             m_startPositionProtein = Math.max(m_startPositionProtein, 0);
             startX = currentX;
             startY = currentY;

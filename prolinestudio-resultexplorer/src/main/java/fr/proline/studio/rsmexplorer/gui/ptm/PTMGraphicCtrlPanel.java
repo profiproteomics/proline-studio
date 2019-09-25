@@ -35,7 +35,6 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
     }
 
     private static Logger logger = LoggerFactory.getLogger(PTMGraphicCtrlPanel.class);
-    private boolean m_isClusterData;
     private PTMPeptidesGraphicView m_ptmPeptideAreaCtrl;
     private PeptideOnProteinOverviewPanel m_proteinOvervewCtrl;
 
@@ -45,7 +44,6 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
         super();
         m_ptmPeptideAreaCtrl = new PTMPeptidesGraphicView(isClusterData);
         m_proteinOvervewCtrl = new PeptideOnProteinOverviewPanel(this);
-        m_isClusterData = isClusterData;
         initComponents();
     }
 
@@ -96,9 +94,9 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
             DPeptideInstance[] peptideInstances = m_selectedProteinMatch.getPeptideSet(this.m_dataBox.getRsmId()).getPeptideInstances();
 
             if (m_selectedProteinMatch.getDBioSequence() != null) {
-                m_proteinOvervewCtrl.setData(m_selectedProteinMatch.getAccession(), m_selectedProteinMatch.getDBioSequence().getSequence(), ptmPepInstances.get(0), ptmPepInstances, peptideInstances);
+                m_proteinOvervewCtrl.setData(m_selectedProteinMatch.getAccession(), m_selectedProteinMatch.getDBioSequence().getSequence().length(), ptmPepInstances.get(0), ptmPepInstances, peptideInstances);
             } else {
-                m_proteinOvervewCtrl.setData(m_selectedProteinMatch.getAccession(), m_ptmPeptideAreaCtrl.getSequence(), ptmPepInstances.get(0), ptmPepInstances, peptideInstances);
+                m_proteinOvervewCtrl.setData(m_selectedProteinMatch.getAccession(), m_ptmPeptideAreaCtrl.getSequence().length(), ptmPepInstances.get(0), ptmPepInstances, peptideInstances);                
             }
         }
 

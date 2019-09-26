@@ -44,34 +44,36 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
 
     private static final Logger m_logger = LoggerFactory.getLogger(RsmProteinAndPeptideOverviewPlotPanel.class);
 
-    private DataBoxPanelInterface m_superCtrl;
+    protected DataBoxPanelInterface m_superCtrl;
     /**
      * HashMap position on protein, List DPeptideInstance, useful for tootips &
      * find peptide from mouse click position
      */
-    HashMap<Integer, ArrayList<DPeptideInstance>> m_postionPeptideMap;
-
-    HashMap<Integer, ArrayList<DPeptidePTM>> m_peptidePTMMap;
-    private int m_proteinLengh;
-    private DPeptideInstance[] m_peptideInstances;
-    private DPeptideInstance m_selectedPeptideInstance;
-    private double m_aaWidth;//width of an amino acid
-    private double m_aaWidthOriginal;
-    private int m_startPositionProtein = 0;
-    private final int m_x0 = 10;
-    private final int m_y0 = 10;
-    private final int m_height = 25;
-    private final int m_ptm_y0 = 15;
-    private final int m_ptm_height = m_height / 2;
-    private final int m_protein_y0 = m_ptm_y0 + m_ptm_height;
-    private final int m_protein_height = m_height - m_ptm_height;
-    private final BasicStroke STROKE_PROTEINE_LINE = new BasicStroke(3, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND);
-    private final BasicStroke STROKE_NORMAL = new BasicStroke(2, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND);
-    private final String TITLE = "Protein Sequence Coverage";
-    private final Color SELECTED_COLOR = Color.black;//blue
-    private final Color PEPTIDE_COLOR = new Color(0, 200, 0, 100);//green with transparence
-    private final Color PTM_PEPTIDE_COLOR = Color.red;
-    private int m_oldWidth;
+    protected HashMap<Integer, ArrayList<DPeptideInstance>> m_postionPeptideMap;
+    /**
+     * used to draw PTM mark above the peptide, alse used to getTooltips for
+     * these mark
+     */
+    protected HashMap<Integer, ArrayList<DPeptidePTM>> m_peptidePTMMap;
+    protected int m_proteinLengh;
+    protected DPeptideInstance[] m_peptideInstances;
+    protected DPeptideInstance m_selectedPeptideInstance;
+    protected double m_aaWidth;//width of an amino acid
+    protected double m_aaWidthOriginal;
+    protected int m_startPositionProtein = 0;
+    protected final int m_x0 = 10;
+    protected final int m_y0 = 10;
+    protected final int m_height = 25;
+    protected final int m_ptm_y0 = 15;
+    protected final int m_ptm_height = m_height / 2;
+    protected final int m_protein_y0 = m_ptm_y0 + m_ptm_height;
+    protected final int m_protein_height = m_height - m_ptm_height;
+    protected final BasicStroke STROKE_PROTEINE_LINE = new BasicStroke(3, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND);
+    protected final BasicStroke STROKE_NORMAL = new BasicStroke(2, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND);
+    protected final String TITLE = "Protein Sequence Coverage";
+    protected final Color SELECTED_COLOR = Color.black;//blue
+    protected final Color PEPTIDE_COLOR = new Color(0, 200, 0, 100);//green with transparence
+    protected int m_oldWidth;
 
     public RsmProteinAndPeptideOverviewPlotPanel(DataBoxPanelInterface superCtrl) {
         super();
@@ -93,7 +95,7 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         m_selectedPeptideInstance = selectedPeptideInstance;
     }
 
-    private int getPosOnProtein(int x) {
+    protected int getPosOnProtein(int x) {
         return m_startPositionProtein + (int) ((x - m_x0) / m_aaWidth);
     }
 
@@ -147,15 +149,11 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         if (m_peptideInstances != null && m_peptideInstances.length != 0) {
             paintPTM(g2);
             paintPeptideListOnSequence(g2);
+            paintSelectedPeptide(g2);
         }
     }
 
-    /**
-     * paint PTMSite in increasing order
-     *
-     * @param g
-     */
-    private void paintPTM(Graphics2D g) {
+    protected void paintPTM(Graphics2D g) {
         if (m_peptidePTMMap.isEmpty()) {
             return;
         }
@@ -173,7 +171,7 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         }
     }
 
-    private void paintPeptideListOnSequence(Graphics2D g) {
+    protected void paintPeptideListOnSequence(Graphics2D g) {
         if (m_peptideInstances == null || m_peptideInstances.length == 0) {
             return;
         }
@@ -191,15 +189,17 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         for (DPeptideInstance pep : m_peptideInstances) {
             paintPeptide(g, pep);
         }
-        g.setColor(PTM_PEPTIDE_COLOR);
 
+    }
+
+    protected void paintSelectedPeptide(Graphics2D g) {
         g.setColor(SELECTED_COLOR);
         if (m_selectedPeptideInstance != null) {
             paintDrawPeptide(g, m_selectedPeptideInstance);
         }
     }
 
-    private void paintDrawPeptide(Graphics2D g, DPeptideInstance pep) {
+    protected void paintDrawPeptide(Graphics2D g, DPeptideInstance pep) {
         int start = pep.getBestPeptideMatch().getSequenceMatch().getId().getStart();
         int stop = pep.getBestPeptideMatch().getSequenceMatch().getId().getStop();
         int length = stop - start + 1;
@@ -209,7 +209,7 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         g.drawRoundRect(x0, m_protein_y0, width, m_protein_height, m_protein_height, m_protein_height);
     }
 
-    private void paintPeptide(Graphics2D g, DPeptideInstance pep) {
+    protected void paintPeptide(Graphics2D g, DPeptideInstance pep) {
 
         int start = pep.getBestPeptideMatch().getSequenceMatch().getId().getStart();
         int stop = pep.getBestPeptideMatch().getSequenceMatch().getId().getStop();
@@ -218,15 +218,6 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         int width = (int) ((float) (length) * m_aaWidth);
         int x0 = (int) (m_x0 + (m_aaWidth * (start - m_startPositionProtein)));
         g.fillRoundRect(x0, m_protein_y0, width, m_protein_height, m_protein_height, m_protein_height);
-    }
-
-    private String getDecoratedSequence(PTMPeptideInstance pep) {
-        String sequence = PeptideRenderer.constructPeptideDisplay(pep.getPeptideInstance().getPeptide())
-                .replaceAll(GlobalValues.HTML_TAG_BEGIN, "")
-                .replaceAll(GlobalValues.HTML_TAG_END, "");
-        String score = DataFormat.format(pep.getBestPepMatch().getScore(), 2);
-        String tips = String.format("%d -%s- %d, score: %s", pep.getStartPosition(), sequence, pep.getStopPosition(), score);
-        return tips;
     }
 
     /**
@@ -283,7 +274,7 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         return null;
     }
 
-    private void createAADataMap(DPeptideInstance[] peptideInstances) {
+    protected void createAADataMap(DPeptideInstance[] peptideInstances) {
         //long beginTime = System.currentTimeMillis();
         m_postionPeptideMap = new HashMap();
         m_peptidePTMMap = new HashMap();
@@ -313,7 +304,7 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
                 Collection<DPeptidePTM> allPtm = bestPeptideMatch.getPeptide().getTransientData().getDPeptidePtmMap().values();
                 for (DPeptidePTM ptm : allPtm) {
                     int position = (int) ptm.getSeqPosition() + start - 1;//position convert to int
-                    long ptmId = ptm.getIdPtmSpecificity();
+
                     ArrayList<DPeptidePTM> ptmList = m_peptidePTMMap.get(position);
                     if (ptmList == null) {
                         ptmList = new ArrayList();
@@ -321,12 +312,13 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
                         m_peptidePTMMap.put(position, ptmList);
                     } else {
                         boolean isExist = false;
+                        long ptmId = ptm.getIdPtmSpecificity();
                         for (DPeptidePTM pepPtm : ptmList) {
                             if (ptmId == pepPtm.getIdPtmSpecificity()) {
                                 isExist = true;
                             }
                         }
-                        if (!isExist == false) {
+                        if (isExist == false) {
                             ptmList.add(ptm);
                         }
                     }
@@ -339,6 +331,10 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         //m_logger.debug("createAADataMap execution time: {} ms", (System.currentTimeMillis() - beginTime));
     }
 
+    protected void actionMouseClicked(MouseEvent e) {
+        return;
+    }
+
     private class ProteinMouseAdapter extends MouseAdapter {
 
         int currentX, currentY, startX, startY;
@@ -346,6 +342,11 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
 
         ProteinMouseAdapter() {
             super();
+        }
+
+        public void mouseClicked(MouseEvent e) {//for selected on the protein, _action will be transfer to superCtrl
+            requestFocusInWindow();
+            actionMouseClicked(e);
         }
 
         @Override

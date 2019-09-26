@@ -111,14 +111,20 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
 
     public void setData(String proteinName, String sequence, DPeptideInstance selectedPeptide, DPeptideInstance[] peptideInstances) {
         m_peptideInstances = peptideInstances;
-        m_proteinLengh = sequence.length();
+        String titleComment = "";
+        if (sequence == null) {
+            m_proteinLengh = 0;
+            titleComment = " (calculated <= protelin length)";
+        } else {
+            m_proteinLengh = sequence.length();
+        }
         m_selectedPeptideInstance = selectedPeptide;
         m_startPositionProtein = 0;
         createAADataMap(peptideInstances);
         //m_proteinLengh may be changed after calculating, so m_aaWidthOriginal is calcul after above create
         m_aaWidthOriginal = ((double) (this.getWidth() - 20) / m_proteinLengh);
         m_aaWidth = m_aaWidthOriginal;
-        String title = proteinName + " " + TITLE + " " + m_proteinLengh + " amino acid";
+        String title = proteinName + " " + TITLE + " " + m_proteinLengh + " amino acid" + titleComment;
         ((TitledBorder) this.getBorder()).setTitle(title);
         this.removeAll();
 
@@ -168,7 +174,7 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
     }
 
     private void paintPeptideListOnSequence(Graphics2D g) {
-        if (m_peptideInstances==null || m_peptideInstances.length==0) {
+        if (m_peptideInstances == null || m_peptideInstances.length == 0) {
             return;
         }
 
@@ -262,8 +268,8 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
                 for (DPeptideInstance pep : peptides) {
                     Long id = pep.getId();
                     String sequence = PeptideRenderer.constructPeptideDisplay(pep.getBestPeptideMatch().getPeptide())
-                                .replaceAll(GlobalValues.HTML_TAG_BEGIN, "")
-                                .replaceAll(GlobalValues.HTML_TAG_END, "");
+                            .replaceAll(GlobalValues.HTML_TAG_BEGIN, "")
+                            .replaceAll(GlobalValues.HTML_TAG_END, "");
                     String score = DataFormat.format(pep.getBestPeptideMatch().getScore(), 2);
                     SequenceMatchPK pepSequencePK = pep.getBestPeptideMatch().getSequenceMatch().getId();
 
@@ -272,8 +278,9 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
                 }
                 return GlobalValues.HTML_TAG_BEGIN + "<body>" + s + "</body>" + GlobalValues.HTML_TAG_END;
             }
+            return "position: " + positionOnProtein;
         }
-        return "position: " + positionOnProtein;
+        return null;
     }
 
     private void createAADataMap(DPeptideInstance[] peptideInstances) {
@@ -314,11 +321,11 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
                         m_peptidePTMMap.put(position, ptmList);
                     } else {
                         boolean isExist = false;
-                        for (DPeptidePTM pepPtm: ptmList){
-                            if (ptmId == pepPtm.getIdPtmSpecificity()){
+                        for (DPeptidePTM pepPtm : ptmList) {
+                            if (ptmId == pepPtm.getIdPtmSpecificity()) {
                                 isExist = true;
-                            }                            
-                        }                        
+                            }
+                        }
                         if (!isExist == false) {
                             ptmList.add(ptm);
                         }

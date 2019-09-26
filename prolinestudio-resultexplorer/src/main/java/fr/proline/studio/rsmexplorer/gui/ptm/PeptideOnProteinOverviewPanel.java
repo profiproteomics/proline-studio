@@ -139,19 +139,24 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
         this.removeAll();
     }
 
-    public void setData(String proteinName, int proteinLength, PTMPeptideInstance selectedPeptide, List<PTMPeptideInstance> ptmPeptideInstances, DPeptideInstance[] peptideInstances) {
+    public void setData(String proteinName, String sequence, PTMPeptideInstance selectedPeptide, List<PTMPeptideInstance> ptmPeptideInstances, DPeptideInstance[] peptideInstances) {
         m_PTMPeptideInstances = ptmPeptideInstances;
         m_peptideInstances = peptideInstances;
-        m_proteinLengh = proteinLength;
+        m_proteinLengh = sequence.length();
+        String titleComment = "";
+        if (sequence.startsWith("0")){
+            m_proteinLengh = Integer.valueOf(sequence.substring(1));
+            titleComment = " (calculated <= protelin length)";
+        }
         m_selectedPTMPeptideInstance = selectedPeptide;
         m_startPositionProtein = 0;
         m_peptidePTMMap = new HashMap();
         createPTMPeptideMap(ptmPeptideInstances);
         createAADataMap(peptideInstances);
-        //m_proteinLengh may be changed after calculating, so m_aaWidthOriginal is calcul after above create
+        //m_proteinLengh may be changed after calculating, so m_aaWidthOriginal is calculated after above create
         m_aaWidthOriginal = ((double) (this.getWidth() - 20) / m_proteinLengh);
         m_aaWidth = m_aaWidthOriginal;
-        String title = proteinName + " " + TITLE + " " + m_proteinLengh + " amino acid";
+        String title = proteinName + " " + TITLE + " " + m_proteinLengh + " amino acid"+ titleComment;
         ((TitledBorder) this.getBorder()).setTitle(title);
         this.removeAll();
 
@@ -320,8 +325,9 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
                 }
                 return GlobalValues.HTML_TAG_BEGIN + "<body>" + s + "</body>" + GlobalValues.HTML_TAG_END;
             }
+            return "position: " + positionOnProtein;
         }
-        return "position: " + positionOnProtein;
+        return null;
     }
 
     private void createPTMPeptideMap(List<PTMPeptideInstance> peptideInstances) {

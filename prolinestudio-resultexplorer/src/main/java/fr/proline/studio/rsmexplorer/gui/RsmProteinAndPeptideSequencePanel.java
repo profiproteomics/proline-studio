@@ -129,7 +129,7 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
             m_editorPane.setText("There is no Protein Sequence Database available. Please contact your IT Administrator to install it.");
             return;
         }
-
+    
         if (!pm.isDBiosequenceSet() && projectId != null) {
             m_logger.info("BioSequence is absent from the protein match, trying to load it ...");
             DatabaseBioSequenceTask.fetchData(Collections.singletonList(pm), projectId);
@@ -177,10 +177,9 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
             m_sequencePoltPane.setData(pm.getAccession(), sequence, selectedPeptide, peptideInstances);
         } else {
             m_editorPane.setText("Protein Sequence not available in database");
-            m_sequencePoltPane.setEmpty(pm.getAccession());
+            m_sequencePoltPane.setData(pm.getAccession(), null, selectedPeptide, peptideInstances);
         }
         repaint();
-
     }
 
     private void hightlight(DPeptideMatch p, boolean selectedPeptide, int[] highlights) {

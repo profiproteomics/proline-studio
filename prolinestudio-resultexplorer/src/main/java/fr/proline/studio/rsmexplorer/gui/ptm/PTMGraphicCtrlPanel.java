@@ -44,6 +44,7 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
         super();
         m_ptmPeptideAreaCtrl = new PTMPeptidesGraphicView(isClusterData);
         m_proteinOvervewCtrl = new PeptideOnProteinOverviewPanel(this);
+
         initComponents();
     }
 
@@ -52,13 +53,14 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
      */
     private void initComponents() {
         setLayout(new BorderLayout());
-
+        JToolBar toolbar = initToolbar();
         m_ptmPeptideAreaCtrl.setSize(WIDTH - 30, HEIGHT - 50);
         m_proteinOvervewCtrl.setPreferredSize(new Dimension(WIDTH - 30, 50));
-        JToolBar toolbar = initToolbar();
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.add(m_ptmPeptideAreaCtrl, BorderLayout.CENTER);
+        centerPanel.add(m_proteinOvervewCtrl, BorderLayout.SOUTH);
         this.add(toolbar, BorderLayout.WEST);
-        this.add(m_ptmPeptideAreaCtrl, BorderLayout.CENTER);
-        this.add(m_proteinOvervewCtrl, BorderLayout.SOUTH);
+        this.add(centerPanel, BorderLayout.CENTER);
     }
 
     /**
@@ -96,7 +98,7 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
             if (m_selectedProteinMatch.getDBioSequence() != null) {
                 m_proteinOvervewCtrl.setData(m_selectedProteinMatch.getAccession(), m_selectedProteinMatch.getDBioSequence().getSequence().length(), ptmPepInstances.get(0), ptmPepInstances, peptideInstances);
             } else {
-                m_proteinOvervewCtrl.setData(m_selectedProteinMatch.getAccession(), m_ptmPeptideAreaCtrl.getSequence().length(), ptmPepInstances.get(0), ptmPepInstances, peptideInstances);                
+                m_proteinOvervewCtrl.setData(m_selectedProteinMatch.getAccession(), m_ptmPeptideAreaCtrl.getSequence().length(), ptmPepInstances.get(0), ptmPepInstances, peptideInstances);
             }
         }
 

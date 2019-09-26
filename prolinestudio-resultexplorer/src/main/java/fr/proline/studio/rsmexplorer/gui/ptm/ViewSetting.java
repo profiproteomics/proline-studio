@@ -66,6 +66,11 @@ public class ViewSetting {
         return getColor(site.getPTMSpecificity().getIdPtmSpecificity());
     }
 
+    /**
+     * get Color by PTM id
+     * @param specificityId
+     * @return 
+     */
     public static final Color getColor(Long specificityId) {
         Color c = PTM_COLORS.get(specificityId);
         if (c == null) {

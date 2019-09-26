@@ -38,14 +38,16 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
     private AbstractDataBox m_dataBox;
     private JEditorPane m_editorPane;
     private JScrollPane m_sequenceScrollPane;
-    private RsmProteinAndPeptideSequencePlotPanel m_sequencePoltPane;
+    private RsmProteinAndPeptideOverviewPlotPanel m_sequencePoltPane;
 
     private JPanel m_sequencePanel;
 
     public RsmProteinAndPeptideSequencePanel() {
 
         setLayout(new BorderLayout());
+        m_sequencePoltPane = new RsmProteinAndPeptideOverviewPlotPanel(this);
         m_sequencePanel = createSequencePanel();
+
         add(m_sequencePanel, BorderLayout.CENTER);
 
         JToolBar toolbar = initToolbar();
@@ -56,7 +58,7 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
     private JPanel createSequencePanel() {
 
         JPanel sequencePanel = new JPanel(new BorderLayout());
-        m_sequencePoltPane = new RsmProteinAndPeptideSequencePlotPanel();
+
         m_sequenceScrollPane = new javax.swing.JScrollPane();
         m_editorPane = new javax.swing.JEditorPane();
         m_sequenceScrollPane.setViewportView(m_editorPane);
@@ -81,6 +83,9 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
 
         Document doc = kit.createDefaultDocument();
         m_editorPane.setDocument(doc);
+
+        m_sequencePoltPane.setPreferredSize(new Dimension(this.getWidth(), 50));
+        m_sequenceScrollPane.setPreferredSize(new Dimension(this.getWidth(), this.getHeight() - 50));
 
         sequencePanel.add(m_sequenceScrollPane, BorderLayout.CENTER);
         sequencePanel.add(m_sequencePoltPane, BorderLayout.SOUTH);
@@ -129,7 +134,7 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
             m_logger.info("BioSequence is absent from the protein match, trying to load it ...");
             DatabaseBioSequenceTask.fetchData(Collections.singletonList(pm), projectId);
         }
-        
+
         if (pm.isDBiosequenceSet()) {
             String sequence = pm.getDBioSequence().getSequence();
             int sequenceLength = sequence.length();
@@ -174,6 +179,7 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
             m_editorPane.setText("Protein Sequence not available in database");
             m_sequencePoltPane.setEmpty(pm.getAccession());
         }
+        repaint();
 
     }
 

@@ -1,7 +1,7 @@
 /*
  * @cea 
  * http://www.profiproteomics.fr
- * Create Date: 27 mai 2019 
+ * Create Date: 16 sept. 2019 
  */
 package fr.proline.studio.rsmexplorer.gui.ptm;
 
@@ -11,7 +11,6 @@ import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
-import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.utils.DataFormat;
 import fr.proline.studio.utils.GlobalValues;
@@ -19,11 +18,8 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.swing.JPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,21 +44,24 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
 
     private PTMGraphicCtrlPanel m_superCtrl;
     /**
-     * HashMap position on protein, List PTMPeptideInstance, useful for tootips
-     * & find peptide from mouse click position
+     * HashMap position on protein, List PTMPeptideInstance, 
+     * useful for paint a cycle around the peptide to indicate this is the PTM cluster in interesting
+     * useful for tootips
      */
     HashMap<Integer, ArrayList<PTMPeptideInstance>> m_postionPTMPeptideMap;
+    /**
+     * HashMap position on protein, List DPeptideInstance, used to paint all peptide of the protein
+     * useful also for get tooltips
+     */
     HashMap<Integer, ArrayList<DPeptideInstance>> m_postionPeptideMap;
     /**
-     * used to draw PTM mark above the peptide
+     * used to draw PTM mark above the peptide, and getTooltips for these mark
      */
-    HashMap<Integer, AminoAcidPtm> m_PTMMap;
-    HashMap<Integer, ArrayList<String>> m_PTMTooltipsMap;
-
+    HashMap<Integer, ArrayList<DPeptidePTM>> m_peptidePTMMap;
     private int m_proteinLengh;
     private List<PTMPeptideInstance> m_PTMPeptideInstances;
     private DPeptideInstance[] m_peptideInstances;
-    private PTMPeptideInstance m_selectedPeptideInstance;
+    private PTMPeptideInstance m_selectedPTMPeptideInstance;
     private int m_selectedPosition;
     private double m_aaWidth;//width of an amino acid
     private double m_aaWidthOriginal;
@@ -99,7 +98,7 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
     }
 
     public void setSelectedPeptide(PTMPeptideInstance selectedPTMPeptideInstance) {
-        m_selectedPeptideInstance = selectedPTMPeptideInstance;
+        m_selectedPTMPeptideInstance = selectedPTMPeptideInstance;
     }
 
     public int getSelectedProteinPosition() {
@@ -144,9 +143,9 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
         m_PTMPeptideInstances = ptmPeptideInstances;
         m_peptideInstances = peptideInstances;
         m_proteinLengh = proteinLength;
-        m_selectedPeptideInstance = selectedPeptide;
+        m_selectedPTMPeptideInstance = selectedPeptide;
         m_startPositionProtein = 0;
-
+        m_peptidePTMMap = new HashMap();
         createPTMPeptideMap(ptmPeptideInstances);
         createAADataMap(peptideInstances);
         //m_proteinLengh may be changed after calculating, so m_aaWidthOriginal is calcul after above create
@@ -161,7 +160,7 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
 
     @Override
     protected void paintComponent(Graphics g) {
-        this.setSize(this.getWidth(), 90);
+        this.setSize(this.getWidth(), 50);
         g.setColor(Color.white);
         g.fillRect(0, 0, this.getWidth(), this.getHeight());
         if (this.getWidth() != m_oldWidth) {
@@ -184,18 +183,18 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
      * @param g
      */
     private void paintPTM(Graphics2D g) {
-        if (m_PTMMap.isEmpty()) {
+        if (m_peptidePTMMap.isEmpty()) {
             return;
         }
         int height = m_ptm_height;
-        Stream<PTMSite> ptmStream = m_PTMMap.values().stream().map(bloc -> bloc.getPtmList()).flatMap(Collection::stream);
-        List<PTMSite> sortedPtm = ptmStream.sorted(Comparator.comparing(PTMSite::getPositionOnProtein)).collect(Collectors.toList());
+
         int x0, y0;
         Color color;
-        for (PTMSite ptm : sortedPtm) {
-            x0 = (int) (m_x0 + m_aaWidth * (ptm.getPositionOnProtein() - m_startPositionProtein));
+        for (Integer i : m_peptidePTMMap.keySet()) {
+            x0 = (int) (m_x0 + m_aaWidth * (i - m_startPositionProtein));
             y0 = m_ptm_y0;
-            color = ViewSetting.getColor(ptm);
+            DPeptidePTM ptm = m_peptidePTMMap.get(i).get(0);//only paint the color for first element
+            color = ViewSetting.getColor(ptm.getIdPtmSpecificity());
             g.setColor(color);
             g.fillRect(x0, y0, (int) ((m_aaWidth) + 1), m_ptm_height);//width minimum = 1
         }
@@ -224,8 +223,8 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
             paintPTMPeptide(g, pep);
         }
         g.setColor(SELECTED_COLOR);
-        if (m_selectedPeptideInstance != null) {
-            paintPTMPeptide(g, m_selectedPeptideInstance);
+        if (m_selectedPTMPeptideInstance != null) {
+            paintPTMPeptide(g, m_selectedPTMPeptideInstance);
         }
     }
 
@@ -248,52 +247,12 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
         g.fillRoundRect(x0, m_protein_y0, width, m_protein_height, m_protein_height, m_protein_height);
     }
 
-    /**
-     *
-     * @param x
-     * @param y
-     * @return null, will refresh to show nothing
-     */
-    private String getPTMTooltips(int x, int y) {
-        if (m_PTMMap == null) {
-            return null;
-        }
-        int yRangPTM = m_ptm_y0;
-        int yRangA = m_protein_y0;
-        int yRangZ = yRangA + m_protein_height;
-        List<PTMPeptideInstance> peptides;
-        AminoAcidPtm ptms;
-        int positionOnProtein = getPosOnProtein(x);
-        if (y > yRangPTM && y < yRangPTM + m_ptm_height) {
-            ptms = this.m_PTMMap.get(positionOnProtein);
-            if (ptms == null) {
-                return null;
-            } else {
-                return ptms.getTooltips();
-            }
-        } else if (y > yRangA && y < yRangZ) {
-            peptides = this.m_postionPTMPeptideMap.get(positionOnProtein);
-            if (peptides != null) {
-                String s = "";
-                for (PTMPeptideInstance pep : peptides) {
-                    String tips = getDecoratedSequence(pep);
-                    s += tips + "\n";
-                }
-                return s;
-            }
-        }
-        return "position: " + positionOnProtein;
-    }
-
     private String getDecoratedSequence(PTMPeptideInstance pep) {
         String sequence = PeptideRenderer.constructPeptideDisplay(pep.getPeptideInstance().getPeptide())
                 .replaceAll(GlobalValues.HTML_TAG_BEGIN, "")
                 .replaceAll(GlobalValues.HTML_TAG_END, "");
         String score = DataFormat.format(pep.getBestPepMatch().getScore(), 2);
         String tips = String.format("%d -%s- %d, score: %s", pep.getStartPosition(), sequence, pep.getStopPosition(), score);
-//        if (sequence.contains(GlobalValues.HTML_TAG_SPAN_END)) {
-//            tips = GlobalValues.HTML_TAG_BEGIN + "<body>" + tips + "</body>" + GlobalValues.HTML_TAG_END;
-//        }
         return tips;
     }
 
@@ -304,21 +263,27 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
      * @return null, will refresh to show nothing
      */
     private String getTooltips(int x, int y) {
-        if (m_PTMMap == null) {
+        if (m_peptidePTMMap == null) {
             return null;
         }
         int yRangPTM = m_ptm_y0;
         int yRangA = m_protein_y0;
         int yRangZ = yRangA + m_protein_height;
 
-        AminoAcidPtm ptms;
+        List<DPeptidePTM> ptms;
         int positionOnProtein = getPosOnProtein(x);
         if (y > yRangPTM && y < yRangPTM + m_ptm_height) {
-            ptms = this.m_PTMMap.get(positionOnProtein);
+            ptms = this.m_peptidePTMMap.get(positionOnProtein);
             if (ptms == null) {
                 return null;
             } else {
-                return ptms.getTooltips();
+                String s = "";
+                for (DPeptidePTM pep : ptms) {
+                    DInfoPTM ptmTypeInfo = DInfoPTM.getInfoPTMMap().get(pep.getIdPtmSpecificity());
+                    int position = (int) pep.getSeqPosition();//position convert to int
+                    s += ptmTypeInfo.toReadablePtmString(position);//@todo position on pep ou position on prot?
+                }
+                return s;
             }
         } else if (y > yRangA && y < yRangZ) {
             List<DPeptideInstance> peptides;
@@ -344,7 +309,9 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
                             continue;
                         }
                     }
-                    String sequence = pep.getBestPeptideMatch().getPeptide().getSequence();//pep.getPeptide() is null, so we get sequence via BestPeptideMatch
+                    String sequence = PeptideRenderer.constructPeptideDisplay(pep.getBestPeptideMatch().getPeptide())
+                            .replaceAll(GlobalValues.HTML_TAG_BEGIN, "")
+                            .replaceAll(GlobalValues.HTML_TAG_END, "");//pep.getPeptide() is null, so we get sequence via BestPeptideMatch
                     String score = DataFormat.format(pep.getBestPeptideMatch().getScore(), 2);
                     SequenceMatchPK pepSequencePK = pep.getBestPeptideMatch().getSequenceMatch().getId();
 
@@ -359,7 +326,6 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
 
     private void createPTMPeptideMap(List<PTMPeptideInstance> peptideInstances) {
         m_postionPTMPeptideMap = new HashMap();
-        m_PTMMap = new HashMap<>();
         ArrayList<PTMPeptideInstance> pepList;
         int start = 0, stop = 0;
         for (PTMPeptideInstance pep : peptideInstances) {
@@ -374,18 +340,21 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
                 pepList.add(pep);
                 m_postionPTMPeptideMap.put(i, pepList);
             }
-            List<PTMSite> ptmList = pep.getSites();
-            for (PTMSite ptm : ptmList) {
-                int position = ptm.getPositionOnProtein();
-                AminoAcidPtm ap = m_PTMMap.get(position);
-                if (ap == null) {
-                    m_PTMMap.put(position, new AminoAcidPtm(ptm));
-                } else {
-                    if (!ap.contains(ptm)) {
-                        ap.addPtm(ptm);
-                    }
-                }
-            }
+//            List<DPeptidePTM> ptmList = pep.getBestPepMatch().getPeptidePTMArray();
+//            for (DPeptidePTM ptm : ptmList) {
+//
+//                int position = (int) (ptm.getSeqPosition()) + start;
+//                ArrayList<DPeptidePTM> ap = m_peptidePTMMap.get(position);
+//                if (ap == null) {
+//                    ap = new ArrayList();
+//                    ap.add(ptm);
+//                    m_peptidePTMMap.put(position, ap);
+//                } else {
+//                    if (!ap.contains(ptm)) {
+//                        ap.add(ptm);
+//                    }
+//                }
+//            }
         }
     }
 
@@ -393,7 +362,7 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
         //long beginTime = System.currentTimeMillis();
         m_postionPeptideMap = new HashMap();
         //m_PTMMap = new HashMap();
-        m_PTMTooltipsMap = new HashMap();
+
         ArrayList<DPeptideInstance> pepList;
         ArrayList<DPeptideMatch> pepMatchList;
 
@@ -415,22 +384,25 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
                         m_postionPeptideMap.put(i, pepList);
                     }
                 }
-
                 //create ptm
                 Collection<DPeptidePTM> allPtm = bestPeptideMatch.getPeptide().getTransientData().getDPeptidePtmMap().values();
                 for (DPeptidePTM ptm : allPtm) {
-                    DInfoPTM ptmTypeInfo = DInfoPTM.getInfoPTMMap().get(ptm.getIdPtmSpecificity());
                     int position = (int) ptm.getSeqPosition() + start - 1;//position convert to int
-                    String tooltips = ptmTypeInfo.toReadablePtmString(position);
-
-                    ArrayList<String> tooltipsList = m_PTMTooltipsMap.get(position);
-                    if (tooltipsList == null) {
-                        tooltipsList = new ArrayList();
-                        tooltipsList.add(tooltips);
-                        m_PTMTooltipsMap.put(position, tooltipsList);
+                    long ptmId = ptm.getIdPtmSpecificity();
+                    ArrayList<DPeptidePTM> ptmList = m_peptidePTMMap.get(position);
+                    if (ptmList == null) {
+                        ptmList = new ArrayList();
+                        ptmList.add(ptm);
+                        m_peptidePTMMap.put(position, ptmList);
                     } else {
-                        if (!tooltipsList.contains(tooltips)) {
-                            tooltipsList.add(tooltips);
+                        boolean isExist = false;
+                        for (DPeptidePTM pepPtm : ptmList) {
+                            if (ptmId == pepPtm.getIdPtmSpecificity()) {
+                                isExist = true;
+                            }
+                        }
+                        if (!isExist == false) {
+                            ptmList.add(ptm);
                         }
                     }
                 }
@@ -440,36 +412,6 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
             }
         }
         //m_logger.debug("createAADataMap execution time: {} ms", (System.currentTimeMillis() - beginTime));
-    }
-
-    private class AminoAcidPtm {
-
-        private ArrayList<PTMSite> _ptmList;
-
-        AminoAcidPtm(PTMSite ptm) {
-            _ptmList = new ArrayList();
-            _ptmList.add(ptm);
-        }
-
-        void addPtm(PTMSite ptm) {
-            _ptmList.add(ptm);
-        }
-
-        public ArrayList<PTMSite> getPtmList() {
-            return _ptmList;
-        }
-
-        public boolean contains(PTMSite ptm) {
-            return this._ptmList.contains(ptm);
-        }
-
-        public String getTooltips() {
-            String s = "";
-            for (PTMSite ptm : _ptmList) {
-                s += ptm.toProteinReadablePtmString();
-            }
-            return s;
-        }
     }
 
     private class ProteinMouseAdapter extends MouseAdapter {
@@ -485,7 +427,6 @@ public class PeptideOnProteinOverviewPanel extends JPanel {
             requestFocusInWindow();
             if (SwingUtilities.isLeftMouseButton(e)) {
                 List<PTMPeptideInstance> peptides;
-                AminoAcidPtm ptms;
                 int x = e.getX();
                 int y = e.getY();
                 if (y > m_ptm_y0 && y < m_ptm_y0 + m_height) {

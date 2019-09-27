@@ -484,7 +484,7 @@ public class PTMPeptidesGraphicView extends JPanel {
             public Color getColor(PTMCluster cluster) {
                 Color c = PTM_CLUSTER_COLORS.get(cluster);
                 if (c == null) {
-                    Color co = CyclicColorPalette.getColor(PTM_CLUSTER_COLORS.size()); //in order to skip the first color Yellow, this is not very visible
+                    Color co = CyclicColorPalette.getColorBlue(PTM_CLUSTER_COLORS.size()); 
                     int rgb = co.getRGB() | 0xFF000000;
                     c = new Color(rgb & 0x00FFFFFF);
                     PTM_CLUSTER_COLORS.put(cluster, c);
@@ -528,7 +528,6 @@ public class PTMPeptidesGraphicView extends JPanel {
                     int ascend = f.getAscent();
                     int y0 = m_y0;
                     int x0;
-                    //g2.setColor(Color.BLACK);
                     g2.setFont(ViewSetting.FONT_NUMBER);
                     String colorId;
                     int stringWidth;
@@ -545,7 +544,7 @@ public class PTMPeptidesGraphicView extends JPanel {
                                 xi0 = xi;
                                 PTMCluster cluster = clusters.get(j);
                                 g2.setColor(getColor(cluster));
-                                g2.fillRect(m_x0, y0, colorWidth, ViewSetting.WIDTH_AA);
+                                g2.fillRect(xi0, y0, colorWidth, ViewSetting.WIDTH_AA);
                             }
                             colorId = getColorId(clusters.get(0));//only the first
                         }

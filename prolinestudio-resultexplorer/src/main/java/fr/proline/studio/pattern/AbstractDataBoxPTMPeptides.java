@@ -41,7 +41,7 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox{
     protected List<PTMPeptideInstance> m_ptmPepInstances;
     protected boolean m_isXICResult = true;
     protected boolean m_displayAllPepMatches = false;
-    protected static final Logger LOG = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.ptm");     
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.ptm");     
     
     private Long m_previousPTMTaskId = null;
     

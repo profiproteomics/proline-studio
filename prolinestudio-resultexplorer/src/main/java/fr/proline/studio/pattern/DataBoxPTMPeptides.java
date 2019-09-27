@@ -88,7 +88,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
             m_typeName = m_displayAllPepMatches ? "PSM PTMs info" : "Peptides PTMs info";
             m_description = m_displayAllPepMatches ? "PTMs information of PSM of a [Group] Modification Site" :  "PTMs information of Peptides of a [Group] Modification Site";        
         }
-        LOG.debug(" ----> Created DataBoxPTMPeptides "+m_typeName);
+        m_logger.debug(" ----> Created DataBoxPTMPeptides "+m_typeName);
 
         
         // Register Possible in parameters          

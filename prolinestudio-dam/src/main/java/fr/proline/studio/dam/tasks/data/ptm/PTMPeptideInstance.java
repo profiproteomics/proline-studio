@@ -76,4 +76,11 @@ public class PTMPeptideInstance {
     }
     return pepMatch;
   }
+
+    @Override
+    public String toString() {
+        return "PTMPeptideInstance{" + this.getSequence()+" Position=("+ this.getStartPosition()+"-" + this.getStopPosition() +this.m_sites.toString()+ "}";
+    }
+  
+  
 }

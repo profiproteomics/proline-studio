@@ -15,6 +15,8 @@ import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.rsmexplorer.gui.ptm.PTMGraphicCtrlPanel;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is very similaire as DataBoxPTMSitePeptides
@@ -23,6 +25,7 @@ import java.util.List;
  */
 public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
 
+    private static Logger m_logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
     private boolean m_isClusterData;
 
     /**
@@ -49,7 +52,6 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
 
     @Override
     public void createPanel() {
-        //PTMPeptidesGraphicView p = new PTMPeptidesGraphicView(m_isClusterData);
         PTMGraphicCtrlPanel p = new PTMGraphicCtrlPanel(m_isClusterData);
         p.setName(m_typeName);
         p.setDataBox(this);
@@ -83,14 +85,12 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
         };
         DatabaseLoadPeptidesInstancesTask task = new DatabaseLoadPeptidesInstancesTask(callback, getProjectId(), proteinMatch, rsmList);
         Long taskId = task.getId();
-       
+
         registerTask(task);
     }
-    
 
     @Override
     public void updateData() {
-        // PTMPeptidesGraphicView graphicView = (PTMPeptidesGraphicView) getDataBoxPanelInterface();
         PTMGraphicCtrlPanel graphicView = (PTMGraphicCtrlPanel) getDataBoxPanelInterface();
         if (m_ptmPepInstances == null || m_ptmPepInstances.isEmpty()) {
             graphicView.setData(null);
@@ -111,15 +111,22 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
 
     }
 
+    /**
+     * Only called 1 time by AbstractDataBoxPTMPeptides in dataChanged(),
+     * if(valueUnchanged), so pepInstance == null come from previous databox who
+     * has not this value, but it is impossible for actual Peptides Graphic Area.
+     *
+     * @param pepInstance
+     */
     @Override
     protected void setSelectedPTMPeptide(PTMPeptideInstance pepInstance) {
-        //((PTMPeptidesGraphicView) getDataBoxPanelInterface()).setSelectedPTMPeptide(pepInstance);
-        ((PTMGraphicCtrlPanel) getDataBoxPanelInterface()).setSelectedPTMPeptide(pepInstance);
+        if (pepInstance != null) {
+            ((PTMGraphicCtrlPanel) getDataBoxPanelInterface()).setSelectedPTMPeptide(pepInstance);
+        }
     }
 
     @Override
     protected PTMPeptideInstance getSelectedPTMPeptide() {
-        //return ((PTMPeptidesGraphicView) getDataBoxPanelInterface()).getSelectedPTMPeptideInstance();
         return ((PTMGraphicCtrlPanel) getDataBoxPanelInterface()).getSelectedPTMPeptideInstance();
     }
 

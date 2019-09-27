@@ -44,6 +44,7 @@ public class PeptideOnProteinOverviewPanel extends RsmProteinAndPeptideOverviewP
 
     public void setSelectedPeptide(PTMPeptideInstance selectedPTMPeptideInstance) {
         m_selectedPTMPeptideInstance = selectedPTMPeptideInstance;
+        repaint();
     }
 
     public int getSelectedProteinPosition() {
@@ -110,7 +111,7 @@ public class PeptideOnProteinOverviewPanel extends RsmProteinAndPeptideOverviewP
             drawPeptide(g, start, length);
         }
     }
-
+    
     private void createPTMPeptideMap(List<PTMPeptideInstance> peptideInstances) {
         m_postionPTMPeptideMap = new HashMap();
         ArrayList<PTMPeptideInstance> pepList;

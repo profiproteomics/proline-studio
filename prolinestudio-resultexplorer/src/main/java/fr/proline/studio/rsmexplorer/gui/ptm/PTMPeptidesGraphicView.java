@@ -24,8 +24,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import static java.awt.image.ImageObserver.HEIGHT;
-import static java.awt.image.ImageObserver.WIDTH;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -191,7 +189,7 @@ public class PTMPeptidesGraphicView extends JPanel {
             if (ajustedLocation >= AJUSTE_GAP) {
                 m_ajustedStartLocation -= AJUSTE_GAP;
             }
-            m_logger.debug("adjust start location ={}", m_ajustedStartLocation);
+            //m_logger.debug("adjust start location ={}", m_ajustedStartLocation);
             Point p = m_scrollPane.getViewport().getViewPosition();
             int y = p.y;
             int x = (int) ((float) this.getWidth() / m_sequenceLength * m_ajustedStartLocation);
@@ -202,7 +200,7 @@ public class PTMPeptidesGraphicView extends JPanel {
         private void setScrollLocation(int ajustedLocation) {
             JScrollBar bar = this.m_scrollPane.getHorizontalScrollBar();
             int max = bar.getMaximum();
-            int x = (int) ((float) max / m_sequenceLength * ajustedLocation);
+            int x = (int) ((float) max / m_sequenceLength * (ajustedLocation - AJUSTE_GAP));
             bar.setValue(x);
         }
 
@@ -328,7 +326,6 @@ public class PTMPeptidesGraphicView extends JPanel {
                         int oldSelected = m_ctrlPeptideArea.getSelectedIndex();
                         int selectedIndex = m_ctrlPeptideArea.getSelectedIndex(e.getX(), e.getY());
                         if (selectedIndex != oldSelected && (selectedIndex != -1) && (m_dataBox != null)) {
-                            repaint(); //VDS : Should Graphic view repaint ?! m_dataBox DataBoxPanelInterface repaint ? 
                             if (m_superCtrl != null) {
                                 m_superCtrl.onMessage(PTMGraphicCtrlPanel.Source.PEPTIDE_AREA, PTMGraphicCtrlPanel.Message.SELECTED);
                             }

@@ -195,15 +195,14 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
     protected void paintSelectedPeptide(Graphics2D g) {
         g.setColor(SELECTED_COLOR);
         if (m_selectedPeptideInstance != null) {
-            paintDrawPeptide(g, m_selectedPeptideInstance);
+            int start = m_selectedPeptideInstance.getBestPeptideMatch().getSequenceMatch().getId().getStart();
+            int stop = m_selectedPeptideInstance.getBestPeptideMatch().getSequenceMatch().getId().getStop();
+            int length = stop - start + 1;
+            drawPeptide(g, start, length);
         }
     }
 
-    protected void paintDrawPeptide(Graphics2D g, DPeptideInstance pep) {
-        int start = pep.getBestPeptideMatch().getSequenceMatch().getId().getStart();
-        int stop = pep.getBestPeptideMatch().getSequenceMatch().getId().getStop();
-        int length = stop - start + 1;
-
+    protected void drawPeptide(Graphics2D g, int start, int length) {
         int width = (int) ((float) (length) * m_aaWidth);
         int x0 = (int) (m_x0 + (m_aaWidth * (start - m_startPositionProtein)));
         g.drawRoundRect(x0, m_protein_y0, width, m_protein_height, m_protein_height, m_protein_height);

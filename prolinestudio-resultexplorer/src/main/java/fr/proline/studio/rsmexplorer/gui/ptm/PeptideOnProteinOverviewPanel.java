@@ -92,16 +92,22 @@ public class PeptideOnProteinOverviewPanel extends RsmProteinAndPeptideOverviewP
 
         repaint();
     }
-
+   
     @Override
     protected void paintSelectedPeptide(Graphics2D g) {
         g.setColor(PTM_PEPTIDE_COLOR);
         for (PTMPeptideInstance pep : m_PTMPeptideInstances) {//paint PTM clusters
-            paintDrawPeptide(g, pep.getPeptideInstance());
+            int start = pep.getStartPosition()+1;//strange, in PTMPeptideInstance, start is 1 position before 
+            int stop = pep.getStopPosition();
+            int length = stop-start+1;
+            //m_logger.debug("sequence {}, position({}-{}, length={})",pep.getSequence(),start, stop,length);
+            drawPeptide(g, start, length);
         }
         g.setColor(SELECTED_COLOR);
         if (m_selectedPTMPeptideInstance != null) {//paint selected PTM Cluster
-            paintDrawPeptide(g, m_selectedPTMPeptideInstance.getPeptideInstance());
+            int start = m_selectedPTMPeptideInstance.getStartPosition()+1;
+            int length = m_selectedPTMPeptideInstance.getStopPosition()-start+1;
+            drawPeptide(g, start, length);
         }
     }
 
@@ -134,7 +140,7 @@ public class PeptideOnProteinOverviewPanel extends RsmProteinAndPeptideOverviewP
             if (y > m_ptm_y0 && y < m_ptm_y0 + m_height) {
                 int positionOnProtein = getPosOnProtein(x);
                 setSelectedOnProtein(positionOnProtein);
-                ((PTMGraphicCtrlPanel)m_superCtrl).onMessage(PTMGraphicCtrlPanel.Source.SEQUENCE, PTMGraphicCtrlPanel.Message.SELECTED);
+                ((PTMGraphicCtrlPanel) m_superCtrl).onMessage(PTMGraphicCtrlPanel.Source.SEQUENCE, PTMGraphicCtrlPanel.Message.SELECTED);
             }
         }
     }

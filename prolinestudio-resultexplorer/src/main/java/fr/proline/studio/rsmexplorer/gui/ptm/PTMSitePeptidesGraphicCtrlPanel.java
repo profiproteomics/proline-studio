@@ -9,7 +9,7 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSitePanelInterface;
 import fr.proline.studio.rsmexplorer.gui.ptm.mark.PTMMarkCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.pep.PeptideAreaCtrl;
-import fr.proline.studio.rsmexplorer.gui.ptm.mark.ProteinSequenceCtrl;
+import fr.proline.studio.rsmexplorer.gui.ptm.mark.ProteinSequence;
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import javax.swing.JPanel;
@@ -28,7 +28,7 @@ public class PTMSitePeptidesGraphicCtrlPanel extends JPanel implements DataBoxPa
 
     protected PTMSitePeptidesGraphicViewPanel m_paintArea;
     protected PTMMarkCtrl m_ctrlMark;
-    protected ProteinSequenceCtrl m_ctrlSequence;
+    protected ProteinSequence m_ctrlSequence;
     protected PeptideAreaCtrl m_ctrlPeptideArea;
 
     protected AbstractDataBox m_dataBox;
@@ -39,7 +39,7 @@ public class PTMSitePeptidesGraphicCtrlPanel extends JPanel implements DataBoxPa
         super();
         m_dataMgr = new PTMSitePeptidesGraphicDataMgr();
         m_ctrlMark = new PTMMarkCtrl();
-        m_ctrlSequence = new ProteinSequenceCtrl();
+        m_ctrlSequence = new ProteinSequence();
         m_ctrlPeptideArea = new PeptideAreaCtrl();
         m_paintArea = new PTMSitePeptidesGraphicViewPanel(this, m_ctrlMark, m_ctrlSequence, m_ctrlPeptideArea);
         initComponents();

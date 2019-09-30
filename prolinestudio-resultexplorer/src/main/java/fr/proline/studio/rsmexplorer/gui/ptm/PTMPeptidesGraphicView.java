@@ -9,7 +9,7 @@ import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.rsmexplorer.gui.ptm.mark.ProteinSequenceCtrl;
+import fr.proline.studio.rsmexplorer.gui.ptm.mark.ProteinSequence;
 import fr.proline.studio.rsmexplorer.gui.ptm.mark.PTMMarkCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.pep.PeptideAreaCtrl;
 import fr.proline.studio.utils.CyclicColorPalette;
@@ -143,11 +143,11 @@ public class PTMPeptidesGraphicView extends JPanel {
         private boolean m_isDataNull;//when precedent databox change order or filter, we can have non selected row, in this case, nothing to show
 
         public PTMPeptidesGraphicPanel(boolean isClusterData) {
-            this(new PTMMarkCtrl(), new ProteinSequenceCtrl(), new PeptideAreaCtrl(), isClusterData);
+            this(new PTMMarkCtrl(), new ProteinSequence(), new PeptideAreaCtrl(), isClusterData);
 
         }
 
-        public PTMPeptidesGraphicPanel(PTMMarkCtrl ctrlMark, ProteinSequenceCtrl ctrlSequence, PeptideAreaCtrl ctrlPeptideArea, boolean isClusterData) {
+        public PTMPeptidesGraphicPanel(PTMMarkCtrl ctrlMark, ProteinSequence ctrlSequence, PeptideAreaCtrl ctrlPeptideArea, boolean isClusterData) {
             m_titlePane = new TitlePane(ctrlMark, ctrlSequence);
             m_peptidesPane = new PeptidePane(ctrlPeptideArea);
             if (isClusterData) {
@@ -241,9 +241,9 @@ public class PTMPeptidesGraphicView extends JPanel {
         private class TitlePane extends JPanel {
 
             private PTMMarkCtrl m_ctrlMark;
-            private ProteinSequenceCtrl m_ctrlSequence;
+            private ProteinSequence m_ctrlSequence;
 
-            private TitlePane(PTMMarkCtrl ctrlMark, ProteinSequenceCtrl ctrlSequence) {
+            private TitlePane(PTMMarkCtrl ctrlMark, ProteinSequence ctrlSequence) {
                 super();
                 m_ctrlMark = ctrlMark;
                 m_ctrlSequence = ctrlSequence;

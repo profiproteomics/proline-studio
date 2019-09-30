@@ -4,7 +4,6 @@ import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSitePeptideInstance;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 

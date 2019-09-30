@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PTMSitePeptidesGraphicDataMgr {
 
-    private static Logger logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
+    private static Logger m_logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
     /**
      * All data for this databox
      */
@@ -54,8 +54,8 @@ public class PTMSitePeptidesGraphicDataMgr {
         return m_peptidesInstances.size();
     }
 
-    public Collection<PTMMark> getAllPtmMarks() {
-        return this.m_allPtmMarks.values();
+    public Map<Integer, PTMMark> getAllPtmMarks() {
+        return this.m_allPtmMarks;
     }
 
     /**
@@ -73,7 +73,7 @@ public class PTMSitePeptidesGraphicDataMgr {
         m_allPtmMarks = new HashMap<>();
 
         if (m_currentPtmSite == null) {
-            logger.debug(this.getClass().getName() + "setData" + " data is null");
+            m_logger.debug(this.getClass().getName() + "setData" + " data is null");
             this.m_proteinSequence = "";
             this.m_beginBestFit = 0;
             return;
@@ -90,24 +90,28 @@ public class PTMSitePeptidesGraphicDataMgr {
             //retrive all ptm in string format
             if (m_currentPtmSite.isProteinNTermWithOutM()) {//@todo verify N-term
                 m_beginBestFit = 0;
-            } else if (ptmPepInstance!= null && m_beginBestFit > ptmPepInstance.getParentPTMPeptideInstance().getStartPosition()) {
+            } else if (ptmPepInstance != null && m_beginBestFit > ptmPepInstance.getParentPTMPeptideInstance().getStartPosition()) {
                 m_beginBestFit = ptmPepInstance.getParentPTMPeptideInstance().getStartPosition();
             }
 //create PTMMark, take all of the site(position, type of modification) from this peptide, in order to create a PTMMark list
 
             for (DPeptidePTM ptm : parentPeptideInstance.getPeptide().getTransientData().getDPeptidePtmMap().values()) {
-                int protLocation =0;
+                int protLocation = 0;
                 if (m_currentPtmSite.isProteinNTermWithOutM()) {
                     protLocation = (int) ptm.getSeqPosition();
 
                     if (protLocation == 0) {
                         protLocation = 1;
                     }
-                } else if (ptmPepInstance!= null){
+                } else if (ptmPepInstance != null) {
                     protLocation = ptmPepInstance.getParentPTMPeptideInstance().getStartPosition() + (int) ptm.getSeqPosition();
                 }
                 PTMMark mark = new PTMMark(ptm, protLocation);
-                m_allPtmMarks.put(protLocation, mark);
+                PTMMark exist = m_allPtmMarks.get(protLocation);
+                if (exist == null || !exist.equals(mark)) {
+                    m_allPtmMarks.put(protLocation, mark);
+                }
+                m_logger.debug("all PTM Marker {}", m_allPtmMarks);
             }
         }
 //create sequence
@@ -123,7 +127,7 @@ public class PTMSitePeptidesGraphicDataMgr {
 //            if (bs != null) {
 //                m_proteinSequence = bs.getSequence();
 //            } else {
-                m_proteinSequence = createSequence();
+            m_proteinSequence = createSequence();
 //            }
         }
     }
@@ -201,10 +205,11 @@ public class PTMSitePeptidesGraphicDataMgr {
 
     public int getPeptideIndex(DPeptideInstance pep) {
         DPeptideInstance comparePep;
-        for (int row = 0; row < this.m_peptidesInstances.size(); row ++){
+        for (int row = 0; row < this.m_peptidesInstances.size(); row++) {
             comparePep = m_peptidesInstances.get(row).getParentPTMPeptideInstance().getPeptideInstance();
-            if (comparePep.equals(pep))
+            if (comparePep.equals(pep)) {
                 return row;
+            }
         }
         return -1;
     }

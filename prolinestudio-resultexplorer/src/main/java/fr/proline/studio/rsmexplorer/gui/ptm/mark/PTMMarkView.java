@@ -16,12 +16,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Draw 1 PTM
  * @author Karine XUE
  */
 public class PTMMarkView extends ViewPtmAbstract {
 
-    private static Logger logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
+    private static Logger m_logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
 
     private PTMMark m_mark;
     /**

@@ -7,7 +7,7 @@ package fr.proline.studio.rsmexplorer.gui.ptm;
 
 import fr.proline.studio.rsmexplorer.gui.ptm.mark.PTMMarkCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.pep.PeptideAreaCtrl;
-import fr.proline.studio.rsmexplorer.gui.ptm.mark.ProteinSequenceCtrl;
+import fr.proline.studio.rsmexplorer.gui.ptm.mark.ProteinSequence;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -46,7 +46,7 @@ public class PTMSitePeptidesGraphicViewPanel extends JPanel {
     private boolean m_isDataNull;//when precedent databox change order ou filter, we can have non selected row, in this case, nothing to show
     private final PeptideNumberPane m_numberPane;
 
-    protected PTMSitePeptidesGraphicViewPanel(PTMSitePeptidesGraphicCtrlPanel ctrl, PTMMarkCtrl ctrlMark, ProteinSequenceCtrl ctrlSequence, PeptideAreaCtrl ctrlPeptideArea) {
+    protected PTMSitePeptidesGraphicViewPanel(PTMSitePeptidesGraphicCtrlPanel ctrl, PTMMarkCtrl ctrlMark, ProteinSequence ctrlSequence, PeptideAreaCtrl ctrlPeptideArea) {
         m_ptmSitePanel = ctrl;
         m_titlePane = new TitlePane(ctrlMark, ctrlSequence);
         m_peptidePane = new PeptidePane(ctrlPeptideArea);
@@ -85,22 +85,11 @@ public class PTMSitePeptidesGraphicViewPanel extends JPanel {
         this.m_isDataLoaded = isDataLoaded;
     }
 
-//    public void setAjustedLocation(int ajustedLocation) {
-//        this.m_ajustedLocation = ajustedLocation;
-//        if (ajustedLocation >= AJUSTE_GAP) {
-//            m_ajustedLocation -= AJUSTE_GAP;
-//        }
-//    }
     public void setScrollLocation(int ajustedLocation) {
         JScrollBar bar = this.m_scrollPane.getHorizontalScrollBar();
         int max = bar.getMaximum();
-        float unit = (float) (max) / m_sequenceLength;
-        m_logger.debug("SSSSSSSSSSSSSSSSSS setScrollLocation, getValue={}, unit={},max={} ", bar.getValue(), unit, max);
-        int x = (int) (unit * (ajustedLocation + AJUSTE_GAP));//relative in the scroll bar
-        m_logger.debug("SSSSSSSSSSSSSSSSSS setScrollLocation, adjusted locaiton ={}, value to set ={} , sequence Length ={}", ajustedLocation + AJUSTE_GAP, x, m_sequenceLength);
-        bar.setValue(x);
-        m_logger.debug("SSSSSSSSSSSSSSSSSS setScrollLocation, getValue 2={} ", bar.getValue());
-
+        int x = (int) ((float) max / m_sequenceLength * (ajustedLocation - AJUSTE_GAP));
+        bar.setValue(Math.min(x, max));
     }
 
     void setRowCount(int rowCount) {
@@ -137,9 +126,9 @@ public class PTMSitePeptidesGraphicViewPanel extends JPanel {
     private class TitlePane extends JPanel {
 
         private PTMMarkCtrl m_ctrlMark;
-        private final ProteinSequenceCtrl m_ctrlSequence;
+        private final ProteinSequence m_ctrlSequence;
 
-        private TitlePane(PTMMarkCtrl ctrlMark, ProteinSequenceCtrl ctrlSequence) {
+        private TitlePane(PTMMarkCtrl ctrlMark, ProteinSequence ctrlSequence) {
             super();
             m_ctrlMark = ctrlMark;
             m_ctrlSequence = ctrlSequence;

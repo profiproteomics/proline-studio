@@ -9,30 +9,32 @@ import fr.proline.studio.rsmexplorer.gui.ptm.PTMMark;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewContext;
 
 import java.awt.Graphics2D;
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
+ * PTM control & data manager
  *
  * @author Karine XUE
  */
 public class PTMMarkCtrl {
-    
-    PTMMarkModel m_mgr;
+
     PTMMarkSetView m_view;
-    
+    Map<Integer, PTMMarkView> m_ptmMarkViewMap;
+
     public PTMMarkCtrl() {
-        m_mgr = new PTMMarkModel();
         m_view = new PTMMarkSetView();
-        
+        m_ptmMarkViewMap = new HashMap();
+
     }
-    
-    public void setData(Collection<PTMMark> ptmMarks){
-        m_mgr.setPTM(ptmMarks);
-        m_view.setPtmMarkList(m_mgr.getPTMMarkList());
+
+    public void setData(Map<Integer, PTMMark> ptmMarks) {
+        this.setPTM(ptmMarks);
+        m_view.setPtmMarkMap(m_ptmMarkViewMap);
     }
 
     public void setBeginPoint(int x, int y) {
-       this.m_view.setBeginPoint(x, y);
+        this.m_view.setBeginPoint(x, y);
     }
 
     public void paint(Graphics2D g2, ViewContext viewContext) {
@@ -40,8 +42,17 @@ public class PTMMarkCtrl {
     }
 
     public String getToolTipText(int x, int y, int ajustedLocation) {
-       return this.m_view.getToolTipText(x,y, ajustedLocation);
-              
+        return this.m_view.getToolTipText(x, y, ajustedLocation);
+
     }
-    
+
+
+    public void setPTM(Map<Integer, PTMMark> ptmMarks) {
+        m_ptmMarkViewMap = new HashMap();
+        for (int i : ptmMarks.keySet()) {
+            PTMMark pa = ptmMarks.get(i);
+            PTMMarkView p = new PTMMarkView(pa);
+            m_ptmMarkViewMap.put(i, p);
+        }
+    }
 }

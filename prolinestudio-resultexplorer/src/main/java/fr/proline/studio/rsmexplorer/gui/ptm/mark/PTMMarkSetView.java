@@ -9,30 +9,30 @@ import fr.proline.studio.rsmexplorer.gui.ptm.ViewContext;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewPtmAbstract;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewSetting;
 import java.awt.Graphics2D;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 /**
+ * all PTM view
  *
  * @author Karine XUE
  */
 public class PTMMarkSetView extends ViewPtmAbstract {
 
-    private List<PTMMarkView> m_ptmMarkList = new ArrayList<>();
+    Map<Integer, PTMMarkView> m_ptmMap;
 
     @Override
     public void paint(Graphics2D g, ViewContext viewContext) {
-        for (PTMMarkView pm : m_ptmMarkList) {
+        if (m_ptmMap == null) {
+            return;
+        }
+        for (PTMMarkView pm : m_ptmMap.values()) {
             pm.setBeginPoint(m_x, m_y);
             pm.paint(g, viewContext);
         }
     }
 
-    void setPtmMarkList(List<PTMMarkView> ptmMarkList) {
-        if (ptmMarkList == null) {
-            ptmMarkList = new ArrayList<>();
-        }
-        this.m_ptmMarkList = ptmMarkList;
+    void setPtmMarkMap(Map<Integer, PTMMarkView> ptmMap) {
+        this.m_ptmMap = ptmMap;
     }
 
     @Override
@@ -43,19 +43,21 @@ public class PTMMarkSetView extends ViewPtmAbstract {
 
     protected String getToolTipText(int x, int y, int ajustedLocation) {
         int index = (x - this.m_x) / ViewSetting.WIDTH_AA + ajustedLocation;
-        if (y >= this.m_y && y <= (this.m_y + ViewSetting.HEIGHT_AA * 3) && m_ptmMarkList != null) {
-
-            for (PTMMarkView pm : m_ptmMarkList) {
-                if (pm.getLocationProtein() == index) {
-
-                    return pm.getPTMShortName() + "(Protein Loc. " + pm.getDisplayedLocationProtein() + ")";
-                } else {
-                    return null;
-                }
+        if (y >= this.m_y && y <= (this.m_y + ViewSetting.HEIGHT_AA * 3)) {
+            String prefix = "(" + x + "," + y + ") ";
+            String tips = "";
+            PTMMarkView pm = m_ptmMap.get(index);
+            if (pm != null) {
+                tips += pm.getPTMShortName() + "(Protein Loc. " + pm.getDisplayedLocationProtein() + ")";
             }
+            if (tips.length() == 0) {
+                tips = null;
+            }
+            return tips;
         } else if (y > (this.m_y + ViewSetting.HEIGHT_AA * 3)) {
-            return ""+index;
+            return "" + index;
         }
+
         return null;
     }
 }

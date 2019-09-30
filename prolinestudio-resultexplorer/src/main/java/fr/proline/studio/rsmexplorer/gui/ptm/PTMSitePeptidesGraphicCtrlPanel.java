@@ -98,10 +98,8 @@ public class PTMSitePeptidesGraphicCtrlPanel extends JPanel implements DataBoxPa
             this.m_paintArea.setSequenceLength(m_dataMgr.getProteinSequence().length());
             int ajustedLocation = m_dataMgr.getBeginBestFit();
             this.m_paintArea.setScrollLocation(ajustedLocation);
-            //this.m_paintArea.setAdjust(ajustedLocation);
             valueChanged();
         }
-
         this.repaint();
     }
 

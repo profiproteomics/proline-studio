@@ -44,6 +44,9 @@ public class PTMMarkSetView extends ViewPtmAbstract {
     protected String getToolTipText(int x, int y, int ajustedLocation) {
         int index = (x - this.m_x) / ViewSetting.WIDTH_AA + ajustedLocation;
         if (y >= this.m_y && y <= (this.m_y + ViewSetting.HEIGHT_AA * 3)) {
+            if (m_ptmMap == null) {
+                return null;
+            }
             String prefix = "(" + x + "," + y + ") ";
             String tips = "";
             PTMMarkView pm = m_ptmMap.get(index);

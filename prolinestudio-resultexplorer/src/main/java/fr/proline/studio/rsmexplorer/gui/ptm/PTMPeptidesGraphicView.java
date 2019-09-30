@@ -484,7 +484,7 @@ public class PTMPeptidesGraphicView extends JPanel {
             public Color getColor(PTMCluster cluster) {
                 Color c = PTM_CLUSTER_COLORS.get(cluster);
                 if (c == null) {
-                    Color co = CyclicColorPalette.getColorBlue(PTM_CLUSTER_COLORS.size()); 
+                    Color co = CyclicColorPalette.getColorBlue(PTM_CLUSTER_COLORS.size());
                     int rgb = co.getRGB() | 0xFF000000;
                     c = new Color(rgb & 0x00FFFFFF);
                     PTM_CLUSTER_COLORS.put(cluster, c);

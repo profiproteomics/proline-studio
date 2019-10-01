@@ -61,7 +61,12 @@ public class PeptideSetView extends ViewPtmAbstract {
         else 
             m_peptideList = peptideList;
     }
-
+    /**
+     * 
+     * @param x
+     * @param y
+     * @return  -1 when no found
+     */
     protected int getSelectedItemIndex(int x, int y) {
         boolean selected = false;
         y0 = m_y;

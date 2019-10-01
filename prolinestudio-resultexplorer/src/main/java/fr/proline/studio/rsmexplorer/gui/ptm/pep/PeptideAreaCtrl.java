@@ -44,14 +44,20 @@ public class PeptideAreaCtrl {
         this.m_pepSetView.paint(g2, viewContext);
     }
 
+    /**
+     * 
+     * @param x
+     * @param y
+     * @return  -1 when no found
+     */
     public int getSelectedIndex(int x, int y) {
         int index = this.m_pepSetView.getSelectedItemIndex(x, y);
         this.m_mgr.setSelectedIndex(index);//change select
-        return this.m_pepSetView.getSelectedItemIndex(x, y);
+        return index;
     }
 
     public void setSelectedIndex(int i) {
-        this.m_mgr.setSelectedIndex(i);
+        this.m_mgr.setSelectedIndex(i);       
     }
 
     public int getSelectedIndex() {

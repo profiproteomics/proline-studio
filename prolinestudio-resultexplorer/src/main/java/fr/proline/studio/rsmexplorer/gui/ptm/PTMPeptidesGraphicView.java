@@ -21,10 +21,10 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -152,7 +152,7 @@ public class PTMPeptidesGraphicView extends JPanel {
             m_titlePane = new TitlePane(ctrlMark, ctrlSequence);
             m_peptidesPane = new PeptidePane(ctrlPeptideArea);
             if (isClusterData) {
-                m_peptidesNumberPane = new ColoredClusterMarkPane();
+                m_peptidesNumberPane = new ColoredClusterMarkPane(ctrlPeptideArea);
             } else {
                 m_peptidesNumberPane = new PeptideNumberPane();
             }
@@ -198,6 +198,10 @@ public class PTMPeptidesGraphicView extends JPanel {
 
         }
 
+        /**
+         *
+         * @param ajustedLocation: position on protein
+         */
         private void setScrollLocation(int ajustedLocation) {
             JScrollBar bar = this.m_scrollPane.getHorizontalScrollBar();
             int max = bar.getMaximum();
@@ -248,21 +252,13 @@ public class PTMPeptidesGraphicView extends JPanel {
                 super();
                 m_ctrlMark = ctrlMark;
                 m_ctrlSequence = ctrlSequence;
-                this.addMouseMotionListener(new MouseMotionListener() {
-
+                this.addMouseMotionListener(new MouseAdapter() {
                     @Override
                     public void mouseMoved(MouseEvent e) {//for tooltips
                         int x = e.getX();
                         int y = e.getY();
                         String tips = m_ctrlMark.getToolTipText(x, y, m_ajustedStartLocation);
                         setToolTipText(tips);//null will turn off ToolTip
-
-                    }
-
-                    @Override
-                    public void mouseDragged(MouseEvent e) {
-                        // TODO Auto-generated method stub
-
                     }
                 });
             }
@@ -320,68 +316,71 @@ public class PTMPeptidesGraphicView extends JPanel {
             private PeptidePane(PeptideAreaCtrl ctrlPeptideArea) {
                 super();
                 m_ctrlPeptideArea = ctrlPeptideArea;
-                this.addMouseListener(new MouseAdapter() {
-                    public void mouseClicked(MouseEvent e) {
-                        requestFocusInWindow();
-                        //PtmSitePeptide selectedItem = _ctrlPeptideArea.getSelectedItem(e.getX(), e.getY());
-                        int oldSelected = m_ctrlPeptideArea.getSelectedIndex();
-                        int selectedIndex = m_ctrlPeptideArea.getSelectedIndex(e.getX(), e.getY());
-                        if (selectedIndex != oldSelected && (selectedIndex != -1) && (m_dataBox != null)) {
-                            if (m_superCtrl != null) {
-                                m_superCtrl.onMessage(PTMGraphicCtrlPanel.Source.PEPTIDE_AREA, PTMGraphicCtrlPanel.Message.SELECTED);
-                            }
-                            repaint();
-                            m_dataBox.propagateDataChanged(PTMPeptideInstance.class);
+                PeptideAreaMouseAdapter mouseAdapter = new PeptideAreaMouseAdapter();
+                this.addMouseListener(mouseAdapter);
+                this.addMouseMotionListener(mouseAdapter);
+                this.addKeyListener(new PeptideAreaKeyAdapter());
+            }
+
+            class PeptideAreaKeyAdapter extends KeyAdapter {
+
+                @Override
+                public void keyPressed(java.awt.event.KeyEvent evt) {
+                    int oldSelected = m_ctrlPeptideArea.getSelectedIndex();
+                    if (evt.getKeyCode() == KeyEvent.VK_UP) {
+                        m_ctrlPeptideArea.setRelativeSelected(-1);
+                    } else if (evt.getKeyCode() == KeyEvent.VK_DOWN) {
+                        m_ctrlPeptideArea.setRelativeSelected(1);
+                    }
+                    int selectedIndex = m_ctrlPeptideArea.getSelectedIndex();
+                    if (selectedIndex != -1) {
+                        PTMPeptideInstance pep = m_dataModel.getPeptideAt(selectedIndex);
+                        if (pep != null) {
+                            setScrollLocation(pep.getStartPosition());
                         }
                     }
-                });
-                this.addMouseMotionListener(new MouseMotionListener() {
-
-                    @Override
-                    public void mouseMoved(MouseEvent e) {//for tooltips
-                        int x = e.getX();
-                        int y = e.getY();
-                        String tips = m_ctrlPeptideArea.getToolTipText(x, y);
-                        //if (tips != null) {
-                        setToolTipText(tips);//null will turn off tooltip
-
-                    }
-
-                    @Override
-                    public void mouseDragged(MouseEvent e) {
-                        // TODO Auto-generated method stub
-
-                    }
-                });
-                this.addKeyListener(
-                        new java.awt.event.KeyListener() {
-                    public void keyPressed(java.awt.event.KeyEvent evt) {
-                        int oldSelected = m_ctrlPeptideArea.getSelectedIndex();
-                        if (evt.getKeyCode() == KeyEvent.VK_UP) {
-                            m_ctrlPeptideArea.setRelativeSelected(-1);
-                        } else if (evt.getKeyCode() == KeyEvent.VK_DOWN) {
-                            m_ctrlPeptideArea.setRelativeSelected(1);
+                    if (oldSelected != selectedIndex) {
+                        if (m_superCtrl != null) {
+                            m_superCtrl.onMessage(PTMGraphicCtrlPanel.Source.PEPTIDE_AREA, PTMGraphicCtrlPanel.Message.SELECTED);
                         }
-                        int selectedIndex = m_ctrlPeptideArea.getSelectedIndex();
-                        if (oldSelected != selectedIndex) {
-                            if (m_superCtrl != null) {
-                                m_superCtrl.onMessage(PTMGraphicCtrlPanel.Source.PEPTIDE_AREA, PTMGraphicCtrlPanel.Message.SELECTED);
-                            }
-                            m_dataBox.propagateDataChanged(PTMPeptideInstance.class);
-                            repaint();
+                        m_dataBox.propagateDataChanged(PTMPeptideInstance.class);
+                        repaint();
+                    }
+                }
+            }
+
+            class PeptideAreaMouseAdapter extends MouseAdapter {
+
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    requestFocusInWindow();
+                    //PtmSitePeptide selectedItem = _ctrlPeptideArea.getSelectedItem(e.getX(), e.getY());
+                    int oldSelected = m_ctrlPeptideArea.getSelectedIndex();
+                    int selectedIndex = m_ctrlPeptideArea.getSelectedIndex(e.getX(), e.getY());
+                    if (selectedIndex != -1) {
+                        PTMPeptideInstance pep = m_dataModel.getPeptideAt(selectedIndex);
+                        if (pep != null) {
+                            setScrollLocation(pep.getStartPosition());
                         }
                     }
-
-                    @Override
-                    public void keyTyped(KeyEvent e) {
-                        // TODO Auto-generated method stub
+                    if (selectedIndex != oldSelected && (selectedIndex != -1) && (m_dataBox != null)) {
+                        if (m_superCtrl != null) {
+                            m_superCtrl.onMessage(PTMGraphicCtrlPanel.Source.PEPTIDE_AREA, PTMGraphicCtrlPanel.Message.SELECTED);
+                        }
+                        repaint();
+                        m_dataBox.propagateDataChanged(PTMPeptideInstance.class);
                     }
+                }
 
-                    @Override
-                    public void keyReleased(KeyEvent e) {
-                        // TODO Auto-generated method stub
-                    }
-                });
+                @Override
+                public void mouseMoved(MouseEvent e) {//for tooltips
+                    int x = e.getX();
+                    int y = e.getY();
+                    String tips = m_ctrlPeptideArea.getToolTipText(x, y);
+                    //if (tips != null) {
+                    setToolTipText(tips);//null will turn off tooltip
+
+                }
             }
 
             public void updateData() {
@@ -474,40 +473,60 @@ public class PTMPeptidesGraphicView extends JPanel {
 
         private class ColoredClusterMarkPane extends PeptideNumberPane {
 
+            private PeptideAreaCtrl m_ctrlPeptideArea;
             private Map<PTMCluster, Color> PTM_CLUSTER_COLORS = new HashMap<>();
             private Map<PTMCluster, String> PTM_CLUSTER_ID = new HashMap<>();
             int m_x0, m_y0;
 
-            private ColoredClusterMarkPane() {
+            private ColoredClusterMarkPane(PeptideAreaCtrl ctrlPeptideArea) {
                 super();
+                m_ctrlPeptideArea = ctrlPeptideArea;
                 this.setBackground(Color.WHITE);
-                TooltipsMouseAdapter coloredTooltips = new TooltipsMouseAdapter();
+                ScrollPaneRowHeaderMouseAdapter coloredTooltips = new ScrollPaneRowHeaderMouseAdapter();
                 this.addMouseMotionListener(coloredTooltips);
+                this.addMouseListener(coloredTooltips);
             }
 
-            class TooltipsMouseAdapter extends MouseAdapter {
+            class ScrollPaneRowHeaderMouseAdapter extends MouseAdapter {
 
                 @Override
                 public void mouseMoved(MouseEvent e) {
                     int x = e.getX();
                     int y = e.getY();
-                    int index = (int) ((y - m_y0) / (ViewSetting.HEIGHT_AA * 1.5));
                     String tips = null;
-                    PTMPeptideInstance pep = m_dataModel.getPeptideAt(index);
-                    if (pep != null) {
-                        List<PTMCluster> clusters = pep.getClusters();
-                        int size = clusters.size();
-                        tips = GlobalValues.HTML_TAG_BEGIN + "<body>";
-                        for (int j = 0; j < size; j++) {
-                            PTMCluster cluster = clusters.get(j);
-                            String htmlColor = CyclicColorPalette.getHTMLColoredBlock(getColor(cluster));
-                            tips += htmlColor + getColorId(cluster);
-                        }
-                        tips += "</body>" + GlobalValues.HTML_TAG_END;
+                    int index = (int) ((y - m_y0) / (ViewSetting.HEIGHT_AA * 1.5));
+                    if (index >= 0 && index < m_dataModel.getRowCount()) {
+                        PTMPeptideInstance pep = m_dataModel.getPeptideAt(index);
+                        if (pep != null) {
+                            List<PTMCluster> clusters = pep.getClusters();
+                            int size = clusters.size();
+                            tips = GlobalValues.HTML_TAG_BEGIN + "<body>";
+                            for (int j = 0; j < size; j++) {
+                                PTMCluster cluster = clusters.get(j);
+                                String htmlColor = CyclicColorPalette.getHTMLColoredBlock(getColor(cluster));
+                                tips += htmlColor + getColorId(cluster);
+                            }
+                            tips += "</body>" + GlobalValues.HTML_TAG_END;
 
+                        }
                     }
-                    m_logger.debug("TTTTTTTTTTTTTTTTTTT tips is {}", tips);
                     setToolTipText(tips);
+                }
+
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    int x = e.getX();
+                    int y = e.getY();
+                    int index = (int) ((y - m_y0) / (ViewSetting.HEIGHT_AA * 1.5));
+                    if (index >= 0 && index < m_dataModel.getRowCount()) {
+                        PTMPeptideInstance pep = m_dataModel.getPeptideAt(index);
+                        if (pep != null) {
+                            setScrollLocation(pep.getStartPosition());
+                        }
+                        m_ctrlPeptideArea.setSelectedIndex(index);
+                        m_internalPanel.repaint();
+                        m_dataBox.propagateDataChanged(PTMPeptideInstance.class);
+                    }
                 }
             }
 

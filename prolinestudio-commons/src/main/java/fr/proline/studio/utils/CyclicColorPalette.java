@@ -24,16 +24,16 @@ public class CyclicColorPalette {
     public static final Color[] GROUP4_PALETTE = {
         new Color(229, 115, 115), //red 1 
         new Color(129, 212, 250), //blue 1 
-        new Color(255, 213, 79),  //yellow 1 
-        new Color(76, 175, 80),   //Greeen 1 
-        new Color(183, 28, 28),   //red 2 
-        new Color(3, 155, 229),   //blue 2 
-        new Color(255, 179, 0),   //yellow 2 
-        new Color(27, 94, 32),    //Greeen 2 
-        new Color(255, 23, 68),   //red 3 
-        new Color(1, 87, 155),    //blue 3 
-        new Color(255, 234, 0),   //yellow 3
-        new Color(0, 200, 83),    //Greeen 3 
+        new Color(255, 213, 79), //yellow 1 
+        new Color(76, 175, 80), //Greeen 1 
+        new Color(183, 28, 28), //red 2 
+        new Color(3, 155, 229), //blue 2 
+        new Color(255, 179, 0), //yellow 2 
+        new Color(27, 94, 32), //Greeen 2 
+        new Color(255, 23, 68), //red 3 
+        new Color(1, 87, 155), //blue 3 
+        new Color(255, 234, 0), //yellow 3
+        new Color(0, 200, 83), //Greeen 3 
     };
 
     public static final Color GRAY_BACKGROUND = new Color(239, 236, 234);
@@ -170,4 +170,7 @@ public class CyclicColorPalette {
         return String.format("%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
     }
 
+    public static String getHTMLColoredBlock(Color color) {
+        return "<font color='" + getHTMLColor(color) + "'>&#x25A0;&nbsp;</font>";
+    }
 }

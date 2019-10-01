@@ -13,6 +13,7 @@ import fr.proline.studio.rsmexplorer.gui.ptm.mark.ProteinSequence;
 import fr.proline.studio.rsmexplorer.gui.ptm.mark.PTMMarkCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.pep.PeptideAreaCtrl;
 import fr.proline.studio.utils.CyclicColorPalette;
+import fr.proline.studio.utils.GlobalValues;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -329,6 +330,7 @@ public class PTMPeptidesGraphicView extends JPanel {
                             if (m_superCtrl != null) {
                                 m_superCtrl.onMessage(PTMGraphicCtrlPanel.Source.PEPTIDE_AREA, PTMGraphicCtrlPanel.Message.SELECTED);
                             }
+                            repaint();
                             m_dataBox.propagateDataChanged(PTMPeptideInstance.class);
                         }
                     }
@@ -479,6 +481,34 @@ public class PTMPeptidesGraphicView extends JPanel {
             private ColoredClusterMarkPane() {
                 super();
                 this.setBackground(Color.WHITE);
+                TooltipsMouseAdapter coloredTooltips = new TooltipsMouseAdapter();
+                this.addMouseMotionListener(coloredTooltips);
+            }
+
+            class TooltipsMouseAdapter extends MouseAdapter {
+
+                @Override
+                public void mouseMoved(MouseEvent e) {
+                    int x = e.getX();
+                    int y = e.getY();
+                    int index = (int) ((y - m_y0) / (ViewSetting.HEIGHT_AA * 1.5));
+                    String tips = null;
+                    PTMPeptideInstance pep = m_dataModel.getPeptideAt(index);
+                    if (pep != null) {
+                        List<PTMCluster> clusters = pep.getClusters();
+                        int size = clusters.size();
+                        tips = GlobalValues.HTML_TAG_BEGIN + "<body>";
+                        for (int j = 0; j < size; j++) {
+                            PTMCluster cluster = clusters.get(j);
+                            String htmlColor = CyclicColorPalette.getHTMLColoredBlock(getColor(cluster));
+                            tips += htmlColor + getColorId(cluster);
+                        }
+                        tips += "</body>" + GlobalValues.HTML_TAG_END;
+
+                    }
+                    m_logger.debug("TTTTTTTTTTTTTTTTTTT tips is {}", tips);
+                    setToolTipText(tips);
+                }
             }
 
             public Color getColor(PTMCluster cluster) {

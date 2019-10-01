@@ -41,8 +41,8 @@ public class PTMMarkSetView extends ViewPtmAbstract {
         this.m_y = y;
     }
 
-    protected String getToolTipText(int x, int y, int ajustedLocation) {
-        int index = (x - this.m_x) / ViewSetting.WIDTH_AA + ajustedLocation;
+    protected String getToolTipText(int x, int y) {
+        int index = (x - this.m_x) / ViewSetting.WIDTH_AA;
         if (y >= this.m_y && y <= (this.m_y + ViewSetting.HEIGHT_AA * 3)) {
             if (m_ptmMap == null) {
                 return null;

@@ -1,7 +1,7 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * @cea 
+ * http://www.profiproteomics.fr
+ * create date: 2019
  */
 package fr.proline.studio.rsmexplorer.gui.ptm;
 
@@ -20,7 +20,6 @@ import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -139,7 +138,6 @@ public class PTMPeptidesGraphicView extends JPanel {
         private final PeptidePane m_peptidesPane;
         private final PeptideNumberPane m_peptidesNumberPane;
 
-        int m_ajustedStartLocation;
         private int m_sequenceLength;
         private boolean m_isDataNull;//when precedent databox change order or filter, we can have non selected row, in this case, nothing to show
 
@@ -185,19 +183,6 @@ public class PTMPeptidesGraphicView extends JPanel {
             m_dataModel = dataModel;
         }
 
-        private void setAjustedLocation(int ajustedLocation) {
-            this.m_ajustedStartLocation = ajustedLocation;
-            if (ajustedLocation >= AJUSTE_GAP) {
-                m_ajustedStartLocation -= AJUSTE_GAP;
-            }
-            //m_logger.debug("adjust start location ={}", m_ajustedStartLocation);
-            Point p = m_scrollPane.getViewport().getViewPosition();
-            int y = p.y;
-            int x = (int) ((float) this.getWidth() / m_sequenceLength * m_ajustedStartLocation);
-            m_scrollPane.getViewport().setViewPosition(new java.awt.Point(x, y));
-
-        }
-
         /**
          *
          * @param ajustedLocation: position on protein
@@ -235,12 +220,8 @@ public class PTMPeptidesGraphicView extends JPanel {
         private void updateData() {
             m_titlePane.updateData();
             m_peptidesPane.updateData();
-
-            //int ajustedLocation = m_dataModel.getLowerStartInProtSeq();
-            int ajustedLocation = 0;
             m_isDataNull = false;
             m_sequenceLength = m_dataModel.getProteinSequence().length();
-            setAjustedLocation(ajustedLocation);
         }
 
         private class TitlePane extends JPanel {
@@ -257,7 +238,7 @@ public class PTMPeptidesGraphicView extends JPanel {
                     public void mouseMoved(MouseEvent e) {//for tooltips
                         int x = e.getX();
                         int y = e.getY();
-                        String tips = m_ctrlMark.getToolTipText(x, y, m_ajustedStartLocation);
+                        String tips = m_ctrlMark.getToolTipText(x, y);
                         setToolTipText(tips);//null will turn off ToolTip
                     }
                 });
@@ -285,7 +266,7 @@ public class PTMPeptidesGraphicView extends JPanel {
 
             @Override
             public Dimension getPreferredSize() {
-                return new Dimension((int) ((m_sequenceLength + AJUSTE_GAP - m_ajustedStartLocation) * ViewSetting.WIDTH_AA), ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE);
+                return new Dimension((int) ((m_sequenceLength + AJUSTE_GAP) * ViewSetting.WIDTH_AA), ViewSetting.HEIGHT_MARK + ViewSetting.HEIGHT_SEQUENCE);
             }
 
             @Override
@@ -294,12 +275,7 @@ public class PTMPeptidesGraphicView extends JPanel {
                 super.paintComponent(g);
                 if (!m_isDataNull) {
                     ViewContext viewContext = new ViewContext();
-                    //viewContext.setAjustedStartLocation(m_ajustedStartLocation);
-                    int adjustedEndLoc = m_dataModel.getHigherEndInProtSeq();
-                    if (m_sequenceLength > (adjustedEndLoc + AJUSTE_GAP)) {
-                        adjustedEndLoc = m_dataModel.getHigherEndInProtSeq() + AJUSTE_GAP;
-                    }
-                    //viewContext.setAjustedEndLocation(adjustedEndLoc).setShowNCtermIndex(false);
+
                     viewContext.setShowNCtermIndex(false);
                     Graphics2D g2 = (Graphics2D) g;
                     m_ctrlMark.paint(g2, viewContext);
@@ -323,6 +299,10 @@ public class PTMPeptidesGraphicView extends JPanel {
             }
 
             class PeptideAreaKeyAdapter extends KeyAdapter {
+
+                public PeptideAreaKeyAdapter() {
+                    super();
+                }
 
                 @Override
                 public void keyPressed(java.awt.event.KeyEvent evt) {
@@ -394,7 +374,7 @@ public class PTMPeptidesGraphicView extends JPanel {
 
             @Override
             public Dimension getPreferredSize() {
-                int width = (int) ((m_sequenceLength + AJUSTE_GAP - m_ajustedStartLocation) * ViewSetting.WIDTH_AA);
+                int width = (int) ((m_sequenceLength + AJUSTE_GAP) * ViewSetting.WIDTH_AA);
                 int height = m_dataModel.getRowCount() * (ViewSetting.HEIGHT_AA * 2 - ViewSetting.HEIGHT_AA / 2);
                 if (height == 0) {
                     height = 5 * ViewSetting.HEIGHT_AA;

@@ -38,7 +38,6 @@ public class PTMSitePeptidesGraphicViewPanel extends JPanel {
     private boolean m_isDataLoaded;
     private TitlePane m_titlePane;
     private PeptidePane m_peptidePane;
-    int m_ajustedLocation;
     private int m_rowCount;
     private int m_sequenceLength;
     private JScrollPane m_scrollPane;
@@ -138,7 +137,7 @@ public class PTMSitePeptidesGraphicViewPanel extends JPanel {
                 public void mouseMoved(MouseEvent e) {//for tooltips
                     int x = e.getX();
                     int y = e.getY();
-                    String tips = m_ctrlMark.getToolTipText(x, y, m_ajustedLocation);
+                    String tips = m_ctrlMark.getToolTipText(x, y);
                     setToolTipText(tips);//null will turn off ToolTip
 
                 }

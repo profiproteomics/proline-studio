@@ -41,8 +41,8 @@ public class PTMMarkCtrl {
         this.m_view.paint(g2, viewContext);
     }
 
-    public String getToolTipText(int x, int y, int ajustedLocation) {
-        return this.m_view.getToolTipText(x, y, ajustedLocation);
+    public String getToolTipText(int x, int y) {
+        return this.m_view.getToolTipText(x, y);
 
     }
 

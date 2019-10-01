@@ -18,7 +18,6 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
  */
 public class DataBoxPTMSitePepMatches extends AbstractDataBox {
 
-    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private DPeptideInstance m_parentPeptideInstance;
             
     public DataBoxPTMSitePepMatches() { 

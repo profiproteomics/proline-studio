@@ -7,6 +7,7 @@ package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
+import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -262,7 +263,10 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                 protTableModel.setData(m_quantChannelInfo.getQuantChannels(), m_masterQuantProteinSet);
                 protTableModel.setName("Protein");
                 return protTableModel;
-            }            
+            } 
+            if (parameterType.equals(DPeptideInstance.class)) {
+                 ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).getSelectedPTMPeptideInstance();
+            }
         }
         return super.getData(getArray, parameterType, isList);
     }

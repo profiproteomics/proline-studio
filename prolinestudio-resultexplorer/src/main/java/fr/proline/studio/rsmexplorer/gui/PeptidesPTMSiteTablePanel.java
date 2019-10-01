@@ -46,6 +46,8 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import org.jdesktop.swingx.JXTable;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -53,6 +55,7 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
  */
 public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface, PeptidesPTMSitePanelInterface {
 
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.PeptidesPTMSiteTablePanel");
     protected AbstractDataBox m_dataBox;
 
     private JScrollPane m_peptidesPtmSiteScrollPane;
@@ -99,7 +102,9 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
         CompoundTableModel compoundTableModel = ((CompoundTableModel) m_peptidesPtmSiteTable.getModel());
         // Retrieve ProteinPTMSite selected
         PeptidesOfPTMSiteTableModel tableModel = (PeptidesOfPTMSiteTableModel) compoundTableModel.getBaseModel();
-
+        if (tableModel.getRowCount() <= 0) {
+            return null;
+        }
         // Retrieve Selected Row
         int selectedRow = getSelectedTableModelRow();
 
@@ -112,9 +117,10 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
         // Retrieve ProteinPTMSite selected
         PeptidesOfPTMSiteTableModel tableModel = (PeptidesOfPTMSiteTableModel) compoundTableModel.getBaseModel();
 
-        if(tableModel.getRowCount()<=0)
+        if (tableModel.getRowCount() <= 0) {
             return null;
-        
+        }
+
         // Retrieve Selected Row
         int selectedRow = getSelectedTableModelRow();
 
@@ -136,7 +142,6 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
         if (selectedRow == -1) {
             return -1;
         }
-
         CompoundTableModel compoundTableModel = ((CompoundTableModel) m_peptidesPtmSiteTable.getModel());
         // convert according to the sorting
         selectedRow = m_peptidesPtmSiteTable.convertRowIndexToModel(selectedRow);
@@ -174,7 +179,7 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
         PeptidesOfPTMSiteTableModel model = ((PeptidesOfPTMSiteTableModel) ((CompoundTableModel) m_peptidesPtmSiteTable.getModel()).getBaseModel());
         model.setData(peptidesPTMSite, m_displayPeptidesMatches, pepInst);
         // select the first row
-        if ((peptidesPTMSite != null) && ((!m_displayPeptidesMatches) || (pepInst != null))) {
+        if ((m_currentPTMSite != null) && ((!m_displayPeptidesMatches) || (m_currentPepInst != null))) {
             m_peptidesPtmSiteTable.getSelectionModel().setSelectionInterval(0, 0);
             m_markerContainerPanel.setMaxLineNumber(m_peptidesPtmSiteTable.getModel().getRowCount());
         }
@@ -422,8 +427,9 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
     }
 
     private class PeptidesPTMSiteTable extends DecoratedMarkerTable implements CrossSelectionInterface, InfoInterface, ProgressInterface {
+
         private boolean selectionWillBeRestored = false;
- 
+
         public PeptidesPTMSiteTable() {
             super();
         }
@@ -458,8 +464,6 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
         public void selectionWillBeRestored(boolean b) {
             selectionWillBeRestored = b;
         }
-
-       
 
 //        @Override
 //        public void importSelection(HashSet selectedData) {

@@ -107,6 +107,12 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
                     return selectedParentPepInstance;
                 }
             }
+            if (parameterType.equals(DPeptideInstance.class)) {
+                PTMPeptideInstance selectedParentPepInstance = getSelectedPTMPeptide();
+                if (selectedParentPepInstance != null) {
+                    return selectedParentPepInstance.getPeptideInstance();
+                }
+            }
 
             if (parameterType.equals(DPeptideMatch.class)) {
                 PTMPeptideInstance selectedParentPepInstance = getSelectedPTMPeptide();

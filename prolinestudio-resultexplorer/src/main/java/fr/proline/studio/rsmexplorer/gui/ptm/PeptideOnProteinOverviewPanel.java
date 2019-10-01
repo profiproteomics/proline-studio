@@ -44,7 +44,6 @@ public class PeptideOnProteinOverviewPanel extends RsmProteinAndPeptideOverviewP
 
     public void setSelectedPeptide(PTMPeptideInstance selectedPTMPeptideInstance) {
         m_selectedPTMPeptideInstance = selectedPTMPeptideInstance;
-        repaint();
     }
 
     public int getSelectedProteinPosition() {

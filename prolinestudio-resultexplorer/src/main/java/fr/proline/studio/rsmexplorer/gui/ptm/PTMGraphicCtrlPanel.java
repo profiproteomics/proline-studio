@@ -185,6 +185,7 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
                 this.m_ptmPeptideAreaCtrl.setScrollLocation(selectedOnProtein);
             }
         }
+        repaint();
 
     }
 

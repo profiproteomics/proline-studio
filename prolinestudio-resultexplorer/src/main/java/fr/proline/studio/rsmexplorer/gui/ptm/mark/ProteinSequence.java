@@ -20,7 +20,6 @@ import java.awt.RenderingHints;
 public class ProteinSequence extends ViewPtmAbstract {
 
     String m_sequence;
-    String m_sequenceView;
     /**
      * the PTM Site Position on the proteine sequence
      */
@@ -33,7 +32,6 @@ public class ProteinSequence extends ViewPtmAbstract {
 
     public void setData(String s) {
         m_sequence = s;
-        m_sequenceView = m_sequence;
     }
 
     /**
@@ -54,20 +52,6 @@ public class ProteinSequence extends ViewPtmAbstract {
             return;
         int aaWidth = ViewSetting.WIDTH_AA;
         int aaHeight = ViewSetting.HEIGHT_AA;
-        int adjusteStartLoc = 0;
-        int adjusteEndLoc = m_sequence.length();
-        if (adjusteEndLoc >= m_sequence.length() || adjusteEndLoc <= 0) {
-            adjusteEndLoc = m_sequence.length();
-        }
-
-        if (adjusteStartLoc > m_sequence.length()) {
-            this.m_sequenceView = m_sequence.substring(0, adjusteEndLoc);
-        } else {
-            if (adjusteEndLoc <= adjusteStartLoc) {
-                adjusteEndLoc = m_sequence.length();
-            }
-            this.m_sequenceView = m_sequence.substring(adjusteStartLoc, adjusteEndLoc);
-        }
 
         // For debug only
 //        g.setColor(Color.lightGray);
@@ -78,11 +62,11 @@ public class ProteinSequence extends ViewPtmAbstract {
         g.setFont(ViewSetting.FONT_SEQUENCE);
         g.setColor(ViewSetting.SEQUENCE_COLOR);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        g.drawString(m_sequenceView, (x0 + aaWidth), y0 + ViewSetting.HEIGHT_AA); //x, y are base line begin x, y
+        g.drawString(m_sequence, (x0 + aaWidth), y0 + ViewSetting.HEIGHT_AA); //x, y are base line begin x, y
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
         //g.drawRect(x0+aaWidth*(this._pTMSeqPos-adjuste), y0, aaWidth, ViewSetting.HEIGHT_AA);
         if (m_ptmSeqPos >= 0) {
-            int xPtmA = x0 + aaWidth * (this.m_ptmSeqPos - adjusteStartLoc);
+            int xPtmA = x0 + aaWidth * (this.m_ptmSeqPos);
             g.setColor(Color.red);
             int[] xPtm = {xPtmA, xPtmA + aaWidth, xPtmA + aaWidth / 2};
             int yPtmA = y0 + aaHeight + 2;
@@ -97,7 +81,7 @@ public class ProteinSequence extends ViewPtmAbstract {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(m_sequenceView);
+        StringBuilder sb = new StringBuilder(m_sequence);
         if (m_ptmSeqPos >= 0) {
             sb.append("PTMSite @ " + m_ptmSeqPos);
         }

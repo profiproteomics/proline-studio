@@ -112,7 +112,6 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     private AddDataAnalyzerButton m_addCompareDataButton;
 
     private JButton m_calcButton;
-
     private SearchToggleButton m_searchToggleButton;
     private InfoToggleButton m_infoToggleButton;
 

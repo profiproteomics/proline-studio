@@ -1,9 +1,9 @@
-/* 
+/*
  * Copyright (C) 2019 VD225637
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
- * ; either version 2.1 
+ * ; either version 2.1
  * of the License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -11,7 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * CeCILL License V2.1 for more details.
  *
- * You should have received a copy of the CeCILL License 
+ * You should have received a copy of the CeCILL License
  * along with this program; If not, see <http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html>.
  */
 package fr.proline.studio.rsmexplorer.gui.dialog;
@@ -29,8 +29,8 @@ import java.util.stream.Collectors;
 
 public class IdentifyPtmSitesDialog extends DefaultDialog {
 
-  List<Ptm> m_ptms;
-  List<Ptm> m_selectedPtms;
+  private List<Ptm> m_ptms;
+  private List<Ptm> m_selectedPtms;
 
   private JComboBox<String> m_clusteringMethodCbx;
   private JComboBox<String> m_serviceVersionCbx;
@@ -65,7 +65,7 @@ public class IdentifyPtmSitesDialog extends DefaultDialog {
     c.gridwidth = 1;
 
     JLabel label = new JLabel("Clustering method:");
-    m_clusteringMethodCbx = new JComboBox<>(new String[] {"draft"});
+    m_clusteringMethodCbx = new JComboBox<>(new String[] {"Exact Position Matching"});
     m_clusteringMethodCbx.setEnabled(false);
     
     parametersV2Panel.add(label, c);
@@ -131,6 +131,7 @@ public class IdentifyPtmSitesDialog extends DefaultDialog {
   }
 
   public String getClusteringMethodName() {
-    return "draft";
+    return m_clusteringMethodCbx.getItemAt(m_clusteringMethodCbx.getSelectedIndex()).toUpperCase().replaceAll(" ", "_");
   }
+
 }

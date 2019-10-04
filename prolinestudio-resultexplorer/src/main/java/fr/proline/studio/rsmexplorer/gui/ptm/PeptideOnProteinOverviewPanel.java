@@ -35,6 +35,11 @@ public class PeptideOnProteinOverviewPanel extends RsmProteinAndPeptideOverviewP
     HashMap<Integer, ArrayList<PTMPeptideInstance>> m_postionPTMPeptideMap;
     private List<PTMPeptideInstance> m_PTMPeptideInstances;
     private PTMPeptideInstance m_selectedPTMPeptideInstance;
+    /**
+     * Mouse click = selected position on the protein in this class, will be
+     * used to scrollBar.setValue() in PTM peptide view which will be called by
+     * m_superCtrl
+     */
     private int m_selectedPosition;
     private final Color PTM_PEPTIDE_COLOR = Color.red;
 
@@ -66,7 +71,7 @@ public class PeptideOnProteinOverviewPanel extends RsmProteinAndPeptideOverviewP
             }
             this.m_selectedPosition = begin;
         }
-        m_logger.debug("selected positon en protein is : {}", m_selectedPosition);
+        //m_logger.debug("selected positon en protein is : {}", m_selectedPosition);
     }
 
     public void setData(String proteinName, String sequence, PTMPeptideInstance selectedPeptide, List<PTMPeptideInstance> ptmPeptideInstances, DPeptideInstance[] peptideInstances) {
@@ -76,7 +81,7 @@ public class PeptideOnProteinOverviewPanel extends RsmProteinAndPeptideOverviewP
         String titleComment = "";
         if (sequence.startsWith("0")) {
             m_proteinLengh = Integer.valueOf(sequence.substring(1));
-            titleComment = " (calculated <= protelin length)";
+            titleComment = " (calculated <= protein length)";
         }
         m_selectedPTMPeptideInstance = selectedPeptide;
         m_startPositionProtein = 0;
@@ -92,25 +97,25 @@ public class PeptideOnProteinOverviewPanel extends RsmProteinAndPeptideOverviewP
 
         repaint();
     }
-   
+
     @Override
     protected void paintSelectedPeptide(Graphics2D g) {
         g.setColor(PTM_PEPTIDE_COLOR);
         for (PTMPeptideInstance pep : m_PTMPeptideInstances) {//paint PTM clusters
-            int start = pep.getStartPosition()+1;//strange, in PTMPeptideInstance, start is 1 position before 
+            int start = pep.getStartPosition() + 1;//strange, in PTMPeptideInstance, start is 1 position before 
             int stop = pep.getStopPosition();
-            int length = stop-start+1;
+            int length = stop - start + 1;
             //m_logger.debug("sequence {}, position({}-{}, length={})",pep.getSequence(),start, stop,length);
             drawPeptide(g, start, length);
         }
         g.setColor(SELECTED_COLOR);
         if (m_selectedPTMPeptideInstance != null) {//paint selected PTM Cluster
-            int start = m_selectedPTMPeptideInstance.getStartPosition()+1;
-            int length = m_selectedPTMPeptideInstance.getStopPosition()-start+1;
+            int start = m_selectedPTMPeptideInstance.getStartPosition() + 1;
+            int length = m_selectedPTMPeptideInstance.getStopPosition() - start + 1;
             drawPeptide(g, start, length);
         }
     }
-    
+
     private void createPTMPeptideMap(List<PTMPeptideInstance> peptideInstances) {
         m_postionPTMPeptideMap = new HashMap();
         ArrayList<PTMPeptideInstance> pepList;

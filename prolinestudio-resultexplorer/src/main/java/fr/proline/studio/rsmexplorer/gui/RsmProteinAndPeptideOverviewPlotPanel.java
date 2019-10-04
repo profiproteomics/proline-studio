@@ -137,7 +137,7 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         this.setSize(this.getWidth(), 90);
         g.setColor(Color.white);
-        g.fillRect(0, 0, this.getWidth(), this.getHeight());
+        g.fillRect(0, 0, this.getWidth(), this.getHeight());//background
         if (this.getWidth() != m_oldWidth) {
             if (m_proteinLengh != 0 && m_aaWidth == m_aaWidthOriginal) {
                 m_aaWidthOriginal = ((double) (this.getWidth() - 20) / m_proteinLengh);
@@ -187,7 +187,7 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         g.setStroke(STROKE_NORMAL);
         g.setColor(PEPTIDE_COLOR);
         for (DPeptideInstance pep : m_peptideInstances) {
-            paintPeptide(g, pep);
+            fillPeptide(g, pep);
         }
 
     }
@@ -202,13 +202,26 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         }
     }
 
+    /**
+     * Draws an outlined round-cornered rectangle with the current color.
+     *
+     * @param g
+     * @param start
+     * @param length
+     */
     protected void drawPeptide(Graphics2D g, int start, int length) {
         int width = (int) ((float) (length) * m_aaWidth);
         int x0 = (int) (m_x0 + (m_aaWidth * (start - m_startPositionProtein)));
         g.drawRoundRect(x0, m_protein_y0, width, m_protein_height, m_protein_height, m_protein_height);
     }
 
-    protected void paintPeptide(Graphics2D g, DPeptideInstance pep) {
+    /**
+     * Fills the specified rounded corner rectangle with the current color.
+     *
+     * @param g
+     * @param pep
+     */
+        protected void fillPeptide(Graphics2D g, DPeptideInstance pep) {
 
         int start = pep.getBestPeptideMatch().getSequenceMatch().getId().getStart();
         int stop = pep.getBestPeptideMatch().getSequenceMatch().getId().getStop();
@@ -329,7 +342,11 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         }
         //m_logger.debug("createAADataMap execution time: {} ms", (System.currentTimeMillis() - beginTime));
     }
-
+    
+    /**
+     * useful for subclasses
+     * @param e 
+     */
     protected void actionMouseClicked(MouseEvent e) {
         return;
     }

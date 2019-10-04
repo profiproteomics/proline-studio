@@ -288,7 +288,6 @@ public class PTMPeptidesGraphicView extends JPanel {
 
         private class PeptidePane extends JPanel {
 
-
             private PeptidePane() {
                 super();
                 PeptideAreaMouseAdapter mouseAdapter = new PeptideAreaMouseAdapter();
@@ -426,12 +425,25 @@ public class PTMPeptidesGraphicView extends JPanel {
 
         }
 
+        /**
+         * call by mouse event adapter ou key event adapter
+         *
+         * @param selectedIndex
+         * @param oldSelected
+         */
         private void selectedAction(int selectedIndex, int oldSelected) {
-            
+
             if (selectedIndex >= 0 && selectedIndex < m_dataModel.getRowCount()) {
                 PTMPeptideInstance pep = m_dataModel.getPeptideAt(selectedIndex);
+                PTMPeptideInstance oldPep = m_dataModel.getPeptideAt(oldSelected);
                 if (pep != null) {
-                    setScrollLocation(pep.getStartPosition());
+                    if (oldPep != null) {
+                        if (Math.abs(oldPep.getStartPosition() - pep.getStartPosition()) > 3) {
+                            setScrollLocation(pep.getStartPosition());
+                        }
+                    } else {
+                        setScrollLocation(pep.getStartPosition());
+                    }
                 }
                 m_peptideAreaCtrl.setSelectedIndex(selectedIndex);
                 if (selectedIndex != oldSelected && (selectedIndex != -1) && (m_dataBox != null)) {
@@ -443,138 +455,137 @@ public class PTMPeptidesGraphicView extends JPanel {
                 }
             }
         }
-    
 
-    private class ColoredClusterMarkPane extends PeptideNumberPane {
+        private class ColoredClusterMarkPane extends PeptideNumberPane {
 
-        private Map<PTMCluster, Color> PTM_CLUSTER_COLORS = new HashMap<>();
-        private Map<PTMCluster, String> PTM_CLUSTER_ID = new HashMap<>();
-        int m_x0, m_y0;
+            private Map<PTMCluster, Color> PTM_CLUSTER_COLORS = new HashMap<>();
+            private Map<PTMCluster, String> PTM_CLUSTER_ID = new HashMap<>();
+            int m_x0, m_y0;
 
-        private ColoredClusterMarkPane() {
-            super();
-            this.setBackground(Color.WHITE);
-            ScrollPaneRowHeaderMouseAdapter coloredTooltips = new ScrollPaneRowHeaderMouseAdapter();
-            this.addMouseMotionListener(coloredTooltips);
-            this.addMouseListener(coloredTooltips);
-        }
+            private ColoredClusterMarkPane() {
+                super();
+                this.setBackground(Color.WHITE);
+                ScrollPaneRowHeaderMouseAdapter coloredTooltips = new ScrollPaneRowHeaderMouseAdapter();
+                this.addMouseMotionListener(coloredTooltips);
+                this.addMouseListener(coloredTooltips);
+            }
 
-        class ScrollPaneRowHeaderMouseAdapter extends MouseAdapter {
+            class ScrollPaneRowHeaderMouseAdapter extends MouseAdapter {
 
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                int x = e.getX();
-                int y = e.getY();
-                String tips = null;
-                int index = (int) ((y - m_y0) / (ViewSetting.HEIGHT_AA * 1.5));
-                if (index >= 0 && index < m_dataModel.getRowCount()) {
-                    PTMPeptideInstance pep = m_dataModel.getPeptideAt(index);
-                    if (pep != null) {
-                        List<PTMCluster> clusters = pep.getClusters();
-                        int size = clusters.size();
-                        tips = GlobalValues.HTML_TAG_BEGIN + "<body>";
-                        for (int j = 0; j < size; j++) {
-                            PTMCluster cluster = clusters.get(j);
-                            String htmlColor = CyclicColorPalette.getHTMLColoredBlock(getColor(cluster));
-                            tips += htmlColor + getColorId(cluster);
+                @Override
+                public void mouseMoved(MouseEvent e) {
+                    int x = e.getX();
+                    int y = e.getY();
+                    String tips = null;
+                    int index = (int) ((y - m_y0) / (ViewSetting.HEIGHT_AA * 1.5));
+                    if (index >= 0 && index < m_dataModel.getRowCount()) {
+                        PTMPeptideInstance pep = m_dataModel.getPeptideAt(index);
+                        if (pep != null) {
+                            List<PTMCluster> clusters = pep.getClusters();
+                            int size = clusters.size();
+                            tips = GlobalValues.HTML_TAG_BEGIN + "<body>";
+                            for (int j = 0; j < size; j++) {
+                                PTMCluster cluster = clusters.get(j);
+                                String htmlColor = CyclicColorPalette.getHTMLColoredBlock(getColor(cluster));
+                                tips += htmlColor + getColorId(cluster);
+                            }
+                            tips += "</body>" + GlobalValues.HTML_TAG_END;
+
                         }
-                        tips += "</body>" + GlobalValues.HTML_TAG_END;
-
                     }
-                }
-                setToolTipText(tips);
-            }
-
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                int x = e.getX();
-                int y = e.getY();
-                int oldSelected = m_peptideAreaCtrl.getSelectedIndex();
-                int selectedIndex = (int) ((y - m_y0) / (ViewSetting.HEIGHT_AA * 1.5));
-                selectedAction(selectedIndex, oldSelected);
-            }
-        }
-
-        public Color getColor(PTMCluster cluster) {
-            Color c = PTM_CLUSTER_COLORS.get(cluster);
-            if (c == null) {
-                Color co = CyclicColorPalette.getColorBlue(PTM_CLUSTER_COLORS.size());
-                int rgb = co.getRGB() | 0xFF000000;
-                c = new Color(rgb & 0x00FFFFFF);
-                PTM_CLUSTER_COLORS.put(cluster, c);
-                int num = ('A') + PTM_CLUSTER_COLORS.size() - 1;
-                String s = String.valueOf((char) num);
-                PTM_CLUSTER_ID.put(cluster, s);// give it a color id, A,B, C...
-
-            }
-            return c;
-        }
-
-        public String getColorId(PTMCluster cluster) {
-            return PTM_CLUSTER_ID.get(cluster);
-
-        }
-
-        public void setBeginPoint(int x, int y) {
-            m_x0 = x;
-            m_y0 = y;
-        }
-
-        @Override
-        public Dimension getPreferredSize() {
-            int width = ViewSetting.WIDTH_AA + 2 * ViewSetting.BORDER_GAP;
-            int height = m_dataModel.getRowCount() * (ViewSetting.HEIGHT_AA * 2 - ViewSetting.HEIGHT_AA / 2);
-            if (height == 0) {
-                height = 5 * ViewSetting.HEIGHT_AA;
-            }
-            return new Dimension(width, height);
-
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            //super.paintComponent(g);
-            if (!m_isDataNull) {
-                PTM_CLUSTER_COLORS = new HashMap<>();
-                PTM_CLUSTER_ID = new HashMap<>();
-                Graphics2D g2 = (Graphics2D) g;
-                FontMetrics f = g2.getFontMetrics(ViewSetting.FONT_NUMBER);
-                int ascend = f.getAscent();
-                int y0 = m_y0;
-                int x0;
-                g2.setFont(ViewSetting.FONT_NUMBER);
-                String colorId;
-                int stringWidth;
-                int rowCount = m_dataModel.getRowCount();
-                for (int i = 1; i < rowCount + 1; i++) {
-                    PTMPeptideInstance item = m_dataModel.getPeptideAt(i - 1);
-                    List<PTMCluster> clusters = item.getClusters();
-                    {
-                        int size = clusters.size();
-                        int xi0 = m_x0;
-                        int colorWidth = ViewSetting.WIDTH_AA / size;
-                        for (int j = 0; j < size; j++) {
-                            int xi = xi0 + colorWidth * j;
-                            xi0 = xi;
-                            PTMCluster cluster = clusters.get(j);
-                            g2.setColor(getColor(cluster));
-                            g2.fillRect(xi0, y0, colorWidth, ViewSetting.WIDTH_AA);
-                        }
-                        colorId = getColorId(clusters.get(0));//only the first
-                    }
-
-                    stringWidth = f.stringWidth(colorId);
-                    x0 = m_x0 + (ViewSetting.WIDTH_AA - stringWidth) / 2;
-                    g2.setColor(Color.WHITE);
-                    g2.drawString(colorId, x0, y0 + ascend);
-                    y0 += (int) ViewSetting.HEIGHT_AA * 1.5;
+                    setToolTipText(tips);
                 }
 
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    int x = e.getX();
+                    int y = e.getY();
+                    int oldSelected = m_peptideAreaCtrl.getSelectedIndex();
+                    int selectedIndex = (int) ((y - m_y0) / (ViewSetting.HEIGHT_AA * 1.5));
+                    selectedAction(selectedIndex, oldSelected);
+                }
             }
+
+            public Color getColor(PTMCluster cluster) {
+                Color c = PTM_CLUSTER_COLORS.get(cluster);
+                if (c == null) {
+                    Color co = CyclicColorPalette.getColorBlue(PTM_CLUSTER_COLORS.size());
+                    int rgb = co.getRGB() | 0xFF000000;
+                    c = new Color(rgb & 0x00FFFFFF);
+                    PTM_CLUSTER_COLORS.put(cluster, c);
+                    int num = ('A') + PTM_CLUSTER_COLORS.size() - 1;
+                    String s = String.valueOf((char) num);
+                    PTM_CLUSTER_ID.put(cluster, s);// give it a color id, A,B, C...
+
+                }
+                return c;
+            }
+
+            public String getColorId(PTMCluster cluster) {
+                return PTM_CLUSTER_ID.get(cluster);
+
+            }
+
+            public void setBeginPoint(int x, int y) {
+                m_x0 = x;
+                m_y0 = y;
+            }
+
+            @Override
+            public Dimension getPreferredSize() {
+                int width = ViewSetting.WIDTH_AA + 2 * ViewSetting.BORDER_GAP;
+                int height = m_dataModel.getRowCount() * (ViewSetting.HEIGHT_AA * 2 - ViewSetting.HEIGHT_AA / 2);
+                if (height == 0) {
+                    height = 5 * ViewSetting.HEIGHT_AA;
+                }
+                return new Dimension(width, height);
+
+            }
+
+            @Override
+            protected void paintComponent(Graphics g) {
+                //super.paintComponent(g);
+                if (!m_isDataNull) {
+                    PTM_CLUSTER_COLORS = new HashMap<>();
+                    PTM_CLUSTER_ID = new HashMap<>();
+                    Graphics2D g2 = (Graphics2D) g;
+                    FontMetrics f = g2.getFontMetrics(ViewSetting.FONT_NUMBER);
+                    int ascend = f.getAscent();
+                    int y0 = m_y0;
+                    int x0;
+                    g2.setFont(ViewSetting.FONT_NUMBER);
+                    String colorId;
+                    int stringWidth;
+                    int rowCount = m_dataModel.getRowCount();
+                    for (int i = 1; i < rowCount + 1; i++) {
+                        PTMPeptideInstance item = m_dataModel.getPeptideAt(i - 1);
+                        List<PTMCluster> clusters = item.getClusters();
+                        {
+                            int size = clusters.size();
+                            int xi0 = m_x0;
+                            int colorWidth = ViewSetting.WIDTH_AA / size;
+                            for (int j = 0; j < size; j++) {
+                                int xi = xi0 + colorWidth * j;
+                                xi0 = xi;
+                                PTMCluster cluster = clusters.get(j);
+                                g2.setColor(getColor(cluster));
+                                g2.fillRect(xi0, y0, colorWidth, ViewSetting.WIDTH_AA);
+                            }
+                            colorId = getColorId(clusters.get(0));//only the first
+                        }
+
+                        stringWidth = f.stringWidth(colorId);
+                        x0 = m_x0 + (ViewSetting.WIDTH_AA - stringWidth) / 2;
+                        g2.setColor(Color.WHITE);
+                        g2.drawString(colorId, x0, y0 + ascend);
+                        y0 += (int) ViewSetting.HEIGHT_AA * 1.5;
+                    }
+
+                }
+            }
+
         }
 
     }
-
-}
 
 }

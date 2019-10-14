@@ -14,6 +14,7 @@ import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewSetting;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
+import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.DataFormat;
 import fr.proline.studio.utils.GlobalValues;
 import java.awt.BasicStroke;
@@ -26,8 +27,10 @@ import javax.swing.JPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -64,15 +67,16 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
     protected final int m_x0 = 10;
     protected final int m_y0 = 10;
     protected final int m_height = 25;
-    protected final int m_ptm_y0 = 15;
-    protected final int m_ptm_height = m_height / 2;
-    protected final int m_protein_y0 = m_ptm_y0 + m_ptm_height;
-    protected final int m_protein_height = m_height - m_ptm_height;
+    protected final int m_bottom_margin = 15;
+    protected final int m_ptm_y0 = 20;
+    protected final int m_ptm_height = 10;
+    protected final int m_protein_y0 = m_ptm_y0; //+ m_ptm_height;
+    protected final int m_protein_height = 10;
     protected final BasicStroke STROKE_PROTEINE_LINE = new BasicStroke(3, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND);
     protected final BasicStroke STROKE_NORMAL = new BasicStroke(2, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND);
     protected final String TITLE = "Protein Sequence Coverage";
     protected final Color SELECTED_COLOR = Color.black;//blue
-    protected final Color PEPTIDE_COLOR = new Color(0, 200, 0, 100);//green with transparence
+    protected final Color PEPTIDE_COLOR = CyclicColorPalette.getColor(ViewSetting.PEPTIDE_COLOR, 100); //new Color(0, 200, 0, 100);//green with transparence
     protected int m_oldWidth;
 
     public RsmProteinAndPeptideOverviewPlotPanel(DataBoxPanelInterface superCtrl) {
@@ -116,7 +120,7 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         String titleComment = "";
         if (sequence == null) {
             m_proteinLengh = 0;
-            titleComment = " (calculated <= protelin length)";
+            titleComment = " (estimated protein length)";
         } else {
             m_proteinLengh = sequence.length();
         }
@@ -133,11 +137,20 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         repaint();
     }
 
+  @Override
+  public Dimension getPreferredSize() {
+    return new Dimension(100,m_height+m_bottom_margin);
+  }
+
+
+
     @Override
     protected void paintComponent(Graphics g) {
-        this.setSize(this.getWidth(), 90);
+        this.setSize(this.getWidth(), m_height+m_bottom_margin);
         g.setColor(Color.white);
-        g.fillRect(0, 0, this.getWidth(), this.getHeight());//background
+        //g.fillRect(0, 0, this.getWidth(), this.getHeight());
+        Insets i = this.getBorder().getBorderInsets(this);
+        g.fillRect(i.left, i.top, this.getWidth()-(i.left+i.right), this.getHeight()-(i.top+i.bottom));
         if (this.getWidth() != m_oldWidth) {
             if (m_proteinLengh != 0 && m_aaWidth == m_aaWidthOriginal) {
                 m_aaWidthOriginal = ((double) (this.getWidth() - 20) / m_proteinLengh);
@@ -147,8 +160,8 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         }
         Graphics2D g2 = (Graphics2D) g;
         if (m_peptideInstances != null && m_peptideInstances.length != 0) {
-            paintPTM(g2);
             paintPeptideListOnSequence(g2);
+            paintPTM(g2);
             paintSelectedPeptide(g2);
         }
     }
@@ -157,8 +170,6 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         if (m_peptidePTMMap.isEmpty()) {
             return;
         }
-        int height = m_ptm_height;
-
         int x0, y0;
         Color color;
         for (Integer i : m_peptidePTMMap.keySet()) {
@@ -256,7 +267,7 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
                 String s = "";
                 for (DPeptidePTM pep : ptms) {
                     DInfoPTM ptmTypeInfo = DInfoPTM.getInfoPTMMap().get(pep.getIdPtmSpecificity());
-                    int position = (int) pep.getSeqPosition();//position convert to int
+                    int position = positionOnProtein; //(int) pep.getSeqPosition();//position convert to int
                     s += ptmTypeInfo.toReadablePtmString(position);//@todo position on pep ou position on prot?
                 }
                 return s;
@@ -342,10 +353,10 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         }
         //m_logger.debug("createAADataMap execution time: {} ms", (System.currentTimeMillis() - beginTime));
     }
-    
+
     /**
      * useful for subclasses
-     * @param e 
+     * @param e
      */
     protected void actionMouseClicked(MouseEvent e) {
         return;

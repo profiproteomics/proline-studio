@@ -149,6 +149,18 @@ public class CyclicColorPalette {
         return new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha);
     }
 
+     /**
+     * get color from the default palette with the specified transparency (alpha
+     * value)
+     *
+     * @param color
+     * @param alpha
+     * @return
+     */
+    public static Color getColor(Color color, int alpha) {
+        return new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha);
+    }
+
     /**
      * get HTML color from the defautl palette
      *

@@ -1,5 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
+/* * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -229,17 +228,18 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
 
         // ask asynchronous loading of data
         m_masterQuantPeptideList = new ArrayList();
-        DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
-        if (m_ptmPepInstances != null && !m_ptmPepInstances.isEmpty()) {
-            List<Long> parentPepInstanceIdsL = m_ptmPepInstances.stream().map(pi -> pi.getPeptideInstance().getId()).collect(Collectors.toList());
-            task.initLoadPeptides(getProjectId(), m_ptmDataset.getDataset(), parentPepInstanceIdsL.toArray(new Long[parentPepInstanceIdsL.size()]), m_masterQuantPeptideList, true);
-        }
         if(m_previousXICTaskId != null){
             // old task is suppressed if it has not been already done
             AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousXICTaskId);
+            m_previousXICTaskId = null;
         }
-        m_previousXICTaskId = task.getId();
-        registerTask(task);
+        if (m_ptmPepInstances != null && !m_ptmPepInstances.isEmpty()) {        
+            DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);        
+            List<Long> parentPepInstanceIdsL = m_ptmPepInstances.stream().map(ptmPepInst -> ptmPepInst.getPeptideInstance().getId()).collect(Collectors.toList());
+            task.initLoadPeptides(getProjectId(), m_ptmDataset.getDataset(), parentPepInstanceIdsL.toArray(new Long[parentPepInstanceIdsL.size()]), m_masterQuantPeptideList, true);
+            m_previousXICTaskId = task.getId();
+            registerTask(task);
+        } 
     }
     
  

@@ -2,11 +2,13 @@ package fr.proline.studio.dam.tasks.data.ptm;
 
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
 import java.util.ArrayList;
 import java.util.Comparator;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PTMPeptideInstance {
 
@@ -76,6 +78,13 @@ public class PTMPeptideInstance {
     }
     return pepMatch;
   }
+  
+    public List<DPeptideMatch> getPepMatchesOnProteinMatch(DProteinMatch proteinMatch) {
+        List<DPeptideMatch> pepMatches = new ArrayList<>();
+        List<Long> allowedProtMatchIds = m_sites.get(0).getPTMdataset().getProtMatchesIdForAccession(proteinMatch.getAccession());
+        pepMatches.addAll(m_peptideInstance.getPeptideMatches().stream().filter(dpm -> allowedProtMatchIds.contains(dpm.getSequenceMatch().getId().getProteinMatchId())).collect(Collectors.toList()));
+        return pepMatches;
+    }
 
     @Override
     public String toString() {

@@ -313,7 +313,7 @@ public class WindowBoxFactory {
         boxes[0].setDataName(dataName);
         ((DataBoxPTMClusters) boxes[0]).setXicResult(true);
         boxes[1] = new DataBoxPTMPeptides();
-        boxes[2] = new DataBoxPTMPeptides(true,true);
+        boxes[2] = new DataBoxPTMPeptides(false,true);
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);        
         boxes[3] = new DataBoxPTMPeptidesGraphic();
         ((DataBoxPTMPeptidesGraphic)boxes[3]).setIsClusterData(true);

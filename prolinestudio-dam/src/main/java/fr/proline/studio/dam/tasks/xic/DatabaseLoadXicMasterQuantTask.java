@@ -218,7 +218,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         if (masterQuantPeptide != null && masterQuantPeptide.getPeptideInstance() != null && masterQuantPeptide.getPeptideInstance().getBestPeptideMatch() != null && masterQuantPeptide.getPeptideInstance().getBestPeptideMatch().getPeptide() != null) {
             peptideName = masterQuantPeptide.getPeptideInstance().getBestPeptideMatch().getPeptide().getSequence();
         }
-        init(SUB_TASK_NB, new TaskInfo("Load Protein Match of peptide " + peptideName, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
+        init(SUB_TASK_NB, new TaskInfo("Load Peptide Match of peptide " + peptideName, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
         m_dataset = dataset;
         m_masterQuantPeptideForPSM = masterQuantPeptide;
@@ -727,86 +727,93 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
     /**
      * load all quant peptides for a xic
      *
+     * @param xic: specific if quanti is xic, otherwise it is spectral count
+     * @param peptideInstanceIdArray: Ids of peptide Instance to get data for. May be null in which case all peptide Instance of rsm will be considered.
      * @return
      */
     private boolean fetchDataPeptideMainTask(boolean xic, Long[] peptideInstanceIdArray) {
         EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
             entityManagerMSI.getTransaction().begin();
-
+            boolean pepInstSpecified = (peptideInstanceIdArray!= null);   
+            boolean mqPepCreatedForSpecifiedPepInstance = true;
+            m_peptideInstanceIds = new ArrayList();
+            if (pepInstSpecified) {
+                m_peptideInstanceIds.addAll(Arrays.asList(peptideInstanceIdArray));
+                mqPepCreatedForSpecifiedPepInstance = false;
+            }
+            
             List<DMasterQuantitationChannel> listMasterQuantitationChannels = m_dataset.getMasterQuantitationChannels();
-
             if (listMasterQuantitationChannels != null && !listMasterQuantitationChannels.isEmpty()) {
                 for (DMasterQuantitationChannel masterQuantitationChannel : listMasterQuantitationChannels) {
-                    Long resultSummaryId = masterQuantitationChannel.getQuantResultSummaryId();
-
-                    //resultSummary
-                    if (resultSummaryId != null) {
-
-                        // CBy : Je ne comprend pas ce que fait ce code si peptideInstanceIdArray est non null ??? Il selection les id des objets 
-                        // dont on a deja les Id ???? Au mieux il filtre ceux qui n'ont pas été trouvés : OUI c'est possible car les peptides instance qui sont 
-                        // envoyés peuvent etre les peptide instance des feuilles d'un PTMSite par exemple .... mais ce filtrage devrait être fait en amont plutot non ? 
-                        // load peptideInstance
-                        String queryPep = "SELECT pi.id "
+                    Long quantResultSummaryId = masterQuantitationChannel.getQuantResultSummaryId();
+                    if (quantResultSummaryId != null ) {
+                        List<Long> currentMQChPepInstanceIds = new ArrayList<Long>();
+                        
+                        //--- Get PeptideInstance Ids
+                        if (!pepInstSpecified) { //get quant RSM peptide instance Ids
+                            String queryPep = "SELECT pi.id "
                                 + "FROM fr.proline.core.orm.msi.PeptideInstance pi "
                                 + "WHERE pi.resultSummary.id=:rsmId ";
-
-                        if (peptideInstanceIdArray != null) {
-                            queryPep += "AND pi.id IN (:pepIds) ";
+                                                    
+                            queryPep += "ORDER BY pi.id ASC";
+                            Query peptidesQuery = entityManagerMSI.createQuery(queryPep);
+                            peptidesQuery.setParameter("rsmId", quantResultSummaryId);
+                            List<Long> listIds = (List<Long>) peptidesQuery.getResultList();
+                            currentMQChPepInstanceIds.addAll(listIds);
+                            m_peptideInstanceIds.addAll(currentMQChPepInstanceIds);
+                            m_logger.info("### loading XIC for peptides ... query returns {} peptide instances", m_peptideInstanceIds.size());
+                        } else if(!mqPepCreatedForSpecifiedPepInstance){      
+                            //Only for first MasterQuantChanel : Add specified peptideInstance to create DMasterQuantPeptide for.
+                            // VDS FIXME : This means that they will be associated to first quantResultSummaryId !!!
+                            mqPepCreatedForSpecifiedPepInstance = true;
+                            currentMQChPepInstanceIds.addAll(m_peptideInstanceIds);
                         }
-                        queryPep += "ORDER BY pi.id ASC";
-                        Query peptidesQuery = entityManagerMSI.createQuery(queryPep);
-                        peptidesQuery.setParameter("rsmId", resultSummaryId);
-                        if (peptideInstanceIdArray != null) {
-                            ArrayList<Long> idList = new ArrayList<>(Arrays.asList(peptideInstanceIdArray));
-                            peptidesQuery.setParameter("pepIds", idList);
-                        }
-                        List<Long> listIds = (List<Long>) peptidesQuery.getResultList();
-                        m_peptideInstanceIds = listIds;
-
-                        m_logger.info("### loading XIC for peptides ... query returns {} peptide instances", m_peptideInstanceIds.size());
+                        
+                        //--- Create corresponding DMasterQuantPeptide
                         List<DMasterQuantPeptide> listDMasterQuantPeptideFake = new ArrayList();
-                        for (Long m_peptideInstanceId : m_peptideInstanceIds) {
-                            DMasterQuantPeptide f = new DMasterQuantPeptide(-1, 0, -1, "", resultSummaryId);
+                        for (Long m_peptideInstanceId : currentMQChPepInstanceIds) {
+                            DMasterQuantPeptide f = new DMasterQuantPeptide(-1, 0, -1, "", quantResultSummaryId);
                             f.setPeptideInstanceId(m_peptideInstanceId);
                             listDMasterQuantPeptideFake.add(f);
                         }
                         m_masterQuantPeptideList.addAll(listDMasterQuantPeptideFake);
 
-                        // load MasterQuantPeptide without PeptideInstance
-                        //SELECT mqc.id ,pi.id
-                        //FROM object_tree ot ,  master_quant_component mqc
-                        //LEFT JOIN peptide_instance pi ON mqc.id  = pi.master_quant_component_id 
-                        //WHERE mqc.result_summary_id = 52 AND
-                        //ot.id = mqc.object_tree_id AND
-                        //ot.schema_name like 'object_tree.label_free_quant_peptides' AND pi.id is null
-                        String queryNonIndent = "SELECT mqc.id "
-                                + "FROM fr.proline.core.orm.msi.ObjectTree ot, fr.proline.core.orm.msi.MasterQuantComponent mqc "
-                                + "WHERE mqc.resultSummary.id=:rsmId AND "
-                                + "NOT EXISTS (select 1 from fr.proline.core.orm.msi.PeptideInstance pi where pi.resultSummary.id=:rsmId AND pi.masterQuantComponentId = mqc.id ) AND "
-                                + "ot.id =  mqc.objectTreeId AND "
-                                + "ot.schema.name like 'object_tree.label_free_quant_peptides' ";
-                        Query quantPeptideNonIdentQuery = entityManagerMSI.createQuery(queryNonIndent);
-                        quantPeptideNonIdentQuery.setParameter("rsmId", resultSummaryId);
-                        List<Long> listPepNonIdentIds = (List<Long>) quantPeptideNonIdentQuery.getResultList();
-                        // in order to add these master quantPeptides to the peptideInstance to load, we add the -masterQuantPeptideId to load in the peptideInstanceId...
-                        for (Long pepNonIdentId : listPepNonIdentIds) {
-                            DMasterQuantPeptide f = new DMasterQuantPeptide(pepNonIdentId, 0, -1, "", resultSummaryId);
-                            f.setPeptideInstanceId(-pepNonIdentId);
-                            m_peptideInstanceIds.add(-pepNonIdentId);
-                            m_masterQuantPeptideList.add(f);
+                        if(!pepInstSpecified) {
+                            // load MasterQuantPeptide without PeptideInstance : only if not pepInstSpecified
+                            //SELECT mqc.id ,pi.id
+                            //FROM object_tree ot ,  master_quant_component mqc
+                            //LEFT JOIN peptide_instance pi ON mqc.id  = pi.master_quant_component_id 
+                            //WHERE mqc.result_summary_id = 52 AND
+                            //ot.id = mqc.object_tree_id AND
+                            //ot.schema_name like 'object_tree.label_free_quant_peptides' AND pi.id is null
+                            String queryNonIndent = "SELECT mqc.id "
+                                    + "FROM fr.proline.core.orm.msi.ObjectTree ot, fr.proline.core.orm.msi.MasterQuantComponent mqc "
+                                    + "WHERE mqc.resultSummary.id=:rsmId AND "
+                                    + "NOT EXISTS (select 1 from fr.proline.core.orm.msi.PeptideInstance pi where pi.resultSummary.id=:rsmId AND pi.masterQuantComponentId = mqc.id ) AND "
+                                    + "ot.id =  mqc.objectTreeId AND "
+                                    + "ot.schema.name like 'object_tree.label_free_quant_peptides' ";
+                            Query quantPeptideNonIdentQuery = entityManagerMSI.createQuery(queryNonIndent);
+                            quantPeptideNonIdentQuery.setParameter("rsmId", quantResultSummaryId);
+                            List<Long> listPepNonIdentIds = (List<Long>) quantPeptideNonIdentQuery.getResultList();
+                            // in order to add these master quantPeptides to the peptideInstance to load, we add the -masterQuantPeptideId to load in the peptideInstanceId...
+                            for (Long pepNonIdentId : listPepNonIdentIds) {
+                                DMasterQuantPeptide f = new DMasterQuantPeptide(pepNonIdentId, 0, -1, "", quantResultSummaryId);
+                                f.setPeptideInstanceId(-pepNonIdentId);
+                                m_peptideInstanceIds.add(-pepNonIdentId);
+                                m_masterQuantPeptideList.add(f);
+                            }
                         }
-                        // slice the task and get the first one
-                        SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_PEPTIDE_INSTANCE, m_peptideInstanceIds.size(), SLICE_SIZE);
-
-                        // execute the first slice now
-                        fetchPeptideInstanceData(subTask, entityManagerMSI, xic);
-
+                        
                     }// end resultSummaryId null
-
                 } // end of the for
+                
+                // slice the task and get the first one
+                SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_PEPTIDE_INSTANCE, m_peptideInstanceIds.size(), SLICE_SIZE);
+                // execute the first slice now
+                fetchPeptideInstanceData(subTask, entityManagerMSI, xic);
 
-            }
+            } //end masterquantchannels exist
 
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {

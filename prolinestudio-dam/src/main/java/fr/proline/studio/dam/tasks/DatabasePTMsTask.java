@@ -265,7 +265,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         List<PTMSite> ptmSites = new ArrayList<>();
         long start = System.currentTimeMillis();
 
-        //---- Get associated RSM  ProteinMatches
+        //---- Get associated Parent RSM  ProteinMatches
         Long rsmId = m_ptmDataset.getDataset().getResultSummaryId();
         TypedQuery<DProteinMatch> typicalProteinQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(pm.id, pm.accession, pm.score, pm.peptideCount, pm.resultSet.id, pm.description, pm.serializedProperties, pepset.id, pepset.score, pepset.sequenceCount, pepset.peptideCount, pepset.peptideMatchCount, pepset.resultSummaryId) "
                 + "FROM PeptideSetProteinMatchMap pset_to_pm JOIN pset_to_pm.proteinMatch as pm JOIN pset_to_pm.peptideSet as pepset JOIN pepset.proteinSet as ps "
@@ -276,7 +276,34 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         long stop = System.currentTimeMillis();
         m_logger.debug(" ** {} typical ProtMatches and {} PTMSites loaded in {} ms", typicalProteinMatchesArray.size(), jsonDataset.ptmSites.length, (stop - start));
         start = stop;
-
+        
+        //--- Get Protein Match mapping between parent and leaf rsm
+        List<String> accessions = typicalProteinMatchesArray.stream().map(DProteinMatch::getAccession).collect(Collectors.toList());
+        Map<String, List<Long>> allProtMatchesIdPerAccession = new HashMap<>();
+        int bufferSize = 10000;
+        int readAccessionCount = 0;
+        while(readAccessionCount < accessions.size()){
+            Query protMatchQuery = entityManagerMSI.createQuery("SELECT pm.id, pm.accession FROM ProteinMatch pm, ResultSummary rsm WHERE pm.accession IN (:accList) AND rsm.resultSet.id = pm.resultSet.id AND rsm.id in (:rsmIds) ");
+            int lastIndex = ((readAccessionCount+bufferSize) > accessions.size()) ? accessions.size() : readAccessionCount+bufferSize;
+            protMatchQuery.setParameter("accList", accessions.subList(readAccessionCount, lastIndex));
+            protMatchQuery.setParameter("rsmIds", m_ptmDataset.getLeafResultSummaryIds());
+                        
+            Iterator<Object[]> proteinMatchesResult = protMatchQuery.getResultList().iterator();
+            while(proteinMatchesResult.hasNext()){
+                Object[] results = proteinMatchesResult.next();
+                Long prMatchAcc = (Long) results[0];
+                String acc = (String) results[1];
+                if(!allProtMatchesIdPerAccession.containsKey(acc))
+                    allProtMatchesIdPerAccession.put(acc, new ArrayList<Long>());
+                allProtMatchesIdPerAccession.get(acc).add(prMatchAcc);
+            }
+            readAccessionCount = lastIndex;
+        }
+        m_ptmDataset.setLeafProtMatchesIdPerAccession(allProtMatchesIdPerAccession);
+        stop = System.currentTimeMillis();
+        m_logger.debug(" ** Creates ProtMatches map for leaf RSM, map size = {} ; loaded in {} ms", allProtMatchesIdPerAccession.size(),  (stop - start));
+        start = stop;
+        
         //----  fetch Generic PTM Data
         fetchGenericPTMData(entityManagerMSI);
 

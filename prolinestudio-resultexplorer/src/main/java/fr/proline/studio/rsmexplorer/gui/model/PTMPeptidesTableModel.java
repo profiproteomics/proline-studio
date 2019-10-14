@@ -10,6 +10,7 @@ import fr.proline.core.orm.msi.dto.DInfoPTM;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DPtmSiteProperties;
 import fr.proline.core.orm.msi.dto.DQuantPeptide;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
@@ -44,7 +45,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import javax.swing.table.TableCellRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -156,11 +156,13 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
         m_ptmPepInstances = ptmPeptides != null ? ptmPeptides : new ArrayList<>();
         m_ptmPepInstancesAsRow = new ArrayList<>();        
         m_ptmPepInstances.forEach(ptmPI -> {
-            Long protMatchIdOfInterest = ptmPI.getSites().size() >0 ? ptmPI.getSites().get(0).getProteinMatch().getId() : ptmPI.getBestPepMatch().getSequenceMatch().getId().getProteinMatchId() ;
+            DProteinMatch protMatchOfInterest = ptmPI.getSites().size() >0 ? ptmPI.getSites().get(0).getProteinMatch() : null ;
+            if(protMatchOfInterest == null)
+                m_logger.debug("---- ERROR GETTING Prot Matvh");
             //Create PeptideMatch List to display according to m_showPeptideMatches
             List<DPeptideMatch> pepMatches = new ArrayList<>();
             if(m_showPeptideMatches){
-                pepMatches.addAll( ptmPI.getPeptideInstance().getPeptideMatches().stream().filter(dpm -> protMatchIdOfInterest.equals(dpm.getSequenceMatch().getId().getProteinMatchId())).collect(Collectors.toList()));
+                pepMatches.addAll( ptmPI.getPepMatchesOnProteinMatch(protMatchOfInterest));
             } else {                 
                 pepMatches.add(ptmPI.getBestPepMatch());
             }

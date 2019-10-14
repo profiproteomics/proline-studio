@@ -32,13 +32,16 @@ public class PTMDataset {
     private List<PTMSite> m_proteinPTMSites;
     
     //data for v2
-    private List<Long> m_leafRSMIds;
-    private List<DInfoPTM> m_ptmOfInterest;
-    private List<PTMCluster> m_ptmClusters;
+    private List<Long> m_leafRSMIds; // Ids of the Leaf RSM where PTM info are read
+    private List<DInfoPTM> m_ptmOfInterest; // Specified PTM to consider 
+    private List<PTMCluster> m_ptmClusters; 
     
+    //Lists of all PTMPeptideInstance for a specific Peptide and Protein Match : For parent RSM and leaf RSM
     private final Map<Long, Map<Long, List<PTMPeptideInstance>>> m_parentPtmPepInstByPepIdByProtMatchId = new HashMap<>();
     private final Map<Long, Map<Long, List<PTMPeptideInstance>>> m_leafPtmPepInstByPepInstIdByProtMatchId = new HashMap<>();
         
+    //VDS: to overcome a missing information in ORM : Link between Protein Matches in merged RSM and child RSM
+    private Map<String, List<Long>> m_allLeafProtMatchesIdPerAccession;
     private Boolean m_isVersion2;
     
     public PTMDataset(DDataset dataset) {
@@ -138,10 +141,11 @@ public class PTMDataset {
 
     
     /**
-     * Get all PTMPeptideInstance defined for specified protein match Id.
+     * Get all PTMPeptideInstance defined for specified protein match Id and peptide instance.
      * The returned PTMPeptideInstance correspond to parent PTMPeptideInstance
      * 
-     * @param proteinMatchId
+     * @param proteinMatchId 
+     * @param pepInstId
      * @return 
      */
     public List<PTMPeptideInstance> getLeafPTMPeptideInstances(Long proteinMatchId, Long pepInstId) {
@@ -245,8 +249,15 @@ public class PTMDataset {
                 ptmPepInsForCluster.forEach( peI -> peI.addCluster(ptmC));
             } );
             
-        }
-                
+        }                
+    }
+    
+    public void setLeafProtMatchesIdPerAccession(Map<String, List<Long>> allProtMatchesIdPerAccession){
+        m_allLeafProtMatchesIdPerAccession = allProtMatchesIdPerAccession;
+    }
+    
+    public List<Long> getProtMatchesIdForAccession(String protMatcherAccession){
+        return m_allLeafProtMatchesIdPerAccession.getOrDefault(protMatcherAccession, new ArrayList<>());
     }
     
 }

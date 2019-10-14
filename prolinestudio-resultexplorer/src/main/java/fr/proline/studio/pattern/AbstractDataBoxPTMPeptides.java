@@ -131,15 +131,15 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
 
     @Override
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
-        //LOG.debug("getData called for "+ (m_displayAllPepMatches?" leaf ": " parent")+" with var array/list :  " +getArray+" - "+isList);        
+        m_logger.debug("getData called for "+   (m_displayAllPepMatches?" leaf ": " parent")+" with var array/list :  " +getArray+" - "+isList);
         DataBoxPanelInterface panel = getDataBoxPanelInterface();
 
         if (parameterType != null && isList && (!(panel instanceof SplittedPanelContainer.ReactiveTabbedComponent)
                 || ((panel instanceof SplittedPanelContainer.ReactiveTabbedComponent) && ((SplittedPanelContainer.ReactiveTabbedComponent) panel).isShowed()))) {
 
             //FIXME TODO  !!! VDS BIG WART !!! TO BE REMOVED WITH Propagate refactoring
-            // Use "getArray" to specify parent (==> display best PepMatch) or leaf (==> display all peptife matches) PTMPeptideInstance... 
-            // if !getArrayReturn same data only if PARENT
+            // Use "getArray" to specify parent (==> display best PepMatch) (if false) or leaf (==> display all peptife matches) PTMPeptideInstance... if true
+            // if !getArray Return same data only if PARENT
             if (parameterType.equals(PTMPeptideInstance.class) && !getArray && !m_displayAllPepMatches
                     || (parameterType.equals(PTMPeptideInstance.class) && getArray && m_displayAllPepMatches)) {
                 if (m_ptmPepInstances == null) {
@@ -167,7 +167,7 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
         PTMDataset newPtmDataset = (PTMDataset) m_previousDataBox.getData(false, PTMDataset.class);
 
         //FIXME TODO  !!! VDS BIG WART !!! TO BE REMOVED WITH Propagate refactoring
-        // Use "getArray" to specify parent or leaf PTMPeptideInstance... corresponding to view only best vs view all peptide matches
+        // Use "getArray" to specify parent (false) or leaf (true) PTMPeptideInstance... corresponding to view only best vs view all peptide matches
         List<PTMPeptideInstance> newPtmPepInstances = (List<PTMPeptideInstance>) m_previousDataBox.getData(m_displayAllPepMatches, PTMPeptideInstance.class, true);
 
         boolean valueUnchanged = Objects.equals(newPtmDataset, m_ptmDataset) && Objects.equals(newPtmPepInstances, m_ptmPepInstances);

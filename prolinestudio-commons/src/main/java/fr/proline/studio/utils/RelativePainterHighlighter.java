@@ -1,24 +1,18 @@
-/*
- * $Id$
+/* 
+ * Copyright (C) 2019 VD225637
  *
- * Copyright 2009 Sun Microsystems, Inc., 4150 Network Circle,
- * Santa Clara, California 95054, U.S.A. All rights reserved.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
+ * ; either version 2.1 
+ * of the License, or (at your option) any later version.
  *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * 
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * CeCILL License V2.1 for more details.
  *
- * jm235353 : done some simplification of the code (could do others) 
+ * You should have received a copy of the CeCILL License 
+ * along with this program; If not, see <http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html>.
  */
 package fr.proline.studio.utils;
 

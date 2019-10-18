@@ -17,11 +17,14 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
+import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.MultiGraphicsPanel;
 import java.util.List;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.SecondAxisTableModelInterface;
+import fr.proline.studio.rsmexplorer.gui.xic.XICComparePeptideTableModel;
+import java.util.ArrayList;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +78,7 @@ public class DataboxMultiGraphics extends AbstractDataBox {
             inParameter.addParameter(ExtendedTableModelInterface.class, true);
             inParameter.addParameter(CrossSelectionInterface.class, true);
             inParameter.addParameter(SecondAxisTableModelInterface.class, true);
+            inParameter.addParameter(PTMPeptideInstance.class, true);//for DataBoxPTMPeptide[XXXX].propagate
             inParameter.addParameter(DMasterQuantPeptide.class, true);//for DataBoxXicPeptideSet.propagate
             registerInParameter(inParameter);
         }
@@ -95,19 +99,38 @@ public class DataboxMultiGraphics extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        final List<ExtendedTableModelInterface> dataModelInterfaceSet1 = (List<ExtendedTableModelInterface>) m_previousDataBox.getData(false, ExtendedTableModelInterface.class, true);
-        final List<CrossSelectionInterface> crossSelectionInterfaceL =  (List<CrossSelectionInterface>) m_previousDataBox.getData(false, CrossSelectionInterface.class, true);
+        List<ExtendedTableModelInterface> dataModelInterfaceSet1 = (List<ExtendedTableModelInterface>) m_previousDataBox.getData(false, ExtendedTableModelInterface.class, true);
+        //obtain select index in next bloc
+        if ((dataModelInterfaceSet1 != null && !dataModelInterfaceSet1.isEmpty() && (dataModelInterfaceSet1.get(0) instanceof XICComparePeptideTableModel))) {
+            ArrayList<Integer> selectedIndex = (ArrayList<Integer>) m_previousDataBox.getData(false, Integer.class);
+            m_logger.debug("multiGraphic, get Selected Index : {}, data size {}", selectedIndex, dataModelInterfaceSet1.size());
+            if (selectedIndex != null && !selectedIndex.isEmpty()) {
+                XICComparePeptideTableModel data;
+                for (int i = 0; i < dataModelInterfaceSet1.size(); i++) {
+                    data = (XICComparePeptideTableModel) dataModelInterfaceSet1.get(i);
+                    if (selectedIndex.contains(i)) {
+                        data.setSelected(true);
+                    }
+                }
+            }
+        }
+
+        //final List<ExtendedTableModelInterface> dataModelInterfaceSet1 = (List<ExtendedTableModelInterface>) m_previousDataBox.getData(false, ExtendedTableModelInterface.class, true);
+        final List<CrossSelectionInterface> crossSelectionInterfaceL = (List<CrossSelectionInterface>) m_previousDataBox.getData(false, CrossSelectionInterface.class, true);
         SecondAxisTableModelInterface dataModelInterfaceSet2 = m_displayDoubleYAxis ? (SecondAxisTableModelInterface) m_previousDataBox.getData(false, SecondAxisTableModelInterface.class, true) : null;
-        
-        boolean valueUnchanged  = Objects.equals(dataModelInterfaceSet1, m_plotValues) && Objects.equals(crossSelectionInterfaceL,m_crossSelectionValues) && Objects.equals(dataModelInterfaceSet2,m_plotSecondAxisValues);
-        if(valueUnchanged)
+
+        boolean valueUnchanged = Objects.equals(dataModelInterfaceSet1, m_plotValues) && Objects.equals(crossSelectionInterfaceL, m_crossSelectionValues) && Objects.equals(dataModelInterfaceSet2, m_plotSecondAxisValues);
+        if (valueUnchanged) {
             return;
+        }
         m_plotValues = dataModelInterfaceSet1;
         m_crossSelectionValues = crossSelectionInterfaceL;
         m_plotSecondAxisValues = dataModelInterfaceSet2;
-        if (m_plotValues != null)
-            ((MultiGraphicsPanel)getDataBoxPanelInterface()).setData(m_plotValues, m_crossSelectionValues,m_plotSecondAxisValues);
+        if (m_plotValues
+                != null) {
+            ((MultiGraphicsPanel) getDataBoxPanelInterface()).setData(m_plotValues, m_crossSelectionValues, m_plotSecondAxisValues);
         }
+    }
 
     @Override
     public void setEntryData(Object data) {

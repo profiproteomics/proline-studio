@@ -101,7 +101,9 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
 
         if (parameterType != null && (!(panel instanceof SplittedPanelContainer.ReactiveTabbedComponent)
                 || (panel instanceof SplittedPanelContainer.ReactiveTabbedComponent && ((SplittedPanelContainer.ReactiveTabbedComponent) panel).isShowed()))) {
-
+            if (parameterType.equals(Integer.class)) {
+                return getSelectedIndex();
+            }
             if (parameterType.equals(ResultSummary.class)) {
                 if (m_rsm != null) {
                     return m_rsm;
@@ -142,7 +144,7 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
 
     @Override
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
-        m_logger.debug("getData called for "+   (m_displayAllPepMatches?" leaf ": " parent")+" with var array/list :  " +getArray+" - "+isList);
+       // m_logger.debug("getData called for " + (m_displayAllPepMatches ? " leaf " : " parent") + " with var array/list :  " + getArray + " - " + isList);
         DataBoxPanelInterface panel = getDataBoxPanelInterface();
 
         if (parameterType != null && isList && (!(panel instanceof SplittedPanelContainer.ReactiveTabbedComponent)
@@ -261,4 +263,6 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
     abstract public void updateData();
 
     abstract protected void loadXicAndPropagate();
+    
+    abstract protected ArrayList<Integer> getSelectedIndex();
 }

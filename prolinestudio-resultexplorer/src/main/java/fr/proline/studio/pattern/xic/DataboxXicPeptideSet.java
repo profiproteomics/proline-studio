@@ -297,16 +297,23 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
             if (parameterType.equals(XicMode.class)) {
                 return new XicMode(isXICMode());
             }
+             if (parameterType.equals(Integer.class)) {
+                 ArrayList<Long>  selection = ((XicPeptidePanel) this.m_panel).getCrossSelectionInterface().getSelection();
+                 ArrayList<Integer> result = new ArrayList();
+                 for (Long l : selection){
+                     result.add(l.intValue());
+                 }
+                return result;
+            }
         }
         return super.getData(getArray, parameterType);
     }
-
+   
     @Override
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
         if (parameterType != null && isList) {
             if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                ArrayList<Long> selectedRowSet = (((XicPeptidePanel) this.getDataBoxPanelInterface()).getCrossSelectionInterface()).getSelection();
-                return getTableModelInterfaceList(selectedRowSet);
+                return getTableModelInterfaceList();
             }
 
             if (parameterType.equals(SecondAxisTableModelInterface.class)) {
@@ -327,11 +334,10 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         return m_dataset.getName() + " " + getTypeName();
     }
 
-    private List<ExtendedTableModelInterface> getTableModelInterfaceList(ArrayList<Long> selectedRowSet) {
+    private List<ExtendedTableModelInterface> getTableModelInterfaceList() {
         if (m_quantChannelInfo == null) {
             if (m_previousDataBox != null) {
                 m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(false, QuantChannelInfo.class);
-
                 if (m_quantChannelInfo == null) {
                     return null;
                 }
@@ -346,11 +352,6 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                 DMasterQuantPeptide quantPeptide = m_masterQuantPeptideList.get(i);
                 XICComparePeptideTableModel peptideData = new XICComparePeptideTableModel();
                 peptideData.setData(m_quantChannelInfo.getQuantChannels(), quantPeptide, m_isXICMode);
-                if (selectedRowSet != null && !selectedRowSet.isEmpty()) {
-                    if (selectedRowSet.contains(new Long(i))) {
-                        peptideData.setSelected(true);
-                    }
-                }
                 list.add(peptideData);
             }
         }

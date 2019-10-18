@@ -100,6 +100,12 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
         registerTask(task);
     }
 
+    protected ArrayList<Integer> getSelectedIndex() {
+        ArrayList<Integer>  result = new ArrayList();
+        result.add(((PTMGraphicCtrlPanel) this.m_panel).getSelectedIndex());
+        return result;
+    }
+
     @Override
     public void updateData() {
         PTMGraphicCtrlPanel graphicView = (PTMGraphicCtrlPanel) getDataBoxPanelInterface();
@@ -125,7 +131,8 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
     /**
      * Only called 1 time by AbstractDataBoxPTMPeptides in dataChanged(),
      * if(valueUnchanged), so pepInstance == null come from previous databox who
-     * has not this value, but it is impossible for actual Peptides Graphic Area.
+     * has not this value, but it is impossible for actual Peptides Graphic
+     * Area.
      *
      * @param pepInstance
      */

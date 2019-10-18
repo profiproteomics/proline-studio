@@ -56,7 +56,7 @@ import org.jdesktop.swingx.JXTable;
 public abstract class AbstractDataBox implements ChangeListener, ProgressInterface, SplittedPanelContainer.UserActions {
     //private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.AbstractDataBox");
     // Panel corresponding to this box
-    private DataBoxPanelInterface m_panel;
+    protected DataBoxPanelInterface m_panel;
 
     // In and out Parameters Registered
     private final HashSet<GroupParameter> m_inParameters = new HashSet<>();

@@ -148,20 +148,18 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         repaint();
     }
 
-  @Override
-  public Dimension getPreferredSize() {
-    return new Dimension(100,m_height+m_bottom_margin);
-  }
-
-
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(100, m_height + m_bottom_margin);
+    }
 
     @Override
     protected void paintComponent(Graphics g) {
-        this.setSize(this.getWidth(), m_height+m_bottom_margin);
+        this.setSize(this.getWidth(), m_height + m_bottom_margin);
         g.setColor(Color.white);
         //g.fillRect(0, 0, this.getWidth(), this.getHeight());
         Insets i = this.getBorder().getBorderInsets(this);
-        g.fillRect(i.left, i.top, this.getWidth()-(i.left+i.right), this.getHeight()-(i.top+i.bottom));
+        g.fillRect(i.left, i.top, this.getWidth() - (i.left + i.right), this.getHeight() - (i.top + i.bottom));
         if (this.getWidth() != m_oldWidth) {
             if (m_proteinLengh != 0 && m_aaWidth == m_aaWidthOriginal) {
                 m_aaWidthOriginal = ((double) (this.getWidth() - 20) / m_proteinLengh);
@@ -243,7 +241,7 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
      * @param g
      * @param pep
      */
-        protected void fillPeptide(Graphics2D g, DPeptideInstance pep) {
+    protected void fillPeptide(Graphics2D g, DPeptideInstance pep) {
 
         int start = pep.getBestPeptideMatch().getSequenceMatch().getId().getStart();
         int stop = pep.getBestPeptideMatch().getSequenceMatch().getId().getStop();
@@ -254,26 +252,18 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         g.fillRoundRect(x0, m_protein_y0, width, m_protein_height, m_protein_height, m_protein_height);
     }
 
-    /**
-     *
-     * @param x
-     * @param y
-     * @return null, will refresh to show nothing
-     */
     private String getTooltips(int x, int y) {
         if (m_peptidePTMMap == null) {
             return null;
         }
-        int yRangPTM = m_ptm_y0;
-        int yRangA = m_protein_y0;
-        int yRangZ = yRangA + m_protein_height;
+
         List<DPeptidePTM> ptms;
         int positionOnProtein = getPosOnProtein(x);
 
-        if (y > yRangPTM && y < yRangPTM + m_ptm_height) {
+        if (y > m_ptm_y0 && y < m_ptm_y0 + m_ptm_height) {
             ptms = this.m_peptidePTMMap.get(positionOnProtein);
             if (ptms == null) {
-                return null;
+                return getToolotipsPeptide(positionOnProtein);
             } else {
                 String s = "";
                 for (DPeptidePTM pep : ptms) {
@@ -283,29 +273,31 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
                 }
                 return s;
             }
-        } else if (y > yRangA && y < yRangZ) {
-            List<DPeptideInstance> peptides;
-            List<PTMPeptideInstance> ptmPeptides;
-            peptides = this.m_postionPeptideMap.get(positionOnProtein);
-            String s = null;
-            if (peptides != null) {
-                s = (s == null) ? "" : s;
-                for (DPeptideInstance pep : peptides) {
-                    Long id = pep.getId();
-                    String sequence = PeptideRenderer.constructPeptideDisplay(pep.getBestPeptideMatch().getPeptide())
-                            .replaceAll(GlobalValues.HTML_TAG_BEGIN, "")
-                            .replaceAll(GlobalValues.HTML_TAG_END, "");
-                    String score = DataFormat.format(pep.getBestPeptideMatch().getScore(), 2);
-                    SequenceMatchPK pepSequencePK = pep.getBestPeptideMatch().getSequenceMatch().getId();
-
-                    String tips = String.format("%d -%s- %d, score: %s", pepSequencePK.getStart(), sequence, pepSequencePK.getStop(), score);
-                    s = s + tips + "<br>";
-                }
-                return GlobalValues.HTML_TAG_BEGIN + "<body>" + s + "</body>" + GlobalValues.HTML_TAG_END;
-            }
-            return "position: " + positionOnProtein;
-        }
+        }        
         return null;
+    }
+
+    private String getToolotipsPeptide(int positionOnProtein) {
+        List<DPeptideInstance> peptides;
+        List<PTMPeptideInstance> ptmPeptides;
+        peptides = this.m_postionPeptideMap.get(positionOnProtein);
+        String s = null;
+        if (peptides != null) {
+            s = (s == null) ? "" : s;
+            for (DPeptideInstance pep : peptides) {
+                Long id = pep.getId();
+                String sequence = PeptideRenderer.constructPeptideDisplay(pep.getBestPeptideMatch().getPeptide())
+                        .replaceAll(GlobalValues.HTML_TAG_BEGIN, "")
+                        .replaceAll(GlobalValues.HTML_TAG_END, "");
+                String score = DataFormat.format(pep.getBestPeptideMatch().getScore(), 2);
+                SequenceMatchPK pepSequencePK = pep.getBestPeptideMatch().getSequenceMatch().getId();
+
+                String tips = String.format("%d -%s- %d, score: %s", pepSequencePK.getStart(), sequence, pepSequencePK.getStop(), score);
+                s = s + tips + "<br>";
+            }
+            return GlobalValues.HTML_TAG_BEGIN + "<body>" + s + "</body>" + GlobalValues.HTML_TAG_END;
+        }
+        return "position: " + positionOnProtein;
     }
 
     protected void createAADataMap(DPeptideInstance[] peptideInstances) {
@@ -367,6 +359,7 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
 
     /**
      * useful for subclasses
+     *
      * @param e
      */
     protected void actionMouseClicked(MouseEvent e) {

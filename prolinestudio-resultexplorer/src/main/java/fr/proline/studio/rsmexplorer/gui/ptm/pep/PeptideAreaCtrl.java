@@ -22,6 +22,8 @@ import fr.proline.studio.rsmexplorer.gui.ptm.ViewContext;
 
 import java.awt.Graphics2D;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -29,6 +31,7 @@ import java.util.List;
  */
 public class PeptideAreaCtrl {
 
+    private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     PeptideAreaModel m_mgr;
     PeptideSetView m_pepSetView;
 
@@ -41,12 +44,12 @@ public class PeptideAreaCtrl {
         m_mgr.setPTM(ptmSitePeptide);
         m_pepSetView.setPeptideViewList(m_mgr.getViewPeptideList());
     }
-    
+
     public void setPTMPepInstanceData(List<PTMPeptideInstance> ptmSitePeptide) {
         m_mgr.setPTMPeptides(ptmSitePeptide);
         m_pepSetView.setPeptideViewList(m_mgr.getViewPeptideList());
     }
-    
+
     public void setBeginPoint(int x, int y) {
         this.m_pepSetView.setBeginPoint(x, y);
     }
@@ -56,19 +59,19 @@ public class PeptideAreaCtrl {
     }
 
     /**
-     * 
+     * from mouse position to find selected peptide,return its index
+     *
      * @param x
      * @param y
-     * @return  -1 when no found
+     * @return -1 when no found
      */
     public int getSelectedIndex(int x, int y) {
         int index = this.m_pepSetView.getSelectedItemIndex(x, y);
-        this.m_mgr.setSelectedIndex(index);//change select
         return index;
     }
 
     public void setSelectedIndex(int i) {
-        this.m_mgr.setSelectedIndex(i);       
+        this.m_mgr.setSelectedIndex(i);
     }
 
     public int getSelectedIndex() {

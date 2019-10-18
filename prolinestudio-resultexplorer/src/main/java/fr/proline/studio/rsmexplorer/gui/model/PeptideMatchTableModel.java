@@ -326,7 +326,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
             }
             case COLTYPE_PEPTIDE_LENGTH: {
                 //SequenceMatch sequenceMatch = peptideMatch.getSequenceMatch();
-                if (peptideMatch == null) {
+                if (peptideMatch == null || peptideMatch.getPeptide() == null || peptideMatch.getPeptide().getSequence() == null) {
                     givePriorityTo(m_taskId, row, col);
                     lazyData.setData(null);
                 } else {

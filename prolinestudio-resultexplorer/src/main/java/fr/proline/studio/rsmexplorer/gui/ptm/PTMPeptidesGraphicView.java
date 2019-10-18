@@ -113,6 +113,10 @@ public class PTMPeptidesGraphicView extends JPanel {
         return null;
     }
 
+    public int getSelectedIndex() {
+        return this.m_internalPanel.getSelectedPeptideIndex();
+    }
+
     public PTMSite getMainPTMSite() {
         return m_dataModel.getMainPTMSite();
     }
@@ -442,21 +446,20 @@ public class PTMPeptidesGraphicView extends JPanel {
          * @param selectedIndex
          * @param oldSelected
          */
-        private void selectedAction(int selectedIndex, int oldSelected) {
-
-            if (selectedIndex >= 0 && selectedIndex < m_dataModel.getRowCount()) {
-                PTMPeptideInstance pep = m_dataModel.getPeptideAt(selectedIndex);
-                PTMPeptideInstance oldPep = m_dataModel.getPeptideAt(oldSelected);
-                if (pep != null) {
-                    if (oldPep != null) {
-                        if (Math.abs(oldPep.getStartPosition() - pep.getStartPosition()) > 3) {
+        private void selectedAction(int selectedIndex, int oldSelected) {           
+                if (selectedIndex >= 0 && selectedIndex < m_dataModel.getRowCount()) {
+                    PTMPeptideInstance pep = m_dataModel.getPeptideAt(selectedIndex);
+                    PTMPeptideInstance oldPep = m_dataModel.getPeptideAt(oldSelected);
+                    if (pep != null) {
+                        if (oldPep != null) {
+                            if (Math.abs(oldPep.getStartPosition() - pep.getStartPosition()) > 3) {
+                                setScrollLocation(pep.getStartPosition());
+                            }
+                        } else {
                             setScrollLocation(pep.getStartPosition());
                         }
-                    } else {
-                        setScrollLocation(pep.getStartPosition());
                     }
-                }
-                m_peptideAreaCtrl.setSelectedIndex(selectedIndex);
+                    m_peptideAreaCtrl.setSelectedIndex(selectedIndex);
                 if (selectedIndex != oldSelected && (selectedIndex != -1) && (m_dataBox != null)) {
                     if (m_superCtrl != null) {
                         m_superCtrl.onMessage(PTMGraphicCtrlPanel.Source.PEPTIDE_AREA, PTMGraphicCtrlPanel.Message.SELECTED);

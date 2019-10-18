@@ -60,7 +60,7 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
     public PTMGraphicCtrlPanel(boolean isClusterData) {
         super();
         m_ptmPeptideAreaCtrl = new PTMPeptidesGraphicView(isClusterData);
-        if (isClusterData){
+        if (isClusterData) {
             m_ptmPeptideAreaCtrl.setSuperCtrl(this);
         }
         m_proteinOvervewCtrl = new PeptideOnProteinOverviewPanel(this);
@@ -141,6 +141,11 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
 
     public PTMPeptideInstance getSelectedPTMPeptideInstance() {
         return this.m_ptmPeptideAreaCtrl.getSelectedPTMPeptideInstance();
+    }
+
+    public int getSelectedIndex() {
+        return this.m_ptmPeptideAreaCtrl.getSelectedIndex();
+        
     }
 
     @Override

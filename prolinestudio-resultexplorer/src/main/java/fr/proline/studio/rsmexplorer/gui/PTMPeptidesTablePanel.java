@@ -79,12 +79,12 @@ import org.slf4j.LoggerFactory;
  */
 public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface, SplittedPanelContainer.ReactiveTabbedComponent {
 
-    protected static final Logger LOG = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.ptm");     
+    protected static final Logger LOG = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.ptm");
     protected AbstractDataBox m_dataBox;
 
     private JScrollPane m_ptmPeptidesScrollPane;
     protected PTMPeptidesTable m_ptmPeptidesTable;
-    protected MarkerContainerPanel m_markerContainerPanel;    
+    protected MarkerContainerPanel m_markerContainerPanel;
 
     private SearchToggleButton m_searchToggleButton;
     private InfoToggleButton m_infoToggleButton;
@@ -95,15 +95,16 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
     private AddDataAnalyzerButton m_addCompareDataButton;
 
     protected List<PTMPeptideInstance> m_ptmPeptideInstances = null;
-    
+
     //--- Xic Specific 
     private final boolean m_isXICResult;
-    
+
     // protected DPeptideInstance m_currentPepInst = null;
     private final boolean m_displayPeptidesMatches;
 
     //Specify if current JPanel is visible or not
     private boolean m_isDisplayed = true;
+
     /**
      * Display Peptides Matches of a PTMSite.
      *
@@ -112,12 +113,11 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
      * all Peptide Instance for this PTMSite.
      *
      */
-    public PTMPeptidesTablePanel(boolean viewAll,boolean isXicResult) {
+    public PTMPeptidesTablePanel(boolean viewAll, boolean isXicResult) {
         m_displayPeptidesMatches = viewAll;
         m_isXICResult = isXicResult;
         initComponents();
     }
-
 
     public PTMPeptideInstance getSelectedPTMPeptideInstance() {
 
@@ -125,15 +125,27 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
         // Retrieve ProteinPTMSite selected
         PTMPeptidesTableModel tableModel = (PTMPeptidesTableModel) compoundTableModel.getBaseModel();
 
-        if(tableModel.getRowCount()<=0)
+        if (tableModel.getRowCount() <= 0) {
             return null;
-        
+        }
+
         // Retrieve Selected Row
         int selectedRow = getSelectedRowInTableModel();
 
         return tableModel.getPTMPeptideInstanceAt(selectedRow);
     }
 
+    public int getSelectedIndex() {
+        CompoundTableModel compoundTableModel = ((CompoundTableModel) m_ptmPeptidesTable.getModel());
+        // Retrieve ProteinPTMSite selected
+        PTMPeptidesTableModel tableModel = (PTMPeptidesTableModel) compoundTableModel.getBaseModel();
+        if (tableModel.getRowCount() <= 0) {
+            return -1;
+        }
+        // Retrieve Selected Row
+        int selectedRow = getSelectedRowInTableModel();
+        return selectedRow;
+    }
 
     /**
      * the selected Index in the table is different from it's index in
@@ -159,7 +171,6 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
         return selectedRow;
     }
 
-
     public void setSelectedPeptide(PTMPeptideInstance pep) {
         PTMPeptidesTableModel model = ((PTMPeptidesTableModel) ((CompoundTableModel) m_ptmPeptidesTable.getModel()).getBaseModel());
         int index = model.getPeptideInstanceIndex(pep); //this is the model original index
@@ -175,30 +186,30 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
         }
     }
 
-    public void setData(Long taskId, List<PTMPeptideInstance> ptmPeptides, Map<Long, DMasterQuantPeptide> quantPeptidesByPepInsId,  boolean finished) {        
-        LOG.debug(" PANEL setData called for "+ (m_displayPeptidesMatches?" leaf ": " parent"));
- 
-        if(Objects.equals(ptmPeptides,m_ptmPeptideInstances)){
-            return;           
+    public void setData(Long taskId, List<PTMPeptideInstance> ptmPeptides, Map<Long, DMasterQuantPeptide> quantPeptidesByPepInsId, boolean finished) {
+        LOG.debug(" PANEL setData called for " + (m_displayPeptidesMatches ? " leaf " : " parent"));
+
+        if (Objects.equals(ptmPeptides, m_ptmPeptideInstances)) {
+            return;
         }
 
         m_ptmPeptideInstances = ptmPeptides;
 
-        ((PTMPeptidesTableModel) ((CompoundTableModel) m_ptmPeptidesTable.getModel()).getBaseModel()).setData(taskId, m_ptmPeptideInstances, quantPeptidesByPepInsId );
-        
+        ((PTMPeptidesTableModel) ((CompoundTableModel) m_ptmPeptidesTable.getModel()).getBaseModel()).setData(taskId, m_ptmPeptideInstances, quantPeptidesByPepInsId);
+
         // select the first row
-        if ( m_ptmPeptideInstances != null ) {
+        if (m_ptmPeptideInstances != null) {
             m_ptmPeptidesTable.getSelectionModel().setSelectionInterval(0, 0);
             m_markerContainerPanel.setMaxLineNumber(m_ptmPeptidesTable.getModel().getRowCount());
         }
 
         m_infoToggleButton.updateInfo();
         setColumnsVisibility();
-        if(finished)
+        if (finished) {
             m_ptmPeptidesTable.setSortable(true);
+        }
     }
-    
-    
+
     private void setColumnsVisibility() {
         // hide the rawAbundance  and selectionLevel columns
         List<Integer> listIdsToHide = ((PTMPeptidesTableModel) ((CompoundTableModel) m_ptmPeptidesTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
@@ -322,14 +333,12 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
         TableRowSorter<TableModel> sorter = new TableRowSorter<>(m_ptmPeptidesTable.getModel());
         m_ptmPeptidesTable.setRowSorter(sorter);
 
-
         m_markerContainerPanel = new MarkerContainerPanel(m_ptmPeptidesScrollPane, m_ptmPeptidesTable);
 
         m_ptmPeptidesScrollPane.setViewportView(m_ptmPeptidesTable);
-        
+
         m_ptmPeptidesTable.setFillsViewportHeight(true);
         m_ptmPeptidesTable.setViewport(m_ptmPeptidesScrollPane.getViewport());
-
 
         c.gridx = 0;
         c.gridy = 0;
@@ -353,7 +362,7 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
             m_ptmPeptidesTable.setSortable(true);
         }
     }
-    
+
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
@@ -399,7 +408,6 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
         return m_ptmPeptidesTable;
     }
 
-
     public void setSelectedRow(int i) {
 
         this.m_ptmPeptidesTable.setRowSelectionInterval(i, i);
@@ -411,9 +419,10 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
             return;
         }
         m_isDisplayed = showed;
-        if(showed){            
-            if(DataBoxPTMPeptides.class.isInstance(m_dataBox))
-                ((DataBoxPTMPeptides)m_dataBox).updateData();
+        if (showed) {
+            if (DataBoxPTMPeptides.class.isInstance(m_dataBox)) {
+                ((DataBoxPTMPeptides) m_dataBox).updateData();
+            }
         }
     }
 
@@ -423,8 +432,9 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
     }
 
     private class PTMPeptidesTable extends LazyTable implements CrossSelectionInterface, InfoInterface, ProgressInterface {
+
         private boolean selectionWillBeRestored = false;
- 
+
         public PTMPeptidesTable() {
             super(m_ptmPeptidesScrollPane.getVerticalScrollBar());
         }
@@ -464,14 +474,12 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
         public void dataUpdated(SubTask subTask, boolean finished) {
             LastAction keepLastAction = m_lastAction;
             try {
-            
-            
+
                 // retrieve selected row
                 int rowSelected = getSelectionModel().getMinSelectionIndex();
                 int rowSelectedInModel = (rowSelected == -1) ? -1 : convertRowIndexToModel(rowSelected);
 
                 // Update Model (but protein set table must not react to the model update)
-
                 selectionWillBeRestored(true);
                 try {
                     ((PTMPeptidesTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
@@ -485,25 +493,24 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
                     //getSelectionModel().setSelectionInterval(rowSelectedInView, rowSelectedInView);
                     setSelection(rowSelectedInView);
 
-
                     // if the subtask correspond to the loading of the data of the sorted column,
                     // we keep the row selected visible
-                    if (((keepLastAction == LastAction.ACTION_SELECTING ) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((CompoundTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
+                    if (((keepLastAction == LastAction.ACTION_SELECTING) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((CompoundTableModel) getModel()).getSubTaskId(getSortedColumnIndex()))) {
                         scrollRowToVisible(rowSelectedInView);
                     }
 
-                }   
-                
+                }
+
             } finally {
 
                 m_lastAction = keepLastAction;
- 
+
             }
-            
+
             if (finished) {
                 setSortable(true);
             }
-       }
+        }
 
         @Override
         public TablePopupMenu initPopupMenu() {

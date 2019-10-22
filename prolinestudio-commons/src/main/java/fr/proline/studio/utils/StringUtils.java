@@ -16,6 +16,9 @@
  */
 package fr.proline.studio.utils;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.internal.LinkedTreeMap;
 import java.awt.FontMetrics;
 import java.io.IOException;
 import java.io.Reader;
@@ -27,6 +30,7 @@ import java.util.regex.Pattern;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.parser.ParserDelegator;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  * utils for String
@@ -160,18 +164,70 @@ public class StringUtils {
             return html;
         }
     }
-    
+
     public static String getTimeInMinutes(float seconds, int nbDigit) {
         double min = seconds / 60;
-        
+
         return DataFormat.format(min, nbDigit);
     }
-    
+
     public static String getTimeAsMinSecText(long seconds) {
         long min = seconds / 60;
         long sec = seconds % 60;
-        
-        return String.format("%d min %d sec",min, sec);
+
+        return String.format("%d min %d sec", min, sec);
     }
 
+    private static int STEP_LIMIT = 1000;
+
+    public static DefaultMutableTreeNode createTreeFromJson(String parameter,String rootName) {
+        Gson gson = new Gson();
+        LinkedTreeMap paramMap = new LinkedTreeMap();
+        DefaultMutableTreeNode parentNode = new DefaultMutableTreeNode(rootName);
+        try {
+            paramMap = gson.fromJson(parameter, paramMap.getClass());
+            createParameterTree(paramMap, parentNode, 0);
+        } catch (JsonSyntaxException jex) {
+            //nothing todo
+        } catch (Exception ex) {
+            //don't treat
+        }
+        return parentNode;
+    }
+
+    private static int createParameterTree(LinkedTreeMap params, DefaultMutableTreeNode parent, int childIndex) {
+
+        if (childIndex > STEP_LIMIT) {
+            return childIndex;
+        }
+        if (params == null) {
+            return childIndex;
+        }
+        int index = childIndex;
+        DefaultMutableTreeNode root = parent;
+        DefaultMutableTreeNode child;
+        for (Object key : params.keySet()) {
+            child = new DefaultMutableTreeNode(key);
+            root.add(child);
+            Object value = params.get(key);
+            if (value instanceof LinkedTreeMap) {
+                index = createParameterTree((LinkedTreeMap) value, child, index++);
+            } else {
+                if (value instanceof ArrayList) {
+                    ArrayList valueList = (ArrayList) value;
+                    if (valueList.get(0) instanceof LinkedTreeMap) {
+                        for (Object item : valueList) {
+                            index = createParameterTree((LinkedTreeMap) item, child, index++);
+                        }
+                    } else {
+                        child.add(new DefaultMutableTreeNode(value));
+                    }
+                } else {
+                    child.add(new DefaultMutableTreeNode(value));
+                }
+            }
+
+        }
+        return index;
+    }
 }

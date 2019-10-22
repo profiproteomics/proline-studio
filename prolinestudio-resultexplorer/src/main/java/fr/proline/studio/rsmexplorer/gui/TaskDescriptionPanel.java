@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.studio.utils.StringUtils;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.gui.HourglassPanel;
@@ -23,6 +24,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -32,17 +34,19 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 
 /**
  * Panel to display information about a specific task
+ *
  * @author JM235353
  */
 public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox m_dataBox;
-    
+
     private JTextField m_taskTextfield;
     private JTextField m_askTimeTextfield;
     private JTextField m_startTimeTextfield;
@@ -50,36 +54,36 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
     private JTextField m_endTimeTextfield;
     private JTextField m_deltaEndTimeTextfield;
     private JTextArea m_errorTextArea;
-    private JButton m_requestButton; 
-    
+    private JButton m_requestButton;
+
     private String m_requestContent;
+    private DefaultMutableTreeNode m_requestContentTreeNode;
     private String m_requestURL;
-    
+
     public TaskDescriptionPanel() {
         initComponents();
     }
-    
+
     private void initComponents() {
 
         setLayout(new GridBagLayout());
         setBorder(BorderFactory.createTitledBorder(""));
-        
-        
+
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
-        
+
         // --- create objects
         JLabel taskLabel = new JLabel("Task:");
         m_taskTextfield = new JTextField();
         m_taskTextfield.setEditable(false);
         m_taskTextfield.setBackground(Color.white);
-        
+
         JPanel timePanel = createTimePanel();
-        
+
         JPanel errorPanel = createErrorPanel();
-        
+
         m_requestButton = new JButton("...");
         m_requestButton.setMargin(new Insets(0, 5, 0, 5));
         m_requestButton.setAction(new AbstractAction() {
@@ -89,12 +93,12 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
             }
         });
         m_requestButton.setEnabled(false);
-        
+
         // --- add objects
         c.gridx = 0;
         c.gridy = 0;
         add(taskLabel, c);
-        
+
         c.weightx = 1;
         c.gridx++;
         add(m_taskTextfield, c);
@@ -102,36 +106,35 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         c.weightx = 0;
         c.gridx++;
         add(m_requestButton, c);
-        
+
         c.weightx = 1;
-        c.gridx = 0 ;
+        c.gridx = 0;
         c.gridy++;
         c.gridwidth = 3;
         add(timePanel, c);
-        
+
         c.gridy++;
         c.weighty = 1;
         add(errorPanel, c);
 
     }
-    
+
     public void showRequestDetailsDialog() {
-        
+
         JPanel requestPanel = new JPanel(new GridBagLayout());
-      
+        requestPanel.setPreferredSize(new Dimension(600, 400));
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
-        
+
         JTextField requestURLTextfield = new JTextField();
         requestURLTextfield.setText(m_requestURL);
-        
+
         JTextArea requestContentTextarea = new JTextArea();
         requestContentTextarea.setText(m_requestContent);
         requestContentTextarea.setEditable(false);
         requestContentTextarea.setLineWrap(true);
-
         // --- add objects
         c.gridx = 0;
         c.gridy = 0;
@@ -139,7 +142,7 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         c.gridx++;
         c.weightx = 1;
         requestPanel.add(requestURLTextfield, c);
-        
+
         c.gridx = 0;
         c.gridy++;
         c.weightx = 0;
@@ -147,9 +150,12 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         c.gridx++;
         c.weightx = 1;
         c.weighty = 1;
-        requestPanel.add(new JScrollPane(requestContentTextarea), c);
-  
-         NotifyDescriptor nd = new NotifyDescriptor(
+
+        JSplitPane contentPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, 
+                new JScrollPane(requestContentTextarea), 
+                new JScrollPane(new JTree(m_requestContentTreeNode)));
+        requestPanel.add(contentPane, c);
+        NotifyDescriptor nd = new NotifyDescriptor(
                 requestPanel, // instance of your panel
                 "Request details", // title of the dialog
                 NotifyDescriptor.PLAIN_MESSAGE, // it is Yes/No dialog ...
@@ -157,27 +163,26 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
                 null,
                 null
         );
-         
-         DialogDisplayer.getDefault().notify(nd);
-         
+
+        DialogDisplayer.getDefault().notify(nd);
+
     }
-    
+
     public JPanel createTimePanel() {
         JPanel timePanel = new JPanel(new GridBagLayout());
         timePanel.setBorder(BorderFactory.createTitledBorder(" Timestamp "));
 
-        
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
-        
+
         // --- create objects
         JLabel askTimeLabel = new JLabel("Ask Time:");
         m_askTimeTextfield = new JTextField();
         m_askTimeTextfield.setEditable(false);
         m_askTimeTextfield.setBackground(Color.white);
-        
+
         JLabel startTimeLabel = new JLabel("Start Time:");
         m_startTimeTextfield = new JTextField();
         m_startTimeTextfield.setEditable(false);
@@ -187,7 +192,7 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         m_deltaStartTimeTextfield.setEditable(false);
         m_deltaStartTimeTextfield.setBackground(Color.white);
         JLabel durationLabel = new JLabel("Duration:");
-        
+
         JLabel endTimeLabel = new JLabel("End Time:");
         m_endTimeTextfield = new JTextField();
         m_endTimeTextfield.setEditable(false);
@@ -195,69 +200,67 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         m_deltaEndTimeTextfield = new JTextField();
         m_deltaEndTimeTextfield.setEditable(false);
         m_deltaEndTimeTextfield.setBackground(Color.white);
-        
-        
+
         // --- add objects
         c.gridx = 0;
         c.gridy = 0;
         timePanel.add(askTimeLabel, c);
-        
+
         c.gridx++;
         c.weightx = 1;
         timePanel.add(m_askTimeTextfield, c);
-        
+
         c.gridx = 0;
         c.gridy++;
         c.weightx = 0;
         timePanel.add(startTimeLabel, c);
-        
+
         c.gridx++;
         c.weightx = 1;
         timePanel.add(m_startTimeTextfield, c);
-        
+
         c.gridx++;
         c.weightx = 0;
         timePanel.add(startDelayLabel, c);
-        
+
         c.gridx++;
         c.weightx = 0.3;
         timePanel.add(m_deltaStartTimeTextfield, c);
-     
+
         c.gridx = 0;
         c.gridy++;
         c.weightx = 0;
         timePanel.add(endTimeLabel, c);
-        
+
         c.gridx++;
         c.weightx = 1;
         timePanel.add(m_endTimeTextfield, c);
-        
+
         c.gridx++;
         c.weightx = 0;
         timePanel.add(durationLabel, c);
-        
+
         c.gridx++;
         c.weightx = 0.3;
         timePanel.add(m_deltaEndTimeTextfield, c);
-        
+
         return timePanel;
     }
-    
-    
+
     public JPanel createErrorPanel() {
         JPanel errorPanel = new JPanel(new GridBagLayout());
         errorPanel.setBorder(BorderFactory.createTitledBorder(" Error Message "));
-        
+
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
-        
+
         // --- create objects
         m_errorTextArea = new JTextArea();
         m_errorTextArea.setEditable(false);
         JScrollPane scrollpane = new JScrollPane(m_errorTextArea);
- 
+
         // --- add objects
         c.gridx = 0;
         c.gridy = 0;
@@ -267,20 +270,20 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
 
         return errorPanel;
     }
-    
+
     public void setTaskInfo(TaskInfo taskInfo) {
-        
+
         if (taskInfo == null) {
             reinit();
             return;
         }
-        
+
         m_taskTextfield.setText(taskInfo.getTaskDescription());
-        
+
         TaskError taskError = taskInfo.getTaskError();
         String errorString;
         if (taskError != null) {
-             errorString = taskError.toString();
+            errorString = taskError.toString();
         } else if (taskInfo.isAborted()) {
             errorString = "Task stopped by the User.";
         } else {
@@ -288,22 +291,23 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         }
 
         m_errorTextArea.setText(errorString);
-        
+
         m_askTimeTextfield.setText(formatTime(taskInfo.getAskTimestamp()));
-        
+
         m_startTimeTextfield.setText(formatTime(taskInfo.getStartTimestamp()));
         m_deltaStartTimeTextfield.setText(formatDeltaTime(taskInfo.getDelay()));
-        
+
         m_endTimeTextfield.setText(formatTime(taskInfo.getEndTimestamp()));
         m_deltaEndTimeTextfield.setText(formatDeltaTime(taskInfo.getDuration()));
-        
+
         m_requestContent = taskInfo.getRequestContent();
+        m_requestContentTreeNode = StringUtils.createTreeFromJson(m_requestContent,"content");
         m_requestURL = taskInfo.getRequestURL();
-        
+
         m_requestButton.setEnabled((m_requestURL != null) && (!m_requestURL.isEmpty()));
 
     }
-    
+
     private void reinit() {
         m_taskTextfield.setText("");
         m_errorTextArea.setText("");
@@ -315,9 +319,9 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         m_requestContent = null;
         m_requestURL = null;
         m_requestButton.setEnabled(false);
+        m_requestContentTreeNode = null;
     }
-    
-    
+
     private String formatTime(long timestamp) {
         if (timestamp == -1) {
             return "N/A";
@@ -325,26 +329,24 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         return m_timestampFormat.format(new Date(timestamp));
     }
     private static final SimpleDateFormat m_timestampFormat = new SimpleDateFormat("HH:mm:ss.SSS");
-    
+
     private String formatDeltaTime(long delta) {
         if (delta == -1) {
             return "";
         }
 
-        double deltaSeconds = ((double) delta)/1000.0;
-        
-        
-        return "+"+m_decimalFormat.format(deltaSeconds)+"s";
+        double deltaSeconds = ((double) delta) / 1000.0;
+
+        return "+" + m_decimalFormat.format(deltaSeconds) + "s";
     }
 
     private static final DecimalFormat m_decimalFormat = new DecimalFormat("####0.00");
-    
-    
-    
+
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
     }
+
     @Override
     public AbstractDataBox getDataBox() {
         return m_dataBox;
@@ -354,7 +356,7 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
     public void addSingleValue(Object v) {
         // should not be used
     }
-    
+
     @Override
     public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getRemoveAction(splittedPanel);
@@ -364,10 +366,10 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
     public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getAddAction(splittedPanel);
     }
-    
+
     @Override
     public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getSaveAction(splittedPanel);
     }
-    
+
 }

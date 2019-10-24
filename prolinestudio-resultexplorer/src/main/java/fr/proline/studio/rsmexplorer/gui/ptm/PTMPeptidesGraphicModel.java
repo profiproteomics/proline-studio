@@ -23,7 +23,6 @@ import fr.proline.studio.dam.tasks.DatabaseBioSequenceTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,7 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PTMPeptidesGraphicModel {
 
-    private static final Logger LOG = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
+    private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
 
     private PTMSite m_mainPTMSite; //dupliquer PanelGraphic
     private List<PTMPeptideInstance> m_ptmPeptidesInstances;
@@ -164,7 +163,7 @@ public class PTMPeptidesGraphicModel {
                         }
                     }
                 } else {
-                    LOG.warn("Try to display a PTM without associated PTMSites.... " + protLocation + " def id " + ptm.toString());
+                    m_logger.warn("Try to display a PTM without associated PTMSites.... " + protLocation + " def id " + ptm.toString());
                 }
                 if (onlyProtNTermPTMWithOutMExist) //Sequence of Protein displayed without M : shift location on prot
                 {
@@ -185,7 +184,7 @@ public class PTMPeptidesGraphicModel {
         if (pm != null) {
             DBioSequence bs = pm.getDBioSequence();
             if (bs == null && prjId > 0) {
-                LOG.trace("BioSequence is absent from the protein match, trying to load it ...");
+                m_logger.trace("BioSequence is absent from the protein match, trying to load it ...");
                 DatabaseBioSequenceTask.fetchData(Collections.singletonList(pm), prjId);
                 bs = pm.getDBioSequence();
             }
@@ -202,13 +201,19 @@ public class PTMPeptidesGraphicModel {
 
     }
 
+    public void setProteinSequence(String sequence) {
+//        m_logger.debug("SSSSSSSSSSSS ProteinSeqence by ptm is {}", m_proteinSequence);
+//        m_logger.debug("SSSSSSSSSSSS Sequence by overview  is {}", sequence);
+        m_proteinSequence = sequence;        
+    }
+
     /**
      * from the created _PtmSitePeptideList, construit the protein sequence
      *
      * @return
      */
     private String createSequence(boolean onlyProtNTermPTMWithOutMExist) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(m_proteinSequence);
         //prefix
         if (this.m_lowerStartLocation > 1) {
             for (int i = 1; i < this.m_lowerStartLocation - 1; i++) { // location begin from 1

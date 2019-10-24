@@ -48,7 +48,8 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
     }
 
     public enum Message {
-        SELECTED
+        SELECTED,
+        SEQUENCE
     }
 
     private static Logger logger = LoggerFactory.getLogger(PTMGraphicCtrlPanel.class);
@@ -145,7 +146,7 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
 
     public int getSelectedIndex() {
         return this.m_ptmPeptideAreaCtrl.getSelectedIndex();
-        
+
     }
 
     @Override
@@ -204,6 +205,11 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
             if (message.equals(Message.SELECTED)) {
                 int selectedOnProtein = m_proteinOvervewCtrl.getSelectedProteinPosition();
                 this.m_ptmPeptideAreaCtrl.setScrollLocation(selectedOnProtein);
+            } else if (message.equals(Message.SEQUENCE)) {
+                String sequence = m_proteinOvervewCtrl.getProteinSequence();
+                this.m_ptmPeptideAreaCtrl.setProteinSequence(sequence);
+                
+
             }
         }
         repaint();

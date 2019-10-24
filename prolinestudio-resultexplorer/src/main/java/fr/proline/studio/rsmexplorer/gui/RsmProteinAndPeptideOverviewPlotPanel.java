@@ -69,12 +69,14 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
      * these mark
      */
     protected HashMap<Integer, ArrayList<DPeptidePTM>> m_peptidePTMMap;
-    protected int m_proteinLengh;
+    protected int m_proteinLength;
+    protected String m_proteinSequence;
     protected DPeptideInstance[] m_peptideInstances;
     protected DPeptideInstance m_selectedPeptideInstance;
     protected double m_aaWidth;//width of an amino acid
     protected double m_aaWidthOriginal;
     protected int m_startPositionProtein = 0;
+    protected boolean m_needCreateSequence;
     protected final int m_x0 = 10;
     protected final int m_y0 = 10;
     protected final int m_height = 25;
@@ -93,6 +95,7 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
     public RsmProteinAndPeptideOverviewPlotPanel(DataBoxPanelInterface superCtrl) {
         super();
         this.m_superCtrl = superCtrl;
+        m_needCreateSequence = false;
         this.setLayout(new BorderLayout());
         initComponent();
     }
@@ -130,18 +133,22 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         m_peptideInstances = peptideInstances;
         String titleComment = "";
         if (sequence == null) {
-            m_proteinLengh = 0;
+            m_proteinLength = 0;
             titleComment = " (estimated protein length)";
+            m_needCreateSequence = true;
+            m_proteinSequence = "";//empty
         } else {
-            m_proteinLengh = sequence.length();
+            m_proteinLength = sequence.length();
+            m_proteinSequence = sequence;
+            m_needCreateSequence = false;
         }
         m_selectedPeptideInstance = selectedPeptide;
         m_startPositionProtein = 0;
         createAADataMap(peptideInstances);
         //m_proteinLengh may be changed after calculating, so m_aaWidthOriginal is calcul after above create
-        m_aaWidthOriginal = ((double) (this.getWidth() - 20) / m_proteinLengh);
+        m_aaWidthOriginal = ((double) (this.getWidth() - 20) / m_proteinLength);
         m_aaWidth = m_aaWidthOriginal;
-        String title = proteinName + " " + TITLE + " " + m_proteinLengh + " amino acid" + titleComment;
+        String title = proteinName + " " + TITLE + " " + m_proteinLength + " amino acid" + titleComment;
         ((TitledBorder) this.getBorder()).setTitle(title);
         this.removeAll();
 
@@ -161,8 +168,8 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         Insets i = this.getBorder().getBorderInsets(this);
         g.fillRect(i.left, i.top, this.getWidth() - (i.left + i.right), this.getHeight() - (i.top + i.bottom));
         if (this.getWidth() != m_oldWidth) {
-            if (m_proteinLengh != 0 && m_aaWidth == m_aaWidthOriginal) {
-                m_aaWidthOriginal = ((double) (this.getWidth() - 20) / m_proteinLengh);
+            if (m_proteinLength != 0 && m_aaWidth == m_aaWidthOriginal) {
+                m_aaWidthOriginal = ((double) (this.getWidth() - 20) / m_proteinLength);
                 m_aaWidth = m_aaWidthOriginal;
                 m_oldWidth = this.getWidth();
             }
@@ -197,7 +204,7 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         }
 
         int startPos = (int) (this.m_startPositionProtein * m_aaWidth);
-        int endPos = (int) ((m_proteinLengh + 1) * m_aaWidth);
+        int endPos = (int) ((m_proteinLength + 1) * m_aaWidth);
         g.setColor(Color.LIGHT_GRAY);
         g.setStroke(STROKE_PROTEINE_LINE);
         g.drawLine(m_x0 - startPos, m_protein_y0 + m_protein_height / 2, m_x0 - startPos + endPos, m_protein_y0 + m_protein_height / 2); //draw protein length in middle
@@ -273,7 +280,7 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
                 }
                 return s;
             }
-        }        
+        }
         return null;
     }
 
@@ -309,14 +316,25 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
 
         for (DPeptideInstance pep : peptideInstances) {
             int start = 0, stop = 0;
+            String pepSequence = "";
             try {
                 //create peptide on protein sequence couvrage
                 DPeptideMatch bestPeptideMatch = pep.getBestPeptideMatch();
                 if (bestPeptideMatch != null) {
                     start = bestPeptideMatch.getSequenceMatch().getId().getStart();
                     stop = bestPeptideMatch.getSequenceMatch().getId().getStop();
-                    if (stop > m_proteinLengh) {
-                        m_proteinLengh = stop;
+                    try {
+                        pepSequence = bestPeptideMatch.getPeptide().getSequence();
+                    } catch (Exception e) {
+                        m_logger.debug("EEEE Exception get peptide sequence:{}", e.getMessage());
+                    }
+
+                    if (m_needCreateSequence) {
+                        buildSequence(start, stop, pepSequence);
+                    }
+                    if (stop > m_proteinLength) {
+                        m_proteinLength = stop - 1;//peptide position on protein begin with 1
+                        m_logger.debug(TITLE);
                     }
                     for (int i = start; i <= stop; i++) {
                         pepList = m_postionPeptideMap.get(i);
@@ -355,6 +373,27 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
             }
         }
         //m_logger.debug("createAADataMap execution time: {} ms", (System.currentTimeMillis() - beginTime));
+    }
+
+    public String getProteinSequence() {
+        return m_proteinSequence;
+    }
+
+    protected void buildSequence(int start, int stop, String pepSquence) {
+        StringBuilder sb = new StringBuilder(m_proteinSequence);
+
+        int cLength = pepSquence.length();
+        //logger.debug("Sequence (" + pIndex + "," + content + ")");
+        if ((start - 1) > sb.length()) {
+            for (int i = sb.length(); i < start - 1; i++) {//-1, because start,stop begin with 1
+                sb.append("-");
+            }
+            sb.append(pepSquence);
+        } else {
+            sb.replace(start - 1, start - 1 + cLength, pepSquence);
+        }
+        m_proteinSequence = new String(sb);
+        m_proteinLength = m_proteinSequence.length();
     }
 
     /**
@@ -491,7 +530,7 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
             int currentPosition = getPosOnProtein(currentX);
             distance = currentPosition - startPosition;
             //m_logger.debug("MMMMMMMM Move horizontal move distance = {} positionOld = {},positionCurrent = {}, ", distance, startPosition, currentPosition);
-            m_startPositionProtein = Math.min(m_startPositionProtein - distance, m_proteinLengh - (int) ((getWidth() - 20) / m_aaWidth));
+            m_startPositionProtein = Math.min(m_startPositionProtein - distance, m_proteinLength - (int) ((getWidth() - 20) / m_aaWidth));
             m_startPositionProtein = Math.max(m_startPositionProtein, 0);
             startX = currentX;
             startY = currentY;

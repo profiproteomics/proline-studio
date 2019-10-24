@@ -67,6 +67,11 @@ public class PTMPeptidesGraphicView extends JPanel {
         repaint();
     }
 
+    public void setProteinSequence(String sequence){
+        m_internalPanel.m_dataModel.setProteinSequence(sequence);
+        this.m_internalPanel.updateData();
+    }
+    
     public PTMPeptidesGraphicView(boolean isClusterData) {
         super();
         m_superCtrl = null;
@@ -233,7 +238,7 @@ public class PTMPeptidesGraphicView extends JPanel {
             m_peptideAreaCtrl.setSelectedIndex(i);
         }
 
-        private void updateData() {
+        protected void updateData() {
             m_titlePane.updateData();
             m_peptidesPane.updateData();
             m_isDataNull = false;

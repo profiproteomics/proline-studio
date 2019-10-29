@@ -76,12 +76,15 @@ public class QuantPostProcessingPanel extends JPanel {
     private JComboBox<String> m_abundanceSummarizingMethodCB;
     private JLabel m_modifiedPeptidesFilteringMethodLabel;
     private JComboBox<String> m_modifiedPeptidesFilteringMethodCB;
+    private JComboBox<String> m_ionAbundanceSummarizingMethodCB;
 
     private final static String[] ABUNDANCE_SUMMARIZING_METHOD_VALUES = {"Mean", "Mean of top 3 peptides", "Median", "Median Biological Profile", "Median Profile", "Sum", "Median Ratio Fitting"};
     private final static String[] ABUNDANCE_SUMMARIZING_METHOD_KEYS = {"MEAN", "MEAN_OF_TOP3", "MEDIAN", "MEDIAN_BIOLOGICAL_PROFILE", "MEDIAN_PROFILE", "SUM", "LFQ"};
     private final static String[] MODIFIED_PEPTIDE_FILTERING_METHOD_VALUES = {"Discard all forms", "Discard modified forms only"};
     private final static String[] MODIFIED_PEPTIDE_FILTERING_METHOD_KEYS = {"DISCARD_ALL_FORMS", "DISCARD_MODIFIED_FORMS"};
-
+    private final static String[] ION_ABUNDANCE_SUMMARIZING_METHOD_VALUES = {"Best Ion", "Sum"};
+    private final static String[] ION_ABUNDANCE_SUMMARIZING_METHOD_KEYS = {"BEST_ION","SUM"};
+  
     /**
      * parameters key
      */
@@ -96,6 +99,7 @@ public class QuantPostProcessingPanel extends JPanel {
     private final static String ABUNDANCE_SUMMARIZING_METHOD_V1 = "abundance_summarizer_method";//V1
 
     private final static String APPLY_NORMALIZATION = "apply_normalization";//double used by peptide & protein
+    private final static String ION_ABUNDANCE_SUMMARIZING_METHOD = "ion_peptide_aggreagation_method";
 
     private JTextField m_peptideStatTestsAlpha;
     private JCheckBox m_applyPepNormalizationChB;
@@ -130,6 +134,7 @@ public class QuantPostProcessingPanel extends JPanel {
     private BooleanParameter m_useOnlySpecificPeptidesParameter;
     private ObjectParameter<String> m_abundanceSummarizingMethodParameter;
     private ObjectParameter<String> m_modifiedPeptidesFilteringMethodParameter;
+    private ObjectParameter<String> m_ionAbundanceSummarizingMethodParameter;
     private List<BooleanParameter> m_peptidesModificationListParameter;
 
     private boolean m_readOnly;
@@ -263,6 +268,11 @@ public class QuantPostProcessingPanel extends JPanel {
         m_abundanceSummarizingMethodCB.setEnabled(!m_readOnly);
         m_abundanceSummarizingMethodParameter = new ObjectParameter<>("abundanceSummarizerMethod", "Abundance Summarizer Method", m_abundanceSummarizingMethodCB, ABUNDANCE_SUMMARIZING_METHOD_VALUES, ABUNDANCE_SUMMARIZING_METHOD_KEYS, 5, null);
         m_parameterList.add(m_abundanceSummarizingMethodParameter);
+        
+        m_ionAbundanceSummarizingMethodCB = new JComboBox(ION_ABUNDANCE_SUMMARIZING_METHOD_VALUES);
+        m_ionAbundanceSummarizingMethodCB.setEnabled(!m_readOnly);
+        m_ionAbundanceSummarizingMethodParameter = new ObjectParameter<>("ionAbundanceSummarizerMethod", "Ion Abundance Summarizer Method", m_ionAbundanceSummarizingMethodCB, ION_ABUNDANCE_SUMMARIZING_METHOD_VALUES, ION_ABUNDANCE_SUMMARIZING_METHOD_KEYS, 0, null);
+        m_parameterList.add(m_ionAbundanceSummarizingMethodParameter);
 
         m_modifiedPeptidesFilteringMethodCB = new JComboBox(MODIFIED_PEPTIDE_FILTERING_METHOD_VALUES);
         m_modifiedPeptidesFilteringMethodCB.setEnabled(!m_readOnly);
@@ -287,7 +297,7 @@ public class QuantPostProcessingPanel extends JPanel {
      * @throws BackingStoreException
      */
     public void loadParameters(FilePreferences filePreferences) throws BackingStoreException {
-         m_loadedPTMsParamsError = false;
+        m_loadedPTMsParamsError = false;
         String[] hiddenParams = {m_parameterList.getPrefixName() + m_peptideStatTestsAlphaParameter.getName(),
                     m_parameterList.getPrefixName() + m_proteinStatTestsAlphaParameter.getName(),
                     m_parameterList.getPrefixName() + m_applyPepMissValInferenceParameter.getName(),
@@ -430,13 +440,26 @@ public class QuantPostProcessingPanel extends JPanel {
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new Insets(5, 5, 5, 5);
-
-        // applyNormalization
+        
         c.gridx = 0;
         c.gridy = 0;
+        c.weightx = 0;
+        c.gridwidth = 1;
+        JLabel ionAbundanceSummarizerMethodLabel = new JLabel("Peptide Ion Abundance Summarizer Method :");
+        ionAbundanceSummarizerMethodLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        pepQuantConfigPanel.add(ionAbundanceSummarizerMethodLabel, c);
+
+        c.gridx++;
+        c.gridwidth = 1;
         c.weightx = 1;
+        pepQuantConfigPanel.add(m_ionAbundanceSummarizingMethodCB, c);
+        
+        // applyNormalization
         c.gridwidth = 2;
+        c.gridx = 0;
+        c.gridy++;
         pepQuantConfigPanel.add(m_applyPepNormalizationChB, c);
+
 
         // applyMissValInference
         c.gridy++;
@@ -493,12 +516,24 @@ public class QuantPostProcessingPanel extends JPanel {
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new Insets(5, 5, 5, 5);
-
-        // applyNormalization
+        
         c.gridx = 0;
         c.gridy = 0;
+        c.weightx = 0;
+        c.gridwidth = 1;
+        JLabel ionAbundanceSummarizerMethodLabel = new JLabel("Peptide Ion Abundance Summarizer Method :");
+        ionAbundanceSummarizerMethodLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        pepQuantConfigPanel.add(ionAbundanceSummarizerMethodLabel, c);
+
+        c.gridx++;
+        c.gridwidth = 1;
         c.weightx = 1;
+        pepQuantConfigPanel.add(m_ionAbundanceSummarizingMethodCB, c);
+        
+        // applyNormalization
         c.gridwidth = 2;
+        c.gridx = 0;
+        c.gridy++;
         pepQuantConfigPanel.add(m_applyPepNormalizationChB, c);
 
         northPanel.add(pepQuantConfigPanel, BorderLayout.NORTH);
@@ -627,6 +662,7 @@ public class QuantPostProcessingPanel extends JPanel {
         params.put(USE_ONLY_SPECIFIC_PEPTIDES, m_useOnlySpecificPeptidesChB.isSelected());
         params.put(DISCARD_MISS_CLEAVED_PEPTIDES, m_discardMissCleavedPeptidesChB.isSelected());
         params.put(DISCARD_MODIFIED_PEPTIDES, m_discardModifiedPeptidesChB.isSelected());
+        params.put(ION_ABUNDANCE_SUMMARIZING_METHOD, ION_ABUNDANCE_SUMMARIZING_METHOD_KEYS[m_ionAbundanceSummarizingMethodCB.getSelectedIndex()]);        
 
         List<Long> ptmIds = new ArrayList();
         for (BooleanParameter ptmToDiscardParameter : m_peptidesModificationListParameter) {

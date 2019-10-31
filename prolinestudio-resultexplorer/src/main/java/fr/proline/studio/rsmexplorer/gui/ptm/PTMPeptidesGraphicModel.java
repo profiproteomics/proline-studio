@@ -204,7 +204,7 @@ public class PTMPeptidesGraphicModel {
     public void setProteinSequence(String sequence) {
 //        m_logger.debug("SSSSSSSSSSSS ProteinSeqence by ptm is {}", m_proteinSequence);
 //        m_logger.debug("SSSSSSSSSSSS Sequence by overview  is {}", sequence);
-        m_proteinSequence = sequence;        
+        m_proteinSequence = sequence;
     }
 
     /**
@@ -258,5 +258,20 @@ public class PTMPeptidesGraphicModel {
 
     public Map<Integer, PTMMark> getAllPtmMarks() {
         return this.m_allPtmMarks;
+    }
+
+    public int getPeptideIndex(int sequencePositon) {
+        int rangeA, rangeZ;
+        PTMPeptideInstance pep;
+        for (int i = 0; i < m_ptmPeptidesInstances.size(); i++) {
+            pep = m_ptmPeptidesInstances.get(i);
+            rangeA = pep.getStartPosition();
+            rangeZ = pep.getStopPosition();
+            if (sequencePositon >= rangeA && sequencePositon <= rangeZ) {
+                return i;
+            }
+
+        }
+        return -1;
     }
 }

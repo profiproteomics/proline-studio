@@ -103,7 +103,7 @@ public class DataboxMultiGraphics extends AbstractDataBox {
         //obtain select index in next bloc
         if ((dataModelInterfaceSet1 != null && !dataModelInterfaceSet1.isEmpty() && (dataModelInterfaceSet1.get(0) instanceof XICComparePeptideTableModel))) {
             ArrayList<Integer> selectedIndex = (ArrayList<Integer>) m_previousDataBox.getData(false, Integer.class);
-            m_logger.debug("multiGraphic, get Selected Index : {}, data size {}", selectedIndex, dataModelInterfaceSet1.size());
+            //m_logger.debug("multiGraphic, get Selected Index : {}, data size {}", selectedIndex, dataModelInterfaceSet1.size());
             if (selectedIndex != null && !selectedIndex.isEmpty()) {
                 XICComparePeptideTableModel data;
                 for (int i = 0; i < dataModelInterfaceSet1.size(); i++) {

@@ -31,6 +31,8 @@ import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -42,6 +44,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.JViewport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,15 +66,25 @@ public class PTMPeptidesGraphicView extends JPanel {
     }
 
     public void setScrollLocation(int ajustedLocation) {
-        this.m_internalPanel.setScrollLocation(ajustedLocation);
+        this.m_internalPanel.setHorizonScrollLocation(ajustedLocation);
         repaint();
     }
 
-    public void setProteinSequence(String sequence){
+    public void setViewPosition(int sequencePositon) {
+        int selectedIndex = m_dataModel.getPeptideIndex(sequencePositon);
+        if (selectedIndex == -1) {
+            this.m_internalPanel.setHorizonScrollLocation(sequencePositon);
+        } else {
+            this.m_internalPanel.setViewPosition(sequencePositon, selectedIndex);
+        }
+        repaint();
+    }
+
+    public void setProteinSequence(String sequence) {
         m_internalPanel.m_dataModel.setProteinSequence(sequence);
         this.m_internalPanel.updateData();
     }
-    
+
     public PTMPeptidesGraphicView(boolean isClusterData) {
         super();
         m_superCtrl = null;
@@ -208,11 +221,26 @@ public class PTMPeptidesGraphicView extends JPanel {
          *
          * @param ajustedLocation: position on protein
          */
-        private void setScrollLocation(int ajustedLocation) {
+        private void setHorizonScrollLocation(int ajustedLocation) {
             JScrollBar bar = this.m_scrollPane.getHorizontalScrollBar();
             int max = bar.getMaximum();
             int x = (int) ((float) max / m_sequenceLength * (ajustedLocation - AJUSTE_GAP));
             bar.setValue(x);
+        }
+
+        private void setViewPosition(int ajustedLocation, int peptideIndex) {
+            JViewport jvp = this.m_scrollPane.getViewport();
+            Rectangle visibleRec = jvp.getVisibleRect();
+            Point vp = jvp.getViewPosition();
+            m_logger.debug("VVVVVVVVVVV2 visibleRec={}, visible Position={} ", visibleRec, vp);
+            int x = (ajustedLocation) * ViewSetting.WIDTH_AA;
+            int y = peptideIndex * (ViewSetting.HEIGHT_AA * 2 - ViewSetting.HEIGHT_AA / 2);
+            Point p = new Point(x, y);
+            m_logger.debug("VVVVVVVVVVV3 sequence position {},peptide index ={},Visible position = {} x={}, y={}", ajustedLocation, peptideIndex, vp, x, y);
+            if (Math.abs(vp.x - p.x) > visibleRec.width || Math.abs(vp.y - p.y) > visibleRec.height) {
+                jvp.setViewPosition(p);
+            }
+
         }
 
         /**
@@ -451,20 +479,20 @@ public class PTMPeptidesGraphicView extends JPanel {
          * @param selectedIndex
          * @param oldSelected
          */
-        private void selectedAction(int selectedIndex, int oldSelected) {           
-                if (selectedIndex >= 0 && selectedIndex < m_dataModel.getRowCount()) {
-                    PTMPeptideInstance pep = m_dataModel.getPeptideAt(selectedIndex);
-                    PTMPeptideInstance oldPep = m_dataModel.getPeptideAt(oldSelected);
-                    if (pep != null) {
-                        if (oldPep != null) {
-                            if (Math.abs(oldPep.getStartPosition() - pep.getStartPosition()) > 3) {
-                                setScrollLocation(pep.getStartPosition());
-                            }
-                        } else {
-                            setScrollLocation(pep.getStartPosition());
+        private void selectedAction(int selectedIndex, int oldSelected) {
+            if (selectedIndex >= 0 && selectedIndex < m_dataModel.getRowCount()) {
+                PTMPeptideInstance pep = m_dataModel.getPeptideAt(selectedIndex);
+                PTMPeptideInstance oldPep = m_dataModel.getPeptideAt(oldSelected);
+                if (pep != null) {
+                    if (oldPep != null) {
+                        if (Math.abs(oldPep.getStartPosition() - pep.getStartPosition()) > 3) {
+                            setHorizonScrollLocation(pep.getStartPosition());
                         }
+                    } else {
+                        setHorizonScrollLocation(pep.getStartPosition());
                     }
-                    m_peptideAreaCtrl.setSelectedIndex(selectedIndex);
+                }
+                m_peptideAreaCtrl.setSelectedIndex(selectedIndex);
                 if (selectedIndex != oldSelected && (selectedIndex != -1) && (m_dataBox != null)) {
                     if (m_superCtrl != null) {
                         m_superCtrl.onMessage(PTMGraphicCtrlPanel.Source.PEPTIDE_AREA, PTMGraphicCtrlPanel.Message.SELECTED);

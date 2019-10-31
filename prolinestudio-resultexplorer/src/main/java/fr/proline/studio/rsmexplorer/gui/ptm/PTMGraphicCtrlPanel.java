@@ -204,7 +204,7 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
         } else if (source.equals(Source.SEQUENCE)) {
             if (message.equals(Message.SELECTED)) {
                 int selectedOnProtein = m_proteinOvervewCtrl.getSelectedProteinPosition();
-                this.m_ptmPeptideAreaCtrl.setScrollLocation(selectedOnProtein);
+                this.m_ptmPeptideAreaCtrl.setViewPosition(selectedOnProtein);
             } else if (message.equals(Message.SEQUENCE)) {
                 String sequence = m_proteinOvervewCtrl.getProteinSequence();
                 this.m_ptmPeptideAreaCtrl.setProteinSequence(sequence);

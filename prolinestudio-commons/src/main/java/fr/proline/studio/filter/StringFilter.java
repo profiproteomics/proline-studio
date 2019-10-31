@@ -369,8 +369,12 @@ public class StringFilter extends Filter {
                 msg = "IOException";
                 Exceptions.printStackTrace(ex);
             }
+            int position = this.textComponent.getCaretPosition();
+            String content = this.textComponent.getText();
+            String beginText = content.substring(0, position);
+            String endText = content.substring(position);
 
-            this.textComponent.setText(msg);
+            this.textComponent.setText(beginText + msg + endText);
         }
 
     }

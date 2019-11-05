@@ -379,20 +379,21 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
         return m_proteinSequence;
     }
 
-    protected void buildSequence(int start, int stop, String pepSquence) {
+    protected void buildSequence(int start, int stop, String pepSequence) {
         StringBuilder sb = new StringBuilder(m_proteinSequence);
 
-        int cLength = pepSquence.length();
-        //logger.debug("Sequence (" + pIndex + "," + content + ")");
+        int cLength = pepSequence.length();
+        //m_logger.debug("pep Sequence ({}-{}-{})",start, pepSequence, stop);
         if ((start - 1) > sb.length()) {
             for (int i = sb.length(); i < start - 1; i++) {//-1, because start,stop begin with 1
                 sb.append("-");
             }
-            sb.append(pepSquence);
+            sb.append(pepSequence);
         } else {
-            sb.replace(start - 1, start - 1 + cLength, pepSquence);
+            sb.replace(start - 1, start - 1 + cLength, pepSequence);
         }
         m_proteinSequence = new String(sb);
+        //m_logger.debug("prot Sequence: {}", m_proteinSequence);
         m_proteinLength = m_proteinSequence.length();
     }
 

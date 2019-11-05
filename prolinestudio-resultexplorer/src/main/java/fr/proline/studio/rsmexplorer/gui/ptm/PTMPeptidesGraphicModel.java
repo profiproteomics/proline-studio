@@ -234,11 +234,8 @@ public class PTMPeptidesGraphicModel {
                     sb.append("-");
                 }
                 sb.append(content);
-            } else if (sb.length() > cLength + pIndex) {
-                sb.replace(pIndex, pIndex + cLength, content);
             } else {
-                sb.delete(pIndex, sb.length());
-                sb.append(content);
+                sb.replace(pIndex, pIndex + cLength, content);
             }
         }
         return sb.toString();

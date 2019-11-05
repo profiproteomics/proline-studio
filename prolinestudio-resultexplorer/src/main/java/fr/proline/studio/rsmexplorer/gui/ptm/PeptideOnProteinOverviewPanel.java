@@ -89,6 +89,7 @@ public class PeptideOnProteinOverviewPanel extends RsmProteinAndPeptideOverviewP
         m_PTMPeptideInstances = ptmPeptideInstances;
         m_peptideInstances = peptideInstances;
         m_proteinLength = sequence.length();
+        m_proteinSequence = sequence;
         String titleComment = "";
         if (sequence.startsWith("0")) {
             m_proteinLength = Integer.valueOf(sequence.substring(1));

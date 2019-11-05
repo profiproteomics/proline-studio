@@ -53,17 +53,18 @@ import fr.proline.studio.extendedtablemodel.SecondAxisTableModelInterface;
 import fr.proline.studio.graphics.DoubleYAxisPlotPanel;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_X_ID;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_Y_ID;
+import fr.proline.studio.pattern.DataboxMultiGraphics;
 import java.awt.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * To rename : This Panel displays multiple Linear Plots : One per ExtendedTableModelInterface
- * passed through setData method.
- * A second (set: actually one, should be list) of object could also be plotted on a second axis .
- *  ==> Rename to MultipleLinearPlotsPanel ... ? 
- * 
- * 
+ * To rename : This Panel displays multiple Linear Plots : One per
+ * ExtendedTableModelInterface passed through setData method. A second (set:
+ * actually one, should be list) of object could also be plotted on a second
+ * axis . ==> Rename to MultipleLinearPlotsPanel ... ?
+ *
+ *
  * @author JM235353
  */
 public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelInterface, PlotToolbarListener {
@@ -97,13 +98,14 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     protected JToggleButton m_gridButton = null;
     protected JButton m_importSelectionButton = null;
     protected JButton m_exportSelectionButton = null;
+    private boolean m_setHideButton;
 
-    public MultiGraphicsPanel(boolean dataLocked, boolean canChooseColor, boolean isDoubleYAxis) {
+    public MultiGraphicsPanel(boolean dataLocked, boolean canChooseColor, boolean isDoubleYAxis, boolean setHideButton) {
         m_isDoubleYAxis = isDoubleYAxis;
         columnXYIndex = new int[2];
         m_dataLocked = dataLocked;
         m_canChooseColor = canChooseColor;
-        
+        m_setHideButton = setHideButton;
         initComponent();
     }
 
@@ -243,6 +245,22 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         toolbar.add(m_gridButton);
         if (m_canChooseColor) {
             toolbar.add(colorPicker);
+        }
+        if (m_setHideButton) {
+            JToggleButton showSelectionButton;
+            showSelectionButton = new JToggleButton(IconManager.getIcon(IconManager.IconType.SELECT_ALL));
+            showSelectionButton.setSize(m_gridButton.getSize());
+            showSelectionButton.setToolTipText("Hide Selection");
+            showSelectionButton.setEnabled(true);
+            showSelectionButton.setFocusPainted(false);
+            showSelectionButton.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    ((DataboxMultiGraphics) m_dataBox).hideSelection(showSelectionButton.isSelected());
+                }
+            });
+            toolbar.add(showSelectionButton);
         }
         toolbar.addSeparator(); // ----
         /*toolbar.add(lockButton);
@@ -522,9 +540,9 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     }
 
     private void setPlotsWithDoubleYAxis() {
-      DoubleYAxisPlotPanel plotPanel = ((DoubleYAxisPlotPanel) m_plotPanel);
-      double mainPlotMaxY = Double.NEGATIVE_INFINITY;
-      double secondPlotMaxY = Double.NEGATIVE_INFINITY;
+        DoubleYAxisPlotPanel plotPanel = ((DoubleYAxisPlotPanel) m_plotPanel);
+        double mainPlotMaxY = Double.NEGATIVE_INFINITY;
+        double secondPlotMaxY = Double.NEGATIVE_INFINITY;
         for (int i = 0; i < m_valuesList.size(); i++) {
             CrossSelectionInterface crossSelectionInterface = (m_crossSelectionInterfaceList == null) || (m_crossSelectionInterfaceList.size() <= i) ? null : m_crossSelectionInterfaceList.get(i);
             //create plotGraphics for each table
@@ -544,23 +562,24 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             plotPanel.addAuxiliaryPlot(plotGraphics);
             Color color = m_valueOn2Yxis.getPlotInformation().getPlotColor();
             String axisTitle = m_valueOn2Yxis.getName();
-            if (axisTitle == null)
+            if (axisTitle == null) {
                 axisTitle = "";
+            }
             plotPanel.setSecondAxisPlotInfo(axisTitle + " " + m_valueOn2Yxis.getDataColumnIdentifier(columnXYIndex[COL_Y_ID]), color);
         }
         plotPanel.preparePaint();
-        
+
         if (plotPanel.hasMainPlots()) {
-          //add to max the quantity equivalent to 5 pixels
-          mainPlotMaxY += (mainPlotMaxY/plotPanel.getYAxis().getHeight())*5;
-          plotPanel.setYAxisBounds(0, mainPlotMaxY);
+            //add to max the quantity equivalent to 5 pixels
+            mainPlotMaxY += (mainPlotMaxY / plotPanel.getYAxis().getHeight()) * 5;
+            plotPanel.setYAxisBounds(0, mainPlotMaxY);
         }
-        
+
         if (plotPanel.hasAuxiliaryPlots()) {
-          secondPlotMaxY += (secondPlotMaxY/plotPanel.getSecondYAxis().getHeight())*5;
-          plotPanel.setSecondaryYAxisBounds(0, secondPlotMaxY);          
+            secondPlotMaxY += (secondPlotMaxY / plotPanel.getSecondYAxis().getHeight()) * 5;
+            plotPanel.setSecondaryYAxisBounds(0, secondPlotMaxY);
         }
-        
+
     }
 
     @Override
@@ -618,6 +637,10 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
                 m_exportSelectionButton.setEnabled(v);
                 break;
         }
+    }
+
+    public void setHideButton(boolean h) {
+        m_setHideButton = h;
     }
 
     protected static class ReferenceToColumn {

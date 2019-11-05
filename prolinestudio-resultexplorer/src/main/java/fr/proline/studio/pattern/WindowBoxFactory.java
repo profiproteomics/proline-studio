@@ -334,9 +334,11 @@ public class WindowBoxFactory {
         boxes[3] = new DataBoxPTMPeptidesGraphic();
         ((DataBoxPTMPeptidesGraphic)boxes[3]).setIsClusterData(true);
         boxes[4] = new DataboxMultiGraphics(false,false,true);//associate a graphic databox for DataboxXicPeptideSet
+        ((DataboxMultiGraphics)boxes[4]).setHideButton(true);
         boxes[4].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);      
         boxes[5] = new DataboxXicPeptideSet(false);//display the selected peptideMatch in each chanel
         boxes[6] = new DataboxMultiGraphics(false,false,true); //associate a graphic databox for DataboxXicPeptideSet
+        ((DataboxMultiGraphics)boxes[6]).setHideButton(true);
         boxes[6].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);     
 
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
@@ -358,12 +360,14 @@ public class WindowBoxFactory {
        // boxes[3] = new DataboxXicPeptideSet(true);//display the selected peptide in each chanel
         //((DataboxXicPeptideSet) boxes[3]).setXICMode(true);      
         boxes[3] = new DataboxMultiGraphics(false,false,true);//associate a graphic databox for DataboxXicPeptideSet
+        ((DataboxMultiGraphics)boxes[3]).setHideButton(true);
         boxes[3].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);               
 //        boxes[5] = new DataBoxPTMSitePepMatches();
 //        boxes[5].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
 //        
         boxes[4] = new DataboxXicPeptideSet(false);//display the selected peptideMatch in each chanel
         boxes[5] = new DataboxMultiGraphics(false,false,true); //associate a graphic databox for DataboxXicPeptideSet
+        ((DataboxMultiGraphics)boxes[5]).setHideButton(true);
         boxes[5].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);     
 
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
@@ -386,12 +390,14 @@ public class WindowBoxFactory {
         boxes[3] = new DataboxXicPeptideSet(true);//display the selected peptide in each chanel
         ((DataboxXicPeptideSet) boxes[3]).setXICMode(true);      
         boxes[4] = new DataboxMultiGraphics(false,false,true);//associate a graphic databox for DataboxXicPeptideSet
+        ((DataboxMultiGraphics)boxes[4]).setHideButton(true);
         boxes[4].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);               
         boxes[5] = new DataBoxPTMSitePepMatches();
         boxes[5].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
         
         boxes[6] = new DataboxXicPeptideSet(false);//display the selected peptideMatch in each chanel
         boxes[7] = new DataboxMultiGraphics(false,false,true); //associate a graphic databox for DataboxXicPeptideSet
+        ((DataboxMultiGraphics)boxes[7]).setHideButton(true);
         boxes[7].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);     
 
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
@@ -498,6 +504,7 @@ public class WindowBoxFactory {
         boxes[1] = new DataboxXicPeptideSet();
         ((DataboxXicPeptideSet) boxes[1]).setXICMode(xicMode);        
         boxes[2] = new DataboxMultiGraphics(false,false,true);
+        ((DataboxMultiGraphics)boxes[2]).setHideButton(true);
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
         if (xicMode) {
             boxes[3] = new DataboxXicPeptideIon();

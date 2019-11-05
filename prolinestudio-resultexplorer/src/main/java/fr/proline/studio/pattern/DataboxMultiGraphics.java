@@ -43,6 +43,9 @@ public class DataboxMultiGraphics extends AbstractDataBox {
     private boolean m_defaultLocked = false;
     private boolean m_canChooseColor = false;
     private boolean m_displayDoubleYAxis = false;
+    private boolean m_hideSelection = false;
+    private ArrayList<Integer> m_selectedIndex;
+    private boolean m_setHideButton;
 
     public DataboxMultiGraphics() {
         this(false, false, false);
@@ -82,7 +85,11 @@ public class DataboxMultiGraphics extends AbstractDataBox {
             inParameter.addParameter(DMasterQuantPeptide.class, true);//for DataBoxXicPeptideSet.propagate
             registerInParameter(inParameter);
         }
+        m_setHideButton = false;
+    }
 
+    protected void setHideButton(boolean h) {
+        this.m_setHideButton = h;
     }
 
     protected boolean isDoubleYAxis() {
@@ -91,7 +98,7 @@ public class DataboxMultiGraphics extends AbstractDataBox {
 
     @Override
     public void createPanel() {
-        MultiGraphicsPanel p = new MultiGraphicsPanel(m_defaultLocked, m_canChooseColor, m_displayDoubleYAxis);
+        MultiGraphicsPanel p = new MultiGraphicsPanel(m_defaultLocked, m_canChooseColor, m_displayDoubleYAxis, m_setHideButton);
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);
@@ -102,13 +109,13 @@ public class DataboxMultiGraphics extends AbstractDataBox {
         List<ExtendedTableModelInterface> dataModelInterfaceSet1 = (List<ExtendedTableModelInterface>) m_previousDataBox.getData(false, ExtendedTableModelInterface.class, true);
         //obtain select index in next bloc
         if ((dataModelInterfaceSet1 != null && !dataModelInterfaceSet1.isEmpty() && (dataModelInterfaceSet1.get(0) instanceof XICComparePeptideTableModel))) {
-            ArrayList<Integer> selectedIndex = (ArrayList<Integer>) m_previousDataBox.getData(false, Integer.class);
+            m_selectedIndex = (ArrayList<Integer>) m_previousDataBox.getData(false, Integer.class);
             //m_logger.debug("multiGraphic, get Selected Index : {}, data size {}", selectedIndex, dataModelInterfaceSet1.size());
-            if (selectedIndex != null && !selectedIndex.isEmpty()) {
+            if (!m_hideSelection && m_selectedIndex != null && !m_selectedIndex.isEmpty()) {//***### here, set selection
                 XICComparePeptideTableModel data;
                 for (int i = 0; i < dataModelInterfaceSet1.size(); i++) {
                     data = (XICComparePeptideTableModel) dataModelInterfaceSet1.get(i);
-                    if (selectedIndex.contains(i)) {
+                    if (m_selectedIndex.contains(i)) {
                         data.setSelected(true);
                     }
                 }
@@ -126,8 +133,7 @@ public class DataboxMultiGraphics extends AbstractDataBox {
         m_plotValues = dataModelInterfaceSet1;
         m_crossSelectionValues = crossSelectionInterfaceL;
         m_plotSecondAxisValues = dataModelInterfaceSet2;
-        if (m_plotValues
-                != null) {
+        if (m_plotValues != null) {
             ((MultiGraphicsPanel) getDataBoxPanelInterface()).setData(m_plotValues, m_crossSelectionValues, m_plotSecondAxisValues);
         }
     }
@@ -136,6 +142,22 @@ public class DataboxMultiGraphics extends AbstractDataBox {
     public void setEntryData(Object data) {
         m_plotValues = (List<ExtendedTableModelInterface>) data;
         ((MultiGraphicsPanel) getDataBoxPanelInterface()).setData(m_plotValues, null);
+    }
+
+    public void hideSelection(boolean hide) {
+        m_hideSelection = hide;
+        if ((m_plotValues != null && !m_plotValues.isEmpty() && (m_plotValues.get(0) instanceof XICComparePeptideTableModel))) {
+            if (m_selectedIndex != null && !m_selectedIndex.isEmpty()) {//***### here, set selection
+                XICComparePeptideTableModel data;
+                for (int i = 0; i < m_plotValues.size(); i++) {
+                    data = (XICComparePeptideTableModel) m_plotValues.get(i);
+                    if (m_selectedIndex.contains(i)) {
+                        data.setSelected(!hide);
+                    }
+                }
+            }
+        }
+        ((MultiGraphicsPanel) getDataBoxPanelInterface()).setData(m_plotValues, m_crossSelectionValues, m_plotSecondAxisValues);
     }
 
 }

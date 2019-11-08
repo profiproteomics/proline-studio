@@ -215,7 +215,7 @@ public class StringUtils {
             } else {
                 if (value instanceof ArrayList) {
                     ArrayList valueList = (ArrayList) value;
-                    if (valueList.get(0) instanceof LinkedTreeMap) {
+                    if (!valueList.isEmpty() && valueList.get(0) instanceof LinkedTreeMap) {
                         for (Object item : valueList) {
                             index = createParameterTree((LinkedTreeMap) item, child, index++);
                         }

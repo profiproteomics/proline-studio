@@ -411,7 +411,7 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         Map<String, Object> params = new HashMap<>();
         params.put("config_version", "2.0");
         //VD TEST 
-        //params.put("ion_peptide_aggreagation_method", "SUM");
+        //params.put("pep_ion_summarizing_methdd", "SUM");
         Map<String, Object> extractionParams = new HashMap<>();
         extractionParams.put("moz_tol", m_extractionMoZTolTF.getText());
         extractionParams.put("moz_tol_unit", DEFAULT_MOZTOL_UNIT);

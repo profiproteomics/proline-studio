@@ -45,11 +45,11 @@ public class FilterRSMProtSetsTask extends AbstractJMSTask {
     private HashMap<String, String> m_argumentsMap;
     
     //Protein PreFilter
-    public static String[] FILTER_KEYS = {"SPECIFIC_PEP","PEP_COUNT", "PEP_SEQ_COUNT", "SCORE"};//TODO USE ENUM
-    public static String[] FILTER_NAME = {"Specific Peptides","Peptides count", "Peptide sequence count","Protein Set Score"};
+    public static String[] FILTER_KEYS = {"SPECIFIC_PEP","PEP_COUNT", "PEP_SEQ_COUNT", "SCORE", "BH_ADJUSTED_PVALUE"};//TODO USE ENUM
+    public static String[] FILTER_NAME = {"Specific Peptides","Peptides count", "Peptide sequence count","Protein Set Score", "BH adjusted pValue (%)"};
     
     public FilterRSMProtSetsTask(AbstractJMSCallback callback,  DDataset dataset,HashMap<String, String> argumentsMap) {
-        super(callback, new TaskInfo( "Filter Protein Sets of Identifcation Summary "+dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
+        super(callback, new TaskInfo( "Filter Protein Sets of Identification Summary "+dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_argumentsMap = argumentsMap;
         m_dataset = dataset; 
     }
@@ -88,10 +88,13 @@ public class FilterRSMProtSetsTask extends AbstractJMSTask {
             if (m_argumentsMap.containsKey(filterKey)) {
                 HashMap filterCfg = new HashMap();
                 filterCfg.put("parameter", filterKey);
-                if(filterKey.equals("SCORE")) //TODO USE ENUM
+                if(filterKey.equals("SCORE")) { //TODO USE ENUM
                     filterCfg.put("threshold", Double.valueOf(m_argumentsMap.get(filterKey)));
-                else
+                } if (filterKey.equals("BH_ADJUSTED_PVALUE")) {
+                    filterCfg.put("threshold", Double.valueOf(m_argumentsMap.get(filterKey))/100.0);
+                }else {
                     filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get(filterKey)));
+                }
                 proteinFilters.add(filterCfg);
             }
         }

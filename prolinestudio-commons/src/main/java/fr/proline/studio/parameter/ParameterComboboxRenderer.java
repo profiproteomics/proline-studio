@@ -22,7 +22,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 
 /**
- * Renderer for Paramters displayed in a combobox
+ * Renderer for Parameters displayed in a combobox
  *
  * @author JM235353
  * @param <E>

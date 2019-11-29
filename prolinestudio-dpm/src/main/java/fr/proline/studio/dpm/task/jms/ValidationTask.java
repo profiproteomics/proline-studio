@@ -16,23 +16,20 @@
  */
 package fr.proline.studio.dpm.task.jms;
 
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Message;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
+import com.thetransactioncompany.jsonrpc2.*;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
-import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
-import static fr.proline.studio.dpm.task.jms.FilterRSMProtSetsTask.FILTER_KEYS;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import static fr.proline.studio.dpm.task.jms.FilterRSMProtSetsTask.FILTER_KEYS;
 
 
 /**
@@ -62,6 +59,8 @@ public class ValidationTask extends AbstractJMSTask  {
     public static String SINGLE_PSM_RANK_FILTER_NAME = "Single PSM per Rank";                                 
     public static String ISOTOPE_OFFSET_FILTER_KEY = "ISOTOPE_OFFSET";
     public static String ISOTOPE_OFFSET_FILTER_NAME = "Isotope Offset";               
+    public static String BH_ADJUSTED_PVALUE_FILTER_KEY = "BH_AJUSTED_PVALUE";
+    public static String BH_ADJUSTED_PVALUE_FILTER_NAME = "BH adjusted pValue (%)";               
 
     private DDataset m_dataset = null;
     private String m_description;  //Not used on server side
@@ -80,7 +79,7 @@ public class ValidationTask extends AbstractJMSTask  {
         m_scoringType = scoringType;
     }
     
-        public ValidationTask(AbstractJMSCallback callback, DDataset dataset, String description, HashMap<String, String> argumentsMap, Integer[] resultSummaryId, HashMap<Long,Long> rsmIdsPerRsIds, String scoringType) {
+    public ValidationTask(AbstractJMSCallback callback, DDataset dataset, String description, HashMap<String, String> argumentsMap, Integer[] resultSummaryId, HashMap<Long,Long> rsmIdsPerRsIds, String scoringType) {
         super(callback, new TaskInfo("JMS Validation of Search Result " + dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_dataset = dataset;
         m_description = description;
@@ -177,74 +176,81 @@ public class ValidationTask extends AbstractJMSTask  {
         params.put("result_set_id", m_dataset.getResultSetId());
         params.put("description", m_description); //JPM.TODO : string is ""
 
-        // Peptide Pre-Filters
-        ArrayList pepFilters = new ArrayList();
+        // PSM Pre-Filters
+        ArrayList psmFilters = new ArrayList();
 
         if (m_argumentsMap.containsKey("PSM_"+RANK_FILTER_KEY)) {
             HashMap filterCfg = new HashMap();
             filterCfg.put("parameter", RANK_FILTER_KEY);
             filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get("PSM_"+RANK_FILTER_KEY)));
-            pepFilters.add(filterCfg);
+            psmFilters.add(filterCfg);
         }
         if (m_argumentsMap.containsKey("PSM_"+SCORE_FILTER_KEY)) {
             HashMap filterCfg = new HashMap();
             filterCfg.put("parameter", SCORE_FILTER_KEY);
             filterCfg.put("threshold", Float.valueOf(m_argumentsMap.get("PSM_"+SCORE_FILTER_KEY)));
-            pepFilters.add(filterCfg);
+            psmFilters.add(filterCfg);
         }
         if (m_argumentsMap.containsKey("PSM_"+MASCOT_EVAL_FILTER_KEY)) {
             HashMap filterCfg = new HashMap();
             filterCfg.put("parameter", MASCOT_EVAL_FILTER_KEY);
             filterCfg.put("threshold", Float.valueOf(m_argumentsMap.get("PSM_"+MASCOT_EVAL_FILTER_KEY)));
-            pepFilters.add(filterCfg);
+            psmFilters.add(filterCfg);
         }
         if (m_argumentsMap.containsKey("PSM_"+MASCOT_ADJUSTED_EVAL_FILTER_KEY)) {
                 HashMap filterCfg = new HashMap();
                 filterCfg.put("parameter", MASCOT_ADJUSTED_EVAL_FILTER_KEY);
                 filterCfg.put("threshold", Float.valueOf(m_argumentsMap.get("PSM_"+MASCOT_ADJUSTED_EVAL_FILTER_KEY)));
-                pepFilters.add(filterCfg);
+                psmFilters.add(filterCfg);
         }
         if (m_argumentsMap.containsKey("PSM_"+PEP_LENGTH_FILTER_KEY)) {
             HashMap filterCfg = new HashMap();
             filterCfg.put("parameter", PEP_LENGTH_FILTER_KEY);
             filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get("PSM_"+PEP_LENGTH_FILTER_KEY)));
-            pepFilters.add(filterCfg);
+            psmFilters.add(filterCfg);
         }
         if (m_argumentsMap.containsKey("PSM_"+MASCOT_IT_SCORE_FILTER_KEY)) {
             HashMap filterCfg = new HashMap();
             filterCfg.put("parameter", MASCOT_IT_SCORE_FILTER_KEY);
             filterCfg.put("threshold", Float.valueOf(m_argumentsMap.get("PSM_"+MASCOT_IT_SCORE_FILTER_KEY)));
-            pepFilters.add(filterCfg);
+            psmFilters.add(filterCfg);
         }
         if (m_argumentsMap.containsKey("PSM_"+MASCOT_HT_SCORE_FILTER_KEY)) {
             HashMap filterCfg = new HashMap();
             filterCfg.put("parameter", MASCOT_HT_SCORE_FILTER_KEY);
             filterCfg.put("threshold", Float.valueOf(m_argumentsMap.get("PSM_"+MASCOT_HT_SCORE_FILTER_KEY)));
-            pepFilters.add(filterCfg);
+            psmFilters.add(filterCfg);
         }
         if (m_argumentsMap.containsKey("PSM_"+SINGLE_PSM_QUERY_FILTER_KEY)) {
             HashMap filterCfg = new HashMap();
             filterCfg.put("parameter", SINGLE_PSM_QUERY_FILTER_KEY);
             filterCfg.put("threshold", 1);
             filterCfg.put("post_validation", Boolean.valueOf(m_argumentsMap.get("PSM_"+SINGLE_PSM_QUERY_FILTER_KEY)));
-            pepFilters.add(filterCfg);
+            psmFilters.add(filterCfg);
         }
         if (m_argumentsMap.containsKey("PSM_"+SINGLE_PSM_RANK_FILTER_KEY)) {
             HashMap filterCfg = new HashMap();
             filterCfg.put("parameter", SINGLE_PSM_RANK_FILTER_KEY);
             filterCfg.put("threshold", 1);
             filterCfg.put("post_validation", Boolean.valueOf(m_argumentsMap.get("PSM_"+SINGLE_PSM_RANK_FILTER_KEY)));
-            pepFilters.add(filterCfg);
+            psmFilters.add(filterCfg);
         }
         if (m_argumentsMap.containsKey("PSM_"+ISOTOPE_OFFSET_FILTER_KEY)) {
             HashMap filterCfg = new HashMap();
             filterCfg.put("parameter", ISOTOPE_OFFSET_FILTER_KEY);
             filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get("PSM_"+ISOTOPE_OFFSET_FILTER_KEY)));
-            pepFilters.add(filterCfg);
+            psmFilters.add(filterCfg);
         }
-        params.put("pep_match_filters", pepFilters);
+        if (m_argumentsMap.containsKey("PSM_"+BH_ADJUSTED_PVALUE_FILTER_KEY)) {
+            HashMap filterCfg = new HashMap();
+            filterCfg.put("parameter", BH_ADJUSTED_PVALUE_FILTER_KEY);
+            filterCfg.put("threshold", Double.valueOf(m_argumentsMap.get("PSM_"+BH_ADJUSTED_PVALUE_FILTER_KEY))/100.0);
+            psmFilters.add(filterCfg);
+        }
 
-        // Peptide Validator
+        params.put("pep_match_filters", psmFilters);
+
+        // PSM Validator
         if (m_argumentsMap.containsKey("expected_fdr")) {
             HashMap pepMatchValidator = new HashMap();
             pepMatchValidator.put("parameter", m_argumentsMap.get("expected_fdr_parameter"));
@@ -252,12 +258,30 @@ public class ValidationTask extends AbstractJMSTask  {
             params.put("pep_match_validator_config", pepMatchValidator);
         }
 
-
-            //DEPRECATED On server Side
-        if (m_argumentsMap.containsKey("use_td_competition")) {
-            params.put("use_td_competition", Boolean.parseBoolean(m_argumentsMap.get("use_td_competition")));
+        if (m_argumentsMap.containsKey("td_analyzer")) {
+            HashMap tdAnalyzerConfig = new HashMap();
+            tdAnalyzerConfig.put("method_name", m_argumentsMap.get("td_analyzer"));
+            
+            if (m_argumentsMap.containsKey("db_ratio")) {
+                HashMap tdAnalyzerParams = new HashMap();
+                tdAnalyzerParams.put("ratio", m_argumentsMap.get("db_ratio"));            
+                tdAnalyzerConfig.put("params", tdAnalyzerParams);
+            }
+            params.put("td_analyzer_config", tdAnalyzerConfig);
+            
         }
 
+        // Peptide Pre-Filters
+        ArrayList peptideFilters = new ArrayList();
+        if (m_argumentsMap.containsKey("PEPTIDE_"+BH_ADJUSTED_PVALUE_FILTER_KEY)) {
+            HashMap filterCfg = new HashMap();
+            filterCfg.put("parameter", BH_ADJUSTED_PVALUE_FILTER_KEY);
+            filterCfg.put("threshold", Double.valueOf(m_argumentsMap.get("PEPTIDE_"+BH_ADJUSTED_PVALUE_FILTER_KEY))/100.0);
+            peptideFilters.add(filterCfg);
+        }
+        params.put("peptide_filters", peptideFilters);
+        
+        
         params.put("pep_set_score_type", m_scoringType);
 
         // Protein Pre-Filters
@@ -268,10 +292,13 @@ public class ValidationTask extends AbstractJMSTask  {
             if (m_argumentsMap.containsKey(filterKeyOfInMap)) {
                 HashMap filterCfg = new HashMap();
                 filterCfg.put("parameter", filterKey);
-                if (filterKey.equals("SCORE")) //TODO USE ENUM
+                if (filterKey.equals("SCORE")) { //TODO USE ENUM
                     filterCfg.put("threshold", Double.valueOf(m_argumentsMap.get(filterKeyOfInMap)));
-                else
-                    filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get(filterKeyOfInMap)));                
+                } else if (filterKey.equals("BH_ADJUSTED_PVALUE")) {
+                    filterCfg.put("threshold", Double.valueOf(m_argumentsMap.get(filterKeyOfInMap))/100.0);                  
+                } else {
+                    filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get(filterKeyOfInMap)));
+                }
                 proteinFilters.add(filterCfg);
             }
         }

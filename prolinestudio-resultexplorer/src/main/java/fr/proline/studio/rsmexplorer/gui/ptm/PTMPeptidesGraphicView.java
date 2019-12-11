@@ -232,11 +232,9 @@ public class PTMPeptidesGraphicView extends JPanel {
             JViewport jvp = this.m_scrollPane.getViewport();
             Rectangle visibleRec = jvp.getVisibleRect();
             Point vp = jvp.getViewPosition();
-            m_logger.debug("VVVVVVVVVVV2 visibleRec={}, visible Position={} ", visibleRec, vp);
             int x = (ajustedLocation) * ViewSetting.WIDTH_AA;
             int y = peptideIndex * (ViewSetting.HEIGHT_AA * 2 - ViewSetting.HEIGHT_AA / 2);
             Point p = new Point(x, y);
-            m_logger.debug("VVVVVVVVVVV3 sequence position {},peptide index ={},Visible position = {} x={}, y={}", ajustedLocation, peptideIndex, vp, x, y);
             if (Math.abs(vp.x - p.x) > visibleRec.width || Math.abs(vp.y - p.y) > visibleRec.height) {
                 jvp.setViewPosition(p);
             }

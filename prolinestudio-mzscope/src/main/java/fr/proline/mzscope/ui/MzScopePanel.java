@@ -573,6 +573,7 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
             }
             mapRawFilePanelRawFile.remove(rawfile);
         }
+        RawFileManager.getInstance().removeFile(rawfile);
     }
 
     private void removeRawFilePanel(IRawFile rawFile, AbstractRawFilePanel panel) {

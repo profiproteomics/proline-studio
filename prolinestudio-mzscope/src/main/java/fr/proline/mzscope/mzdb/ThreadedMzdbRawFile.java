@@ -264,4 +264,8 @@ public class ThreadedMzdbRawFile implements IRawFile {
       return null;
     }
     
+    @Override
+    public void closeIRawFile() {
+        mzdbRawFile.closeIRawFile();
+    }     
 }

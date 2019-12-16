@@ -31,8 +31,8 @@ import org.slf4j.LoggerFactory;
  */
 public class MzMLRawFile implements IRawFile {
 
-   private static Logger logger = LoggerFactory.getLogger(MzMLRawFile.class);
-   private File mzMLFile;
+   private static final Logger LOG = LoggerFactory.getLogger(MzMLRawFile.class);
+   private final File mzMLFile;
    private List<Scan> scans;
 
    public MzMLRawFile(File file) {
@@ -43,11 +43,11 @@ public class MzMLRawFile implements IRawFile {
    private void init() {
       try {
          long start = System.currentTimeMillis();
-         logger.info("Start reading mzMLRawFile "+mzMLFile.getAbsolutePath());
+         LOG.info("Start reading mzMLRawFile "+mzMLFile.getAbsolutePath());
          scans = mzMLReader.read(mzMLFile.getAbsolutePath());
-         logger.info("File mzML read in :: " + (System.currentTimeMillis() - start) + " ms");
+         LOG.info("File mzML read in :: " + (System.currentTimeMillis() - start) + " ms");
       } catch (Exception e) {
-         logger.error("cannot read file " + mzMLFile.getAbsolutePath(), e);
+         LOG.error("cannot read file " + mzMLFile.getAbsolutePath(), e);
       }
    }
 
@@ -62,6 +62,7 @@ public class MzMLRawFile implements IRawFile {
     }
 
    
+   @Override
     public IChromatogram getTIC() {
       throw new UnsupportedOperationException("Not supported yet.");      
    }
@@ -160,4 +161,15 @@ public class MzMLRawFile implements IRawFile {
     public QCMetrics getFileMetrics() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-}
+    
+    @Override
+    public String toString() {
+        return getName();
+    }
+
+    @Override
+    public void closeIRawFile() {
+        
+    }
+    
+  }

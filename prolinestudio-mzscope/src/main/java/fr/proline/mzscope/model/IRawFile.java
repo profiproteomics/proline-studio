@@ -173,5 +173,10 @@ public interface IRawFile {
     * @return 
     */
    public QCMetrics getFileMetrics();
-   
+
+   /*
+   * Close IRawFile : called when file will be closed / removed from file list.
+   * All necessary resouces should be closed here
+   */
+   public void closeIRawFile();
 }

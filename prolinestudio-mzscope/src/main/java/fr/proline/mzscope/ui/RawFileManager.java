@@ -19,6 +19,7 @@ package fr.proline.mzscope.ui;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.mzdb.ThreadedMzdbRawFile;
 import fr.proline.mzscope.mzml.MzMLRawFile;
+import fr.proline.mzscope.timstof.TimstofRawFile;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,10 +34,10 @@ import org.slf4j.LoggerFactory;
  */
 public class RawFileManager {
 
-    private static Logger logger = LoggerFactory.getLogger(RawFileManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(RawFileManager.class);
     
     private Map<String, IRawFile> files;
-
+ 
     private IRawFile currentFile;
 
     private static RawFileManager instance;
@@ -49,7 +50,7 @@ public class RawFileManager {
     }
 
     private RawFileManager() {
-        files = new HashMap<String,IRawFile>();
+        files = new HashMap<>();
     }
 
     public IRawFile addRawFile(IRawFile rawFile) {
@@ -63,11 +64,15 @@ public class RawFileManager {
        if (file.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
             currentFile = new ThreadedMzdbRawFile(file);
             files.put(file.getName(), currentFile);
-            logger.info("Rawfile {} added to RawFileManager",file.getAbsolutePath());
+            logger.info("mzDB Rawfile {} added to RawFileManager",file.getAbsolutePath());
         } else if (file.getAbsolutePath().toLowerCase().endsWith(".mzml")) {
             currentFile = new MzMLRawFile(file);
             files.put(file.getName(), currentFile);
-            logger.info("Rawfile {} added to RawFileManager",file.getAbsolutePath());
+            logger.info("mzML Rawfile {} added to RawFileManager",file.getAbsolutePath());
+        } else if(file.getAbsolutePath().toLowerCase().endsWith(".d")){
+            currentFile = new TimstofRawFile(file);
+            files.put(file.getName(), currentFile);
+            logger.info("TimsTof Rawfile {} added to RawFileManager",file.getAbsolutePath());
         }
        return currentFile;
     }
@@ -87,11 +92,26 @@ public class RawFileManager {
     }
 
     public List<IRawFile> getAllFiles(){
-        return new ArrayList<IRawFile>(files.values());
+        return new ArrayList<>(files.values());
+    }
+    
+    public void removeFile(IRawFile rawFile){
+        if(files.containsValue(rawFile)){
+            for(Map.Entry<String, IRawFile> e : files.entrySet()){
+                if(e.getValue().equals(rawFile) ){
+                    rawFile.closeIRawFile();
+                    files.remove(e.getKey());
+                    break;
+                }
+            }
+        }
     }
     
     public void removeAllFiles(){
-        files = new HashMap<String,IRawFile>();
+        for(IRawFile rFile :  files.values()){
+            rFile.closeIRawFile();
+        }
+        files = new HashMap<>();
     }
 
     public boolean removeRawFile(IRawFile rawFile) {

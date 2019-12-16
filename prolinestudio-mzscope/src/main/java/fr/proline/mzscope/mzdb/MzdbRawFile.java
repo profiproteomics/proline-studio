@@ -56,7 +56,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,9 +68,9 @@ import scala.Option;
  */
 public class MzdbRawFile implements IRawFile {
 
-    private static final Logger logger = LoggerFactory.getLogger(MzdbRawFile.class);
-    final private static DecimalFormat massFormatter = new DecimalFormat("0.####");
-    final private static DecimalFormat timeFormatter = new DecimalFormat("0.00");
+    private static final Logger LOG = LoggerFactory.getLogger(MzdbRawFile.class);
+    final private static DecimalFormat MASS_FORMATTER = new DecimalFormat("0.####");
+    final private static DecimalFormat TIME_FORMATTER = new DecimalFormat("0.00");
 
     private final File mzDbFile;
     private MzDbReader reader;
@@ -97,9 +96,9 @@ public class MzdbRawFile implements IRawFile {
             //reader.enableParamTreeLoading();
             long start = System.currentTimeMillis();
             isDIAFile= checkDIAFile();
-            logger.debug("MzdbRawFile "+getName()+(isDIAFile?" is ": " is not ")+" a DIA File in "+(System.currentTimeMillis() - start)+" ms");
+            LOG.debug("MzdbRawFile "+getName()+(isDIAFile?" is ": " is not ")+" a DIA File in "+(System.currentTimeMillis() - start)+" ms");
         } catch (ClassNotFoundException | FileNotFoundException | SQLiteException e) {
-            logger.error("cannot read file " + mzDbFile.getAbsolutePath(), e);
+            LOG.error("cannot read file " + mzDbFile.getAbsolutePath(), e);
         }
     }
 
@@ -129,7 +128,7 @@ public class MzdbRawFile implements IRawFile {
             elutionStartTime = Math.floor(headers[0].getElutionTime()/60.0);
             elutionEndTime = Math.ceil(headers[headers.length - 1].getElutionTime()/60.0);
          } catch (SQLiteException ex) {
-            logger.error("Cannot generate TIC chromatogram", ex);
+            LOG.error("Cannot generate TIC chromatogram", ex);
         }
     }
     
@@ -164,7 +163,7 @@ public class MzdbRawFile implements IRawFile {
             chromatogram = new Chromatogram(getName(), getName()+" TIC", xAxisData, yAxisData, getElutionStartTime(), getElutionEndTime());
             return chromatogram;
         } catch (SQLiteException ex) {
-            logger.error("Cannot generate TIC chromatogram", ex);
+            LOG.error("Cannot generate TIC chromatogram", ex);
         }
         return chromatogram;
     }
@@ -184,7 +183,7 @@ public class MzdbRawFile implements IRawFile {
             chromatogram = new Chromatogram(getName(), getName()+" BPC", xAxisData, yAxisData, getElutionStartTime(), getElutionEndTime());
             return chromatogram;
         } catch (SQLiteException ex) {
-            logger.error("Cannot generate BPC chromatogram", ex);
+            LOG.error("Cannot generate BPC chromatogram", ex);
         }
         return chromatogram;
     }
@@ -193,7 +192,7 @@ public class MzdbRawFile implements IRawFile {
     public IChromatogram getXIC(MsnExtractionRequest params) {
         long start = System.currentTimeMillis();
         Chromatogram chromatogram = null;
-        logger.info("Extract XIC with params : " + params.toString());
+        LOG.info("Extract XIC with params : " + params.toString());
 
         try {
             Peak[] peaks;
@@ -208,17 +207,17 @@ public class MzdbRawFile implements IRawFile {
                 chromatogram.setMaxMz((params.getMsLevel() == 1) ? params.getMaxMz() : params.getFragmentMaxMz());
                 StringBuilder builder = new StringBuilder();
                 builder.append("MS").append(params.getMsLevel()).append(" m/z: ");
-                builder.append(massFormatter.format(chromatogram.getMinMz())).append("-").append(massFormatter.format(chromatogram.getMaxMz()));
+                builder.append(MASS_FORMATTER.format(chromatogram.getMinMz())).append("-").append(MASS_FORMATTER.format(chromatogram.getMaxMz()));
                 if (params.getMsLevel() > 1) {
-                    builder.append(" (prec m/z: ").append(massFormatter.format(params.getMz())).append(')');
+                    builder.append(" (prec m/z: ").append(MASS_FORMATTER.format(params.getMz())).append(')');
                 }
                 chromatogram.setTitle(builder.toString());
             } else {
-                logger.info("mzdb extracted chromatogram is empty");
+                LOG.info("mzdb extracted chromatogram is empty");
             }
-            logger.info("mzdb chromatogram extracted in {} ms", (System.currentTimeMillis() - start));
+            LOG.info("mzdb chromatogram extracted in {} ms", (System.currentTimeMillis() - start));
         } catch (SQLiteException | StreamCorruptedException e) {
-            logger.error("Error during chromatogram extraction", e);
+            LOG.error("Error during chromatogram extraction", e);
         }
         return chromatogram;
     }
@@ -249,7 +248,7 @@ public class MzdbRawFile implements IRawFile {
                     previousSpectrumId = (int) peak.getLcContext().getSpectrumId();
                 }
             } catch (SQLiteException sle) {
-                logger.error("Error while reading mzdb file", sle);
+                LOG.error("Error while reading mzdb file", sle);
             }
             chromatogram = new Chromatogram(getName(), "", Doubles.toArray(xAxisData), Doubles.toArray(yAxisData), getElutionStartTime(), getElutionEndTime());
         }
@@ -304,10 +303,10 @@ public class MzdbRawFile implements IRawFile {
                 }
             }
         } catch (SQLiteException | StreamCorruptedException ex) {
-            logger.error("Error while getting LcMs RunSlice Iterator: " + ex);
+            LOG.error("Error while getting LcMs RunSlice Iterator: " + ex);
         } catch (Exception e) {
-            logger.error("unexpected error ",e);
-        }
+            LOG.error("unexpected error ",e);
+        } 
         return result;
     }
 
@@ -388,12 +387,12 @@ public class MzdbRawFile implements IRawFile {
     private List<IFeature> extractFeaturesFromMs2(float tolPPM) {
         List<IFeature> result = new ArrayList<>();
         try {
-            logger.info("retrieve spectrum headers...");
-            SpectrumHeader[] ms2SpectrumHeaders = reader.getMs2SpectrumHeaders();
+            LOG.info("retrieve spectrum headers...");
+            SpectrumHeader[] readMs2SpectrumHeaders = reader.getMs2SpectrumHeaders();
 
             List<PutativeFeature> pfs = new ArrayList<>();
-            logger.info("building putative features list from MS2 spectrum events...");
-            for (SpectrumHeader spectrumH : ms2SpectrumHeaders) {
+            LOG.info("building putative features list from MS2 spectrum events...");
+            for (SpectrumHeader spectrumH : readMs2SpectrumHeaders) {
                 pfs.add(new PutativeFeature(
                         PutativeFeature.generateNewId(),
                         spectrumH.getPrecursorMz(),
@@ -408,7 +407,7 @@ public class MzdbRawFile implements IRawFile {
                 result.add(new MzdbFeatureWrapper(f, this, 1));
             }
         } catch (SQLiteException ex) {
-            logger.error("error while extracting features", ex);
+            LOG.error("error while extracting features", ex);
         }
         return result;
     }
@@ -424,7 +423,7 @@ public class MzdbRawFile implements IRawFile {
             List<Feature> tmpresult = scala.collection.JavaConversions.seqAsJavaList(extractor.extractFeatures(rsdProv, scala.collection.JavaConversions.asScalaBuffer(pfs), tolPPM));
             tmpresult.stream().forEach(f -> result.add(f));
         } catch (SQLiteException | StreamCorruptedException ex) {
-            logger.error("error while extracting features", ex);
+            LOG.error("error while extracting features", ex);
         }
         return result;
     }
@@ -442,8 +441,8 @@ public class MzdbRawFile implements IRawFile {
             final double[] leftSigma = new double[mzList.length];
             final double[] rightSigma = new double[mzList.length];
             final float[] intensityList = data.getIntensityList();
-            List<Float> xAxisData = new ArrayList<Float>(mzList.length);
-            List<Float> yAxisData = new ArrayList<Float>(mzList.length);
+            List<Float> xAxisData = new ArrayList<>(mzList.length);
+            List<Float> yAxisData = new ArrayList<>(mzList.length);
             for (int count = 0; count < mzList.length; count++) {
                 if ((data.getLeftHwhmList() != null) && data.getLeftHwhmList()[count] > 0 && !encoding.getMode().equals(DataMode.PROFILE)) {
                     leftSigma[count] = 2.0 * data.getLeftHwhmList()[count] / 2.35482;
@@ -496,7 +495,7 @@ public class MzdbRawFile implements IRawFile {
             StringBuilder builder = new StringBuilder(getName());
 
             if (spectrum.getMsLevel() == 2) {
-                builder.append(massFormatter.format(rawSpectrum.getHeader().getPrecursorMz())).append(" (");
+                builder.append(MASS_FORMATTER.format(rawSpectrum.getHeader().getPrecursorMz())).append(" (");
                 builder.append(rawSpectrum.getHeader().getPrecursorCharge()).append("+) - ");
                 spectrum.setPrecursorMz(rawSpectrum.getHeader().getPrecursorMz());
                 spectrum.setPrecursorCharge(rawSpectrum.getHeader().getPrecursorCharge());
@@ -504,16 +503,16 @@ public class MzdbRawFile implements IRawFile {
                 spectrum.setPrecursorMz(null);
                 spectrum.setPrecursorCharge(null);
             }
-            builder.append(", sc=").append(spectrumIndex).append(", rt=").append(timeFormatter.format(rawSpectrum.getHeader().getElutionTime() / 60.0));
+            builder.append(", sc=").append(spectrumIndex).append(", rt=").append(TIME_FORMATTER.format(rawSpectrum.getHeader().getElutionTime() / 60.0));
             builder.append(", ms").append(spectrum.getMsLevel());
             //spectrum.setTitle(builder.toString());
             spectrum.setTitle("");
             spectrum.setSpectrumData(data);
             //logger.debug("mzdb Spectrum length {} rebuilded in Spectrum length {} ", mzList.length, xAxisData.size());
         } catch (SQLiteException | StreamCorruptedException ex) {
-            logger.error("enable to retrieve Spectrum data", ex);
+            LOG.error("enable to retrieve Spectrum data", ex);
         }catch(Exception e){
-            logger.error("Error while retrieving Spectrum data", e);
+            LOG.error("Error while retrieving Spectrum data", e);
         }
         return spectrum;
     }
@@ -525,19 +524,20 @@ public class MzdbRawFile implements IRawFile {
             SpectrumHeader[] headers = (msLevel == 1) ? reader.getMs1SpectrumHeaders() : reader.getMs2SpectrumHeaders();
             return Arrays.stream(headers).mapToDouble(h -> h.getElutionTime()/60.0).toArray();
         } catch (SQLiteException e) {
-            logger.error("enable to retrieve spectrum headers");
+            LOG.error("enable to retrieve spectrum headers");
         }
 
         return null;
     }
 
+    @Override
     public double getSpectrumElutionTime(int spectrumIndex) {
-        SpectrumHeader header = null;
+        SpectrumHeader header;
         try {
             header = reader.getSpectrumHeaderById().get((long) spectrumIndex);
             return header.getElutionTime();
         } catch (SQLiteException e) {
-            logger.error("enable to retrieve Spectrum Id", e);
+            LOG.error("enable to retrieve Spectrum Id", e);
         }
 
         return -1.0;
@@ -548,7 +548,7 @@ public class MzdbRawFile implements IRawFile {
         try {
             return (int) reader.getSpectrumHeaderForTime((float) retentionTime, 1).getSpectrumId();
         } catch (Exception ex) {
-            logger.error("enable to retrieve Spectrum Id", ex);
+            LOG.error("enable to retrieve Spectrum Id", ex);
         }
         return 0;
     }
@@ -575,7 +575,7 @@ public class MzdbRawFile implements IRawFile {
             }
             return (int) k;
         } catch (SQLiteException e) {
-            logger.error("Error while reading spectrumsCount", e);
+            LOG.error("Error while reading spectrumsCount", e);
         }
         return 0;
     }
@@ -596,10 +596,10 @@ public class MzdbRawFile implements IRawFile {
         List<Float> listMsMsEventTime = new ArrayList();
         if (ms2SpectrumHeaders == null) {
             try {
-                logger.debug("retrieve Ms2 SpectrumHeader");
+                LOG.debug("retrieve Ms2 SpectrumHeader");
                 buildMs2SpectrumHeaderIndexes(reader.getMs2SpectrumHeaders());
             } catch (SQLiteException ex) {
-                logger.error("Exception while retrieving SpectrumHeader " + ex);
+                LOG.error("Exception while retrieving SpectrumHeader " + ex);
             }
         }
         if (ms2SpectrumHeaders != null) {
@@ -615,7 +615,7 @@ public class MzdbRawFile implements IRawFile {
                 }
             }
         }
-        logger.debug("retrieve MS/MS events finished in " + (System.currentTimeMillis() - startTime) + "+ ms");
+        LOG.debug("retrieve MS/MS events finished in " + (System.currentTimeMillis() - startTime) + "+ ms");
         return listMsMsEventTime;
     }
     
@@ -624,7 +624,7 @@ public class MzdbRawFile implements IRawFile {
         try {
             return reader.getSpectraCount();
         } catch (SQLiteException sle) {
-            logger.error("Error while reading mzdb file", sle);
+            LOG.error("Error while reading mzdb file", sle);
         }
         return 0;
     }
@@ -638,22 +638,22 @@ public class MzdbRawFile implements IRawFile {
                 case MGF :{
                     try {
                         MgfExportParameters mgfExportParam = (MgfExportParameters)exportParams;
-                        logger.debug("MGF writer start for " + this.getName() + ": mgfFilePath=" + outputFileName 
+                        LOG.debug("MGF writer start for " + this.getName() + ": mgfFilePath=" + outputFileName 
                                 + ", precursorMzComputation=" + mgfExportParam.getPrecComp().getParamName() +
                                 ", mzTol=" + mgfExportParam.getMzTolPPM() 
                                 + ", intensityCutoff=" + mgfExportParam.getIntensityCutoff() 
                                 + ", exportProlineTitle=" + mgfExportParam.isExportProlineTitle());
                         MgfWriter writer = new MgfWriter(this.getFile().getAbsolutePath());
                         writer.write(outputFileName, mgfExportParam.getPrecComp(), mgfExportParam.getIntensityCutoff(), mgfExportParam.isExportProlineTitle());
-                        logger.debug(" mgf created in " + (System.currentTimeMillis() - start) + " ms");
+                        LOG.debug(" mgf created in " + (System.currentTimeMillis() - start) + " ms");
                     } catch (SQLiteException | ClassNotFoundException ex) {
-                        logger.error("SQLiteException or ClassNotFoundException while exporting mgf file", ex);
+                        LOG.error("SQLiteException or ClassNotFoundException while exporting mgf file", ex);
                         return false;
                     } catch (FileNotFoundException ex) {
-                        logger.error("FileNotFoundException while exporting mgf file: ", ex);
+                        LOG.error("FileNotFoundException while exporting mgf file: ", ex);
                         return false;
                     }catch (IOException ex) {
-                        logger.error("IOException while exporting mgf file: ", ex);
+                        LOG.error("IOException while exporting mgf file: ", ex);
                         return false;
                     }
                     break;
@@ -668,7 +668,7 @@ public class MzdbRawFile implements IRawFile {
                             try{
                                 spectrumHeaders = reader.getMs1SpectrumHeaders();
                             }catch(SQLiteException ex){
-                                logger.error("SQLiteException while exporting spectrum Header file", ex);
+                                LOG.error("SQLiteException while exporting spectrum Header file", ex);
                                 return false;
                             }
                             break;
@@ -677,7 +677,7 @@ public class MzdbRawFile implements IRawFile {
                             try{
                                 spectrumHeaders = reader.getMs2SpectrumHeaders();
                             }catch(SQLiteException ex){
-                                logger.error("SQLiteException while exporting scpectrum Header file", ex);
+                                LOG.error("SQLiteException while exporting scpectrum Header file", ex);
                                 return false;
                             }
                             break;
@@ -689,7 +689,7 @@ public class MzdbRawFile implements IRawFile {
                     }
                     // runId is set to -1
                     MsSpectrumTSVWriter.writeRun(spectrumHeaders, -1, outFile);
-                    logger.debug(" scan header file created in " + (System.currentTimeMillis() - start) + " ms");
+                    LOG.debug(" scan header file created in " + (System.currentTimeMillis() - start) + " ms");
                     break;
                 }
                 default:{
@@ -709,7 +709,7 @@ public class MzdbRawFile implements IRawFile {
                 return true;
             }
         } catch (SQLiteException ex) {
-            logger.error("Check DIA: SQLiteException while reading acquisition mode", ex);
+            LOG.error("Check DIA: SQLiteException while reading acquisition mode", ex);
         }
         return false;
     }
@@ -724,7 +724,7 @@ public class MzdbRawFile implements IRawFile {
         try {
             return MzdbMetricsCollector.getFileFormatData(getMzDbReader());
         } catch (SQLiteException ex) {
-            logger.error("Enable to extract information from mzdb file", ex);
+            LOG.error("Enable to extract information from mzdb file", ex);
         }
         return null;
     }
@@ -735,9 +735,13 @@ public class MzdbRawFile implements IRawFile {
             QCMetrics metrics = MzdbMetricsCollector.getMSMetrics(this);
             return metrics;
         } catch (SQLiteException ex) {
-            logger.error("Enable to extract information from mzdb file", ex);
+            LOG.error("Enable to extract information from mzdb file", ex);
         }
         return null;
     }
-    
+ 
+    @Override
+    public void closeIRawFile() {
+        reader.close();
+    }   
 }

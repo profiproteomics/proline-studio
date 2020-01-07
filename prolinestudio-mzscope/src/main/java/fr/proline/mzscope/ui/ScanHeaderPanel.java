@@ -277,6 +277,8 @@ public class ScanHeaderPanel extends JPanel {
             }
             retentionTimeTF.setText(TIME_FORMATTER.format(scan.getRetentionTime() / 60.0));
             msLevelTF.setText(Integer.toString(scan.getMsLevel()));
+            if(scan.getTitle()!=null && !scan.getTitle().isEmpty())
+                titleLabel.setText(scan.getTitle());
         }
     }
 

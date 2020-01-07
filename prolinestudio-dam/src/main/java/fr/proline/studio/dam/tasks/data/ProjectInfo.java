@@ -24,7 +24,7 @@ import java.util.Date;
  * 
  * @author JM235353
  */
-public class ProjectToDBs {
+public class ProjectInfo {
     
     private long m_projectId;
     private String m_name;
@@ -37,7 +37,7 @@ public class ProjectToDBs {
     private Integer m_rawFilesCount;
 
 
-    public ProjectToDBs(long projectId, String name, String description, String properties, String user) {
+    public ProjectInfo(long projectId, String name, String description, String properties, String user) {
         m_projectId = projectId;
         m_name = name;
         m_description = description;
@@ -55,6 +55,10 @@ public class ProjectToDBs {
         }
     }
 
+    public Date getLastDatasetDate() {
+      return m_lastDatasetDate;
+    }
+    
     public void setLastDatasetDate(Date date) {
         m_lastDatasetDate = date;
     }

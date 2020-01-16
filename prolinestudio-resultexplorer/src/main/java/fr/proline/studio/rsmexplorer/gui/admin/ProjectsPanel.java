@@ -16,11 +16,12 @@
  */
 package fr.proline.studio.rsmexplorer.gui.admin;
 
+import fr.proline.studio.dam.tasks.data.DRawFile;
 import fr.proline.studio.table.BeanTableModel;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.dam.tasks.data.ProjectToDBs;
+import fr.proline.studio.dam.tasks.data.ProjectInfo;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.filter.FilterButton;
@@ -32,12 +33,18 @@ import fr.proline.studio.table.renderer.DoubleRenderer;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelListener;
 /**
  *
@@ -46,16 +53,20 @@ import javax.swing.event.TableModelListener;
  * 
  * @author JM235353
  */
-public class ProjectsPanel extends JPanel {
+public class ProjectsPanel extends JPanel implements ListSelectionListener {
     
     private JDialog m_dialogOwner = null;
     private Boolean m_isEditable = true;
     
-    private final BeanTableModel m_genericBeanModel = new BeanTableModel<ProjectToDBs>(ProjectToDBs.class);
-    private final CompoundTableModel m_projectsModel = new CompoundTableModel(m_genericBeanModel, true);
+    private final BeanTableModel m_projectBeanModel = new BeanTableModel<ProjectInfo>(ProjectInfo.class);
+    private final CompoundTableModel m_projectsModel = new CompoundTableModel(m_projectBeanModel, true);
     private DecoratedMarkerTable m_projectsTable;
-    
-    private ArrayList<ProjectToDBs> m_resultProjectsList = new ArrayList<>();
+
+    private final BeanTableModel m_rawfilesBeanModel = new BeanTableModel<DRawFile>(DRawFile.class);
+    private final CompoundTableModel m_rawfilesModel = new CompoundTableModel(m_rawfilesBeanModel, true);
+    private DecoratedMarkerTable m_rawfilesTable;
+
+    private ArrayList<ProjectInfo> m_resultProjectsList = new ArrayList<>();
 
     public ProjectsPanel(JDialog dialog, Boolean editable) {
         m_isEditable = editable;
@@ -77,10 +88,11 @@ public class ProjectsPanel extends JPanel {
         initGenericModel();
 
         internalPanel.setBorder(BorderFactory.createTitledBorder("Projects"));
-        
         internalPanel.setLayout(new java.awt.GridBagLayout());
 
-        JScrollPane tableScrollPane = new JScrollPane();
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        
+        JScrollPane projectTableScrollPane = new JScrollPane();
         m_projectsTable = new DecoratedMarkerTable() {
 
             @Override
@@ -97,11 +109,37 @@ public class ProjectsPanel extends JPanel {
                 getModel().addTableModelListener(l);
             }
         };
-        tableScrollPane.setViewportView(m_projectsTable);
+        projectTableScrollPane.setViewportView(m_projectsTable);
         m_projectsTable.setFillsViewportHeight(true);
         m_projectsTable.setModel(m_projectsModel);
+        m_projectsTable.getSelectionModel().addListSelectionListener(this);
 
+        m_rawfilesTable = new DecoratedMarkerTable() {
+            @Override
+            public void addTableModelListener(TableModelListener l) {
+                getModel().addTableModelListener(l);
+            }
 
+            @Override
+            public TablePopupMenu initPopupMenu() {
+                return new TablePopupMenu();
+            }
+
+            @Override
+            public void prepostPopupMenu() {
+
+            }
+        };
+        
+        JScrollPane rawFilesScrollPane = new JScrollPane();
+        rawFilesScrollPane.setViewportView(m_rawfilesTable);
+        m_rawfilesTable.setFillsViewportHeight(true);
+        m_rawfilesTable.setModel(m_rawfilesModel);
+
+        splitPane.setTopComponent(projectTableScrollPane);
+        splitPane.setBottomComponent(rawFilesScrollPane);
+        splitPane.setDividerLocation(0.5);
+        
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
@@ -112,15 +150,16 @@ public class ProjectsPanel extends JPanel {
         c.gridwidth = 3;
         c.weightx = 1.0;
         c.weighty = 1.0;
-        internalPanel.add(tableScrollPane, c);
         
-        
+        internalPanel.add(splitPane, c);
+
+
         c.gridy++;
         c.gridwidth = 1;
         c.weighty = 0;
         internalPanel.add(Box.createHorizontalGlue(), c);
-
         
+
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
             @Override
             public boolean mustBeCalledInAWT() {
@@ -156,8 +195,6 @@ public class ProjectsPanel extends JPanel {
             
         };
         ExportButton exportButton = new ExportButton(m_projectsModel, "Peptides", m_projectsTable);
-
-        
         
         toolbar.add(filterButton);
         toolbar.add(exportButton);
@@ -166,22 +203,56 @@ public class ProjectsPanel extends JPanel {
     }
     
     private void initGenericModel() {
-        m_genericBeanModel.addProperties("projectId", 0, "Id");
-        m_genericBeanModel.addProperties("name", 1, "Project");
-        m_genericBeanModel.addProperties("description", 2);
-        m_genericBeanModel.addProperties("size", 3, "Size (MB)", new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0, true, true), null);
-        m_genericBeanModel.addProperties("user", 4, "Owner");
-        m_genericBeanModel.addProperties("DBName", 5, "Databases");
+        m_projectBeanModel.addProperties("projectId", 0, "Id");
+        m_projectBeanModel.addProperties("name", 1, "Project");
+        m_projectBeanModel.addProperties("description", 2);
+        m_projectBeanModel.addProperties("size", 3, "Size (MB)", new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0, true, true), null);
+        m_projectBeanModel.addProperties("user", 4, "Owner");
+        m_projectBeanModel.addProperties("DBName", 5, "Databases");
+        m_projectBeanModel.addProperties("lastDatasetDate", 6, "DatasetDate");
+        
         
         // must be called only one time
-        m_genericBeanModel.firePropertiesChanged();
+        m_projectBeanModel.firePropertiesChanged();
     }
     
     public void updateData() {
-        
-        m_genericBeanModel.setData(m_resultProjectsList);
-
+        m_projectBeanModel.setData(m_resultProjectsList);
     }
-    
 
+    private void updateRawFiles(ArrayList<DRawFile> resultRawfiles) {
+        m_rawfilesBeanModel.setData(resultRawfiles);
+    }
+
+    @Override
+    public void valueChanged(ListSelectionEvent e) {
+        int[] rows = m_projectsTable.getSelectedRows();
+        
+        List<Long> projectIds = Arrays.stream(rows).mapToObj(i -> {
+            int mi = m_projectsModel.convertRowToOriginalModel(i);
+            mi = m_projectsTable.convertRowIndexToModel(i);
+            mi = m_projectsModel.convertCompoundRowToBaseModelRow(mi);
+            return Long.valueOf(m_resultProjectsList.get(mi).getProjectId());
+        }).collect(Collectors.toList());
+
+        if (!(projectIds == null) && (!projectIds.isEmpty())) {
+            final ArrayList<DRawFile> resultRawfiles = new ArrayList<DRawFile>();
+            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                    if (success) {
+                        updateRawFiles(resultRawfiles);
+                    }
+                }
+            };
+            fr.proline.studio.dam.tasks.DatabaseProjectTask task = new fr.proline.studio.dam.tasks.DatabaseProjectTask(callback);
+            task.initLoadRawFilesList(projectIds, resultRawfiles);
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+        }
+    }
 }

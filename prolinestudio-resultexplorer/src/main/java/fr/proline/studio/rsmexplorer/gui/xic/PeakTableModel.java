@@ -62,6 +62,7 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
     private Peakel m_peakel;
     private List<Peak> m_peaks = null;
     private Color m_color = null;
+    private boolean m_dashed = false;
     private String m_title = null;
     private Integer m_isotopeIndex = null;
 
@@ -158,12 +159,13 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
         return null; // should never happen
     }
 
-    public void setData(Long taskId, Feature feature, Peakel peakel, Integer isotopeIndex, List<Peak> peaks, Color color, String title) {
+    public void setData(Long taskId, Feature feature, Peakel peakel, Integer isotopeIndex, List<Peak> peaks, Color color, boolean dashed, String title) {
         m_peaks = peaks;
         m_feature = feature;
         m_peakel = peakel;
         m_isotopeIndex = isotopeIndex ;
         m_color = color;
+        m_dashed = dashed;
         m_title = title;
 
         m_taskId = taskId;
@@ -350,12 +352,15 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
     public PlotInformation getPlotInformation() {
         PlotInformation plotInformation = new PlotInformation();
         plotInformation.setPlotColor(m_color);
+        plotInformation.setDashed(m_dashed);
         plotInformation.setPlotTitle(m_title);
         plotInformation.setDrawPoints(false);
         plotInformation.setDrawGap(true);
         HashMap<String, String> plotInfo = new HashMap();
-        plotInfo.put("Apex Int.", DataFormat.formatWithGroupingSep(m_peakel.getApexIntensity(), 0));
-        plotInfo.put("Isotope index", Integer.toString(m_isotopeIndex));
+        if (m_peakel != null) {
+            plotInfo.put("Apex Int.", DataFormat.formatWithGroupingSep(m_peakel.getApexIntensity(), 0));
+            plotInfo.put("Isotope index", Integer.toString(m_isotopeIndex));
+        }
         plotInformation.setPlotInfo(plotInfo);
         return plotInformation;
     }

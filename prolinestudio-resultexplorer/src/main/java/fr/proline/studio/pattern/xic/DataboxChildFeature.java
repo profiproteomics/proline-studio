@@ -17,7 +17,6 @@
 package fr.proline.studio.pattern.xic;
 
 import fr.proline.core.orm.lcms.Feature;
-import fr.proline.core.orm.lcms.MapAlignment;
 import fr.proline.core.orm.lcms.Peakel;
 import fr.proline.core.orm.lcms.Peak;
 import fr.proline.core.orm.lcms.dto.DFeature;
@@ -41,6 +40,8 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.rsmexplorer.gui.xic.PeakTableModel;
+import java.util.Arrays;
 
 /**
  *
@@ -56,6 +57,9 @@ public class DataboxChildFeature extends AbstractDataBox {
     private List<List<Peakel>> m_peakelList;
     private List<List<List<Peak>>> m_peakList;
 
+    private ArrayList<DFeature> m_xicExctractedFromFeature = null;
+    private ArrayList<Peak[]> m_retrievedXic = null;
+    
     public DataboxChildFeature() {
         super(DataboxType.DataboxXicChildFeature, DataboxStyle.STYLE_XIC);
 
@@ -81,6 +85,10 @@ public class DataboxChildFeature extends AbstractDataBox {
         outParameter = new GroupParameter();
         outParameter.addParameter(CrossSelectionInterface.class, true);
         registerOutParameter(outParameter);
+        
+        outParameter = new GroupParameter();
+        outParameter.addParameter(DFeature.class, true);
+        registerOutParameter(outParameter);
 
     }
 
@@ -94,6 +102,10 @@ public class DataboxChildFeature extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
+        
+        m_retrievedXic = null;
+        m_xicExctractedFromFeature = null;
+        
         DMasterQuantPeptideIon oldIon = m_masterQuantPeptideIon;
         m_masterQuantPeptideIon = (DMasterQuantPeptideIon) m_previousDataBox.getData(false, DMasterQuantPeptideIon.class);
         m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(false, QuantChannelInfo.class);
@@ -256,6 +268,11 @@ public class DataboxChildFeature extends AbstractDataBox {
             if (parameterType.equals(MzScopeInterface.class)) {
                 return ((XicFeaturePanel) getDataBoxPanelInterface()).getMzScopeInterface();
             }
+            if (parameterType.equals(DFeature.class)) {
+                return m_childFeatureList;
+            }
+
+            
         }
         return super.getData(getArray, parameterType);
     }
@@ -284,6 +301,25 @@ public class DataboxChildFeature extends AbstractDataBox {
         for (XicPeakPanel peakPanel : listPeakPanel) {
             listCDI.add(peakPanel.getGlobalTableModelInterface());
         }
+        
+        // Add models for retrieved xics
+        if (m_retrievedXic != null) {
+            int size = m_retrievedXic.size();
+            for (int i=0;i<size;i++) {
+                Peak[] peakArray = m_retrievedXic.get(i);
+                DFeature feature = m_xicExctractedFromFeature.get(i);
+                
+                
+                PeakTableModel model = new PeakTableModel(null);
+                
+                Color color = m_quantChannelInfo.getQuantChannelColor(feature.getQuantChannelId());
+                String title = m_quantChannelInfo.getQuantChannels(feature.getQuantChannelId()).getName();
+                
+                model.setData(-1L, null, null, -1, new ArrayList<>(Arrays.asList(peakArray)), color, true, title);
+                listCDI.add(model);
+            }
+        }
+        
         return listCDI;
     }
 
@@ -293,6 +329,16 @@ public class DataboxChildFeature extends AbstractDataBox {
         for (XicPeakPanel peakPanel : listPeakPanel) {
             listCSI.add(peakPanel.getCrossSelectionInterface());
         }
+
+        
         return listCSI;
     }
+    
+    public void setRetrievedXic(ArrayList<DFeature> featureList, ArrayList<Peak[]> retrievedXic) {
+        m_retrievedXic = retrievedXic;
+        m_xicExctractedFromFeature = featureList;
+        
+        propagateDataChanged(ExtendedTableModelInterface.class);
+    }
+    
 }

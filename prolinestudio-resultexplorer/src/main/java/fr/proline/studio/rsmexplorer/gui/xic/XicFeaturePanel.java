@@ -18,8 +18,12 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.lcms.Feature;
 import fr.proline.core.orm.lcms.dto.DFeature;
+import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dpm.AccessJMSManagerThread;
+import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
+import fr.proline.studio.dpm.task.jms.GetXICChromatogramTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.export.ExportFontData;
@@ -67,6 +71,11 @@ import javax.swing.event.TableModelListener;
 import org.jdesktop.swingx.JXTable;
 import org.openide.windows.WindowManager;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.pattern.xic.DataboxChildFeature;
+import fr.proline.studio.table.AbstractTableAction;
+import java.util.HashMap;
+import java.util.HashSet;
+import javax.swing.JTable;
 
 /**
  *
@@ -88,6 +97,9 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
     private JButton m_graphicsTypeButton;
     private AddMzScopeButton m_mzscopeButton;
 
+    private ExctractXICAction m_extractSelectedXICAction = null;
+    private ExctractXICAction m_extractAlldXICAction = null;
+    
     public static final int VIEW_ALL_GRAPH_PEAKS = 0;
     public static final int VIEW_ALL_ISOTOPES_FOR_FEATURE = 1;
 
@@ -383,6 +395,10 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         return m_featureTable.getSelectedFeature();
     }
     
+    public List<DFeature> getSelectedFeatures() {
+        return m_featureTable.getSelectedFeatures();
+    }
+    
     public Color getPlotColor() {
         return m_featureTable.getPlotColor();
     }
@@ -532,9 +548,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             return m_dataBox.isLoaded();
         }
 
-
         public DFeature getSelectedFeature() {
-
             // Retrieve Selected Row
             int selectedRow = getSelectedRow();
 
@@ -543,6 +557,10 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
                 return null;
 
             }
+            
+            return getFeature(selectedRow);
+        }
+        private DFeature getFeature(int row) {
 
             CompoundTableModel compoundTableModel = (CompoundTableModel) getModel();
             if (compoundTableModel.getRowCount() == 0) {
@@ -551,13 +569,31 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             }
 
             // convert according to the sorting
-            selectedRow = convertRowIndexToModel(selectedRow);
-            selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
+            row = convertRowIndexToModel(row);
+            row = compoundTableModel.convertCompoundRowToBaseModelRow(row);
 
             // Retrieve PeptideIon selected
             FeatureTableModel tableModel = (FeatureTableModel) compoundTableModel.getBaseModel();
-            return tableModel.getFeature(selectedRow);
+            return tableModel.getFeature(row);
 
+        }
+        
+        public ArrayList<DFeature> getSelectedFeatures() {
+
+            int[] selectedRows = getSelectedRows();
+
+            // nothing selected
+            if ((selectedRows == null) || (selectedRows.length == 0)) {
+                return null;
+
+            }
+
+            ArrayList<DFeature> features = new ArrayList<DFeature>(selectedRows.length);
+            for (int row : selectedRows) {
+                features.add(getFeature(row));
+            }
+
+            return features;
         }
         
         public Color getPlotColor() {
@@ -632,6 +668,13 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         public TablePopupMenu initPopupMenu() {
             m_popupMenu = new DisplayTablePopupMenu(XicFeaturePanel.this);
 
+            m_extractSelectedXICAction = new ExctractXICAction(false);
+            m_extractAlldXICAction = new ExctractXICAction(true);
+            
+            m_popupMenu.addAction(null);
+            m_popupMenu.addAction(m_extractSelectedXICAction);
+            m_popupMenu.addAction(m_extractAlldXICAction);
+            
             return m_popupMenu;
         }
         private DisplayTablePopupMenu m_popupMenu;
@@ -640,11 +683,124 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
 
         @Override
         public void prepostPopupMenu() {
+            
+            m_extractSelectedXICAction.setBox(m_dataBox);
+            m_extractAlldXICAction.setBox(m_dataBox);
+            
             m_popupMenu.prepostPopupMenu();
         }
         
 
         
+    }
+    
+        public class ExctractXICAction extends AbstractTableAction {
+
+        private AbstractDataBox m_box;
+
+        private boolean m_all;
+
+        public ExctractXICAction(boolean all) {
+            super(all ? "Extract All XIC" : "Extract Selected XIC");
+            m_all = all;
+        }
+
+        public void setBox(AbstractDataBox box) {
+            m_box = box;
+        }
+
+        @Override
+        public void actionPerformed(int col, int row, int[] selectedRows, JTable table) {
+
+            if (m_box == null) {
+                return; // should not happen
+            }
+
+            final DataboxChildFeature databoxChildFeature = (DataboxChildFeature) m_box;
+            QuantChannelInfo quantChannelInfo = (QuantChannelInfo) databoxChildFeature.getData(false, QuantChannelInfo.class);
+            DQuantitationChannel[] qChannels = quantChannelInfo.getQuantChannels();
+            
+            HashMap<Long, DQuantitationChannel> qChannelMap = new HashMap<>();
+            
+            for (DQuantitationChannel qChannel : qChannels) {
+                qChannelMap.put(qChannel.getId(), qChannel);
+            }
+            
+            List<DFeature> featureList;
+            if (!m_all) {
+                featureList = getSelectedFeatures();
+            } else {
+                // all features
+                featureList = (List<DFeature>) databoxChildFeature.getData(true, DFeature.class);
+            }
+
+            
+            
+            HashSet<String> identifierFound = new HashSet<>();
+
+            int size = featureList.size();
+            ArrayList<String> rawFileIdentifierList = new ArrayList<>(size);
+            ArrayList<Double> mozList = new ArrayList<>(size);
+            final ArrayList<DFeature> featuresSearched = new  ArrayList<>(size);
+            
+            
+            for (int i = 0; i < size; i++) {
+                DFeature feature = featureList.get(i);
+                double moz = feature.getMoz();
+                if (moz <= 1e-15) {
+                    // moz is equal to 0, do not take it in account
+                    continue;
+                }
+
+                
+                String rawFileIdentifier = qChannelMap.get(feature.getQuantChannelId()).getRawFileIdentifier();
+
+                // avoid to treat multiple time the same rawFile
+                if (identifierFound.contains(rawFileIdentifier)) {
+                    continue;
+                }
+                identifierFound.add(rawFileIdentifier);
+
+                rawFileIdentifierList.add(rawFileIdentifier);
+                mozList.add(moz);
+                featuresSearched.add(feature);
+            }
+
+            double ppm = 5; // tolerance set to 5ppm, could be changed
+
+            final ArrayList[] returnValue = new ArrayList[1];
+
+            AbstractJMSCallback callback = new AbstractJMSCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success) {
+                    if (success) {
+
+                        databoxChildFeature.setRetrievedXic(featuresSearched, returnValue[0]);
+
+                    } else {
+                        // we could manage error with errorMessage
+
+                    }
+                }
+            };
+
+            // use canonicalPath when it is possible to be sure to have an unique path
+            GetXICChromatogramTask task = new GetXICChromatogramTask(callback, rawFileIdentifierList, mozList, ppm, returnValue);
+            AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+
+        }
+
+        @Override
+        public void updateEnabled(int row, int col, int[] selectedRows, JTable table) {
+            setEnabled(m_all || ((selectedRows != null) && (selectedRows.length > 0)));
+        }
+
     }
     
 }

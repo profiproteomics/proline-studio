@@ -230,7 +230,7 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
     }                 
     
     public void setData(Long taskId,  Feature feature, Peakel peakel, Integer isotopeIndex, List<Peak> peaks, Color color, String title, boolean finished) {
-        ((PeakTableModel)((CompoundTableModel) m_peakTable.getModel()).getBaseModel()).setData(taskId, feature, peakel,  isotopeIndex, peaks, color, title);
+        ((PeakTableModel)((CompoundTableModel) m_peakTable.getModel()).getBaseModel()).setData(taskId, feature, peakel,  isotopeIndex, peaks, color, false, title);
 
         // select the first row
         if ((peaks != null) && (peaks.size() > 0)) {

@@ -87,6 +87,10 @@ public class PlotLinear extends PlotXYAbstract {
     private static final BasicStroke STROKE_2 = new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
     private boolean strokeFixed = false;
 
+    private static final float dash[] = {2.0f, 2.0f};
+    private static final BasicStroke STROKE_1_DASHED = new BasicStroke(1.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
+
+
     private BasicStroke m_strokeLine = STROKE_1;
     private BasicStroke m_userStrock = null;
     private static final BasicStroke EDGE_STROKE = new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
@@ -670,6 +674,7 @@ public class PlotLinear extends PlotXYAbstract {
         return m_yMax;
     }
 
+    @Override
     public void paint(Graphics2D g, XAxis xAxis, YAxis yAxis) {
         // set clipping area
         int clipX = xAxis.valueToPixel(xAxis.getMinValue());
@@ -700,7 +705,7 @@ public class PlotLinear extends PlotXYAbstract {
 
         int size = m_dataX == null ? 0 : m_dataX.length;
         if (size > 0) {
-            if (this.getPlotInformation().isSelected()) {
+            if ((m_plotInformation!=null) && (m_plotInformation.isSelected())) {
                 paintExtendedLinear(g, SELECTED_COLOR, SELECTED_STROCK, 0);
             }
             int x0 = xAxis.valueToPixel(m_dataX[0]);
@@ -718,7 +723,11 @@ public class PlotLinear extends PlotXYAbstract {
                 if (m_userStrock != null) {
                     g.setStroke(m_userStrock);
                 } else {
-                    g.setStroke(m_strokeLine);
+                    if ((m_plotInformation != null) && (m_plotInformation.isDashed())) {
+                        g.setStroke(STROKE_1_DASHED);
+                    } else {
+                        g.setStroke(m_strokeLine);
+                    }
                 }
                 if (m_isDrawPoints && isDef) {
                     int radius = DEFAULT_POINT_RADIUS;

@@ -37,6 +37,8 @@ public class PlotInformation {
     // draw gap
     private boolean isDrawGap;
     
+    private boolean isDashed = false;
+    
     // key value information, to be displayed in the tooltip
     private HashMap<String, String> plotInfo;
     
@@ -62,6 +64,15 @@ public class PlotInformation {
         this.plotColor = plotColor;
     }
 
+    public boolean isDashed() {
+        return isDashed;
+    }
+
+    public void setDashed(boolean isDashed) {
+        this.isDashed = isDashed;
+    }
+    
+    
     public String getPlotTitle() {
         return plotTitle;
     }

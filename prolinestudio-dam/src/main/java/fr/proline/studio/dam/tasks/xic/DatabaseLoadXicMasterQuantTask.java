@@ -593,22 +593,28 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             } catch (NoResultException | NonUniqueResultException e) {
 
             }
+
             // take the dataset name as qch name TODO IF NOT DEFINE ABOVE
-            String queryQCName = "SELECT ds.name "
-                    + "FROM fr.proline.core.orm.uds.Dataset ds, fr.proline.core.orm.uds.QuantitationChannel qc "
+            String rawFileIdentifier = null;
+            String queryQCName = "SELECT ds.name, run.rawFile.identifier "
+                    + "FROM fr.proline.core.orm.uds.Dataset ds, fr.proline.core.orm.uds.QuantitationChannel qc, fr.proline.core.orm.uds.Run run "
                     + "WHERE ds.resultSummaryId = qc.identResultSummaryId AND "
-                    + "qc.id=:qChId AND ds.project.id=:projectId ";
-            TypedQuery<String> queryQCNameQ = entityManagerUDS.createQuery(queryQCName, String.class);
+                    + "qc.id=:qChId AND ds.project.id=:projectId AND "
+                    + "qc.run.id=run.id ";
+            Query  queryQCNameQ = entityManagerUDS.createQuery(queryQCName);
             queryQCNameQ.setParameter("qChId", qc.getId());
             queryQCNameQ.setParameter("projectId", projectId);
             try {
-                String name = queryQCNameQ.getSingleResult();
+                Object[] res = (Object[]) queryQCNameQ.getSingleResult();
+                String name = (String) res[0];
                 resultFileName = name;
+                rawFileIdentifier = (String) res[1];
             } catch (NoResultException | NonUniqueResultException e2) {
 
             }
             dqc.setResultFileName(resultFileName);
             dqc.setRawFilePath(rawPath);
+            dqc.setRawFileIdentifier(rawFileIdentifier);
             // search for run_identification rawFileName (mzdb fileName) in UDS
 
             String mzdbFile = "";

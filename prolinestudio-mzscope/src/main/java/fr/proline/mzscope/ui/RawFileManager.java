@@ -93,4 +93,9 @@ public class RawFileManager {
     public void removeAllFiles(){
         files = new HashMap<String,IRawFile>();
     }
+
+    public boolean removeRawFile(IRawFile rawFile) {
+        IRawFile removedFile = files.remove(rawFile.getName());
+        return (removedFile != null);
+    }
 }

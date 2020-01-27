@@ -165,7 +165,7 @@ public class IsotopicPatternUtils {
                     Tuple2<Object, TheoreticalIsotopePattern> p = putativePatterns[k];
                     if (p == bestPattern) break;
                 }
-                logger.debug("A better prediction is available at position {}, swap them", k);
+//                logger.debug("A better prediction is available at position {}, swap them", k);
                 putativePatterns[0] = putativePatterns[k];
                 putativePatterns[k] = tmp;
             }
@@ -203,7 +203,7 @@ public class IsotopicPatternUtils {
      
      public static Tuple2<Object, TheoreticalIsotopePattern>[] calcIsotopicPatternHypotheses(SpectrumData currentSpectrum, double mz, double ppmTol, Scorer scorer) {
       
-      logger.debug("calculate IP hypotheses using scorer "+scorer.getClass().getSimpleName());
+//      logger.debug("calculate IP hypotheses using scorer "+scorer.getClass().getSimpleName());
       
       List<Tuple2<Double, TheoreticalIsotopePattern>> result = new ArrayList<>();
       for (int charge = 1; charge <= 5; charge++) {

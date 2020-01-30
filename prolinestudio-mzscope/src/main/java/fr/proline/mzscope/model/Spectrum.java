@@ -48,6 +48,7 @@ public class Spectrum {
       this.retentionTime = rt;
       this.msLevel = msLevel;
       this.dataType = type;
+      this.spectrumData = new SpectrumData(this.masses, this.intensities);
    }
 
    public double[] getMasses() {

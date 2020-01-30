@@ -18,13 +18,11 @@ import fr.proline.mzscope.model.QCMetrics;
 import fr.proline.mzscope.model.Spectrum;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,8 +40,7 @@ public class TimstofRawFile implements IRawFile{
     private Map<Integer, Integer> m_frame2FirstSpectraIndex;
     private IChromatogram m_ticChromato;
     private IChromatogram m_bpcChromato;
-//    private  File m_ttBinFile;
-//    private  File m_ttSqliteFile;
+
     
     private static final Logger LOG = LoggerFactory.getLogger(TimstofRawFile.class);
     
@@ -53,23 +50,10 @@ public class TimstofRawFile implements IRawFile{
            throw new IllegalArgumentException("You should specify a brucker .d directory");
         
         m_ttDirFile = ttFile;
-//        // Get TT bin files
-//        File[] binFiles = ttFile.listFiles((File dir, String name) -> "analysis.tdf_bin".equalsIgnoreCase(name));        
-//        if(binFiles != null && binFiles.length >0 ){
-//            m_ttBinFile = binFiles[0];
-//        }else{
-//            throw new IllegalArgumentException("You should select a valid brucker .d directory (containing analysis.tdf_bin)");
-//        }
-//        
-//        // Get TT Sqlite files
-//        File[] sqliteFiles = ttFile.listFiles((File dir, String name) -> "analysis.tdf".equalsIgnoreCase(name));        
-//        if(sqliteFiles != null && binFiles.length >0 ){
-//            m_ttSqliteFile = sqliteFiles[0];
-//        }
-//        long end = System.currentTimeMillis();
-//        LOG.info(" Read dir "+ttFile.getAbsolutePath()+". Duration "+ ((end-start)/1000));
-        
-        init();        
+       
+        init();     
+        long end = System.currentTimeMillis();
+        LOG.info(" Read TTof file "+ttFile.getAbsolutePath()+". Duration "+ ((end-start)/1000));
     }
     
     private void init() {
@@ -126,6 +110,18 @@ public class TimstofRawFile implements IRawFile{
         }
         return m_ticChromato;
     }
+    
+     public float getSpectrumTIC(int index) {         
+        if(m_ticChromato == null)
+            getTIC();
+        
+        int frIndx = m_spectra2FrameIndex.get(index);
+        double[] intensities = m_ticChromato.getIntensities();
+        if(frIndx<intensities.length)
+            return (float)intensities[frIndx];
+                       
+        return -1;
+    }
 
     @Override
     public IChromatogram getBPI() {
@@ -150,8 +146,7 @@ public class TimstofRawFile implements IRawFile{
 
     @Override
     public Spectrum getSpectrum(int spectrumIndex) {
-        Integer frameId = m_spectra2FrameIndex.get(spectrumIndex);
-        LOG.info("GET Spectrum  "+spectrumIndex+" in Frame : "+frameId);
+        Integer frameId = m_spectra2FrameIndex.get(spectrumIndex);       
         
         Optional<TimsFrame> opFrame = m_ttFrames.stream().filter(frame -> frame.getId().equals(frameId)).findFirst();
         if(!opFrame.isPresent())
@@ -209,10 +204,10 @@ public class TimstofRawFile implements IRawFile{
 
     @Override
     public int getSpectrumId(double retentionTime) {
-        LOG.info("Search Spectrum for RT "+retentionTime);
+        //LOG.info("Search Spectrum for RT "+retentionTime);
         for (TimsFrame fr : m_ttFrames) {
             if (Math.abs(fr.getTime() - retentionTime) < 0.05) {
-                LOG.info(" FOUND "+fr.getId());
+               // LOG.info(" FOUND "+fr.getId());
                 return m_frame2FirstSpectraIndex.get(fr.getId());
             }
         }

@@ -40,13 +40,26 @@ import fr.profi.mzdb.model.SpectrumHeader;
 import scala.Option;
 
 public class Main {
-
+    static {
+        try {
+            System.load("D:\\DEV\\sqlite4java-win32-x64-1.0.392.dll");
+        } catch (UnsatisfiedLinkError e) {
+          System.err.println("Native code library failed to load.\n" + e);
+          System.exit(1);
+        }
+  }
+       
   public static void main(String[] args) {
     
     //String filepath = args[0];
-    String filepath =  "C:\\DATA\\Proline\\mzdb\\QEx2_019027.mzdb";//"C:\\Local\\bruley\\Data\\Proline\\Data\\mzdb\\TTOF_00063.mzdb";
+    String filepath =  "D:\\DEV\\TimsTof\\example_data\\200ngHeLaPASEF_2min_compressed.mzdb";
+    //String filepath =  "C:\\DATA\\Proline\\mzdb\\QEx2_019039.mzdb";//"C:\\Local\\bruley\\Data\\Proline\\Data\\mzdb\\TTOF_00063.mzdb";
 
     try {
+       
+//      System.setProperty("java.library.path", "C:\\DATA\\vero\\dev\\maven\\repository\\com\\almworks\\sqlite4java\\sqlite4java-win32-x64\\1.0.392\\sqlite4java-win32-x64-1.0.392.dll");
+//      String p = System.getProperty("java.library.path");
+//      System.out.println("java.library.path :: " + p );
       long start = System.currentTimeMillis();
       MzDbReader reader = new MzDbReader(filepath, true);
       System.out.println("Ohh ... File mzDb read in :: " + (System.currentTimeMillis() - start) + " ms");
@@ -108,7 +121,7 @@ public class Main {
       for (Feature f : mzDbFts) {
         System.out.println(f.getMz() + " - " + f.getArea());
       }
-
+  
       System.out.println("Select feature number 4 = ");
       Feature f = mzDbFts.get(4);
       System.out.println("Feature m/z: " + f.getMz());

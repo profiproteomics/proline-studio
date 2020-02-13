@@ -24,6 +24,7 @@ import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dpm.task.jms.ComputeQuantPostProcessingTask;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.gui.DefaultDialog;
@@ -60,24 +61,30 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
 
     }
 
+    /**
+     *
+     * @param selectedNodes
+     * @param x, dialogue shown location
+     * @param y, dialogue shown location
+     */
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
         if (ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject() == null) {
             JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "A project should be selected !", "Warning", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        
+
         //project id
         final Long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
-        
+
         final int posX = x;
         final int posY = y;
-        
+
         // only on one node
         final DataSetNode datasetNode = (DataSetNode) selectedNodes[0];
         //dataset
         final DDataset dataSet = datasetNode.getDataset();
-        
+
         // call back for loading masterQuantChannel
         AbstractDatabaseCallback masterQuantChannelCallback = new AbstractDatabaseCallback() {
 
@@ -98,20 +105,19 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
                         if (yesNoDialog.getButtonClicked() != DefaultDialog.BUTTON_OK) {
                             return;
                         }
-                    }    
-                    
+                    }
+
                     quantificationProfile(null, posX, posY, pID, dataSet, datasetNode);
                 }
             }
         };
-                
+
         DatabaseDataSetTask loadTask = new DatabaseDataSetTask(masterQuantChannelCallback);
         loadTask.initLoadQuantitation(ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject(), dataSet);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(loadTask);
-          
+
     }
-    
-    
+
     public static boolean quantificationProfile(final ResultCallback resultCallback, int posx, int posy, Long pID, DDataset dataSet, DataSetNode datasetNode) {
         // dialog with the parameters for quantitation profiler
         QuantPostProcessingDialog dialog = new QuantPostProcessingDialog(WindowManager.getDefault().getMainWindow(), dataSet);
@@ -139,7 +145,7 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
                 DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
                 treeModel.nodeChanged(datasetNode);
             }
-            
+
             // dataset name
             final String xicName = dataSet.getName();
 
@@ -167,7 +173,7 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
                         if (resultCallback != null) {
                             resultCallback.run(success);
                         }
- 
+
                     }
                 };
                 fr.proline.studio.dpm.task.jms.ComputeQuantPostProcessingTask task = new fr.proline.studio.dpm.task.jms.ComputeQuantPostProcessingTask(xicCallback, pID, masterQuantChannelId, quantParams, xicName);
@@ -190,8 +196,7 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
             setEnabled(false);
             return;
         }
-        
-        
+
         // only one node selected
         if (selectedNodes.length != 1) {
             setEnabled(false);
@@ -215,7 +220,7 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
         DataSetNode datasetNode = (DataSetNode) node;
 
         // must be a quantitation XIC
-        if (! datasetNode.isQuantXIC()) {
+        if (!datasetNode.isQuantXIC()) {
             setEnabled(false);
             return;
         }

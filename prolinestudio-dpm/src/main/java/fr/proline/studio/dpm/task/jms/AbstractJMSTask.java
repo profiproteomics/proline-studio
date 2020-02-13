@@ -76,7 +76,7 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
        
     public AbstractJMSTask(AbstractJMSCallback callback,  boolean synchronous, TaskInfo taskInfo) {
         super(taskInfo);
-        
+        m_taskInfo = taskInfo;
         m_callback = callback;
         m_synchronous = synchronous;
     }
@@ -179,6 +179,10 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
     }
 
     
+    /**
+     * task listen received message, finished
+     * @param jmsMessage :received Message
+     */
     @Override
     public final void onMessage(final Message jmsMessage) {       
         

@@ -50,6 +50,7 @@ import org.openide.nodes.Sheet;
 public class DataSetNode extends AbstractNode {
 
     private boolean m_isReference = false;
+    private boolean m_isRefined = false;
 
     public DataSetNode(NodeTypes type, AbstractData data) {
         super(type, data);
@@ -124,9 +125,9 @@ public class DataSetNode extends AbstractNode {
                 return getIcon(IconManager.IconType.QUANT_XIC);
             }
             if (dataset.getQuantMethodInfo() == QuantitationMethodInfo.FEATURES_EXTRACTION) { // XIC
-                    if (datasetType.isAggregation()) {
-                        return getIcon(IconManager.IconType.QUANT_AGGREGATION_XIC);
-                    }
+                if (datasetType.isAggregation()) {
+                    return getIcon(IconManager.IconType.QUANT_AGGREGATION_XIC);
+                }
                 return getIcon(IconManager.IconType.QUANT_XIC);
             } else if (dataset.getQuantMethodInfo() == QuantitationMethodInfo.SPECTRAL_COUNTING) { // Spectral count
                 return getIcon(IconManager.IconType.QUANT_SC);
@@ -420,6 +421,15 @@ public class DataSetNode extends AbstractNode {
         } else {
             return false;
         }
+    }
+
+    //refined = compute quant post processing done
+    public boolean isRefined() {
+        return this.m_isRefined;
+    }
+
+    public void setIsRefined(boolean isRefined) {
+        this.m_isRefined = isRefined;
     }
 
     /**

@@ -43,7 +43,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.QuantifyAction;
 import fr.proline.studio.rsmexplorer.actions.identification.RetrieveBioSeqJMSAction;
 import fr.proline.studio.rsmexplorer.actions.xic.AddQuantitationFolderAction;
 import fr.proline.studio.rsmexplorer.actions.xic.AggregateQuantitationsAction;
-import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantPostProcessingAction;
+import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantPostProcessingMultipleAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayExperimentalDesignAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayXICAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
@@ -196,11 +196,14 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
             if (m_multiPopup == null) {
 
                 // create the actions
-                m_multiActions = new ArrayList<>(4);  // <--- get in sync
+                m_multiActions = new ArrayList<>(5);  // <--- get in sync
 
                 AggregateQuantitationsAction aggregateAction = new AggregateQuantitationsAction(this);
                 m_multiActions.add(aggregateAction);
 
+                ComputeQuantPostProcessingMultipleAction computePTMAction = new ComputeQuantPostProcessingMultipleAction(this);
+                m_multiActions.add(computePTMAction);
+                
                 m_multiActions.add(null);  // separator
 
                 ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(this, true);
@@ -336,7 +339,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
                     m_mainActions.add(null);  // separator
 
-                    ComputeQuantPostProcessingAction computeQuantPostProcessingAction = new ComputeQuantPostProcessingAction(this);
+                    ComputeQuantPostProcessingMultipleAction computeQuantPostProcessingAction = new ComputeQuantPostProcessingMultipleAction(this);
                     m_mainActions.add(computeQuantPostProcessingAction);
 
                     CreateQuantitationAction createXICAction = new CreateQuantitationAction(this, true);

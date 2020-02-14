@@ -120,7 +120,7 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
         m_ptmsOutput = ptmsToFill;
         m_action = LOAD_IDENTIFIED_PTM_SPECIFICITIES;
     }
-        
+
     public void initLoadUsedPTMs(Long projectId, List<Long> rsmIds, List<PtmSpecificity> ptmsToFill) {
         init(new TaskInfo("Load used PTMs from RSM ids" + rsmIds, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;

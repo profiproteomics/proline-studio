@@ -1,7 +1,18 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/* 
+ * Copyright (C) 2019 VD225637
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
+ * ; either version 2.1 
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * CeCILL License V2.1 for more details.
+ *
+ * You should have received a copy of the CeCILL License 
+ * along with this program; If not, see <http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html>.
  */
 package fr.proline.studio.rsmexplorer.actions.xic;
 
@@ -39,6 +50,7 @@ import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
 /**
+ * key word: Refine = Compute Quan Post Processing
  *
  * @author Karine XUE at CEA
  */
@@ -90,8 +102,11 @@ public class ComputeQuantPostProcessingMultipleAction extends AbstractRSMAction 
                         ArrayList<DataSetNode> selectedDatasetNodeList = new ArrayList<>();
                         if (m_nbLoadedQuanti == selectedNodes.length) {//all loaded
                             if (!computedList.isEmpty()) {
-                                String message = computedList + " Proteins Sets Abundances have already been refined.\nDo you want to continue?";
+                                String[] options = {"Refine All", "Skip already refined"};
+                                String message = computedList + " Proteins Sets Abundances have already been refined \n(Compute Qaunt Post Processing done).";
                                 OptionDialog yesNoDialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Refine Proteins Sets Abundances", message);
+                                yesNoDialog.setButtonName(DefaultDialog.BUTTON_OK, options[0]);
+                                yesNoDialog.setButtonName(DefaultDialog.BUTTON_CANCEL, options[1]);
                                 yesNoDialog.setLocation(posX, posY);
                                 yesNoDialog.setVisible(true);
 
@@ -118,7 +133,7 @@ public class ComputeQuantPostProcessingMultipleAction extends AbstractRSMAction 
                 }
 
             };
-
+            //load Quantitation, in order to test if the dataset is already refined
             DatabaseDataSetTask loadTask = new DatabaseDataSetTask(masterQuantChannelCallback);
             loadTask.initLoadQuantitation(ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject(), dataSet);
             AccessDatabaseThread.getAccessDatabaseThread().addTask(loadTask);
@@ -248,12 +263,11 @@ public class ComputeQuantPostProcessingMultipleAction extends AbstractRSMAction 
         } else if (aggregationList.isEmpty()) {
             return false;
         } else {
-            String errorMsg = "The selection has aggregation dataSet and non aggregation dataset.";
+            String errorMsg = "The selection has Aggregated Quatitation dataSets and Quatitation datasets.";
             errorMsg += "\n Quantitation: " + quantitationList;
             errorMsg += "\n Aggregation: " + aggregationList;
-            errorMsg += "\n The option Discard_Peptides_Sharing_Peakels will not available";
-            //JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), errorMsg, "Warning", JOptionPane.ERROR_MESSAGE);
-            final JOptionPane pane = new JOptionPane(errorMsg, JOptionPane.WARNING_MESSAGE);
+            errorMsg += "\n The option Discard_Peptides_Sharing_Peakels will not be available";
+            final JOptionPane pane = new JOptionPane(errorMsg, JOptionPane.INFORMATION_MESSAGE);
             final JDialog d = pane.createDialog((JFrame) null, "Warning");
             d.setLocation(posX, posY);
             d.setVisible(true);

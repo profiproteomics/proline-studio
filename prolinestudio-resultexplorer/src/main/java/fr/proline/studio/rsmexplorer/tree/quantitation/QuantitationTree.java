@@ -43,7 +43,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.QuantifyAction;
 import fr.proline.studio.rsmexplorer.actions.identification.RetrieveBioSeqJMSAction;
 import fr.proline.studio.rsmexplorer.actions.xic.AddQuantitationFolderAction;
 import fr.proline.studio.rsmexplorer.actions.xic.AggregateQuantitationsAction;
-import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantPostProcessingMultipleAction;
+import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantPostProcessingAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayExperimentalDesignAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayXICAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
@@ -201,7 +201,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 AggregateQuantitationsAction aggregateAction = new AggregateQuantitationsAction(this);
                 m_multiActions.add(aggregateAction);
 
-                ComputeQuantPostProcessingMultipleAction computePTMAction = new ComputeQuantPostProcessingMultipleAction(this);
+                ComputeQuantPostProcessingAction computePTMAction = new ComputeQuantPostProcessingAction(this);
                 m_multiActions.add(computePTMAction);
                 
                 m_multiActions.add(null);  // separator
@@ -339,7 +339,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
                     m_mainActions.add(null);  // separator
 
-                    ComputeQuantPostProcessingMultipleAction computeQuantPostProcessingAction = new ComputeQuantPostProcessingMultipleAction(this);
+                    ComputeQuantPostProcessingAction computeQuantPostProcessingAction = new ComputeQuantPostProcessingAction(this);
                     m_mainActions.add(computeQuantPostProcessingAction);
 
                     CreateQuantitationAction createXICAction = new CreateQuantitationAction(this, true);

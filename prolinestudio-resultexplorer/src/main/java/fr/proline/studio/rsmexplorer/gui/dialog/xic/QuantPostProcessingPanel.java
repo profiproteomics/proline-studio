@@ -151,7 +151,7 @@ public class QuantPostProcessingPanel extends JPanel {
         // completeMode can be changed in the preferences file with the Profilizer key
         Preferences preferences = NbPreferences.root();
         this.completeMode = preferences.getBoolean("Profi", false);
-        m_parameterList = new ParameterList(QuantPostProcessingMultipleDialog.SETTINGS_KEY);
+        m_parameterList = new ParameterList(QuantPostProcessingDialog.SETTINGS_KEY);
         m_peptideModificationListChB = new ArrayList<>();
         m_peptidesModificationListParameter = new ArrayList<>();
         createParameters();

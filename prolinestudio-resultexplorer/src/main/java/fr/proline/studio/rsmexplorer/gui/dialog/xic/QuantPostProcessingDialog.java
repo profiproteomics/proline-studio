@@ -39,14 +39,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author MB243701
  */
-public class QuantPostProcessingMultipleDialog extends DefaultDialog {
+public class QuantPostProcessingDialog extends DefaultDialog {
 
     private QuantPostProcessingPanel m_quantPostProcessingPanel;
 
     public final static String SETTINGS_KEY = "QuantPostProcessing";
 
     //public QuantPostProcessingMultipleDialog(Window parent, ArrayList<DataSetNode> nodeList) {
-    public QuantPostProcessingMultipleDialog(Window parent, ArrayList<PtmSpecificity> ptms, boolean isAggregation) {
+    public QuantPostProcessingDialog(Window parent, ArrayList<PtmSpecificity> ptms, boolean isAggregation) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         setTitle("Compute PostProcessing on Proteins Sets Abundances");
 

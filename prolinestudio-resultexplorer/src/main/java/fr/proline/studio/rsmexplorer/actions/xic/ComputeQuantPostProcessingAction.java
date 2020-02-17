@@ -33,7 +33,7 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.QuantPostProcessingMultipleDialog;
+import fr.proline.studio.rsmexplorer.gui.dialog.xic.QuantPostProcessingDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
@@ -54,12 +54,12 @@ import org.openide.windows.WindowManager;
  *
  * @author Karine XUE at CEA
  */
-public class ComputeQuantPostProcessingMultipleAction extends AbstractRSMAction {
+public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
 
     private int m_nbLoadedQuanti;
 
-    public ComputeQuantPostProcessingMultipleAction(AbstractTree tree) {
-        super(NbBundle.getMessage(ComputeQuantPostProcessingMultipleAction.class, "CTL_ComputeQuantPostProcessingAction"), tree);
+    public ComputeQuantPostProcessingAction(AbstractTree tree) {
+        super(NbBundle.getMessage(ComputeQuantPostProcessingAction.class, "CTL_ComputeQuantPostProcessingAction"), tree);
     }
 
     @Override
@@ -143,7 +143,7 @@ public class ComputeQuantPostProcessingMultipleAction extends AbstractRSMAction 
     public static boolean quantificationProfile(final ResultCallback resultCallback, int posX, int posY, Long pID, ArrayList<DataSetNode> nodeList) {
         ArrayList<PtmSpecificity> ptms = fetchPtmsFromDAM(nodeList);
         boolean isAggregation = isAllAggregation(nodeList, posX, posY);
-        QuantPostProcessingMultipleDialog dialog = new QuantPostProcessingMultipleDialog(WindowManager.getDefault().getMainWindow(), ptms, isAggregation);
+        QuantPostProcessingDialog dialog = new QuantPostProcessingDialog(WindowManager.getDefault().getMainWindow(), ptms, isAggregation);
         dialog.setLocation(posX, posY);
         dialog.setVisible(true);
 

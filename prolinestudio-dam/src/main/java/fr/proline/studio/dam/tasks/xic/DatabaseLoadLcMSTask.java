@@ -806,7 +806,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
 //                TypedQuery<MasterFeatureItem> queryMasterFeatureItem = entityManagerLCMS.createQuery(queryMFI, MasterFeatureItem.class);
 //                queryMasterFeatureItem.setParameter("masterFeatureId", m_masterQuantPeptideIon.getLcmsMasterFeatureId());
 
-                java.util.Map<Long, Long> qcIdByFeatureId = m_masterQuantPeptideIon.getQuantPeptideIonByQchIds().entrySet().stream().collect(Collectors.toMap(entry -> entry.getValue().getLcmsFeatureId(), entry -> entry.getKey()));
+                java.util.Map<Long, Long> qcIdByFeatureId = m_masterQuantPeptideIon.getQuantPeptideIonByQchIds().entrySet().stream().filter(e -> e.getValue().getLcmsFeatureId() != null).collect(Collectors.toMap(entry -> entry.getValue().getLcmsFeatureId(), entry -> entry.getKey()));
                 //List<Long> childFeaturesIds = m_masterQuantPeptideIon.getQuantPeptideIonByQchIds().values().stream().map(qpep -> qpep.getLcmsFeatureId()).collect(Collectors.toList());
                 String queryMFI = "SELECT mfi "
                         + "FROM fr.proline.core.orm.lcms.MasterFeatureItem mfi "

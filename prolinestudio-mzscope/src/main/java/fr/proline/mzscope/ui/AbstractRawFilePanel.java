@@ -326,7 +326,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
     }
 
     @Override
-    public void displayFeature(final IFeature f) {
+    public void displayFeature(final IPeakel f) {
         double ppm = MzScopePreferences.getInstance().getMzPPMTolerance();
         final MsnExtractionRequest.Builder builder = MsnExtractionRequest.builder().setMzTolPPM((float) ppm);
 

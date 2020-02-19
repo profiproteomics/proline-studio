@@ -144,19 +144,36 @@ public class ThreadedMzdbRawFile implements IRawFile {
       return null;
    }
 
-   @Override
-   public List<IFeature> extractFeatures(final FeaturesExtractionRequest params) {
+  @Override
+  public List<IFeature> extractFeatures(FeaturesExtractionRequest params) {
+    try {
+      logger.info("extract feature starting");
+      Future<List<IFeature>> future = service.submit(() -> {
+        List<IFeature> result = mzdbRawFile.extractFeatures(params);
+        result.stream().forEach( f -> f.setRawFile(ThreadedMzdbRawFile.this));
+        return result;
+      });
+      logger.info("waiting for feature extraction ... ");
+      return future.get();
+    } catch (InterruptedException | ExecutionException ex ) {
+      logger.error("extractFeatures call fail", ex);
+    }
+    return null;
+  }
+
+  @Override
+   public List<IPeakel> extractPeakels(final FeaturesExtractionRequest params) {
      try {
-         logger.info("extract feature starting");
-         Future<List<IFeature>> future = service.submit(() -> {
-            List<IFeature> result = mzdbRawFile.extractFeatures(params);
+         logger.info("extract peakels starting");
+         Future<List<IPeakel>> future = service.submit(() -> {
+            List<IPeakel> result = mzdbRawFile.extractPeakels(params);
             result.stream().forEach( f -> f.setRawFile(ThreadedMzdbRawFile.this));
             return result;
          });
-         logger.info("waiting for feature extraction ... ");
+         logger.info("waiting for peakels extraction ... ");
          return future.get();
       } catch (InterruptedException | ExecutionException ex ) {
-         logger.error("extractFeatures call fail", ex);
+         logger.error("extractPeakels call fail", ex);
       } 
       return null;
    }

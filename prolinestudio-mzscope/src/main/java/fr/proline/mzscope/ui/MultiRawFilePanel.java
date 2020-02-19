@@ -181,7 +181,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
     
     // override display feature to display all xic
     @Override
-    public void displayFeature(final IFeature f) {
+    public void displayFeature(final IPeakel f) {
         double ppm = MzScopePreferences.getInstance().getMzPPMTolerance();
         final double maxMz = f.getMz() + f.getMz() * ppm / 1e6;
         final double minMz = f.getMz() - f.getMz() * ppm / 1e6;

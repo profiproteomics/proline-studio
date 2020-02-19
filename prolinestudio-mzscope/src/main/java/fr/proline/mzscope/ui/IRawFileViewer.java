@@ -50,7 +50,7 @@ public interface IRawFileViewer {
     * 
     * @param f : the feature to be displayed
     */
-   public void displayFeature(IFeature f);
+   public void displayFeature(IPeakel f);
    
    /**
     * Display the scan specified by the index parameter.

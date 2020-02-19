@@ -20,7 +20,6 @@ import fr.proline.mzscope.model.*;
 import fr.proline.mzscope.model.IChromatogram;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -124,6 +123,11 @@ public class MzMLRawFile implements IRawFile {
 
    @Override
    public List<IFeature> extractFeatures(FeaturesExtractionRequest params) {
+      throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+   }
+
+   @Override
+   public List<IPeakel> extractPeakels(FeaturesExtractionRequest params) {
       throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
    }
 

@@ -19,6 +19,9 @@ package fr.proline.mzscope.ui;
 import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
 import fr.proline.mzscope.model.*;
+import fr.proline.mzscope.ui.peakels.FeaturesPanel;
+import fr.proline.mzscope.ui.peakels.IPeakelViewer;
+import fr.proline.mzscope.ui.peakels.PeakelsPanel;
 import fr.proline.mzscope.utils.ButtonTabComponent;
 import com.google.common.base.Strings;
 import fr.profi.mzdb.peakeldb.io.PeakelDbReader;
@@ -46,7 +49,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -68,7 +70,7 @@ import static scala.collection.JavaConversions.asJavaIterable;
  *
  * @author MB243701
  */
-public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionResultsViewer, IMzScopeController {
+public class MzScopePanel extends JPanel implements IPeakelViewer, IExtractionResultsViewer, IMzScopeController {
 
     private final static Logger logger = LoggerFactory.getLogger("ProlineStudio.mzScope.MzScopePanel");
 
@@ -206,7 +208,7 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
                 p.extractAndDisplayChromatogram(params, new Display(Display.Mode.REPLACE), new MzScopeCallback() {
                     @Override
                     public void callback(boolean success) {
-                        p.displayFeature(new BaseFeature(moz, (float) elutionTime, (float) firstScanTime, (float) lastScanTime, rawfile, 1));
+                        p.displayFeature(new BasePeakel(moz, (float) elutionTime, (float) firstScanTime, (float) lastScanTime, rawfile, 1));
                     }
                 });
                 // display elutionTime, firstScanTime, lastScanTime
@@ -371,6 +373,20 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
         }
     }
 
+    public void detectPeakels(List<IRawFile> rawfiles) {
+        boolean isDIA = isDIAFiles(rawfiles);
+        ExtractionParamsDialog dialog = new ExtractionParamsDialog(this.parentFrame, true, isDIA);
+        dialog.setExtractionParamsTitle("Detect Peakels Parameters");
+        dialog.setLocationRelativeTo(this);
+        dialog.showExtractionParamsDialog();
+        FeaturesExtractionRequest.Builder builder = dialog.getExtractionParams();
+        if (builder != null) {
+            builder.setExtractionMethod(FeaturesExtractionRequest.ExtractionMethod.DETECT_PEAKELS);
+            FeaturesExtractionRequest params = builder.build();
+            startPeakelsExtractions(rawfiles, params);
+        }
+    }
+
     public void extractFeatures(List<IRawFile> rawfiles) {
         boolean isDIA = isDIAFiles(rawfiles);
         ExtractionParamsDialog dialog = new ExtractionParamsDialog(this.parentFrame, true, isDIA);
@@ -381,11 +397,71 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
         if (builder != null) {
             builder.setExtractionMethod(FeaturesExtractionRequest.ExtractionMethod.EXTRACT_MS2_FEATURES);
             FeaturesExtractionRequest params = builder.build();
-            extractFeatures(rawfiles, params);
+            startFeaturesExtractions(rawfiles, params);
         }
     }
 
-    private void extractFeatures(List<IRawFile> rawfiles, FeaturesExtractionRequest params) {
+    public void detectFeatures(List<IRawFile> rawfiles) {
+        boolean isDIA = isDIAFiles(rawfiles);
+        ExtractionParamsDialog dialog = new ExtractionParamsDialog(this.parentFrame, true, isDIA);
+        dialog.setExtractionParamsTitle("Detect Features Parameters");
+        dialog.setLocationRelativeTo(this);
+        dialog.showExtractionParamsDialog();
+        FeaturesExtractionRequest.Builder builder = dialog.getExtractionParams();
+        if (builder != null) {
+            builder.setExtractionMethod(FeaturesExtractionRequest.ExtractionMethod.DETECT_FEATURES);
+            startFeaturesExtractions(rawfiles, builder.build());
+        }
+    }
+
+    private void startPeakelsExtractions(List<IRawFile> rawfiles, FeaturesExtractionRequest params) {
+        final PeakelsPanel peakelsPanel = new PeakelsPanel(this);
+        final ButtonTabComponent tabComp = addFeatureTab(getName(rawfiles), peakelsPanel, params.getExtractionParamsString());
+        tabComp.setWaitingState(true);
+        fireExtractionEvent(new ExtractionEvent(this, ExtractionEvent.EXTRACTION_STARTED));
+        final long start = System.currentTimeMillis();
+        SwingWorker worker = new SwingWorker<Integer, List<IPeakel>>() {
+            int count = 0;
+
+            @Override
+            protected Integer doInBackground() throws Exception {
+
+                for (IRawFile rawFile : rawfiles) {
+                    List<IPeakel> listF = rawFile.extractPeakels(params);
+                    count++;
+                    publish(listF);
+                }
+                return count;
+            }
+
+            @Override
+            protected void process(List<List<IPeakel>> list) {
+                List<IPeakel> listF = list.stream().flatMap(l -> l.stream()).collect(Collectors.toList());
+                logger.info("{} peakels extracted in {}", listF.size(), (System.currentTimeMillis() - start) / 1000.0);
+
+                if (count == 1) {
+                    peakelsPanel.setPeakels(listF, rawfiles.size() > 1);
+                } else {
+                    peakelsPanel.addPeakels(listF);
+                }
+            }
+
+            @Override
+            protected void done() {
+                logger.info("All peakels extracted in {}", (System.currentTimeMillis() - start) / 1000.0);
+                featuresTabPane.setSelectedComponent(peakelsPanel);
+                tabComp.setWaitingState(false);
+                fireExtractionEvent(new ExtractionEvent(this, ExtractionEvent.EXTRACTION_DONE));
+            }
+        };
+
+        worker.execute();
+        logger.debug("Peakels extraction running ... ");
+    }
+
+
+
+    private void startFeaturesExtractions(List<IRawFile> rawfiles, FeaturesExtractionRequest params) {
         final FeaturesPanel featurePanel = new FeaturesPanel(this);
         final ButtonTabComponent tabComp = addFeatureTab(getName(rawfiles), featurePanel, params.getExtractionParamsString());
         tabComp.setWaitingState(true);
@@ -408,18 +484,20 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
             @Override
             protected void process(List<List<IFeature>> list) {
                 List<IFeature> listF = list.stream().flatMap(l -> l.stream()).collect(Collectors.toList());
-                logger.info("{} features/peakels extracted in {}", listF.size(), (System.currentTimeMillis() - start) / 1000.0);
+                logger.info("{} features extracted in {}", listF.size(), (System.currentTimeMillis() - start) / 1000.0);
 
                 if (count == 1) {
+                    logger.info("Set {} features ", listF.size());
                     featurePanel.setFeatures(listF, rawfiles.size() > 1);
                 } else {
+                    logger.info("Add {} features ", listF.size());
                     featurePanel.addFeatures(listF);
                 }
             }
 
             @Override
             protected void done() {
-                logger.info("All features/peakels extracted in {}", (System.currentTimeMillis() - start) / 1000.0);
+                logger.info("All features extracted in {}", (System.currentTimeMillis() - start) / 1000.0);
                 featuresTabPane.setSelectedComponent(featurePanel);
                 tabComp.setWaitingState(false);
                 fireExtractionEvent(new ExtractionEvent(this, ExtractionEvent.EXTRACTION_DONE));
@@ -427,45 +505,45 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
         };
 
         worker.execute();
-        logger.debug("Feature extraction running ... ");
+        logger.debug("Features extraction running ... ");
     }
-
-    private void extractFeatures(final IRawFile rawFile, final FeaturesExtractionRequest params) {
-        if ((selectedRawFilePanel != null) && (viewersTabPane.getSelectedIndex() >= 0)) {
-            final FeaturesPanel featurePanel = new FeaturesPanel(this);
-            final ButtonTabComponent tabComp = addFeatureTab(rawFile.getName(), featurePanel, params.getExtractionParamsString());
-            tabComp.setWaitingState(true);
-            fireExtractionEvent(new ExtractionEvent(this, ExtractionEvent.EXTRACTION_STARTED));
-            final long start = System.currentTimeMillis();
-            SwingWorker worker;
-            worker = new SwingWorker<List<IFeature>, Void>() {
-                @Override
-                protected List<IFeature> doInBackground() throws Exception {
-                    return rawFile.extractFeatures(params);
-                }
-
-                @Override
-                protected void done() {
-                    try {
-                        List<IFeature> features = get();
-                        logger.info("{} features/peakels extracted in {}", features.size(), (System.currentTimeMillis() - start) / 1000.0);
-                        featurePanel.setFeatures(features, false);
-                        featuresTabPane.setSelectedComponent(featurePanel);
-                        tabComp.setWaitingState(false);
-                        fireExtractionEvent(new ExtractionEvent(this, ExtractionEvent.EXTRACTION_DONE));
-                    } catch (InterruptedException | ExecutionException e) {
-                        logger.error("Error while reading chromatogram");
-                    }
-                }
-            };
-            worker.execute();
-            logger.debug("Feature extraction running ... ");
-        }
-    }
+//
+//    private void extractFeatures(final IRawFile rawFile, final FeaturesExtractionRequest params) {
+//        if ((selectedRawFilePanel != null) && (viewersTabPane.getSelectedIndex() >= 0)) {
+//            final FeaturesPanel featurePanel = new FeaturesPanel(this);
+//            final ButtonTabComponent tabComp = addFeatureTab(rawFile.getName(), featurePanel, params.getExtractionParamsString());
+//            tabComp.setWaitingState(true);
+//            fireExtractionEvent(new ExtractionEvent(this, ExtractionEvent.EXTRACTION_STARTED));
+//            final long start = System.currentTimeMillis();
+//            SwingWorker worker;
+//            worker = new SwingWorker<List<IPeakel>, Void>() {
+//                @Override
+//                protected List<IPeakel> doInBackground() throws Exception {
+//                    return rawFile.extractPeakels(params);
+//                }
+//
+//                @Override
+//                protected void done() {
+//                    try {
+//                        List<IPeakel> features = get();
+//                        logger.info("{} features/peakels extracted in {}", features.size(), (System.currentTimeMillis() - start) / 1000.0);
+//                        featurePanel.setFeatures(features, false);
+//                        featuresTabPane.setSelectedComponent(featurePanel);
+//                        tabComp.setWaitingState(false);
+//                        fireExtractionEvent(new ExtractionEvent(this, ExtractionEvent.EXTRACTION_DONE));
+//                    } catch (InterruptedException | ExecutionException e) {
+//                        logger.error("Error while reading chromatogram");
+//                    }
+//                }
+//            };
+//            worker.execute();
+//            logger.debug("Feature extraction running ... ");
+//        }
+//    }
 
     public void loadPeakels(IRawFile rawfile, File file) {
         try {
-            List<IFeature> features = new ArrayList<>();
+            List<IPeakel> features = new ArrayList<>();
             SQLiteConnection connection = new SQLiteConnection(file);
             connection.openReadonly();
             Iterator<Peakel> peakelsIt = asJavaIterable(PeakelDbReader.loadAllPeakels(connection, 400000)).iterator();
@@ -474,51 +552,13 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
             }
             logger.info("loaded peakels : "+features.size());
             connection.dispose();
-            final FeaturesPanel featurePanel = new FeaturesPanel(this);
-            addFeatureTab(rawfile.getName(), featurePanel, "loaded from "+file.getAbsolutePath());
-            featurePanel.setFeatures(features, true);
+            final PeakelsPanel peakelsPanel = new PeakelsPanel(this);
+            addFeatureTab(rawfile.getName(), peakelsPanel, "loaded from "+file.getAbsolutePath());
+            peakelsPanel.setPeakels(features, true);
             
         } catch (SQLiteException ex) {
             logger.error("error while reading peakeldb file", ex);
             Exceptions.printStackTrace(ex);
-        }
-    }
-        
-    public void detectPeakels(List<IRawFile> rawfiles) {
-        boolean isDIA = isDIAFiles(rawfiles);
-        ExtractionParamsDialog dialog = new ExtractionParamsDialog(this.parentFrame, true, isDIA);
-        dialog.setExtractionParamsTitle("Detect Peakels Parameters");
-        dialog.setLocationRelativeTo(this);
-        dialog.showExtractionParamsDialog();
-        FeaturesExtractionRequest.Builder builder = dialog.getExtractionParams();
-        if (builder != null) {
-            builder.setExtractionMethod(FeaturesExtractionRequest.ExtractionMethod.DETECT_PEAKELS);
-            FeaturesExtractionRequest params = builder.build();
-            extractFeatures(rawfiles, params);
-        }
-    }
-
-    public void detectFeatures() {
-        IRawFile rawFile = selectedRawFilePanel.getCurrentRawfile();
-        if (rawFile != null) {
-            detectFeatures(Collections.singletonList(selectedRawFilePanel.getCurrentRawfile()));
-        } else {
-            logger.error("Feature detection is available as soon as a raw file is currently dispayed");
-        }
-    }
-
-    public void detectFeatures(List<IRawFile> rawfiles) {
-        boolean isDIA = isDIAFiles(rawfiles);
-        ExtractionParamsDialog dialog = new ExtractionParamsDialog(this.parentFrame, true, isDIA);
-        dialog.setExtractionParamsTitle("Detect Features Parameters");
-        dialog.setLocationRelativeTo(this);
-        dialog.showExtractionParamsDialog();
-        FeaturesExtractionRequest.Builder builder = dialog.getExtractionParams();
-        if (builder != null) {
-            builder.setExtractionMethod(FeaturesExtractionRequest.ExtractionMethod.DETECT_FEATURES);
-            for (IRawFile rawFile : rawfiles) {
-                extractFeatures(rawFile, builder.build());
-            }
         }
     }
 
@@ -604,7 +644,7 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
     }
 
     @Override
-    public void displayFeatureInRawFile(IFeature f) {
+    public void displayPeakelInRawFile(IPeakel f) {
         List<AbstractRawFilePanel> list = mapRawFilePanelRawFile.get(f.getRawFile());
         if (list != null) {
             for (AbstractRawFilePanel panel : list) {
@@ -617,7 +657,7 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionR
     }
 
     @Override
-    public void displayFeatureInCurrentRawFile(IFeature f) {
+    public void displayPeakelInCurrentRawFile(IPeakel f) {
         IRawFileViewer panel = (IRawFileViewer) viewersTabPane.getSelectedComponent();
         if (panel != null) {
             panel.displayFeature(f);

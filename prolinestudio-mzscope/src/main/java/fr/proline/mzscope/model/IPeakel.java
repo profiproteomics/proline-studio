@@ -14,21 +14,40 @@
  * You should have received a copy of the CeCILL License 
  * along with this program; If not, see <http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html>.
  */
-package fr.proline.mzscope.ui;
+package fr.proline.mzscope.model;
 
-import fr.proline.mzscope.model.IChromatogram;
-import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.ui.peakels.IPeakelViewer;
-
-import java.util.Map;
+import fr.profi.mzdb.model.Peakel;
 
 /**
  *
- * @author MB243701
+ * @author CB205360
  */
-public interface IExtractionResultsViewer extends IPeakelViewer {
-    
-    public void displayChromatogramAsSingleView(IRawFile rawfile, IChromatogram c);
-    
-    public void displayChromatogramAsMultiView(Map<IRawFile, IChromatogram> chromatogramByRawFile);
+public interface IPeakel {
+
+   float getArea();
+
+   float getApexIntensity();
+
+   float getDuration();
+
+   float getElutionTime();
+
+   float getFirstElutionTime();
+
+   float getLastElutionTime();
+
+   int getScanCount();
+
+   double getMz();
+
+   IRawFile getRawFile();
+   
+   // TODO : to be removed as soon as ThreadedMzdbRawFile is removed
+   void setRawFile(IRawFile rawfile);
+   
+   int getMsLevel();
+   
+   double getParentMz();
+
+   Peakel getPeakel();
 }

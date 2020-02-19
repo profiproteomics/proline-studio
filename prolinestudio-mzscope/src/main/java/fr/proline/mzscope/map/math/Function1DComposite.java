@@ -14,21 +14,35 @@
  * You should have received a copy of the CeCILL License 
  * along with this program; If not, see <http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html>.
  */
-package fr.proline.mzscope.ui;
-
-import fr.proline.mzscope.model.IChromatogram;
-import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.ui.peakels.IPeakelViewer;
-
-import java.util.Map;
+package fr.proline.mzscope.map.math;
 
 /**
+ * Linear function 'f(g(x))'
  *
- * @author MB243701
+ * @author JeT
  */
-public interface IExtractionResultsViewer extends IPeakelViewer {
-    
-    public void displayChromatogramAsSingleView(IRawFile rawfile, IChromatogram c);
-    
-    public void displayChromatogramAsMultiView(Map<IRawFile, IChromatogram> chromatogramByRawFile);
+public class Function1DComposite implements Function1D {
+
+    private Function1D f, g;
+
+    /**
+     * @param f
+     * @param g
+     */
+    public Function1DComposite(Function1D f, Function1D g) {
+	super();
+	this.f = f;
+	this.g = g;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see fr.profi.mzscope.math.Function1D#f(double)
+     */
+    @Override
+    public double eval(double x) {
+	return this.f.eval(this.g.eval(x));
+    }
+
 }

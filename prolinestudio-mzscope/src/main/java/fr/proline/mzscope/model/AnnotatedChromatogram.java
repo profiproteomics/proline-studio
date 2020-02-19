@@ -19,14 +19,14 @@ package fr.proline.mzscope.model;
 public class AnnotatedChromatogram implements IChromatogram {
 
   private IChromatogram chromatogram;
-  private IFeature feature;
+  private IPeakel feature;
 
-  public AnnotatedChromatogram(IChromatogram chromatogram, IFeature feature) {
+  public AnnotatedChromatogram(IChromatogram chromatogram, IPeakel feature) {
     this.chromatogram = chromatogram;
     this.feature = feature;
   }
 
-  public IFeature getAnnotation() {
+  public IPeakel getAnnotation() {
     return feature;
   }
 

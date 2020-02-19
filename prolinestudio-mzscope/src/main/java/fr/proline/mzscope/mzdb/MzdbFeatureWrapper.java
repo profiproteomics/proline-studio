@@ -1,9 +1,9 @@
-/* 
+/*
  * Copyright (C) 2019 VD225637
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
- * ; either version 2.1 
+ * ; either version 2.1
  * of the License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -11,14 +11,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * CeCILL License V2.1 for more details.
  *
- * You should have received a copy of the CeCILL License 
+ * You should have received a copy of the CeCILL License
  * along with this program; If not, see <http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html>.
  */
 package fr.proline.mzscope.mzdb;
 
-import fr.proline.mzscope.model.IFeature;
 import fr.profi.mzdb.model.Feature;
 import fr.profi.mzdb.model.Peakel;
+import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.IRawFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,91 +30,96 @@ import org.slf4j.LoggerFactory;
  */
 public class MzdbFeatureWrapper implements IFeature {
 
-    final private static Logger logger = LoggerFactory.getLogger(MzdbFeatureWrapper.class);
-    
-    private final Feature mzdbFeature;
-    //TODO set to final as soon as setRawFile will remove
-    private IRawFile rawFile;
-    private final int msLevel;
-    
-   public MzdbFeatureWrapper(Feature mzdbFeature, IRawFile rawfile, int msLevel) {
-      this.mzdbFeature = mzdbFeature;
-      this.rawFile = rawfile;
-      this.msLevel = msLevel;
-   }
+  final private static Logger logger = LoggerFactory.getLogger(MzdbFeatureWrapper.class);
 
-   @Override
-   public float getArea() {
-      return mzdbFeature.getArea();
-   }
+  private final Feature mzdbFeature;
+  //TODO set to final as soon as setRawFile will remove
+  private IRawFile rawFile;
+  private final int msLevel;
 
-   @Override
-   public int getScanCount() {
-      return mzdbFeature.getMs1Count();
-   }
+  public MzdbFeatureWrapper(Feature mzdbFeature, IRawFile rawfile, int msLevel) {
+    this.mzdbFeature = mzdbFeature;
+    this.rawFile = rawfile;
+    this.msLevel = msLevel;
+  }
 
-   @Override
-   public int getPeakelsCount() {
-      return mzdbFeature.getPeakelsCount();
-   }
+  @Override
+  public float getArea() {
+    return mzdbFeature.getArea();
+  }
 
-   @Override
-   public double getMz() {
-      return mzdbFeature.getMz();
-   }
+  @Override
+  public int getScanCount() {
+    return mzdbFeature.getMs1Count();
+  }
 
-   @Override
-   public int getCharge() {
-      return mzdbFeature.getCharge();
-   }
+  @Override
+  public int getPeakelsCount() {
+    return mzdbFeature.getPeakelsCount();
+  }
 
-   @Override
-   public float getElutionTime() {
-      return mzdbFeature.getElutionTime();
-   }
-   
-   @Override
-   public float getDuration() {
-      return mzdbFeature.getBasePeakel().calcDuration();
-   }
-    
-   @Override
-   public float getApexIntensity() {
-      return mzdbFeature.getBasePeakel().getApexIntensity();
-   }
-   
-   @Override
-   public float getFirstElutionTime() {
-      return mzdbFeature.getBasePeakel().getFirstElutionTime();
-   }
+  @Override
+  public double getMz() {
+    return mzdbFeature.getMz();
+  }
 
-   @Override
-   public float getLastElutionTime() {
-      return mzdbFeature.getBasePeakel().getLastElutionTime();
-   }
+  @Override
+  public int getCharge() {
+    return mzdbFeature.getCharge();
+  }
 
-    @Override
-    public IRawFile getRawFile() {
-        return rawFile;
-    }
+  @Override
+  public float getElutionTime() {
+    return mzdbFeature.getElutionTime();
+  }
 
-    @Override
-    public void setRawFile(IRawFile rawfile) {
-        this.rawFile = rawfile;
-    }
+  @Override
+  public float getDuration() {
+    return mzdbFeature.getBasePeakel().calcDuration();
+  }
 
-    @Override
-    public int getMsLevel() {
-        return msLevel;
-    }
+  @Override
+  public float getApexIntensity() {
+    return mzdbFeature.getBasePeakel().getApexIntensity();
+  }
 
-    @Override
-    public double getParentMz() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+  @Override
+  public float getFirstElutionTime() {
+    return mzdbFeature.getBasePeakel().getFirstElutionTime();
+  }
 
-    @Override
-    public Peakel[] getPeakels() {
-        return mzdbFeature.getPeakels();
-    }
+  @Override
+  public float getLastElutionTime() {
+    return mzdbFeature.getBasePeakel().getLastElutionTime();
+  }
+
+  @Override
+  public IRawFile getRawFile() {
+    return rawFile;
+  }
+
+  @Override
+  public void setRawFile(IRawFile rawfile) {
+    this.rawFile = rawfile;
+  }
+
+  @Override
+  public int getMsLevel() {
+    return msLevel;
+  }
+
+  @Override
+  public double getParentMz() {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
+
+  @Override
+  public Peakel getPeakel() {
+    return getPeakels()[0];
+  }
+
+  @Override
+  public Peakel[] getPeakels() {
+    return mzdbFeature.getPeakels();
+  }
 }

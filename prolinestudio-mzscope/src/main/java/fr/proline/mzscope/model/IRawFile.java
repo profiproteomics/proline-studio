@@ -35,9 +35,9 @@ public interface IRawFile {
    public String getName();
    
    /**
-    * Returns the File object correspondng to this raw file on disk.
+    * Returns the File object corresponding to this raw file on disk.
     * 
-    * @return the File object correspondng to this raw file 
+    * @return the File object corresponding to this raw file
     */
    public File getFile();
 
@@ -62,13 +62,21 @@ public interface IRawFile {
    public IChromatogram getBPI();
 
    /**
-    * Extract the features list from this raw file.
+    * Extract the list of peakels from this raw file.
     * 
     * @param params
     * @return 
     */
+   public List<IPeakel> extractPeakels(FeaturesExtractionRequest params);
+
+   /**
+    * Extract the list of peakels from this raw file.
+    *
+    * @param params
+    * @return
+    */
    public List<IFeature> extractFeatures(FeaturesExtractionRequest params);
-   
+
    /**
     * Returns the spectrum corresponding to the specified index.
     * 
@@ -93,17 +101,29 @@ public interface IRawFile {
     */
    public int getSpectrumId(double retentionTime);
 
+   /**
+    * Returns an array of elution times for all spectrum of the specified msLevel
+    *
+    * @param msLevel
+    * @return
+    */
    public double[] getElutionTimes(int msLevel);
 
+   /**
+    * Returns the elution time of the specified spectrum index.
+    *
+    * @param spectrumIndex
+    * @return
+    */
    public double getSpectrumElutionTime(int spectrumIndex);
 
-      /**
-       * Returns the index of the spectrum following the spectrumIndex and corresponding to the specified MS level.
-       *
-       * @param spectrumIndex
-       * @param msLevel
-       * @return The Index of the following spectrum
-       */
+    /**
+     * Returns the index of the spectrum following the spectrumIndex and corresponding to the specified MS level.
+     *
+     * @param spectrumIndex
+     * @param msLevel
+     * @return The Index of the following spectrum
+     */
    public int getNextSpectrumId(int spectrumIndex, int msLevel);
    
    /**

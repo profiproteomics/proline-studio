@@ -89,7 +89,7 @@ public class ChromatogramAnnotator implements IAnnotator {
         }
 
   //TODO : redetermine elution-time as apex time instead of requested retention time
-          BaseFeature feature = new BaseFeature(
+          BasePeakel feature = new BasePeakel(
                   (chromatogram.getMaxMz() + chromatogram.getMinMz()) / 2.0,
                   (float) time[cRtIndex]*60.0f,
                   (float) time[cStartIdx]*60.0f,

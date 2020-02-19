@@ -341,7 +341,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
 
     // override display feature to display all xic
     @Override
-    public void displayFeature(final IFeature f) {
+    public void displayFeature(final IPeakel f) {
         // TODO : how to handle this simple display of a unique feature ? In this case multiple Features must be displayed, one by RawFile
     }
 

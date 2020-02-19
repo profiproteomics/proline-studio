@@ -16,9 +16,8 @@
  */
 package fr.proline.mzscope.ui;
 
-import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.IChromatogram;
-import fr.proline.mzscope.model.IFeature;
+import fr.proline.mzscope.model.IPeakel;
 import fr.proline.mzscope.ui.event.AxisRangeChromatogramListener;
 import fr.proline.mzscope.ui.model.ChromatogramTableModel;
 import fr.proline.mzscope.utils.Display;
@@ -191,7 +190,7 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
         }
     }
 
-   public void displayFeature(final IFeature f, Display display) {
+   public void displayFeature(final IPeakel f, Display display) {
       PlotLinear chromatogramPlot = chromatogramPlots.isEmpty() ? null : chromatogramPlots.get(0);
       if (chromatogramPlot != null) {
          chromatogramPlot.clearMarkers();

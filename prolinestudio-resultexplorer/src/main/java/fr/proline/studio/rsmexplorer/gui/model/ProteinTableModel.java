@@ -48,9 +48,6 @@ import javax.swing.table.TableCellRenderer;
  */
 public class ProteinTableModel extends DecoratedTableModel implements GlobalTableModelInterface {
 
-
-
-
     public enum Column {
         PROTEIN_ID("Id", Long.class, 0),
         PROTEIN_NAME("Protein", String.class, 1),

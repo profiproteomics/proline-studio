@@ -61,17 +61,17 @@ class PeakelAnnotatorImpl {
 
   private final FeaturesExtractionRequest params;
   private IRawFile rawFile;
-  private Map<Integer, List<IFeature>> featuresByNominalMass;
+  private Map<Integer, List<IPeakel>> featuresByNominalMass;
 
   public PeakelAnnotatorImpl(IRawFile rawFile, FeaturesExtractionRequest params) {
     this.params = params;
     this.rawFile = rawFile;
   }
 
-  private Map<Integer, List<IFeature>> getPeakels() {
+  private Map<Integer, List<IPeakel>> getPeakels() {
     if (featuresByNominalMass == null) {
       if (params != null) {
-        List<IFeature> list = rawFile.extractFeatures(params);
+        List<IPeakel> list = rawFile.extractPeakels(params);
         featuresByNominalMass = list.stream().collect(Collectors.groupingBy(f -> Integer.valueOf((int) f.getMz()), Collectors.toList()));
       }
     }
@@ -80,12 +80,12 @@ class PeakelAnnotatorImpl {
   }
 
   public AnnotatedChromatogram annotate(IChromatogram chromatogram, MsnExtractionRequest request, Integer expectedCharge) {
-    List<IFeature> features = getPeakels().get((int)request.getMz());
+    List<IPeakel> features = getPeakels().get((int)request.getMz());
 
     if (features == null)
       return chromatogram == null ? null : new AnnotatedChromatogram(chromatogram, null);
 
-    IFeature feature = features.stream().filter(f -> {
+    IPeakel feature = features.stream().filter(f -> {
               double tolDa = f.getMz()*params.getMzTolPPM()/1e6;
               double upperTimeLimit = rawFile.getSpectrumElutionTime(rawFile.getNextSpectrumId(rawFile.getNextSpectrumId(rawFile.getSpectrumId(f.getLastElutionTime()), 1), 1));
               double lowerTimeLimit = rawFile.getSpectrumElutionTime(rawFile.getPreviousSpectrumId(rawFile.getSpectrumId(f.getFirstElutionTime()), 1));

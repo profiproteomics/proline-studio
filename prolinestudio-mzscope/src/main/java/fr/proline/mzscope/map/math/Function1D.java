@@ -14,21 +14,12 @@
  * You should have received a copy of the CeCILL License 
  * along with this program; If not, see <http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html>.
  */
-package fr.proline.mzscope.ui;
-
-import fr.proline.mzscope.model.IChromatogram;
-import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.ui.peakels.IPeakelViewer;
-
-import java.util.Map;
+package fr.proline.mzscope.map.math;
 
 /**
+ * @author JeT
  *
- * @author MB243701
  */
-public interface IExtractionResultsViewer extends IPeakelViewer {
-    
-    public void displayChromatogramAsSingleView(IRawFile rawfile, IChromatogram c);
-    
-    public void displayChromatogramAsMultiView(Map<IRawFile, IChromatogram> chromatogramByRawFile);
+public interface Function1D {
+    double eval(double x);
 }

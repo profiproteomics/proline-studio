@@ -28,7 +28,7 @@ import fr.profi.mzdb.MzDbReader;
 import fr.profi.mzdb.util.concurrent.Callback;
 import fr.proline.mzscope.map.LcMsViewerEvent.LcMsViewerEventType;
 import fr.proline.mzscope.map.color.IntensityPainter;
-import fr.proline.mzscope.math.Function1D;
+import fr.proline.mzscope.map.math.Function1D;
 
 /**
  * @author JeT

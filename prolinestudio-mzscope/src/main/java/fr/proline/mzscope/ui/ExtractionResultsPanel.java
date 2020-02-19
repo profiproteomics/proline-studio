@@ -121,14 +121,7 @@ public class ExtractionResultsPanel extends JPanel {
         JButton importCSVBtn = new JButton();
         importCSVBtn.setIcon(IconManager.getIcon(IconManager.IconType.TABLE_IMPORT));
         importCSVBtn.setToolTipText("Import m/z values from a csv file...");
-        importCSVBtn.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                importCSVExtractions();
-            }
-
-        });
+        importCSVBtn.addActionListener(e -> importCSVExtractions());
         toolbar.add(importCSVBtn);
         
         JButton iRTBtn = new JButton("iRT");
@@ -333,7 +326,7 @@ public class ExtractionResultsPanel extends JPanel {
                                 if (chr != null) {
                                     if (chr.getAnnotation() != null) {
                                         // because displayFeature will re-extract the XIC of the feature moz ... find a better solution
-                                        m_extractionResultsViewer.displayFeatureInCurrentRawFile(chr.getAnnotation());
+                                        m_extractionResultsViewer.displayPeakelInCurrentRawFile(chr.getAnnotation());
                                     } else {
                                         m_extractionResultsViewer.displayChromatogramAsSingleView(rawfiles.get(0), chr);
                                     }

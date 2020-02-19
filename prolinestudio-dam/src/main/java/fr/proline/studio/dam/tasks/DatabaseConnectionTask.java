@@ -130,7 +130,6 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
     @Override
     public boolean needToFetch() {
         return true; // anyway this task is used only one time for each node
-
     }
 
     

@@ -31,7 +31,7 @@ import fr.profi.mzdb.model.SpectrumSlice;
 import fr.profi.mzdb.util.concurrent.CallableCallback;
 import fr.profi.mzdb.util.concurrent.Callback;
 import fr.proline.mzscope.map.color.IntensityPainter;
-import fr.proline.mzscope.math.Function1D;
+import fr.proline.mzscope.map.math.Function1D;
 
 /**
  * @author JeT

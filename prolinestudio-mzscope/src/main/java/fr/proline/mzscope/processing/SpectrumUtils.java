@@ -171,14 +171,14 @@ public class SpectrumUtils {
         Pair<double[], double[]> values = zipValues(x1, y1, x2, y2);
         PearsonsCorrelation pearson = new PearsonsCorrelation();
         double corr = pearson.correlation(values.getLeft(), values.getRight());
-        return Math.abs(corr);
+        return corr;
     }
 
     public static double correlation(double[] x1, double[] y1, double[] x2, double[] y2) {
         Pair<double[], double[]> values = zipValues(x1, y1, x2, y2);
         PearsonsCorrelation pearson = new PearsonsCorrelation();
         double corr = pearson.correlation(values.getLeft(), values.getRight());
-        return Math.abs(corr);
+        return corr;
     }
        
     public static Pair<double[], double[]> zipValues(double[] x1, double[] y1, double[] x2, double[] y2) {

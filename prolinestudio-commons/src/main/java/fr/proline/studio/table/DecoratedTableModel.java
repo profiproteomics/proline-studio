@@ -71,5 +71,4 @@ public abstract class DecoratedTableModel extends AbstractTableModel implements 
     public PlotDataSpec getDataSpecAt(int i) {
         return null;
     }
-
 }

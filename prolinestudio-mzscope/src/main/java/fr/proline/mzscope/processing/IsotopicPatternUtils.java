@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Tuple2;
@@ -198,6 +197,7 @@ public class IsotopicPatternUtils {
      public static Tuple2<Object, TheoreticalIsotopePattern>[] calcIsotopicPatternHypotheses(SpectrumData currentSpectrum, double mz, double ppmTol) {
          Tuple2<Object, TheoreticalIsotopePattern>[] patterns = calcIsotopicPatternHypotheses(currentSpectrum, mz, ppmTol, new DotProductScorer());
          reorderDotProductHypotheses(patterns);
+//        Tuple2<Object, TheoreticalIsotopePattern>[] patterns = IsotopicPatternScorer.calcIsotopicPatternHypotheses(currentSpectrum, mz, ppmTol);
          return patterns;
      }
      
@@ -241,38 +241,37 @@ public class IsotopicPatternUtils {
       //tracePredictions(scorer.getClass().getSimpleName(), mz, ppmTol, patterns);
       return patterns;
    }
-     
- 
+
 }
 
 
 class ProlineLikeScorer implements Scorer {
-    
-      public  Tuple2<Double, TheoreticalIsotopePattern> score(SpectrumData currentSpectrum, double intialMz, int shift,  int charge, double ppmTol) {
-      double score = 0.0;
-      double mz = intialMz - shift * IsotopePatternEstimator.avgIsoMassDiff() / charge;
-      TheoreticalIsotopePattern pattern = IsotopePatternEstimator.getTheoreticalPattern(mz, charge);
-      double normalisationRatio = -1.0;
-      Double ipMoz = mz;
-      int matchingPeaksCount = 0;
-      for (int rank = 0; rank < pattern.mzAbundancePairs().length; rank++) {
-         ipMoz = (rank == 0) ? ipMoz : ipMoz + IsotopePatternEstimator.avgIsoMassDiff()/charge;
-         int nearestPeakIdx =  SpectrumUtils.getNearestPeakIndex(currentSpectrum.getMzList(), ipMoz);
-         if (normalisationRatio < 0) {
-            normalisationRatio = currentSpectrum.getIntensityList()[nearestPeakIdx]/(Float) pattern.mzAbundancePairs()[0]._2;
-         }
-         double ipAbundance = ((Float) pattern.mzAbundancePairs()[rank]._2) * normalisationRatio;
-         double penality = Math.min(100.0, 0.0001 * Math.pow(10, rank*2));
-         double abundance = ((1e6 * Math.abs(currentSpectrum.getMzList()[nearestPeakIdx] - ipMoz) / ipMoz) < ppmTol) ? currentSpectrum.getIntensityList()[nearestPeakIdx] : ipAbundance/100.0;
-         double d = ((ipAbundance - abundance) / Math.min(abundance, ipAbundance)) * 1.0/penality;
-         score += d * d;
-         if ((1e6 * Math.abs(currentSpectrum.getMzList()[nearestPeakIdx] - ipMoz) / ipMoz) < ppmTol) {
-            matchingPeaksCount++;
-            ipMoz = currentSpectrum.getMzList()[nearestPeakIdx];
-         }
-      }
-      score = Math.log10(score) - matchingPeaksCount;
 
-      return new Tuple2<Double, TheoreticalIsotopePattern>(score, pattern);
-   }
+  public Tuple2<Double, TheoreticalIsotopePattern> score(SpectrumData currentSpectrum, double intialMz, int shift, int charge, double ppmTol) {
+    double score = 0.0;
+    double mz = intialMz - shift * IsotopePatternEstimator.avgIsoMassDiff() / charge;
+    TheoreticalIsotopePattern pattern = IsotopePatternEstimator.getTheoreticalPattern(mz, charge);
+    double normalisationRatio = -1.0;
+    Double ipMoz = mz;
+    int matchingPeaksCount = 0;
+    for (int rank = 0; rank < pattern.mzAbundancePairs().length; rank++) {
+      ipMoz = (rank == 0) ? ipMoz : ipMoz + IsotopePatternEstimator.avgIsoMassDiff() / charge;
+      int nearestPeakIdx = SpectrumUtils.getNearestPeakIndex(currentSpectrum.getMzList(), ipMoz);
+      if (normalisationRatio < 0) {
+        normalisationRatio = currentSpectrum.getIntensityList()[nearestPeakIdx] / (Float) pattern.mzAbundancePairs()[0]._2;
+      }
+      double ipAbundance = ((Float) pattern.mzAbundancePairs()[rank]._2) * normalisationRatio;
+      double penality = Math.min(100.0, 0.0001 * Math.pow(10, rank * 2));
+      double abundance = ((1e6 * Math.abs(currentSpectrum.getMzList()[nearestPeakIdx] - ipMoz) / ipMoz) < ppmTol) ? currentSpectrum.getIntensityList()[nearestPeakIdx] : ipAbundance / 100.0;
+      double d = ((ipAbundance - abundance) / Math.min(abundance, ipAbundance)) * 1.0 / penality;
+      score += d * d;
+      if ((1e6 * Math.abs(currentSpectrum.getMzList()[nearestPeakIdx] - ipMoz) / ipMoz) < ppmTol) {
+        matchingPeaksCount++;
+        ipMoz = currentSpectrum.getMzList()[nearestPeakIdx];
+      }
+    }
+    score = Math.log10(score) - matchingPeaksCount;
+
+    return new Tuple2<Double, TheoreticalIsotopePattern>(score, pattern);
+  }
 }

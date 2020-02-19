@@ -70,10 +70,10 @@ import fr.proline.mzscope.map.control.LcMsViewerExtractorManipulator;
 import fr.proline.mzscope.map.control.LcMsViewerManipulator;
 import fr.proline.mzscope.map.control.LcMsViewerNavigateManipulator;
 import fr.proline.mzscope.map.control.LcMsViewerSelectionManipulator;
-import fr.proline.mzscope.math.Function1D;
-import fr.proline.mzscope.math.Function1DComposite;
-import fr.proline.mzscope.math.Function1DLinear;
-import fr.proline.mzscope.math.Function1DLog;
+import fr.proline.mzscope.map.math.Function1D;
+import fr.proline.mzscope.map.math.Function1DComposite;
+import fr.proline.mzscope.map.math.Function1DLinear;
+import fr.proline.mzscope.map.math.Function1DLog;
 import fr.proline.studio.utils.IconManager;
 
 /**

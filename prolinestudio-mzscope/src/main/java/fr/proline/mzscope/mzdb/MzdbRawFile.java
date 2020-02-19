@@ -256,6 +256,61 @@ public class MzdbRawFile implements IRawFile {
         return chromatogram;
     }
 
+
+    @Override
+    public List<IPeakel> extractPeakels(FeaturesExtractionRequest params) {
+        List<IPeakel> result = new ArrayList<>();
+        logger.info("Extract peakels with params : " + params.toString());
+
+        try {
+            Iterator<RunSlice> runSlices;
+            if (params.getMinMz() <= 0 && params.getMaxMz() <= 0) {
+                if(params.isMsnExtraction()){
+                    runSlices = getMzDbReader().getLcMsnRunSliceIterator(params.getMinMz(), params.getMaxMz());
+                }else{
+                    runSlices = getMzDbReader().getLcMsRunSliceIterator();
+                }
+            } else {
+                if (params.isMsnExtraction()){
+                    if (params.getFragmentMinMz() <= 0 && params.getFragmentMaxMz() <= 0) {
+                        runSlices = getMzDbReader().getLcMsnRunSliceIterator(params.getMinMz(), params.getMaxMz());
+                    } else {
+                        runSlices = getMzDbReader().getLcMsnRunSliceIterator(params.getMinMz(), params.getMaxMz(), params.getFragmentMinMz(), params.getFragmentMaxMz());
+                    }
+                } else{
+                    runSlices = getMzDbReader().getLcMsRunSliceIterator(params.getMinMz(), params.getMaxMz());
+                }
+            }
+
+            FeatureDetectorConfig detectorConfig = buildFeatureDetectorConfig(params);
+            MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, detectorConfig);
+
+            Peakel[] peakels = detector.detectPeakels(runSlices, Option.empty());
+            double min = (params.getMsLevel() == 1) ? params.getMinMz() : params.getFragmentMinMz();
+            double max = (params.getMsLevel() == 1) ? params.getMaxMz() : params.getFragmentMaxMz();
+
+            logger.info("{} peakels found",peakels.length);
+
+            for (Peakel peakel : peakels) {
+                //creates a fake Feature associated to this peakel in order to always display Features
+                IPeakel feature = (params.getMsLevel() == 1) ? new MzdbPeakelWrapper(peakel, this) : new MzdbPeakelWrapper(peakel, this, getMzDbReader().getSpectrumHeader(peakel.getApexSpectrumId()).getPrecursorMz());
+                if (min <= 0 && max <= 0) {
+                    result.add(feature);
+                } else {
+                    //check that the feature is in the mass range
+                    if (feature.getMz() >= min && feature.getMz() <= max) {
+                        result.add(feature);
+                    }
+                }
+            }
+        } catch (SQLiteException | StreamCorruptedException ex) {
+            logger.error("Error while getting LcMs RunSlice Iterator: " + ex);
+        } catch (Exception e) {
+            logger.error("unexpected error ",e);
+        }
+        return result;
+    }
+
     @Override
     public List<IFeature> extractFeatures(FeaturesExtractionRequest params) {
         switch (params.getExtractionMethod()) {
@@ -263,8 +318,6 @@ public class MzdbRawFile implements IRawFile {
                 return extractFeaturesFromMs2(params.getMzTolPPM());
             case DETECT_FEATURES:
                 return detectFeatures(params);
-            case DETECT_PEAKELS:
-                return detectPeakels(params);
         }
         return null;
     }
@@ -292,8 +345,10 @@ public class MzdbRawFile implements IRawFile {
             
             PeakelsHelper helper = new PeakelsHelper(peakels);
             //List<Feature> features2 = helper.deisotopePeakels(reader, mzTolPPM);            
-            List<Feature> features = helper.deisotopePeakelsFromMzdb(reader, params.getMzTolPPM());
-            
+            //List<Feature> features = helper.deisotopePeakelsFromMzdb(reader, params.getMzTolPPM());
+            //List<Feature> features = helper.deisotopePeakelsFromMzdb(reader, params.getMzTolPPM());
+            List<Feature> features = helper.deisotopePeakels(reader, params.getMzTolPPM());
+
             //List<Feature> features = PeakelsHelper.deisotopePeakelsFromMzdb(reader, peakels, mzTolPPM);
             features.forEach(f -> result.add(new MzdbFeatureWrapper(f, this, 1)));            
             
@@ -301,7 +356,6 @@ public class MzdbRawFile implements IRawFile {
             logger.error("Error while getting LcMs RunSlice Iterator: " + ex);
         }
         return result;
-
     }
 
     private FeatureDetectorConfig buildFeatureDetectorConfig(FeaturesExtractionRequest params) {
@@ -332,61 +386,6 @@ public class MzdbRawFile implements IRawFile {
       }
       logger.info("Real bounds : " + min + " - " + max);
    }
-
-    private List<IFeature> detectPeakels(FeaturesExtractionRequest params) {
-
-        List<IFeature> result = new ArrayList<>();
-        logger.info("Extract peakels with params : " + params.toString());
-
-        try {
-            Iterator<RunSlice> runSlices;
-            if (params.getMinMz() <= 0 && params.getMaxMz() <= 0) {
-                if(params.isMsnExtraction()){
-                    runSlices = getMzDbReader().getLcMsnRunSliceIterator(params.getMinMz(), params.getMaxMz());
-                }else{
-                    runSlices = getMzDbReader().getLcMsRunSliceIterator();
-                }
-            } else {
-                if (params.isMsnExtraction()){
-                    if (params.getFragmentMinMz() <= 0 && params.getFragmentMaxMz() <= 0) {
-                        runSlices = getMzDbReader().getLcMsnRunSliceIterator(params.getMinMz(), params.getMaxMz());
-                    } else {
-                        runSlices = getMzDbReader().getLcMsnRunSliceIterator(params.getMinMz(), params.getMaxMz(), params.getFragmentMinMz(), params.getFragmentMaxMz());
-                    }
-                } else{
-                    runSlices = getMzDbReader().getLcMsRunSliceIterator(params.getMinMz(), params.getMaxMz());
-                }
-            }
-
-
-            FeatureDetectorConfig detectorConfig = buildFeatureDetectorConfig(params);
-            MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, detectorConfig);
-            
-            Peakel[] peakels = detector.detectPeakels(runSlices, Option.empty());
-            double min = (params.getMsLevel() == 1) ? params.getMinMz() : params.getFragmentMinMz();
-            double max = (params.getMsLevel() == 1) ? params.getMaxMz() : params.getFragmentMaxMz();
-            
-            logger.info("{} peakels found",peakels.length);
-            
-            for (Peakel peakel : peakels) {
-                //creates a fake Feature associated to this peakel in order to always display Features
-                IFeature feature = (params.getMsLevel() == 1) ? new MzdbPeakelWrapper(peakel, this) : new MzdbPeakelWrapper(peakel, this, getMzDbReader().getSpectrumHeader(peakel.getApexSpectrumId()).getPrecursorMz());
-                if (min <= 0 && max <= 0) {
-                    result.add(feature);
-                } else {
-                    //check that the feature is in the mass range
-                    if (feature.getMz() >= min && feature.getMz() <= max) {
-                        result.add(feature);
-                    }
-                }
-            }
-        } catch (SQLiteException | StreamCorruptedException ex) {
-            logger.error("Error while getting LcMs RunSlice Iterator: " + ex);
-        } catch (Exception e) {
-            logger.error("unexpected error ",e);
-        }
-        return result;
-    }
 
     private List<IFeature> extractFeaturesFromMs2(float tolPPM) {
         List<IFeature> result = new ArrayList<>();

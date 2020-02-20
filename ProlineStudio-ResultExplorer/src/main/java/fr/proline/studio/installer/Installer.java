@@ -11,6 +11,7 @@ import fr.proline.studio.rserver.RServerManager;
 import java.awt.Frame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import org.openide.windows.WindowManager;
 
 /**

@@ -670,6 +670,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
                         userObject.setStatus(RunInfoData.Status.MISSING);
                         userObject.setSelectedRawFile(null);
                         userObject.setRun(null);
+                        userObject.setMessage("");
                         fireTableDataChanged();
                         updatePotentialsListForMissings();
                     }

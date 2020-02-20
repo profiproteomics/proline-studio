@@ -34,7 +34,6 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 
@@ -56,12 +55,13 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
     private JTextArea m_errorTextArea;
     private JButton m_requestButton;
 
-    private String m_requestContent;
-    private DefaultMutableTreeNode m_requestContentTreeNode;
+    private RequestContentDialog m_requestDialog;
+
     private String m_requestURL;
 
     public TaskDescriptionPanel() {
         initComponents();
+        m_requestDialog = new RequestContentDialog();
     }
 
     private void initComponents() {
@@ -89,7 +89,7 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         m_requestButton.setAction(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                showRequestDetailsDialog();
+                m_requestDialog.showRequestDetailsDialog();
             }
         });
         m_requestButton.setEnabled(false);
@@ -116,55 +116,6 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         c.gridy++;
         c.weighty = 1;
         add(errorPanel, c);
-
-    }
-
-    public void showRequestDetailsDialog() {
-
-        JPanel requestPanel = new JPanel(new GridBagLayout());
-        requestPanel.setPreferredSize(new Dimension(600, 400));
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-        JTextField requestURLTextfield = new JTextField();
-        requestURLTextfield.setText(m_requestURL);
-
-        JTextArea requestContentTextarea = new JTextArea();
-        requestContentTextarea.setText(m_requestContent);
-        requestContentTextarea.setEditable(false);
-        requestContentTextarea.setLineWrap(true);
-        // --- add objects
-        c.gridx = 0;
-        c.gridy = 0;
-        requestPanel.add(new JLabel("URL:"), c);
-        c.gridx++;
-        c.weightx = 1;
-        requestPanel.add(requestURLTextfield, c);
-
-        c.gridx = 0;
-        c.gridy++;
-        c.weightx = 0;
-        requestPanel.add(new JLabel("Content:"), c);
-        c.gridx++;
-        c.weightx = 1;
-        c.weighty = 1;
-
-        JSplitPane contentPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, 
-                new JScrollPane(requestContentTextarea), 
-                new JScrollPane(new JTree(m_requestContentTreeNode)));
-        requestPanel.add(contentPane, c);
-        NotifyDescriptor nd = new NotifyDescriptor(
-                requestPanel, // instance of your panel
-                "Request details", // title of the dialog
-                NotifyDescriptor.PLAIN_MESSAGE, // it is Yes/No dialog ...
-                NotifyDescriptor.PLAIN_MESSAGE, // ... of a question type => a question mark icon
-                null,
-                null
-        );
-
-        DialogDisplayer.getDefault().notify(nd);
 
     }
 
@@ -300,12 +251,13 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         m_endTimeTextfield.setText(formatTime(taskInfo.getEndTimestamp()));
         m_deltaEndTimeTextfield.setText(formatDeltaTime(taskInfo.getDuration()));
 
-        m_requestContent = taskInfo.getRequestContent();
-        m_requestContentTreeNode = StringUtils.createTreeFromJson(m_requestContent,"content");
+        m_requestDialog.setRequestContent(taskInfo.getRequestContent());
+
         m_requestURL = taskInfo.getRequestURL();
 
         m_requestButton.setEnabled((m_requestURL != null) && (!m_requestURL.isEmpty()));
 
+        repaint();
     }
 
     private void reinit() {
@@ -316,10 +268,9 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         m_deltaStartTimeTextfield.setText("");
         m_endTimeTextfield.setText("");
         m_deltaEndTimeTextfield.setText("");
-        m_requestContent = null;
         m_requestURL = null;
         m_requestButton.setEnabled(false);
-        m_requestContentTreeNode = null;
+        m_requestDialog.reinit();
     }
 
     private String formatTime(long timestamp) {
@@ -370,6 +321,84 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
     @Override
     public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getSaveAction(splittedPanel);
+    }
+
+    class RequestContentDialog {
+
+        private JTextArea _requestDialogContentTextarea;
+        private JSplitPane _requestDialogContentPane;
+        private JTree _requestContentTree;
+        private String _requestContent = "";
+
+        public RequestContentDialog() {
+            _requestDialogContentTextarea = new JTextArea();
+            //_requestDialogContentTextarea.setSize(600, 100);
+            _requestDialogContentPane = new JSplitPane();
+        }
+
+        public void showRequestDetailsDialog() {
+
+            JPanel requestPanel = new JPanel(new GridBagLayout());
+            requestPanel.setPreferredSize(new Dimension(600, 400));
+            GridBagConstraints c = new GridBagConstraints();
+            c.anchor = GridBagConstraints.NORTHWEST;
+            c.fill = GridBagConstraints.BOTH;
+            c.insets = new java.awt.Insets(5, 5, 5, 5);
+
+            JTextField requestURLTextfield = new JTextField();
+            requestURLTextfield.setText(m_requestURL);
+
+            _requestDialogContentTextarea = new JTextArea();
+            _requestDialogContentTextarea.setText(_requestContent);
+            _requestDialogContentTextarea.setCaretPosition(0);
+            _requestDialogContentTextarea.setEditable(false);
+            _requestDialogContentTextarea.setLineWrap(true);
+            // --- add objects
+            c.gridx = 0;
+            c.gridy = 0;
+            requestPanel.add(new JLabel("URL:"), c);
+            c.gridx++;
+            c.weightx = 1;
+            requestPanel.add(requestURLTextfield, c);
+
+            c.gridx = 0;
+            c.gridy++;
+            c.weightx = 0;
+            requestPanel.add(new JLabel("Content:"), c);
+            c.gridx++;
+            c.weightx = 1;
+            c.weighty = 1;
+            JScrollPane top = new JScrollPane(_requestDialogContentTextarea);
+            top.setMinimumSize(new Dimension(600, 60));
+            JScrollPane bottom = new JScrollPane(_requestContentTree);
+            _requestDialogContentPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, top, bottom);
+
+            requestPanel.add(_requestDialogContentPane, c);
+            NotifyDescriptor nd = new NotifyDescriptor(
+                    requestPanel, // instance of your panel
+                    "Request details", // title of the dialog
+                    NotifyDescriptor.PLAIN_MESSAGE, // it is Yes/No dialog ...
+                    NotifyDescriptor.PLAIN_MESSAGE, // ... of a question type => a question mark icon
+                    null,
+                    null
+            );
+
+            DialogDisplayer.getDefault().notify(nd);
+
+        }
+
+        private void setRequestContent(String content) {
+            _requestContent = content;
+            _requestContentTree = StringUtils.createExpandedTreeFromJson(content, "content");
+            _requestDialogContentTextarea.setText(_requestContent);
+            int nbLine = _requestDialogContentTextarea.getLineCount();
+
+        }
+
+        private void reinit() {
+            _requestContent = "";
+            _requestContentTree = null;
+        }
     }
 
 }

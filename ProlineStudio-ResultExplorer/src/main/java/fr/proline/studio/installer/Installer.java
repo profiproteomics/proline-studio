@@ -25,8 +25,9 @@ public class Installer extends VersionInstaller {
     @Override
     public void restored() {
 
-        // for Mac : we need to use Metal UI, otherwise the browse file on server does not work
-        forceMetalUIForMac();
+        // for Mac and Linux : we need to use Metal UI, otherwise the browse file on server does not work (for mac)
+        // and the float are not well displayed (for Linux)
+        forceMetalUIForMacAndLinux();
         
         String productVersion = moduleVersion;
         int firstIndex = moduleVersion.indexOf('.');
@@ -51,9 +52,9 @@ public class Installer extends VersionInstaller {
         
     }
     
-    private void forceMetalUIForMac() {
+    private void forceMetalUIForMacAndLinux() {
         String OS = System.getProperty("os.name").toLowerCase();
-        if (OS.contains("mac")) {
+        if (isMacString(OS) || isUnix(OS)) {
             SwingUtilities.invokeLater(new Runnable() {
 
                 @Override
@@ -64,11 +65,11 @@ public class Installer extends VersionInstaller {
                         Frame f = WindowManager.getDefault().getMainWindow();
                         if (f == null) {
                             // should never be null
-                            forceMetalUIForMac();
+                            forceMetalUIForMacAndLinux();
                         } else {
                             SwingUtilities.updateComponentTreeUI(f);
                         }
-                    } catch (Exception e) {
+                    } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
                         e.printStackTrace();
                     }
 
@@ -78,6 +79,13 @@ public class Installer extends VersionInstaller {
         }
     }
     
+    public static boolean isMacString(String os) {
+        return (os.contains("mac"));	
+    }
+    public static boolean isUnix(String os) {
+        return (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0 || os.indexOf("aix") > 0 );	
+    }
+	
     @Override
     public boolean closing() {
         

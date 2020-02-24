@@ -97,8 +97,8 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
     private JButton m_graphicsTypeButton;
     private AddMzScopeButton m_mzscopeButton;
 
-    private ExctractXICAction m_extractSelectedXICAction = null;
-    private ExctractXICAction m_extractAlldXICAction = null;
+//    private ExctractXICAction m_extractSelectedXICAction = null;
+//    private ExctractXICAction m_extractAlldXICAction = null;
     
     public static final int VIEW_ALL_GRAPH_PEAKS = 0;
     public static final int VIEW_ALL_ISOTOPES_FOR_FEATURE = 1;
@@ -668,12 +668,12 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         public TablePopupMenu initPopupMenu() {
             m_popupMenu = new DisplayTablePopupMenu(XicFeaturePanel.this);
 
-            m_extractSelectedXICAction = new ExctractXICAction(false);
-            m_extractAlldXICAction = new ExctractXICAction(true);
-            
-            m_popupMenu.addAction(null);
-            m_popupMenu.addAction(m_extractSelectedXICAction);
-            m_popupMenu.addAction(m_extractAlldXICAction);
+//            m_extractSelectedXICAction = new ExctractXICAction(false);
+//            m_extractAlldXICAction = new ExctractXICAction(true);
+//            
+//            m_popupMenu.addAction(null);
+//            m_popupMenu.addAction(m_extractSelectedXICAction);
+//            m_popupMenu.addAction(m_extractAlldXICAction);
             
             return m_popupMenu;
         }
@@ -684,8 +684,8 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         @Override
         public void prepostPopupMenu() {
             
-            m_extractSelectedXICAction.setBox(m_dataBox);
-            m_extractAlldXICAction.setBox(m_dataBox);
+//            m_extractSelectedXICAction.setBox(m_dataBox);
+//            m_extractAlldXICAction.setBox(m_dataBox);
             
             m_popupMenu.prepostPopupMenu();
         }

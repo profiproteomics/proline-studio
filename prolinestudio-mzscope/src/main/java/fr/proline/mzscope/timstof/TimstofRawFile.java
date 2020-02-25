@@ -173,24 +173,24 @@ public class TimstofRawFile implements IRawFile{
         } else if (!tf.isPasef()){
             fr.proline.brucker.timstof.model.Spectrum tfSp = tf.getSingleSpectrum();
             //Suppose MS1
-            HashMap<Float, Double> massPerInt = new HashMap<>();
-            double[] allMasses = tfSp.getMasses();
-            float[] allInt = tfSp.getIntensities();
-            List<Float> maxInt = new ArrayList<>();
-            for(int i = 0; i<allMasses.length; i++){    
-                massPerInt.put(allInt[i], allMasses[i]);
-                maxInt.add(allInt[i]);
-            }
-            Collections.sort(maxInt);
-            Collections.reverse(maxInt);
-            double[] someMasses = new double[50000];
-            float[] someInt =new  float[50000];
-            for(int i =0 ; i<50000; i++){
-             someInt[i]=maxInt.get(i);
-             someMasses[i]=massPerInt.get(someInt[i]);
-            }
-            //spectrum  = new Spectrum(spectrumIndex,  tf.getTime().floatValue(), tfSp.getMasses(), tfSp.getIntensities(), 1);
-            spectrum  = new Spectrum(spectrumIndex,  tf.getTime().floatValue(), someMasses, someInt, 1);
+//            HashMap<Float, Double> massPerInt = new HashMap<>();
+//            double[] allMasses = tfSp.getMasses();
+//            float[] allInt = tfSp.getIntensities();
+//            List<Float> maxInt = new ArrayList<>();
+//            for(int i = 0; i<allMasses.length; i++){    
+//                massPerInt.put(allInt[i], allMasses[i]);
+//                maxInt.add(allInt[i]);
+//            }
+//            Collections.sort(maxInt);
+//            Collections.reverse(maxInt);
+//            double[] someMasses = new double[50000];
+//            float[] someInt =new  float[50000];
+//            for(int i =0 ; i<50000; i++){
+//             someInt[i]=maxInt.get(i);
+//             someMasses[i]=massPerInt.get(someInt[i]);
+//            }
+            spectrum  = new Spectrum(spectrumIndex,  tf.getTime().floatValue(), tfSp.getMasses(), tfSp.getIntensities(), 1);
+//            spectrum  = new Spectrum(spectrumIndex,  tf.getTime().floatValue(), someMasses, someInt, 1);
             spectrum.setTitle(tfSp.getTitle());
         }
             

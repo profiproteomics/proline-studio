@@ -48,9 +48,9 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelListener;
 /**
  *
- * Panel displaying all projects of all users with the database size.
- * It is used in the admin dialog
- * 
+ * Panel displaying all projects of all users with the database size. It is used
+ * in the admin dialog
+ *
  * @author JM235353
  */
 public class ProjectsPanel extends JPanel implements ListSelectionListener {
@@ -61,22 +61,22 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
     private final BeanTableModel m_projectBeanModel = new BeanTableModel<ProjectInfo>(ProjectInfo.class);
     private final CompoundTableModel m_projectsModel = new CompoundTableModel(m_projectBeanModel, true);
     private DecoratedMarkerTable m_projectsTable;
-
+    
     private final BeanTableModel m_rawfilesBeanModel = new BeanTableModel<DRawFile>(DRawFile.class);
     private final CompoundTableModel m_rawfilesModel = new CompoundTableModel(m_rawfilesBeanModel, true);
     private DecoratedMarkerTable m_rawfilesTable;
-
+    
     private ArrayList<ProjectInfo> m_resultProjectsList = new ArrayList<>();
-
+    
     public ProjectsPanel(JDialog dialog, Boolean editable) {
         m_isEditable = editable;
         m_dialogOwner = dialog;
-
+        
         setLayout(new BorderLayout());
-
+        
         JPanel internalPanel = createInternalPanel();
         add(internalPanel, BorderLayout.CENTER);
-
+        
         JToolBar toolbar = initToolbar();
         add(toolbar, BorderLayout.WEST);
         
@@ -86,24 +86,24 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         JPanel internalPanel = new JPanel();
         
         initGenericModel();
-
+        
         internalPanel.setBorder(BorderFactory.createTitledBorder("Projects"));
         internalPanel.setLayout(new java.awt.GridBagLayout());
-
+        
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         
         JScrollPane projectTableScrollPane = new JScrollPane();
         m_projectsTable = new DecoratedMarkerTable() {
-
+            
             @Override
             public TablePopupMenu initPopupMenu() {
                 return new TablePopupMenu();
             }
-
+            
             @Override
             public void prepostPopupMenu() {
             }
-
+            
             @Override
             public void addTableModelListener(TableModelListener l) {
                 getModel().addTableModelListener(l);
@@ -113,21 +113,21 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         m_projectsTable.setFillsViewportHeight(true);
         m_projectsTable.setModel(m_projectsModel);
         m_projectsTable.getSelectionModel().addListSelectionListener(this);
-
+        
         m_rawfilesTable = new DecoratedMarkerTable() {
             @Override
             public void addTableModelListener(TableModelListener l) {
                 getModel().addTableModelListener(l);
             }
-
+            
             @Override
             public TablePopupMenu initPopupMenu() {
                 return new TablePopupMenu();
             }
-
+            
             @Override
             public void prepostPopupMenu() {
-
+                
             }
         };
         
@@ -144,7 +144,7 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
-
+        
         c.gridx = 0;
         c.gridy = 0;
         c.gridwidth = 3;
@@ -152,43 +152,40 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         c.weighty = 1.0;
         
         internalPanel.add(splitPane, c);
-
-
+        
         c.gridy++;
         c.gridwidth = 1;
         c.weighty = 0;
         internalPanel.add(Box.createHorizontalGlue(), c);
         
-
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
             @Override
             public boolean mustBeCalledInAWT() {
                 return true;
             }
-
+            
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                 if (success) {
                     updateData();
                 }
             }
-
+            
         };
-
+        
         fr.proline.studio.dam.tasks.DatabaseProjectTask task = new fr.proline.studio.dam.tasks.DatabaseProjectTask(callback);
-        task.initLoadProjectsList(m_resultProjectsList); 
+        task.initLoadProjectsList(m_resultProjectsList);        
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-
+        
         return internalPanel;
     }
-
     
     private JToolBar initToolbar() {
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
-
+        
         FilterButton filterButton = new FilterButton(m_projectsModel) {
-
+            
             @Override
             protected void filteringDone() {
             }
@@ -210,8 +207,7 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         m_projectBeanModel.addProperties("user", 4, "Owner");
         m_projectBeanModel.addProperties("DBName", 5, "Databases");
         m_projectBeanModel.addProperties("lastDatasetDate", 6, "DatasetDate");
-        
-        
+
         // must be called only one time
         m_projectBeanModel.firePropertiesChanged();
     }
@@ -219,11 +215,11 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
     public void updateData() {
         m_projectBeanModel.setData(m_resultProjectsList);
     }
-
+    
     private void updateRawFiles(ArrayList<DRawFile> resultRawfiles) {
         m_rawfilesBeanModel.setData(resultRawfiles);
     }
-
+    
     @Override
     public void valueChanged(ListSelectionEvent e) {
         int[] rows = m_projectsTable.getSelectedRows();
@@ -234,7 +230,7 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
             mi = m_projectsModel.convertCompoundRowToBaseModelRow(mi);
             return Long.valueOf(m_resultProjectsList.get(mi).getProjectId());
         }).collect(Collectors.toList());
-
+        
         if (!(projectIds == null) && (!projectIds.isEmpty())) {
             final ArrayList<DRawFile> resultRawfiles = new ArrayList<DRawFile>();
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -242,7 +238,7 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
                 public boolean mustBeCalledInAWT() {
                     return true;
                 }
-
+                
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     if (success) {

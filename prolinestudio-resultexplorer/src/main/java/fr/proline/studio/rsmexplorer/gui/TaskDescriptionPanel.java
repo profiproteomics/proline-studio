@@ -369,10 +369,9 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
             c.weightx = 1;
             c.weighty = 1;
             JScrollPane top = new JScrollPane(_requestDialogContentTextarea);
-            top.setMinimumSize(new Dimension(600, 60));
             JScrollPane bottom = new JScrollPane(_requestContentTree);
             _requestDialogContentPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, top, bottom);
-
+            _requestDialogContentPane.setDividerLocation(60);
             requestPanel.add(_requestDialogContentPane, c);
             NotifyDescriptor nd = new NotifyDescriptor(
                     requestPanel, // instance of your panel

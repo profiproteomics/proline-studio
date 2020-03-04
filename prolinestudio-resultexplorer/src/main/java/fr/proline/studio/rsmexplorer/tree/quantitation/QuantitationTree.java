@@ -713,7 +713,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         }
 
         // register hour glass which is expanded
-        loadingMap.put(nodeToLoad.getData(), nodeToLoad);
+        m_loadingMap.put(nodeToLoad.getData(), nodeToLoad);
 
         final ArrayList<AbstractData> childrenList = new ArrayList<>();
         final AbstractData parentData = nodeToLoad.getData();
@@ -813,7 +813,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
     @Override
     protected void dataLoaded(AbstractData data, List<AbstractData> list) {
 
-        AbstractNode parentNode = loadingMap.remove(data);
+        AbstractNode parentNode = m_loadingMap.remove(data);
 
         parentNode.remove(0); // remove the first child which correspond to the hour glass
 

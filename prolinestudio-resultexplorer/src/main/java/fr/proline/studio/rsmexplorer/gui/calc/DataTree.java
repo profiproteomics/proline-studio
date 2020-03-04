@@ -46,6 +46,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.graphics.VennDiagramGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.macros.AbstractMacro;
 import fr.proline.studio.rsmexplorer.gui.calc.macros.ProStarMacro;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.rserver.RServerManager;
 import fr.proline.studio.rsmexplorer.gui.calc.macros.MacroSavedManager;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
@@ -85,7 +86,6 @@ public abstract class DataTree extends JTree {
     private ParentFunctionNode m_parentFunctionNode = null;
     private ParentGraphicNode m_parentGraphicNode = null;
 
-   
     
     protected DataTree(DataNode root, boolean tableOnly, GraphPanel graphPanel) {
         super(root);
@@ -131,6 +131,13 @@ public abstract class DataTree extends JTree {
                          return;
                      }
                      DataNode node = (DataNode) path.getLastPathComponent();
+                     
+                     // check for R functions that R server is started
+                     boolean actionNotAllowed = (node.isRNeeded() && (!RServerManager.getRServerManager().isRStarted()));
+                     if (actionNotAllowed) {
+                         return;
+                     }
+                     
                      action(node);
 
                      clearSelection();
@@ -245,7 +252,7 @@ public abstract class DataTree extends JTree {
     
     private void fillMacrosNodes(ParentMacrosNode parentMacrosNode) {
         ProStarMacro proStar = new ProStarMacro();
-        parentMacrosNode.add( new MacroNode(proStar));
+        parentMacrosNode.add( new MacroNode(proStar, true));
         
         ArrayList<String> macros = MacroSavedManager.readSavedMacros();
         if (macros != null) {
@@ -263,28 +270,28 @@ public abstract class DataTree extends JTree {
         ParentFunctionNode tableFonctionsNode = new ParentFunctionNode("Table");
         parentFunctionNode.add(tableFonctionsNode);
         
-        FunctionNode tsvFunction = new FunctionNode(new ImportTSVFunction(null));
+        FunctionNode tsvFunction = new FunctionNode(new ImportTSVFunction(null), false);
         tableFonctionsNode.add(tsvFunction);
         
-        FunctionNode columnFilterFunction = new FunctionNode(new ColumnFilterFunction(null));
+        FunctionNode columnFilterFunction = new FunctionNode(new ColumnFilterFunction(null), false);
         tableFonctionsNode.add(columnFilterFunction);
         
-        FunctionNode filterFunction = new FunctionNode(new FilterFunction(null));
+        FunctionNode filterFunction = new FunctionNode(new FilterFunction(null), false);
         tableFonctionsNode.add(filterFunction);
         
-        FunctionNode expressionFunction = new FunctionNode(new ExpressionFunction(null));
+        FunctionNode expressionFunction = new FunctionNode(new ExpressionFunction(null), false);
         tableFonctionsNode.add(expressionFunction);
         
-        FunctionNode logFunction = new FunctionNode(new LogFunction(null, false));
+        FunctionNode logFunction = new FunctionNode(new LogFunction(null, false), false);
         tableFonctionsNode.add(logFunction);
         
-        FunctionNode log10Function = new FunctionNode(new LogFunction(null, true));
+        FunctionNode log10Function = new FunctionNode(new LogFunction(null, true), false);
         tableFonctionsNode.add(log10Function);
         
-        FunctionNode diffFunction = new FunctionNode(new DiffFunction(null));
+        FunctionNode diffFunction = new FunctionNode(new DiffFunction(null), false);
         tableFonctionsNode.add(diffFunction);
         
-        FunctionNode joinFunction = new FunctionNode(new JoinFunction(null));
+        FunctionNode joinFunction = new FunctionNode(new JoinFunction(null), false);
         tableFonctionsNode.add(joinFunction);
         
         
@@ -292,25 +299,25 @@ public abstract class DataTree extends JTree {
         ParentFunctionNode statsFonctionsNode = new ParentFunctionNode("Statistics");
         parentFunctionNode.add(statsFonctionsNode);
         
-        FunctionNode quantiFilterFunction = new FunctionNode(new QuantiFilterFunction(null));
+        FunctionNode quantiFilterFunction = new FunctionNode(new QuantiFilterFunction(null), false);
         statsFonctionsNode.add(quantiFilterFunction);
         
-        FunctionNode missingValuesImputationFunction = new FunctionNode(new MissingValuesImputationFunction(null));
+        FunctionNode missingValuesImputationFunction = new FunctionNode(new MissingValuesImputationFunction(null), true);
         statsFonctionsNode.add(missingValuesImputationFunction);
         
-        FunctionNode normalizationFunction = new FunctionNode(new NormalizationFunction(null));
+        FunctionNode normalizationFunction = new FunctionNode(new NormalizationFunction(null), true);
         statsFonctionsNode.add(normalizationFunction);
         
-        FunctionNode bbinomialFunction = new FunctionNode(new SCDiffAnalysisFunction(null));
+        FunctionNode bbinomialFunction = new FunctionNode(new SCDiffAnalysisFunction(null), true);
         statsFonctionsNode.add(bbinomialFunction);
         
-        FunctionNode diffAnalysisFunction = new FunctionNode(new DiffAnalysisFunction(null));
+        FunctionNode diffAnalysisFunction = new FunctionNode(new DiffAnalysisFunction(null), true);
         statsFonctionsNode.add(diffAnalysisFunction);
 
-        FunctionNode adjustPFunction = new FunctionNode(new AdjustPFunction(null));
+        FunctionNode adjustPFunction = new FunctionNode(new AdjustPFunction(null), true);
         statsFonctionsNode.add(adjustPFunction);
         
-        FunctionNode computeFDRFunction = new FunctionNode(new ComputeFDRFunction(null));
+        FunctionNode computeFDRFunction = new FunctionNode(new ComputeFDRFunction(null), true);
         statsFonctionsNode.add(computeFDRFunction);
 
 //        FunctionNode pvalueFunction = new FunctionNode(new PValueFunction(null));
@@ -325,28 +332,28 @@ public abstract class DataTree extends JTree {
     
     private void fillGraphicNodes(ParentGraphicNode parentGraphicNode) {
         
-        GraphicNode node = new GraphicNode(new BoxPlotGraphic(null));
+        GraphicNode node = new GraphicNode(new BoxPlotGraphic(null), true);
         parentGraphicNode.add(node);
         
-        node = new GraphicNode(new CalibrationPlotGraphic(null));
+        node = new GraphicNode(new CalibrationPlotGraphic(null), true);
         parentGraphicNode.add(node);
         
-        node = new GraphicNode(new DensityPlotGraphic(null));
+        node = new GraphicNode(new DensityPlotGraphic(null), true);
         parentGraphicNode.add(node);
         
-        node = new GraphicNode(new ParallelCoordinatesGraphic(null));
+        node = new GraphicNode(new ParallelCoordinatesGraphic(null), false);
         parentGraphicNode.add(node);
         
-        node = new GraphicNode(new ScatterOrHistogramGraphic(null, PlotType.HISTOGRAM_PLOT));
+        node = new GraphicNode(new ScatterOrHistogramGraphic(null, PlotType.HISTOGRAM_PLOT), false);
         parentGraphicNode.add(node);
         
-        node = new GraphicNode(new ScatterOrHistogramGraphic(null, PlotType.SCATTER_PLOT));
+        node = new GraphicNode(new ScatterOrHistogramGraphic(null, PlotType.SCATTER_PLOT), false);
         parentGraphicNode.add(node);
         
-        node = new GraphicNode(new VarianceDistPlotGraphic(null));
+        node = new GraphicNode(new VarianceDistPlotGraphic(null), true);
         parentGraphicNode.add(node);
         
-        node = new GraphicNode(new VennDiagramGraphic(null));
+        node = new GraphicNode(new VennDiagramGraphic(null), false);
         parentGraphicNode.add(node);
         
         DefaultTreeModel model = (DefaultTreeModel) getModel();
@@ -388,14 +395,21 @@ public abstract class DataTree extends JTree {
         }
         
         private DataNodeType m_type;
-        
-        public DataNode(DataNodeType type) {
+        private boolean m_needsR;
+   
+        public DataNode(DataNodeType type, boolean needsR) {
             m_type =  type;
+            m_needsR = needsR;
         }
 
-        public DataNode(DataNodeType type, TableInfo tableInfo) {
+        public DataNode(DataNodeType type, TableInfo tableInfo, boolean needsR) {
             m_type =  type;
+            m_needsR = needsR;
             setUserObject(tableInfo);
+        }
+        
+        public boolean isRNeeded() {
+            return m_needsR;
         }
 
         public DataNodeType getType() {
@@ -420,7 +434,7 @@ public abstract class DataTree extends JTree {
     public static class RootDataAnalyzerNode extends DataNode {
 
         public RootDataAnalyzerNode() {
-            super(DataNodeType.ROOT_DATA_ANALYZER);
+            super(DataNodeType.ROOT_DATA_ANALYZER, false);
         }
 
         @Override
@@ -437,7 +451,7 @@ public abstract class DataTree extends JTree {
     public static class ParentDataNode extends DataNode {
 
         public ParentDataNode() {
-            super(DataNodeType.PARENT_DATA);
+            super(DataNodeType.PARENT_DATA, false);
         }
         
         @Override
@@ -454,7 +468,7 @@ public abstract class DataTree extends JTree {
     public static class ParentMacrosNode extends DataNode {
 
         public ParentMacrosNode() {
-            super(DataNodeType.PARENT_MACROS);
+            super(DataNodeType.PARENT_MACROS, false);
         }
         
         @Override
@@ -478,7 +492,7 @@ public abstract class DataTree extends JTree {
         }
         
         public ParentFunctionNode(String label) {
-            super(DataNodeType.PARENT_FUNCTION);
+            super(DataNodeType.PARENT_FUNCTION, false);
             this.name = label;
         }
         
@@ -496,7 +510,7 @@ public abstract class DataTree extends JTree {
     public static class ParentGraphicNode extends DataNode {
 
         public ParentGraphicNode() {
-            super(DataNode.DataNodeType.PARENT_GRAPHIC);
+            super(DataNode.DataNodeType.PARENT_GRAPHIC, false);
         }
         
         @Override
@@ -514,8 +528,8 @@ public abstract class DataTree extends JTree {
 
         private AbstractMacro m_macro = null;
 
-        public MacroNode(AbstractMacro macro) {
-            super(DataNode.DataNodeType.MACRO);
+        public MacroNode(AbstractMacro macro, boolean needsR) {
+            super(DataNode.DataNodeType.MACRO, needsR);
             m_macro = macro;
         }
 
@@ -540,7 +554,7 @@ public abstract class DataTree extends JTree {
         private String m_name = "";
 
         public UserMacroNode(String xmlMacro) {
-            super(DataNode.DataNodeType.USERMACRO);
+            super(DataNode.DataNodeType.USERMACRO, false);
             m_xmlMacro = xmlMacro;
             final String ID_DATAANALYZER_XML = "<dataanalyzer name=\"";
             int indexStartName = xmlMacro.indexOf(ID_DATAANALYZER_XML);
@@ -572,8 +586,8 @@ public abstract class DataTree extends JTree {
 
         private AbstractFunction m_function = null;
         
-        public FunctionNode(AbstractFunction function) {
-            super(DataNodeType.FUNCTION);
+        public FunctionNode(AbstractFunction function, boolean needsR) {
+            super(DataNodeType.FUNCTION, needsR);
             m_function = function;
         }
         
@@ -596,8 +610,8 @@ public abstract class DataTree extends JTree {
 
         private AbstractGraphic m_graphic = null;
 
-        public GraphicNode(AbstractGraphic function) {
-            super(DataNodeType.GRAPHIC);
+        public GraphicNode(AbstractGraphic function, boolean needsR) {
+            super(DataNodeType.GRAPHIC, needsR);
             m_graphic = function;
         }
 
@@ -619,7 +633,7 @@ public abstract class DataTree extends JTree {
     private class WindowDataNode extends DataNode {
 
         public WindowDataNode(TableInfo tableInfo) {
-            super(DataNodeType.WINDOW_DATA, tableInfo);
+            super(DataNodeType.WINDOW_DATA, tableInfo, false);
         }
 
         @Override
@@ -638,7 +652,7 @@ public abstract class DataTree extends JTree {
     public class ViewDataNode extends DataNode {
 
         public ViewDataNode(TableInfo tableInfo) {
-            super(DataNodeType.VIEW_DATA, tableInfo);
+            super(DataNodeType.VIEW_DATA, tableInfo, false);
         }
 
         public void fillColumns() {
@@ -681,7 +695,7 @@ public abstract class DataTree extends JTree {
         private final boolean m_visible;
 
         public ColumnDataNode(TableInfo tableInfo, int columnIndex, boolean visible) {
-            super(DataNodeType.COLUMN_DATA, tableInfo);
+            super(DataNodeType.COLUMN_DATA, tableInfo, false);
             m_columnIndex = columnIndex;
             m_visible = visible;
         }
@@ -725,8 +739,8 @@ public abstract class DataTree extends JTree {
 
             DataNode node = ((DataNode) value);
 
-            boolean visible = node.isVisible();
-            if (!visible) {
+            boolean grayed =  !node.isVisible() || (node.isRNeeded() && (!RServerManager.getRServerManager().isRStarted()));
+            if (grayed) {
                 setForeground(Color.gray);
             } else {
                 setForeground(Color.black);

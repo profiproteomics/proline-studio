@@ -42,6 +42,9 @@ public class InfoFloatingPanel extends JPanel {
 
     private JToggleButton m_infoButton = null;
 
+    private JButton m_closeButton;
+    private JButton m_retryButton;
+    private JLabel m_hourGlassLabel;
     private JLabel m_infoLabel = null;
 
     public InfoFloatingPanel() {
@@ -50,13 +53,13 @@ public class InfoFloatingPanel extends JPanel {
         setOpaque(true);
         setLayout(new FlowLayout());
         
-        JButton closeButton = new JButton(IconManager.getIcon(IconManager.IconType.CROSS_SMALL7));
-        closeButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        closeButton.setFocusPainted(false);
-        closeButton.setContentAreaFilled(false);
+        m_closeButton = new JButton(IconManager.getIcon(IconManager.IconType.CROSS_SMALL7));
+        m_closeButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        m_closeButton.setFocusPainted(false);
+        m_closeButton.setContentAreaFilled(false);
         
 
-        closeButton.addActionListener(new ActionListener() {
+        m_closeButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -68,9 +71,20 @@ public class InfoFloatingPanel extends JPanel {
 
         });
 
+        m_hourGlassLabel = new JLabel(IconManager.getIcon(IconManager.IconType.HOUR_GLASS_MINI11));
+        m_hourGlassLabel.setVisible(false); // hidden at start
+        
+        m_retryButton = new JButton(IconManager.getIcon(IconManager.IconType.REFRESH11));
+        m_retryButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        m_retryButton.setFocusPainted(false);
+        m_retryButton.setContentAreaFilled(false);
+        m_retryButton.setVisible(false); // hidden at start
+        
         m_infoLabel = new JLabel();
         
-        add(closeButton);
+        add(m_closeButton);
+        add(m_hourGlassLabel);
+        add(m_retryButton);
         add(m_infoLabel);
 
         
@@ -136,6 +150,26 @@ public class InfoFloatingPanel extends JPanel {
 
     }
 
+    public void switchToHourGlass() {
+        m_hourGlassLabel.setVisible(true);
+        m_closeButton.setVisible(false);
+        m_retryButton.setVisible(false);
+    }
+    public void switchToClose() {
+        m_hourGlassLabel.setVisible(false);
+        m_closeButton.setVisible(true);
+        m_retryButton.setVisible(false);
+    }
+    public void switchToRetry(ActionListener a) {
+        m_hourGlassLabel.setVisible(false);
+        m_closeButton.setVisible(false);
+        m_retryButton.setVisible(true);
+        if (a != null) {
+            m_retryButton.addActionListener(a);
+        }
+    }
+
+    
     public void setInfo(String info) {
         m_infoLabel.setText(info);
         Dimension d = getPreferredSize();

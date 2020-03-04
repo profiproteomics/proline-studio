@@ -42,6 +42,7 @@ import java.util.List;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.rsmexplorer.gui.xic.PeakTableModel;
 import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  *
@@ -57,8 +58,7 @@ public class DataboxChildFeature extends AbstractDataBox {
     private List<List<Peakel>> m_peakelList;
     private List<List<List<Peak>>> m_peakList;
 
-    private ArrayList<DFeature> m_xicExctractedFromFeature = null;
-    private ArrayList<Peak[]> m_retrievedXic = null;
+    private HashSet<DFeature> m_extractedXICSet = null;
     
     public DataboxChildFeature() {
         super(DataboxType.DataboxXicChildFeature, DataboxStyle.STYLE_XIC);
@@ -103,8 +103,7 @@ public class DataboxChildFeature extends AbstractDataBox {
     @Override
     public void dataChanged() {
         
-        m_retrievedXic = null;
-        m_xicExctractedFromFeature = null;
+        m_extractedXICSet = null;
         
         DMasterQuantPeptideIon oldIon = m_masterQuantPeptideIon;
         m_masterQuantPeptideIon = (DMasterQuantPeptideIon) m_previousDataBox.getData(false, DMasterQuantPeptideIon.class);
@@ -303,13 +302,10 @@ public class DataboxChildFeature extends AbstractDataBox {
         }
         
         // Add models for retrieved xics
-        if (m_retrievedXic != null) {
-            int size = m_retrievedXic.size();
-            for (int i=0;i<size;i++) {
-                Peak[] peakArray = m_retrievedXic.get(i);
-                DFeature feature = m_xicExctractedFromFeature.get(i);
-                
-                
+        if (m_extractedXICSet != null) {
+            for (DFeature feature : m_extractedXICSet) {
+                Peak[] peakArray = feature.getPeakArray();
+
                 PeakTableModel model = new PeakTableModel(null);
                 
                 Color color = m_quantChannelInfo.getQuantChannelColor(feature.getQuantChannelId());
@@ -334,10 +330,13 @@ public class DataboxChildFeature extends AbstractDataBox {
         return listCSI;
     }
     
-    public void setRetrievedXic(ArrayList<DFeature> featureList, ArrayList<Peak[]> retrievedXic) {
-        m_retrievedXic = retrievedXic;
-        m_xicExctractedFromFeature = featureList;
+    public void setRetrievedXic(ArrayList<DFeature> featureList) {
+        if (m_extractedXICSet == null) {
+            m_extractedXICSet = new HashSet<>();
+        }
         
+        m_extractedXICSet.addAll(featureList);
+
         propagateDataChanged(ExtendedTableModelInterface.class);
     }
     

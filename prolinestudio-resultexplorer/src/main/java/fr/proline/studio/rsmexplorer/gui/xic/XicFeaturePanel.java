@@ -110,6 +110,8 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
     private JLabel m_titleLabel;
     private final static String TABLE_TITLE = "Features";
     
+    private int m_loadingXICId = 0;
+    
     public XicFeaturePanel(boolean canGraph) {
         this.m_canGraph = canGraph ;
         initComponents();
@@ -694,7 +696,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         
     }
     
-        public class ExctractXICAction extends AbstractTableAction {
+    public class ExctractXICAction extends AbstractTableAction {
 
         private AbstractDataBox m_box;
 
@@ -746,6 +748,10 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             
             for (int i = 0; i < size; i++) {
                 DFeature feature = featureList.get(i);
+                if (feature.getPeakArray() != null) {
+                    // data already loaded
+                    continue;
+                }
                 double moz = feature.getMoz();
                 if (moz <= 1e-15) {
                     // moz is equal to 0, do not take it in account
@@ -766,10 +772,18 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
                 featuresSearched.add(feature);
             }
 
+            
+            if (featuresSearched.isEmpty()) {
+                // nothing to do, data already loaded
+                return;
+            }
+            
             double ppm = 5; // tolerance set to 5ppm, could be changed
 
-            final ArrayList[] returnValue = new ArrayList[1];
 
+            final int loadingId = m_loadingXICId++;
+            setLoading(loadingId);
+            
             AbstractJMSCallback callback = new AbstractJMSCallback() {
 
                 @Override
@@ -781,20 +795,22 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
                 public void run(boolean success) {
                     if (success) {
 
-                        databoxChildFeature.setRetrievedXic(featuresSearched, returnValue[0]);
+                        databoxChildFeature.setRetrievedXic(featuresSearched);
 
                     } else {
                         // we could manage error with errorMessage
 
                     }
+                    setLoaded(loadingId);
                 }
             };
 
             // use canonicalPath when it is possible to be sure to have an unique path
-            GetXICChromatogramTask task = new GetXICChromatogramTask(callback, rawFileIdentifierList, mozList, ppm, returnValue);
+            GetXICChromatogramTask task = new GetXICChromatogramTask(callback, featuresSearched, rawFileIdentifierList, mozList, ppm);
             AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
         }
+        
 
         @Override
         public void updateEnabled(int row, int col, int[] selectedRows, JTable table) {

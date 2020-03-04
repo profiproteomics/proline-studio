@@ -26,6 +26,7 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.proline.core.orm.lcms.Peak;
+import fr.proline.core.orm.lcms.dto.DFeature;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
@@ -45,17 +46,17 @@ public class GetXICChromatogramTask extends AbstractJMSTask {
     private final String m_version = "1.0";
 
 
-    private ArrayList<Peak[]>[] m_peakArrayRef = null;
 
+    private final ArrayList<DFeature> m_features;
     private final ArrayList<String> m_rawFileIdentifierList;
     private final ArrayList<Double> m_mzList;
     private final double m_ppm;
 
 
-    public GetXICChromatogramTask(AbstractJMSCallback callback, ArrayList<String> rawFileIdentifierList, ArrayList<Double> mzList, double ppm, ArrayList<Peak[]>[] peakArrayRef) {
+    public GetXICChromatogramTask(AbstractJMSCallback callback, ArrayList<DFeature> features, ArrayList<String> rawFileIdentifierList, ArrayList<Double> mzList, double ppm) {
         super(callback, new TaskInfo("Retrieve XIC Chromatograms", false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
-        m_peakArrayRef = peakArrayRef;
-
+        
+        m_features = features;
         m_rawFileIdentifierList = rawFileIdentifierList;
         m_mzList = mzList;
         m_ppm = ppm;
@@ -132,8 +133,12 @@ public class GetXICChromatogramTask extends AbstractJMSTask {
                 
                 Type peakArrayListType = new TypeToken<ArrayList<Peak[]>>(){}.getType();
                 
-                m_peakArrayRef[0] = gson.fromJson((String)result, peakArrayListType);
+                ArrayList<Peak[]> peakArray = gson.fromJson((String)result, peakArrayListType);
 
+                for (int i=0;i<peakArray.size();i++) {
+                    m_features.get(i).setPeakArray(peakArray.get(i));
+                }
+  
             }
         }
         m_currentState = JMSState.STATE_DONE;

@@ -47,6 +47,7 @@ public class IconManager {
         ADD_REMOVE,
         HOUR_GLASS,
         HOUR_GLASS_MINI9,
+        HOUR_GLASS_MINI11,
         HOUR_GLASS_MINI16,
         PROJECT,
         PROJECT_READ_ONLY,
@@ -171,6 +172,7 @@ public class IconManager {
         FUNCTION,
         TICK_CIRCLE,
         REFRESH,
+        REFRESH11,
         SETTINGS,
         TABLE_IMPORT,
         FULL_SCREEN,
@@ -368,6 +370,8 @@ public class IconManager {
                 return "fr/proline/studio/images/hourglass.png";
             case HOUR_GLASS_MINI9:
                 return "fr/proline/studio/images/hourglass-mini.png";
+            case HOUR_GLASS_MINI11:
+                return "fr/proline/studio/images/hourglass-mini-11x11.png";
             case HOUR_GLASS_MINI16:
                 return "fr/proline/studio/images/hourglass-mini-16x16.png";
             case PROJECT:
@@ -612,6 +616,8 @@ public class IconManager {
                 return "fr/proline/studio/images/tick-circle.png";
             case REFRESH:
                 return "fr/proline/studio/images/refresh.png";
+            case REFRESH11:
+                return "fr/proline/studio/images/refresh11x11.png";
             case SETTINGS:
                 return "fr/proline/studio/images/settings.png";
             case TABLE_IMPORT:

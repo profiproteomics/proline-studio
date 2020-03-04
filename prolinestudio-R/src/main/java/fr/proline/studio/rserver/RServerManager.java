@@ -29,6 +29,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.prefs.Preferences;
+import javax.swing.SwingUtilities;
 import org.openide.util.NbPreferences;
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPMismatchException;
@@ -59,7 +60,7 @@ public class RServerManager {
     
     private RServerManager() {}
 
-    public static RServerManager getRServerManager() {
+    public synchronized static RServerManager getRServerManager() {
 
         if (m_rServerManager == null) {
             m_rServerManager = new RServerManager();
@@ -70,7 +71,7 @@ public class RServerManager {
     }
     
     
-    public boolean startRProcessWithRetry() throws Exception {
+    public synchronized boolean startRProcessWithRetry() throws Exception {
         
         boolean RStarted = false;
         
@@ -459,6 +460,45 @@ public class RServerManager {
             } catch (IOException ioe) {
             }
         }
+    }
+    
+    public boolean isRStarted() {
+       return (m_RProcess != null); 
+    }
+
+    public void checkRAvailability(final RAvailableInterface client) {
+        
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+
+                boolean success = false;
+                try {
+                    success = startRProcessWithRetry();
+                } catch (Exception e) {
+                    
+                }
+                final boolean _success = success;
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        client.available(_success);
+                    }
+                    
+                });
+                
+            }
+            
+        };
+        
+        Thread t = new Thread(r);
+        t.start();
+    }
+    
+    
+    public interface RAvailableInterface {
+        void available(boolean b);
     }
     
 }

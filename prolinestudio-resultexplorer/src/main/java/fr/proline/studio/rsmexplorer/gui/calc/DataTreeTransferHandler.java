@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui.calc;
 
+import fr.proline.studio.rserver.RServerManager;
 import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.calc.DataTree.DataNode;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
@@ -65,6 +66,14 @@ public class DataTreeTransferHandler extends TransferHandler {
                 if ((nodeType != DataNode.DataNodeType.VIEW_DATA) && (nodeType != DataNode.DataNodeType.FUNCTION) && (nodeType != DataNode.DataNodeType.GRAPHIC) && (nodeType != DataNode.DataNodeType.MACRO) && (nodeType != DataNode.DataNodeType.USERMACRO)) {
                     return null;
                 }
+
+                // check for R functions that R server is started
+                boolean actionNotAllowed = (node.isRNeeded() && (!RServerManager.getRServerManager().isRStarted()));
+                if (actionNotAllowed) {
+                    return null;
+                }
+                    
+                
             } 
 
             DataTreeTransferable.TransferData data = new DataTreeTransferable.TransferData();
@@ -122,6 +131,7 @@ public class DataTreeTransferHandler extends TransferHandler {
                 int y = p.y;
                 GraphPanel graphPanel = ((GraphPanel)support.getComponent());
                 for (DataNode node : dataNodes) {
+     
                     switch (node.getType()) {
 
                         case VIEW_DATA: {

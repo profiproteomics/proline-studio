@@ -19,8 +19,10 @@ package fr.proline.studio.rsmexplorer.gui.calc;
 
 
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.info.InfoFloatingPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.rserver.RServerManager;
 import javax.swing.JPanel;
 import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
@@ -33,12 +35,15 @@ import fr.proline.studio.rsmexplorer.gui.calc.macros.AbstractMacro;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import javax.swing.AbstractAction;
@@ -47,6 +52,7 @@ import javax.swing.Box;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLayeredPane;
 
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -59,13 +65,14 @@ import javax.swing.KeyStroke;
  * 
  * @author JM235353
  */
-public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
+public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface, RServerManager.RAvailableInterface {
 
     private AbstractDataBox m_dataBox;
 
     private JScrollPane graphScrollPane;
     
     private GraphPanel m_graphPanel;
+    private InfoFloatingPanel m_RSearchFloatingPanel;
 
     private DataAnalyzerTree m_dataAnalyzerTree;
     
@@ -188,11 +195,60 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
         
         //toolbar.add(playButton);
         
-        // create graph objects
+        // Create the graph panel
         m_graphPanel = new GraphPanel(this);
+        
+        // And the information about searching R
+        m_RSearchFloatingPanel = new InfoFloatingPanel();
+        m_RSearchFloatingPanel.switchToHourGlass();
+        m_RSearchFloatingPanel.setInfo("Look for R");
+        
+        
+        
+        // Create a layered pane to contain :
+        // - GraphPanel
+        // - Floatting panel searching for R Server or R.exe
+        final JLayeredPane layeredPane = new JLayeredPane();
+
+        layeredPane.addComponentListener(new ComponentListener() {
+
+            @Override
+            public void componentResized(ComponentEvent e) {
+                final Component c = e.getComponent();
+
+                m_graphPanel.setBounds(0, 0, c.getWidth(), c.getHeight());
+                final int PAD = 10;
+                m_RSearchFloatingPanel.setLocation(PAD, c.getHeight()-PAD-m_RSearchFloatingPanel.getHeight());
+
+                
+                layeredPane.revalidate();
+                layeredPane.repaint();
+
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+            }
+        });
+        add(layeredPane, BorderLayout.CENTER);
+
+        layeredPane.add(m_graphPanel, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(m_RSearchFloatingPanel, JLayeredPane.PALETTE_LAYER);
+
+        
+        // create graph objects
+
         graphScrollPane = new JScrollPane();
         graphScrollPane.setBackground(Color.white);
-        graphScrollPane.setViewportView(m_graphPanel);
+        graphScrollPane.setViewportView(layeredPane);
         
         
         c.gridx = 0;
@@ -212,6 +268,10 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
         graphZonePanel.add(graphScrollPane, c);
         
         graphZonePanel.setBackground(playButton.getBackground());
+        
+        
+        m_RSearchFloatingPanel.setVisible(true);
+        RServerManager.getRServerManager().checkRAvailability(this);
         
         return graphZonePanel;
     }
@@ -286,6 +346,35 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface {
     public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getSaveAction(splittedPanel);
     }
+
+    @Override
+    public void available(boolean rIsAvailable) {
+        if (rIsAvailable) {
+            m_RSearchFloatingPanel.setVisible(false);
+            m_dataAnalyzerTree.repaint();
+        } else {
+            // R is not available
+            // switch to retry
+
+            if (m_actionForRetry == null) {
+                final DataAnalyzerPanel _this = this;
+                m_actionForRetry = new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        m_RSearchFloatingPanel.switchToHourGlass();
+                        m_RSearchFloatingPanel.setInfo("Look for R");
+                        RServerManager.getRServerManager().checkRAvailability(_this);
+                    }
+                };
+                m_RSearchFloatingPanel.switchToRetry(m_actionForRetry);
+            } else {
+                m_RSearchFloatingPanel.switchToRetry(null);
+            }
+            m_RSearchFloatingPanel.setInfo("R is not available, Retry ?");
+            
+        }
+    }
+    private ActionListener m_actionForRetry = null;
 
 
     

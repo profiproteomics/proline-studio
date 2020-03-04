@@ -451,7 +451,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
         }
 
         // register hour glass which is expanded
-        loadingMap.put(nodeToLoad.getData(), nodeToLoad);
+        m_loadingMap.put(nodeToLoad.getData(), nodeToLoad);
 
         final ArrayList<AbstractData> childrenList = new ArrayList<>();
         final AbstractData parentData = nodeToLoad.getData();

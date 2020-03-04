@@ -44,7 +44,8 @@ public abstract class AbstractTree extends JTree implements MouseListener {
 
     protected RSMTreeModel m_model;
     protected RSMTreeSelectionModel m_selectionModel;
-    protected HashMap<AbstractData, AbstractNode> loadingMap = new HashMap<>();
+    protected HashMap<AbstractData, AbstractNode> m_loadingMap = new HashMap<>();
+    private HashSet<AbstractNode> m_loadingStartedMap = new HashSet<>();
 
     public void subscribeRenamer(SetRsetNameAction subscribedRenamer) {
         this.m_subscribedRenamer = subscribedRenamer;
@@ -94,9 +95,15 @@ public abstract class AbstractTree extends JTree implements MouseListener {
         if (childNode.getType() != AbstractNode.NodeTypes.HOUR_GLASS) {
             return;
         }
+        
+        if (m_loadingStartedMap.contains(nodeToLoad)) {
+            // user has already started the loading (can happens, when the user click on [+], then [-], then [+] during the loading
+            return;
+        }
 
         // register hour glass which is expanded
-        loadingMap.put(nodeToLoad.getData(), nodeToLoad);
+        m_loadingStartedMap.add(nodeToLoad);
+        m_loadingMap.put(nodeToLoad.getData(), nodeToLoad);
 
         final ArrayList<AbstractData> childrenList = new ArrayList<>();
         final AbstractData parentData = nodeToLoad.getData();
@@ -129,7 +136,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
 
                         dataLoaded(parentData, childrenList);
 
-                        if (loadingMap.isEmpty() && (selectionFromrsmArray != null)) {
+                        if (m_loadingMap.isEmpty() && (selectionFromrsmArray != null)) {
                             // A selection has been postponed, we do it now
                             setSelection(selectionFromrsmArray);
                             selectionFromrsmArray = null;
@@ -151,7 +158,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
 
     protected void dataLoaded(AbstractData data, List<AbstractData> list) {
 
-        AbstractNode parentNode = loadingMap.remove(data);
+        AbstractNode parentNode = m_loadingMap.remove(data);
 
         parentNode.remove(0); // remove the first child which correspond to the hour glass
 
@@ -211,7 +218,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
             // this node needs to be loaded
 
             // register hour glass which is expanded
-            loadingMap.put(node.getData(), node);
+            m_loadingMap.put(node.getData(), node);
 
             final ArrayList<AbstractData> childrenList = new ArrayList<>();
             final AbstractData parentData = node.getData();
@@ -249,7 +256,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
     
     private void dataLoadingDone(final HashSet<AbstractNode> nodes, AbstractNode node, Runnable callback, AbstractData data, List<AbstractData> list, boolean identificationDataset) {
 
-        AbstractNode parentNode = loadingMap.remove(data);
+        AbstractNode parentNode = m_loadingMap.remove(data);
 
         nodes.remove(node);
         
@@ -315,7 +322,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
         }
 
         // register hour glass which is expanded
-        loadingMap.put(nodeToLoad.getData(), nodeToLoad);
+        m_loadingMap.put(nodeToLoad.getData(), nodeToLoad);
 
         final ArrayList<AbstractData> childrenList = new ArrayList<>();
         final AbstractData parentData = nodeToLoad.getData();
@@ -351,7 +358,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
 
     private void dataLoadedAtOnce(AbstractData data, List<AbstractData> list, boolean identificationDataset) {
 
-        AbstractNode parentNode = loadingMap.remove(data);
+        AbstractNode parentNode = m_loadingMap.remove(data);
 
         parentNode.remove(0); // remove the first child which correspond to the hour glass
 
@@ -425,7 +432,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
 
     public void setSelection(ArrayList<ResultSummary> rsmArray) {
 
-        if (!loadingMap.isEmpty()) {
+        if (!m_loadingMap.isEmpty()) {
             // Tree is loading, we must postpone the selection
             selectionFromrsmArray = rsmArray;
             return;

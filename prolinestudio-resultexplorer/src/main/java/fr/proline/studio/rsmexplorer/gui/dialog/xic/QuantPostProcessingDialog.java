@@ -17,8 +17,6 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.core.orm.msi.PtmSpecificity;
-import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
@@ -44,13 +42,12 @@ import org.slf4j.LoggerFactory;
 public class QuantPostProcessingDialog extends DefaultDialog {
 
     private QuantPostProcessingPanel m_quantPostProcessingPanel;
-    private DDataset m_dataset;
 
     public final static String SETTINGS_KEY = "QuantPostProcessing";
 
-    public QuantPostProcessingDialog(Window parent, DDataset dataset) {
+    //public QuantPostProcessingMultipleDialog(Window parent, ArrayList<DataSetNode> nodeList) {
+    public QuantPostProcessingDialog(Window parent, ArrayList<PtmSpecificity> ptms, boolean isAggregation) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-        m_dataset = dataset;
         setTitle("Compute PostProcessing on Proteins Sets Abundances");
 
         setDocumentationSuffix("id.2dlolyb");
@@ -60,7 +57,7 @@ public class QuantPostProcessingDialog extends DefaultDialog {
 
         setResizable(true);
 
-        init();
+        init(ptms, isAggregation);
 
     }
 
@@ -150,22 +147,17 @@ public class QuantPostProcessingDialog extends DefaultDialog {
         return true;
     }
 
-    private void init() {
-        //Get potential PTMs from dataset
-        final ArrayList<PtmSpecificity> ptms = new ArrayList<>();
-        DatabasePTMSitesTask task = new DatabasePTMSitesTask(null);
-        task.initLoadUsedPTMs(m_dataset.getProject().getId(), m_dataset.getResultSummaryId(), ptms);
-        task.fetchData();
+    public Map<String, Object> getQuantParams() {
+        return m_quantPostProcessingPanel.getQuantParams();
+    }
+
+    private void init(ArrayList<PtmSpecificity> ptms, boolean isAggregation) {
         Map<Long, String> ptmSpecificityNameById = ptms.stream().collect(Collectors.toMap(ptmS -> ptmS.getId(), ptmS -> ptmS.toString()));
         m_quantPostProcessingPanel = new QuantPostProcessingPanel(false, ptmSpecificityNameById);
         Preferences preferences = NbPreferences.root();
         m_quantPostProcessingPanel.getParameterList().loadParameters(preferences);
-        boolean isAggregation = (m_dataset.isQuantitation() && m_dataset.isAggregation()) ? true : false;
         m_quantPostProcessingPanel.setDiscardPeptidesSharingPeakelsChB(isAggregation);
         setInternalComponent(m_quantPostProcessingPanel);
     }
 
-    public Map<String, Object> getQuantParams() {
-        return m_quantPostProcessingPanel.getQuantParams();
-    }
 }

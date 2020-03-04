@@ -20,6 +20,7 @@ import fr.proline.core.orm.uds.RawFile;
 import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rsmexplorer.gui.TreeFileChooserPanel;
 import fr.proline.studio.rsmexplorer.gui.TreeFileChooserTableModelInterface;
 import fr.proline.studio.rsmexplorer.gui.TreeFileChooserTransferHandler;
@@ -39,11 +40,13 @@ import fr.proline.studio.utils.HelpUtils;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Point;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
@@ -52,12 +55,15 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.DropMode;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
+import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelListener;
@@ -87,6 +93,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
     private static final String[] SUFFIX = {".raw", ".mzdb", ".wiff"};
     private final TreeFileChooserTransferHandler m_transferHandler;
     private AbstractNode m_rootNode;
+    JButton m_cleanAssciatBt;
 
     public static SelectRawFilesPanel getPanel(AbstractNode rootNode) {
         if (m_singleton == null) {
@@ -181,10 +188,39 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
+        c.insets = new java.awt.Insets(5, 0, 5, 0);
 
         c.gridx = 0;
         c.gridy = 0;
+        {
+            c.gridheight = 1;
+            c.weightx = 0.0;
+            c.weighty = 0.0;
+
+            m_cleanAssciatBt = new JButton(IconManager.getIcon(IconManager.IconType.ERASER));
+            m_cleanAssciatBt.setFocusPainted(false);
+            m_cleanAssciatBt.setOpaque(true);
+            m_cleanAssciatBt.setToolTipText("Disassociate mzDB Raw file - Mascot dat file");
+            m_cleanAssciatBt.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    Point p = m_cleanAssciatBt.getLocationOnScreen();
+                    cleanRawFileDialog(p.x, p.y);
+                }
+            });
+
+            JToolBar toolbar = new JToolBar();
+            toolbar.setFloatable(false);
+            toolbar.add(m_cleanAssciatBt);
+            designTablePanel.add(toolbar, c);//set it top 
+            c.gridy++;
+            designTablePanel.add(Box.createVerticalBox(), c);
+            c.gridy = 0;
+            c.gridheight = 2;
+            c.gridx++;
+        }
+
         c.weightx = 1;
         c.weighty = 1;
 
@@ -269,6 +305,17 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
         }
     }
 
+    private void cleanRawFileDialog(int posX, int posY) {
+        OptionDialog yesNoDialog = new OptionDialog(null, "Clean Raw File", "Erase all associated Row file except DB-Linded");
+        yesNoDialog.setIconImage(IconManager.getImage(IconManager.IconType.ERASER));
+        yesNoDialog.setLocation(posX, posY);
+        yesNoDialog.setVisible(true);
+        if (yesNoDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+            m_model.cleanRawFile();
+            repaint();
+        }
+    }
+
     private class FlatDesignTable extends DecoratedMarkerTable implements MouseListener {
 
         public FlatDesignTable() {
@@ -276,6 +323,17 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
             setDropMode(DropMode.ON);
             setTransferHandler(m_transferHandler);
             addMouseListener(this);
+            this.getTableHeader().addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent event) {
+                    if (SwingUtilities.isRightMouseButton(event)) {//popup 
+                        int col = FlatDesignTable.this.getTableHeader().columnAtPoint(event.getPoint());
+                        int colModel = FlatDesignTable.this.convertColumnIndexToModel(col);
+                        if (col == FlatDesignTableModel.COLTYPE_RAW_FILE) {
+                            cleanRawFileDialog(event.getXOnScreen(), event.getYOnScreen());//popup clean row file
+                        }
+                    }
+                }
+            });
         }
 
         @Override
@@ -377,7 +435,9 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
         private XICDropZone m_dropZone = null;
 
         private final ArrayList<NodeModelRow> m_dataList = new ArrayList<>();
-
+        /**
+         * HashMap<rowIndex, FileName String set>
+         */
         private final HashMap<Integer, HashSet<String>> m_potentialFileNameForMissings;
 
         public FlatDesignTableModel() {
@@ -632,6 +692,24 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
                 }
             }
             return true;
+        }
+
+        private void cleanRawFile() {
+            if (this.m_dataList != null) {
+                for (NodeModelRow node : m_dataList) {
+                    RunInfoData userObject = (RunInfoData) node.m_run.getData();
+                    RunInfoData.Status status = userObject.getStatus();
+                    if (status != RunInfoData.Status.LINKED_IN_DATABASE) {
+                        userObject.setPotentialRawFiles(null);
+                        userObject.setStatus(RunInfoData.Status.MISSING);
+                        userObject.setSelectedRawFile(null);
+                        userObject.setRun(null);
+                        userObject.setMessage(null);
+                        fireTableDataChanged();
+                        updatePotentialsListForMissings();
+                    }
+                }
+            }
         }
 
     }

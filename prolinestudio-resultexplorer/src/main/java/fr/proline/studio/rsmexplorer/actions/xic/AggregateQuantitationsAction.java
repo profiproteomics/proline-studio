@@ -122,11 +122,11 @@ public class AggregateQuantitationsAction extends AbstractRSMAction {
 
             final Long[] _xicQuantiDataSetId = new Long[1];
 
-            String datasetName = "Quant Agg.";
             StringBuffer errorMsg = new StringBuffer("");
 
             //*** Get experimental design values                
             DataSetData _quantiDS = (DataSetData) dialog.getExperimentalDesignNode().getData();
+            String datasetName = _quantiDS.getTemporaryName();
             Map<String, Object> expParams = null;
             try {
                 expParams = dialog.getExperimentalDesignParameters();

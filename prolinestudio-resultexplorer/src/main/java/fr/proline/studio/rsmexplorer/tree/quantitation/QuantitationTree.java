@@ -196,11 +196,14 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
             if (m_multiPopup == null) {
 
                 // create the actions
-                m_multiActions = new ArrayList<>(4);  // <--- get in sync
+                m_multiActions = new ArrayList<>(5);  // <--- get in sync
 
                 AggregateQuantitationsAction aggregateAction = new AggregateQuantitationsAction(this);
                 m_multiActions.add(aggregateAction);
 
+                ComputeQuantPostProcessingAction computePTMAction = new ComputeQuantPostProcessingAction(this);
+                m_multiActions.add(computePTMAction);
+                
                 m_multiActions.add(null);  // separator
 
                 ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(this, true);

@@ -15,7 +15,7 @@
       <includes>
       	<include>documentation/**</include>
       </includes>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory></outputDirectory>
     </fileSet>
 
     <fileSet>
@@ -23,18 +23,18 @@
       <includes>
         <include>R/**</include>
       </includes>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory></outputDirectory>
     </fileSet>
 
 
     <fileSet>
       <directory>${project.build.directory}/${project.artifactId}-${project.version}/prolinestudio</directory>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory></outputDirectory>
     </fileSet>
     
     <fileSet>
       <directory>${project.build.directory}/${project.artifactId}-${project.version}</directory>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory></outputDirectory>
       <excludes>
       	<exclude>prolinestudio/**</exclude>
       </excludes>

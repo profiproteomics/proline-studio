@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.JTree;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.parser.ParserDelegator;
@@ -180,7 +181,13 @@ public class StringUtils {
 
     private static int STEP_LIMIT = 1000;
 
-    public static DefaultMutableTreeNode createTreeFromJson(String parameter,String rootName) {
+    public static JTree createExpandedTreeFromJson(String parameter, String rootName) {
+        JTree result = createTreeFromJson(parameter, rootName);
+        expandTreeAllNodes(result, 0, result.getRowCount());
+        return result;
+    }
+
+    public static JTree createTreeFromJson(String parameter, String rootName) {
         Gson gson = new Gson();
         LinkedTreeMap paramMap = new LinkedTreeMap();
         DefaultMutableTreeNode parentNode = new DefaultMutableTreeNode(rootName);
@@ -192,12 +199,12 @@ public class StringUtils {
         } catch (Exception ex) {
             //don't treat
         }
-        return parentNode;
+        return new JTree(parentNode);
     }
 
     private static int createParameterTree(LinkedTreeMap params, DefaultMutableTreeNode parent, int childIndex) {
-
-        if (childIndex > STEP_LIMIT) {
+        final int PARMETER_STEP_LIMIT = 9000;//for recursion method
+        if (childIndex > PARMETER_STEP_LIMIT) {
             return childIndex;
         }
         if (params == null) {
@@ -208,26 +215,41 @@ public class StringUtils {
         DefaultMutableTreeNode child;
         for (Object key : params.keySet()) {
             child = new DefaultMutableTreeNode(key);
-            root.add(child);
+
             Object value = params.get(key);
             if (value instanceof LinkedTreeMap) {
+                root.add(child);
                 index = createParameterTree((LinkedTreeMap) value, child, index++);
             } else {
                 if (value instanceof ArrayList) {
                     ArrayList valueList = (ArrayList) value;
                     if (!valueList.isEmpty() && valueList.get(0) instanceof LinkedTreeMap) {
+                        root.add(child);
                         for (Object item : valueList) {
                             index = createParameterTree((LinkedTreeMap) item, child, index++);
                         }
                     } else {
-                        child.add(new DefaultMutableTreeNode(value));
+                        String node = (child + ":  " + value);
+                        root.add(new DefaultMutableTreeNode(node));
                     }
                 } else {
-                    child.add(new DefaultMutableTreeNode(value));
+                    String node = (child + ":  " + value);
+                    root.add(new DefaultMutableTreeNode(node));
                 }
             }
 
         }
         return index;
     }
+
+    private static void expandTreeAllNodes(JTree tree, int startingIndex, int rowCount) {
+        for (int i = startingIndex; i < rowCount; ++i) {
+            tree.expandRow(i);
+        }
+
+        if (tree.getRowCount() != rowCount) {
+            expandTreeAllNodes(tree, rowCount, tree.getRowCount());
+        }
+    }
+
 }

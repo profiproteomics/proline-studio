@@ -10,7 +10,7 @@
     </appender>
   
     <appender name="Fappender" class="ch.qos.logback.core.FileAppender">
-        <file>Proline_Studio-${user.name}.log</file>
+        <file>log/Proline_Studio-${user.name}.log</file>
         <append>true</append>
         <encoder>
             <pattern>%-5level: %logger{35} [%thread] %date{dd MMM yyyy - HH:mm:ss} - %msg%n</pattern>
@@ -18,7 +18,7 @@
     </appender>
 
     <appender name="FappenderError" class="ch.qos.logback.core.FileAppender">
-        <file>Proline_Studio-Error-${user.name}.log</file>
+        <file>log/Proline_Studio-Error-${user.name}.log</file>
         <append>true</append>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>WARN</level>

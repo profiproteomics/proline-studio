@@ -16,13 +16,16 @@
  */
 package fr.proline.studio.rsmexplorer.actions.xic;
 
+import fr.proline.core.orm.msi.PtmSpecificity;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
+import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
+import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
@@ -36,28 +39,27 @@ import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import fr.proline.studio.utils.ResultCallback;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * Action to run the quantitation profile
+ * key word: Refine = Compute Quan Post Processing
  *
- * @author MB243701
+ * @author Karine XUE at CEA
  */
 public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
 
-    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-
+    private int m_nbLoadedQuanti;
 
     public ComputeQuantPostProcessingAction(AbstractTree tree) {
         super(NbBundle.getMessage(ComputeQuantPostProcessingAction.class, "CTL_ComputeQuantPostProcessingAction"), tree);
-
     }
 
     @Override
@@ -66,56 +68,83 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
             JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "A project should be selected !", "Warning", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        
+
         //project id
         final Long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
-        
+
         final int posX = x;
         final int posY = y;
-        
-        // only on one node
-        final DataSetNode datasetNode = (DataSetNode) selectedNodes[0];
-        //dataset
-        final DDataset dataSet = datasetNode.getDataset();
-        
-        // call back for loading masterQuantChannel
-        AbstractDatabaseCallback masterQuantChannelCallback = new AbstractDatabaseCallback() {
 
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
+        ArrayList<String> computedList = new ArrayList();
+        m_nbLoadedQuanti = 0;
+        for (AbstractNode n : selectedNodes) {
 
-            @Override
-            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                if (success) {
-                    // check if profilizer has already been launched
-                    if (dataSet.getPostQuantProcessingConfig() != null) {
-                        String message = "Proteins Sets Abundances have already been refined.\nDo you want to continue?";
-                        OptionDialog yesNoDialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Refine Proteins Sets Abundances", message);
-                        yesNoDialog.setLocation(posX, posY);
-                        yesNoDialog.setVisible(true);
-                        if (yesNoDialog.getButtonClicked() != DefaultDialog.BUTTON_OK) {
-                            return;
-                        }
-                    }    
-                    
-                    quantificationProfile(null, posX, posY, pID, dataSet, datasetNode);
+            DataSetNode node = (DataSetNode) n;
+            //selectedDatasetNodeList.add(node);
+            DDataset dataSet = ((DataSetData) node.getData()).getDataset();
+            // call back for loading masterQuantChannel
+            AbstractDatabaseCallback masterQuantChannelCallback = new AbstractDatabaseCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
                 }
-            }
-        };
-                
-        DatabaseDataSetTask loadTask = new DatabaseDataSetTask(masterQuantChannelCallback);
-        loadTask.initLoadQuantitation(ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject(), dataSet);
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(loadTask);
-          
+
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                    if (success) {
+                        // check if profilizer has already been launched
+                        if (dataSet.getPostQuantProcessingConfig() != null) {
+                            node.setIsRefined(true);
+                            computedList.add(node.getDataset().getName());
+                        }
+                        m_nbLoadedQuanti++;
+                        ArrayList<DataSetNode> selectedDatasetNodeList = new ArrayList<>();
+                        if (m_nbLoadedQuanti == selectedNodes.length) {//all loaded
+                            if (!computedList.isEmpty()) {
+                                String[] options = {"Refine All", "Skip already refined"};
+                                String message = computedList + " Proteins Sets Abundances have already been refined \n(Compute Qaunt Post Processing done).";
+                                OptionDialog yesNoDialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Refine Proteins Sets Abundances", message);
+                                yesNoDialog.setButtonName(DefaultDialog.BUTTON_OK, options[0]);
+                                yesNoDialog.setButtonName(DefaultDialog.BUTTON_CANCEL, options[1]);
+                                yesNoDialog.setLocation(posX, posY);
+                                yesNoDialog.setVisible(true);
+
+                                if (yesNoDialog.getButtonClicked() != DefaultDialog.BUTTON_OK) {
+                                    for (AbstractNode an : selectedNodes) {
+                                        DataSetNode dn = ((DataSetNode) an);
+                                        if (!dn.isRefined()) {
+                                            selectedDatasetNodeList.add(dn);
+                                        }
+                                    }
+                                } else {
+                                    for (AbstractNode an : selectedNodes) {
+                                        DataSetNode dn = ((DataSetNode) an);
+                                        selectedDatasetNodeList.add(dn);
+                                    }
+
+                                }
+                            }
+                            if (!selectedDatasetNodeList.isEmpty()) {
+                                quantificationProfile(null, posX, posY, pID, selectedDatasetNodeList);
+                            }
+                        }
+                    }
+                }
+
+            };
+            //load Quantitation, in order to test if the dataset is already refined
+            DatabaseDataSetTask loadTask = new DatabaseDataSetTask(masterQuantChannelCallback);
+            loadTask.initLoadQuantitation(ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject(), dataSet);
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(loadTask);
+        }
     }
-    
-    
-    public static boolean quantificationProfile(final ResultCallback resultCallback, int posx, int posy, Long pID, DDataset dataSet, DataSetNode datasetNode) {
-        // dialog with the parameters for quantitation profiler
-        QuantPostProcessingDialog dialog = new QuantPostProcessingDialog(WindowManager.getDefault().getMainWindow(), dataSet);
-        dialog.setLocation(posx, posy);
+
+    public static boolean quantificationProfile(final ResultCallback resultCallback, int posX, int posY, Long pID, ArrayList<DataSetNode> nodeList) {
+        ArrayList<PtmSpecificity> ptms = fetchPtmsFromDAM(nodeList);
+        boolean isAggregation = isAllAggregation(nodeList, posX, posY);
+        QuantPostProcessingDialog dialog = new QuantPostProcessingDialog(WindowManager.getDefault().getMainWindow(), ptms, isAggregation);
+        dialog.setLocation(posX, posY);
         dialog.setVisible(true);
 
         // retreive parameters
@@ -132,53 +161,119 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
                 JOptionPane.showMessageDialog(dialog, errorMsg, "Warning", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
-            // only on one node
-            if (datasetNode != null) {
-                datasetNode.setIsChanging(true);
-                QuantitationTree tree = QuantitationTree.getCurrentTree();
-                DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-                treeModel.nodeChanged(datasetNode);
+            // set all node in color grey = in processing
+            if (nodeList != null) {
+                for (DataSetNode node : nodeList) {
+                    node.setIsChanging(true);
+                    QuantitationTree tree = QuantitationTree.getCurrentTree();
+                    DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+                    treeModel.nodeChanged(node);
+                }
             }
-            
-            // dataset name
-            final String xicName = dataSet.getName();
 
-            List<DMasterQuantitationChannel> listMasterQuantChannels = dataSet.getMasterQuantitationChannels();
-            if (listMasterQuantChannels != null && !listMasterQuantChannels.isEmpty()) {
-                Long masterQuantChannelId = new Long(listMasterQuantChannels.get(0).getId());
-                // CallBack for Xic Quantitation Service
+            for (DataSetNode node : nodeList) {
+                // dataset name
+                DDataset dataset = node.getDataset();
+                final String xicName = dataset.getName();
 
-                AbstractJMSCallback xicCallback = new AbstractJMSCallback() {
+                List<DMasterQuantitationChannel> listMasterQuantChannels = dataset.getMasterQuantitationChannels();
+                if (listMasterQuantChannels != null && !listMasterQuantChannels.isEmpty()) {
+                    Long masterQuantChannelId = new Long(listMasterQuantChannels.get(0).getId());
+                    // CallBack for Xic Quantitation Service
+                    //one callback by datasetNode
+                    AbstractJMSCallback xicCallback = new AbstractJMSCallback() {
 
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return true;
-                    }
-
-                    @Override
-                    public void run(boolean success) {
-
-                        if (datasetNode != null) {
-                            QuantitationTree tree = QuantitationTree.getCurrentTree();
-                            DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-                            datasetNode.setIsChanging(false);
-                            treeModel.nodeChanged(datasetNode);
+                        @Override
+                        public boolean mustBeCalledInAWT() {
+                            return true;
                         }
-                        if (resultCallback != null) {
-                            resultCallback.run(success);
-                        }
- 
-                    }
-                };
-                fr.proline.studio.dpm.task.jms.ComputeQuantPostProcessingTask task = new fr.proline.studio.dpm.task.jms.ComputeQuantPostProcessingTask(xicCallback, pID, masterQuantChannelId, quantParams, xicName);
-                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
-            }
+                        @Override
+                        public void run(boolean success) {
+
+                            if (node != null) {
+                                QuantitationTree tree = QuantitationTree.getCurrentTree();
+                                DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+                                node.setIsChanging(false);
+                                treeModel.nodeChanged(node);
+                            }
+                            if (resultCallback != null) {
+                                resultCallback.run(success);
+                            }
+
+                        }
+                    };
+                    fr.proline.studio.dpm.task.jms.ComputeQuantPostProcessingTask task = new fr.proline.studio.dpm.task.jms.ComputeQuantPostProcessingTask(xicCallback, pID, masterQuantChannelId, quantParams, xicName);
+                    AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+
+                }
+            } //End OK entered   
             return true;
-        } //End OK entered   
-        else {
-            return false;
         }
+        return false;
+    }
+
+    public static boolean quantificationProfile(final ResultCallback resultCallback, int posx, int posy, Long pID, DDataset dataSet) {
+        ArrayList<DataSetNode> nodeList = new ArrayList();
+        nodeList.add(new DataSetNode(new DataSetData(dataSet)));
+        return quantificationProfile(resultCallback, posx, posy, pID, nodeList);
+    }
+
+    private static ArrayList<PtmSpecificity> fetchPtmsFromDAM(ArrayList<DataSetNode> nodeList) {
+        ArrayList<PtmSpecificity> ptms = new ArrayList();
+        DatabasePTMSitesTask task = new DatabasePTMSitesTask(null);
+        ArrayList<Long> rsmIdList = new ArrayList();
+        DDataset dataset;
+        long projectId = nodeList.get(0).getDataset().getProject().getId();
+        for (int i = 0; i < nodeList.size(); i++) {
+            dataset = nodeList.get(i).getDataset();
+            rsmIdList.add(dataset.getResultSummaryId());
+        }
+        task.initLoadUsedPTMs(projectId, rsmIdList, ptms);
+        task.fetchData();
+        return ptms;
+    }
+
+//    private ArrayList<PtmSpecificity> fetchPtmsFromDAM(DDataset dataset) {
+//        ArrayList<PtmSpecificity> ptms = new ArrayList();
+//        DatabasePTMSitesTask task = new DatabasePTMSitesTask(null);
+//        long projectId = dataset.getProject().getId();
+//        task.initLoadUsedPTMs(projectId, dataset.getResultSummaryId(), ptms);
+//        task.fetchData();
+//        return ptms;
+//    }
+//    private boolean isAllAggregation(DDataset dataset) {
+//        return dataset.isQuantitation() && dataset.isAggregation();
+//    }
+    private static boolean isAllAggregation(ArrayList<DataSetNode> nodeList, int posX, int posY) {
+        DDataset dataset;
+        String quantitationList = "";
+        String aggregationList = "";
+        for (DataSetNode node : nodeList) {
+            dataset = node.getDataset();
+            boolean test = (dataset.isQuantitation() && dataset.isAggregation());
+            if (test) {
+                aggregationList += dataset.getName() + " ";
+            } else {
+                quantitationList += dataset.getName() + " ";
+            }
+        }
+        if (quantitationList.isEmpty()) {
+            return true;
+        } else if (aggregationList.isEmpty()) {
+            return false;
+        } else {
+            String errorMsg = "The selection has Aggregated Quatitation dataSets and Quatitation datasets.";
+            errorMsg += "\n Quantitation: " + quantitationList;
+            errorMsg += "\n Aggregation: " + aggregationList;
+            errorMsg += "\n The option Discard_Peptides_Sharing_Peakels will not be available";
+            final JOptionPane pane = new JOptionPane(errorMsg, JOptionPane.INFORMATION_MESSAGE);
+            final JDialog d = pane.createDialog((JFrame) null, "Warning");
+            d.setLocation(posX, posY);
+            d.setVisible(true);
+            return true;
+        }
+
     }
 
     @Override
@@ -190,36 +285,30 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
             setEnabled(false);
             return;
         }
-        
-        
-        // only one node selected
-        if (selectedNodes.length != 1) {
-            setEnabled(false);
-            return;
-        }
 
-        AbstractNode node = (AbstractNode) selectedNodes[0];
+        for (AbstractNode node : selectedNodes) {
+            // the node must not be in changing state
+            if (node.isChanging()) {
+                setEnabled(false);
+                return;
+            }
 
-        // the node must not be in changing state
-        if (node.isChanging()) {
-            setEnabled(false);
-            return;
-        }
+            // must be a dataset 
+            if (node.getType() != AbstractNode.NodeTypes.DATA_SET) {
+                setEnabled(false);
+                return;
+            }
 
-        // must be a dataset 
-        if (node.getType() != AbstractNode.NodeTypes.DATA_SET) {
-            setEnabled(false);
-            return;
-        }
+            DataSetNode datasetNode = (DataSetNode) node;
 
-        DataSetNode datasetNode = (DataSetNode) node;
-
-        // must be a quantitation XIC
-        if (! datasetNode.isQuantXIC()) {
-            setEnabled(false);
-            return;
+            // must be a quantitation XIC
+            if (!datasetNode.isQuantXIC()) {
+                setEnabled(false);
+                return;
+            }
         }
 
         setEnabled(true);
     }
+
 }

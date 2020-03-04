@@ -613,7 +613,11 @@ public class CreateQuantitationDialog extends DefaultDialog {
 
         return false;
     }
-
+    
+    /**
+     * step back 
+     * @return 
+     */
     @Override
     protected boolean backCalled() {
         switch (m_step) {

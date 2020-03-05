@@ -415,6 +415,22 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         return m_inParameters;
     }
 
+    /**
+     * Return potential extra data available for the corresponding parameter of class type
+     * @param c
+     * @return 
+     */
+    public Object getExtraData(Class parameterType) {
+        if (isDataDependant(parameterType)) {
+            return null;
+        }
+        if (m_previousDataBox != null) {
+            return  m_previousDataBox.getExtraData(parameterType);
+        }
+        return null;
+    }
+
+    
     public boolean isDataDependant(Class dataType) {
         Iterator<GroupParameter> it = m_inParameters.iterator();
         while (it.hasNext()) {

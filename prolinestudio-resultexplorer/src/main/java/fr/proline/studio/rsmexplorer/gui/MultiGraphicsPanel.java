@@ -53,6 +53,8 @@ import fr.proline.studio.extendedtablemodel.SecondAxisTableModelInterface;
 import fr.proline.studio.graphics.DoubleYAxisPlotPanel;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_X_ID;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_Y_ID;
+import fr.proline.studio.graphics.XAxis;
+import fr.proline.studio.graphics.YAxis;
 import fr.proline.studio.pattern.DataboxMultiGraphics;
 import java.awt.Color;
 import org.slf4j.Logger;
@@ -298,7 +300,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             @Override
             public void actionPerformed(ActionEvent e) {
                 fillXYCombobox();
-                setDataImpl();
+                setDataImpl(false);
                 updateXYCbxVisibility();
 
             }
@@ -472,10 +474,10 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     }
 
     public void setData(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList) {
-        this.setData(valuesList, crossSelectionInterfaceList, m_valueOn2Yxis);
+        this.setData(valuesList, crossSelectionInterfaceList, m_valueOn2Yxis, false);
     }
 
-    public void setData(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList, SecondAxisTableModelInterface value2) {
+    public void setData(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList, SecondAxisTableModelInterface value2, boolean keepZoom) {
         if (m_plotPanel.isLocked()) {
             return;
         }
@@ -494,7 +496,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             }
         }
         this.setXYZComboBox();
-        this.setDataImpl();
+        this.setDataImpl(keepZoom);
         if (m_dataLocked) {
             // check that plotPanel corresponds, it can not correspond at the first call
             m_plotPanel.lockData(m_dataLocked);
@@ -504,7 +506,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     /**
      *
      */
-    private void setDataImpl() {
+    private void setDataImpl(boolean keepZoom) {
         ReferenceToColumn refX = (ReferenceToColumn) m_valueXComboBox.getSelectedItem();
         ReferenceToColumn refY = (ReferenceToColumn) m_valueYComboBox.getSelectedItem();
         if (refX != null && refY != null) {
@@ -515,12 +517,29 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         PlotType plotType = (PlotType) m_allPlotsComboBox.getSelectedItem();
         switch (plotType) {
             case LINEAR_PLOT: {
+                
+                // Values if keepZoom is true
+                XAxis xAxis = m_plotPanel.getXAxis();
+                double minXValue = xAxis.getMinValue();
+                double maxXValue = xAxis.getMaxValue();
+                YAxis yAxis = m_plotPanel.getYAxis();
+                double minYValue = yAxis.getMinValue();
+                double maxYValue = yAxis.getMaxValue();
+                
                 m_plotPanel.clearPlots();
                 if (m_isDoubleYAxis) {
                     setPlotsWithDoubleYAxis();
                 } else {
                     setPlots();
                 }
+                
+                if (keepZoom) {
+                    xAxis = m_plotPanel.getXAxis(); // axis has been changed
+                    xAxis.setRange(minXValue, maxXValue);
+                    yAxis = m_plotPanel.getYAxis();
+                    yAxis.setRange(minYValue, maxYValue);
+                }
+                
                 m_plotPanel.repaint();
 
                 break;

@@ -121,6 +121,11 @@ public class DataboxMultiGraphics extends AbstractDataBox {
                 }
             }
         }
+        
+        Boolean keepZoom = (Boolean) m_previousDataBox.getExtraData(ExtendedTableModelInterface.class); // True during xic extraction
+        if (keepZoom == null) {
+            keepZoom = Boolean.FALSE;
+        }
 
         //final List<ExtendedTableModelInterface> dataModelInterfaceSet1 = (List<ExtendedTableModelInterface>) m_previousDataBox.getData(false, ExtendedTableModelInterface.class, true);
         final List<CrossSelectionInterface> crossSelectionInterfaceL = (List<CrossSelectionInterface>) m_previousDataBox.getData(false, CrossSelectionInterface.class, true);
@@ -134,7 +139,7 @@ public class DataboxMultiGraphics extends AbstractDataBox {
         m_crossSelectionValues = crossSelectionInterfaceL;
         m_plotSecondAxisValues = dataModelInterfaceSet2;
         if (m_plotValues != null) {
-            ((MultiGraphicsPanel) getDataBoxPanelInterface()).setData(m_plotValues, m_crossSelectionValues, m_plotSecondAxisValues);
+            ((MultiGraphicsPanel) getDataBoxPanelInterface()).setData(m_plotValues, m_crossSelectionValues, m_plotSecondAxisValues, keepZoom);
         }
     }
 
@@ -157,7 +162,7 @@ public class DataboxMultiGraphics extends AbstractDataBox {
                 }
             }
         }
-        ((MultiGraphicsPanel) getDataBoxPanelInterface()).setData(m_plotValues, m_crossSelectionValues, m_plotSecondAxisValues);
+        ((MultiGraphicsPanel) getDataBoxPanelInterface()).setData(m_plotValues, m_crossSelectionValues, m_plotSecondAxisValues, false);
     }
 
 }

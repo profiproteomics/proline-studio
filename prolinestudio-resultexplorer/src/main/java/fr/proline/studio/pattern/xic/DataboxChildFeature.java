@@ -60,6 +60,8 @@ public class DataboxChildFeature extends AbstractDataBox {
 
     private HashSet<DFeature> m_extractedXICSet = null;
     
+    private Boolean m_xicExtraction = Boolean.FALSE;
+    
     public DataboxChildFeature() {
         super(DataboxType.DataboxXicChildFeature, DataboxStyle.STYLE_XIC);
 
@@ -289,6 +291,20 @@ public class DataboxChildFeature extends AbstractDataBox {
         return super.getData(getArray, parameterType, isList);
     }
 
+   /**
+     * Return potential extra data available for the corresponding parameter of class type
+     * @param c
+     * @return 
+     */
+    @Override
+    public Object getExtraData(Class parameterType) {
+        if (parameterType.equals(ExtendedTableModelInterface.class)) {
+            return m_xicExtraction; // True during xic extraction 
+        }
+        
+        return super.getExtraData(parameterType);
+    }
+
     @Override
     public String getFullName() {
         return m_masterQuantPeptideIon.getCharge() + " " + getTypeName();
@@ -337,7 +353,10 @@ public class DataboxChildFeature extends AbstractDataBox {
         
         m_extractedXICSet.addAll(featureList);
 
+        m_xicExtraction = Boolean.TRUE;
         propagateDataChanged(ExtendedTableModelInterface.class);
+        m_xicExtraction = Boolean.FALSE;
     }
+    
     
 }

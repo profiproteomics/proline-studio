@@ -447,7 +447,6 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             }
  
             m_dataBox.propagateDataChanged(Feature.class);
-            m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
 
         }
         

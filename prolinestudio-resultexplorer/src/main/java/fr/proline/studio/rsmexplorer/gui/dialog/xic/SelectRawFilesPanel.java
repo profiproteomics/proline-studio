@@ -70,7 +70,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
-
+import java.nio.file.Paths;
 /**
  *
  * @author JM235353
@@ -427,10 +427,11 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
         public static final int COLTYPE_SAMPLE = 1;
         public static final int COLTYPE_SAMPLE_ANALYSIS = 2;
         public static final int COLTYPE_RAW_FILE = 3;
-        public static final int COLTYPE_PEAKLIST = 4;
-        public static final int COLTYPE_ASSOCIATION_SOURCE = 5;
+        public static final int COLTYPE_RAW_FILE_PATH = 4;
+        public static final int COLTYPE_PEAKLIST = 5;
+        public static final int COLTYPE_ASSOCIATION_SOURCE = 6;
 
-        private static final String[] columnNames = {"Group", "Sample", "Sample Analysis", "mzDB File", "Peaklist", "Association Source"};
+        private static final String[] columnNames = {"Group", "Sample", "Sample Analysis", "mzDB File", "mzDB File Path", "Peaklist", "Association Source"};
 
         private XICDropZone m_dropZone = null;
 
@@ -558,6 +559,21 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
                 case COLTYPE_RAW_FILE: {
                     return nodeModelRow.m_run.toString();
                 }
+                case COLTYPE_RAW_FILE_PATH: {
+                    RunInfoData infoD = (RunInfoData) nodeModelRow.m_run.getData();
+                    String directory = "";
+                    if (infoD != null) {
+                        if (infoD.getLinkedRawFile() != null) {
+                            directory = infoD.getLinkedRawFile().getRawFileDirectory();
+                        } else if (infoD.getRawFileOnDisk() != null) {
+                            File f = infoD.getRawFileOnDisk();
+                            directory = Paths.get(f.getPath()).getParent().toString();
+                        }else if (infoD.getSelectedRawFile()!=null){
+                            directory = infoD.getSelectedRawFile().getRawFileDirectory();
+                        }
+                    }
+                    return directory;
+                }
                 case COLTYPE_PEAKLIST: {
                     //VDS Use cache in NodeModelRow
                     if (nodeModelRow == null) {
@@ -613,6 +629,12 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
             return null;
         }
 
+        /**
+         * Drag & Down used by TreeFileChooserTableModelInterface.importData()
+         *
+         * @param fileList
+         * @param rowIndex
+         */
         @Override
         public void setFiles(ArrayList<File> fileList, int rowIndex) {
             int nbFiles = fileList.size();

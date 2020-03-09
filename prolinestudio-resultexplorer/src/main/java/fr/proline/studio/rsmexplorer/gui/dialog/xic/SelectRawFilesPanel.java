@@ -582,8 +582,8 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
                             File f = infoD.getRawFileOnDisk(); //USER_DEFINED
                             //need not to test
                             directory = Paths.get(f.getPath()).getParent().toString();
-//                        }else if (infoD.getSelectedRawFile()!=null){//LAST_DEFINED
-//                            directory = infoD.getSelectedRawFile().getRawFileDirectory();
+                        }else if (infoD.getSelectedRawFile()!=null){//LAST_DEFINED
+                            directory = infoD.getSelectedRawFile().getRawFileDirectory();
                         }
                     }
                     return directory;

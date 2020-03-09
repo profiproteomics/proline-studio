@@ -71,6 +71,10 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import java.nio.file.Paths;
+import java.util.List;
+import javax.swing.table.TableColumn;
+import org.jdesktop.swingx.table.TableColumnExt;
+
 /**
  *
  * @author JM235353
@@ -232,6 +236,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
         m_model.setXICDropZone(m_dropZone);
         m_table.setModel(m_model);
         m_table.getColumnModel().getColumn(FlatDesignTableModel.COLTYPE_ASSOCIATION_SOURCE).setCellRenderer(new LinkAssociationRenderer());
+        m_table.setColumnsVisibility();
         tableScrollPane.setViewportView(m_table);
 
         designTablePanel.add(tableScrollPane, c);
@@ -336,6 +341,14 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
             });
         }
 
+        private void setColumnsVisibility() {
+            List<TableColumn> columns = getColumns(true);
+            TableColumnExt columnExt = (TableColumnExt) columns.get(FlatDesignTableModel.COLTYPE_RAW_FILE_DIRECTORY);
+            if (columnExt != null) {
+                columnExt.setVisible(false);
+            }
+        }
+
         @Override
         public void addTableModelListener(TableModelListener l) {
             getModel().addTableModelListener(l);
@@ -427,7 +440,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
         public static final int COLTYPE_SAMPLE = 1;
         public static final int COLTYPE_SAMPLE_ANALYSIS = 2;
         public static final int COLTYPE_RAW_FILE = 3;
-        public static final int COLTYPE_RAW_FILE_PATH = 4;
+        public static final int COLTYPE_RAW_FILE_DIRECTORY = 4;
         public static final int COLTYPE_PEAKLIST = 5;
         public static final int COLTYPE_ASSOCIATION_SOURCE = 6;
 
@@ -559,17 +572,18 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
                 case COLTYPE_RAW_FILE: {
                     return nodeModelRow.m_run.toString();
                 }
-                case COLTYPE_RAW_FILE_PATH: {
+                case COLTYPE_RAW_FILE_DIRECTORY: {
                     RunInfoData infoD = (RunInfoData) nodeModelRow.m_run.getData();
                     String directory = "";
                     if (infoD != null) {
-                        if (infoD.getLinkedRawFile() != null) {
+                        if (infoD.getLinkedRawFile() != null) { //SYSTEM_PROPOSED = database
                             directory = infoD.getLinkedRawFile().getRawFileDirectory();
                         } else if (infoD.getRawFileOnDisk() != null) {
-                            File f = infoD.getRawFileOnDisk();
+                            File f = infoD.getRawFileOnDisk(); //USER_DEFINED
+                            //need not to test
                             directory = Paths.get(f.getPath()).getParent().toString();
-                        }else if (infoD.getSelectedRawFile()!=null){
-                            directory = infoD.getSelectedRawFile().getRawFileDirectory();
+//                        }else if (infoD.getSelectedRawFile()!=null){//LAST_DEFINED
+//                            directory = infoD.getSelectedRawFile().getRawFileDirectory();
                         }
                     }
                     return directory;

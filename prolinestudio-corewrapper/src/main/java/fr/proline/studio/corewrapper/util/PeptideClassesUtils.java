@@ -41,4 +41,16 @@ public class PeptideClassesUtils {
             }
         return ppm;
     }
+    
+    /**
+     * 
+     * @param petideIonMoz  
+     * @param petideIonCharge
+     * @param isotopRank  from 0
+     * @return 
+     */
+    public static double getIsotopMoz(double petideIonMoz, int petideIonCharge, int isotopRank) {
+        return petideIonMoz + (PROTON_MASS / petideIonCharge)*(isotopRank);
+    }
+
 }

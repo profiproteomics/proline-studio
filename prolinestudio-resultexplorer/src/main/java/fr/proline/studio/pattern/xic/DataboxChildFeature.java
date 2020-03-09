@@ -60,7 +60,7 @@ public class DataboxChildFeature extends AbstractDataBox {
 
     private HashSet<DFeature> m_extractedXICSet = null;
     
-    private Boolean m_xicExtraction = Boolean.FALSE;
+    private Boolean m_keepZoom = Boolean.FALSE;
     
     public DataboxChildFeature() {
         super(DataboxType.DataboxXicChildFeature, DataboxStyle.STYLE_XIC);
@@ -246,12 +246,68 @@ public class DataboxChildFeature extends AbstractDataBox {
 
         return list;
     }
+    
+    
+    private void addExtractedXIC(List<ExtendedTableModelInterface> modelList) {
+
+        if (m_extractedXICSet == null) {
+            return;
+        }
+        
+        int viewType = ((XicFeaturePanel) getDataBoxPanelInterface()).getGraphViewType();
+        if (m_childFeatureList != null) {
+            switch (viewType) {
+                case VIEW_ALL_GRAPH_PEAKS: {   
+                    for (DFeature feature : m_extractedXICSet) {
+                        if (!feature.hasPeaks()) {
+                            // no extracted XIC for this feature
+                            continue;
+                        }
+                        Color color = m_quantChannelInfo.getQuantChannelColor(feature.getQuantChannelId());
+                        String title = m_quantChannelInfo.getQuantChannels(feature.getQuantChannelId()).getName();
+                        
+                        // Take only first isotop
+                        Peak[] peakArray = feature.getPeakArray(0 /*first isotop*/);
+                        if (peakArray != null) {
+                            PeakTableModel model = new PeakTableModel(null);
+                            model.setData(-1L, null, null, -1, new ArrayList<>(Arrays.asList(peakArray)), color, true, title);
+                            modelList.add(model);
+                        }
+                    }   
+                    break;
+                }
+                case VIEW_ALL_ISOTOPES_FOR_FEATURE: {
+                    DFeature selectedFeature = ((XicFeaturePanel) getDataBoxPanelInterface()).getSelectedFeature();
+                    if (!selectedFeature.hasPeaks()) {
+                        // no extracted XIC for this feature
+                        return;
+                    }
+                    Color color = m_quantChannelInfo.getQuantChannelColor(selectedFeature.getQuantChannelId());
+                    String title = m_quantChannelInfo.getQuantChannels(selectedFeature.getQuantChannelId()).getName();
+                    for (int i=0;i<3;i++) {
+                        Peak[] peakArray = selectedFeature.getPeakArray(i);
+                        if (peakArray != null) {
+                            PeakTableModel model = new PeakTableModel(null);
+                            model.setData(-1L, null, null, -1, new ArrayList<>(Arrays.asList(peakArray)), color, true, title);
+                            modelList.add(model);
+                        }
+                    }
+                    break;
+                }
+            }
+
+        }
+    }
 
     @Override
     public void setEntryData(Object data) {
         getDataBoxPanelInterface().addSingleValue(data);
         m_masterQuantPeptideIon = (DMasterQuantPeptideIon) data;
         dataChanged();
+    }
+    
+    public DMasterQuantPeptideIon getMasterQuantPeptideIon() {
+        return m_masterQuantPeptideIon;
     }
 
     @Override
@@ -299,7 +355,7 @@ public class DataboxChildFeature extends AbstractDataBox {
     @Override
     public Object getExtraData(Class parameterType) {
         if (parameterType.equals(ExtendedTableModelInterface.class)) {
-            return m_xicExtraction; // True during xic extraction 
+            return m_keepZoom; // True during xic extraction 
         }
         
         return super.getExtraData(parameterType);
@@ -312,29 +368,21 @@ public class DataboxChildFeature extends AbstractDataBox {
 
     private List<ExtendedTableModelInterface> getCompareDataInterfaceList() {
         List<ExtendedTableModelInterface> listCDI = new ArrayList();
-        List<XicPeakPanel> listPeakPanel = getPeakTableModelList();
+        List<XicPeakPanel> listPeakPanel = getPeakTableModelList();  //JPM : use of XicPeakPanel is a nonsense
         for (XicPeakPanel peakPanel : listPeakPanel) {
             listCDI.add(peakPanel.getGlobalTableModelInterface());
         }
         
-        // Add models for retrieved xics
-        if (m_extractedXICSet != null) {
-            for (DFeature feature : m_extractedXICSet) {
-                Peak[] peakArray = feature.getPeakArray();
+        addExtractedXIC(listCDI);
+        
+        
 
-                PeakTableModel model = new PeakTableModel(null);
-                
-                Color color = m_quantChannelInfo.getQuantChannelColor(feature.getQuantChannelId());
-                String title = m_quantChannelInfo.getQuantChannels(feature.getQuantChannelId()).getName();
-                
-                model.setData(-1L, null, null, -1, new ArrayList<>(Arrays.asList(peakArray)), color, true, title);
-                listCDI.add(model);
-            }
-        }
         
         return listCDI;
     }
 
+
+    
     private List<CrossSelectionInterface> getCrossSelectionInterfaceList() {
         List<CrossSelectionInterface> listCSI = new ArrayList();
         List<XicPeakPanel> listPeakPanel = getPeakTableModelList();
@@ -346,16 +394,20 @@ public class DataboxChildFeature extends AbstractDataBox {
         return listCSI;
     }
     
-    public void setRetrievedXic(ArrayList<DFeature> featureList) {
+    public void setRetrievedXic(HashSet<DFeature> featureList) {
         if (m_extractedXICSet == null) {
             m_extractedXICSet = new HashSet<>();
         }
         
         m_extractedXICSet.addAll(featureList);
 
-        m_xicExtraction = Boolean.TRUE;
+        propagateModelChangeWithoutModifyingZoom();
+    }
+    
+    public void propagateModelChangeWithoutModifyingZoom() {
+        m_keepZoom = Boolean.TRUE;
         propagateDataChanged(ExtendedTableModelInterface.class);
-        m_xicExtraction = Boolean.FALSE;
+        m_keepZoom = Boolean.FALSE;
     }
     
     

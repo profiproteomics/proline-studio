@@ -136,7 +136,7 @@ public class GetXICChromatogramTask extends AbstractJMSTask {
                 ArrayList<Peak[]> peakArray = gson.fromJson((String)result, peakArrayListType);
 
                 for (int i=0;i<peakArray.size();i++) {
-                    m_features.get(i).setPeakArray(peakArray.get(i));
+                    m_features.get(i).addPeakArray(peakArray.get(i));
                 }
   
             }

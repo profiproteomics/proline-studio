@@ -18,7 +18,9 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.lcms.Feature;
 import fr.proline.core.orm.lcms.dto.DFeature;
+import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.corewrapper.util.PeptideClassesUtils;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
@@ -237,7 +239,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
                     }
                 }
                 setGraphicTypeToolTip();
-                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                ((DataboxChildFeature) m_dataBox).propagateModelChangeWithoutModifyingZoom();
             }
         });
         if(m_canGraph) {
@@ -447,6 +449,8 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             }
  
             m_dataBox.propagateDataChanged(Feature.class);
+            ((DataboxChildFeature) m_dataBox).propagateModelChangeWithoutModifyingZoom();
+
 
         }
         
@@ -745,18 +749,14 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             final ArrayList<DFeature> featuresSearched = new  ArrayList<>(size);
             
             
+            DMasterQuantPeptideIon masterQuantPeptideIon = databoxChildFeature.getMasterQuantPeptideIon();
+            
             for (int i = 0; i < size; i++) {
                 DFeature feature = featureList.get(i);
-                if (feature.getPeakArray() != null) {
+                if (feature.hasPeaks()) {
                     // data already loaded
                     continue;
                 }
-                double moz = feature.getMoz();
-                if (moz <= 1e-15) {
-                    // moz is equal to 0, do not take it in account
-                    continue;
-                }
-
                 
                 String rawFileIdentifier = qChannelMap.get(feature.getQuantChannelId()).getRawFileIdentifier();
 
@@ -764,11 +764,21 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
                 if (identifierFound.contains(rawFileIdentifier)) {
                     continue;
                 }
+                
                 identifierFound.add(rawFileIdentifier);
+                
+                // We start from the moz of masterQuantPeptideIon for everybody (even if we have found a Feature)
+                for (int rank = 0; rank <= 2; rank++) {
+                    // extract XIC for 3 first isotops
+                    double moz = PeptideClassesUtils.getIsotopMoz(masterQuantPeptideIon.getMoz(), masterQuantPeptideIon.getCharge(), rank /* isotop */);
 
-                rawFileIdentifierList.add(rawFileIdentifier);
-                mozList.add(moz);
-                featuresSearched.add(feature);
+                    rawFileIdentifierList.add(rawFileIdentifier);
+                    mozList.add(moz);
+                    featuresSearched.add(feature);
+                }
+    
+                
+
             }
 
             
@@ -794,7 +804,12 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
                 public void run(boolean success) {
                     if (success) {
 
-                        databoxChildFeature.setRetrievedXic(featuresSearched);
+                        HashSet<DFeature> features = new HashSet();
+                        for (DFeature f : featuresSearched) {
+                            features.add(f);
+                        }
+                        
+                        databoxChildFeature.setRetrievedXic(features);
 
                     } else {
                         // we could manage error with errorMessage

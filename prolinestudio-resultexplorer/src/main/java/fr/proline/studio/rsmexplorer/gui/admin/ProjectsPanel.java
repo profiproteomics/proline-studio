@@ -30,20 +30,31 @@ import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
+import fr.proline.studio.utils.CyclicColorPalette;
+import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.BorderFactory;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTable;
 import javax.swing.JToolBar;
+import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 
 /**
  *
@@ -67,6 +78,8 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
 
     private ArrayList<ProjectInfo> m_resultProjectsList = new ArrayList<>();
 
+    private HashMap<String, ProjectInfo.Status> m_projectStatusMap = new HashMap();
+
     public ProjectsPanel(JDialog dialog, Boolean editable) {
         m_isEditable = editable;
         m_dialogOwner = dialog;
@@ -80,8 +93,8 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
     private JPanel createInternalPanel() {
         JPanel internalPanel = new JPanel(new BorderLayout());
 
-        initGenericModel();
-
+        initGenericModel();//add desired Table columns order
+        initRawFileModel();
         internalPanel.setBorder(BorderFactory.createTitledBorder("Projects"));
 
         JScrollPane projectTableScrollPane = new JScrollPane();
@@ -99,6 +112,20 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
             @Override
             public void addTableModelListener(TableModelListener l) {
                 getModel().addTableModelListener(l);
+            }
+
+            @Override
+            public TableCellRenderer getCellRenderer(int row, int column) {
+                int columnIndex = this.convertColumnIndexToModel(column);
+                switch (columnIndex) {
+                    case 0:
+                        TableColumn column0;
+                        column0 = this.getColumnModel().getColumn(columnIndex);
+                        column0.setPreferredWidth(30);
+                        return new StatusRenderer();
+                    default:
+                        return super.getCellRenderer(convertRowIndexToModel(row), columnIndex);
+                }
             }
         };
         projectTableScrollPane.setViewportView(m_projectsTable);
@@ -123,6 +150,20 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
             @Override
             public void prepostPopupMenu() {
 
+            }
+
+            @Override
+            public TableCellRenderer getCellRenderer(int row, int column) {
+                int columnIndex = this.convertColumnIndexToModel(column);
+                switch (columnIndex) {
+                    case 0:
+                        TableColumn column0;
+                        column0 = this.getColumnModel().getColumn(columnIndex);
+                        column0.setPreferredWidth(30);
+                        return new StatusRenderer();
+                    default:
+                        return super.getCellRenderer(convertRowIndexToModel(row), columnIndex);
+                }
             }
         };
 
@@ -192,24 +233,75 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
     }
 
     private void initGenericModel() {
-        m_projectBeanModel.addProperties("projectId", 0, "Id");
-        m_projectBeanModel.addProperties("name", 1, "Project");
-        m_projectBeanModel.addProperties("description", 2);
-        m_projectBeanModel.addProperties("size", 3, "Size (MB)", new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0, true, true), null);
-        m_projectBeanModel.addProperties("user", 4, "Owner");
-        m_projectBeanModel.addProperties("DBName", 5, "Databases");
-        m_projectBeanModel.addProperties("lastDatasetDate", 6, "DatasetDate");
+        m_projectBeanModel.addProperties("status", 0, "Status"); //(properties name, order, column name)
+        m_projectBeanModel.addProperties("projectId", 1, "Id");
+        m_projectBeanModel.addProperties("name", 2, "Project");
+        m_projectBeanModel.addProperties("description", 3);
+        m_projectBeanModel.addProperties("size", 4, "Size (MB)", new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0, true, true), null);
+        m_projectBeanModel.addProperties("user", 5, "Owner");
+        m_projectBeanModel.addProperties("DBName", 6, "Databases");
+        m_projectBeanModel.addProperties("lastDatasetDate", 7, "DatasetDate");
 
         // must be called only one time
         m_projectBeanModel.firePropertiesChanged();
     }
 
+    private void initRawFileModel() {
+
+        m_rawfilesBeanModel.addProperties("projectStatus", 0, "Status");
+        m_rawfilesBeanModel.addProperties("creationTimestamp", 1, "CreationTimestamp");
+        m_rawfilesBeanModel.addProperties("identifier", 2, "Identifier");
+        m_rawfilesBeanModel.addProperties("project_ids", 3, "project_ids");
+        m_rawfilesBeanModel.addProperties("projectsCount", 4, "projectsCount");
+        m_rawfilesBeanModel.addProperties("rawFileName", 5, "rawFileName");
+        m_rawfilesBeanModel.addProperties("rawFileDirectory", 6, "rawFileDirectory");
+        m_rawfilesBeanModel.addProperties("mzdbFileName", 7, "mzdbFileName");
+        m_rawfilesBeanModel.addProperties("mzdbFileDirectory", 8, "mzdbFileDirectory");
+        m_rawfilesBeanModel.addProperties("serializedProperties", 9, "serializedProperties");
+
+        // must be called only one time
+        m_rawfilesBeanModel.firePropertiesChanged();
+    }
+
     public void updateData() {
         m_projectBeanModel.setData(m_resultProjectsList);
+        m_projectStatusMap = new HashMap<>();
+        for (ProjectInfo pi : m_resultProjectsList) {
+            m_projectStatusMap.put("" + pi.getProjectId(), pi.getStatus());
+        }
     }
 
     private void updateRawFiles(ArrayList<DRawFile> resultRawfiles) {
         m_rawfilesBeanModel.setData(resultRawfiles);
+        for (DRawFile file : resultRawfiles) {
+            DRawFile.ProjectStatus ps = DRawFile.ProjectStatus.ACTIVE;
+            int nbArchived = 0;
+            String projectIds = file.getProjectIds();
+            String[] ids = projectIds.split(",");
+            StringBuilder sb = new StringBuilder();
+            sb.append("<html>");
+            Color c;
+            for (String id : ids) {
+                ProjectInfo.Status s = m_projectStatusMap.get(id);
+                if (s == ProjectInfo.Status.ARCHIVED) {
+                    nbArchived++;
+                    c = Color.LIGHT_GRAY;
+                } else {
+                    c = Color.BLACK;
+                }
+                String projectColor = CyclicColorPalette.getHTMLColor(c);
+                sb.append("<font color='").append(projectColor).append("'>" + id + "</font>,");
+            }
+            String toShow = sb.substring(0, sb.length() - 2) + "</html>";
+            file.setProjectIds(toShow);
+
+            if (nbArchived == file.getProjectsCount()) {
+                ps = DRawFile.ProjectStatus.ALL_ARCHIVED;
+            } else if (nbArchived > 0) {
+                ps = DRawFile.ProjectStatus.SOME_ARCHIVED;
+            }
+            file.setProjectStatus(ps);
+        }
     }
 
     @Override
@@ -241,6 +333,58 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
             fr.proline.studio.dam.tasks.DatabaseProjectTask task = new fr.proline.studio.dam.tasks.DatabaseProjectTask(callback);
             task.initLoadRawFilesList(projectIds, resultRawfiles);
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+        }
+    }
+
+    private class StatusRenderer extends DefaultTableCellRenderer {
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            this.setHorizontalTextPosition(JLabel.CENTER);
+            this.setVerticalTextPosition(JLabel.BOTTOM);
+
+            if (value instanceof ProjectInfo.Status) {
+
+                ProjectInfo.Status status = (ProjectInfo.Status) value;
+
+                switch (status) {
+                    case ACTIVE:
+                        this.setIcon(IconManager.getIcon(IconManager.IconType.STATUS_ACTIVE));
+                        this.setToolTipText("ACTIVE");
+                        break;
+                    case ARCHIVED:
+                        this.setIcon(IconManager.getIcon(IconManager.IconType.STATUS_ALL_ACHIVED));
+                        this.setToolTipText("ARCHIVED");
+                        break;
+                }
+            } else if (value instanceof DRawFile.ProjectStatus) {
+                DRawFile.ProjectStatus status = (DRawFile.ProjectStatus) value;
+
+                switch (status) {
+                    case ACTIVE:
+                        this.setIcon(IconManager.getIcon(IconManager.IconType.STATUS_ACTIVE));
+                        this.setToolTipText("ACTIVE");
+                        break;
+                    case SOME_ARCHIVED:
+                        this.setIcon(IconManager.getIcon(IconManager.IconType.STATUS_SOME_ARCHIVED));
+                        this.setToolTipText("SOME ARCHIVED");
+                        break;
+                    case ALL_ARCHIVED:
+                        this.setIcon(IconManager.getIcon(IconManager.IconType.STATUS_ALL_ACHIVED));
+                        this.setToolTipText("ALL ARCHIVED");
+                        break;
+
+                }
+            }
+            this.setHorizontalAlignment(SwingConstants.CENTER);
+            if (isSelected) {
+                this.setBackground(javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground"));
+                this.setForeground(Color.WHITE);
+            } else {
+                this.setBackground(null);
+                this.setForeground(Color.BLACK);
+            }
+            return this;
         }
     }
 }

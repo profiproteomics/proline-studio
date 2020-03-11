@@ -209,7 +209,10 @@ public class IconManager {
         TEST,
         OPTIONS_MORE,
         OPTIONS_LESS,
-        PIN
+        PIN,
+        STATUS_ACTIVE,
+        STATUS_SOME_ARCHIVED,
+        STATUS_ALL_ACHIVED
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private final static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -234,7 +237,7 @@ public class IconManager {
     }
 
     public static ImageIcon getGrayedIcon(IconType iconType) {
-    
+
         ImageIcon grayedIcon = m_grayedIconMap.get(iconType);
         if (grayedIcon == null) {
             String path = getIconFilePath(iconType);
@@ -570,9 +573,9 @@ public class IconManager {
                 return "fr/proline/studio/images/arrow-right.png";
             case ARROW_UP:
                 return "fr/proline/studio/images/arrow-up.png";
-             case ARROW_MOVE_UP:
+            case ARROW_MOVE_UP:
                 return "fr/proline/studio/images/move-up.png";
-              case ARROW_MOVE_DOWN:
+            case ARROW_MOVE_DOWN:
                 return "fr/proline/studio/images/move-down.png";
             case ARROW_INSERT_UP:
                 return "fr/proline/studio/images/insert-up.png";
@@ -692,6 +695,12 @@ public class IconManager {
                 return "fr/proline/studio/images/hammer-minus.png";
             case PIN:
                 return "fr/proline/studio/images/pin.png";
+            case STATUS_ACTIVE:
+                return "fr/proline/studio/images/green.png";
+            case STATUS_SOME_ARCHIVED:
+                return "fr/proline/studio/images/orange.png";
+            case STATUS_ALL_ACHIVED:
+                return "fr/proline/studio/images/grey.png";
         }
 
         return null; // can not happen

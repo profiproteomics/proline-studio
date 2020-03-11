@@ -19,13 +19,13 @@ package fr.proline.studio.dam.tasks.data;
 import java.util.Date;
 
 /**
- * Class Used as template to display all projects and databases size for 
- * Admin dialog
- * 
+ * Class Used as template to display all projects and databases size for Admin
+ * dialog
+ *
  * @author JM235353
  */
 public class ProjectInfo {
-    
+
     private long m_projectId;
     private String m_name;
     private String m_description;
@@ -35,7 +35,11 @@ public class ProjectInfo {
     private String m_properties;
     private Date m_lastDatasetDate;
     private Integer m_rawFilesCount;
+    private Status m_status;
 
+    public enum Status {
+        ACTIVE, ARCHIVED
+    }
 
     public ProjectInfo(long projectId, String name, String description, String properties, String user) {
         m_projectId = projectId;
@@ -43,8 +47,22 @@ public class ProjectInfo {
         m_description = description;
         m_user = user;
         m_properties = properties;
+        setStatus(m_properties);
     }
-    
+
+    private void setStatus(String properties) {
+        if (properties == null || properties.isEmpty()) {
+            m_status = Status.ACTIVE;
+        } else if (properties.contains("\"is_active\":false")) {
+            m_status = Status.ARCHIVED;
+        }
+
+    }
+
+    public Status getStatus() {
+        return m_status;
+    }
+
     public void addDb(String dbname, double size) {
         if (m_dbname == null) {
             m_dbname = dbname;
@@ -56,9 +74,9 @@ public class ProjectInfo {
     }
 
     public Date getLastDatasetDate() {
-      return m_lastDatasetDate;
+        return m_lastDatasetDate;
     }
-    
+
     public void setLastDatasetDate(Date date) {
         m_lastDatasetDate = date;
     }
@@ -66,11 +84,11 @@ public class ProjectInfo {
     public long getProjectId() {
         return m_projectId;
     }
-    
+
     public String getName() {
         return m_name;
     }
-    
+
     public String getDescription() {
         return m_description;
     }
@@ -82,11 +100,11 @@ public class ProjectInfo {
     public String getUser() {
         return m_user;
     }
-    
+
     public double getSize() {
         return m_size;
     }
-    
+
     public String getDBName() {
         return m_dbname;
     }

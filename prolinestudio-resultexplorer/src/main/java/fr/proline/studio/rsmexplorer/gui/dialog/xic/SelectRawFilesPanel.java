@@ -46,7 +46,6 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
@@ -235,7 +234,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
         m_model = new FlatDesignTableModel();
         m_model.setXICDropZone(m_dropZone);
         m_table.setModel(m_model);
-        m_table.getColumnModel().getColumn(FlatDesignTableModel.COLTYPE_ASSOCIATION_SOURCE).setCellRenderer(new LinkAssociationRenderer());
+        //m_table.getColumnModel().getColumn(FlatDesignTableModel.COLTYPE_ASSOCIATION_SOURCE).setCellRenderer(new LinkAssociationRenderer());
         m_table.setColumnsVisibility();
         tableScrollPane.setViewportView(m_table);
 
@@ -328,17 +327,6 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
             setDropMode(DropMode.ON);
             setTransferHandler(m_transferHandler);
             addMouseListener(this);
-            this.getTableHeader().addMouseListener(new MouseAdapter() {
-                public void mouseClicked(MouseEvent event) {
-                    if (SwingUtilities.isRightMouseButton(event)) {//popup 
-                        int col = FlatDesignTable.this.getTableHeader().columnAtPoint(event.getPoint());
-                        int colModel = FlatDesignTable.this.convertColumnIndexToModel(col);
-                        if (col == FlatDesignTableModel.COLTYPE_RAW_FILE) {
-                            cleanRawFileDialog(event.getXOnScreen(), event.getYOnScreen());//popup clean row file
-                        }
-                    }
-                }
-            });
         }
 
         private void setColumnsVisibility() {
@@ -346,6 +334,17 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
             TableColumnExt columnExt = (TableColumnExt) columns.get(FlatDesignTableModel.COLTYPE_RAW_FILE_DIRECTORY);
             if (columnExt != null) {
                 columnExt.setVisible(false);
+            }
+        }
+
+        @Override
+        public TableCellRenderer getCellRenderer(int row, int column) {
+            int columnM = this.convertColumnIndexToModel(column);
+            switch (columnM) {
+                case FlatDesignTableModel.COLTYPE_ASSOCIATION_SOURCE:
+                    return new LinkAssociationRenderer();
+                default:
+                    return super.getCellRenderer(convertRowIndexToModel(row), columnM);
             }
         }
 
@@ -532,11 +531,6 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
         }
 
         @Override
-        public Class getColumnClass(int col) {
-            return String.class;
-        }
-
-        @Override
         public int getRowCount() {
             if (m_dataList == null) {
                 return 0;
@@ -555,10 +549,27 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
         }
 
         @Override
+        public Class<?> getColumnClass(int columnIndex) {
+            switch (columnIndex) {
+                case COLTYPE_GROUP:
+                case COLTYPE_SAMPLE:
+                case COLTYPE_SAMPLE_ANALYSIS:
+                case COLTYPE_RAW_FILE:
+                case COLTYPE_RAW_FILE_DIRECTORY:
+                case COLTYPE_PEAKLIST: {
+                    return String.class;
+                }
+                case COLTYPE_ASSOCIATION_SOURCE: {
+                    return RunInfoData.Status.class;
+                }
+                default:
+                    return null;
+            }
+        }
+
+        @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-
             NodeModelRow nodeModelRow = m_dataList.get(rowIndex);
-
             switch (columnIndex) {
                 case COLTYPE_GROUP: {
                     return nodeModelRow.m_group.toString();
@@ -582,7 +593,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
                             File f = infoD.getRawFileOnDisk(); //USER_DEFINED
                             //need not to test
                             directory = Paths.get(f.getPath()).getParent().toString();
-                        }else if (infoD.getSelectedRawFile()!=null){//LAST_DEFINED
+                        } else if (infoD.getSelectedRawFile() != null) {//LAST_DEFINED
                             directory = infoD.getSelectedRawFile().getRawFileDirectory();
                         }
                     }

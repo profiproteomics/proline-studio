@@ -38,7 +38,7 @@ public class ProjectInfo {
     private Status m_status;
 
     public enum Status {
-        ACTIVE, ARCHIVED
+        ACTIVE, ARCHIVED, INACTIVE
     }
 
     public ProjectInfo(long projectId, String name, String description, String properties, String user) {
@@ -54,7 +54,11 @@ public class ProjectInfo {
         if (properties == null || properties.isEmpty()) {
             m_status = Status.ACTIVE;
         } else if (properties.contains("\"is_active\":false")) {
-            m_status = Status.ARCHIVED;
+            if (properties.contains("\"archive_date\":")) {
+                m_status = Status.ARCHIVED;
+            } else {
+                m_status = Status.INACTIVE;
+            }
         }
 
     }

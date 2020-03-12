@@ -281,8 +281,17 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
     }
 
     private void updateRawFiles(ArrayList<DRawFile> resultRawfiles) {
-        m_rawfilesBeanModel.setData(resultRawfiles);
+        ArrayList<String> idList = new ArrayList();
+        ArrayList<DRawFile> fileList = new ArrayList<>();
+
         for (DRawFile file : resultRawfiles) {
+            String identifier = file.getIdentifier();
+            if (idList.contains(identifier)) {
+                continue;
+            } else {
+                idList.add(identifier);
+                fileList.add(file);
+            }
             DRawFile.ProjectStatus ps = DRawFile.ProjectStatus.ACTIVE;
             int nbArchived = 0;
             String projectIds = file.getProjectIds();
@@ -291,12 +300,19 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
             sb.append("<html>");
             Color c;
             for (String id : ids) {
-                ProjectInfo.Status s = m_projectStatusMap.get(id);
-                if (s == ProjectInfo.Status.ARCHIVED) {
-                    nbArchived++;
-                    c = Color.GRAY;
-                } else {
-                    c = Color.BLACK;
+                ProjectInfo.Status status = m_projectStatusMap.get(id);
+                switch (status) {
+                    case ARCHIVED:
+                        nbArchived++;
+                        c = Color.GRAY;
+                        break;
+                    case INACTIVE:
+                        nbArchived++;
+                        c = Color.BLUE;
+                        break;
+                    default:
+                        c = Color.BLACK;
+                        break;
                 }
                 String projectColor = CyclicColorPalette.getHTMLColor(c);
                 sb.append("<font color='").append(projectColor).append("'>" + id + "</font>,");
@@ -311,6 +327,8 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
             }
             file.setProjectStatus(ps);
         }
+
+        m_rawfilesBeanModel.setData(fileList);
     }
 
     @Override
@@ -348,8 +366,9 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
     private class StatusRenderer extends DefaultTableCellRenderer {
 
         String active = "<html><font color='" + CyclicColorPalette.getHTMLColor(Color.green) + "'>&#x2587;&nbsp;</font></html>";
+        String archived = "<html><font color='" + CyclicColorPalette.getHTMLColor(Color.blue) + "'>&#x2587;&nbsp;</font></html>";
         String some_archived = "<html><font color='" + CyclicColorPalette.getHTMLColor(Color.orange) + "'>&#x2587;&nbsp;</font></html>";
-        String all_archived = "<html><font color='" + CyclicColorPalette.getHTMLColor(Color.gray) + "'>&#x2587;&nbsp;</font></html>";
+        String inactive = "<html><font color='" + CyclicColorPalette.getHTMLColor(Color.gray) + "'>&#x2587;&nbsp;</font></html>";
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -363,11 +382,15 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
                 switch (status) {
                     case ACTIVE:
                         this.setText(active);
-                        this.setToolTipText("ACTIVE");
+                        this.setToolTipText("Active");
                         break;
                     case ARCHIVED:
-                        this.setText(all_archived);
-                        this.setToolTipText("ARCHIVED");
+                        this.setText(archived);
+                        this.setToolTipText("Archived");
+                        break;
+                    case INACTIVE:
+                        this.setText(inactive);
+                        this.setToolTipText("Inactive");
                         break;
                 }
             } else if (value instanceof DRawFile.ProjectStatus) {
@@ -376,15 +399,15 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
                 switch (status) {
                     case ACTIVE:
                         this.setText(active);
-                        this.setToolTipText("ACTIVE");
+                        this.setToolTipText("Active");
                         break;
                     case SOME_ARCHIVED:
                         this.setText(some_archived);
-                        this.setToolTipText("SOME ARCHIVED");
+                        this.setToolTipText("Some Archived");
                         break;
                     case ALL_ARCHIVED:
-                        this.setText(all_archived);
-                        this.setToolTipText("ALL ARCHIVED");
+                        this.setText(inactive);
+                        this.setToolTipText("All archived/Inactive");
                         break;
 
                 }

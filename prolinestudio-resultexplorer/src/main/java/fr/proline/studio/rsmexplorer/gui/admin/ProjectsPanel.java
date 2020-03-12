@@ -31,7 +31,6 @@ import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.utils.CyclicColorPalette;
-import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -92,85 +91,28 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
 
     private JPanel createInternalPanel() {
         JPanel internalPanel = new JPanel(new BorderLayout());
-
-        initGenericModel();//add desired Table columns order
-        initRawFileModel();
         internalPanel.setBorder(BorderFactory.createTitledBorder("Projects"));
 
         JScrollPane projectTableScrollPane = new JScrollPane();
-        m_projectsTable = new DecoratedMarkerTable() {
-
-            @Override
-            public TablePopupMenu initPopupMenu() {
-                return new TablePopupMenu();
-            }
-
-            @Override
-            public void prepostPopupMenu() {
-            }
-
-            @Override
-            public void addTableModelListener(TableModelListener l) {
-                getModel().addTableModelListener(l);
-            }
-
-            @Override
-            public TableCellRenderer getCellRenderer(int row, int column) {
-                int columnIndex = this.convertColumnIndexToModel(column);
-                switch (columnIndex) {
-                    case 0:
-                        TableColumn column0;
-                        column0 = this.getColumnModel().getColumn(columnIndex);
-                        column0.setPreferredWidth(30);
-                        return new StatusRenderer();
-                    default:
-                        return super.getCellRenderer(convertRowIndexToModel(row), columnIndex);
-                }
-            }
-        };
+        initProjectsModel();//add desired Table columns order
+        createProjectsTable();
         projectTableScrollPane.setViewportView(m_projectsTable);
         m_projectsTable.setFillsViewportHeight(true);
         m_projectsTable.setModel(m_projectsModel);
         m_projectsTable.getSelectionModel().addListSelectionListener(this);
-        JToolBar toolbar = initToolbar();
+
+        JToolBar toolbar = initTopToolbar();
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.add(projectTableScrollPane, BorderLayout.CENTER);
         topPanel.add(toolbar, BorderLayout.WEST);
-        m_rawfilesTable = new DecoratedMarkerTable() {
-            @Override
-            public void addTableModelListener(TableModelListener l) {
-                getModel().addTableModelListener(l);
-            }
 
-            @Override
-            public TablePopupMenu initPopupMenu() {
-                return new TablePopupMenu();
-            }
-
-            @Override
-            public void prepostPopupMenu() {
-
-            }
-
-            @Override
-            public TableCellRenderer getCellRenderer(int row, int column) {
-                int columnIndex = this.convertColumnIndexToModel(column);
-                switch (columnIndex) {
-                    case 0:
-                        TableColumn column0;
-                        column0 = this.getColumnModel().getColumn(columnIndex);
-                        column0.setPreferredWidth(30);
-                        return new StatusRenderer();
-                    default:
-                        return super.getCellRenderer(convertRowIndexToModel(row), columnIndex);
-                }
-            }
-        };
-
+        initRawFileModel();
+        createRawFileTable();
         JScrollPane rawFilesScrollPane = new JScrollPane();
         rawFilesScrollPane.setViewportView(m_rawfilesTable);
         m_rawfilesTable.setFillsViewportHeight(true);
         m_rawfilesTable.setModel(m_rawfilesModel);
+
         JToolBar bottomToolbar = initBottomToolbar();
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.add(rawFilesScrollPane, BorderLayout.CENTER);
@@ -179,33 +121,15 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         splitPane.setTopComponent(topPanel);
         splitPane.setBottomComponent(bottomPanel);
-
         splitPane.setDividerLocation(150);
-
         internalPanel.add(splitPane, BorderLayout.CENTER);
-        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
 
-            @Override
-            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                if (success) {
-                    updateData();
-                }
-            }
-
-        };
-
-        fr.proline.studio.dam.tasks.DatabaseProjectTask task = new fr.proline.studio.dam.tasks.DatabaseProjectTask(callback);
-        task.initLoadProjectsList(m_resultProjectsList);
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+        loadProjectsData();
 
         return internalPanel;
     }
 
-    private JToolBar initToolbar() {
+    private JToolBar initTopToolbar() {
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
@@ -232,7 +156,93 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         return toolbar;
     }
 
-    private void initGenericModel() {
+    private void createProjectsTable() {
+        m_projectsTable = new DecoratedMarkerTable() {
+
+            @Override
+            public TablePopupMenu initPopupMenu() {
+                return new TablePopupMenu();
+            }
+
+            @Override
+            public void prepostPopupMenu() {
+            }
+
+            @Override
+            public void addTableModelListener(TableModelListener l) {
+                getModel().addTableModelListener(l);
+            }
+
+            @Override
+            public TableCellRenderer getCellRenderer(int row, int columnIndex) {
+                //don't use convertColumnIndexToModel, will have class cast error in CellRenderer
+                switch (columnIndex) {
+                    case 0:
+                        TableColumn column0;
+                        column0 = this.getColumnModel().getColumn(columnIndex);
+                        column0.setPreferredWidth(30);
+                        return new StatusRenderer();
+                    default:
+                        return super.getCellRenderer(row, columnIndex);
+                }
+            }
+        };
+    }
+
+    private void createRawFileTable() {
+        m_rawfilesTable = new DecoratedMarkerTable() {
+            @Override
+            public void addTableModelListener(TableModelListener l) {
+                getModel().addTableModelListener(l);
+            }
+
+            @Override
+            public TablePopupMenu initPopupMenu() {
+                return new TablePopupMenu();
+            }
+
+            @Override
+            public void prepostPopupMenu() {
+
+            }
+
+            @Override
+            public TableCellRenderer getCellRenderer(int row, int columnIndex) {
+                switch (columnIndex) {
+                    case 0:
+                        TableColumn column0;
+                        column0 = this.getColumnModel().getColumn(columnIndex);
+                        column0.setPreferredWidth(30);
+                        return new StatusRenderer();
+                    default:
+                        return super.getCellRenderer(row, columnIndex);
+                }
+            }
+        };
+    }
+
+    private void loadProjectsData() {
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                if (success) {
+                    updateData();
+                }
+            }
+
+        };
+
+        fr.proline.studio.dam.tasks.DatabaseProjectTask task = new fr.proline.studio.dam.tasks.DatabaseProjectTask(callback);
+        task.initLoadProjectsList(m_resultProjectsList);
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+    }
+
+    private void initProjectsModel() {
         m_projectBeanModel.addProperties("status", 0, "Status"); //(properties name, order, column name)
         m_projectBeanModel.addProperties("projectId", 1, "Id");
         m_projectBeanModel.addProperties("name", 2, "Project");
@@ -247,14 +257,13 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
     }
 
     private void initRawFileModel() {
-
         m_rawfilesBeanModel.addProperties("projectStatus", 0, "Status");
         m_rawfilesBeanModel.addProperties("creationTimestamp", 1, "CreationTimestamp");
         m_rawfilesBeanModel.addProperties("identifier", 2, "Identifier");
-        m_rawfilesBeanModel.addProperties("project_ids", 3, "project_ids");
-        m_rawfilesBeanModel.addProperties("projectsCount", 4, "projectsCount");
-        m_rawfilesBeanModel.addProperties("rawFileName", 5, "rawFileName");
-        m_rawfilesBeanModel.addProperties("rawFileDirectory", 6, "rawFileDirectory");
+        m_rawfilesBeanModel.addProperties("rawFileName", 3, "rawFileName");
+        m_rawfilesBeanModel.addProperties("rawFileDirectory", 4, "rawFileDirectory");
+        m_rawfilesBeanModel.addProperties("project_ids", 5, "project_ids");
+        m_rawfilesBeanModel.addProperties("projectsCount", 6, "projectsCount");
         m_rawfilesBeanModel.addProperties("mzdbFileName", 7, "mzdbFileName");
         m_rawfilesBeanModel.addProperties("mzdbFileDirectory", 8, "mzdbFileDirectory");
         m_rawfilesBeanModel.addProperties("serializedProperties", 9, "serializedProperties");
@@ -263,7 +272,7 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         m_rawfilesBeanModel.firePropertiesChanged();
     }
 
-    public void updateData() {
+    private void updateData() {
         m_projectBeanModel.setData(m_resultProjectsList);
         m_projectStatusMap = new HashMap<>();
         for (ProjectInfo pi : m_resultProjectsList) {
@@ -285,7 +294,7 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
                 ProjectInfo.Status s = m_projectStatusMap.get(id);
                 if (s == ProjectInfo.Status.ARCHIVED) {
                     nbArchived++;
-                    c = Color.LIGHT_GRAY;
+                    c = Color.GRAY;
                 } else {
                     c = Color.BLACK;
                 }
@@ -338,6 +347,10 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
 
     private class StatusRenderer extends DefaultTableCellRenderer {
 
+        String active = "<html><font color='" + CyclicColorPalette.getHTMLColor(Color.green) + "'>&#x2587;&nbsp;</font></html>";
+        String some_archived = "<html><font color='" + CyclicColorPalette.getHTMLColor(Color.orange) + "'>&#x2587;&nbsp;</font></html>";
+        String all_archived = "<html><font color='" + CyclicColorPalette.getHTMLColor(Color.gray) + "'>&#x2587;&nbsp;</font></html>";
+
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             this.setHorizontalTextPosition(JLabel.CENTER);
@@ -349,11 +362,11 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
 
                 switch (status) {
                     case ACTIVE:
-                        this.setIcon(IconManager.getIcon(IconManager.IconType.STATUS_ACTIVE));
+                        this.setText(active);
                         this.setToolTipText("ACTIVE");
                         break;
                     case ARCHIVED:
-                        this.setIcon(IconManager.getIcon(IconManager.IconType.STATUS_ALL_ACHIVED));
+                        this.setText(all_archived);
                         this.setToolTipText("ARCHIVED");
                         break;
                 }
@@ -362,15 +375,15 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
 
                 switch (status) {
                     case ACTIVE:
-                        this.setIcon(IconManager.getIcon(IconManager.IconType.STATUS_ACTIVE));
+                        this.setText(active);
                         this.setToolTipText("ACTIVE");
                         break;
                     case SOME_ARCHIVED:
-                        this.setIcon(IconManager.getIcon(IconManager.IconType.STATUS_SOME_ARCHIVED));
+                        this.setText(some_archived);
                         this.setToolTipText("SOME ARCHIVED");
                         break;
                     case ALL_ARCHIVED:
-                        this.setIcon(IconManager.getIcon(IconManager.IconType.STATUS_ALL_ACHIVED));
+                        this.setText(all_archived);
                         this.setToolTipText("ALL ARCHIVED");
                         break;
 

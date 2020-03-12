@@ -26,6 +26,7 @@ import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.dpm.task.util.JMSMessageUtil;
 import fr.proline.studio.gui.InfoDialog;
+import fr.proline.studio.utils.StudioExceptions;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -280,10 +281,7 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
 
     private void showError(TaskError taskErr) {
         if (taskErr != null) {
-            if (taskErr != null) {
-                InfoDialog dialog = new InfoDialog(null, InfoDialog.InfoType.WARNING, taskErr.getErrorTitle(), taskErr.getErrorText());
-                dialog.setVisible(true);
-            }
+            StudioExceptions.notify("JMS Task Error", new Exception(taskErr.getErrorTitle() + taskErr.getErrorText()));
         }
     }
 

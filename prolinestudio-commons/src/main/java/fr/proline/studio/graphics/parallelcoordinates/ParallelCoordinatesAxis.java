@@ -570,12 +570,12 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
     }
 
     @Override
-    public boolean inside(int x, int y) {
+    public boolean insideXY(int x, int y) {
         return true;
     }
 
     @Override
-    public void move(int deltaX, int deltaY) {
+    public void moveDXY(int deltaX, int deltaY) {
 
         if (deltaY != 0) {
             double deltaMinHandle = ((double) AXIS_WIDTH + PAD_HANDLE) / m_heightTotal;

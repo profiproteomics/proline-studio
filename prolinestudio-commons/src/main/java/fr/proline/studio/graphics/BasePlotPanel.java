@@ -18,6 +18,7 @@ package fr.proline.studio.graphics;
 
 import fr.proline.studio.graphics.Axis.EnumXInterface;
 import fr.proline.studio.graphics.Axis.EnumYInterface;
+import fr.proline.studio.graphics.core.PlotToolbarListenerInterface;
 import fr.proline.studio.graphics.cursor.AbstractCursor;
 import fr.proline.studio.graphics.measurement.AbstractMeasurement;
 import fr.proline.studio.parameter.ParameterList;
@@ -67,8 +68,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author JM235353
  */
-public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, EnumXInterface, EnumYInterface, SettingsInterface {
+public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, EnumXInterface, EnumYInterface, SettingsInterface, MoveableInterface {
 
+
+
+    public enum MOUSE_MODE {
+        NORMAL_MODE,
+        SELECTION_MODE
+    }
+    
     private static final Logger m_logger = LoggerFactory.getLogger(BasePlotPanel.class);
 
     protected static final Color PANEL_BACKGROUND_COLOR = UIManager.getColor("Panel.background");
@@ -106,9 +114,12 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     private boolean m_dataLocked = false;
     protected boolean m_drawCursor = false;
 
-    private PlotToolbarListener m_plotToolbarListener = null;
+    
     protected List<PlotPanelListener> m_listeners = new ArrayList<>();
 
+        
+    private PlotToolbarListenerInterface m_plotToolbarListener = null;
+    
     protected Rectangle m_plotArea = new Rectangle();
 
     // cursor, show coord.
@@ -141,6 +152,8 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
      */
     protected boolean m_isEnumAxisUpdated = false;
 
+    private MOUSE_MODE m_mouseMode = MOUSE_MODE.NORMAL_MODE;
+    
     public BasePlotPanel() {
         formatE.applyPattern("0.#####E0");
         addMouseListener(this);
@@ -150,6 +163,10 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         m_plots = new ArrayList();
     }
 
+    public void setMouseMode(MOUSE_MODE mouseMode) {
+        m_mouseMode = mouseMode;
+    }
+    
     public void setPlotTitle(String title) {
         m_plotTitle = title;
     }
@@ -158,7 +175,11 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         return m_plotTitle;
     }
 
-    public void enableButton(PlotToolbarListener.BUTTONS button, boolean v) {
+    public void setPlotToolbarListener(PlotToolbarListenerInterface plotToolbarListener) {
+        m_plotToolbarListener = plotToolbarListener;
+    }
+    
+    public void enableButton(PlotToolbarListenerInterface.BUTTONS button, boolean v) {
         if (m_plotToolbarListener != null) {
             m_plotToolbarListener.enable(button, v);
         }
@@ -703,25 +724,36 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             }
 
             if (SwingUtilities.isLeftMouseButton(e)) {
-                // check if we are over a moveable object
-                MoveableInterface movable = null;
-                PlotBaseAbstract plotWithMovable = null;
-                for (PlotBaseAbstract plot : m_plots) {
-                    movable = plot.getOverMovable(x, y);
-                    if (movable != null) {
-                        plotWithMovable = plot;
-                        break;
-                    }
-                }
-                if (movable != null) {
-                    m_moveGesture.startMoving(x, y, movable);
-                    if (movable instanceof AbstractCursor) {
-                        plotWithMovable.selectCursor((AbstractCursor) movable);
-                    }
-                    setCursor(new Cursor(Cursor.MOVE_CURSOR));
-                } else {
+                
+                // Action according to mode
+                if (m_mouseMode == MOUSE_MODE.SELECTION_MODE) {
                     m_selectionGesture.startSelection(x, y);
+                } else {
+                    // check if we are over a moveable object
+                    MoveableInterface movable = null;
+                    PlotBaseAbstract plotWithMovable = null;
+                    for (PlotBaseAbstract plot : m_plots) {
+                        movable = plot.getOverMovable(x, y);
+                        if (movable != null) {
+                            plotWithMovable = plot;
+                            break;
+                        }
+                    }
+                    
+                    if (movable == null) {
+                        // we move the panel itself !
+                        movable = this;
+                    }
+                    
+                    if (movable != null) {
+                        m_moveGesture.startMoving(x, y, movable);
+                        if (movable instanceof AbstractCursor) {
+                            plotWithMovable.selectCursor((AbstractCursor) movable);
+                        }
+                        setCursor(new Cursor(Cursor.MOVE_CURSOR));
+                    }
                 }
+                
 
             } else if (SwingUtilities.isRightMouseButton(e)) {
                 m_zoomGesture.startZooming(x, y);
@@ -880,6 +912,46 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         repaint();
     }
 
+    public void zoomIn() {
+        zoom(true);
+    }
+    public void zoomOut() {
+        zoom(false);
+    }
+    private void zoom(boolean zoomIn) {
+        if (m_plots == null || m_plots.isEmpty()) {
+            return;
+        }
+
+        int rotation = (zoomIn) ? -1 : 1;
+
+        double oldMinX = m_xAxis.getMinValue();
+        double oldMaxX = m_xAxis.getMaxValue();
+        double oldMinY = m_yAxis.getMinValue();
+        double oldMaxY = m_yAxis.getMaxValue();
+
+        double factor = 0.20;
+        double xValue = (oldMinX+oldMaxX)/2;
+        double yValue = (oldMinY+oldMaxY)/2;
+        double newXmin = oldMinX + (oldMinX - xValue) * factor * rotation;
+        double newXmax = oldMaxX - (xValue - oldMaxX) * factor * rotation;
+        double newYmin = oldMinY + (oldMinY - yValue) * factor * rotation;
+        double newYmax = oldMaxY - (yValue - oldMaxY) * factor * rotation;
+        m_xAxis.setRange(newXmin, newXmax);
+        m_yAxis.setRange(newYmin, newYmax);
+        repaintUpdateDoubleBuffer();
+
+        fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY, oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue());
+    
+    }
+    
+    public void viewAll() {
+        for (PlotBaseAbstract plot : m_plots) {
+            updateAxis(plot);
+        }
+        repaint();
+    }
+    
     public void addListener(PlotPanelListener listener) {
         m_listeners.add(listener);
     }
@@ -974,15 +1046,18 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             return;
         }
 
-        double xValue = m_xAxis.pixelToValue(e.getX());
-        double yValue = m_yAxis.pixelToValue(e.getY());
-        boolean isInGridArea = (e.getX() <= m_plotArea.width + m_plotArea.x && e.getX() >= m_plotArea.x && e.getY() >= m_plotArea.y && e.getY() <= m_plotArea.height + m_plotArea.y);
+        int mouseX = e.getX();
+        int mouseY = e.getY();
+        
+        double xValue = m_xAxis.pixelToValue(mouseX);
+        double yValue = m_yAxis.pixelToValue(mouseY);
+        boolean isInGridArea = (mouseX <= m_plotArea.width + m_plotArea.x && mouseX >= m_plotArea.x && mouseY >= m_plotArea.y && mouseY <= m_plotArea.height + m_plotArea.y);
         if (!isInGridArea) {
             m_coordX = "";
             m_coordY = "";
-            if (m_xAxis.inside(e.getX(), e.getY())) {
+            if (m_xAxis.inside(mouseX, mouseY)) {
                 setCursor(new Cursor(Cursor.W_RESIZE_CURSOR));
-            } else if (m_yAxis.inside(e.getX(), e.getY())) {
+            } else if (m_yAxis.inside(mouseX, mouseY)) {
                 setCursor(new Cursor(Cursor.N_RESIZE_CURSOR));
             } else {
                 setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
@@ -1001,8 +1076,8 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                 } else {
                     m_coordY = format.format(yValue);
                 }
-                m_posx = e.getX();
-                m_posy = e.getY();
+                m_posx = mouseX;
+                m_posy = mouseY;
             }
         }
 
@@ -1010,11 +1085,11 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         boolean repaintNeeded = false;
         for (PlotBaseAbstract plot : m_plots) {
             
-            boolean isPlotSelected = plot.isMouseOnPlot(xValue, yValue);
+            boolean isPlotSelected = isInGridArea && plot.isMouseOnPlot(xValue, yValue);
             //by mouseMoved, if isPlotSelected, then plot paint a marker effet
             repaintNeeded |= plot.setIsPaintMarker(isPlotSelected);
 
-            String toolTipForPlot = plot.getToolTipText(xValue, yValue);
+            String toolTipForPlot = isInGridArea ? plot.getToolTipText(xValue, yValue) : null;
 
             if (toolTipForPlot != null && !toolTipForPlot.isEmpty()) {
                 if (nbPlotTooltip == 0) {
@@ -1091,9 +1166,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         return popup;
     }
 
-    public void setPlotToolbarListener(PlotToolbarListener plotToolbarListener) {
-        m_plotToolbarListener = plotToolbarListener;
-    }
+
 
     @Override
     public String getEnumValueX(int index, boolean fromData) {
@@ -1243,7 +1316,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                 m_plotHorizontalGrid = !m_plotHorizontalGrid;
             }
             if (m_plotToolbarListener != null) {
-                m_plotToolbarListener.stateModified(PlotToolbarListener.BUTTONS.GRID);
+                m_plotToolbarListener.stateModified(PlotToolbarListenerInterface.BUTTONS.GRID);
             }
             m_updateDoubleBuffer = true;
             repaint();
@@ -1292,18 +1365,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
     }
 
-    public interface PlotToolbarListener {
 
-        public enum BUTTONS {
-            GRID,
-            EXPORT_SELECTION,
-            IMPORT_SELECTION
-        }
-
-        public void stateModified(BUTTONS b);
-
-        public void enable(BUTTONS b, boolean v);
-    }
 
     public class FPSUtility {
 
@@ -1348,5 +1410,46 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         int y1 = yAxis.valueToPixel(yAxis.getMaxValue());
         int y2 = yAxis.valueToPixel(yAxis.getMinValue());
         return (x >= x1) && (x <= x2) && (y >= y1) && (y <= y2);
+    }
+    
+    @Override
+    public boolean isMoveable() {
+        return true;
+    }
+
+    @Override
+    public void snapToData(boolean isCtrlOrShiftDown) {
+        // do nothing
+    }
+
+    @Override
+    public void setSelected(boolean s, boolean isCtrlOrShiftDown) {
+        // do nothing
+    }
+    
+    @Override
+    public boolean insideXY(int x, int y) {
+        return insidePlotArea(x, y);
+    }
+    
+    @Override
+    public void moveDXY(int deltaX, int deltaY) {
+        
+        double oldMinX = m_xAxis.getMinValue();
+        double oldMaxX = m_xAxis.getMaxValue();
+        double oldMinY = m_yAxis.getMinValue();
+        double oldMaxY = m_yAxis.getMaxValue();
+        
+        double deltaValueX = m_xAxis.deltaPixelToDeltaValue(deltaX);
+        m_xAxis.setRange(m_xAxis.getMinValue() - deltaValueX, m_xAxis.getMaxValue() - deltaValueX);
+        
+        double deltaValueY = m_yAxis.deltaPixelToDeltaValue(deltaY);
+        m_yAxis.setRange(m_yAxis.getMinValue() - deltaValueY, m_yAxis.getMaxValue() - deltaValueY);
+        
+        fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY, oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue());
+    
+        m_updateDoubleBuffer = true;
+        repaint();
+
     }
 }

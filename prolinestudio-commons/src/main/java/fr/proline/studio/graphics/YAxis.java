@@ -498,5 +498,12 @@ public class YAxis extends Axis {
         }
 
     }
+    
+    @Override
+    public double deltaPixelToDeltaValue(int deltaPixel) {
+        double value1 = pixelToValue(m_height/2);
+        double value2 = pixelToValue(m_height/2+deltaPixel);
+        return value2-value1;
+    }
 
 }

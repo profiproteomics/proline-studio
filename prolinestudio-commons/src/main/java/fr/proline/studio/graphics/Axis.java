@@ -340,6 +340,8 @@ public abstract class Axis {
     public abstract int valueToPixel(double v);
 
     public abstract double pixelToValue(int pixel);
+    
+    public abstract double deltaPixelToDeltaValue(int deltaPixel);
 
     public double getMinValue() {
         return m_minValue;

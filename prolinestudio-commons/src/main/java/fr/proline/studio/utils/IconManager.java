@@ -183,6 +183,8 @@ public class IconManager {
         NAVIGATE,
         SELECT,
         ZOOM_FIT,
+        ZOOM_IN,
+        ZOOM_OUT,
         ZOOM_ALL,
         CONTROL_PLAY,
         CONTROL_PAUSE,
@@ -209,7 +211,10 @@ public class IconManager {
         TEST,
         OPTIONS_MORE,
         OPTIONS_LESS,
-        PIN
+        PIN,
+        MOUSE_POINTER,
+        MOUSE_SELECT,
+        EXPAND
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private final static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -638,6 +643,10 @@ public class IconManager {
                 return "fr/proline/studio/images/select.png";
             case ZOOM_FIT:
                 return "fr/proline/studio/images/magnifier-zoom-fit.png";
+            case ZOOM_OUT:
+                return "fr/proline/studio/images/magnifier-zoom-out.png";
+            case ZOOM_IN:
+                return "fr/proline/studio/images/magnifier-zoom-in.png";
             case ZOOM_ALL:
                 return "fr/proline/studio/images/magnifier-zoom-all.png";
             case CONTROL_PLAY:
@@ -692,6 +701,12 @@ public class IconManager {
                 return "fr/proline/studio/images/hammer-minus.png";
             case PIN:
                 return "fr/proline/studio/images/pin.png";
+            case MOUSE_POINTER:
+                return "fr/proline/studio/images/mouse-pointer.png";
+            case MOUSE_SELECT:
+                return "fr/proline/studio/images/layer-select.png";
+            case EXPAND:
+                return "fr/proline/studio/images/expand.png";
         }
 
         return null; // can not happen

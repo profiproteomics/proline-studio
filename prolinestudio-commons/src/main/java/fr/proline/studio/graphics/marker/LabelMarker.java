@@ -300,7 +300,7 @@ public class LabelMarker extends AbstractMarker implements MoveableInterface {
     private boolean m_firstPaint = true;
 
     @Override
-    public boolean inside(int x, int y) {
+    public boolean insideXY(int x, int y) {
         if (m_labelCoordinates == null) {
             return false;
         }
@@ -313,7 +313,7 @@ public class LabelMarker extends AbstractMarker implements MoveableInterface {
     }
 
     @Override
-    public void move(int deltaX, int deltaY) {
+    public void moveDXY(int deltaX, int deltaY) {
         m_labelCoordinates.setPixelPosition(m_plotPanel, m_labelCoordinates.getPixelX(m_plotPanel)+deltaX, m_labelCoordinates.getPixelY(m_plotPanel)+deltaY);
     }
 

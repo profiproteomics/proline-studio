@@ -16,7 +16,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui;
 
-import fr.proline.studio.graphics.BaseGraphicsPanel;
+import fr.proline.studio.graphics.MonoGraphicsPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
@@ -26,7 +26,7 @@ import java.awt.event.ActionListener;
  *
  * @author JM235353
  */
-public class GraphicsPanel extends BaseGraphicsPanel implements DataBoxPanelInterface {
+public class GraphicsPanel extends MonoGraphicsPanel implements DataBoxPanelInterface {
 
     
     private AbstractDataBox m_dataBox;

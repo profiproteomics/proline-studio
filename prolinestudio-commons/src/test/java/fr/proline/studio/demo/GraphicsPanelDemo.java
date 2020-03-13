@@ -16,7 +16,7 @@
  */
 package fr.proline.studio.demo;
 
-import fr.proline.studio.graphics.BaseGraphicsPanel;
+import fr.proline.studio.graphics.MonoGraphicsPanel;
 import fr.proline.studio.sampledata.Sample;
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
@@ -32,11 +32,11 @@ import org.openide.util.Exceptions;
  */
 public class GraphicsPanelDemo extends JFrame {
 
-   private BaseGraphicsPanel graphicsPanel;
+   private MonoGraphicsPanel graphicsPanel;
 
    public GraphicsPanelDemo() {
       super("Graphics Panel demo");
-      graphicsPanel = new BaseGraphicsPanel(true);
+      graphicsPanel = new MonoGraphicsPanel(true);
       Sample sample = new Sample(3000);
       graphicsPanel.setData(sample, null);
       getContentPane().setLayout(new BorderLayout());

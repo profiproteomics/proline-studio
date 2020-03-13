@@ -71,7 +71,7 @@ public class HorizontalCursor extends AbstractCursor {
     }
 
     @Override
-    public boolean inside(int x, int y) {
+    public boolean insideXY(int x, int y) {
         if (!m_selectable) {
             return false;
         }
@@ -79,7 +79,7 @@ public class HorizontalCursor extends AbstractCursor {
     }
 
     @Override
-    public void move(int deltaX, int deltaY) {
+    public void moveDXY(int deltaX, int deltaY) {
         m_positionY += deltaY;
         YAxis yAxis = m_plotPanel.getYAxis();
         

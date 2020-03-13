@@ -627,5 +627,12 @@ public class XAxis extends Axis {
         }
 
     }
+    
+    @Override
+    public double deltaPixelToDeltaValue(int deltaPixel) {
+        double value1 = pixelToValue(m_width/2);
+        double value2 = pixelToValue(m_width/2+deltaPixel);
+        return value2-value1;
+    }
 
 }

@@ -40,6 +40,7 @@ import java.util.HashMap;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.graphics.core.PlotToolbarListenerInterface;
 
 /**
  *
@@ -111,9 +112,9 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
         m_yTranslationParameter.setExternalActionListener(repaintAction);
 
         // disable selection buttons
-        m_plotPanel.enableButton(BasePlotPanel.PlotToolbarListener.BUTTONS.GRID, false);
-        m_plotPanel.enableButton(BasePlotPanel.PlotToolbarListener.BUTTONS.EXPORT_SELECTION, false);
-        m_plotPanel.enableButton(BasePlotPanel.PlotToolbarListener.BUTTONS.IMPORT_SELECTION, false);
+        m_plotPanel.enableButton(PlotToolbarListenerInterface.BUTTONS.GRID, false);
+        m_plotPanel.enableButton(PlotToolbarListenerInterface.BUTTONS.EXPORT_SELECTION, false);
+        m_plotPanel.enableButton(PlotToolbarListenerInterface.BUTTONS.IMPORT_SELECTION, false);
     }
 
     @Override

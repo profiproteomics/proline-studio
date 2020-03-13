@@ -41,7 +41,7 @@ public class MoveGesture {
     }
     
     public void move(int x, int y) {
-        m_moveableObject.move(x-m_x, y-m_y);
+        m_moveableObject.moveDXY(x-m_x, y-m_y);
         m_x = x;
         m_y = y;
     }

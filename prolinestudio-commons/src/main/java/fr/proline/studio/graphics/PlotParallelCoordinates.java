@@ -36,6 +36,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JSpinner;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.graphics.core.PlotToolbarListenerInterface;
 
 /**
  *
@@ -96,7 +97,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         m_parameterListArray.add(colorParameteList);
         
          // disable selection buttons
-        m_plotPanel.enableButton(BasePlotPanel.PlotToolbarListener.BUTTONS.GRID, false);
+        m_plotPanel.enableButton(PlotToolbarListenerInterface.BUTTONS.GRID, false);
         //m_plotPanel.enableButton(BasePlotPanel.PlotToolbarListener.BUTTONS.IMPORT_SELECTION, false);
     }
 

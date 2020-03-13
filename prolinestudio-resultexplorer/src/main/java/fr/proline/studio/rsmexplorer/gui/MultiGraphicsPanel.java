@@ -23,14 +23,12 @@ import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.parameter.DefaultParameterDialog;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.utils.IconManager;
-import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -47,7 +45,6 @@ import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import org.openide.windows.WindowManager;
-import fr.proline.studio.graphics.BasePlotPanel.PlotToolbarListener;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.SecondAxisTableModelInterface;
 import fr.proline.studio.graphics.DoubleYAxisPlotPanel;
@@ -55,6 +52,7 @@ import static fr.proline.studio.graphics.PlotBaseAbstract.COL_X_ID;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_Y_ID;
 import fr.proline.studio.graphics.XAxis;
 import fr.proline.studio.graphics.YAxis;
+import fr.proline.studio.graphics.core.GraphicsToolbarPanel;
 import fr.proline.studio.pattern.DataboxMultiGraphics;
 import java.awt.Color;
 import org.slf4j.Logger;
@@ -69,13 +67,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author JM235353
  */
-public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelInterface, PlotToolbarListener {
+public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxPanelInterface {
 
     private static final Logger m_logger = LoggerFactory.getLogger(MultiGraphicsPanel.class);
     protected AbstractDataBox m_dataBox;
 
-    protected BasePlotPanel m_plotPanel;
-    private final boolean m_isDoubleYAxis;
 
     protected boolean m_canChooseColor = false;
     //plot type combo box
@@ -95,32 +91,18 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     protected SecondAxisTableModelInterface m_valueOn2Yxis = null;
     protected boolean m_isUpdatingCbx = false;
 
-    protected boolean m_dataLocked = false;
-
-    protected JToggleButton m_gridButton = null;
-    protected JButton m_importSelectionButton = null;
-    protected JButton m_exportSelectionButton = null;
     private boolean m_setHideButton;
 
     public MultiGraphicsPanel(boolean dataLocked, boolean canChooseColor, boolean isDoubleYAxis, boolean setHideButton) {
-        m_isDoubleYAxis = isDoubleYAxis;
+        super(dataLocked, isDoubleYAxis);
+        
         columnXYIndex = new int[2];
-        m_dataLocked = dataLocked;
         m_canChooseColor = canChooseColor;
         m_setHideButton = setHideButton;
-        initComponent();
     }
 
-    private void initComponent() {
-        JPanel internalPanel = createInternalPanel();
-        JToolBar toolbar = initToolbar();
-
-        this.setLayout(new BorderLayout());
-        add(internalPanel, BorderLayout.CENTER);
-        add(toolbar, BorderLayout.WEST);
-    }
-
-    protected JPanel createInternalPanel() {
+    @Override
+    protected final JPanel createInternalPanel() {
 
         JPanel internalPanel = new JPanel();
         internalPanel.setLayout(new GridBagLayout());
@@ -149,76 +131,8 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         return internalPanel;
     }
 
-    protected final JToolBar initToolbar() {
-
-        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
-        toolbar.setFloatable(false);
-
-        m_gridButton = new JToggleButton(IconManager.getIcon(IconManager.IconType.GRID));
-        m_gridButton.setSelected(true);
-        m_gridButton.setFocusPainted(false);
-        m_gridButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                m_plotPanel.displayGrid(m_gridButton.isSelected());
-            }
-        });
-
-        m_importSelectionButton = new JButton(IconManager.getIcon(IconManager.IconType.IMPORT_TABLE_SELECTION));
-        m_importSelectionButton.setToolTipText("Import Selection from Previous View");
-        m_importSelectionButton.setFocusPainted(false);
-        m_importSelectionButton.setEnabled(!m_dataLocked);
-        m_importSelectionButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                /*if (m_crossSelectionInterface != null) {
-                    ArrayList<Integer> selection = m_crossSelectionInterface.getSelectedIds();
-                    m_plotPanel.setSelectedIds(selection);
-                }*/
-            }
-        });
-        m_exportSelectionButton = new JButton(IconManager.getIcon(IconManager.IconType.EXPORT_TABLE_SELECTION));
-        m_exportSelectionButton.setToolTipText("Export Selection to Previous View");
-        m_exportSelectionButton.setFocusPainted(false);
-        m_exportSelectionButton.setEnabled(!m_dataLocked);
-        m_exportSelectionButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                /*if (m_crossSelectionInterface != null) {
-                    m_crossSelectionInterface.select(m_plotPanel.getSelectedIds());
-                }*/
-            }
-        });
-
-        final JButton lockButton = new JButton(m_dataLocked ? IconManager.getIcon(IconManager.IconType.LOCK) : IconManager.getIcon(IconManager.IconType.UNLOCK));
-        lockButton.setToolTipText("Lock/Unlock Input Data");
-        lockButton.setFocusPainted(false);
-        lockButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                /*
-                m_dataLocked = ! m_dataLocked;
-                if (m_dataLocked) {
-                    m_values = new LockedDataModel(m_values);
-                } else {
-                    m_values = ((LockedDataModel) m_values).getSrcDataInterface();
-                }
-                
-                m_plotPanel.lockData(m_dataLocked);
-                setDataImpl(m_values, m_crossSelectionInterface);
-                
-                if (m_dataLocked) {
-                    lockButton.setIcon(IconManager.getIcon(IconManager.IconType.LOCK));
-                } else {
-                    lockButton.setIcon(IconManager.getIcon(IconManager.IconType.UNLOCK));
-                }
-                importSelectionButton.setEnabled(!m_dataLocked);
-                exportSelectionButton.setEnabled(!m_dataLocked);
-                 */
-            }
-        });
+    @Override
+    public final void fillToolbar(JToolBar toolbar) {
 
         ExportButton exportImageButton = new ExportButton("Graphic", m_plotPanel);
 
@@ -244,7 +158,6 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         });
 
         // add buttons to toolbar
-        toolbar.add(m_gridButton);
         if (m_canChooseColor) {
             toolbar.add(colorPicker);
         }
@@ -265,14 +178,8 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             toolbar.add(showSelectionButton);
         }
         toolbar.addSeparator(); // ----
-        /*toolbar.add(lockButton);
-        toolbar.add(importSelectionButton);
-        toolbar.add(exportSelectionButton);
-        toolbar.addSeparator(); // ----
-         */
         toolbar.add(exportImageButton);
 
-        return toolbar;
 
     }
 
@@ -631,32 +538,6 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         return m_dataBox.getSaveAction(splittedPanel);
     }
 
-    @Override
-    public void stateModified(BUTTONS b) {
-        switch (b) {
-            case GRID:
-                if (!m_plotPanel.displayGrid()) {
-                    m_gridButton.setSelected(false);
-                }
-                break;
-        }
-
-    }
-
-    @Override
-    public void enable(BUTTONS b, boolean v) {
-        switch (b) {
-            case GRID:
-                m_gridButton.setEnabled(v);
-                break;
-            case IMPORT_SELECTION:
-                m_importSelectionButton.setEnabled(v);
-                break;
-            case EXPORT_SELECTION:
-                m_exportSelectionButton.setEnabled(v);
-                break;
-        }
-    }
 
     public void setHideButton(boolean h) {
         m_setHideButton = h;

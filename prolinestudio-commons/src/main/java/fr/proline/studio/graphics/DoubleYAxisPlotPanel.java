@@ -834,10 +834,10 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         for (PlotBaseAbstract plot : m_mainPlots) {
             xValue = m_xAxis.pixelToValue(e.getX());
             yValue = m_yAxis.pixelToValue(e.getY());
-            boolean isPlotSelected = plot.isMouseOnPlot(xValue, yValue);
+            boolean isPlotSelected = isInGridArea && plot.isMouseOnPlot(xValue, yValue);
             repaintNeeded |= plot.setIsPaintMarker(isPlotSelected);
 
-            String toolTipForPlot = plot.getToolTipText(xValue, yValue);
+            String toolTipForPlot = isInGridArea ? plot.getToolTipText(xValue, yValue) : null;
 
             if (toolTipForPlot != null && !toolTipForPlot.isEmpty()) {
                 if (nbPlotTooltip == 0) {
@@ -860,10 +860,10 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         for (PlotBaseAbstract plot : m_secondPlots) {
             xValue = m_secondXAxis.pixelToValue(e.getX());
             yValue = m_secondYAxis.pixelToValue(e.getY());
-            boolean isPlotSelected = plot.isMouseOnPlot(xValue, yValue);
+            boolean isPlotSelected = isInGridArea && plot.isMouseOnPlot(xValue, yValue);
             repaintNeeded |= plot.setIsPaintMarker(isPlotSelected);
 
-            String toolTipForPlot = plot.getToolTipText(xValue, yValue);
+            String toolTipForPlot = isInGridArea ? plot.getToolTipText(xValue, yValue) : null;
 
             if (toolTipForPlot != null && !toolTipForPlot.isEmpty()) {
                 if (nbPlotTooltip == 0) {

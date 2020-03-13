@@ -16,18 +16,17 @@
  */
 package fr.proline.studio.graphics;
 
+import fr.proline.studio.graphics.core.GraphicsToolbarPanel;
 import fr.proline.studio.extendedtablemodel.LockedDataModel;
 import fr.proline.studio.export.ExportButton;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_X_ID;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_Y_ID;
 import fr.proline.studio.gui.AdvancedSelectionPanel;
-import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.parameter.DefaultParameterDialog;
 import fr.proline.studio.parameter.MultiObjectParameter;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.utils.IconManager;
-import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -41,20 +40,16 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import org.openide.windows.WindowManager;
-import fr.proline.studio.graphics.BasePlotPanel.PlotToolbarListener;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
  *
  * @author JM235353
  */
-public class BaseGraphicsPanel extends HourglassPanel implements PlotToolbarListener {
+public class MonoGraphicsPanel extends GraphicsToolbarPanel {
 
-    private BasePlotPanel m_plotPanel;
-    
     private JComboBox<PlotType> m_allPlotsComboBox;
     private JComboBox<String> m_valueXComboBox;
     private JComboBox<String> m_valueYComboBox;
@@ -72,24 +67,10 @@ public class BaseGraphicsPanel extends HourglassPanel implements PlotToolbarList
     private CrossSelectionInterface m_crossSelectionInterface = null;
     
     private boolean m_isUpdatingCbx = false;
-    
-    private boolean m_dataLocked = false;
-    
-    private JToggleButton m_gridButton = null;
-    private JButton m_importSelectionButton = null;
-    private JButton m_exportSelectionButton = null;
-    
-    
-    public BaseGraphicsPanel(boolean dataLocked) {
-        setLayout(new BorderLayout());
-        
-        m_dataLocked = dataLocked;
-        
-        JPanel internalPanel = createInternalPanel();
-        add(internalPanel, BorderLayout.CENTER);
 
-        JToolBar toolbar = initToolbar();
-        add(toolbar, BorderLayout.WEST);
+    
+    public MonoGraphicsPanel(boolean dataLocked) {
+        super(dataLocked, false);
 
     }
     
@@ -101,7 +82,8 @@ public class BaseGraphicsPanel extends HourglassPanel implements PlotToolbarList
         return m_plotPanel;
     }
     
-    public final JPanel createInternalPanel() {
+    @Override
+    protected final JPanel createInternalPanel() {
         
         JPanel internalPanel = new JPanel();
         internalPanel.setLayout(new GridBagLayout());
@@ -128,21 +110,10 @@ public class BaseGraphicsPanel extends HourglassPanel implements PlotToolbarList
         return internalPanel;
     }
  
-    public final JToolBar initToolbar() {
-            
-        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
-        toolbar.setFloatable(false);
+    @Override
+    public final void fillToolbar(JToolBar toolbar) {
 
-        m_gridButton = new JToggleButton(IconManager.getIcon(IconManager.IconType.GRID));
-        m_gridButton.setSelected(true);
-        m_gridButton.setFocusPainted(false);
-        m_gridButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                m_plotPanel.displayGrid(m_gridButton.isSelected());
-            }
-        });
-        
+
         SettingsButton settingsButton = new SettingsButton(null, m_plotPanel);
 
         
@@ -199,12 +170,10 @@ public class BaseGraphicsPanel extends HourglassPanel implements PlotToolbarList
         });
         
 
-        
         ExportButton exportImageButton = new ExportButton("Graphic", m_plotPanel);
         
         
         // add buttons to toolbar
-        toolbar.add(m_gridButton);
         toolbar.add(settingsButton);
         toolbar.addSeparator(); // ----
         toolbar.add(lockButton);
@@ -213,10 +182,7 @@ public class BaseGraphicsPanel extends HourglassPanel implements PlotToolbarList
         toolbar.addSeparator(); // ----
         toolbar.add(exportImageButton);
 
-        return toolbar;
-
     }
-    
 
     
     private JPanel createSelectPanel() {
@@ -654,34 +620,6 @@ public class BaseGraphicsPanel extends HourglassPanel implements PlotToolbarList
         
         
         
-    }
-
-
-    @Override
-    public void stateModified(BUTTONS b) {
-        switch (b) {
-            case GRID:
-                if (!m_plotPanel.displayGrid()) {
-                    m_gridButton.setSelected(false);
-                }
-                break;
-        }
-        
-    }
-
-    @Override
-    public void enable(BUTTONS b, boolean v) {
-        switch (b) {
-            case GRID:
-                m_gridButton.setEnabled(v);
-                break;
-            case IMPORT_SELECTION:
-                m_importSelectionButton.setEnabled(v);
-                break;
-            case EXPORT_SELECTION:
-                m_exportSelectionButton.setEnabled(v);
-                break;
-        }
     }
 
 

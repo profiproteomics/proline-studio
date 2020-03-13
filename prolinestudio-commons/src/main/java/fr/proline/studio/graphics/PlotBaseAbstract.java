@@ -237,7 +237,7 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
                 AbstractMarker m = m_markersList.get(i);
                 if (m instanceof MoveableInterface) {
                     MoveableInterface movable = (MoveableInterface) m;
-                    if (movable.isMoveable() && movable.inside(x, y)) {
+                    if (movable.isMoveable() && movable.insideXY(x, y)) {
                         return movable;
                     }
                 }
@@ -252,7 +252,7 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
             int nb = m_cursorList.size();
             for (int i = nb - 1; i >= 0; i--) { // Last cursor in the list is at the front, so we check it first
                 AbstractCursor c = m_cursorList.get(i);
-                if (c.isMoveable() && c.inside(x, y)) {
+                if (c.isMoveable() && c.insideXY(x, y)) {
                     return c;
                 }
             }

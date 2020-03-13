@@ -70,7 +70,7 @@ public class VerticalCursor extends AbstractCursor {
     }
 
     @Override
-    public boolean inside(int x, int y) {
+    public boolean insideXY(int x, int y) {
         if (!m_selectable) {
             return false;
         }
@@ -78,7 +78,7 @@ public class VerticalCursor extends AbstractCursor {
     }
 
     @Override
-    public void move(int deltaX, int deltaY) {
+    public void moveDXY(int deltaX, int deltaY) {
         m_positionX += deltaX;
         XAxis xAxis = m_plotPanel.getXAxis();
         

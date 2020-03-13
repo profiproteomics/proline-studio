@@ -22,7 +22,7 @@ import fr.proline.mzscope.ui.model.ChromatogramTableModel;
 import fr.proline.mzscope.ui.model.StatisticsTableModel;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
-import fr.proline.studio.graphics.BaseGraphicsPanel;
+import fr.proline.studio.graphics.MonoGraphicsPanel;
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.graphics.PlotLinear;
@@ -55,6 +55,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 /**
  *
  * @author CB205360
@@ -69,7 +70,7 @@ public class QCMetricsPanel extends JPanel implements CrossSelectionInterface {
     
     private final CompoundTableModel m_tableModel = new CompoundTableModel(new MapTableModel(), true);
     private DecoratedMarkerTable m_table;
-    private BaseGraphicsPanel m_graphicsPanel;
+    private MonoGraphicsPanel m_graphicsPanel;
     private JTabbedPane m_tabbedPanel;
     private JToolBar m_toolbar;
     private MetricsDetailsPanel m_detailsPanel;
@@ -166,7 +167,7 @@ public class QCMetricsPanel extends JPanel implements CrossSelectionInterface {
 
         m_tabbedPanel = new JTabbedPane();
         
-        m_graphicsPanel = new BaseGraphicsPanel(false);
+        m_graphicsPanel = new MonoGraphicsPanel(false);
         m_tabbedPanel.add("All Metrics", m_graphicsPanel);
         
         m_detailsPanel = new MetricsDetailsPanel();

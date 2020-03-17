@@ -20,7 +20,6 @@ import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
 import fr.proline.mzscope.model.*;
 import fr.proline.mzscope.ui.peakels.FeaturesPanel;
-import fr.proline.mzscope.ui.peakels.IPeakelViewer;
 import fr.proline.mzscope.ui.peakels.PeakelsPanel;
 import fr.proline.mzscope.utils.ButtonTabComponent;
 import com.google.common.base.Strings;
@@ -70,7 +69,7 @@ import static scala.collection.JavaConversions.asJavaIterable;
  *
  * @author MB243701
  */
-public class MzScopePanel extends JPanel implements IPeakelViewer, IExtractionResultsViewer, IMzScopeController {
+public class MzScopePanel extends JPanel implements IMzScopeController {
 
     private final static Logger logger = LoggerFactory.getLogger("ProlineStudio.mzScope.MzScopePanel");
 
@@ -152,6 +151,16 @@ public class MzScopePanel extends JPanel implements IPeakelViewer, IExtractionRe
         return selectedRawFilePanel;
     }
 
+
+    @Override
+    public IRawFileViewer getRawFileViewer(IRawFile rawfile, boolean setVisible) {
+        AbstractRawFilePanel viewer = displayRaw(rawfile, false);
+        if (setVisible) {
+            viewersTabPane.setSelectedComponent(viewer);
+        }
+        return viewer;
+    }
+
     public void openRaw(List<File> files, boolean display) {
         List<IRawFile> rawfiles = new ArrayList();
         for (File f : files) {
@@ -160,21 +169,6 @@ public class MzScopePanel extends JPanel implements IPeakelViewer, IExtractionRe
                 rawfile = RawFileManager.getInstance().addRawFile(f);
             }
             rawfiles.add(rawfile);
-//            List<AbstractRawFilePanel> list = mapRawFilePanelRawFile.get(rawfile);
-//            if (list != null) {
-//                boolean fileAlreadyOpen = false;
-//                for (AbstractRawFilePanel p : list) {
-//                    if (p instanceof SingleRawFilePanel) {
-//                        fileAlreadyOpen = true;
-//                        break;
-//                    }
-//                }
-//                if (!fileAlreadyOpen) {
-//                    rawfiles.add(rawfile);
-//                }
-//            } else {
-//                rawfiles.add(rawfile);
-//            }
         }
         if (display) {
             displayRaw(rawfiles);
@@ -208,7 +202,7 @@ public class MzScopePanel extends JPanel implements IPeakelViewer, IExtractionRe
                 p.extractAndDisplayChromatogram(params, new Display(Display.Mode.REPLACE), new MzScopeCallback() {
                     @Override
                     public void callback(boolean success) {
-                        p.displayFeature(new BasePeakel(moz, (float) elutionTime, (float) firstScanTime, (float) lastScanTime, rawfile, 1));
+                        p.displayPeakel(new BasePeakel(moz, (float) elutionTime, (float) firstScanTime, (float) lastScanTime, rawfile, 1));
                     }
                 });
                 // display elutionTime, firstScanTime, lastScanTime
@@ -387,7 +381,7 @@ public class MzScopePanel extends JPanel implements IPeakelViewer, IExtractionRe
         }
     }
 
-    public void extractFeatures(List<IRawFile> rawfiles) {
+    public void extractFeaturesFromMS2(List<IRawFile> rawfiles) {
         boolean isDIA = isDIAFiles(rawfiles);
         ExtractionParamsDialog dialog = new ExtractionParamsDialog(this.parentFrame, true, isDIA);
         dialog.setExtractionParamsTitle("Extract Features Parameters");
@@ -507,39 +501,6 @@ public class MzScopePanel extends JPanel implements IPeakelViewer, IExtractionRe
         worker.execute();
         logger.debug("Features extraction running ... ");
     }
-//
-//    private void extractFeatures(final IRawFile rawFile, final FeaturesExtractionRequest params) {
-//        if ((selectedRawFilePanel != null) && (viewersTabPane.getSelectedIndex() >= 0)) {
-//            final FeaturesPanel featurePanel = new FeaturesPanel(this);
-//            final ButtonTabComponent tabComp = addFeatureTab(rawFile.getName(), featurePanel, params.getExtractionParamsString());
-//            tabComp.setWaitingState(true);
-//            fireExtractionEvent(new ExtractionEvent(this, ExtractionEvent.EXTRACTION_STARTED));
-//            final long start = System.currentTimeMillis();
-//            SwingWorker worker;
-//            worker = new SwingWorker<List<IPeakel>, Void>() {
-//                @Override
-//                protected List<IPeakel> doInBackground() throws Exception {
-//                    return rawFile.extractPeakels(params);
-//                }
-//
-//                @Override
-//                protected void done() {
-//                    try {
-//                        List<IPeakel> features = get();
-//                        logger.info("{} features/peakels extracted in {}", features.size(), (System.currentTimeMillis() - start) / 1000.0);
-//                        featurePanel.setFeatures(features, false);
-//                        featuresTabPane.setSelectedComponent(featurePanel);
-//                        tabComp.setWaitingState(false);
-//                        fireExtractionEvent(new ExtractionEvent(this, ExtractionEvent.EXTRACTION_DONE));
-//                    } catch (InterruptedException | ExecutionException e) {
-//                        logger.error("Error while reading chromatogram");
-//                    }
-//                }
-//            };
-//            worker.execute();
-//            logger.debug("Feature extraction running ... ");
-//        }
-//    }
 
     public void loadPeakels(IRawFile rawfile, File file) {
         try {
@@ -593,15 +554,8 @@ public class MzScopePanel extends JPanel implements IPeakelViewer, IExtractionRe
     }
 
     public void closeRawFile(IRawFile rawfile) {
-        // TODO : if we still need to be able to close raw file, a list of features panel 
-        // must be maintained and closed at this stage
-//        //feature panel
-//        FeaturesPanel featurePanel = mapFeaturePanelRawFile.get(rawfile);
-//        if (featurePanel != null) {
-//            featuresTabPane.remove(featurePanel);
-//            mapFeaturePanelRawFile.remove(rawfile);
-//        }
-        // raw file panel
+        // TODO : if we still need to be able to close raw file, a list of features panel must be maintained and closed at this stage
+
         List<AbstractRawFilePanel> tabPanels = mapRawFilePanelRawFile.get(rawfile);
         if (tabPanels != null) {
             for (AbstractRawFilePanel tabPanel : tabPanels) {
@@ -641,27 +595,6 @@ public class MzScopePanel extends JPanel implements IPeakelViewer, IExtractionRe
             }
         }
         return list;
-    }
-
-    @Override
-    public void displayPeakelInRawFile(IPeakel f) {
-        List<AbstractRawFilePanel> list = mapRawFilePanelRawFile.get(f.getRawFile());
-        if (list != null) {
-            for (AbstractRawFilePanel panel : list) {
-                if (panel instanceof SingleRawFilePanel) {
-                    panel.displayFeature(f);
-                    viewersTabPane.setSelectedComponent(panel);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void displayPeakelInCurrentRawFile(IPeakel f) {
-        IRawFileViewer panel = (IRawFileViewer) viewersTabPane.getSelectedComponent();
-        if (panel != null) {
-            panel.displayFeature(f);
-        }
     }
 
     public TabbedMultiRawFilePanel displayAllRaw() {
@@ -761,36 +694,16 @@ public class MzScopePanel extends JPanel implements IPeakelViewer, IExtractionRe
     }
 
     @Override
-    public void displayChromatogramAsSingleView(IRawFile rawfile, IChromatogram c) {
-        displayRaw(rawfile, false);
-        List<AbstractRawFilePanel> list = mapRawFilePanelRawFile.get(rawfile);
-        if (list != null) {
-            for (AbstractRawFilePanel panel : list) {
-                if (panel instanceof SingleRawFilePanel) {
-                    panel.displayChromatogram(c, new Display(Display.Mode.REPLACE));
-                    viewersTabPane.setSelectedComponent(panel);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void displayChromatogramAsMultiView(Map<IRawFile, IChromatogram> chromatogramByRawFile) {
-        TabbedMultiRawFilePanel panel = getTabbedMultiRawFilePanel();
-        if (panel == null) {
-            displayAllRaw();
-            panel = getTabbedMultiRawFilePanel();
-        }
-        panel.displayChromatograms(chromatogramByRawFile);
-    }
-
-    private TabbedMultiRawFilePanel getTabbedMultiRawFilePanel() {
+    public IRawFileViewer getTabbedMultiRawFileViewer() {
         int nbT = viewersTabPane.getTabCount();
         TabbedMultiRawFilePanel panel = null;
         for (int i = 0; i < nbT; i++) {
             if (viewersTabPane.getComponentAt(i) instanceof TabbedMultiRawFilePanel) {
                 panel = (TabbedMultiRawFilePanel) viewersTabPane.getComponentAt(i);
             }
+        }
+        if (panel == null) {
+            panel = displayAllRaw();
         }
         return panel;
     }

@@ -36,6 +36,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
@@ -241,7 +242,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
         }
     }
 
-    public Display.Mode getXicDisplayMode() {
+    public Display.Mode getChromatogramDisplayMode() {
         return xicDisplayMode;
     }
 
@@ -290,6 +291,14 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
         return plotColor;
     }
 
+    /**
+     * Default implementation: display only the chromatogram corresponding this the current raw file.
+     */
+    @Override
+    public void displayChromatograms(Map<IRawFile, IChromatogram> chromatogramByRawFile, Display display) {
+        displayChromatogram(chromatogramByRawFile.get(getCurrentRawfile()), display);
+    }
+
     @Override
     public void extractAndDisplayChromatogram(MsnExtractionRequest params, final Display display, final MzScopeCallback callback) {
         if (rawFileLoading != null) {
@@ -326,7 +335,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
     }
 
     @Override
-    public void displayFeature(final IPeakel f) {
+    public void displayPeakel(final IPeakel f) {
         double ppm = MzScopePreferences.getInstance().getMzPPMTolerance();
         final MsnExtractionRequest.Builder builder = MsnExtractionRequest.builder().setMzTolPPM((float) ppm);
 
@@ -353,7 +362,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
             @Override
             protected void done() {
                 try {
-                    displayChromatogram(get(), new Display(getXicDisplayMode()));
+                    displayChromatogram(get(), new Display(getChromatogramDisplayMode()));
                     chromatogramPanel.displayFeature(f, new Display(Collections.singletonList(
                         new IntervalMarker(null, Color.ORANGE, Color.RED, f.getFirstElutionTime() / 60.0, f.getLastElutionTime() / 60.0))));
                     displayScan(getCurrentRawfile().getSpectrumId(f.getElutionTime()));
@@ -393,6 +402,11 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
                 rawFileLoading.setWaitingState(false);
             }
         }
+    }
+
+    @Override
+    public void setReferenceSpectrum(Spectrum spectrum) {
+        spectrumContainerPanel.displayReferenceSpectrum(spectrum);
     }
 
     @Override

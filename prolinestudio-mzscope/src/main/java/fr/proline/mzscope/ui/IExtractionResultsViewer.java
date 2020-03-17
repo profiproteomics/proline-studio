@@ -18,7 +18,6 @@ package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.model.IChromatogram;
 import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.ui.peakels.IPeakelViewer;
 
 import java.util.Map;
 
@@ -26,7 +25,7 @@ import java.util.Map;
  *
  * @author MB243701
  */
-public interface IExtractionResultsViewer extends IPeakelViewer {
+public interface IExtractionResultsViewer {
     
     public void displayChromatogramAsSingleView(IRawFile rawfile, IChromatogram c);
     

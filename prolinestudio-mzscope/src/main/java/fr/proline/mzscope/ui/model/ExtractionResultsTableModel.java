@@ -17,9 +17,8 @@
 package fr.proline.mzscope.ui.model;
 
 import fr.proline.mzscope.model.AnnotatedChromatogram;
-import fr.proline.mzscope.model.IChromatogram;
-import fr.proline.mzscope.model.ExtractionResult;
-import fr.proline.mzscope.model.ExtractionResult.Status;
+import fr.proline.mzscope.model.ExtractionObject;
+import fr.proline.mzscope.model.ExtractionObject.Status;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.ui.StatusRenderer;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
@@ -89,23 +88,23 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
 
     }
 
-    private List<ExtractionResult> m_extractionResults = new ArrayList<>(0);
+    private List<ExtractionObject> m_extractionObjects = new ArrayList<>(0);
 
     public void setRawFiles(List<IRawFile> rawFiles) {
         this.m_rawFiles = rawFiles;
     }
     
     
-    public ExtractionResult getExtractionResultAt(int rowId){
-        if (rowId > -1 && rowId < m_extractionResults.size()){
-            return m_extractionResults.get(rowId);
+    public ExtractionObject getExtractionResultAt(int rowId){
+        if (rowId > -1 && rowId < m_extractionObjects.size()){
+            return m_extractionObjects.get(rowId);
         }else {
             return null;
         }
     }
 
-    public void setExtractions(List<ExtractionResult> extractionResults) {
-        this.m_extractionResults = extractionResults;
+    public void setExtractions(List<ExtractionObject> extractionObjects) {
+        this.m_extractionObjects = extractionObjects;
         fireTableDataChanged();
     }
 
@@ -121,7 +120,7 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
 
     @Override
     public int getRowCount() {
-        return m_extractionResults.size();
+        return m_extractionObjects.size();
     }
 
     @Override
@@ -156,13 +155,13 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
         if (columnIndex < valuesCount) {
         switch (Column.values()[columnIndex]) {
             case MZ:
-                return m_extractionResults.get(rowIndex).getMz();
+                return m_extractionObjects.get(rowIndex).getMz();
             case STATUS:
-                return m_extractionResults.get(rowIndex).getStatus();
+                return m_extractionObjects.get(rowIndex).getStatus();
         }
         } else {
             Pair<IRawFile, EColumn> index = getColumnContent(columnIndex);
-            AnnotatedChromatogram chromatogram = (AnnotatedChromatogram)m_extractionResults.get(rowIndex).getChromatogram(index.getLeft());
+            AnnotatedChromatogram chromatogram = (AnnotatedChromatogram) m_extractionObjects.get(rowIndex).getChromatogram(index.getLeft());
             if (chromatogram == null)
                 return null;
             if (index.getRight() == EColumn.INTENSITY) {
@@ -315,7 +314,7 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
     @Override
     public String getExportRowCell(int row, int col) {
         if (col == Column.STATUS.id) {
-            Status st = m_extractionResults.get(row).getStatus();
+            Status st = m_extractionObjects.get(row).getStatus();
             if (st.equals(Status.DONE)) {
                 return "done";
             } else if (st.equals(Status.REQUESTED)) {
@@ -340,7 +339,7 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
     @Override
     public ArrayList<ExtraDataType> getExtraDataTypes() {
         ArrayList<ExtraDataType> list = new ArrayList<>();
-        list.add(new ExtraDataType(ExtractionResult.class, true));
+        list.add(new ExtraDataType(ExtractionObject.class, true));
         registerSingleValuesAsExtraTypes(list);
         return list;
     }
@@ -352,8 +351,8 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
 
     @Override
     public Object getRowValue(Class c, int row) {
-        if (c.equals(ExtractionResult.class)) {
-            return m_extractionResults.get(row);
+        if (c.equals(ExtractionObject.class)) {
+            return m_extractionObjects.get(row);
         }
         return null;
     }

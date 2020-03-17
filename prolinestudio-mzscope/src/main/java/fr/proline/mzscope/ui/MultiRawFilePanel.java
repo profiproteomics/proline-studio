@@ -129,7 +129,13 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
        colorByRawFilename.put(chromato.getRawFilename(), plotColor);
        return plotColor ;
     }
-    
+
+    @Override
+    public void displayChromatograms(Map<IRawFile, IChromatogram> chromatogramByRawFile, Display display) {
+        //TODO: implements a true multi chomatogram display
+        super.displayChromatograms(chromatogramByRawFile, display);
+    }
+
     @Override
     protected void displayTIC() {
         final List<IRawFile> rawFiles = new ArrayList<>(rawfiles);
@@ -181,7 +187,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
     
     // override display feature to display all xic
     @Override
-    public void displayFeature(final IPeakel f) {
+    public void displayPeakel(final IPeakel f) {
         double ppm = MzScopePreferences.getInstance().getMzPPMTolerance();
         final double maxMz = f.getMz() + f.getMz() * ppm / 1e6;
         final double minMz = f.getMz() - f.getMz() * ppm / 1e6;

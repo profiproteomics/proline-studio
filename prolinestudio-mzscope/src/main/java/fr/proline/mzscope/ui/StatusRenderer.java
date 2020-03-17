@@ -16,11 +16,9 @@
  */
 package fr.proline.mzscope.ui;
 
-import fr.proline.mzscope.model.ExtractionResult.Status;
-import fr.proline.studio.export.ExportFontData;
+import fr.proline.mzscope.model.ExtractionObject.Status;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Component;
-import java.util.ArrayList;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;

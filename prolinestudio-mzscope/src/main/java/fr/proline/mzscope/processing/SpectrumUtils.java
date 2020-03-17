@@ -37,7 +37,7 @@ public class SpectrumUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(SpectrumUtils.class);
 
-    public static final double MIN_CORRELATION_SCORE = 0.6;
+    public static final double MIN_CORRELATION_SCORE = 0.5;
 
     /**
      * sort spectrumHeader by mz

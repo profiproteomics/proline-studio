@@ -18,6 +18,7 @@ package fr.proline.mzscope.ui.peakels;
 
 import fr.profi.mzdb.model.Peakel;
 import fr.proline.mzscope.model.IPeakel;
+import fr.proline.mzscope.ui.IMzScopeController;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.filter.FilterButton;
@@ -53,12 +54,12 @@ public abstract class AbstractPeakelsPanel extends JPanel  {
   protected DecoratedMarkerTable m_table;
   protected CompoundTableModel m_compoundTableModel;
 
-  protected IPeakelViewer m_peakelViewer;
+  protected IMzScopeController m_viewersController;
   protected BasePlotPanel m_graphPlot;
   protected MarkerContainerPanel m_markerContainerPanel;
 
-  public AbstractPeakelsPanel(IPeakelViewer peakelViewer) {
-    this.m_peakelViewer = peakelViewer;
+  public AbstractPeakelsPanel(IMzScopeController controller) {
+    this.m_viewersController = controller;
     initComponents();
   }
 
@@ -126,7 +127,7 @@ public abstract class AbstractPeakelsPanel extends JPanel  {
     List<IPeakel> peakels = getSelectedIPeakels();
     updatePeakelsViewer(getSelectedPeakels());
     if (evt.getClickCount() == 2 && peakels != null && peakels.size() > 0) {
-      m_peakelViewer.displayPeakelInRawFile(peakels.get(0));
+      m_viewersController.getRawFileViewer(peakels.get(0).getRawFile(), true).displayPeakel(peakels.get(0));
     }
   }
 
@@ -141,7 +142,9 @@ public abstract class AbstractPeakelsPanel extends JPanel  {
       int index = 0;
       for (Peakel p : peakels) {
           maxY = Math.max(p.getApexIntensity(), maxY);
-          PlotLinear plot = new PlotLinear(m_graphPlot, new PeakelWrapper(p, index++), null, 0, 1);
+          PeakelWrapper wrapper = new PeakelWrapper(p, index++);
+          PlotLinear plot = new PlotLinear(m_graphPlot, wrapper, null, 0, 1);
+          plot.setPlotInformation(wrapper.getPlotInformation());
           m_graphPlot.addPlot(plot);
       }
       m_graphPlot.getYAxis().setRange(0, maxY);
@@ -170,7 +173,7 @@ public abstract class AbstractPeakelsPanel extends JPanel  {
     public void actionPerformed(int col, int row, int[] selectedRows, JTable table) {
       List<IPeakel> peakels = getSelectedIPeakels();
       if(peakels != null && peakels.size() > 0) {
-        m_peakelViewer.displayPeakelInRawFile(peakels.get(0));
+        m_viewersController.getRawFileViewer(peakels.get(0).getRawFile(), true).displayPeakel(peakels.get(0));
       }
     }
 
@@ -190,7 +193,7 @@ public abstract class AbstractPeakelsPanel extends JPanel  {
     public void actionPerformed(int col, int row, int[] selectedRows, JTable table) {
       List<IPeakel> peakels = getSelectedIPeakels();
       if(peakels != null && peakels.size() > 0) {
-        m_peakelViewer.displayPeakelInCurrentRawFile(peakels.get(0));
+        m_viewersController.getCurrentRawFileViewer().displayPeakel(peakels.get(0));
       }
     }
 

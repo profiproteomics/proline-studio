@@ -34,7 +34,7 @@ public class DotProductScorer implements Scorer {
     private static final int MAX_SCORED_ISOTOPES = 8; 
     
        public Tuple2<Double, TheoreticalIsotopePattern> score(SpectrumData currentSpectrum, double intialMz, int shift, int charge, double ppmTol) {
-        double score = 0.0;        
+        double score = 0.0;
         double mz = intialMz - shift * IsotopePatternEstimator.avgIsoMassDiff() / charge;
         TheoreticalIsotopePattern pattern = IsotopePatternEstimator.getTheoreticalPattern(mz, charge);
         
@@ -46,17 +46,17 @@ public class DotProductScorer implements Scorer {
         int observations = 0;
         //logger.info("mz {} charge pattern {}+, nb isotopes = {}", mz, charge, pattern.mzAbundancePairs().length);
         
-        for (int rank = 0; rank < pattern.mzAbundancePairs().length; rank++) {
+        for (int rank = 0; rank < pattern.mzAbundancePairs().length ; rank++) {
             ipMoz = (rank == 0) ? ipMoz : ipMoz + IsotopePatternEstimator.avgIsoMassDiff() / charge;
             int nearestPeakIdx = SpectrumUtils.getNearestPeakIndex(currentSpectrum.getMzList(), ipMoz);
                if (((1e6 * Math.abs(currentSpectrum.getMzList()[nearestPeakIdx] - ipMoz) / ipMoz) < ppmTol)) {
                    observed[rank] = currentSpectrum.getIntensityList()[nearestPeakIdx];
                    observations++;
                } else {
-                   // test minus expected abundance to penalise signal absence
-                   observed[rank] = -(Float)pattern.mzAbundancePairs()[rank]._2 * scale; // was 0.0
+                   //  minus expected abundance to penalise signal absence
+                   observed[rank] = -(Float)pattern.mzAbundancePairs()[rank]._2 * scale;
                 }
-            expected[rank] = (Float) pattern.mzAbundancePairs()[rank]._2;
+            expected[rank] = (Float) pattern.mzAbundancePairs()[rank]._2 ;
         }
 
         score = dotProduct(observed, expected);
@@ -68,8 +68,9 @@ public class DotProductScorer implements Scorer {
         double sumObserved = 0.0;
         double sumExpected = 0.0;
         double dotProduct = 0.0;
-                
-        for (int k = 0; k < Math.min(observed.length, MAX_SCORED_ISOTOPES); k++) {
+
+//        for (int k = 0; k < Math.min(observed.length, MAX_SCORED_ISOTOPES); k++) {
+      for (int k = 0; (k < observed.length) && (expected[k] > 0.1) ; k++) {
             dotProduct += observed[k]*expected[k];
             sumExpected += expected[k]*expected[k];
             sumObserved += observed[k]*observed[k];

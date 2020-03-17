@@ -338,8 +338,8 @@ public class MzdbRawFile implements IRawFile {
             }
             Peakel[] peakels = detector.detectPeakels(runSlices,Option.empty());
 
-             Iterator<RunSlice> tmpRunSlices = (minMz == 0 && maxMz == 0) ? getMzDbReader().getLcMsRunSliceIterator() : getMzDbReader().getLcMsRunSliceIterator(minMz, maxMz);
-             logSliceBounds(tmpRunSlices);
+            Iterator<RunSlice> tmpRunSlices = (minMz == 0 && maxMz == 0) ? getMzDbReader().getLcMsRunSliceIterator() : getMzDbReader().getLcMsRunSliceIterator(minMz, maxMz);
+            logSliceBounds(tmpRunSlices);
              
             Arrays.sort(peakels, (p1, p2) -> Double.compare(p2.getApexIntensity(), p1.getApexIntensity()));
             
@@ -348,9 +348,7 @@ public class MzdbRawFile implements IRawFile {
             //List<Feature> features = helper.deisotopePeakelsFromMzdb(reader, params.getMzTolPPM());
             //List<Feature> features = helper.deisotopePeakelsFromMzdb(reader, params.getMzTolPPM());
             List<Feature> features = helper.deisotopePeakels(reader, params.getMzTolPPM());
-
-            //List<Feature> features = PeakelsHelper.deisotopePeakelsFromMzdb(reader, peakels, mzTolPPM);
-            features.forEach(f -> result.add(new MzdbFeatureWrapper(f, this, 1)));            
+            features.forEach(f -> result.add(new MzdbFeatureWrapper(f, this, 1)));
             
         } catch (SQLiteException | StreamCorruptedException ex) {
             logger.error("Error while getting LcMs RunSlice Iterator: " + ex);
@@ -405,7 +403,7 @@ public class MzdbRawFile implements IRawFile {
                 ));
 
             }
-            List<Feature> mzdbResult = extractFeatures(pfs, tolPPM);
+            List<Feature> mzdbResult = extractPutativeFeatures(pfs, tolPPM);
             for(Feature f : mzdbResult) {
                 result.add(new MzdbFeatureWrapper(f, this, 1));
             }
@@ -415,7 +413,7 @@ public class MzdbRawFile implements IRawFile {
         return result;
     }
 
-    private List<Feature> extractFeatures(List<PutativeFeature> pfs, float tolPPM) {
+    private List<Feature> extractPutativeFeatures(List<PutativeFeature> pfs, float tolPPM) {
         List<Feature> result = new ArrayList();
         try {
             // Instantiates a Run Slice Data provider

@@ -339,9 +339,26 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
         return c;
     }
 
+    @Override
+    public void displayChromatograms(Map<IRawFile, IChromatogram> chromatogramByRawFile, Display display) {
+        int nbTab = chromatogramContainerPanel.getTabCount();
+        for (Map.Entry<IRawFile, IChromatogram> entrySet : chromatogramByRawFile.entrySet()) {
+            IRawFile rawFile = entrySet.getKey();
+            IChromatogram chromato = entrySet.getValue();
+            for (int t = 0; t < nbTab; t++) {
+                String tabTitle = chromatogramContainerPanel.getTitleAt(t);
+                if (tabTitle.equals(rawFile.getName())) {  // see how to better get the tabComponent linked to a rawFile
+                    ChromatogramPanel chromatoPanel = (ChromatogramPanel) chromatogramContainerPanel.getComponentAt(t);
+                    chromatoPanel.displayChromatogram(chromato, new Display(Display.Mode.REPLACE));
+                    mapChromatogramForRawFile.put(rawFile, chromato);
+                }
+            }
+        }
+    }
+
     // override display feature to display all xic
     @Override
-    public void displayFeature(final IPeakel f) {
+    public void displayPeakel(final IPeakel f) {
         // TODO : how to handle this simple display of a unique feature ? In this case multiple Features must be displayed, one by RawFile
     }
 
@@ -358,6 +375,11 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
                 chromatogramContainerPanel.setSelectedIndex(idP);
             }
         }
+    }
+
+    @Override
+    public void setReferenceSpectrum(Spectrum spectrum) {
+        spectrumContainerPanel.displayReferenceSpectrum(spectrum);
     }
 
     private IRawFile getRawFile(String fileName) {
@@ -473,22 +495,6 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
         };
 
         worker.execute();
-    }
-    
-    public void displayChromatograms(Map<IRawFile, IChromatogram> chromatogramByRawFile) {
-        int nbTab = chromatogramContainerPanel.getTabCount();
-        for (Map.Entry<IRawFile, IChromatogram> entrySet : chromatogramByRawFile.entrySet()) {
-            IRawFile rawFile = entrySet.getKey();
-            IChromatogram chromato = entrySet.getValue();
-            for (int t = 0; t < nbTab; t++) {
-                String tabTitle = chromatogramContainerPanel.getTitleAt(t);
-                if (tabTitle.equals(rawFile.getName())) {  // see how to better get the tabComponent linked to a rawFile
-                    ChromatogramPanel chromatoPanel = (ChromatogramPanel) chromatogramContainerPanel.getComponentAt(t);
-                    chromatoPanel.displayChromatogram(chromato, new Display(Display.Mode.REPLACE));
-                    mapChromatogramForRawFile.put(rawFile, chromato);
-                }
-            }
-        }
     }
     
     private void synchronizeZoom(){
@@ -639,7 +645,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     }
 
     @Override
-    public Display.Mode getXicDisplayMode() {
+    public Display.Mode getChromatogramDisplayMode() {
         return xicDisplayMode;
     }
 

@@ -75,7 +75,7 @@ public class MzdbFeatureWrapper implements IFeature {
 
   @Override
   public float getDuration() {
-    return mzdbFeature.getBasePeakel().calcDuration();
+    return mzdbFeature.calcDuration();
   }
 
   @Override

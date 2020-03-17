@@ -330,7 +330,8 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
                     // select Parser according to the extension of the first file
                     // ABU : use the map to deal with different extensions for the same parser
-                    if ((nbFiles > 0) && !hasFilesPreviously) {
+                    //if ((nbFiles > 0) && !hasFilesPreviously) {
+                    if (nbFiles > 0) { //Even if has files previously, check again software engin
                         File f = files[0];
                         String fileName = f.getName();
                         int parserIndex = -1;

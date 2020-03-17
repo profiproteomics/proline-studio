@@ -24,6 +24,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Annotate a chromatogram by finding the peakel matching the requested m/z and rt. If not found
+ * The charge state is used to test if a peakel matching a putative second isotope could be found.
+ */
 public class PeakelAnnotator implements IAnnotator {
 
   Map<IRawFile, PeakelAnnotatorImpl> annotators = null;
@@ -37,7 +41,7 @@ public class PeakelAnnotator implements IAnnotator {
   public AnnotatedChromatogram annotate(IRawFile rawFile, IChromatogram chromatogram, MsnExtractionRequest request, Integer expectedCharge) {
     if (annotators == null) {
       ExtractionParamsDialog dialog = new ExtractionParamsDialog(null, true, false);
-      dialog.setExtractionParamsTitle("Extract Features Parameters");
+      dialog.setExtractionParamsTitle("Detect Peakels Parameters");
       dialog.showExtractionParamsDialog();
       FeaturesExtractionRequest.Builder builder = dialog.getExtractionParams();
       if (builder == null) {

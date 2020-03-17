@@ -17,9 +17,15 @@
 package fr.proline.mzscope.ui.peakels;
 
 import fr.profi.mzdb.model.Peakel;
+import fr.profi.mzdb.model.SpectrumData;
 import fr.proline.mzscope.model.IPeakel;
+import fr.proline.mzscope.model.Spectrum;
+import fr.proline.mzscope.processing.PeakelsHelper;
+import fr.proline.mzscope.ui.IMzScopeController;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
+import fr.proline.studio.utils.IconManager;
 
+import javax.swing.*;
 import javax.swing.event.RowSorterListener;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,9 +40,10 @@ import java.util.stream.Collectors;
 public class PeakelsPanel extends AbstractPeakelsPanel  {
 
   protected List<IPeakel> m_peakels = new ArrayList<>();
+  protected PeakelsHelper m_helper = null;
 
-  public PeakelsPanel(IPeakelViewer peakelViewer) {
-    super(peakelViewer);
+  public PeakelsPanel(IMzScopeController controller) {
+    super(controller);
   }
 
   protected CompoundTableModel buildTableModel() {
@@ -58,6 +65,41 @@ public class PeakelsPanel extends AbstractPeakelsPanel  {
     return getSelectedIPeakels().stream().map(p-> p.getPeakel()).collect(Collectors.toList());
   }
 
+  protected JToolBar initToolbar() {
+
+    JToolBar toolbar = super.initToolbar();
+
+    JButton buildSpectrumBtn = new JButton();
+    buildSpectrumBtn.setIcon(IconManager.getIcon(IconManager.IconType.SIGNAL));
+    buildSpectrumBtn.setToolTipText("Build Spectrum from peakels");
+    buildSpectrumBtn.addActionListener(e -> buildSpectrum());
+
+    toolbar.add(buildSpectrumBtn);
+
+    return toolbar;
+  }
+
+  private void buildSpectrum() {
+    List<IPeakel> peakels = getSelectedIPeakels();
+    Peakel peakel = peakels.get(0).getPeakel();
+    PeakelsHelper helper = getPeakelsHelper();
+    List<Peakel> coelutingPeakels = helper.findCoelutigPeakels(peakel.getApexMz() - 5,
+            peakel.getApexMz() + 5,
+            peakel.getFirstElutionTime(),
+            peakel.getLastElutionTime());
+    SpectrumData spectrumData = helper.buildSpectrumDataFromPeakels(peakel, coelutingPeakels);
+    Spectrum spectrum = new Spectrum(-1, peakel.getApexElutionTime(), spectrumData.getMzList(), spectrumData.getIntensityList(), 1, Spectrum.ScanType.CENTROID);
+    m_viewersController.getRawFileViewer(peakels.get(0).getRawFile(), true).setReferenceSpectrum(spectrum);
+  }
+
+  private PeakelsHelper getPeakelsHelper() {
+    if (m_helper == null) {
+      Peakel[] apeakels = m_peakels.stream().map(p -> p.getPeakel()).toArray(s -> new Peakel[s]);
+      m_helper = new PeakelsHelper(apeakels);
+    }
+    return m_helper;
+  }
+
   public void addPeakels(List<IPeakel> peakels) {
     ((PeakelsTableModel)m_compoundTableModel.getBaseModel()).addPeakels(peakels);
     this.m_peakels.addAll(peakels);
@@ -65,13 +107,14 @@ public class PeakelsPanel extends AbstractPeakelsPanel  {
   }
 
 
-  public void setPeakels(List<IPeakel> peakels, boolean displayRawFile) {
+  public void setPeakels(List<IPeakel> peakels, boolean displayRawFileColumn) {
     m_modelSelectedRowBeforeSort = -1;
+    m_helper = null;
     ((PeakelsTableModel)m_compoundTableModel.getBaseModel()).setPeakels(peakels);
     this.m_peakels = peakels;
     m_markerContainerPanel.setMaxLineNumber(peakels.size());
     // hide RawFileName column
-    m_table.getColumnExt(m_table.convertColumnIndexToView(FeaturesTableModel.COLTYPE_FEATURE_RAWFILE.getIndex())).setVisible(displayRawFile);
+    m_table.getColumnExt(m_table.convertColumnIndexToView(FeaturesTableModel.COLTYPE_FEATURE_RAWFILE.getIndex())).setVisible(displayRawFileColumn);
   }
 
 }

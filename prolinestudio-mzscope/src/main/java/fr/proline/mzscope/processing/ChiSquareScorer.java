@@ -49,16 +49,16 @@ public class ChiSquareScorer implements Scorer {
         }
         score = TestUtils.chiSquareTest(expected, observed);
 
-        for (int k = expected.length - 2; k >= 2; k--) {
-            long[] sObserved = new long[k + 1];
-            System.arraycopy(observed, 0, sObserved, 0, k + 1);
-            double[] sExpected = new double[k + 1];
-            System.arraycopy(expected, 0, sExpected, 0, k + 1);
-            double s = TestUtils.chiSquareTest(sExpected, sObserved);
-            if (s > score) {
-                score = s;
-            }
-        }
+//        for (int k = expected.length - 2; k >= 2; k--) {
+//            long[] sObserved = new long[k + 1];
+//            System.arraycopy(observed, 0, sObserved, 0, k + 1);
+//            double[] sExpected = new double[k + 1];
+//            System.arraycopy(expected, 0, sExpected, 0, k + 1);
+//            double s = TestUtils.chiSquareTest(sExpected, sObserved);
+//            if (s > score) {
+//                score = s;
+//            }
+//        }
 
         return new Tuple2<Double, TheoreticalIsotopePattern>(1.0 - score, pattern);
     }

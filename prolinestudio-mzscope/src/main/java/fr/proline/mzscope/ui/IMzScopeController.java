@@ -16,6 +16,8 @@
  */
 package fr.proline.mzscope.ui;
 
+import fr.proline.mzscope.model.IRawFile;
+
 /**
  *
  * @author CB205360
@@ -23,5 +25,8 @@ package fr.proline.mzscope.ui;
 public interface IMzScopeController {
 
     IRawFileViewer getCurrentRawFileViewer();
-    
+
+    IRawFileViewer getRawFileViewer(IRawFile rawFile, boolean setVisible);
+
+    IRawFileViewer getTabbedMultiRawFileViewer();
 }

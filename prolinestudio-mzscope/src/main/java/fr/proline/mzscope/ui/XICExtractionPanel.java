@@ -301,7 +301,7 @@ public class XICExtractionPanel extends JPanel{
         
         IRawFileViewer currentViewer = appController.getCurrentRawFileViewer();
         if (currentViewer != null) {
-            currentViewer.extractAndDisplayChromatogram(builder.build(), new Display(currentViewer.getXicDisplayMode()), null);
+            currentViewer.extractAndDisplayChromatogram(builder.build(), new Display(currentViewer.getChromatogramDisplayMode()), null);
         }
     }
 

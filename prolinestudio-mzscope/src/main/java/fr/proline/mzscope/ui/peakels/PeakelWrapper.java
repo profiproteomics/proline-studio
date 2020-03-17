@@ -14,17 +14,18 @@ import java.util.Map;
 
 class PeakelWrapper implements ExtendedTableModelInterface {
 
-  Peakel peakel;
-  int isotopeIndex;
+  Peakel m_peakel;
+  int m_isotopeIndex;
+  PlotInformation m_plotInformation = null;
 
   public PeakelWrapper(Peakel p, int i) {
-    peakel = p;
-    isotopeIndex = i;
+    m_peakel = p;
+    m_isotopeIndex = i;
   }
 
   @Override
   public int getRowCount() {
-    return peakel.getElutionTimes().length;
+    return m_peakel.getElutionTimes().length;
   }
 
   @Override
@@ -44,7 +45,7 @@ class PeakelWrapper implements ExtendedTableModelInterface {
 
   @Override
   public Object getDataValueAt(int rowIndex, int columnIndex) {
-    return (columnIndex == 0) ? peakel.getElutionTimes()[rowIndex] / 60.0f : peakel.getIntensityValues()[rowIndex];
+    return (columnIndex == 0) ? m_peakel.getElutionTimes()[rowIndex] / 60.0f : m_peakel.getIntensityValues()[rowIndex];
   }
 
   @Override
@@ -74,18 +75,19 @@ class PeakelWrapper implements ExtendedTableModelInterface {
 
   @Override
   public PlotInformation getPlotInformation() {
-    PlotInformation plotInformation = new PlotInformation();
-    plotInformation.setPlotColor(CyclicColorPalette.getColor(1));
-    plotInformation.setPlotTitle("Elution peak");
-    plotInformation.setDrawPoints(false);
-    plotInformation.setDrawGap(true);
-    HashMap<String, String> plotInfo = new HashMap();
-    plotInfo.put("m/z", Double.toString(peakel.getApexMz()));
-    plotInfo.put("Apex Int.", DataFormat.formatWithGroupingSep(peakel.getApexIntensity(), 0));
-    plotInfo.put("Isotope index", Integer.toString(isotopeIndex));
-
-    plotInformation.setPlotInfo(plotInfo);
-    return plotInformation;
+    if (m_plotInformation == null) {
+      m_plotInformation = new PlotInformation();
+      m_plotInformation.setPlotColor(CyclicColorPalette.getColor(1));
+      m_plotInformation.setPlotTitle("Elution peak\n");
+      m_plotInformation.setDrawPoints(false);
+      m_plotInformation.setDrawGap(true);
+      HashMap<String, String> plotInfo = new HashMap();
+      plotInfo.put("m/z", Double.toString(m_peakel.getApexMz()));
+      plotInfo.put("Apex Int.", DataFormat.formatWithGroupingSep(m_peakel.getApexIntensity(), 0));
+      plotInfo.put("Isotope index", Integer.toString(m_isotopeIndex));
+      m_plotInformation.setPlotInfo(plotInfo);
+    }
+    return m_plotInformation;
   }
 
   @Override
@@ -132,5 +134,6 @@ class PeakelWrapper implements ExtendedTableModelInterface {
   public PlotDataSpec getDataSpecAt(int i) {
     return null;
   }
+
 
 }

@@ -30,8 +30,10 @@ import scala.Tuple2;
 public class WeightedDotProductScorer implements Scorer {
     
     private static final Logger logger = LoggerFactory.getLogger(WeightedDotProductScorer.class);
-    
-       public Tuple2<Double, TheoreticalIsotopePattern> score(SpectrumData currentSpectrum, double intialMz, int shift, int charge, double ppmTol) {
+
+    private static final int MAX_SCORED_ISOTOPES = 8;
+
+  public Tuple2<Double, TheoreticalIsotopePattern> score(SpectrumData currentSpectrum, double intialMz, int shift, int charge, double ppmTol) {
         double score = 0.0;
         double mz = intialMz - shift * IsotopePatternEstimator.avgIsoMassDiff() / charge;
         TheoreticalIsotopePattern pattern = IsotopePatternEstimator.getTheoreticalPattern(mz, charge);
@@ -54,8 +56,8 @@ public class WeightedDotProductScorer implements Scorer {
         }
 
         score = dotProduct(observed, expected);
-        //score = (1.0 - score)/observations;
-        score = 1.0 - score;
+        score = (1.0 - score)/observations;
+        //score = 1.0 - score;
         return new Tuple2<Double, TheoreticalIsotopePattern>(score, pattern);
     }
        
@@ -64,12 +66,12 @@ public class WeightedDotProductScorer implements Scorer {
         double sumExpected = 0.0;
         double dotProduct = 0.0;
         
-        for (int k = 0; k < observed.length; k++) {
+        for (int k = 0; k < Math.min(observed.length, MAX_SCORED_ISOTOPES); k++) {
             dotProduct += observed[k]*expected[k];
             sumExpected += expected[k]*expected[k];
             sumObserved += observed[k]*observed[k];
         }
         
-        return dotProduct/(Math.sqrt(sumExpected)*Math.sqrt(sumObserved));
+        return ((sumExpected == 0) || (sumObserved == 0)) ? 0.0 : dotProduct/(Math.sqrt(sumExpected)*Math.sqrt(sumObserved));
     }
 }

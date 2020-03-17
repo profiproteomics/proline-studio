@@ -20,13 +20,21 @@ import fr.proline.mzscope.model.*;
 import fr.proline.mzscope.utils.Display;
 import fr.proline.mzscope.utils.MzScopeCallback;
 import java.awt.Color;
+import java.util.Map;
 
 /**
  *
  * @author CB205360
  */
 public interface IRawFileViewer {
-   
+
+   /**
+    * Returns the current RawFile ie the the raw file associated with the current IChromatogram  (see below)
+    *
+    * @return
+    */
+   public IRawFile getCurrentRawfile();
+
    /**
     * Extract a IChromatogram according to the specified parameters and display the results in this panel. The specified 
     * callback is called in the AWT event dispatch thread when the display finished.
@@ -36,6 +44,7 @@ public interface IRawFileViewer {
     * @param callback that must be called back after XIC extraction.
     */
    public void extractAndDisplayChromatogram(MsnExtractionRequest params, Display display, MzScopeCallback callback);
+
    /**
     * Display the chromatogram and return the plot color
     * 
@@ -44,13 +53,20 @@ public interface IRawFileViewer {
     * @return the color used to display the sepecified c
     */ 
    public Color displayChromatogram(IChromatogram chromato, Display display);
-   
+
+   /**
+    * Display the supplied chromatograms
+    *
+    * @param chromatogramByRawFile
+    */
+   public void displayChromatograms(Map<IRawFile, IChromatogram> chromatogramByRawFile, Display display);
+
    /**
     * Display the specified Feature in this component.
-    * 
+    *
     * @param f : the feature to be displayed
     */
-   public void displayFeature(IPeakel f);
+   public void displayPeakel(IPeakel f);
    
    /**
     * Display the scan specified by the index parameter.
@@ -60,11 +76,11 @@ public interface IRawFileViewer {
    public void displayScan(long index);
 
    /**
-    * Returns the current RawFile ie the the raw file associated with the current IChromatogram  (see below)
-    * 
-    * @return 
+    *
+    *
+    * @param spectrum
     */
-   public IRawFile getCurrentRawfile();
+   public void setReferenceSpectrum(Spectrum spectrum);
 
    /**
     * Returns the active IChromatogram ie the chromatogram that will be used to select or iterate over scans.
@@ -72,7 +88,14 @@ public interface IRawFileViewer {
     * @return 
     */
    public IChromatogram getCurrentChromatogram();
-   
+
+   /**
+    * Returns all Chromatograms displayed by this component
+    *
+    * @return an iterator over all Chromatograms displayed by this component
+    */
+   public Iterable<IChromatogram> getAllChromatograms();
+
    /**
     * Returns the color associated with the specified rawFilename
     * 
@@ -86,13 +109,6 @@ public interface IRawFileViewer {
     * 
     *  @return the mode used by this component to display XIC.
     */
-   public Display.Mode getXicDisplayMode();
-   
-   /**
-    * Returns all Chromatograms displayed by this component
-    * 
-    * @return an iterator over all Chromatograms displayed by this component
-    */
-   public Iterable<IChromatogram> getAllChromatograms();
+   public Display.Mode getChromatogramDisplayMode();
    
 }

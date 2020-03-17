@@ -31,6 +31,6 @@ public class BaseFeature extends BasePeakel implements IFeature {
 
   @Override
   public int getCharge() {
-    return 0;
+    return this.charge;
   }
 }

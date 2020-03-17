@@ -16,18 +16,22 @@
  */
 package fr.proline.mzscope.model;
 
+/**
+ * A chromatogram annotated by a Peakel. This means that part of the extracted chromatogram
+ * is matched by a peakel delimiting a region of interest.
+ */
 public class AnnotatedChromatogram implements IChromatogram {
 
   private IChromatogram chromatogram;
-  private IPeakel feature;
+  private IPeakel peakel;
 
   public AnnotatedChromatogram(IChromatogram chromatogram, IPeakel feature) {
     this.chromatogram = chromatogram;
-    this.feature = feature;
+    this.peakel = feature;
   }
 
   public IPeakel getAnnotation() {
-    return feature;
+    return peakel;
   }
 
   @Override

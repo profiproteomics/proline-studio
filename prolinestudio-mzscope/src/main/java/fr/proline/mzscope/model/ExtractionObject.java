@@ -22,12 +22,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Represents an extraction: the requested extraction, the resulting extracted annotated Chromatograms for each IRawFile
+ * and the status of the extraction. The expected charge state is set is supplied in the extraction user table.
  *
  * @author CB205360
  */
-public class ExtractionResult {
+public class ExtractionObject {
 
-   final private static Logger logger = LoggerFactory.getLogger(ExtractionResult.class);
+   final private static Logger logger = LoggerFactory.getLogger(ExtractionObject.class);
 
    public enum Status {
       NONE, REQUESTED, DONE
@@ -38,7 +40,7 @@ public class ExtractionResult {
    private Map<IRawFile, AnnotatedChromatogram> chromatograms;
    private Status status = Status.NONE;
 
-   public ExtractionResult(MsnExtractionRequest request, Integer expectedCharge) {
+   public ExtractionObject(MsnExtractionRequest request, Integer expectedCharge) {
       this.request = request;
       this.expectedCharge = expectedCharge;
    }

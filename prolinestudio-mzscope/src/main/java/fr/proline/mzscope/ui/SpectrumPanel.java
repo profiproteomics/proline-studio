@@ -165,7 +165,7 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
           public void actionPerformed(ActionEvent e) {
               JToggleButton tBtn = (JToggleButton)e.getSource();
             if (tBtn.isSelected()) {
-               displayReferenceSpectrum(currentScan);
+               _displayReferenceSpectrum(currentScan);
             } else {
                clearReferenceSpectrumData();
             }
@@ -248,7 +248,7 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
     @Override
     public void plotPanelMouseClicked(MouseEvent e, double xValue, double yValue) {
         if (e.getClickCount() == 2) {
-            if ((e.getModifiers() & OVERLAY_KEY) == 0 && rawFilePanel.getXicDisplayMode() != Display.Mode.OVERLAY) {
+            if ((e.getModifiers() & OVERLAY_KEY) == 0 && rawFilePanel.getChromatogramDisplayMode() != Display.Mode.OVERLAY) {
                 scanPlot.clearMarkers();
                 scanPlot.addMarker(positionMarker);
             }
@@ -268,7 +268,7 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
                 if ((e.getModifiers() & OVERLAY_KEY) != 0) {
                     rawFilePanel.extractAndDisplayChromatogram(builder.build(), new Display(Display.Mode.OVERLAY), null);
                 } else {
-                    rawFilePanel.extractAndDisplayChromatogram(builder.build(), new Display(rawFilePanel.getXicDisplayMode()), null);
+                    rawFilePanel.extractAndDisplayChromatogram(builder.build(), new Display(rawFilePanel.getChromatogramDisplayMode()), null);
                 }
 
         } else if (SwingUtilities.isLeftMouseButton(e)) {
@@ -331,7 +331,7 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
          }
          
          scanPlot.addMarker(positionMarker);
-         displayReferenceSpectrum(referenceSpectrum);
+         _displayReferenceSpectrum(referenceSpectrum);
          spectrumPlotPanel.repaint();
          headerSpectrumPanel.setMzdbFileName(rawFilePanel.getCurrentRawfile().getName());
          currentScan = scan;
@@ -340,7 +340,7 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
       }
    }
 
-    public void displayReferenceSpectrum(Spectrum spectrum) {
+    private void _displayReferenceSpectrum(Spectrum spectrum) {
         if (spectrum != null) {
             
             double xMin = 0.0, xMax = 0.0, yMin = 0.0, yMax = 0.0;
@@ -392,8 +392,13 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
             displayScan(currentScan);
         }
     }
-    
-   public int getNextScanIndex(Integer spectrumIndex) {
+
+    public void displayReferenceSpectrum(Spectrum spectrum) {
+      referenceSpectrum = spectrum;
+      displayScan(currentScan);
+    }
+
+    public int getNextScanIndex(Integer spectrumIndex) {
       if (keepSameMsLevel) 
          return (rawFilePanel.getCurrentRawfile().getNextSpectrumId(spectrumIndex, currentScan.getMsLevel()));
       return Math.min(currentScan.getIndex() + 1, rawFilePanel.getCurrentRawfile().getSpectrumCount()-1);

@@ -23,19 +23,15 @@ import com.github.davidmoten.rtree.geometry.Geometries;
 import com.github.davidmoten.rtree.geometry.Point;
 import fr.profi.ms.model.TheoreticalIsotopePattern;
 import fr.profi.mzdb.MzDbReader;
+import fr.profi.mzdb.algo.IsotopicPatternScorer;
 import fr.profi.mzdb.model.Feature;
 import fr.profi.mzdb.model.Peakel;
 import fr.profi.mzdb.model.PeakelCursor;
 import fr.profi.mzdb.model.SpectrumData;
 import static fr.proline.mzscope.processing.SpectrumUtils.MIN_CORRELATION_SCORE;
 import java.io.StreamCorruptedException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Tuple2;
@@ -77,12 +73,23 @@ public class PeakelsHelper {
         return coelutingPeakels;
     }
 
+    public List<Peakel> findCoelutigPeakels(double minMz, double maxMz, float minRt, float maxRt, Map<Integer, Peakel> assigned) {
+        List<Peakel> coelutingPeakels = new ArrayList<>(1000);
+        Iterator<Entry<Peakel, Point>> peakelIterator = rTree.search(Geometries.rectangle(minMz, minRt, maxMz, maxRt)).toBlocking().toIterable().iterator();
+        while (peakelIterator.hasNext()) {
+            Peakel p = peakelIterator.next().value();
+            if (!assigned.containsKey(p.getId()) )
+                coelutingPeakels.add(p);
+        }
+        return coelutingPeakels;
+    }
+
     public List<Feature> deisotopePeakels(MzDbReader reader, float mzTolPPM) throws StreamCorruptedException, SQLiteException {
 
         long start = System.currentTimeMillis();
 
         List<Feature> result = new ArrayList<>();
-        Set<Peakel> assigned = new HashSet<>();
+        Map<Integer, Peakel> assigned = new HashMap<>();
 
         peakels.sort(new Comparator<Peakel>() {
             @Override
@@ -91,50 +98,73 @@ public class PeakelsHelper {
             }
         });
 
-        double REFMZ = 411.2302;
-        double REFRT = 85;
+        // for debug purposes
+        double REFMZ = 724.71024;
+        double REFRT = 133.866;
         
 
         for (int k = 0; k < peakels.size(); k++) {
             if ((k % 10000) == 0) {
                 logger.info("processing peakel " + k);
             }
-            if (!assigned.contains(peakels.get(k))) {
+            if (!assigned.containsKey(peakels.get(k).getId())) {
                 
-              if ((Math.abs(peakels.get(k).getMz() - REFMZ) < 0.004) && (Math.abs(REFRT*60.0 - peakels.get(k).getApexElutionTime()) < 120)) {
+              if ((Math.abs(peakels.get(k).getMz() - REFMZ) < REFMZ*mzTolPPM/1e6) && (Math.abs(REFRT*60.0 - peakels.get(k).getApexElutionTime()) < 60)) {
                 logger.debug("this one");
               }
 
-                SpectrumData data = buildSpectrumDataFromPeakels(k);
+                SpectrumData data = buildSpectrumDataFromPeakels(k, assigned);
 
+//                Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = IsotopicPatternScorer.calcIsotopicPatternHypotheses(data, peakels.get(k).getMz(), mzTolPPM);
                 Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = IsotopicPatternUtils.calcIsotopicPatternHypotheses(data, peakels.get(k).getMz(), mzTolPPM);
                 TheoreticalIsotopePattern bestPattern = putativePatterns[0]._2;
                 List<Peakel> l = new ArrayList<>(bestPattern.isotopeCount() + 1);
+                int gapRank = 0;
+
+                int indexOfMatching = 0;
+                for (Tuple2 t : bestPattern.mzAbundancePairs()) {
+                    if (1e6 * (Math.abs(peakels.get(k).getMz() - (double) t._1) / peakels.get(k).getMz()) < mzTolPPM) {
+                        break;
+                    }
+                    indexOfMatching++;
+                }
+
+                double scaling = peakels.get(k).getApexIntensity() / ((Float)bestPattern.mzAbundancePairs()[indexOfMatching]._2);
 
                 for (Tuple2 t : bestPattern.mzAbundancePairs()) {
-                    double mz = (double) t._1;
-                    List<Peakel> isotopes = findCoelutigPeakels(mz - (mz * mzTolPPM / 1e6), mz + (mz * mzTolPPM / 1e6), peakels.get(k).getFirstElutionTime(), peakels.get(k).getLastElutionTime());
+                    double patternMz = (double) t._1;
+                    float patternNormAbundance = (float)t._2;
+                    List<Peakel> isotopes = findCoelutigPeakels(patternMz - (patternMz * mzTolPPM / 1e6), patternMz + (patternMz * mzTolPPM / 1e6), peakels.get(k).getFirstElutionTime(), peakels.get(k).getLastElutionTime(), assigned);
                     Peakel bestMatching = null;
                     double maxCorr = Double.MIN_VALUE;
                     for (Peakel p : isotopes) {
                         double corr = SpectrumUtils.correlation(peakels.get(k), p);
-                        if (corr > MIN_CORRELATION_SCORE && (corr > maxCorr)) {
+                        if (corr > MIN_CORRELATION_SCORE && (corr > maxCorr) &&
+                            (p.getApexIntensity() < 2.5 * patternNormAbundance * scaling)) {
                             maxCorr = corr;
                             bestMatching = p;
                         }
                     }
 
-                    if ((bestMatching != null) && !assigned.contains(bestMatching)) {
-                        assigned.add(bestMatching);
-                        l.add(bestMatching);
-                        if ((Math.abs(bestMatching.getMz() - REFMZ) < 0.004) && (Math.abs(REFRT*60.0 - bestMatching.getApexElutionTime()) < 120)) {
-                          logger.debug("this one");
+                    if (bestMatching != null) {
+                        if (!assigned.containsKey(bestMatching.getId())) {
+                            gapRank = 0;
+                            assigned.put(bestMatching.getId(), bestMatching);
+                            l.add(bestMatching);
+                            if ((Math.abs(bestMatching.getMz() - REFMZ) < REFMZ * mzTolPPM / 1e6) && (Math.abs(REFRT * 60.0 - bestMatching.getApexElutionTime()) < 60)) {
+                                logger.debug("this one but assigned as isotope");
+                            }
+                        } else {
+                            logger.debug("best isotope match found but already assigned");
                         }
-
+                    } else {
+                        gapRank++;
                     }
+                    if (gapRank >= 3)
+                        break;
                 }
                 if (l.isEmpty()) {
-                    logger.warn("Strange situation : peakel not found within isotopic pattern .... " + peakels.get(k).getMz());
+                    logger.warn("Strange situation: peakel {}, {} not found from pattern at mono {}, {}+ (gap: {})", peakels.get(k).getMz(), peakels.get(k).getApexElutionTime()/60.0, bestPattern.monoMz(), bestPattern.charge(), gapRank);
                     l.add(peakels.get(k));
                 }
                 //logger.info("Creates feature with "+l.size()+" peakels at mz="+l.get(0).getMz()+ " from peakel "+peakels[k].getMz()+ " at "+peakels[k].getApexElutionTime()/60.0);                
@@ -151,7 +181,7 @@ public class PeakelsHelper {
         long start = System.currentTimeMillis();
 
         List<Feature> result = new ArrayList<>();
-        Set<Peakel> assigned = new HashSet<>();
+        Map<Integer, Peakel> assigned = new HashMap<>();
 
         peakels.sort(new Comparator<Peakel>() {
             @Override
@@ -165,9 +195,11 @@ public class PeakelsHelper {
             if ((k % 10000) == 0) {
                 logger.info("processing peakel " + k);
             }
-            if (!assigned.contains(peakels.get(k))) {
+            if (!assigned.containsKey(peakels.get(k).getId())) {
               
                 SpectrumData data = reader.getSpectrumData(peakels.get(k).getApexSpectrumId());
+
+//                Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = IsotopicPatternScorer.calcIsotopicPatternHypotheses(data, peakels.get(k).getMz(), mzTolPPM);
                 Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = IsotopicPatternUtils.calcIsotopicPatternHypotheses(data, peakels.get(k).getMz(), mzTolPPM);
                 TheoreticalIsotopePattern bestPattern = putativePatterns[0]._2;
                 List<Peakel> l = new ArrayList<>(bestPattern.isotopeCount() + 1);
@@ -185,9 +217,8 @@ public class PeakelsHelper {
                         }
                     }
 
-                    if ((bestMatching != null) && !assigned.contains(bestMatching)) {
-                                                           
-                       assigned.add(bestMatching);
+                    if ((bestMatching != null) && !assigned.containsKey(bestMatching.getId())) {
+                       assigned.put(bestMatching.getId(), bestMatching);
                        l.add(bestMatching);
                     }
                 }
@@ -266,20 +297,24 @@ public class PeakelsHelper {
 //        return result;
 //    }
 
-    private SpectrumData buildSpectrumDataFromPeakels(int k) {
+    private SpectrumData buildSpectrumDataFromPeakels(int k, Map<Integer, Peakel> assigned) {
 //        List<Peakel> coelutingPeakels = findCoelutigPeakels(peakels.get(k).getApexMz() - HALF_MZ_WINDOW,
 //                peakels.get(k).getApexMz() + HALF_MZ_WINDOW,
 //                peakels.get(k).getApexElutionTime() - RT_TOLERANCE,
 //                peakels.get(k).getApexElutionTime() + RT_TOLERANCE);
-        List<Peakel> coelutingPeakels = findCoelutigPeakels(peakels.get(k).getApexMz() - HALF_MZ_WINDOW,
-                peakels.get(k).getApexMz() + HALF_MZ_WINDOW,
-                peakels.get(k).getFirstElutionTime(),
-                peakels.get(k).getLastElutionTime());
-        return buildSpectrumDataFromPeakels(k, coelutingPeakels);
+
+        final Peakel peakel = peakels.get(k);
+        List<Peakel> coelutingPeakels = findCoelutigPeakels(peakel.getApexMz() - HALF_MZ_WINDOW,
+                peakel.getApexMz() + HALF_MZ_WINDOW,
+                peakel.getFirstElutionTime(),
+                peakel.getLastElutionTime(),
+                assigned);
+
+        return buildSpectrumDataFromPeakels(peakel, coelutingPeakels);
     }
 
-    private SpectrumData buildSpectrumDataFromPeakels(int k, List<Peakel> coelutingPeakels) {
-        Tuple2<double[], float[]> values = slicePeakels(coelutingPeakels, peakels.get(k));
+    public SpectrumData buildSpectrumDataFromPeakels(Peakel peakel, List<Peakel> coelutingPeakels) {
+        Tuple2<double[], float[]> values = slicePeakels(coelutingPeakels, peakel);
         SpectrumData data = new SpectrumData(values._1, values._2);
         return data;
     }
@@ -297,21 +332,50 @@ public class PeakelsHelper {
             }
         });
 
+//        coelutingPeakels.stream().forEach(peakel -> {
+//
+//            PeakelCursor peakelCursor = peakel.getNewCursor();
+//            boolean foundPeak = false;
+//
+//            // TODO: optimize this search (start from the apex or implement binary search)
+//            while (peakelCursor.next() && foundPeak == false) {
+//                if (peakelCursor.getSpectrumId() == matchingSpectrumId) {
+//                    mzList.add(peakelCursor.getMz());
+//                    intensityList.add(peakelCursor.getIntensity());
+//                    foundPeak = true;
+//                }
+//            }
+//        }
+//        );
+//
+
+        final int SPAN = 3;
         coelutingPeakels.stream().forEach(peakel -> {
 
             PeakelCursor peakelCursor = peakel.getNewCursor();
             boolean foundPeak = false;
-
-            // TODO: optimize this search (start from the apex or implement binary search)
-            while (peakelCursor.next() && foundPeak == false) {
+            float sum = 0;
+            int count = 0;
+            while (peakelCursor.next() &&  foundPeak == false) {
                 if (peakelCursor.getSpectrumId() == matchingSpectrumId) {
                     mzList.add(peakelCursor.getMz());
-                    intensityList.add(peakelCursor.getIntensity());
                     foundPeak = true;
                 }
             }
-        }
-        );
+            if (foundPeak) {
+                int index = peakelCursor.cursorIndex();
+                int minBound = Math.max(0, index - SPAN);
+                int maxBound = Math.min(index + SPAN, peakel.getPeaksCount() - 1);
+                for (int i = minBound; i <= maxBound; i++) {
+                    sum += peakel.intensityValues()[i];
+                    count++;
+                }
+                intensityList.add(sum / count);
+            }
+        });
+
+
+
         int idx = 0;
         double[] mz = new double[mzList.size()];
         for (Double d : mzList) {

@@ -18,6 +18,7 @@ package fr.proline.studio.graphics.core;
 
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.ExtendableButtonPanel;
+import fr.proline.studio.graphics.ExtendableButtonPanelGroup;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
@@ -120,8 +121,9 @@ public abstract class GraphicsToolbarPanel extends HourglassPanel implements Plo
         
         ButtonGroup buttonModeGroup = new ButtonGroup();
         
+        ExtendableButtonPanelGroup extendablePanelGroup = new ExtendableButtonPanelGroup();
+        
         m_normalModeButton = new JToggleButton(IconManager.getIcon(IconManager.IconType.MOUSE_POINTER));
-        m_normalModeButton.setSelected(true);
         m_normalModeButton.setFocusPainted(false);
         m_normalModeButton.addActionListener(new ActionListener() {
             @Override
@@ -131,16 +133,42 @@ public abstract class GraphicsToolbarPanel extends HourglassPanel implements Plo
         });
         buttonModeGroup.add(m_normalModeButton);
         
-        m_selectionModeButton = new JToggleButton(IconManager.getIcon(IconManager.IconType.MOUSE_SELECT));
-        m_selectionModeButton.setSelected(false);
-        m_selectionModeButton.setFocusPainted(false);
-        m_selectionModeButton.addActionListener(new ActionListener() {
+        ActionListener mouseSelectSquareActionListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 m_plotPanel.setMouseMode(BasePlotPanel.MOUSE_MODE.SELECTION_MODE);
+                m_plotPanel.setSelectionType(true);
             }
-        });
+        };
+        
+        ActionListener mouseSelectFreeActionListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                m_plotPanel.setMouseMode(BasePlotPanel.MOUSE_MODE.SELECTION_MODE);
+                m_plotPanel.setSelectionType(false);
+            }
+        };
+
+
+        m_selectionModeButton = new JToggleButton(IconManager.getIcon(IconManager.IconType.MOUSE_SELECT_SQUARE));
+        m_selectionModeButton.setSelected(false);
+        m_selectionModeButton.setFocusPainted(false);
+        m_selectionModeButton.addActionListener(mouseSelectSquareActionListener);
         buttonModeGroup.add(m_selectionModeButton);
+        
+        JButton selectionModeSquareButton = new JButton(IconManager.getIcon(IconManager.IconType.MOUSE_SELECT_SQUARE));
+        selectionModeSquareButton.addActionListener(mouseSelectSquareActionListener);
+        selectionModeSquareButton.setToolTipText("Square Selection");
+        
+        JButton selectionModeFreeButton = new JButton(IconManager.getIcon(IconManager.IconType.MOUSE_SELECT_FREE));
+        selectionModeFreeButton.addActionListener(mouseSelectFreeActionListener);
+        selectionModeFreeButton.setToolTipText("Free Selection");
+        
+        ExtendableButtonPanel extendableButtonSelectionPanel = new ExtendableButtonPanel(m_selectionModeButton);
+        addToLayer(extendableButtonSelectionPanel);
+        extendableButtonSelectionPanel.registerButton(selectionModeSquareButton);
+        extendableButtonSelectionPanel.registerButton(selectionModeFreeButton);
+        extendablePanelGroup.add(extendableButtonSelectionPanel);
         
         // Zoom+ / Zoom- / View all
         ActionListener zoomInAction = new ActionListener() {
@@ -182,6 +210,7 @@ public abstract class GraphicsToolbarPanel extends HourglassPanel implements Plo
         extendableButtonPanel.registerButton(zoomInButton);
         extendableButtonPanel.registerButton(zoomOutButton);
         extendableButtonPanel.registerButton(viewAlltButton);
+        extendablePanelGroup.add(extendableButtonPanel);
         
         
         // -- Grid Button
@@ -196,7 +225,7 @@ public abstract class GraphicsToolbarPanel extends HourglassPanel implements Plo
         });
         
         
-
+        m_normalModeButton.doClick();
         
         
         m_toolbar.add(m_normalModeButton);

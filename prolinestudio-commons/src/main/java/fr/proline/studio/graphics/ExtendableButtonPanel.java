@@ -26,9 +26,9 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 
 /**
  *
@@ -45,7 +45,10 @@ public class ExtendableButtonPanel extends JPanel {
     
     private boolean m_isExpanded = false;
     
+    private ExtendableButtonPanelGroup m_group = null;
+    
     public ExtendableButtonPanel(AbstractButton currentButton) {
+        
         setBorder(null);
         setOpaque(true);
         setLayout(new FlowLayout( FlowLayout.LEFT, 2, 2));
@@ -82,6 +85,11 @@ public class ExtendableButtonPanel extends JPanel {
         
         Dimension d = getPreferredSize();
         setSize((int) d.getWidth(), (int) d.getHeight());
+
+    }
+    
+    protected void addedToGroup(ExtendableButtonPanelGroup g) {
+        m_group = g;
     }
     
     public void paint(Graphics g) {
@@ -117,6 +125,10 @@ public class ExtendableButtonPanel extends JPanel {
         m_isExpanded = true;
         m_buttonPanel.setVisible(true);
 
+        if (m_group != null) {
+            m_group.beingExpanded(this);
+        }
+        
         calculatePosition();
         
         repaint();
@@ -143,6 +155,7 @@ public class ExtendableButtonPanel extends JPanel {
         button.setMargin(new java.awt.Insets(2, 2, 2, 2));
         button.setFocusPainted(false);
         button.setBorder(null);
+        button.setContentAreaFilled(false);
         
 
         
@@ -167,6 +180,14 @@ public class ExtendableButtonPanel extends JPanel {
             m_currentButton.addActionListener(a);
         }
         
+        if (m_currentButton instanceof JToggleButton) {
+            if (!((JToggleButton) m_currentButton).isSelected()) {
+                ((JToggleButton) m_currentButton).doClick();
+            }
+        }
+        
         collapse();
     }
+
+    
 }

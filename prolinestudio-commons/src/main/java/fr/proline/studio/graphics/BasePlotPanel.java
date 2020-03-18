@@ -153,6 +153,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     protected boolean m_isEnumAxisUpdated = false;
 
     private MOUSE_MODE m_mouseMode = MOUSE_MODE.NORMAL_MODE;
+
     
     public BasePlotPanel() {
         formatE.applyPattern("0.#####E0");
@@ -165,6 +166,10 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
     public void setMouseMode(MOUSE_MODE mouseMode) {
         m_mouseMode = mouseMode;
+    }
+    
+    public void setSelectionType(boolean selectionSquare) {
+        m_selectionGesture.setSelectionIsSquare(selectionSquare);
     }
     
     public void setPlotTitle(String title) {

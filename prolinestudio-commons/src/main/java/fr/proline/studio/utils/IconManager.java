@@ -213,7 +213,8 @@ public class IconManager {
         OPTIONS_LESS,
         PIN,
         MOUSE_POINTER,
-        MOUSE_SELECT,
+        MOUSE_SELECT_SQUARE,
+        MOUSE_SELECT_FREE,
         EXPAND
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -703,8 +704,10 @@ public class IconManager {
                 return "fr/proline/studio/images/pin.png";
             case MOUSE_POINTER:
                 return "fr/proline/studio/images/mouse-pointer.png";
-            case MOUSE_SELECT:
-                return "fr/proline/studio/images/layer-select.png";
+            case MOUSE_SELECT_SQUARE:
+                return "fr/proline/studio/images/selection-select.png";
+            case MOUSE_SELECT_FREE:
+                return "fr/proline/studio/images/selection-select-byhand.png";
             case EXPAND:
                 return "fr/proline/studio/images/expand.png";
         }

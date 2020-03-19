@@ -17,14 +17,19 @@
 package fr.proline.studio.rsmexplorer.gui.admin;
 
 import fr.proline.studio.dam.tasks.data.DRawFile;
-import fr.proline.studio.table.BeanTableModel;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ProjectInfo;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
+import fr.proline.studio.filter.ConvertValueInterface;
+import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.filter.IntegerFilter;
+import fr.proline.studio.filter.LongFilter;
+import fr.proline.studio.filter.StringFilter;
+import fr.proline.studio.table.AbstractDecoratedGlobalTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.TablePopupMenu;
@@ -36,7 +41,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.BorderFactory;
@@ -67,12 +74,15 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
     private JDialog m_dialogOwner = null;
     private Boolean m_isEditable = true;
 
-    private final BeanTableModel m_projectBeanModel = new BeanTableModel<ProjectInfo>(ProjectInfo.class);
-    private final CompoundTableModel m_projectsModel = new CompoundTableModel(m_projectBeanModel, true);
+    //private final BeanTableModel m_projectBeanModel = new BeanTableModel<ProjectInfo>(ProjectInfo.class);
+//    private final CompoundTableModel m_projectsModel = new CompoundTableModel(m_projectBeanModel, true);
+    private final ProjectsInfoTableModel m_projectsBaseModel = new ProjectsInfoTableModel();
+    private final CompoundTableModel m_projectsModel = new CompoundTableModel(m_projectsBaseModel, true);
     private DecoratedMarkerTable m_projectsTable;
 
-    private final BeanTableModel m_rawfilesBeanModel = new BeanTableModel<DRawFile>(DRawFile.class);
-    private final CompoundTableModel m_rawfilesModel = new CompoundTableModel(m_rawfilesBeanModel, true);
+    //private final BeanTableModel m_rawfilesBeanModel = new BeanTableModel<DRawFile>(DRawFile.class);
+    //private final CompoundTableModel m_rawfilesModel = new CompoundTableModel(m_rawfilesBeanModel, true);
+    private final RawFilesTableModel m_rawFileTableModel = new RawFilesTableModel();
     private DecoratedMarkerTable m_rawfilesTable;
 
     private ArrayList<ProjectInfo> m_resultProjectsList = new ArrayList<>();
@@ -94,7 +104,6 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         internalPanel.setBorder(BorderFactory.createTitledBorder("Projects"));
 
         JScrollPane projectTableScrollPane = new JScrollPane();
-        initProjectsModel();//add desired Table columns order
         createProjectsTable();
         projectTableScrollPane.setViewportView(m_projectsTable);
         m_projectsTable.setFillsViewportHeight(true);
@@ -106,12 +115,11 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         topPanel.add(projectTableScrollPane, BorderLayout.CENTER);
         topPanel.add(toolbar, BorderLayout.WEST);
 
-        initRawFileModel();
         createRawFileTable();
         JScrollPane rawFilesScrollPane = new JScrollPane();
         rawFilesScrollPane.setViewportView(m_rawfilesTable);
         m_rawfilesTable.setFillsViewportHeight(true);
-        m_rawfilesTable.setModel(m_rawfilesModel);
+        m_rawfilesTable.setModel(m_rawFileTableModel);
 
         JToolBar bottomToolbar = initBottomToolbar();
         JPanel bottomPanel = new JPanel(new BorderLayout());
@@ -151,7 +159,7 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
     private JToolBar initBottomToolbar() {
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
-        ExportButton exportButton = new ExportButton(m_rawfilesModel, "Raw Files", m_rawfilesTable);
+        ExportButton exportButton = new ExportButton(m_rawFileTableModel, "Raw Files", m_rawfilesTable);
         toolbar.add(exportButton);
         return toolbar;
     }
@@ -177,11 +185,14 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
             public TableCellRenderer getCellRenderer(int row, int columnIndex) {
                 //don't use convertColumnIndexToModel, will have class cast error in CellRenderer
                 switch (columnIndex) {
-                    case 0:
+                    case ProjectsInfoTableModel.COLTYPE_STATUS:
                         TableColumn column0;
                         column0 = this.getColumnModel().getColumn(columnIndex);
                         column0.setPreferredWidth(30);
                         return new StatusRenderer();
+                    case ProjectsInfoTableModel.COLTYPE_SIZE:
+                        DefaultRightAlignRenderer rightAign = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
+                        return new DoubleRenderer(rightAign, 0, true, true);
                     default:
                         return super.getCellRenderer(row, columnIndex);
                 }
@@ -209,7 +220,7 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
             @Override
             public TableCellRenderer getCellRenderer(int row, int columnIndex) {
                 switch (columnIndex) {
-                    case 0:
+                    case RawFilesTableModel.COLTYPE_PROJECT_STATUS:
                         TableColumn column0;
                         column0 = this.getColumnModel().getColumn(columnIndex);
                         column0.setPreferredWidth(30);
@@ -242,38 +253,8 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
     }
 
-    private void initProjectsModel() {
-        m_projectBeanModel.addProperties("status", 0, "Status"); //(properties name, order, column name)
-        m_projectBeanModel.addProperties("projectId", 1, "Id");
-        m_projectBeanModel.addProperties("name", 2, "Project");
-        m_projectBeanModel.addProperties("description", 3);
-        m_projectBeanModel.addProperties("size", 4, "Size (MB)", new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0, true, true), null);
-        m_projectBeanModel.addProperties("user", 5, "Owner");
-        m_projectBeanModel.addProperties("DBName", 6, "Databases");
-        m_projectBeanModel.addProperties("lastDatasetDate", 7, "DatasetDate");
-
-        // must be called only one time
-        m_projectBeanModel.firePropertiesChanged();
-    }
-
-    private void initRawFileModel() {
-        m_rawfilesBeanModel.addProperties("projectStatus", 0, "Status");
-        m_rawfilesBeanModel.addProperties("creationTimestamp", 1, "CreationTimestamp");
-        m_rawfilesBeanModel.addProperties("identifier", 2, "Identifier");
-        m_rawfilesBeanModel.addProperties("rawFileName", 3, "rawFileName");
-        m_rawfilesBeanModel.addProperties("rawFileDirectory", 4, "rawFileDirectory");
-        m_rawfilesBeanModel.addProperties("project_ids", 5, "project_ids");
-        m_rawfilesBeanModel.addProperties("projectsCount", 6, "projectsCount");
-        m_rawfilesBeanModel.addProperties("mzdbFileName", 7, "mzdbFileName");
-        m_rawfilesBeanModel.addProperties("mzdbFileDirectory", 8, "mzdbFileDirectory");
-        m_rawfilesBeanModel.addProperties("serializedProperties", 9, "serializedProperties");
-
-        // must be called only one time
-        m_rawfilesBeanModel.firePropertiesChanged();
-    }
-
     private void updateData() {
-        m_projectBeanModel.setData(m_resultProjectsList);
+        m_projectsBaseModel.setData(m_resultProjectsList);
         m_projectStatusMap = new HashMap<>();
         for (ProjectInfo pi : m_resultProjectsList) {
             m_projectStatusMap.put("" + pi.getProjectId(), pi.getStatus());
@@ -328,7 +309,7 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
             file.setProjectStatus(ps);
         }
 
-        m_rawfilesBeanModel.setData(fileList);
+        m_rawFileTableModel.setData(fileList);
     }
 
     @Override
@@ -361,6 +342,195 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
             task.initLoadRawFilesList(projectIds, resultRawfiles);
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         }
+    }
+
+    public class ProjectsInfoTableModel extends AbstractDecoratedGlobalTableModel<ProjectInfo> {
+
+        public static final int COLTYPE_STATUS = 0;
+        public static final int COLTYPE_PROJECTID = 1;// "Id"
+        public static final int COLTYPE_NAME = 2;//"Project"
+        public static final int COLTYPE_DESCRIPTION = 3;
+        public static final int COLTYPE_SIZE = 4;// "Size (MB)", new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0, true, true), null);
+        public static final int COLTYPE_USER = 5; //"Owner"
+        public static final int COLTYPE_RAW_FILES_COUNT = 6;
+        public static final int COLTYPE_DB_NAME = 7;// "Databases"
+        public static final int COLTYPE_LAST_DATASET_DATE = 8;// "DatasetDate"
+        public static final int COLTYPE_PROPERTIES = 9;
+
+        {
+            String[] columnNames = {" ", "Id", "Project", "Description", "Size (MB)", "Owner", "Count Raw File", "Databases", "Dataset Date", "Properties"};
+            m_columnNames = columnNames;
+            String[] columnTooltips = {"Status", "Id", "Project", "Description", "Size (MB)", "Owner", "Count Raw File", "Databases", "Dataset Date", "Properties"};
+            m_columnTooltips = columnTooltips;
+        }
+
+        public ProjectsInfoTableModel() {
+            m_entities = new ArrayList<>();
+        }
+
+        @Override
+        public int getRowCount() {
+            return m_entities.size();
+        }
+
+        @Override
+        public int getColumnCount() {
+            return m_columnNames.length;
+        }
+
+        @Override
+        public Object getValueAt(int row, int col) {
+            ProjectInfo project = m_entities.get(row);
+
+            switch (col) {
+                case COLTYPE_STATUS:
+                    return project.getStatus();
+                case COLTYPE_PROJECTID:
+                    return project.getProjectId();
+                case COLTYPE_NAME:
+                    return project.getName();
+                case COLTYPE_DESCRIPTION:
+                    return project.getDescription();
+                case COLTYPE_SIZE:
+                    return project.getSize();
+                case COLTYPE_USER:
+                    return project.getUser();
+                case COLTYPE_RAW_FILES_COUNT:
+                    return project.getRawFilesCount();
+                case COLTYPE_DB_NAME:
+                    return project.getDBName();
+                case COLTYPE_LAST_DATASET_DATE:
+                    return project.getLastDatasetDate();
+                case COLTYPE_PROPERTIES:
+                    return project.getProperties();
+                default:
+                    return "";
+            }
+        }
+
+        @Override
+        public String getToolTipForHeader(int col) {
+            return m_columnTooltips[col];
+        }
+
+        @Override
+        public TableCellRenderer getRenderer(int row, int col) {
+            return null;
+        }
+
+        @Override
+        public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
+            filtersMap.put(COLTYPE_STATUS, new IntegerFilter(m_columnNames[COLTYPE_STATUS], null, COLTYPE_STATUS));
+            filtersMap.put(COLTYPE_NAME, new StringFilter(m_columnNames[COLTYPE_NAME], null, COLTYPE_NAME));
+            filtersMap.put(COLTYPE_PROJECTID, new LongFilter(m_columnNames[COLTYPE_PROJECTID], null, COLTYPE_PROJECTID));
+            filtersMap.put(COLTYPE_NAME, new StringFilter(m_columnNames[COLTYPE_NAME], null, COLTYPE_NAME));
+            filtersMap.put(COLTYPE_DESCRIPTION, new StringFilter(m_columnNames[COLTYPE_DESCRIPTION], null, COLTYPE_DESCRIPTION));
+            filtersMap.put(COLTYPE_USER, new StringFilter(m_columnNames[COLTYPE_USER], null, COLTYPE_USER));
+            filtersMap.put(COLTYPE_DB_NAME, new StringFilter(m_columnNames[COLTYPE_DB_NAME], null, COLTYPE_DB_NAME));
+            ConvertValueInterface dateConverter = new ConvertValueInterface() {
+                @Override
+                public Object convertValue(Object o) {
+                    if (o == null) {
+                        return null;
+                    }
+                    return ((Date) o).getTime();
+                }
+
+            };
+            filtersMap.put(COLTYPE_LAST_DATASET_DATE, new LongFilter(m_columnNames[COLTYPE_LAST_DATASET_DATE], dateConverter, COLTYPE_LAST_DATASET_DATE));
+
+        }
+
+        //***************** Next is specific GlobalTableModelInterface******************//
+        @Override
+        public Object getRowValue(Class c, int row) {
+            if (c.equals(ProjectInfo.class)) {
+                return m_entities.get(row);
+            }
+            return null;
+        }
+
+        @Override
+        public int[] getKeysColumn() {
+            int[] keys = {COLTYPE_PROJECTID, COLTYPE_NAME};
+            return keys;
+        }
+
+    }
+
+    public class RawFilesTableModel extends AbstractDecoratedGlobalTableModel<DRawFile> {
+
+        public static final int COLTYPE_PROJECT_STATUS = 0;// "Status"
+        public static final int COLTYPE_CREATION_TIMESTAMP = 1;// "CreationTimestamp"
+        public static final int COLTYPE_IDENTIFIER = 2;// "Identifier"
+        public static final int COLTYPE_RAW_FILE_NAME = 3;// "rawFileName"
+        public static final int COLTYPE_RAW_FILE_DIRECTORY = 4;// "rawFileDirectory"
+        public static final int COLTYPE_PROJECT_IDS = 5;// "project_ids"
+        public static final int COLTYPE_PROJECTS_COUNT = 6;// "projectsCount"
+        public static final int COLTYPE_SERIALIZED_PROPERTIES = 7;//"serializedProperties"
+
+        {
+            String[] columnNames = {" ", "Creation Timestamp", "Identifier", "Raw File Name", "Raw File Directory", "Project Ids", "Projects Count", "serializedProperties"};
+            m_columnNames = columnNames;
+            String[] columnTooltips = {"Projects Status", "Creation Timestamp", "Identifier", "Raw File Name", "Raw File Directory", "Project Ids", "Projects Count", "serializedProperties"};
+            m_columnTooltips = columnTooltips;
+        }
+
+        public RawFilesTableModel() {
+            m_entities = new ArrayList<>();
+        }
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            DRawFile file = m_entities.get(rowIndex);
+
+            switch (columnIndex) {
+                case COLTYPE_PROJECT_STATUS:
+                    return file.getProjectStatus();
+                case COLTYPE_CREATION_TIMESTAMP:
+                    return file.getCreationTimestamp();
+                case COLTYPE_IDENTIFIER:
+                    return file.getIdentifier();
+                case COLTYPE_RAW_FILE_NAME:
+                    return file.getRawFileName();
+                case COLTYPE_RAW_FILE_DIRECTORY:
+                    return file.getRawFileDirectory();
+                case COLTYPE_PROJECT_IDS:
+                    return file.getProjectIds();
+                case COLTYPE_PROJECTS_COUNT:
+                    return file.getProjectsCount();
+                case COLTYPE_SERIALIZED_PROPERTIES:
+                    return file.getSerializedProperties();
+                default:
+                    return "";
+            }
+        }
+
+        @Override
+        public TableCellRenderer getRenderer(int row, int col) {
+            return null;//renderer at table level, not here
+        }
+
+        @Override
+        public Object getRowValue(Class c, int row) {
+            if (c.equals(DRawFile.class)) {
+                return m_entities.get(row);
+            }
+            return null;
+        }
+
+        @Override
+        public int[] getKeysColumn() {
+            int[] keys = {COLTYPE_IDENTIFIER};
+            return keys;
+        }
+
+        @Override
+        public void addFilters(LinkedHashMap<Integer, Filter> filtersMap
+        ) {
+            //no Filters
+        }
+
     }
 
     private class StatusRenderer extends DefaultTableCellRenderer {

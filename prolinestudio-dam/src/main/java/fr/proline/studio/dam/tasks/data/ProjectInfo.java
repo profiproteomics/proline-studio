@@ -106,11 +106,7 @@ public class ProjectInfo {
     }
 
     public double getSize() {
-        if (m_size == 0 && this.m_status != Status.ACTIVE) {
-            return Double.NaN;
-        } else {
-            return m_size;
-        }
+        return m_size;
     }
 
     public String getDBName() {

@@ -29,9 +29,6 @@ import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.LongFilter;
 import fr.proline.studio.filter.StringFilter;
-import fr.proline.studio.gui.DefaultDialog;
-import static fr.proline.studio.gui.DefaultDialog.BUTTON_CANCEL;
-import static fr.proline.studio.gui.DefaultDialog.BUTTON_OK;
 import fr.proline.studio.table.AbstractDecoratedGlobalTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.TableDefaultRendererManager;
@@ -39,27 +36,19 @@ import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.utils.CyclicColorPalette;
-import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -72,7 +61,6 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
-import org.openide.windows.WindowManager;
 
 /**
  *
@@ -100,10 +88,6 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
     private ArrayList<ProjectInfo> m_resultProjectsList = new ArrayList<>();
 
     private HashMap<String, ProjectInfo.Status> m_projectStatusMap = new HashMap();
-    private HashMap<Long, ProjectInfo> m_projectMap = new HashMap();
-    private SharedProjectDialg m_sharedProjectDialog;
-    private HashMap<Long, ProjectInfo> m_sharedProjects4SelectMap;
-    private ProjectsInfoTableModel m_sharedProjects4SelectModel = new ProjectsInfoTableModel();
 
     public ProjectsPanel(JDialog dialog, Boolean editable) {
         m_isEditable = editable;
@@ -120,7 +104,7 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         internalPanel.setBorder(BorderFactory.createTitledBorder("Projects"));
 
         JScrollPane projectTableScrollPane = new JScrollPane();
-        m_projectsTable = createProjectsTable();
+        createProjectsTable();
         projectTableScrollPane.setViewportView(m_projectsTable);
         m_projectsTable.setFillsViewportHeight(true);
         m_projectsTable.setModel(m_projectsModel);
@@ -177,61 +161,11 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         toolbar.setFloatable(false);
         ExportButton exportButton = new ExportButton(m_rawFileTableModel, "Raw Files", m_rawfilesTable);
         toolbar.add(exportButton);
-        JButton otherProjectBt = new JButton(IconManager.getIcon(IconManager.IconType.PROJECT));
-        otherProjectBt.setToolTipText("Projects share at least one mzdb file with current projet(s)");
-        otherProjectBt.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (m_sharedProjects4SelectMap.isEmpty()) {
-                    JOptionPane.showMessageDialog(m_dialogOwner, "No other raw file shared project");
-                } else {
-                    if (m_sharedProjectDialog == null) {
-                        m_sharedProjectDialog = new SharedProjectDialg();
-                    }
-                    m_sharedProjectDialog.setVisible(true);
-                }
-            }
-        });
-        toolbar.add(otherProjectBt);
         return toolbar;
     }
 
-    class SharedProjectDialg extends DefaultDialog {
-
-        private SharedProjectDialg() {
-            setIconImage(IconManager.getImage(IconManager.IconType.PROJECT));
-            Frame f = WindowManager.getDefault().getMainWindow();
-            setSize(new Dimension(500, 480));
-            setResizable(true);
-            setButtonVisible(BUTTON_CANCEL, false);
-            setButtonName(BUTTON_OK, "Close");
-            initInternalPanel();
-
-            setLocationRelativeTo(ProjectsPanel.this);
-            setVisible(true);
-        }
-
-        void initInternalPanel() {
-            JPanel sharedProjectPane = new JPanel(new BorderLayout());
-            sharedProjectPane.setBorder(BorderFactory.createTitledBorder("Other Project(s) Which Share Raw Files"));
-
-            DecoratedMarkerTable sharedProjectTable = createProjectsTable();
-            JScrollPane sharedProjectTableScrollPane = new JScrollPane();
-
-            sharedProjectTableScrollPane.setViewportView(sharedProjectTable);
-            sharedProjectTable.setFillsViewportHeight(true);
-
-            sharedProjectTable.setModel(m_sharedProjects4SelectModel);
-            sharedProjectPane.add(sharedProjectTableScrollPane, BorderLayout.CENTER);
-            setInternalComponent(sharedProjectPane);
-        }
-
-    }
-
-    private DecoratedMarkerTable createProjectsTable() {
-        //m_projectsTable
-        DecoratedMarkerTable table = new DecoratedMarkerTable() {
+    private void createProjectsTable() {
+        m_projectsTable = new DecoratedMarkerTable() {
 
             @Override
             public TablePopupMenu initPopupMenu() {
@@ -264,7 +198,6 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
                 }
             }
         };
-        return table;
     }
 
     private void createRawFileTable() {
@@ -325,14 +258,13 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         m_projectStatusMap = new HashMap<>();
         for (ProjectInfo pi : m_resultProjectsList) {
             m_projectStatusMap.put("" + pi.getProjectId(), pi.getStatus());
-            m_projectMap.put(pi.getProjectId(), pi);
         }
     }
 
-    private void updateRawFiles(ArrayList<DRawFile> resultRawfiles, List<Long> selectedProjectIds) {
+    private void updateRawFiles(ArrayList<DRawFile> resultRawfiles) {
         ArrayList<String> idList = new ArrayList();
         ArrayList<DRawFile> fileList = new ArrayList<>();
-        m_sharedProjects4SelectMap = new HashMap();
+
         for (DRawFile file : resultRawfiles) {
             String identifier = file.getIdentifier();
             if (idList.contains(identifier)) {
@@ -349,10 +281,6 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
             sb.append("<html>");
             Color c;
             for (String id : ids) {
-                Long idProject = Long.parseLong(id);
-                if (!selectedProjectIds.contains(idProject) && m_sharedProjects4SelectMap.get(idProject) == null) {
-                    m_sharedProjects4SelectMap.put(idProject, m_projectMap.get(idProject));
-                }
                 ProjectInfo.Status status = m_projectStatusMap.get(id);
                 switch (status) {
                     case ARCHIVED:
@@ -380,8 +308,7 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
             }
             file.setProjectStatus(ps);
         }
-        List data = m_sharedProjects4SelectMap.values().stream().sorted(Comparator.comparingLong(ProjectInfo::getProjectId)).collect(Collectors.toList());
-        m_sharedProjects4SelectModel.setData(data);
+
         m_rawFileTableModel.setData(fileList);
     }
 
@@ -407,7 +334,7 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     if (success) {
-                        updateRawFiles(resultRawfiles, projectIds);
+                        updateRawFiles(resultRawfiles);
                     }
                 }
             };
@@ -543,9 +470,9 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         public static final int COLTYPE_SERIALIZED_PROPERTIES = 7;//"serializedProperties"
 
         {
-            String[] columnNames = {" ", "Creation Timestamp", "Identifier", "Raw File Name", "Raw File Directory", "Project Ids", "Projects Count", "Properties"};
+            String[] columnNames = {" ", "Creation Timestamp", "Identifier", "Raw File Name", "Raw File Directory", "Project Ids", "Projects Count", "serializedProperties"};
             m_columnNames = columnNames;
-            String[] columnTooltips = {"Projects Status", "Creation Timestamp", "Identifier", "Raw File Name", "Raw File Directory", "Project Ids", "Projects Count", "Properties"};
+            String[] columnTooltips = {"Projects Status", "Creation Timestamp", "Identifier", "Raw File Name", "Raw File Directory", "Project Ids", "Projects Count", "serializedProperties"};
             m_columnTooltips = columnTooltips;
         }
 

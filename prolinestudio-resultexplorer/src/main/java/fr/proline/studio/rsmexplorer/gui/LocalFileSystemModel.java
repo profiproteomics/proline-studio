@@ -19,6 +19,8 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.studio.msfiles.LocalFileSystemFile;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
@@ -28,6 +30,8 @@ import javax.swing.tree.TreePath;
 
 /**
  *
+ * Model containing the directories and files of the local file system
+ * 
  * @author AK249877
  */
 public class LocalFileSystemModel implements TreeModel {
@@ -38,7 +42,7 @@ public class LocalFileSystemModel implements TreeModel {
 
     public LocalFileSystemModel(String rootURL) {
         m_root = new DefaultMutableTreeNode(new LocalFileSystemFile(rootURL));
-        listeners = new HashSet<TreeModelListener>();
+        listeners = new HashSet<>();
     }
 
     public void setRoot(String rootURL) {
@@ -56,7 +60,7 @@ public class LocalFileSystemModel implements TreeModel {
 
         File directory = (File) parentNode.getUserObject();
 
-        String[] directoryMembers = directory.list(new Filter());
+        String[] directoryMembers = getFilesName(directory);
 
         DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(new LocalFileSystemFile(directory, directoryMembers[index]));
 
@@ -75,12 +79,7 @@ public class LocalFileSystemModel implements TreeModel {
 
         File fileSystemMember = (File) parentNode.getUserObject();
         if (fileSystemMember.isDirectory()) {
-            File[] directoryMembers = fileSystemMember.listFiles(new Filter());
-
-            if (directoryMembers == null) {
-                return 0;
-            }
-            return directoryMembers.length;
+            return getFilesCount(fileSystemMember);
         } else {
             return 0;
         }
@@ -107,7 +106,7 @@ public class LocalFileSystemModel implements TreeModel {
         File directory = (File) parentNode.getUserObject();
         File directoryMember = (File) childNode.getUserObject();
 
-        String[] directoryMemberNames = directory.list();
+        String[] directoryMemberNames = getFilesName(directory);
         int result = -1;
 
         for (int i = 0; i < directoryMemberNames.length; ++i) {
@@ -158,7 +157,7 @@ public class LocalFileSystemModel implements TreeModel {
         }
     }
 
-    public class Filter implements FilenameFilter {
+    /*public class Filter implements FilenameFilter {
 
         @Override
 
@@ -166,10 +165,45 @@ public class LocalFileSystemModel implements TreeModel {
 
             File f = new File(directory, fileName);
 
-            return f.isDirectory() || fileName.toLowerCase().endsWith(".raw") || fileName.toLowerCase().endsWith(".mzdb") || fileName.toLowerCase().endsWith(".wiff") || fileName.toLowerCase().endsWith(".mgf");
+            return f.isDirectory() || fileName.toLowerCase().endsWith(".dat") || fileName.toLowerCase().endsWith(".raw") || fileName.toLowerCase().endsWith(".mzdb") || fileName.toLowerCase().endsWith(".wiff") || fileName.toLowerCase().endsWith(".mgf");
 
         }
 
+    }*/
+
+    
+    private int getFilesCount(File directory) {
+        String[] list = directory.list();
+        return (list != null) ? list.length : 0;
     }
+    private File[] getFiles(File directory) {
+        File[] files = directory.listFiles();
+        Arrays.sort(files, FILE_COMPARATOR);
+        return files;
+    }
+    private String[] getFilesName(File directory) {
+        File[] files = getFiles(directory);
+        int nbFiles = files.length;
+        String[] fileNames = new String[nbFiles];
+        for (int i=0;i<nbFiles;i++) {
+            fileNames[i] = files[i].getName();
+        }
+        return fileNames;
+    }
+    
+    
+    private static Comparator<File> FILE_COMPARATOR = new Comparator<File>() {         
+    @Override         
+    public int compare(File f1, File f2) {   
+        if (f1.isDirectory()) {
+            if (!f2.isDirectory()) {
+                return -1;
+            }
+        } else if (f2.isDirectory()) {
+            return 1;
+        }
+      return f1.getName().toLowerCase().compareTo(f2.getName().toLowerCase());
+    }     
+  };     
 
 }

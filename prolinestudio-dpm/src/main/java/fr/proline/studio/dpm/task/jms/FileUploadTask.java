@@ -49,8 +49,9 @@ import org.openide.util.Exceptions;
  */
 public class FileUploadTask extends AbstractJMSTask {
 
-    private final static int UPLOAD_MAXQUANT_FILE = 0;
-    private final static int UPLOAD_MZDB_FILE = 1;
+    private final static int UPLOAD_GENERIC_FILE = 0;
+    private final static int UPLOAD_MAXQUANT_FILE = 1;
+    private final static int UPLOAD_MZDB_FILE = 2;
 
     private int m_action = UPLOAD_MAXQUANT_FILE;
 
@@ -66,10 +67,17 @@ public class FileUploadTask extends AbstractJMSTask {
         m_remoteFilePath = remoteFilePath;
     }
 
-    public void initUploadGenericFile() {
+    public void initUploadMaxquantFile() {
         m_action = UPLOAD_MAXQUANT_FILE;
     }
 
+    public void initUploadGenericFile(String mountLabel, String destinationPath) {
+        m_action = UPLOAD_GENERIC_FILE;
+        m_mountLabel = mountLabel;
+        m_destinationPath = destinationPath;
+    }
+    
+    
     public void initUploadMZDB(String mountLabel, String destinationPath) {
         m_action = UPLOAD_MZDB_FILE;
         m_mountLabel = mountLabel;
@@ -85,7 +93,12 @@ public class FileUploadTask extends AbstractJMSTask {
 
             File uploadFile = null;
 
-            if (m_action == UPLOAD_MAXQUANT_FILE) {
+            
+            
+            if (m_action == UPLOAD_GENERIC_FILE) {
+                m_loggerProline.debug("Prepare to upload file " + m_filePath);
+                uploadFile = new File(m_filePath);
+            } else if (m_action == UPLOAD_MAXQUANT_FILE) {
                 m_loggerProline.debug("Prepare MaxQuant Import First Step : Upload Files from " + m_filePath);
                 //Create ZIP file to upload
                 List<String> files2Zip = getZipFilesList(m_filePath);
@@ -102,7 +115,7 @@ public class FileUploadTask extends AbstractJMSTask {
             message.setStringProperty("dest_file_name", uploadFile.getName());
 
             //this needs checking!
-            if (m_action == UPLOAD_MZDB_FILE) {                
+            if ((m_action == UPLOAD_MZDB_FILE) || (m_action == UPLOAD_GENERIC_FILE)) {                
                 message.setStringProperty("dest_folder_path", m_mountLabel + m_destinationPath);
             }
 

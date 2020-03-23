@@ -124,42 +124,43 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         c.weighty = 0;
         c.weightx = 0;
 
-        if (true) {
-            JButton updateButton = new JButton(IconManager.getIcon(IconManager.IconType.REFRESH));
-            updateButton.setFocusPainted(false);
-            updateButton.setOpaque(true);
-            updateButton.addActionListener(new ActionListener() {
 
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (!m_updating) {
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                updateTree();
-                            }
-                        });
-                    }
+        JButton updateButton = new JButton(IconManager.getIcon(IconManager.IconType.REFRESH));
+        updateButton.setToolTipText("Refresh");
+        updateButton.setFocusPainted(false);
+        updateButton.setOpaque(true);
+        updateButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!m_updating) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateTree();
+                        }
+                    });
                 }
-            });
+            }
+        });
 
-            JToolBar toolbar = new JToolBar();
-            toolbar.setFloatable(false);
+        JToolBar toolbar = new JToolBar();
+        toolbar.setFloatable(false);
 
-            toolbar.add(updateButton);
+        toolbar.add(updateButton);
 
-            add(toolbar, c);
+        add(toolbar, c);
 
-            c.gridy++;
+        c.gridy++;
 
-            add(Box.createVerticalBox(), c);
+        add(Box.createVerticalBox(), c);
 
-            c.gridy = 0;
+        c.gridy = 0;
 
-            c.gridheight = 2;
+        c.gridheight = 2;
 
-            c.gridx++;
-        }
+        c.gridx++;
+
 
         JPanel treePanel = new JPanel();
         treePanel.setLayout(new BorderLayout(0, 5));
@@ -230,6 +231,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
             public void treeExpanded(TreeExpansionEvent tee) {
                 TreeUtils.saveExpansionState(m_tree, TreeUtils.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
                 DefaultMutableTreeNode expandedNode = (DefaultMutableTreeNode) tee.getPath().getLastPathComponent();
+
                 traverseAndExpand(expandedNode);
             }
 
@@ -320,9 +322,9 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
     private void traverseAndExpand(DefaultMutableTreeNode root) {
 
-        if (m_paths.size() <= 0) {
+        /*if (m_paths.size() <= 0) {
             return;
-        }
+        }*/
 
         boolean found = false;
 

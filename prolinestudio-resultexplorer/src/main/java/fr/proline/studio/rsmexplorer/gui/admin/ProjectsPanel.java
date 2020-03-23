@@ -660,7 +660,7 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
                 this.setBackground(javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground"));
                 this.setForeground(Color.WHITE);
             } else {
-                this.setBackground(null);
+                this.setBackground(javax.swing.UIManager.getDefaults().getColor("Table.background"));
                 this.setForeground(Color.BLACK);
             }
             return this;

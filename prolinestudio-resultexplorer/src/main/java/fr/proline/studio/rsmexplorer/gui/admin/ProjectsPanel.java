@@ -368,10 +368,10 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
                         break;
                 }
                 String projectColor = CyclicColorPalette.getHTMLColor(c);
-                sb.append("<font color='").append(projectColor).append("'>" + id + "</font>,");
+                sb.append("<span style='color:#").append(projectColor).append(";'>" + id + "</span>,");
             }
-            String toShow = sb.substring(0, sb.length() - 2) + "</html>";
-            file.setProjectIds(toShow);
+            String toShow = sb.substring(0, sb.length() - 1) + "</html>";
+            file.setProjectIdsDecorted(toShow);
 
             if (nbArchived == file.getProjectsCount()) {
                 ps = DRawFile.ProjectStatus.ALL_ARCHIVED;
@@ -553,6 +553,25 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
             m_entities = new ArrayList<>();
         }
 
+        /**
+         * used for export
+         * @param rowIndex
+         * @param columnIndex
+         * @return 
+         */
+        @Override
+        public Object getDataValueAt(int rowIndex, int columnIndex) {
+            DRawFile file = m_entities.get(rowIndex);
+
+            switch (columnIndex) {
+                case COLTYPE_PROJECT_IDS:
+                    return file.getProjectIds();
+                default:
+                    return getValueAt(rowIndex, columnIndex);
+            }
+
+        }
+
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
             DRawFile file = m_entities.get(rowIndex);
@@ -569,7 +588,7 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
                 case COLTYPE_RAW_FILE_DIRECTORY:
                     return file.getRawFileDirectory();
                 case COLTYPE_PROJECT_IDS:
-                    return file.getProjectIds();
+                    return file.getProjectIdsDecorted();
                 case COLTYPE_PROJECTS_COUNT:
                     return file.getProjectsCount();
                 case COLTYPE_SERIALIZED_PROPERTIES:

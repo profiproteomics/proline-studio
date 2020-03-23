@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.studio.dpm.task.jms.DownloadProcessedFileTask;
 import fr.proline.studio.msfiles.MzdbDownloadBatch;
 import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import java.awt.datatransfer.Transferable;
@@ -61,7 +62,7 @@ public class LocalFileSystemTransferHandler extends TransferHandler {
                 
                 String url = file.getAbsolutePath().toLowerCase();
                 
-                if (url.endsWith(".mzdb") || url.endsWith(".raw") || url.endsWith(".wiff")) {
+                if (url.endsWith(".mzdb") || url.endsWith(".raw") || url.endsWith(".wiff") || url.endsWith(".dat")) {
                     transferableFiles.add(file);
                 }
             }
@@ -70,7 +71,7 @@ public class LocalFileSystemTransferHandler extends TransferHandler {
                 return null;
             }
 
-            return new FilesTransferable(transferableFiles);
+            return new FilesTransferable(transferableFiles, FilesTransferable.SourceFileSystem.SOURCE_LOCAL_FILE_SYSTEM);
 
         }
         return null;
@@ -90,6 +91,22 @@ public class LocalFileSystemTransferHandler extends TransferHandler {
         if (support.isDataFlavorSupported(FilesTransferable.Files_FLAVOR)) {
             DropLocation dropLocation = support.getDropLocation();
             if (dropLocation instanceof JTree.DropLocation) {
+                
+                try {
+                    FilesTransferable transferable = (FilesTransferable) support.getTransferable().getTransferData(FilesTransferable.Files_FLAVOR);
+                    if (transferable.getSource() == FilesTransferable.SourceFileSystem.SOURCE_LOCAL_FILE_SYSTEM) {
+                        return false;
+                    }
+                } catch (UnsupportedFlavorException | IOException e) {
+                    return false;
+                }
+                
+                TreePath dropPath = ((JTree.DropLocation) support.getDropLocation()).getPath();
+                File dropFile = pathToFile(MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().getSelectedRoot(), dropPath);
+                if (!dropFile.isDirectory()) {
+                    return false;
+                }
+ 
                 return true;
             }else if(support.getComponent() instanceof TreeFileChooserPanel){
                 return true;
@@ -106,7 +123,7 @@ public class LocalFileSystemTransferHandler extends TransferHandler {
         try {
             
             FilesTransferable transferable = (FilesTransferable) support.getTransferable().getTransferData(FilesTransferable.Files_FLAVOR);
-            ArrayList<File> files = transferable.getFiles();
+            ArrayList<File> filesToTransfer = transferable.getFiles();
             
             if (support.getComponent() instanceof JTree) {
                 
@@ -114,10 +131,23 @@ public class LocalFileSystemTransferHandler extends TransferHandler {
                 
                 TreePath dropPath = dropLocation.getPath();
                 
-                MzdbDownloadBatch downloadBatch = new MzdbDownloadBatch(files, dropPath, MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().getSelectedRoot());
-                Thread downloadThread = new Thread(downloadBatch);
-                downloadThread.start();
+                // separe mzdb files and other files
+                /*ArrayList<File> mzdbFiles = new ArrayList<>();
+                ArrayList<File> otherFiles = new ArrayList<>();
+                for (File f : filesToTransfer) {
+                    if (f.getName().toLowerCase().endsWith(".mzdb")) {
+                        mzdbFiles.add(f);
+                    } else {
+                        otherFiles.add(f);
+                    }
+                }
                 
+                if (! mzdbFiles.isEmpty()) {*/
+                    MzdbDownloadBatch downloadBatch = new MzdbDownloadBatch(filesToTransfer, dropPath, MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().getSelectedRoot());
+                    Thread downloadThread = new Thread(downloadBatch);
+                    downloadThread.start();
+                //} 
+
                 return true;
                 
             } else if (support.getComponent() instanceof TreeFileChooserPanel) {
@@ -132,4 +162,17 @@ public class LocalFileSystemTransferHandler extends TransferHandler {
 
     }
 
+    private File pathToFile(String root, TreePath pathToExpand) {
+        
+        StringBuilder localURL = new StringBuilder();
+        localURL.append(root);
+        
+        Object elements[] = pathToExpand.getPath();
+        for (int i = 0, n = elements.length; i < n; i++) {
+            localURL.append(elements[i]).append("\\");
+        }
+
+        File f = new File(localURL.toString());
+        return f;
+    }
 }

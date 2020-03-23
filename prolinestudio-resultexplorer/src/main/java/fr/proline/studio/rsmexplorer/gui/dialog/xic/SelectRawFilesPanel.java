@@ -809,7 +809,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
                 this.setForeground(Color.WHITE);
                 //this.setBorder(BorderFactory.createMatteBorder(1, 0, 1, 0, Color.BLACK));
             } else {
-                this.setBackground(null);
+                this.setBackground(javax.swing.UIManager.getDefaults().getColor("Table.background"));
                 this.setForeground(Color.BLACK);
                 //this.setBorder(BorderFactory.createEmptyBorder());
             }

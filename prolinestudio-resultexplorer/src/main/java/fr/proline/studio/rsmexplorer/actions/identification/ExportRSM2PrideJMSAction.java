@@ -19,7 +19,7 @@ package fr.proline.studio.rsmexplorer.actions.identification;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
-import fr.proline.studio.dpm.task.jms.DownloadFileTask;
+import fr.proline.studio.dpm.task.jms.DownloadProcessedFileTask;
 import fr.proline.studio.dpm.task.jms.ExportDatasetTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.exporter.ExportPrideDialog;
@@ -107,7 +107,7 @@ public class ExportRSM2PrideJMSAction extends AbstractRSMAction {
                             if (!fileName.endsWith(".xml") && !fileName.endsWith(".XML")) {
                                 fileName += ".xml";
                             }
-                            DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath.get(0), _JMSNodeId.get(0));
+                            DownloadProcessedFileTask task = new DownloadProcessedFileTask(downloadCallback, fileName, _filePath.get(0), _JMSNodeId.get(0));
                             AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
                         } else {

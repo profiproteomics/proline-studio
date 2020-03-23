@@ -16,6 +16,9 @@
  */
 package fr.proline.studio.msfiles;
 
+import fr.proline.studio.dpm.AccessJMSManagerThread;
+import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
+import fr.proline.studio.dpm.task.jms.FileUploadTask;
 import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import java.io.File;
 import java.util.ArrayList;
@@ -25,6 +28,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.logging.Level;
 import javax.swing.tree.TreePath;
 
 /**
@@ -47,12 +51,47 @@ public class MzdbUploadBatch implements Runnable, MsListener {
         m_pathToExpand = pathToExpand;
     }
 
-    public void upload(File f, MzdbUploadSettings uploadSettings) {
+    public void upload(final File f, MzdbUploadSettings uploadSettings) {
         if (f.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
             MzdbUploader uploader = new MzdbUploader(f, uploadSettings);
             uploader.addMsListener(this);
             m_executor.execute(uploader);
+        } else {
+            final String[] result = new String[1];
+
+            AbstractJMSCallback callback = new AbstractJMSCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success) {
+
+                    if (success) {
+
+                        if (f.exists()) {
+                            ArrayList<MsListenerParameter> list = new ArrayList<MsListenerParameter>();
+                            list.add(new MsListenerParameter(f, true));
+                            uploadPerformed(list);
+                        }
+
+                    } else {
+                        ArrayList<MsListenerParameter> list = new ArrayList<>();
+                        list.add(new MsListenerParameter(f, false));
+                        uploadPerformed(list);
+                    }
+                }
+            };
+
+            FileUploadTask task = new FileUploadTask(callback, f.getAbsolutePath(), result);
+
+            task.initUploadGenericFile(uploadSettings.getMountingPointPath(), uploadSettings.getDestination());
+
+            AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
         }
+           
     }
 
     @Override

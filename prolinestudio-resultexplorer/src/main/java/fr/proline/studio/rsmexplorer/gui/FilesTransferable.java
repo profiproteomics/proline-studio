@@ -35,14 +35,29 @@ public class FilesTransferable implements Transferable, Serializable {
     private static final DataFlavor[] DATA_FLAVORS = {Files_FLAVOR};
 
     private final ArrayList<File> m_selectedFiles;
+    private final SourceFileSystem m_source;
 
-    public FilesTransferable(ArrayList<File> selectedFiles) {
+    public enum SourceFileSystem {
+        SOURCE_LOCAL_FILE_SYSTEM,
+        SOURCE_SERVE_FILE_SYSTEM
+    };
+
+    
+    
+    public FilesTransferable(ArrayList<File> selectedFiles, SourceFileSystem source) {
         m_selectedFiles = selectedFiles;
+        m_source = source;
     }
 
     public ArrayList<File> getFiles() {
         return m_selectedFiles;
     }
+    
+    public SourceFileSystem getSource() {
+        return m_source;
+    }
+
+    
 
     @Override
     public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {

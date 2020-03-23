@@ -18,21 +18,14 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.studio.dpm.serverfilesystem.RootInfo;
 import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
-import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.gui.DefaultDialogListener;
-import fr.proline.studio.rsmexplorer.gui.dialog.DefaultConverterDialog;
-import fr.proline.studio.msfiles.ConversionSettings;
-import fr.proline.studio.msfiles.ConvertionUploadBatch;
 import fr.proline.studio.msfiles.MzdbUploadBatch;
 import fr.proline.studio.msfiles.MzdbUploadSettings;
 import java.awt.Color;
-import java.awt.Frame;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.prefs.Preferences;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -41,8 +34,6 @@ import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.TreePath;
 import org.openide.util.Exceptions;
-import org.openide.util.NbPreferences;
-import org.openide.windows.WindowManager;
 
 /**
  * Class used for Drag and Drop of nodes
@@ -85,7 +76,7 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
                 return null;
             }
 
-            return new FilesTransferable(selectedFiles);
+            return new FilesTransferable(selectedFiles, FilesTransferable.SourceFileSystem.SOURCE_SERVE_FILE_SYSTEM);
 
         }
         return null;
@@ -102,6 +93,9 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
         support.setShowDropLocation(true);
 
         if (support.isDataFlavorSupported(FilesTransferable.Files_FLAVOR)) {
+            
+            
+            
             DropLocation dropLocation = support.getDropLocation();
             if (dropLocation instanceof JTable.DropLocation) {
                 return true;
@@ -109,7 +103,32 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
                 m_components.get((JComponent) support.getComponent()).setBackground(Color.WHITE);
                 return true;
             } else if (dropLocation instanceof JTree.DropLocation) {
-                return true;
+                try {
+                    FilesTransferable transferable = (FilesTransferable) support.getTransferable().getTransferData(FilesTransferable.Files_FLAVOR);
+                    if (transferable.getSource() == FilesTransferable.SourceFileSystem.SOURCE_LOCAL_FILE_SYSTEM) {
+
+                        JTree.DropLocation treeDropLocation = (JTree.DropLocation) support.getDropLocation();
+                        TreePath treePath = treeDropLocation.getPath();
+
+                        DropInfo dropInfo = checkServer(treePath);
+                        if (dropInfo == null) {
+                            return false;
+                        }
+                        
+                        ArrayList<File> transferredFiles = transferable.getFiles();
+                        
+                        ArrayList<File> compatibleTransferredFiles = dropInfo.filterCompatibleFiles(transferredFiles);
+                        if (compatibleTransferredFiles.isEmpty()) {
+                            return false;
+                        }
+                        
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } catch (UnsupportedFlavorException | IOException e) {
+                    return false;
+                }
             }
         }
 
@@ -204,74 +223,42 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
                 JTree.DropLocation treeDropLocation = (JTree.DropLocation) support.getDropLocation();
                 TreePath treePath = treeDropLocation.getPath();
 
-                String textTreePath = treePath.toString();
-
-                textTreePath = textTreePath.replaceAll("\\[", "").replaceAll("\\]", "");
-
-                String[] pathNodes = textTreePath.split(",");
-
-                for (int i = 0; i < pathNodes.length; i++) {
-                    pathNodes[i] = pathNodes[i].trim();
+                DropInfo dropInfo = checkServer(treePath);
+                if (dropInfo == null) {
+                    return false;
                 }
-
-                ArrayList<String> labels = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_MZDB_FILES);
-                String parentLabel = null;
-                int parentIndex = -1;
-
-                for (int i = 0; i < pathNodes.length; i++) {
-
-                    for (int j = 0; j < labels.size(); j++) {
-                        String node = pathNodes[i];
-                        String label = labels.get(j);
-
-                        if (node.compareToIgnoreCase(label) == 0) {
-                            parentLabel = pathNodes[i];
-                            parentIndex = i;
-                            break;
-                        }
-                    }
-
-                }
-
-                if (parentLabel == null || parentIndex == -1) {
+                ArrayList<File> compatibleTransferredFiles = dropInfo.filterCompatibleFiles(transferredFiles);
+                if (compatibleTransferredFiles.isEmpty()) {
                     return false;
                 }
 
-                StringBuilder destinationBuilder = new StringBuilder();
-
-                for (int i = parentIndex + 1; i < pathNodes.length; i++) {
-                    destinationBuilder.append(File.separator).append(pathNodes[i]);
-                }
-                destinationBuilder.append(File.separator);
-
-                String destination = destinationBuilder.toString();
+                String parentLabel = dropInfo.getParentLabel();
+                String destination = dropInfo.getDestination();
 
                 //Here we must do a small modification so that mzdb is deleted if it is a result of a conversion drag!
-                MzdbUploadSettings uploadSettings = new MzdbUploadSettings(!transferredFiles.get(0).getAbsolutePath().endsWith(".mzdb"), parentLabel, destination);
+                MzdbUploadSettings uploadSettings = new MzdbUploadSettings(false, parentLabel, destination);
 
-                if (transferredFiles.get(0).getAbsolutePath().endsWith(".mzdb")) {
-
-                    //Here prepare mzdb samples HashMap!
-                    HashMap<File, MzdbUploadSettings> uploadSamples = new HashMap<File, MzdbUploadSettings>();
-                    for (int i = 0; i < transferredFiles.size(); i++) {
-                        if (transferredFiles.get(i).isFile()) {
-                            uploadSamples.put(transferredFiles.get(i), uploadSettings);
-                        } else {
-                            File[] listOfFiles = transferredFiles.get(i).listFiles();
-                            for (File file : listOfFiles) {
-                                if (file.isFile()) {
-                                    uploadSamples.put(file, uploadSettings);
-                                }
+                //Here prepare mzdb samples HashMap!
+                HashMap<File, MzdbUploadSettings> uploadSamples = new HashMap<File, MzdbUploadSettings>();
+                for (int i = 0; i < transferredFiles.size(); i++) {
+                    if (compatibleTransferredFiles.get(i).isFile()) {
+                        uploadSamples.put(compatibleTransferredFiles.get(i), uploadSettings);
+                    } else {
+                        File[] listOfFiles = compatibleTransferredFiles.get(i).listFiles();
+                        for (File file : listOfFiles) {
+                            if (file.isFile()) {
+                                uploadSamples.put(file, uploadSettings);
                             }
                         }
                     }
+                }
 
-                    //Uploading Task
-                    MzdbUploadBatch uploadBatch = new MzdbUploadBatch(uploadSamples, treePath);
-                    Thread thread = new Thread(uploadBatch);
-                    thread.start();
+                //Uploading Task
+                MzdbUploadBatch uploadBatch = new MzdbUploadBatch(uploadSamples, treePath);
+                Thread thread = new Thread(uploadBatch);
+                thread.start();
 
-                } else if (transferredFiles.get(0).getAbsolutePath().endsWith(".raw")) {
+                /*else if (transferredFiles.get(0).getAbsolutePath().endsWith(".raw")) {
 
                     Preferences preferences = NbPreferences.root();
 
@@ -325,7 +312,7 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
                         launchConversion(transferredFiles, converterPath, uploadSettings, treePath);
                     }
 
-                }
+                }*/
 
             } catch (UnsupportedFlavorException | IOException ex) {
                 Exceptions.printStackTrace(ex);
@@ -337,7 +324,7 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
 
     }
 
-    private void launchConversion(ArrayList<File> transferredFiles, String converterPath, MzdbUploadSettings uploadSettings, TreePath pathToExpand) {
+    /*private void launchConversion(ArrayList<File> transferredFiles, String converterPath, MzdbUploadSettings uploadSettings, TreePath pathToExpand) {
         //Here prepare raw samples HashMap!
         HashMap<File, ConversionSettings> conversionSamples = new HashMap<File, ConversionSettings>();
         for (int i = 0; i < transferredFiles.size(); i++) {
@@ -360,6 +347,119 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
         ConvertionUploadBatch conversionBatch = new ConvertionUploadBatch(conversionSamples, pathToExpand);
         Thread thread = new Thread(conversionBatch);
         thread.start();
-    }
+    }*/
 
+    
+    private DropInfo checkServer(TreePath treePath) {
+
+        String textTreePath = treePath.toString();
+
+        textTreePath = textTreePath.replaceAll("\\[", "").replaceAll("\\]", "");
+
+        String[] pathNodes = textTreePath.split(",");
+
+        for (int i = 0; i < pathNodes.length; i++) {
+            pathNodes[i] = pathNodes[i].trim();
+        }
+        
+        DropInfo dropInfo = lookForLabels(pathNodes, RootInfo.TYPE_MZDB_FILES);
+        if (dropInfo != null) {
+            return dropInfo;
+        }
+        
+        dropInfo = lookForLabels(pathNodes, RootInfo.TYPE_RAW_FILES);
+        if (dropInfo != null) {
+            return dropInfo;
+        }
+        
+        dropInfo = lookForLabels(pathNodes, RootInfo.TYPE_RESULT_FILES);
+        return dropInfo;
+
+        
+    }
+    
+    private DropInfo lookForLabels(String[] pathNodes, String rootInfoType) {
+        ArrayList<String> labels = ServerFileSystemView.getServerFileSystemView().getLabels(rootInfoType);
+        String parentLabel = null;
+        int parentIndex = -1;
+
+        for (int i = 0; i < pathNodes.length; i++) {
+
+            for (int j = 0; j < labels.size(); j++) {
+                String node = pathNodes[i];
+                String label = labels.get(j);
+
+                if (node.compareToIgnoreCase(label) == 0) {
+                    parentLabel = pathNodes[i];
+                    parentIndex = i;
+                    break;
+                }
+            }
+
+        }
+
+        if (parentLabel == null || parentIndex == -1) {
+            return null;
+        }
+        
+        StringBuilder destinationBuilder = new StringBuilder();
+
+        for (int i = parentIndex + 1; i < pathNodes.length; i++) {
+            destinationBuilder.append(File.separator).append(pathNodes[i]);
+        }
+        destinationBuilder.append(File.separator);
+
+        String destination = destinationBuilder.toString();
+        
+        return new DropInfo(parentLabel, parentIndex, destination, rootInfoType);
+    }
+    
+    private class DropInfo {
+        
+        private String m_parentLabel;
+        private int m_parentIndex;
+        private String m_destination;
+        private String m_rootInfoType;
+        
+        public DropInfo(String parentLabel, int parentIndex, String destination, String rootInfoType) {
+            m_parentLabel = parentLabel;
+            m_parentIndex = parentIndex;
+            m_destination = destination;
+            m_rootInfoType = rootInfoType;
+        }
+        
+        public String getParentLabel() {
+            return m_parentLabel;
+        }
+        
+        public int getParentIndex() {
+            return m_parentIndex;
+        }
+        
+        public String getDestination() {
+            return m_destination;
+        }
+        
+        public ArrayList<File> filterCompatibleFiles(ArrayList<File> files) {
+            
+            String allowedExtension = null;
+            if (m_rootInfoType.equals(RootInfo.TYPE_MZDB_FILES)) {
+                allowedExtension = ".mzdb";
+            } else if (m_rootInfoType.equals(RootInfo.TYPE_RAW_FILES)) {
+                allowedExtension = ".raw";
+            } else if (m_rootInfoType.equals(RootInfo.TYPE_RESULT_FILES)) {
+                allowedExtension = ".dat";
+            } 
+            
+            
+            ArrayList<File> compatibleFiles = new ArrayList<>(files.size());
+            for (File f : files) {
+                if (f.getAbsolutePath().toLowerCase().endsWith(allowedExtension)) {
+                    compatibleFiles.add(f);
+                }
+            }
+            return compatibleFiles;
+        }
+    }
+    
 }

@@ -18,7 +18,7 @@ package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
-import fr.proline.studio.dpm.task.jms.DownloadFileTask;
+import fr.proline.studio.dpm.task.jms.DownloadProcessedFileTask;
 import fr.proline.studio.dpm.task.jms.ExportDatasetTask;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.GetExportInformationTask;
@@ -154,7 +154,7 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
                                                 fileName += "." + extension;
                                             }
                                             if (_filePath.size() == 1) {
-                                                DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath.get(0), _jmsNodeId.get(0));
+                                                DownloadProcessedFileTask task = new DownloadProcessedFileTask(downloadCallback, fileName, _filePath.get(0), _jmsNodeId.get(0));
                                                 AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
                                             } else {
                                                 int nb = 1;
@@ -195,7 +195,7 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
                                                         fn = dirName + dsName+"_"+ dsId.toString()+"_" + nb + "." + extension;
                                                     }
                                                     nb++;
-                                                    DownloadFileTask task = new DownloadFileTask(downloadCallback, fn, fp, _jmsNodeId.get(nb - 2));
+                                                    DownloadProcessedFileTask task = new DownloadProcessedFileTask(downloadCallback, fn, fp, _jmsNodeId.get(nb - 2));
                                                     AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
                                                 }
                                             }

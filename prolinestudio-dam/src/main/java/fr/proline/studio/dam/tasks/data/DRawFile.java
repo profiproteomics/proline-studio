@@ -11,6 +11,7 @@ public class DRawFile {
     private String mzdbFileName;
     private int projectsCount;
     private String project_ids;
+    private String projectIdsDecorted;
     private ProjectStatus projectStatus;
 
     public enum ProjectStatus {
@@ -87,7 +88,17 @@ public class DRawFile {
 
     public void setProjectIds(String project_ids) {
         this.project_ids = project_ids;
+        projectIdsDecorted = project_ids;
     }
+
+    public String getProjectIdsDecorted() {
+        return projectIdsDecorted;
+    }
+
+    public void setProjectIdsDecorted(String projectIdsDecorted) {
+        this.projectIdsDecorted = projectIdsDecorted;
+    }
+    
 
     public ProjectStatus getProjectStatus() {
         return projectStatus;

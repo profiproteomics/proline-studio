@@ -5,8 +5,8 @@
  */
 package fr.proline.mzscope.timstof;
 
-import fr.proline.brucker.timstof.TimstofReader;
-import fr.proline.brucker.timstof.model.TimsFrame;
+import fr.profi.brucker.timstof.io.TimstofReader;
+import fr.profi.brucker.timstof.model.TimsFrame;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.FeaturesExtractionRequest;
 import fr.proline.mzscope.model.IChromatogram;
@@ -17,7 +17,6 @@ import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.mzscope.model.QCMetrics;
 import fr.proline.mzscope.model.Spectrum;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -167,11 +166,11 @@ public class TimstofRawFile implements IRawFile{
            if(indexInFrameSpectra >= precursorIds.size())
                return null;
            Collections.sort(precursorIds);           
-           fr.proline.brucker.timstof.model.Spectrum tfSp = tf.getPrecursorSpectrum(precursorIds.get(indexInFrameSpectra));
+           fr.profi.brucker.timstof.model.Spectrum tfSp = tf.getPrecursorSpectrum(precursorIds.get(indexInFrameSpectra));
            spectrum = new Spectrum(spectrumIndex,  tf.getTime().floatValue(), tfSp.getMasses(), tfSp.getIntensities(), 2);
            spectrum.setTitle(tfSp.getTitle());
         } else if (!tf.isPasef()){
-            fr.proline.brucker.timstof.model.Spectrum tfSp = tf.getSingleSpectrum();
+            fr.profi.brucker.timstof.model.Spectrum tfSp = tf.getSingleSpectrum();
             //Suppose MS1
 //            HashMap<Float, Double> massPerInt = new HashMap<>();
 //            double[] allMasses = tfSp.getMasses();

@@ -34,6 +34,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelListener;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -85,6 +87,12 @@ public abstract class AbstractPeakelsPanel extends JPanel  {
     jScrollPane.setViewportView(m_table);
     m_table.setFillsViewportHeight(true);
     m_table.setViewport(jScrollPane.getViewport());
+  m_table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+    @Override
+    public void valueChanged(ListSelectionEvent e) {
+      updatePeakelsViewer(getSelectedPeakels());
+    }
+  });
 
     JToolBar toolbar = initToolbar();
 
@@ -147,8 +155,8 @@ public abstract class AbstractPeakelsPanel extends JPanel  {
           plot.setPlotInformation(wrapper.getPlotInformation());
           m_graphPlot.addPlot(plot);
       }
+      m_graphPlot.getYAxis().lockMinValue(0.0);
       m_graphPlot.getYAxis().setRange(0, maxY);
-      m_graphPlot.lockMinYValue();
       m_graphPlot.repaint();
     }
   }

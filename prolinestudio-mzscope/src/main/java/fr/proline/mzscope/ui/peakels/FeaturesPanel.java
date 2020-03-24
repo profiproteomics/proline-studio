@@ -81,12 +81,12 @@ public class FeaturesPanel extends AbstractPeakelsPanel {
 
     JToolBar toolbar = super.initToolbar();
 
-    JButton importCSVBtn = new JButton();
-    importCSVBtn.setIcon(IconManager.getIcon(IconManager.IconType.TABLE_IMPORT));
-    importCSVBtn.setToolTipText("Import m/z values from a csv file...");
-    importCSVBtn.addActionListener(e -> importCSVIons());
+    JButton matchIonsBtn = new JButton();
+    matchIonsBtn.setIcon(IconManager.getIcon(IconManager.IconType.TABLE_IMPORT));
+    matchIonsBtn.setToolTipText("Match (m/z,rt) values from a csv file...");
+    matchIonsBtn.addActionListener(e -> matchCSVIons());
 
-    toolbar.add(importCSVBtn);
+    toolbar.add(matchIonsBtn);
 
     JButton buildSpectrumBtn = new JButton();
     buildSpectrumBtn.setIcon(IconManager.getIcon(IconManager.IconType.SIGNAL));
@@ -156,7 +156,7 @@ public class FeaturesPanel extends AbstractPeakelsPanel {
     m_table.getColumnExt(m_table.convertColumnIndexToView(FeaturesTableModel.COLTYPE_FEATURE_RAWFILE.getIndex())).setVisible(displayRawFileColumn);
   }
 
-  private void importCSVIons() {
+  private void matchCSVIons() {
     Preferences prefs = Preferences.userNodeForPackage(this.getClass());
     String directory = prefs.get(LAST_DIR, m_fchooser.getCurrentDirectory().getAbsolutePath());
     m_fchooser.setCurrentDirectory(new File(directory));

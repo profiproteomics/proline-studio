@@ -19,6 +19,7 @@ package fr.proline.mzscope.ui;
 import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
 import fr.proline.mzscope.model.*;
+import fr.proline.mzscope.ui.peakels.DetectedFeaturesPanel;
 import fr.proline.mzscope.ui.peakels.FeaturesPanel;
 import fr.proline.mzscope.ui.peakels.PeakelsPanel;
 import fr.proline.mzscope.utils.ButtonTabComponent;
@@ -456,7 +457,7 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
 
 
     private void startFeaturesExtractions(List<IRawFile> rawfiles, FeaturesExtractionRequest params) {
-        final FeaturesPanel featurePanel = new FeaturesPanel(this);
+        final DetectedFeaturesPanel featurePanel = new DetectedFeaturesPanel(this);
         final ButtonTabComponent tabComp = addFeatureTab(getName(rawfiles), featurePanel, params.getExtractionParamsString());
         tabComp.setWaitingState(true);
         fireExtractionEvent(new ExtractionEvent(this, ExtractionEvent.EXTRACTION_STARTED));

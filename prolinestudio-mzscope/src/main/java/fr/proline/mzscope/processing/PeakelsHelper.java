@@ -32,6 +32,8 @@ import static fr.proline.mzscope.processing.SpectrumUtils.MIN_CORRELATION_SCORE;
 import java.io.StreamCorruptedException;
 import java.util.*;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.MultivariateSummaryStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Tuple2;
@@ -46,6 +48,7 @@ public class PeakelsHelper {
     private static final Logger logger = LoggerFactory.getLogger(PeakelsHelper.class);
     private static int HALF_MZ_WINDOW = 5;
     private static float RT_TOLERANCE = 40.0f;
+    private static float INTENSITY_PERCENTILE = 0.99f;
 
     private List<Peakel> peakels;
     private RTree<Peakel, Point> rTree;
@@ -88,7 +91,11 @@ public class PeakelsHelper {
 
         long start = System.currentTimeMillis();
 
-        List<Feature> result = new ArrayList<>();
+        DescriptiveStatistics[] stats = new DescriptiveStatistics[] {new DescriptiveStatistics(), new DescriptiveStatistics(), new DescriptiveStatistics()};
+
+        List<Feature> features = new ArrayList<>();
+        List<Feature> monoPeakelFeatures = new ArrayList<>();
+
         Map<Integer, Peakel> assigned = new HashMap<>();
 
         peakels.sort(new Comparator<Peakel>() {
@@ -101,7 +108,8 @@ public class PeakelsHelper {
         // for debug purposes
         double REFMZ = 724.71024;
         double REFRT = 133.866;
-        
+
+        float intensityThreshold = peakels.get(Math.min(peakels.size()-1, (int)(peakels.size()*INTENSITY_PERCENTILE))).getApexIntensity();
 
         for (int k = 0; k < peakels.size(); k++) {
             if ((k % 10000) == 0) {
@@ -167,13 +175,34 @@ public class PeakelsHelper {
                     logger.warn("Strange situation: peakel {}, {} not found from pattern at mono {}, {}+ (gap: {})", peakels.get(k).getMz(), peakels.get(k).getApexElutionTime()/60.0, bestPattern.monoMz(), bestPattern.charge(), gapRank);
                     l.add(peakels.get(k));
                 }
-                //logger.info("Creates feature with "+l.size()+" peakels at mz="+l.get(0).getMz()+ " from peakel "+peakels[k].getMz()+ " at "+peakels[k].getApexElutionTime()/60.0);                
                 Feature feature = new Feature(l.get(0).getMz(), bestPattern.charge(), JavaConverters.asScalaBufferConverter(l).asScala(), true);
-                result.add(feature);
+                if (l.size() > 1) {
+                    features.add(feature);
+                    stats[0].addValue(feature.getBasePeakel().getApexIntensity());
+                    stats[1].addValue(feature.calcDuration());
+                    stats[2].addValue(feature.getMs1Count());
+                } else {
+                    monoPeakelFeatures.add(feature);
+                }
             }
         }
-        logger.info("Features detected : {} in {} ms", result.size(), (System.currentTimeMillis() - start));
-        return result;
+        // filter mono peakel features
+        double minIntensity = stats[0].getPercentile(10);
+        double maxDuration = stats[1].getMax();
+        double minMs1Count = stats[2].getPercentile(10);
+
+        logger.info("Thresholds: minIntensity={}, maxDuration={}, minMs1Count{}", minIntensity, maxDuration, minMs1Count);
+        for(Feature f: monoPeakelFeatures) {
+            if ((f.getBasePeakel().getApexIntensity() >= minIntensity) && (f.calcDuration() <= maxDuration) && (f.getMs1Count() >= minMs1Count)) {
+                features.add(f);
+            } else {
+                logger.info("Doubtful Feature  = {}; {}; {}; {}; {} ",f.getMz(), f.getElutionTime() / 60.0, f.getCharge(), f.getBasePeakel().getApexIntensity(),  f.getMs1Count());
+                features.add(f);
+            }
+        }
+
+        logger.info("Features detected : {} in {} ms", features.size(), (System.currentTimeMillis() - start));
+        return features;
     }
 
     public List<Feature> deisotopePeakelsFromMzdb(MzDbReader reader, float mzTolPPM) throws StreamCorruptedException, SQLiteException {

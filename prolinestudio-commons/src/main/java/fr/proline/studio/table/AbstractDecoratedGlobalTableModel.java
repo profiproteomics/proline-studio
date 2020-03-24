@@ -120,7 +120,14 @@ public abstract class AbstractDecoratedGlobalTableModel<T> extends DecoratedTabl
     public Class getDataColumnClass(int columnIndex) {
         return getColumnClass(columnIndex);
     }
-
+    
+    /**
+     * Used for export etc, which mais be diffrent from shown in Swing.
+     * You can Override it.
+     * @param rowIndex
+     * @param columnIndex
+     * @return 
+     */
     @Override
     public Object getDataValueAt(int rowIndex, int columnIndex) {
         return getValueAt(rowIndex, columnIndex);

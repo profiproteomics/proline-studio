@@ -21,6 +21,8 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ProjectInfo;
+import fr.proline.studio.dpm.serverfilesystem.RootInfo;
+import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.filter.ConvertValueInterface;
@@ -47,6 +49,7 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -104,11 +107,12 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
     private SharedProjectDialg m_sharedProjectDialog;
     private HashMap<Long, ProjectInfo> m_sharedProjects4SelectMap;
     private ProjectsInfoTableModel m_sharedProjects4SelectModel = new ProjectsInfoTableModel();
+    String m_mzdbPath;
 
     public ProjectsPanel(JDialog dialog, Boolean editable) {
         m_isEditable = editable;
         m_dialogOwner = dialog;
-
+        m_mzdbPath = this.getDRawFilePathRoot();
         setLayout(new BorderLayout());
 
         JPanel internalPanel = createInternalPanel();
@@ -329,6 +333,15 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         }
     }
 
+    /**
+     * For each DRawFile, mark it's ProjectIds in color according to project
+     * status, register colored ProjectsId by setProjectIdsDecorted().<br>
+     * Build m_sharedProjects4SelectMap, which register another projets, those use
+     * also the DRawFile in this selected project(s).<br>
+     * Mark relative rawFile directory.
+     * @param resultRawfiles
+     * @param selectedProjectIds
+     */
     private void updateRawFiles(ArrayList<DRawFile> resultRawfiles, List<Long> selectedProjectIds) {
         ArrayList<String> idList = new ArrayList();
         ArrayList<DRawFile> fileList = new ArrayList<>();
@@ -340,6 +353,10 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
             } else {
                 idList.add(identifier);
                 fileList.add(file);
+            }
+            String path = file.getRawFileDirectory();
+            if (path.startsWith(m_mzdbPath)) {
+                file.setRawFileDirectory(path.replaceFirst(m_mzdbPath, "<" + m_mzdbPath + ">"));
             }
             DRawFile.ProjectStatus ps = DRawFile.ProjectStatus.ACTIVE;
             int nbArchived = 0;
@@ -383,6 +400,14 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         List data = m_sharedProjects4SelectMap.values().stream().sorted(Comparator.comparingLong(ProjectInfo::getProjectId)).collect(Collectors.toList());
         m_sharedProjects4SelectModel.setData(data);
         m_rawFileTableModel.setData(fileList);
+    }
+
+    private String getDRawFilePathRoot() {
+        ArrayList<String> paths = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_MZDB_FILES);
+        if (paths != null && !paths.isEmpty()) {
+            return paths.get(0);
+        }
+        return "";
     }
 
     @Override
@@ -555,9 +580,10 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
 
         /**
          * used for export
+         *
          * @param rowIndex
          * @param columnIndex
-         * @return 
+         * @return
          */
         @Override
         public Object getDataValueAt(int rowIndex, int columnIndex) {

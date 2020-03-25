@@ -32,6 +32,7 @@ import javax.swing.JTable;
 import javax.swing.JTree;
 
 import javax.swing.TransferHandler;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import org.openide.util.Exceptions;
 
@@ -221,98 +222,9 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
                 ArrayList<File> transferredFiles = transferable.getFiles();
 
                 JTree.DropLocation treeDropLocation = (JTree.DropLocation) support.getDropLocation();
-                TreePath treePath = treeDropLocation.getPath();
+                TreePath dropPath = treeDropLocation.getPath();
 
-                DropInfo dropInfo = checkServer(treePath);
-                if (dropInfo == null) {
-                    return false;
-                }
-                ArrayList<File> compatibleTransferredFiles = dropInfo.filterCompatibleFiles(transferredFiles);
-                if (compatibleTransferredFiles.isEmpty()) {
-                    return false;
-                }
-
-                String parentLabel = dropInfo.getParentLabel();
-                String destination = dropInfo.getDestination();
-
-                //Here we must do a small modification so that mzdb is deleted if it is a result of a conversion drag!
-                MzdbUploadSettings uploadSettings = new MzdbUploadSettings(false, parentLabel, destination);
-
-                //Here prepare mzdb samples HashMap!
-                HashMap<File, MzdbUploadSettings> uploadSamples = new HashMap<File, MzdbUploadSettings>();
-                for (int i = 0; i < transferredFiles.size(); i++) {
-                    if (compatibleTransferredFiles.get(i).isFile()) {
-                        uploadSamples.put(compatibleTransferredFiles.get(i), uploadSettings);
-                    } else {
-                        File[] listOfFiles = compatibleTransferredFiles.get(i).listFiles();
-                        for (File file : listOfFiles) {
-                            if (file.isFile()) {
-                                uploadSamples.put(file, uploadSettings);
-                            }
-                        }
-                    }
-                }
-
-                //Uploading Task
-                MzdbUploadBatch uploadBatch = new MzdbUploadBatch(uploadSamples, treePath);
-                Thread thread = new Thread(uploadBatch);
-                thread.start();
-
-                /*else if (transferredFiles.get(0).getAbsolutePath().endsWith(".raw")) {
-
-                    Preferences preferences = NbPreferences.root();
-
-                    String converterPath = preferences.get("Conversion/Upload_Settings.Converter_(.exe)", null);
-
-                    if (converterPath == null) {
-                        Frame f = WindowManager.getDefault().getMainWindow();
-
-                        DefaultConverterDialog dialog = DefaultConverterDialog.getDialog(f);
-
-                        dialog.addDefaultDialogListener(new DefaultDialogListener() {
-
-                            @Override
-                            public void okPerformed(DefaultDialog d) {
-                                
-                                launchConversion(transferredFiles, preferences.get("Conversion/Upload_Settings.Converter_(.exe)", null), uploadSettings, treePath);
-
-                            }
-
-                            @Override
-                            public void cancelPerformed(DefaultDialog d) {
-                                ;
-                            }
-
-                            @Override
-                            public void defaultPerformed(DefaultDialog d) {
-                                ;
-                            }
-
-                            @Override
-                            public void backPerformed(DefaultDialog d) {
-                                ;
-                            }
-
-                            @Override
-                            public void savePerformed(DefaultDialog d) {
-                                ;
-                            }
-
-                            @Override
-                            public void loadPerformed(DefaultDialog d) {
-                                ;
-                            }
-
-                        });
-
-                        dialog.setLocationRelativeTo(f);
-                        dialog.setVisible(true);
-
-                    } else {     
-                        launchConversion(transferredFiles, converterPath, uploadSettings, treePath);
-                    }
-
-                }*/
+                return treeTransfer(transferredFiles, dropPath);
 
             } catch (UnsupportedFlavorException | IOException ex) {
                 Exceptions.printStackTrace(ex);
@@ -324,33 +236,59 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
 
     }
 
-    /*private void launchConversion(ArrayList<File> transferredFiles, String converterPath, MzdbUploadSettings uploadSettings, TreePath pathToExpand) {
-        //Here prepare raw samples HashMap!
-        HashMap<File, ConversionSettings> conversionSamples = new HashMap<File, ConversionSettings>();
+    public boolean treeTransfer(ArrayList<File> transferredFiles, TreePath dropPath) {
+        DropInfo dropInfo = checkServer(dropPath);
+        if (dropInfo == null) {
+            return false;
+        }
+        ArrayList<File> compatibleTransferredFiles = dropInfo.filterCompatibleFiles(transferredFiles);
+        if (compatibleTransferredFiles.isEmpty()) {
+            return false;
+        }
+
+        String parentLabel = dropInfo.getParentLabel();
+        String destination = dropInfo.getDestination();
+
+        //Here we must do a small modification so that mzdb is deleted if it is a result of a conversion drag!
+        MzdbUploadSettings uploadSettings = new MzdbUploadSettings(false, parentLabel, destination);
+
+        //Here prepare mzdb samples HashMap!
+        HashMap<File, MzdbUploadSettings> uploadSamples = new HashMap<File, MzdbUploadSettings>();
         for (int i = 0; i < transferredFiles.size(); i++) {
-
-            ConversionSettings conversionSettings = new ConversionSettings(converterPath, transferredFiles.get(i).getParent(), false, true);
-            conversionSettings.setUploadSettings(uploadSettings);
-
-            if (transferredFiles.get(i).isFile()) {
-                conversionSamples.put(transferredFiles.get(i), conversionSettings);
+            if (compatibleTransferredFiles.get(i).isFile()) {
+                uploadSamples.put(compatibleTransferredFiles.get(i), uploadSettings);
             } else {
-                File[] listOfFiles = transferredFiles.get(i).listFiles();
+                File[] listOfFiles = compatibleTransferredFiles.get(i).listFiles();
                 for (File file : listOfFiles) {
                     if (file.isFile()) {
-                        conversionSamples.put(file, conversionSettings);
+                        uploadSamples.put(file, uploadSettings);
                     }
                 }
             }
         }
 
-        ConvertionUploadBatch conversionBatch = new ConvertionUploadBatch(conversionSamples, pathToExpand);
-        Thread thread = new Thread(conversionBatch);
+        //Uploading Task
+        MzdbUploadBatch uploadBatch = new MzdbUploadBatch(uploadSamples, dropPath);
+        Thread thread = new Thread(uploadBatch);
         thread.start();
-    }*/
 
+        return true;
+    }
     
     private DropInfo checkServer(TreePath treePath) {
+
+        // Check that the path if a directory
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) treePath.getLastPathComponent();
+        Object data = node.getUserObject();
+        if (data instanceof IconData) {
+            Object extraData = ((IconData) data).getObject();
+            if (extraData instanceof TreeFileChooserPanel.FileNode) {
+                File f = ((TreeFileChooserPanel.FileNode) extraData).getFile();
+                if (! f.isDirectory()) {
+                    return null;
+                }
+            }
+        }
 
         String textTreePath = treePath.toString();
 

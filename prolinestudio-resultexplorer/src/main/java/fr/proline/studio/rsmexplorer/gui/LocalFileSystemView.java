@@ -20,6 +20,8 @@ import fr.proline.studio.msfiles.ExportMgfDialog;
 import fr.proline.studio.msfiles.FileDeletionBatch;
 import fr.proline.mzscope.utils.IPopupMenuDelegate;
 import fr.proline.studio.dam.DatabaseDataManager;
+import fr.proline.studio.msfiles.FileToTransfer;
+import fr.proline.studio.msfiles.MsFilesExplorer;
 import fr.proline.studio.msfiles.MzdbEncodingVerificationBatch;
 import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.pattern.MzScopeWindowBoxManager;
@@ -57,6 +59,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
 import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
@@ -82,6 +86,8 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
     private JComboBox m_rootsComboBox;
     private Preferences m_preferences;
 
+    private MsFilesExplorer.FileSelectionInterface m_fileSelectionInterface = null;
+    
     private HashSet<String> m_paths;
 
     private boolean m_updating;
@@ -253,6 +259,21 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
                 }
             }
         });
+        
+        m_tree.addTreeSelectionListener(new TreeSelectionListener() {
+            public void valueChanged(TreeSelectionEvent e) {
+                
+                if (m_fileSelectionInterface == null) {
+                    return;
+                }
+                
+                ArrayList<FileToTransfer> files = new ArrayList<>();
+                ArrayList<FileToTransfer> directories = new ArrayList<>();
+                getSelectedFilesAndDirectories(files, directories);
+                m_fileSelectionInterface.upSelectionChanged(files, directories);
+  
+            }
+        });
 
         JScrollPane scrollPane = new JScrollPane(m_tree);
         treePanel.add(scrollPane, BorderLayout.CENTER);
@@ -265,6 +286,10 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         initRoot();
     }
 
+    public void setFileSelectionListener(MsFilesExplorer.FileSelectionInterface fileSelectionInterface) {
+        m_fileSelectionInterface = fileSelectionInterface;
+    }
+    
     private void initRoot() {
         String previousDrive = m_preferences.get(LOCAL_FILE_SYSTEM_LIST_KEY + "." + DRIVE_PARAM_KEY, null);
         if (previousDrive != null) {
@@ -301,6 +326,32 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         }
         return selectedURLs;
     }
+    
+    private void getSelectedFilesAndDirectories(ArrayList<FileToTransfer> files, ArrayList<FileToTransfer> directories) {
+        files.clear();
+        directories.clear();
+        
+        TreePath[] paths = m_tree.getSelectionPaths();
+        if (paths != null) {
+            for (TreePath path : paths) {
+
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+                File f = (File) node.getUserObject();
+
+                if (f.isFile()) {
+                    
+                    String url = f.getAbsolutePath().toLowerCase();
+                    if (url.endsWith(".mzdb") || url.endsWith(".raw") || url.endsWith(".wiff") || url.endsWith(".dat")) {
+                        files.add(new FileToTransfer(f,path));
+                    }
+                } else if (f.isDirectory()) {
+                    directories.add(new FileToTransfer(f,path));
+                }
+
+            }
+        }
+    }
+    
 
     public void resetTreeState() {
         TreeUtils.setExpansionState(TreeUtils.loadExpansionState(TreeUtils.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString()), m_tree, (DefaultMutableTreeNode) m_tree.getModel().getRoot(), TreeUtils.TreeType.LOCAL, m_rootsComboBox.getSelectedItem().toString());
@@ -384,7 +435,11 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
     private boolean isSelectionHomogeneous(ArrayList<String> selectedURLs) {
         if (selectedURLs.size() > 0) {
-            String firstSuffix = selectedURLs.get(0).substring(selectedURLs.get(0).lastIndexOf("."));
+            int lastIndexOfDot = selectedURLs.get(0).lastIndexOf(".");
+            if (lastIndexOfDot == -1 ) {
+                return false;
+            }
+            String firstSuffix = selectedURLs.get(0).substring(lastIndexOfDot);
             for (String url : selectedURLs) {
                 if (!url.endsWith(firstSuffix)) {
                     return false;

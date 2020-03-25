@@ -215,7 +215,9 @@ public class IconManager {
         MOUSE_POINTER,
         MOUSE_SELECT_SQUARE,
         MOUSE_SELECT_FREE,
-        EXPAND
+        EXPAND,
+        ARROW_MOVE_UP_BIG,
+        ARROW_MOVE_DOWN_BIG
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private final static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -710,6 +712,10 @@ public class IconManager {
                 return "fr/proline/studio/images/selection-select-byhand.png";
             case EXPAND:
                 return "fr/proline/studio/images/expand.png";
+            case ARROW_MOVE_UP_BIG:
+                return "fr/proline/studio/images/arrow-090.png";
+            case ARROW_MOVE_DOWN_BIG:
+                return "fr/proline/studio/images/arrow-270.png";
         }
 
         return null; // can not happen

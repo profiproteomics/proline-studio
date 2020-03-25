@@ -16,6 +16,8 @@
  */
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.studio.msfiles.FileToTransfer;
+import fr.proline.studio.msfiles.MsFilesExplorer;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.awt.Component;
@@ -66,6 +68,8 @@ public class TreeFileChooserPanel extends JPanel {
     private boolean m_showUpdateButton;
     private TreeUtils.TreeType m_treeType;
 
+    private MsFilesExplorer.FileSelectionInterface m_fileSelectionInterface = null;
+    
     public TreeFileChooserPanel(FileSystemView fileSystemView, TreeFileChooserTransferHandler transferHandler) {
         m_fileSystemView = fileSystemView;
         m_transferHandler = transferHandler;
@@ -132,7 +136,22 @@ public class TreeFileChooserPanel extends JPanel {
 
         m_tree.addTreeExpansionListener(new DirExpansionListener());
 
-        m_tree.addTreeSelectionListener(new DirSelectionListener());
+        
+        m_tree.addTreeSelectionListener(new TreeSelectionListener() {
+            @Override
+            public void valueChanged(TreeSelectionEvent e) {
+
+                if (m_fileSelectionInterface ==null) {
+                    return;
+                }
+                
+                ArrayList<FileToTransfer> files = new ArrayList<>();
+                ArrayList<FileToTransfer> directories = new ArrayList<>();
+                getSelectedFilesAndDirectories(files, directories);
+                m_fileSelectionInterface.downSelectionChanged(files, directories);
+  
+            }
+        });
         
         m_tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
         m_tree.setShowsRootHandles(true);
@@ -190,6 +209,10 @@ public class TreeFileChooserPanel extends JPanel {
         add(scrollPane, c);
     }
 
+    public void setFileSelectionListener(MsFilesExplorer.FileSelectionInterface fileSelectionInterface) {
+        m_fileSelectionInterface = fileSelectionInterface;
+    }
+    
     public void updateTree() {
 
         HashSet<String> expandedPaths = TreeUtils.getExpansionState(m_tree);
@@ -337,15 +360,36 @@ public class TreeFileChooserPanel extends JPanel {
         }
     }
 
-    class DirSelectionListener
-            implements TreeSelectionListener {
+    private void getSelectedFilesAndDirectories(ArrayList<FileToTransfer> files, ArrayList<FileToTransfer> directories) {
+        files.clear();
+        directories.clear();
+        
+        TreePath[] paths = m_tree.getSelectionPaths();
+        if (paths != null) {
+            for (TreePath path : paths) {
 
-        @Override
-        public void valueChanged(TreeSelectionEvent event) {
-            DefaultMutableTreeNode node = getTreeNode(
-                    event.getPath());
-            FileNode fnode = getFileNode(node);
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+                Object data = node.getUserObject();
+                if (data instanceof IconData) {
+                    Object extraData = ((IconData) data).getObject();
+                    if (extraData instanceof FileNode) {
+                        File f = ((FileNode) extraData).getFile();
 
+                        if (f.isFile()) {
+                            files.add(new FileToTransfer(f, path));
+                        } else if (f.isDirectory()) {
+                            directories.add(new FileToTransfer(f, path));
+                        }
+                    } else {
+                        files.clear();
+                        directories.clear();
+                        return;
+                    }
+                }
+
+
+
+            }
         }
     }
 

@@ -131,22 +131,9 @@ public class LocalFileSystemTransferHandler extends TransferHandler {
                 
                 TreePath dropPath = dropLocation.getPath();
                 
-                // separe mzdb files and other files
-                /*ArrayList<File> mzdbFiles = new ArrayList<>();
-                ArrayList<File> otherFiles = new ArrayList<>();
-                for (File f : filesToTransfer) {
-                    if (f.getName().toLowerCase().endsWith(".mzdb")) {
-                        mzdbFiles.add(f);
-                    } else {
-                        otherFiles.add(f);
-                    }
-                }
-                
-                if (! mzdbFiles.isEmpty()) {*/
-                    MzdbDownloadBatch downloadBatch = new MzdbDownloadBatch(filesToTransfer, dropPath, MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().getSelectedRoot());
-                    Thread downloadThread = new Thread(downloadBatch);
-                    downloadThread.start();
-                //} 
+                MzdbDownloadBatch downloadBatch = new MzdbDownloadBatch(filesToTransfer, dropPath, MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().getSelectedRoot());
+                Thread downloadThread = new Thread(downloadBatch);
+                downloadThread.start();
 
                 return true;
                 

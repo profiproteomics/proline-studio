@@ -50,6 +50,7 @@ import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -336,9 +337,10 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
     /**
      * For each DRawFile, mark it's ProjectIds in color according to project
      * status, register colored ProjectsId by setProjectIdsDecorted().<br>
-     * Build m_sharedProjects4SelectMap, which register another projets, those use
-     * also the DRawFile in this selected project(s).<br>
+     * Build m_sharedProjects4SelectMap, which register another projets, those
+     * use also the DRawFile in this selected project(s).<br>
      * Mark relative rawFile directory.
+     *
      * @param resultRawfiles
      * @param selectedProjectIds
      */
@@ -507,6 +509,34 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         }
 
         @Override
+        public Class<?> getColumnClass(int columnIndex) {
+            switch (columnIndex) {
+                case COLTYPE_STATUS:
+                    return Integer.class;
+                case COLTYPE_PROJECTID:
+                    return Long.class;
+                case COLTYPE_NAME:
+                    return String.class;
+                case COLTYPE_DESCRIPTION:
+                    return String.class;
+                case COLTYPE_SIZE:
+                    return Double.class;
+                case COLTYPE_USER:
+                    return String.class;
+                case COLTYPE_RAW_FILES_COUNT:
+                    return Integer.class;
+                case COLTYPE_DB_NAME:
+                    return String.class;
+                case COLTYPE_LAST_DATASET_DATE:
+                    return Date.class;
+                case COLTYPE_PROPERTIES:
+                    return String.class;
+                default:
+                    return Object.class;//as in AbstractTableModel
+            }
+        }
+
+        @Override
         public String getToolTipForHeader(int col) {
             return m_columnTooltips[col];
         }
@@ -625,6 +655,27 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         }
 
         @Override
+        public Class<?> getColumnClass(int columnIndex) {
+            switch (columnIndex) {
+                case COLTYPE_PROJECT_STATUS:
+                    return Integer.class;
+                case COLTYPE_CREATION_TIMESTAMP:
+                    return Timestamp.class;
+                case COLTYPE_IDENTIFIER:
+                case COLTYPE_RAW_FILE_NAME:
+                case COLTYPE_RAW_FILE_DIRECTORY:
+                case COLTYPE_PROJECT_IDS:
+                    return String.class;
+                case COLTYPE_PROJECTS_COUNT:
+                    return Integer.class;
+                case COLTYPE_SERIALIZED_PROPERTIES:
+                    return String.class;
+                default:
+                    return Object.class;
+            }
+        }
+
+        @Override
         public TableCellRenderer getRenderer(int row, int col) {
             return null;//renderer at table level, not here
         }
@@ -644,8 +695,7 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         }
 
         @Override
-        public void addFilters(LinkedHashMap<Integer, Filter> filtersMap
-        ) {
+        public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
             //no Filters
         }
 

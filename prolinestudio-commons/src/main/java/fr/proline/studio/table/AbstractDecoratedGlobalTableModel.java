@@ -1,7 +1,18 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/* 
+ * Copyright (C) 2019 VD225637
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
+ * ; either version 2.1 
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * CeCILL License V2.1 for more details.
+ *
+ * You should have received a copy of the CeCILL License 
+ * along with this program; If not, see <http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html>.
  */
 package fr.proline.studio.table;
 
@@ -30,6 +41,15 @@ public abstract class AbstractDecoratedGlobalTableModel<T> extends DecoratedTabl
 
     @Override
     public abstract Object getValueAt(int rowIndex, int columnIndex);
+
+    /**
+     * AbstractTableModel 
+     * Very often, if you have non String.class column, you should override it in order to use <b>column sort</b>
+     * @param columnIndex
+     * @return 
+     */
+    @Override
+    public abstract Class<?> getColumnClass(int columnIndex);//{/*default:*/ return Object.class;}
 
     @Override
     public abstract TableCellRenderer getRenderer(int row, int col);
@@ -120,13 +140,14 @@ public abstract class AbstractDecoratedGlobalTableModel<T> extends DecoratedTabl
     public Class getDataColumnClass(int columnIndex) {
         return getColumnClass(columnIndex);
     }
-    
+
     /**
-     * Used for export etc, which mais be diffrent from shown in Swing.
-     * You can Override it.
+     * Used for export etc, which mais be diffrent from shown in Swing. You can
+     * Override it.
+     *
      * @param rowIndex
      * @param columnIndex
-     * @return 
+     * @return
      */
     @Override
     public Object getDataValueAt(int rowIndex, int columnIndex) {

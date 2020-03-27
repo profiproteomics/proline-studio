@@ -542,14 +542,6 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         }
 
         @Override
-        public ArrayList<ExportFontData> getExportFonts(int row, int col) {
-            if (col == COLTYPE_SIZE) {
-                fr.proline.studio.export.ExportModelUtilities.getExportRowCell(this, row, col);
-            }
-            return null;
-        }
-
-        @Override
         public TableCellRenderer getRenderer(int row, int col) {
             return null;
         }
@@ -687,7 +679,7 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         public ArrayList<ExportFontData> getExportFonts(int row, int col) {
             if (col == COLTYPE_PROJECT_IDS) {
                 String projectId = (String)getDataValueAt(row, col); //return projectId without html tag
-                ArrayList<ExportFontData> fonds = fr.proline.studio.table.ExportModelUtilities.getExportFonts(projectId,m_projectStatusMap);
+                ArrayList<ExportFontData> fonds = fr.proline.studio.table.ExportFontModelUtilities.getExportFonts(projectId,m_projectStatusMap);
                 return fonds;
             }
             return null;

@@ -25,8 +25,9 @@ import fr.proline.core.orm.msi.dto.DPtmSiteProperties;
 import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
-import fr.proline.studio.table.ExportModelUtilities;
+import fr.proline.studio.table.ExportFontModelUtilities;
 import fr.proline.studio.export.ExportFontData;
+import fr.proline.studio.export.ExportModelUtilities;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
@@ -432,7 +433,7 @@ public class ProteinPTMSiteTableModel extends LazyTableModel implements GlobalTa
     if (col == COLTYPE_PEPTIDE_NAME) {
       PTMSite proteinPTMSite = m_arrayInUse.get(row);
       DPeptideMatch peptideMatch = proteinPTMSite.getBestPeptideMatch();
-      return ExportModelUtilities.getExportFonts(peptideMatch);
+      return ExportFontModelUtilities.getExportFonts(peptideMatch);
     }
     return null;
   }

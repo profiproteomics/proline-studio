@@ -24,6 +24,7 @@ import fr.proline.studio.dam.tasks.data.ProjectInfo;
 import fr.proline.studio.dpm.serverfilesystem.RootInfo;
 import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
 import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.Filter;
@@ -49,7 +50,6 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -542,6 +542,14 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         }
 
         @Override
+        public ArrayList<ExportFontData> getExportFonts(int row, int col) {
+            if (col == COLTYPE_SIZE) {
+                fr.proline.studio.export.ExportModelUtilities.getExportRowCell(this, row, col);
+            }
+            return null;
+        }
+
+        @Override
         public TableCellRenderer getRenderer(int row, int col) {
             return null;
         }
@@ -673,6 +681,16 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
                 default:
                     return Object.class;
             }
+        }
+
+        @Override
+        public ArrayList<ExportFontData> getExportFonts(int row, int col) {
+            if (col == COLTYPE_PROJECT_IDS) {
+                String projectId = (String)getDataValueAt(row, col); //return projectId without html tag
+                ArrayList<ExportFontData> fonds = fr.proline.studio.table.ExportModelUtilities.getExportFonts(projectId,m_projectStatusMap);
+                return fonds;
+            }
+            return null;
         }
 
         @Override

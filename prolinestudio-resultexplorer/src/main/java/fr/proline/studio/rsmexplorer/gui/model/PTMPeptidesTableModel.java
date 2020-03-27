@@ -26,6 +26,7 @@ import fr.proline.core.orm.msi.dto.DPtmSiteProperties;
 import fr.proline.core.orm.msi.dto.DQuantPeptide;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.export.ExportFontData;
+import fr.proline.studio.export.ExportModelUtilities;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.filter.ConvertValueInterface;
@@ -38,7 +39,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
-import fr.proline.studio.table.ExportModelUtilities;
+import fr.proline.studio.table.ExportFontModelUtilities;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
@@ -824,7 +825,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     public ArrayList<ExportFontData> getExportFonts(int row, int col) {
         if (col == COLTYPE_PEPTIDE_NAME) {
             PTMPeptideInstance peptide = m_ptmPepInstancesAsRow.get(row).ptmPeptideInstance;
-            return ExportModelUtilities.getExportFonts(peptide.getPeptideInstance());
+            return ExportFontModelUtilities.getExportFonts(peptide.getPeptideInstance());
         }
         return null;
     }

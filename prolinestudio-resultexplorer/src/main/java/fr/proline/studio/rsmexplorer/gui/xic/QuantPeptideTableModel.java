@@ -33,7 +33,7 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseModifyPeptideTask;
 import fr.proline.studio.export.ExportFontData;
-import fr.proline.studio.table.ExportModelUtilities;
+import fr.proline.studio.table.ExportFontModelUtilities;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
@@ -451,7 +451,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     public ArrayList<ExportFontData> getExportFonts(int row, int col) {
         if (col == COLTYPE_PEPTIDE_NAME) {
             DMasterQuantPeptide quantPeptide = m_quantPeptides.get(row);
-            return ExportModelUtilities.getExportFonts(quantPeptide.getPeptideInstance());
+            return ExportFontModelUtilities.getExportFonts(quantPeptide.getPeptideInstance());
         }
         return null;
     }

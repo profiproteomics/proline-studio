@@ -26,8 +26,9 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.corewrapper.util.PeptideClassesUtils;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
-import fr.proline.studio.table.ExportModelUtilities;
+import fr.proline.studio.table.ExportFontModelUtilities;
 import fr.proline.studio.export.ExportFontData;
+import fr.proline.studio.export.ExportModelUtilities;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
@@ -582,7 +583,7 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
     @Override
     public ArrayList<ExportFontData> getExportFonts(int row, int col) {
         if (col == COLTYPE_PEPTIDE_NAME) {
-            return ExportModelUtilities.getExportFonts(m_peptideInstances[row]);
+            return ExportFontModelUtilities.getExportFonts(m_peptideInstances[row]);
         }
         return null;
     }

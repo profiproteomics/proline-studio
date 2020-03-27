@@ -30,7 +30,7 @@ import org.apache.poi.hssf.util.HSSFColor;
  *
  * @author JM235353
  */
-public class ExportModelUtilities extends fr.proline.studio.export.ExportModelUtilities {
+public class ExportFontModelUtilities extends fr.proline.studio.export.ExportModelUtilities {
 
     public static ArrayList<ExportFontData> getExportFonts(DPeptideMatch peptideMatch) {
         Peptide peptide = peptideMatch.getPeptide();
@@ -88,7 +88,7 @@ public class ExportModelUtilities extends fr.proline.studio.export.ExportModelUt
 
     public static ArrayList<ExportFontData> getExportFonts(DPeptideInstance peptideInstance) {
         if ((peptideInstance != null) && (peptideInstance.getBestPeptideMatch() != null)) {
-            return ExportModelUtilities.getExportFonts(peptideInstance.getBestPeptideMatch());
+            return ExportFontModelUtilities.getExportFonts(peptideInstance.getBestPeptideMatch());
         }
         return null;
     }

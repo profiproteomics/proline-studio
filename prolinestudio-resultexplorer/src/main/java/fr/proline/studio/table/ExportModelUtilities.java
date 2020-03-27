@@ -20,8 +20,8 @@ import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
+import fr.proline.studio.dam.tasks.data.ProjectInfo;
 import fr.proline.studio.export.ExportFontData;
-import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.poi.hssf.util.HSSFColor;
@@ -93,4 +93,34 @@ public class ExportModelUtilities extends fr.proline.studio.export.ExportModelUt
         return null;
     }
 
+
+
+    public static ArrayList<ExportFontData> getExportFonts(String projectIds, HashMap<String, ProjectInfo.Status> projectStatusMap) {
+        if (projectIds != null && projectStatusMap != null) {
+            ArrayList<ExportFontData> exportFontDatas = new ArrayList<>();
+            
+            String[] ids = projectIds.split(",");
+            int start = 0, stop = 0;
+            short colorIndex;
+            for (String id : ids) {
+                ProjectInfo.Status status = projectStatusMap.get(id);
+                stop = start + id.length();
+                switch (status) {
+                    case ARCHIVED:
+                        colorIndex = HSSFColor.GREY_50_PERCENT.index;
+                        break;
+                    case INACTIVE:
+                        colorIndex = HSSFColor.BLUE.index;
+                        break;
+                    default:
+                        colorIndex = HSSFColor.BLACK.index;
+                        break;
+                }
+                exportFontDatas.add(new ExportFontData(start, stop, colorIndex));
+                start = stop + 1; //skip ","
+            }
+            return exportFontDatas;
+        }
+        return null;
+    }
 }

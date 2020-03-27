@@ -16,7 +16,6 @@
  */
 package fr.proline.studio.export.model;
 
-import fr.proline.studio.export.ExportExcelSheet;
 import fr.proline.studio.export.ExportExcelSheetField;
 
 /**

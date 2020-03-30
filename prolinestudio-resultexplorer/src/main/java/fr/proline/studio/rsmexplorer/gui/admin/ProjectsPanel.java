@@ -472,9 +472,9 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         public static final int COLTYPE_PROPERTIES = 9;
 
         {
-            String[] columnNames = {" ", "Id", "Project", "Description", "Size (MB)", "Owner", "Count Raw File", "Databases", "Dataset Date", "Properties"};
+            String[] columnNames = {" ", "Id", "Project", "Description", "Size (MB)", "Owner", "Raw Files Count", "Databases", "Dataset Date", "Properties"};
             m_columnNames = columnNames;
-            String[] columnTooltips = {"Status", "Id", "Project", "Description", "Size (MB)", "Owner", "Count Raw File", "Databases", "Dataset Date", "Properties"};
+            String[] columnTooltips = {"Status", "Id", "Project", "Description", "Size (MB)", "Owner", "Raw Files Count", "Databases", "Dataset Date", "Properties"};
             m_columnTooltips = columnTooltips;
         }
 
@@ -612,9 +612,9 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         public static final int COLTYPE_SERIALIZED_PROPERTIES = 7;//"serializedProperties"
 
         {
-            String[] columnNames = {" ", "Creation Timestamp", "Identifier", "Raw File Name", "Raw File Directory", "Project Ids", "Projects Count", "Properties"};
+            String[] columnNames = {" ", "Creation Date", "Identifier", "Raw File Name", "Raw File Directory", "Project Ids", "Projects Count", "Properties"};
             m_columnNames = columnNames;
-            String[] columnTooltips = {"Projects Status", "Creation Timestamp", "Identifier", "Raw File Name", "Raw File Directory", "Project Ids", "Projects Count", "Properties"};
+            String[] columnTooltips = {"Projects Status", "Creation Date", "Identifier", "Raw File Name", "Raw File Directory", "Project Ids", "Projects Count", "Properties"};
             m_columnTooltips = columnTooltips;
         }
 

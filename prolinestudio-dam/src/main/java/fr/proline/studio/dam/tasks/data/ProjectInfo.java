@@ -36,6 +36,7 @@ public class ProjectInfo {
     private Date m_lastDatasetDate;
     private Integer m_rawFilesCount;
     private Status m_status;
+    private boolean m_selected;
 
     public enum Status {
         ACTIVE, ARCHIVED, INACTIVE
@@ -65,6 +66,14 @@ public class ProjectInfo {
 
     public Status getStatus() {
         return m_status;
+    }
+    
+    public boolean isSelected() {
+        return m_selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.m_selected = selected;
     }
 
     public void addDb(String dbname, double size) {

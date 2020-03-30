@@ -108,7 +108,9 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
     private SharedProjectDialg m_sharedProjectDialog;
     private HashMap<Long, ProjectInfo> m_sharedProjects4SelectMap;
     private ProjectsInfoTableModel m_sharedProjects4SelectModel = new ProjectsInfoTableModel();
+    private DecoratedMarkerTable m_sharedProjectTable = createProjectsTable();
     String m_mzdbPath;
+    static String sharedProjectText = "Project(s) Which Share Raw Files With Selected Project(s)";
 
     public ProjectsPanel(JDialog dialog, Boolean editable) {
         m_isEditable = editable;
@@ -183,19 +185,22 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         ExportButton exportButton = new ExportButton(m_rawFileTableModel, "Raw Files", m_rawfilesTable);
         toolbar.add(exportButton);
         JButton otherProjectBt = new JButton(IconManager.getIcon(IconManager.IconType.PROJECT));
-        otherProjectBt.setToolTipText("Projects share at least one mzdb file with current projet(s)");
+        otherProjectBt.setToolTipText(sharedProjectText);
         otherProjectBt.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (m_sharedProjects4SelectMap.isEmpty()) {
-                    JOptionPane.showMessageDialog(m_dialogOwner, "No other raw file shared project");
-                } else {
-                    if (m_sharedProjectDialog == null) {
-                        m_sharedProjectDialog = new SharedProjectDialg();
-                    }
-                    m_sharedProjectDialog.setVisible(true);
+                if (m_sharedProjectDialog == null) {
+                    m_sharedProjectDialog = new SharedProjectDialg();
                 }
+                ProjectInfo proj;
+                for (int i = 0; i < m_sharedProjects4SelectModel.getRowCount(); i++) {
+                    proj = (ProjectInfo) m_sharedProjects4SelectModel.getRowValue((ProjectInfo.class), i);
+                    if (proj.isSelected()) {
+                        m_sharedProjectTable.addRowSelectionInterval(i, i);
+
+                    }
+                }
+                m_sharedProjectDialog.setVisible(true);
             }
         });
         toolbar.add(otherProjectBt);
@@ -219,15 +224,15 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
 
         void initInternalPanel() {
             JPanel sharedProjectPane = new JPanel(new BorderLayout());
-            sharedProjectPane.setBorder(BorderFactory.createTitledBorder("Other Project(s) Which Share Raw Files"));
+            sharedProjectPane.setBorder(BorderFactory.createTitledBorder(sharedProjectText));
 
-            DecoratedMarkerTable sharedProjectTable = createProjectsTable();
+            //_sharedProjectTable = createProjectsTable();
             JScrollPane sharedProjectTableScrollPane = new JScrollPane();
 
-            sharedProjectTableScrollPane.setViewportView(sharedProjectTable);
-            sharedProjectTable.setFillsViewportHeight(true);
+            sharedProjectTableScrollPane.setViewportView(m_sharedProjectTable);
+            m_sharedProjectTable.setFillsViewportHeight(true);
 
-            sharedProjectTable.setModel(m_sharedProjects4SelectModel);
+            m_sharedProjectTable.setModel(m_sharedProjects4SelectModel);
             sharedProjectPane.add(sharedProjectTableScrollPane, BorderLayout.CENTER);
             setInternalComponent(sharedProjectPane);
         }
@@ -372,8 +377,14 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
             Color c;
             for (String id : ids) {
                 Long idProject = Long.parseLong(id);
-                if (!selectedProjectIds.contains(idProject) && m_sharedProjects4SelectMap.get(idProject) == null) {
-                    m_sharedProjects4SelectMap.put(idProject, m_projectMap.get(idProject));
+                if (m_sharedProjects4SelectMap.get(idProject) == null) {
+                    ProjectInfo proj = m_projectMap.get(idProject);
+                    if (selectedProjectIds.contains(idProject)) {
+                        proj.setSelected(true);
+                    } else {
+                        proj.setSelected(false);
+                    }
+                    m_sharedProjects4SelectMap.put(idProject, proj);
                 }
                 ProjectInfo.Status status = m_projectStatusMap.get(id);
                 switch (status) {

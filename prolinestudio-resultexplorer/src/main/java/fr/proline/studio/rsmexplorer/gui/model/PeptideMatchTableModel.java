@@ -694,7 +694,6 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
         // COLTYPE_PEPTIDE_PREVIOUS_AA
         if (m_hasPrevNextAA) {
             putFilter(COLTYPE_PEPTIDE_PREVIOUS_AA, StringFilter.class, null, filtersMap);
-            //filtersMap.put(COLTYPE_PEPTIDE_PREVIOUS_AA, new StringFilter(getColumnName(COLTYPE_PEPTIDE_PREVIOUS_AA), null, COLTYPE_PEPTIDE_PREVIOUS_AA));
         }
 
         ConvertValueInterface peptideConverter = new ConvertValueInterface() {
@@ -708,24 +707,18 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
 
         };
         putFilter(COLTYPE_PEPTIDE_NAME, StringFilter.class, peptideConverter, filtersMap);
-        // filtersMap.put(COLTYPE_PEPTIDE_NAME, new StringFilter(getColumnName(COLTYPE_PEPTIDE_NAME), peptideConverter, COLTYPE_PEPTIDE_NAME)); //COLTYPE_PEPTIDE_NAME
 
         // COLTYPE_PEPTIDE_NEXT_AA
         if (m_hasPrevNextAA) {
             putFilter(COLTYPE_PEPTIDE_NEXT_AA, StringFilter.class, null, filtersMap);
-            //filtersMap.put(COLTYPE_PEPTIDE_NEXT_AA, new StringFilter(getColumnName(COLTYPE_PEPTIDE_NEXT_AA), null, COLTYPE_PEPTIDE_NEXT_AA));
         }
         putFilter(COLTYPE_PEPTIDE_LENGTH, IntegerFilter.class, null, filtersMap);
         putFilter(COLTYPE_PEPTIDE_SCORE, DoubleFilter.class, null, filtersMap);
-        //filtersMap.put(COLTYPE_PEPTIDE_LENGTH, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_LENGTH), null, COLTYPE_PEPTIDE_LENGTH));
-        //filtersMap.put(COLTYPE_PEPTIDE_SCORE, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_SCORE), null, COLTYPE_PEPTIDE_SCORE));
 
         // COLTYPE_PEPTIDE_START and COLTYPE_PEPTIDE_STOP
         if (m_hasPrevNextAA) {
             putFilter(COLTYPE_PEPTIDE_START, IntegerFilter.class, null, filtersMap);
             putFilter(COLTYPE_PEPTIDE_STOP, IntegerFilter.class, null, filtersMap);
-            //filtersMap.put(COLTYPE_PEPTIDE_START, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_START), null, COLTYPE_PEPTIDE_START));
-            //filtersMap.put(COLTYPE_PEPTIDE_STOP, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_STOP), null, COLTYPE_PEPTIDE_STOP));
         }
 
         ConvertValueInterface msQueryConverter = new ConvertValueInterface() {
@@ -745,39 +738,24 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
         putFilter(COLTYPE_PEPTIDE_MISSED_CLIVAGE, IntegerFilter.class, null, filtersMap);
         putFilter(COLTYPE_PEPTIDE_RANK, IntegerFilter.class, null, filtersMap);
         putFilter(COLTYPE_PEPTIDE_RETENTION_TIME, DoubleFilter.class, null, filtersMap);
-        //filtersMap.put(COLTYPE_PEPTIDE_CALCULATED_MASS, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_CALCULATED_MASS), null, COLTYPE_PEPTIDE_CALCULATED_MASS));
-        //filtersMap.put(COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ), null, COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ));
-        //filtersMap.put(COLTYPE_PEPTIDE_PPM, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_PPM), null, COLTYPE_PEPTIDE_PPM));
-        //filtersMap.put(COLTYPE_PEPTIDE_CHARGE, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_CHARGE), null, COLTYPE_PEPTIDE_CHARGE));
-        //filtersMap.put(COLTYPE_PEPTIDE_MISSED_CLIVAGE, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_MISSED_CLIVAGE), null, COLTYPE_PEPTIDE_MISSED_CLIVAGE));
-        //filtersMap.put(COLTYPE_PEPTIDE_RANK, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_RANK), null, COLTYPE_PEPTIDE_RANK));        
-        //filtersMap.put(COLTYPE_PEPTIDE_RETENTION_TIME, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_RETENTION_TIME), null, COLTYPE_PEPTIDE_RETENTION_TIME));
 
         if (m_forRSM) {
             putFilter(COLTYPE_PEPTIDE_PROTEIN_SET_COUNT, IntegerFilter.class, null, filtersMap);
             putFilter(COLTYPE_PEPTIDE_PROTEIN_SET_NAMES, StringFilter.class, null, filtersMap);
-            //filtersMap.put(COLTYPE_PEPTIDE_PROTEIN_SET_COUNT, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_PROTEIN_SET_COUNT), null, COLTYPE_PEPTIDE_PROTEIN_SET_COUNT));
-            //filtersMap.put(COLTYPE_PEPTIDE_PROTEIN_SET_NAMES, new StringFilter(getColumnName(COLTYPE_PEPTIDE_PROTEIN_SET_NAMES), null, COLTYPE_PEPTIDE_PROTEIN_SET_NAMES));
         }
         putFilter(COLTYPE_PEPTIDE_ION_PARENT_INTENSITY, DoubleFilter.class, null, filtersMap);
-        //filtersMap.put(COLTYPE_PEPTIDE_ION_PARENT_INTENSITY, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_ION_PARENT_INTENSITY), null, COLTYPE_PEPTIDE_ION_PARENT_INTENSITY));
         if (m_isDecoyAndValidated) {
             putFilter(COLTYPE_PEPTIDE_IS_DECOY, BooleanFilter.class, null, filtersMap);
-            //filtersMap.put(COLTYPE_PEPTIDE_IS_DECOY, new BooleanFilter(getColumnName(COLTYPE_PEPTIDE_IS_DECOY), null, COLTYPE_PEPTIDE_IS_DECOY));
             if (m_forRSM) {
                 putFilter(COLTYPE_PEPTIDE_IS_VALIDATED, BooleanFilter.class, null, filtersMap);
-                //filtersMap.put(COLTYPE_PEPTIDE_IS_VALIDATED, new BooleanFilter(getColumnName(COLTYPE_PEPTIDE_IS_VALIDATED), null, COLTYPE_PEPTIDE_IS_VALIDATED));
             }
         }
         putFilter(COLTYPE_PEPTIDE_MSQUERY, IntegerFilter.class, msQueryConverter, filtersMap);
-        //filtersMap.put(COLTYPE_PEPTIDE_MSQUERY, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_MSQUERY), msQueryConverter, COLTYPE_PEPTIDE_MSQUERY));
 
         if (m_isMerged) {
             putFilter(COLTYPE_SRC_DAT_FILE, StringFilter.class, null, filtersMap);
-            //filtersMap.put(COLTYPE_SRC_DAT_FILE, new StringFilter(getColumnName(COLTYPE_SRC_DAT_FILE), null, COLTYPE_SRC_DAT_FILE));
         }
         putFilter(COLTYPE_SPECTRUM_TITLE, StringFilter.class, null, filtersMap);
-        //filtersMap.put(COLTYPE_SPECTRUM_TITLE, new StringFilter(getColumnName(COLTYPE_SPECTRUM_TITLE), null, COLTYPE_SPECTRUM_TITLE));
     }
 
     @Override

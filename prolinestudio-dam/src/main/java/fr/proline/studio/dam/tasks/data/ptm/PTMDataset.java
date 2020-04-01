@@ -74,7 +74,7 @@ public class PTMDataset {
     }
     
     public List<Long> getLeafResultSummaryIds(){
-        if(!isV2() || m_leafRSMIds == null)
+        if(!isVersion2() || m_leafRSMIds == null)
             return Collections.<Long>emptyList();
         return new ArrayList(m_leafRSMIds);
     }
@@ -83,10 +83,9 @@ public class PTMDataset {
         m_leafRSMIds = new ArrayList<>(l);
     }
     
-    public boolean isV2(){
+    public boolean isVersion2(){
         return m_isVersion2;
     } 
-    
 
     public void setIsVersion2(boolean isV2){
         m_isVersion2 = isV2;
@@ -112,8 +111,7 @@ public class PTMDataset {
         proteinPTMSites.stream().forEach(site -> site.setDataset(this));
         this.m_proteinPTMSites = proteinPTMSites;
     }
-    
-    
+
     public List<PTMCluster> getPTMClusters() {
         return m_ptmClusters;
     }
@@ -123,9 +121,9 @@ public class PTMDataset {
     }
    
     public PTMSite getPTMSite(Long id){
-        if(!isV2())
+        if(!isVersion2())
             return null;
-        else{
+        else {
             Optional<PTMSite> ptmSite = m_proteinPTMSites.stream().filter(site -> site.getid().equals(id)).findFirst();
             return ptmSite.orElse(null);            
         }

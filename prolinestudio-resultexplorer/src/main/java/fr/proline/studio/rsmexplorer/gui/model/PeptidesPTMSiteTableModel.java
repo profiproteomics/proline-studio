@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author VD225637
  */
-public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements GlobalTableModelInterface {
+public class PeptidesPTMSiteTableModel extends DecoratedTableModel implements GlobalTableModelInterface {
 
     public static final int COLTYPE_PEPTIDE_ID = 0;
     public static final int COLTYPE_PEPTIDE_NAME = 1;
@@ -134,7 +134,7 @@ public class PeptidesOfPTMSiteTableModel extends DecoratedTableModel implements 
             for (DPeptideInstance parentPeptideInstance : dpInstanceList) {
                 // TODO this check is mandatory to avoid NullPointer, but the problem must be handled: PTMSite and parentPepInstance parameters are inconsistent
                 if (m_currentPtmSite.getPTMSitePeptideInstance(parentPeptideInstance.getPeptideId()) != null) {
-                    DPeptideMatch bestPM = m_currentPtmSite.getPTMSitePeptideInstance(parentPeptideInstance.getPeptideId()).getBestPeptideMatch();
+                    DPeptideMatch bestPM = m_currentPtmSite.getPTMSitePeptideInstance(parentPeptideInstance.getPeptideId()).getBestProbabilityPepMatch();
                     m_ptmSitePeptides.add(new Row(parentPeptideInstance, bestPM));
                 }
             }

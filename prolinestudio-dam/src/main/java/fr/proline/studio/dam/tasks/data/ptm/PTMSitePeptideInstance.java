@@ -43,7 +43,7 @@ public class PTMSitePeptideInstance {
     return m_site;
   }
 
-  public DPeptideMatch getBestPeptideMatch() {
+  public DPeptideMatch getBestProbabilityPepMatch() {
     return m_bestPeptideMatch;
   }
 

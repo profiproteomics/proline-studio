@@ -33,6 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Represents a set of PTM sites co-located that are supported by at least a peptide identification showing these modification
+ * sites.
  *
  * @author VD225637
  */
@@ -41,8 +43,8 @@ public class PTMCluster implements Comparable<PTMCluster>{
       private final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ptm");
 
     private final List<PTMSite> m_sites;
-    private final JSONPTMCluster m_jsonCluster;
-    
+    private final List<Long> m_peptideIds;
+
     private DProteinMatch m_proteinMatch;    
     private DMasterQuantProteinSet m_masterQuantProteinSet;
     private DPeptideMatch m_bestPeptideMatch;
@@ -51,30 +53,26 @@ public class PTMCluster implements Comparable<PTMCluster>{
     private List<PTMPeptideInstance> m_leafPTMPeptideInstances;
     private List<DPeptideInstance> m_parentPeptideInstances;
 
-//    //PTMPeptideInstance of leaf dataset by peptideId
-//    private Map<Long, PTMPeptideInstance> m_ptmPeptideInstanceByPepId;
-
-        
     private final PTMDataset m_ptmDataset;
     private Object m_expressionValue;
 
     public PTMCluster(JSONPTMCluster jsonValue, PTMDataset ptmds) {
+        this(Arrays.asList(jsonValue.ptmSiteLocations), Arrays.asList(jsonValue.peptideIds), ptmds);
+    }
+
+    public PTMCluster(List<Long> ptmSiteIds, List<Long> peptideIds, PTMDataset ptmds) {
         m_ptmDataset = ptmds;
-        m_jsonCluster = jsonValue;        
-        
-        //*** Retieve other needed informations
-        
-        //Get clustered PTMSites
-        List<Long> ptmSitesIds = Arrays.asList(jsonValue.ptmSiteLocations);        
-        m_sites = m_ptmDataset.getPTMSites().stream().filter(site -> ptmSitesIds.contains(site.getid())).collect(Collectors.toList());        
-        
+        m_peptideIds = peptideIds;
+        m_sites = m_ptmDataset.getPTMSites().stream().filter(site -> ptmSiteIds.contains(site.getid())).collect(Collectors.toList());
+
         if(!m_sites.isEmpty()) {
             //Get ProteinMatch from one of the PTMSite : all should have same. VDS TODO To test ?
             m_proteinMatch = m_sites.get(0).getProteinMatch();
             m_masterQuantProteinSet = m_sites.get(0).getMasterQuantProteinSet();
-        }        
+        }
+
     }
-    
+
     public DProteinMatch getProteinMatch(){
         return m_proteinMatch;
     }
@@ -103,8 +101,7 @@ public class PTMCluster implements Comparable<PTMCluster>{
         if (m_sites == null || m_sites.isEmpty())
             return null;
         if (m_parentPeptideInstances == null) {
-            List<Long> pepIds = Arrays.asList(m_jsonCluster.peptideIds);
-            m_parentPeptideInstances = m_sites.stream().flatMap(site -> site.getParentPeptideInstances().stream()).distinct().filter(pi -> pepIds.contains(pi.getPeptideId())).collect(Collectors.toList());
+            m_parentPeptideInstances = m_sites.stream().flatMap(site -> site.getParentPeptideInstances().stream()).distinct().filter(pi -> m_peptideIds.contains(pi.getPeptideId())).collect(Collectors.toList());
         }
         return m_parentPeptideInstances;
     }
@@ -134,10 +131,9 @@ public class PTMCluster implements Comparable<PTMCluster>{
         if (m_parentPTMPeptideInstances == null) {
             List<Integer> sitesPosition = m_sites.stream().map(site -> site.getPositionOnProtein()).collect(Collectors.toList());            
             Collection<PTMPeptideInstance> ptmPeptides = m_ptmDataset.getPTMPeptideInstances(m_proteinMatch.getId());
-            List<Long> pepIds = Arrays.asList(m_jsonCluster.peptideIds);
             m_parentPTMPeptideInstances = new ArrayList<>();
             for (PTMPeptideInstance ptmPepI : ptmPeptides) {
-                if (pepIds.contains(ptmPepI.getPeptideInstance().getPeptideId()) && !m_parentPTMPeptideInstances.contains(ptmPepI) ){
+                if (m_peptideIds.contains(ptmPepI.getPeptideInstance().getPeptideId()) && !m_parentPTMPeptideInstances.contains(ptmPepI) ){
                     for(Integer sitePos : sitesPosition){
                         if(sitePos >= ptmPepI.getStartPosition() && sitePos <=ptmPepI.getStopPosition()){
                             m_parentPTMPeptideInstances.add(ptmPepI);
@@ -160,11 +156,10 @@ public class PTMCluster implements Comparable<PTMCluster>{
         if (m_leafPTMPeptideInstances == null) {
             m_leafPTMPeptideInstances = new ArrayList<>();            
             Set<PTMSitePeptideInstance> allPTMSitePepInst = new HashSet<>();
-            List<Long> pepIds = Arrays.asList(m_jsonCluster.peptideIds);   
             
             // Get PTMSitePeptideInstance for all sites of this Cluster
             for(PTMSite nextSite : m_sites){                                
-                allPTMSitePepInst.addAll(nextSite.getPTMSitePeptideInstances().stream().filter(ptmSitePepI ->pepIds.contains(ptmSitePepI.getParentPTMPeptideInstance().getPeptideInstance().getPeptideId())).collect(Collectors.toList()));
+                allPTMSitePepInst.addAll(nextSite.getPTMSitePeptideInstances().stream().filter(ptmSitePepI ->m_peptideIds.contains(ptmSitePepI.getParentPTMPeptideInstance().getPeptideInstance().getPeptideId())).collect(Collectors.toList()));
             }
                         
             // Create Leaf PTMPeptideInstances for each parent PTMPeptideInstance (get from PTMSitePeptideInstance)
@@ -200,7 +195,7 @@ public class PTMCluster implements Comparable<PTMCluster>{
     }
     
     public Integer getPeptideCount() {
-        return m_jsonCluster.peptideIds.length;
+        return m_peptideIds.size();
     }
      
     public void setQuantProteinSet(DMasterQuantProteinSet mqps) {

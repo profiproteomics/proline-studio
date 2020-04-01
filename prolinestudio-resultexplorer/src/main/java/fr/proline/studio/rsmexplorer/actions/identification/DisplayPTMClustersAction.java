@@ -66,7 +66,7 @@ public class DisplayPTMClustersAction  extends AbstractRSMAction {
         if (rsm != null) {
 
             // prepare window box
-            WindowBox wbox = WindowBoxFactory.getPTMDataWindowBox(dataSet.getName());
+            WindowBox wbox = WindowBoxFactory.getPTMDataWindowBox(dataSet.getName(), false);
             wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));
             
             // open a window to display the window box
@@ -87,7 +87,7 @@ public class DisplayPTMClustersAction  extends AbstractRSMAction {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     
-                    WindowBox wbox = WindowBoxFactory.getPTMDataWindowBox(dataSet.getName());
+                    WindowBox wbox = WindowBoxFactory.getPTMDataWindowBox(dataSet.getName(), false);
                     // open a window to display the window box
                     DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
                     win.open();

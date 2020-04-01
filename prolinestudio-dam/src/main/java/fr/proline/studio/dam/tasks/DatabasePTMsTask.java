@@ -38,7 +38,6 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import static fr.proline.studio.dam.tasks.AbstractDatabaseTask.m_logger;
 import fr.proline.studio.dam.tasks.data.ptm.JSONPTMCluster;
 import fr.proline.studio.dam.tasks.data.ptm.JSONPTMDataset;
 import fr.proline.studio.dam.tasks.data.ptm.JSONPTMSite2;
@@ -92,6 +91,8 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
     private final static int FILL_ALL_PTM_SITES_PEPINFO = 1;
     private final static int FILL_ALL_PTM_INFO = 2;
 
+    private boolean m_sitesAsClusters;
+
     public DatabasePTMsTask(AbstractDatabaseCallback callback) {
         super(callback);
     }
@@ -110,12 +111,13 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         m_action = FILL_ALL_PTM_SITES_PEPINFO;
     }
 
-    public void initLoadPTMDataset(Long projectId, DDataset dataset, List<PTMDataset> ptmDataset) {
+    public void initLoadPTMDataset(Long projectId, DDataset dataset, List<PTMDataset> ptmDataset, boolean sitesAsClusters) {
         init(SUB_TASK_COUNT, new TaskInfo("Load PTM Dataset for " + dataset.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
         m_ptmDatasetOutput = ptmDataset;
         m_dataset = dataset;
         m_action = LOAD_PTMDATASET;
+        m_sitesAsClusters = sitesAsClusters;
     }
 
     @Override
@@ -252,8 +254,12 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
             for (Long i : jsonDS.ptmIds) {
                 m_ptmDataset.addInfoPTM(DInfoPTM.getInfoPTMMap().get(i));
             }
-            //** Read and create PTMCluster
-            createPTMDatasetPTMCluster(jsonDS, entityManagerMSI);
+            if (!m_sitesAsClusters) {
+                //** Read and create PTMCluster
+                createPTMDatasetPTMCluster(jsonDS, entityManagerMSI);
+            } else {
+                createPTMDatasetPTMCluster(entityManagerMSI);
+            }
 
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
@@ -356,26 +362,23 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
     }
 
     private boolean createPTMDatasetPTMCluster(JSONPTMDataset jsonDataset, EntityManager entityManagerMSI) throws Exception {
-
         long start = System.currentTimeMillis();
-//        //Read Best PeptideMatch Ids
-//        m_bestClustersPepMatchIds = Arrays.asList(jsonDataset.ptmClusters).stream().map(cluster-> cluster.bestPeptideMatchId).distinct().collect(Collectors.toList());
         m_bestClustersPepMatchIds = new ArrayList<>();
 
         List<PTMCluster> allClusters = new ArrayList<>();
         m_ptmClustersByBestPepMatchId = new HashMap<>();
         for (JSONPTMCluster cluster : jsonDataset.ptmClusters) {
-            PTMCluster ptmClutser = new PTMCluster(cluster, m_ptmDataset);
-            if (ptmClutser.getClusteredSites() == null || ptmClutser.getClusteredSites().isEmpty()) {
+            PTMCluster ptmCluster = new PTMCluster(cluster, m_ptmDataset);
+            if (ptmCluster.getClusteredSites() == null || ptmCluster.getClusteredSites().isEmpty()) {
                 continue;
             }
             Long bestPepMatchID = cluster.bestPeptideMatchId;
             m_bestClustersPepMatchIds.add(bestPepMatchID);
-            allClusters.add(ptmClutser);            
+            allClusters.add(ptmCluster);
             if (!m_ptmClustersByBestPepMatchId.containsKey(bestPepMatchID)) {
                 m_ptmClustersByBestPepMatchId.put(bestPepMatchID, new ArrayList<>());
             }
-            m_ptmClustersByBestPepMatchId.get(bestPepMatchID).add(ptmClutser);
+            m_ptmClustersByBestPepMatchId.get(bestPepMatchID).add(ptmCluster);
         }
         m_ptmDataset.setPTMClusters(allClusters);
         long stop = System.currentTimeMillis();
@@ -386,6 +389,42 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         //Get Best Peptide Matches 
         SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_PTMCLUSTER_PEPTIDES, m_bestClustersPepMatchIds.size(), SLICE_SIZE);
         fetchClusterBestPeptideMatches(subTask, entityManagerMSI); //get first slice                    
+        stop = System.currentTimeMillis();
+        m_logger.debug(" -- First {} Best PSM + Peptide + Spectrum + Query from PepInstances created in {} ms", SLICE_SIZE, (stop - start));
+        return true;
+    }
+
+
+    private boolean createPTMDatasetPTMCluster(EntityManager entityManagerMSI) throws Exception {
+
+        long start = System.currentTimeMillis();
+        m_bestClustersPepMatchIds = new ArrayList<>();
+
+        List<PTMCluster> allClusters = new ArrayList<>();
+        m_ptmClustersByBestPepMatchId = new HashMap<>();
+        for (PTMSite site: m_ptmDataset.getPTMSites()) {
+            PTMCluster ptmCluster = new PTMCluster(Arrays.asList(site.getid()), site.getPeptideIds() , m_ptmDataset);
+            if (ptmCluster.getClusteredSites() == null || ptmCluster.getClusteredSites().isEmpty()) {
+                continue;
+            }
+            Long bestPepMatchID = site.getBestProbabilityPepMatchId();
+            m_bestClustersPepMatchIds.add(bestPepMatchID);
+            allClusters.add(ptmCluster);
+            if (!m_ptmClustersByBestPepMatchId.containsKey(bestPepMatchID)) {
+                m_ptmClustersByBestPepMatchId.put(bestPepMatchID, new ArrayList<>());
+            }
+            m_ptmClustersByBestPepMatchId.get(bestPepMatchID).add(ptmCluster);
+        }
+        m_ptmDataset.setPTMClusters(allClusters);
+        long stop = System.currentTimeMillis();
+        m_logger.debug(" -- Created {} Cluster in {} ms", allClusters.size(), (stop - start));
+        start = stop;
+
+        // TODO : try to simplify this since the same peptideMatches will already be loaded for sites, except that this
+        // TODO: is done in a subtasks. When executing this method, the subtasks is not necessarily done.
+        //---- Runs subtasks to get peptide matches
+        SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_PTMCLUSTER_PEPTIDES, m_bestClustersPepMatchIds.size(), SLICE_SIZE);
+        fetchClusterBestPeptideMatches(subTask, entityManagerMSI); //get first slice
         stop = System.currentTimeMillis();
         m_logger.debug(" -- First {} Best PSM + Peptide + Spectrum + Query from PepInstances created in {} ms", SLICE_SIZE, (stop - start));
         return true;
@@ -499,7 +538,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
                     sites.stream().forEach(site -> {
                         PTMSite finalSite = m_ptmDataset.getPTMSite(site.getid());
                         if (finalSite != null) {
-                            finalSite.setBestPeptideMatch(pm);
+                            finalSite.setBestProbabilityPepMatch(pm);
                         }
                     });
                 }

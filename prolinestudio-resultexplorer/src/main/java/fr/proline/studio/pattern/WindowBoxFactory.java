@@ -301,11 +301,12 @@ public class WindowBoxFactory {
      * @param dataName
      * @return 
      */
-    public static WindowBox getPTMDataWindowBox(String dataName) {
+    public static WindowBox getPTMDataWindowBox(String dataName, boolean viewSites) {
         AbstractDataBox[] boxes = new AbstractDataBox[4];
         boxes[0] = new DataBoxPTMClusters();
         boxes[0].setDataName(dataName);
-        ((DataBoxPTMClusters) boxes[0]).setXicResult(false); 
+        ((DataBoxPTMClusters) boxes[0]).setXicResult(false);
+        ((DataBoxPTMClusters) boxes[0]).setViewSitesOnly(viewSites);
         boxes[1] = new DataBoxPTMPeptidesGraphic();
          ((DataBoxPTMPeptidesGraphic)boxes[1]).setIsClusterData(true);
         boxes[2] = new DataBoxPTMPeptides(false, false);
@@ -323,11 +324,12 @@ public class WindowBoxFactory {
      * @param dataName
      * @return 
      */
-    public static WindowBox getXicPTMDataWindowBox(String dataName) {
+    public static WindowBox getXicPTMDataWindowBox(String dataName, boolean viewSites) {
         AbstractDataBox[] boxes = new AbstractDataBox[7];
         boxes[0] = new DataBoxPTMClusters();
         boxes[0].setDataName(dataName);
         ((DataBoxPTMClusters) boxes[0]).setXicResult(true);
+        ((DataBoxPTMClusters) boxes[0]).setViewSitesOnly(viewSites);
         boxes[1] = new DataBoxPTMPeptides();
         boxes[2] = new DataBoxPTMPeptides(false,true);
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);        

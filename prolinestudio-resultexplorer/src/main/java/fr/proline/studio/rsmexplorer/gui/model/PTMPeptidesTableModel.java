@@ -169,8 +169,6 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
         m_ptmPepInstancesAsRow = new ArrayList<>();        
         m_ptmPepInstances.forEach(ptmPI -> {
             DProteinMatch protMatchOfInterest = ptmPI.getSites().size() >0 ? ptmPI.getSites().get(0).getProteinMatch() : null ;
-            if(protMatchOfInterest == null)
-                m_logger.debug("---- ERROR GETTING Prot Matvh");
             //Create PeptideMatch List to display according to m_showPeptideMatches
             List<DPeptideMatch> pepMatches = new ArrayList<>();
             if(m_showPeptideMatches){

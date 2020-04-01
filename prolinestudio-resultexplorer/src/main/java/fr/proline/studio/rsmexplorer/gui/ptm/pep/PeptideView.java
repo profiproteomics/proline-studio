@@ -126,7 +126,7 @@ public class PeptideView extends ViewPtmAbstract {
 
     protected float getScore() {
         if(isPtmSiteView)
-            return m_ptmSitePeptideInst.getBestPeptideMatch().getScore();
+            return m_ptmSitePeptideInst.getBestProbabilityPepMatch().getScore();
         else
             return m_ptmPeptideInst.getBestPepMatch().getScore();
     }
@@ -213,7 +213,7 @@ public class PeptideView extends ViewPtmAbstract {
      * @return
      */
     public Float getProbability(DPeptidePTM ptm) {
-        DPeptideMatch pepMatch =  isPtmSiteView ? m_ptmSitePeptideInst.getBestPeptideMatch() : m_ptmPeptideInst.getBestPepMatch();
+        DPeptideMatch pepMatch =  isPtmSiteView ? m_ptmSitePeptideInst.getBestProbabilityPepMatch() : m_ptmPeptideInst.getBestPepMatch();
         DPtmSiteProperties properties = pepMatch.getPtmSiteProperties();
         if (properties != null) {
             String readablePtm = DInfoPTM.getInfoPTMMap().get(ptm.getIdPtmSpecificity()).toReadablePtmString((int) ptm.getSeqPosition());
@@ -237,7 +237,7 @@ public class PeptideView extends ViewPtmAbstract {
      * @return 
      */
     private String getReadablePtmString(DPeptidePTM ptm) {
-        DPeptideMatch pepMatch =  isPtmSiteView ? m_ptmSitePeptideInst.getBestPeptideMatch() : m_ptmPeptideInst.getBestPepMatch();
+        DPeptideMatch pepMatch =  isPtmSiteView ? m_ptmSitePeptideInst.getBestProbabilityPepMatch() : m_ptmPeptideInst.getBestPepMatch();
         DPtmSiteProperties properties = pepMatch.getPtmSiteProperties();
         if (properties != null) {
             String readablePtm = DInfoPTM.getInfoPTMMap().get(ptm.getIdPtmSpecificity()).toReadablePtmString((int) ptm.getSeqPosition());

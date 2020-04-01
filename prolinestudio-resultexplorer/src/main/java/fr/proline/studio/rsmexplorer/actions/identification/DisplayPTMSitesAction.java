@@ -107,10 +107,11 @@ public class DisplayPTMSitesAction  extends AbstractRSMAction {
                     WindowBox wbox ;
                     if (serviceVersion.equals("2.0")) {
                         wbox = WindowBoxFactory.getPTMSitesWindowBoxV2(dataSet.getName());
-                    } else{
-                        wbox = WindowBoxFactory.getPTMSitesWindowBoxV1(dataSet.getName());            
-                    } 
-                              
+                    } else if (serviceVersion.equals("2.1")) {
+                        wbox = WindowBoxFactory.getPTMDataWindowBox(dataSet.getName(), true);
+                    } else {
+                        wbox = WindowBoxFactory.getPTMSitesWindowBoxV1(dataSet.getName());
+                    }
                     // open a window to display the window box
                     DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
                     win.open();
@@ -158,42 +159,43 @@ public class DisplayPTMSitesAction  extends AbstractRSMAction {
         setEnabled(true);
     }
     
-    class DisplayPTMSiteDialog extends DefaultDialog {
-        
+    public static class DisplayPTMSiteDialog extends DefaultDialog {
+
        JComboBox<String>  m_serviceVersionCbx;
-                
+
         public DisplayPTMSiteDialog(Window parent){
-           super(parent, Dialog.ModalityType.APPLICATION_MODAL); 
+           super(parent, Dialog.ModalityType.APPLICATION_MODAL);
             setTitle("Display Modification Sites");
             setHelpHeaderText("Select the version of PTMs identification service that was used: \n<br>"+
             " &bull; v1.0 a list of all identified sites was generated \n<br>"+
             " &bull; v2.0 a PTMs Dataset in which sites are clusterized has been generated.\n<br>");
             initInternalPanel();
-            pack();           
+            pack();
         }
-        
+
         private void initInternalPanel() {
-            JPanel internalPanel = new JPanel();    
+            JPanel internalPanel = new JPanel();
             internalPanel.setLayout(new java.awt.GridBagLayout());
             GridBagConstraints c = new GridBagConstraints();
             c.anchor = GridBagConstraints.NORTHWEST;
             c.fill = GridBagConstraints.HORIZONTAL;
             c.insets = new java.awt.Insets(15, 15, 15, 15);
             c.gridx = 0;
-            c.gridy = 0;            
-            
-            JLabel label = new JLabel("Service version:");     
+            c.gridy = 0;
+
+            JLabel label = new JLabel("Service version:");
             internalPanel.add(label, c);
-            String[] versions = new String[] {"Modification Sites (v1.0)", "PTMs Dataset (v2.0)"};
+            String[] versions = new String[] {"Modification Sites (v1.0)", "PTMs Dataset (v2.0)", "Sites as Clusters (v2.1)"};
             m_serviceVersionCbx = new JComboBox(versions);
              c.gridx++;
             internalPanel.add(m_serviceVersionCbx, c);
-            setInternalComponent(internalPanel);            
+            setInternalComponent(internalPanel);
         }
-        
+
         public String getServiceVersion() {
-            return m_serviceVersionCbx.getItemAt(m_serviceVersionCbx.getSelectedIndex()).contains("2.0") ? "2.0" : "1.0";
+            String selectedOption = m_serviceVersionCbx.getItemAt(m_serviceVersionCbx.getSelectedIndex());
+            return selectedOption.contains("2.0") ? "2.0" : selectedOption.contains("2.1") ? "2.1" : "1.0";
         }
-        
+
     }
 }

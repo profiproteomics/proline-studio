@@ -528,7 +528,7 @@ public class PTMPeptidesGraphicView extends JPanel {
                         if (pep != null) {
                             List<PTMCluster> clusters = pep.getClusters();
                             int size = clusters.size();
-                            tips = GlobalValues.HTML_TAG_BEGIN + "<body>";
+                            tips = GlobalValues.HTML_TAG_BEGIN + "<body>Clusters: ";
                             for (int j = 0; j < size; j++) {
                                 PTMCluster cluster = clusters.get(j);
                                 String htmlColor = CyclicColorPalette.getHTMLColoredBlock(getColor(cluster));

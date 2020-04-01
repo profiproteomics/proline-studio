@@ -26,6 +26,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * A peptide instance located on a protein sequence by start and stop positions. A single PTMPeptideInstance could be
+ * involved in multiple clusters and multiple sites
+ *
+ */
 public class PTMPeptideInstance {
 
   private final DPeptideInstance m_peptideInstance;
@@ -80,14 +85,14 @@ public class PTMPeptideInstance {
   public DPeptideMatch getBestPepMatch() {
     DPeptideMatch pepMatch = getPeptideInstance().getBestPeptideMatch();
     if (pepMatch == null) {
-        //m_logger.warn("--- PTMPeptide (Xic) table: UNABLE to get peptide match associated to peptide instance "+ptmPepInstance.toString());
+        //m_logger.warn("--- PTMPeptide (Xic) table: UNABLE to get peptide match associated to peptide instance "+getPeptideInstance().toString());
         //Try using ptmSite PTMSitePeptideInstance
         Iterator<PTMSite> siteIT = getSites().iterator();
         while (siteIT.hasNext()) {
             PTMSite nextSite = siteIT.next();
             PTMSitePeptideInstance ptmSitePepInst = nextSite.getPTMSitePeptideInstance(getPeptideInstance().getPeptideId());
             if (ptmSitePepInst != null) {
-                pepMatch = ptmSitePepInst.getBestPeptideMatch();
+                pepMatch = ptmSitePepInst.getBestProbabilityPepMatch();
                 break;
             }
         }

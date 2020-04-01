@@ -36,7 +36,7 @@ import fr.proline.studio.pattern.MsQueryInfoRset;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
-import fr.proline.studio.rsmexplorer.gui.model.PeptidesOfPTMSiteTableModel;
+import fr.proline.studio.rsmexplorer.gui.model.PeptidesPTMSiteTableModel;
 import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
@@ -90,6 +90,7 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
     protected DPeptideInstance m_currentPepInst = null;
 
     private final boolean m_displayPeptidesMatches;
+    private PeptidesPTMSiteTableModel m_peptidesPtmSiteTableModel;
 
     /**
      * Display Peptides Matches of a PTMSite.
@@ -106,41 +107,24 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
 
     @Override
     public PTMSite getSelectedPTMSite() {
-
-        CompoundTableModel compoundTableModel = ((CompoundTableModel) m_peptidesPtmSiteTable.getModel());
-        // Retrieve ProteinPTMSite selected
-        PeptidesOfPTMSiteTableModel tableModel = (PeptidesOfPTMSiteTableModel) compoundTableModel.getBaseModel();
-        return tableModel.getCurrentPTMSite();
+        return m_peptidesPtmSiteTableModel.getCurrentPTMSite();
     }
 
     public DPeptideMatch getSelectedPeptideMatchSite() {
-
-        CompoundTableModel compoundTableModel = ((CompoundTableModel) m_peptidesPtmSiteTable.getModel());
-        // Retrieve ProteinPTMSite selected
-        PeptidesOfPTMSiteTableModel tableModel = (PeptidesOfPTMSiteTableModel) compoundTableModel.getBaseModel();
-        if (tableModel.getRowCount() <= 0) {
+        if (m_peptidesPtmSiteTableModel.getRowCount() <= 0) {
             return null;
         }
-        // Retrieve Selected Row
         int selectedRow = getSelectedTableModelRow();
-
-        return tableModel.getSelectedPeptideMatchSite(selectedRow);
+        return m_peptidesPtmSiteTableModel.getSelectedPeptideMatchSite(selectedRow);
     }
 
     @Override
     public DPeptideInstance getSelectedPeptideInstance() {
-        CompoundTableModel compoundTableModel = ((CompoundTableModel) m_peptidesPtmSiteTable.getModel());
-        // Retrieve ProteinPTMSite selected
-        PeptidesOfPTMSiteTableModel tableModel = (PeptidesOfPTMSiteTableModel) compoundTableModel.getBaseModel();
-
-        if (tableModel.getRowCount() <= 0) {
+        if (m_peptidesPtmSiteTableModel.getRowCount() <= 0) {
             return null;
         }
-
-        // Retrieve Selected Row
         int selectedRow = getSelectedTableModelRow();
-
-        return tableModel.getSelectedPeptideInstance(selectedRow);
+        return m_peptidesPtmSiteTableModel.getSelectedPeptideInstance(selectedRow);
     }
 
     /**
@@ -168,9 +152,8 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
 
     @Override
     public void setSelectedPeptide(DPeptideInstance pep) {
-        PeptidesOfPTMSiteTableModel model = ((PeptidesOfPTMSiteTableModel) ((CompoundTableModel) m_peptidesPtmSiteTable.getModel()).getBaseModel());
-        int index = model.getSelectedIndex(pep); //this is the model original index
-        //now find the real row perhaps after sorting or filting
+        int index = m_peptidesPtmSiteTableModel.getSelectedIndex(pep); //this is the model original index
+        //now find the real row perhaps after sorting or filtering
         if (index != -1) {
             //find the original index
             CompoundTableModel compoundTableModel = ((CompoundTableModel) m_peptidesPtmSiteTable.getModel());
@@ -183,21 +166,20 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
     }
 
     @Override
-    public void setData(PTMSite peptidesPTMSite, DPeptideInstance pepInst) {
+    public void setData(PTMSite ptmSite, DPeptideInstance pepInst) {
 
-        if ((peptidesPTMSite == m_currentPTMSite) && (pepInst == m_currentPepInst)) {
+        if ((ptmSite == m_currentPTMSite) && (pepInst == m_currentPepInst)) {
             return;
         }
 
-        m_currentPTMSite = peptidesPTMSite;
+        m_currentPTMSite = ptmSite;
         m_currentPepInst = pepInst;
 
-        PeptidesOfPTMSiteTableModel model = ((PeptidesOfPTMSiteTableModel) ((CompoundTableModel) m_peptidesPtmSiteTable.getModel()).getBaseModel());
-        model.setData(peptidesPTMSite, m_displayPeptidesMatches, pepInst);
+        m_peptidesPtmSiteTableModel.setData(ptmSite, m_displayPeptidesMatches, pepInst);
         // select the first row
         if ((m_currentPTMSite != null) && ((!m_displayPeptidesMatches) || (m_currentPepInst != null))) {
             m_peptidesPtmSiteTable.getSelectionModel().setSelectionInterval(0, 0);
-            m_markerContainerPanel.setMaxLineNumber(m_peptidesPtmSiteTable.getModel().getRowCount());
+            m_markerContainerPanel.setMaxLineNumber(m_peptidesPtmSiteTableModel.getRowCount());
         }
 
         m_infoToggleButton.updateInfo();
@@ -304,16 +286,16 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
         m_peptidesPtmSiteScrollPane = new JScrollPane();
 
         m_peptidesPtmSiteTable = new PeptidesPTMSiteTable();
-        PeptidesOfPTMSiteTableModel model = new PeptidesOfPTMSiteTableModel();
-        m_peptidesPtmSiteTable.setModel(new CompoundTableModel(model, true));
+        m_peptidesPtmSiteTableModel = new PeptidesPTMSiteTableModel();
+        m_peptidesPtmSiteTable.setModel(new CompoundTableModel(m_peptidesPtmSiteTableModel, true));
 
         // hide the id column
-        m_peptidesPtmSiteTable.getColumnExt(m_peptidesPtmSiteTable.convertColumnIndexToView(PeptidesOfPTMSiteTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
+        m_peptidesPtmSiteTable.getColumnExt(m_peptidesPtmSiteTable.convertColumnIndexToView(PeptidesPTMSiteTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
         //m_ptmProteinSiteTable.displayColumnAsPercentage(PtmProtenSiteTableModel_V2.COLTYPE_PEPTIDE_SCORE);
         TableRowSorter<TableModel> sorter = new TableRowSorter<>(m_peptidesPtmSiteTable.getModel());
         m_peptidesPtmSiteTable.setRowSorter(sorter);
 
-        sorter.setComparator(PeptidesOfPTMSiteTableModel.COLTYPE_MODIFICATION_LOC, new Comparator<String>() {
+        sorter.setComparator(PeptidesPTMSiteTableModel.COLTYPE_MODIFICATION_LOC, new Comparator<String>() {
 
             @Override
             public int compare(String s1, String s2) {
@@ -339,7 +321,7 @@ public class PeptidesPTMSiteTablePanel extends JPanel implements DataBoxPanelInt
 
         });
 
-        sorter.setComparator(PeptidesOfPTMSiteTableModel.COLTYPE_PROTEIN_LOC, new Comparator<Integer>() {
+        sorter.setComparator(PeptidesPTMSiteTableModel.COLTYPE_PROTEIN_LOC, new Comparator<Integer>() {
 
             @Override
             public int compare(Integer s1, Integer s2) {

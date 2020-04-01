@@ -202,8 +202,6 @@ public class PTMPeptidesGraphicModel {
     }
 
     public void setProteinSequence(String sequence) {
-//        m_logger.debug("SSSSSSSSSSSS ProteinSeqence by ptm is {}", m_proteinSequence);
-//        m_logger.debug("SSSSSSSSSSSS Sequence by overview  is {}", sequence);
         m_proteinSequence = sequence;
     }
 

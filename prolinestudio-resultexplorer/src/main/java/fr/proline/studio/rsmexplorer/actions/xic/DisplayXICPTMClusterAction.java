@@ -66,7 +66,7 @@ public class DisplayXICPTMClusterAction extends AbstractRSMAction {
         if (rsm != null) {
 
             // prepare window box
-            WindowBox wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName()); ;
+            WindowBox wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName(), false); ;
             wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));    
                
             // open a window to display the window box
@@ -87,7 +87,7 @@ public class DisplayXICPTMClusterAction extends AbstractRSMAction {
 
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                    WindowBox wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName());;
+                    WindowBox wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName(), false);
 
                     // open a window to display the window box
                     DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);

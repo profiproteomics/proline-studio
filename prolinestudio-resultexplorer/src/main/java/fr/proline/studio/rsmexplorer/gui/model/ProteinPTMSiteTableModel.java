@@ -47,7 +47,7 @@ import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
-import fr.proline.studio.utils.IconManager;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -182,7 +182,7 @@ public class ProteinPTMSiteTableModel extends LazyTableModel implements GlobalTa
 
     PTMSite proteinPTMSite = m_arrayInUse.get(row);
     DProteinMatch proteinMatch = proteinPTMSite.getProteinMatch();
-    DPeptideMatch peptideMatch = proteinPTMSite.getBestPeptideMatch();
+    DPeptideMatch peptideMatch = proteinPTMSite.getBestProbabilityPepMatch();
     DInfoPTM infoPtm = proteinPTMSite.getPTMSpecificity();
 
     switch (col) {
@@ -267,7 +267,7 @@ public class ProteinPTMSiteTableModel extends LazyTableModel implements GlobalTa
       case COLTYPE_RESIDUE_AA: 
         return infoPtm.getResidueAASpecificity();
       case COLTYPE_SPECTRUM_TITLE:
-        return proteinPTMSite.getBestPeptideMatch().getMsQuery().getDSpectrum().getTitle();
+        return proteinPTMSite.getBestProbabilityPepMatch().getMsQuery().getDSpectrum().getTitle();
       case COLTYPE_EXPRESSION:
         return proteinPTMSite.getExpressionValue();
     }
@@ -432,7 +432,7 @@ public class ProteinPTMSiteTableModel extends LazyTableModel implements GlobalTa
   public ArrayList<ExportFontData> getExportFonts(int row, int col) {
     if (col == COLTYPE_PEPTIDE_NAME) {
       PTMSite proteinPTMSite = m_arrayInUse.get(row);
-      DPeptideMatch peptideMatch = proteinPTMSite.getBestPeptideMatch();
+      DPeptideMatch peptideMatch = proteinPTMSite.getBestProbabilityPepMatch();
       return ExportFontModelUtilities.getExportFonts(peptideMatch);
     }
     return null;
@@ -535,7 +535,7 @@ public class ProteinPTMSiteTableModel extends LazyTableModel implements GlobalTa
       return m_arrayInUse.get(row).getProteinMatch();
     }
     if (c.equals(DPeptideMatch.class)) {
-      return ((PTMSite) m_arrayInUse.get(row)).getBestPeptideMatch();
+      return ((PTMSite) m_arrayInUse.get(row)).getBestProbabilityPepMatch();
     }
     return null;
   }

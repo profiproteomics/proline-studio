@@ -70,6 +70,8 @@ import org.slf4j.LoggerFactory;
 public class DataBoxPTMClusters extends AbstractDataBox {
     
     private final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.ptm");
+
+    private boolean m_viewSitesAsClusters;
     private long logStartTime;
     
     private PTMDataset m_ptmDataset;
@@ -82,8 +84,8 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         
        // Name of this databox
         m_typeName = "Dataset PTMs Clusters"; //May be Quant PTM Protein Sites... 
-        m_description = "Clusters of Modification Sites of a Dataset";//May be Ident or Quant dataset... 
-
+        m_description = "Clusters of Modification Sites of a Dataset";//May be Ident or Quant dataset...
+        
         // Register Possible in parameters
         // One PTMDatasert ResultSummary
         GroupParameter inParameter = new GroupParameter();
@@ -123,11 +125,14 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         registerOutParameter(outParameter);
                         
     }
-    
+
+    public void setViewSitesOnly(boolean viewSitesAsClusters) {
+        m_viewSitesAsClusters = viewSitesAsClusters;
+    }
+
     private boolean isXicResult() {
         return m_isXicResult;
     }
-
     
     public void setXicResult(boolean isXICResult) {
         m_isXicResult = isXICResult;
@@ -217,10 +222,9 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         // ask asynchronous loading of data
         
         DatabasePTMsTask task = new DatabasePTMsTask(callback);
-        task.initLoadPTMDataset(getProjectId(), m_ptmDataset.getDataset(), ptmDS);       
+        task.initLoadPTMDataset(getProjectId(), m_ptmDataset.getDataset(), ptmDS, m_viewSitesAsClusters);
         m_logger.debug("DataBoxPTMClusters : **** Register task DatabasePTMsTask.initLoadPTMDataset. ID= "+task.getId());
         registerTask(task);
-       
           
     }
 

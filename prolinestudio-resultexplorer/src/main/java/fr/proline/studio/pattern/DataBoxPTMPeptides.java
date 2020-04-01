@@ -268,8 +268,10 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
 
         DataBoxPanelInterface panel = getDataBoxPanelInterface();
 
-        if (parameterType != null && isList && (!(panel instanceof SplittedPanelContainer.ReactiveTabbedComponent)
-                || ((panel instanceof SplittedPanelContainer.ReactiveTabbedComponent) && ((SplittedPanelContainer.ReactiveTabbedComponent) panel).isShowed()))
+        if ( (parameterType != null) && isList &&
+                (!(panel instanceof SplittedPanelContainer.ReactiveTabbedComponent)
+                    || ((panel instanceof SplittedPanelContainer.ReactiveTabbedComponent)
+                    && ((SplittedPanelContainer.ReactiveTabbedComponent) panel).isShowed()))
                 && m_isXICResult) {
 
             if (parameterType.equals(ExtendedTableModelInterface.class)) {

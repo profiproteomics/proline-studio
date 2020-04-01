@@ -242,7 +242,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
                     if(subTask == null){
                         //Main task callback!
                         m_ptmDataset = ptmDS.get(0);
-                        m_logger.debug(" Add PTMCluster "+ptmDS.get(0).getPTMClusters().size());
+                        m_logger.debug(" Add PTM Sites "+ptmDS.get(0).getPTMSites().size());
                         loadPeptideMatchesV2();
 
                     } else  {
@@ -270,7 +270,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
         // ask asynchronous loading of data
         
         DatabasePTMsTask task = new DatabasePTMsTask(callback);
-        task.initLoadPTMDataset(getProjectId(), m_ptmDataset.getDataset(), ptmDS);
+        task.initLoadPTMDataset(getProjectId(), m_ptmDataset.getDataset(), ptmDS, true);
         m_logger.debug("**** Register task DatabasePTMsTask.initLoadPTMDataset ID : "+task.getId());
         registerTask(task); 
     }
@@ -555,7 +555,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
             if (parameterType.equals(DPeptideMatch.class)) {
                 PTMSite proteinPtmSite = ((ProteinPTMSitePanel) getDataBoxPanelInterface()).getSelectedProteinPTMSite();
                 if (proteinPtmSite != null) {
-                    return proteinPtmSite.getBestPeptideMatch();
+                    return proteinPtmSite.getBestProbabilityPepMatch();
                 }
             }
             if (parameterType.equals(PTMSite.class)) {
@@ -596,15 +596,15 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
         }
         return super.getData(getArray, parameterType);
     }
- 
+
     @Override
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
-        if(parameterType.equals(PTMPeptideInstance.class) && isList){
-        if(m_loadPepMatchOnGoing)
-                return null;            
+        if (parameterType.equals(PTMPeptideInstance.class) && isList) {
+            if (m_loadPepMatchOnGoing)
+                return null;
             PTMSite site = ((ProteinPTMSitePanel) getDataBoxPanelInterface()).getSelectedProteinPTMSite();
-            List<PTMPeptideInstance> sitePtmPepInstance =  new ArrayList<>();
-            if(site != null)
+            List<PTMPeptideInstance> sitePtmPepInstance = new ArrayList<>();
+            if (site != null)
                 sitePtmPepInstance = site.getAssociatedPTMPeptideInstances();
             return sitePtmPepInstance;
         }

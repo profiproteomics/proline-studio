@@ -23,10 +23,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * A PTM Site is for one given protein , the modification on a amino acide, so 4
+ * A PTM Site is for one given protein, the modification on a amino acide, so 4
  * keys for describe a PTMSite: protein, position + amino acid + type of
  * modification. In this PTMSite class, for the given modification in this
- * protein, there are a list of peptide which contain this modificaiton.
+ * protein, there are a list of peptide which contain this modification.
  *
  * @author CB205360
  */
@@ -85,12 +85,18 @@ public class PTMSite {
         return m_proteinMatch;
     }
 
-    public void setBestPeptideMatch(DPeptideMatch peptideMatch) {
+    public void setBestProbabilityPepMatch(DPeptideMatch peptideMatch) {
         m_bestPeptideMatch = peptideMatch;
     }
 
-    public DPeptideMatch getBestPeptideMatch() {
+    public DPeptideMatch getBestProbabilityPepMatch() {
         return m_bestPeptideMatch;
+    }
+
+    public Long getBestProbabilityPepMatchId() {
+        if (m_bestPeptideMatch != null)
+            return m_bestPeptideMatch.getId();
+        return m_site.bestPeptideMatchId;
     }
 
     public void setPTMSpecificity(DInfoPTM specificity) {
@@ -112,7 +118,7 @@ public class PTMSite {
     public void setPeptideInstances(List<DPeptideInstance> parentPeptideInstances, List<DPeptideInstance> leafInstances) {
         m_parentPeptideInstances = parentPeptideInstances;
         m_ptmSitePeptideInstanceByPepId = new HashMap<>();
-        fillPeptideInstances(parentPeptideInstances, leafInstances);
+        linkPeptideInstances(parentPeptideInstances, leafInstances);
     }
     
     public void addPeptideInstances(List<DPeptideInstance> parentPeptideInstances, List<DPeptideInstance> leafInstances) {
@@ -123,10 +129,10 @@ public class PTMSite {
         if(m_ptmSitePeptideInstanceByPepId ==null)
             m_ptmSitePeptideInstanceByPepId = new HashMap<>();
         
-        fillPeptideInstances(parentPeptideInstances, leafInstances);      
+        linkPeptideInstances(parentPeptideInstances, leafInstances);
     }
     
-    private void fillPeptideInstances(List<DPeptideInstance> parentPeptideInstances, List<DPeptideInstance> leafInstances){
+    private void linkPeptideInstances(List<DPeptideInstance> parentPeptideInstances, List<DPeptideInstance> leafInstances){
         Map<Long, List<DPeptideInstance>> leafPepInstanceByPepId = leafInstances.stream().collect(Collectors.groupingBy(pi -> pi.getPeptideId()));
         for (DPeptideInstance parentPeptideInstance : parentPeptideInstances) {
             PTMPeptideInstance parentPTMPeptideInst = m_dataset.getPTMPeptideInstance(m_proteinMatch, parentPeptideInstance, m_site.seqPosition);
@@ -134,7 +140,7 @@ public class PTMSite {
             parentPTMPeptideInst.setStartPosition(getPositionOnProtein() - getPositionOnPeptide(peptideId));
             parentPTMPeptideInst.addPTMSite(this);
             List<DPeptideInstance> leafPeptideInstances = leafPepInstanceByPepId.get(peptideId);
-            PTMSitePeptideInstance ptmSitePeptideInstance = new PTMSitePeptideInstance(this, parentPTMPeptideInst, leafPeptideInstances, getBestPeptideMatch(leafPeptideInstances));
+            PTMSitePeptideInstance ptmSitePeptideInstance = new PTMSitePeptideInstance(this, parentPTMPeptideInst, leafPeptideInstances, getBestProbabilityPepMatch(leafPeptideInstances));
             m_ptmSitePeptideInstanceByPepId.put(peptideId, ptmSitePeptideInstance);
         }
     }
@@ -163,7 +169,7 @@ public class PTMSite {
         return (m_ptmSitePeptideInstanceByPepId != null);
     }
 
-    private DPeptideMatch getBestPeptideMatch(List<DPeptideInstance> peptideInstances) {
+    private DPeptideMatch getBestProbabilityPepMatch(List<DPeptideInstance> peptideInstances) {
 
         List<DPeptideMatch> pepMatches = peptideInstances.stream().flatMap(pi -> Optional.ofNullable(pi.getPeptideMatches()).map(Collection::stream).orElseGet(Stream::empty)).collect(Collectors.toList());
 

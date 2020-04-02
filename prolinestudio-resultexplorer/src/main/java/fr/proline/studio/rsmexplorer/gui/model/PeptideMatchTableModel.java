@@ -663,14 +663,8 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
 
     }
 
-      private void putFilter(int modelColumnType, Class filterClass, ConvertValueInterface converter, LinkedHashMap<Integer, Filter> filtersMap) {
-        int usedColIndex = -1;
-        for (int i = 0; i < m_colUsed.size(); i++) {
-            if (m_colUsed.get(i) == modelColumnType) {
-                usedColIndex = i;
-                break;
-            }
-        }
+    private void putFilter(int modelColumnType, Class filterClass, ConvertValueInterface converter, LinkedHashMap<Integer, Filter> filtersMap) {
+        int usedColIndex = convertColToColUsed(modelColumnType);
         Filter filter = null;
         if (usedColIndex != -1) {
             if (filterClass == StringFilter.class) {

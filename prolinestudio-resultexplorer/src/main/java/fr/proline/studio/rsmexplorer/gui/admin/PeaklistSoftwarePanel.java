@@ -265,15 +265,8 @@ public class PeaklistSoftwarePanel extends JPanel {
 
     protected static void parse(StringBuilder sb, String rule, String fieldName, String stringToParse) {
         sb.append(fieldName);
-
-        final String REGEX = "regex_cut";
         String ruleTreat;
-        if (rule.contains("||")) {
-            ruleTreat = rule.replace("||", REGEX);
-        } else {
-            ruleTreat = rule;
-        }
-        String[] ruleList = ruleTreat.split(REGEX); //we can't split with regex="||"
+        String[] ruleList = rule.split("\\|\\|"); // split at "||" 
         for (String element : ruleList) {
             if (!element.isEmpty()) {
                 Pattern pattern = Pattern.compile(element);

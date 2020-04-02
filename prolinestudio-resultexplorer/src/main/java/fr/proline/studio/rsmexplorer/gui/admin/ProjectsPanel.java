@@ -63,7 +63,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -76,6 +75,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
+import org.jdesktop.swingx.table.TableColumnExt;
 import org.openide.windows.WindowManager;
 
 /**
@@ -132,7 +132,15 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         m_projectsTable.setFillsViewportHeight(true);
         m_projectsTable.setModel(m_projectsModel);
         m_projectsTable.getSelectionModel().addListSelectionListener(this);
-
+        {//set colonne isSelected invisible after set model
+            List<TableColumn> columns = m_projectsTable.getColumns(true);
+            TableColumnExt columnExt = (TableColumnExt) columns.get(ProjectsInfoTableModel.COLTYPE_IS_SELECTED);
+            if (columnExt != null) {
+                columnExt.setPreferredWidth(30);
+                columnExt.setVisible(false);
+            }
+        }
+       
         JToolBar toolbar = initTopToolbar();
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.add(projectTableScrollPane, BorderLayout.CENTER);
@@ -233,6 +241,7 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
             m_sharedProjectTable.setFillsViewportHeight(true);
 
             m_sharedProjectTable.setModel(m_sharedProjects4SelectModel);
+            m_sharedProjectTable.packAll();
             sharedProjectPane.add(sharedProjectTableScrollPane, BorderLayout.CENTER);
             setInternalComponent(sharedProjectPane);
         }
@@ -258,8 +267,8 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
             }
 
             @Override
-            public TableCellRenderer getCellRenderer(int row, int columnIndex) {
-                //don't use convertColumnIndexToModel, will have class cast error in CellRenderer
+            public TableCellRenderer getCellRenderer(int row, int col) {
+                int columnIndex = convertColumnIndexToModel(col);
                 switch (columnIndex) {
                     case ProjectsInfoTableModel.COLTYPE_STATUS:
                         TableColumn column0;
@@ -429,6 +438,10 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
     @Override
     public void valueChanged(ListSelectionEvent e) {
         int[] rows = m_projectsTable.getSelectedRows();
+        int size = m_projectsModel.getRowCount();
+        for (ProjectInfo project : m_resultProjectsList) {
+            project.setSelected(false);
+        }
 
         List<Long> projectIds = Arrays.stream(rows).mapToObj(i -> {
             int mi = m_projectsModel.convertRowToOriginalModel(i);
@@ -470,11 +483,12 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         public static final int COLTYPE_DB_NAME = 7;// "Databases"
         public static final int COLTYPE_LAST_DATASET_DATE = 8;// "DatasetDate"
         public static final int COLTYPE_PROPERTIES = 9;
+        public static final int COLTYPE_IS_SELECTED = 10;
 
         {
-            String[] columnNames = {" ", "Id", "Project", "Description", "Size (MB)", "Owner", "Raw Files Count", "Databases", "Dataset Date", "Properties"};
+            String[] columnNames = {" ", "Id", "Project", "Description", "Size (MB)", "Owner", "Raw Files Count", "Databases", "Dataset Date", "Properties", "isSelected"};
             m_columnNames = columnNames;
-            String[] columnTooltips = {"Status", "Id", "Project", "Description", "Size (MB)", "Owner", "Raw Files Count", "Databases", "Dataset Date", "Properties"};
+            String[] columnTooltips = {"Status", "Id", "Project", "Description", "Size (MB)", "Owner", "Raw Files Count", "Databases", "Dataset Date", "Properties", "isSelected"};
             m_columnTooltips = columnTooltips;
         }
 
@@ -517,6 +531,8 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
                     return project.getLastDatasetDate();
                 case COLTYPE_PROPERTIES:
                     return project.getProperties();
+                case COLTYPE_IS_SELECTED:
+                    return project.isSelected();
                 default:
                     return "";
             }

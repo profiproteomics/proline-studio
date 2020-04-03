@@ -140,7 +140,7 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
                 columnExt.setVisible(false);
             }
         }
-       
+
         JToolBar toolbar = initTopToolbar();
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.add(projectTableScrollPane, BorderLayout.CENTER);
@@ -492,10 +492,6 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
             m_columnTooltips = columnTooltips;
         }
 
-        public ProjectsInfoTableModel() {
-            m_entities = new ArrayList<>();
-        }
-
         @Override
         public int getRowCount() {
             return m_entities.size();
@@ -632,10 +628,6 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
             m_columnNames = columnNames;
             String[] columnTooltips = {"Projects Status", "Creation Date", "Identifier", "Raw File Name", "Raw File Directory", "Project Ids", "Projects Count", "Properties"};
             m_columnTooltips = columnTooltips;
-        }
-
-        public RawFilesTableModel() {
-            m_entities = new ArrayList<>();
         }
 
         /**

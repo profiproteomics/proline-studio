@@ -37,16 +37,21 @@ public abstract class AbstractDecoratedGlobalTableModel<T> extends DecoratedTabl
 
     protected String[] m_columnNames;
     protected String[] m_columnTooltips;
-    protected List<T> m_entities = new ArrayList<>();
+    protected List<T> m_entities;
+
+    public AbstractDecoratedGlobalTableModel() {
+        m_entities = new ArrayList<>();
+    }
 
     @Override
     public abstract Object getValueAt(int rowIndex, int columnIndex);
 
     /**
-     * AbstractTableModel 
-     * Very often, if you have non String.class column, you should override it in order to use <b>column sort</b>
+     * AbstractTableModel Very often, if you have non String.class column, you
+     * should override it in order to use <b>column sort</b>
+     *
      * @param columnIndex
-     * @return 
+     * @return
      */
     @Override
     public abstract Class<?> getColumnClass(int columnIndex);//{/*default:*/ return Object.class;}

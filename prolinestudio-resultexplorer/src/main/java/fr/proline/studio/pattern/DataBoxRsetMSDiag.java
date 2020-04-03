@@ -18,6 +18,7 @@ package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.rsmexplorer.gui.RsetMSDiagPanel;
@@ -79,6 +80,8 @@ public class DataBoxRsetMSDiag extends AbstractDataBox {
 
         ResultSet _rset = (m_rset != null) ? m_rset : (ResultSet) m_previousDataBox.getData(false, ResultSet.class);
 
+        TransientMemoryCacheManager.getSingleton().linkCache(this, _rset);
+        
         long rSetId = _rset.getId();
 
         Map<String, Object> parameters = new HashMap<>();

@@ -21,6 +21,7 @@ import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
@@ -100,6 +101,8 @@ public class DataBoxRsmPSMForMsQuery extends AbstractDataBox{
         m_rset = _msqI.getResultSet();
         m_rsm = _msqI.getResultSummary();
 
+        TransientMemoryCacheManager.getSingleton().linkCache(this, m_rset);
+        TransientMemoryCacheManager.getSingleton().linkCache(this, m_rsm);
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
             

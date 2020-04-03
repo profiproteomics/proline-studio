@@ -29,6 +29,8 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
+import fr.proline.studio.dam.memory.TransientMemoryClientInterface;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import org.apache.commons.lang3.tuple.Pair;
@@ -81,11 +83,12 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     private final static int LOAD_PSM_FOR_PROTEIN_SET_RSM = 3;
     private final static int LOAD_PSM_FOR_PEPTIDE_RSM = 4;
     private final static int LOAD_PSM_FOR_MSQUERY = 5;
+
     
     public DatabaseLoadPeptideMatchTask(AbstractDatabaseCallback callback, long projectId, ResultSet rset) {
         super(callback, SUB_TASK_COUNT_RSET, new TaskInfo("Load Peptide Matches for Search Result "+rset.getId(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
-        m_rset = rset;   
+        m_rset = rset; 
         m_action = LOAD_ALL_RSET;
     }
     public DatabaseLoadPeptideMatchTask(AbstractDatabaseCallback callback, long projectId, ResultSet rset, DProteinMatch proteinMatch) {
@@ -135,12 +138,12 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         super.abortTask();
         switch (m_action) {
             case LOAD_ALL_RSET:
-                m_rset.getTransientData().setPeptideMatchIds(null);
-                m_rset.getTransientData().setPeptideMatches(null);
+                m_rset.getTransientData(TransientMemoryCacheManager.getSingleton()).setPeptideMatchIds(null);
+                m_rset.getTransientData(TransientMemoryCacheManager.getSingleton()).setPeptideMatches(null);
                 break;
             case LOAD_ALL_RSM:
-                m_rsm.getTransientData().setPeptideMatches(null);
-                m_rsm.getTransientData().setPeptideMatchesId(null);
+                m_rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).setPeptideMatches(null);
+                m_rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).setPeptideMatchesId(null);
                 break;
             case LOAD_PEPTIDES_FOR_PROTEIN_RSET:
                 m_proteinMatch.setPeptideMatches(null);
@@ -163,9 +166,9 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     public boolean needToFetch() {
         switch (m_action) {
             case LOAD_ALL_RSET:
-                return (m_rset.getTransientData().getPeptideMatchIds() == null);
+                return (m_rset.getTransientData(TransientMemoryCacheManager.getSingleton()).getPeptideMatchIds() == null);
             case LOAD_ALL_RSM:
-                return (m_rsm.getTransientData().getPeptideMatches() == null);
+                return (m_rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).getPeptideMatches() == null);
             case LOAD_PEPTIDES_FOR_PROTEIN_RSET:
                 return (m_proteinMatch.getPeptideMatches() == null);
             case LOAD_PSM_FOR_PROTEIN_SET_RSM:
@@ -229,14 +232,14 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                 peptideMatchIdsArray[i] = id;
                 m_peptideMatchPosition.put(id, i);
             }       
-            m_rset.getTransientData().setPeptideMatchIds(peptideMatchIdsArray);
+            m_rset.getTransientData(TransientMemoryCacheManager.getSingleton()).setPeptideMatchIds(peptideMatchIdsArray);
 
             
             int nb = peptideMatchIds.size();
             DPeptideMatch[] peptideMatchArray = new DPeptideMatch[nb];
-            m_rset.getTransientData().setPeptideMatches(peptideMatchArray);
-            
+            m_rset.getTransientData(TransientMemoryCacheManager.getSingleton()).setPeptideMatches(peptideMatchArray);
 
+            
             int nbPeptideMatch = m_peptideMatchIds.size();
             if (nbPeptideMatch > 0) {
 
@@ -416,9 +419,11 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             DPeptideMatch[] peptideMatchArray = matches.getRight();
             long[] peptideMatchArrayIds = matches.getLeft();
 
-            m_rsm.getTransientData().setPeptideMatches(peptideMatchArray);
-            m_rsm.getTransientData().setPeptideMatchesId(peptideMatchArrayIds);
+            m_rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).setPeptideMatches(peptideMatchArray);
+            m_rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).setPeptideMatchesId(peptideMatchArrayIds);
 
+
+            
             m_peptideMatchIds = Arrays.stream(peptideMatchArrayIds).boxed().collect(Collectors.toList());
             m_peptideMatchMap = Arrays.stream(peptideMatchArray).collect(Collectors.toMap(pm -> pm.getId(), pm -> pm));
 
@@ -778,7 +783,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         }
         
 
-        DPeptideMatch[] peptideMatches = m_rset.getTransientData().getPeptideMatches();
+        DPeptideMatch[] peptideMatches = m_rset.getTransientData(TransientMemoryCacheManager.getSingleton()).getPeptideMatches();
 
         Iterator<DPeptideMatch> it = resultList.iterator();
         while (it.hasNext()) {

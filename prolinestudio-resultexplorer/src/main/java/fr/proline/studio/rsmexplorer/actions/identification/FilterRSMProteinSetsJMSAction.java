@@ -20,6 +20,7 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.DatabaseDataManager;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.FilterRSMProtSetsTask;
@@ -85,7 +86,7 @@ public class FilterRSMProteinSetsJMSAction extends AbstractRSMAction{
                         // Protein Sets will have to be reloaded
                         ResultSummary rsm = d.getResultSummary();
                         if (rsm != null) {
-                            rsm.getTransientData().setProteinSetArray(null);
+                            rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).setProteinSetArray(null);
                         }
                         
                         dataSetNode.setIsChanging(false);

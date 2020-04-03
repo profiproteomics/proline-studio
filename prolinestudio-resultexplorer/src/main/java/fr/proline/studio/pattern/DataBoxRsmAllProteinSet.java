@@ -22,6 +22,7 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -81,6 +82,8 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
 
         final ResultSummary _rsm = (m_rsm != null) ? m_rsm : (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
 
+        TransientMemoryCacheManager.getSingleton().linkCache(this, _rsm);
+        
         final int loadingId = setLoading();
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -94,7 +97,7 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                 if (subTask == null) {
-                    DProteinSet[] proteinSetArray = _rsm.getTransientData().getProteinSetArray();
+                    DProteinSet[] proteinSetArray = _rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).getProteinSetArray();
                     ((RsmProteinSetPanel) getDataBoxPanelInterface()).setData(taskId, proteinSetArray, finished);
                     
                     if (m_dataToBeSelected != null) {

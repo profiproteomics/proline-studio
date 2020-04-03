@@ -140,7 +140,7 @@ public class RetrieveBioSeqJMSAction extends AbstractRSMAction {
                 }
 
                 for (ResultSummary rsm : rsms2Clean) {
-                    rsm.getTransientData().setProteinSetArray(null);
+                    rsm.getTransientData(null).setProteinSetArray(null);
                 }
 
             }

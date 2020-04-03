@@ -24,6 +24,7 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -85,6 +86,8 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
     public void dataChanged() {
         
         final ResultSummary _rsm = (m_rsm!=null) ? m_rsm : (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
+        
+        TransientMemoryCacheManager.getSingleton().linkCache(this, _rsm);
 
         final int loadingId = setLoading();
         
@@ -100,7 +103,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
                 
                if (subTask == null) {
 
-                    PeptideInstance[] peptideinstanceArray = _rsm.getTransientData().getPeptideInstanceArray();
+                    PeptideInstance[] peptideinstanceArray = _rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).getPeptideInstanceArray();
                     ((RsmPeptidesPanel)getDataBoxPanelInterface()).setData(taskId, peptideinstanceArray, finished);
                } else {
                     ((RsmPeptidesPanel)getDataBoxPanelInterface()).dataUpdated(subTask, finished);

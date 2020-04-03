@@ -23,6 +23,7 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -81,6 +82,8 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
+        TransientMemoryCacheManager.getSingleton().linkCache(this, m_rsm);
+        
         final PeptideInstance _peptideInstance = (PeptideInstance) m_previousDataBox.getData(false, PeptideInstance.class);
 
 

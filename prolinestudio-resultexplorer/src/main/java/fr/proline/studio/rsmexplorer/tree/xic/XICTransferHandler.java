@@ -117,9 +117,10 @@ public class XICTransferHandler extends AbstractTreeTransferHandler {
 
                 } else {
 
-                    if ((dropComponent instanceof XICBiologicalSampleNode) || // Sample Node
+                    if (((dropComponent instanceof XICBiologicalSampleNode) || // Sample Node
                             (dropComponent instanceof DataSetNode) || // XIC Node
-                            (dropComponent instanceof XICBiologicalGroupNode)) {    // Group Node
+                            (dropComponent instanceof XICBiologicalGroupNode))
+                        && (! (dropComponent instanceof  XICBiologicalSampleAnalysisNode))) {    // Group Node
                         return true;
                     }
 

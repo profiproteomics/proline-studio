@@ -22,6 +22,7 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
@@ -130,7 +131,7 @@ public class FilterRSMProtSetsTask extends AbstractJMSTask {
 	    } else {
 		m_loggerProline.debug("Result :\n" + result); 
                 if(m_dataset.getResultSummary() != null){
-                    m_dataset.getResultSummary().getTransientData().setProteinSetArray(null);
+                    m_dataset.getResultSummary().getTransientData(TransientMemoryCacheManager.getSingleton()).setProteinSetArray(null);
                 }
 	    }
         }

@@ -21,6 +21,7 @@ import fr.proline.core.orm.msi.dto.DInfoPTM;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.rsmexplorer.gui.RsmProteinAndPeptideSequencePanel;
 
@@ -68,6 +69,8 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
             ((RsmProteinAndPeptideSequencePanel) getDataBoxPanelInterface()).setData(null, null, null, null);
             return;
         }
+        
+        TransientMemoryCacheManager.getSingleton().linkCache(this, resultSummary);
 
         DPeptideSet peptideSet = proteinMatch.getPeptideSet(resultSummary.getId());
         if (peptideSet == null) {

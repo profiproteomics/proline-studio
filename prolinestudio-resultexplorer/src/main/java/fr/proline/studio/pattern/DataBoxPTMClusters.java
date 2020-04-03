@@ -29,6 +29,7 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
@@ -173,6 +174,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     @Override
     public void dataChanged() {
         
+        TransientMemoryCacheManager.getSingleton().linkCache(this, m_rsm);
             
         final int loadingId = setLoading();
         final long logStartTimelocal = System.currentTimeMillis();

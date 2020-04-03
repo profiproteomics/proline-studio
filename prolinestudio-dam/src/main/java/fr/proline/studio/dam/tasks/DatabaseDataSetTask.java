@@ -57,6 +57,7 @@ import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import java.io.IOException;
 import javax.persistence.NoResultException;
 import org.netbeans.api.db.explorer.DatabaseException;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 
 /**
  * Used to load dataset in two cases : - parent dataset of a project - children
@@ -347,7 +348,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 // this task is used only one time for each node
                 return true;
             case LOAD_DATASET_FOR_RSM:
-                return (m_rsm.getTransientData().getDataSet() == null);
+                return (m_rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).getDataSet() == null);
             case LOAD_RSET_AND_RSM_OF_DATASET:
                 if (m_datasetList != null) {
                     int nbDataSet = m_datasetList.size();
@@ -985,7 +986,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             ResultSummary rsmFound = entityManagerMSI.find(ResultSummary.class, rsmId);
             Set<String> objTreeByName = rsmFound.getObjectTreeIdByName().keySet(); //to init Lazy map
             
-            rsmFound.getTransientData().setDDataset(d);
+            rsmFound.getTransientData(TransientMemoryCacheManager.getSingleton()).setDDataset(d);
             d.setResultSummary(rsmFound);
         }
     }
@@ -1002,7 +1003,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             TypedQuery<Dataset> dataSetQuery = entityManagerUDS.createQuery("SELECT d FROM Dataset d WHERE d.resultSummaryId=:rsmId", Dataset.class);
             dataSetQuery.setParameter("rsmId", rsmId);
             Dataset dataSet = dataSetQuery.getSingleResult();
-            rsm.getTransientData().setDataSet(dataSet);
+            rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).setDataSet(dataSet);
 
             entityManagerUDS.getTransaction().commit();
 

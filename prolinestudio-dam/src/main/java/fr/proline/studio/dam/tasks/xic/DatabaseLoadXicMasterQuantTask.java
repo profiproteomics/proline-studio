@@ -50,6 +50,8 @@ import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 import fr.proline.core.orm.uds.SampleAnalysis;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
+import fr.proline.studio.dam.memory.TransientMemoryClientInterface;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;

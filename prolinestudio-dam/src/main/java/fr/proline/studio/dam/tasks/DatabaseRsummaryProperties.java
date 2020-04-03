@@ -19,6 +19,9 @@ package fr.proline.studio.dam.tasks;
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
+import fr.proline.core.orm.util.TransientDataAllocationListener;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
+import fr.proline.studio.dam.memory.TransientMemoryClientInterface;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import javax.persistence.EntityManager;
@@ -33,6 +36,7 @@ public class DatabaseRsummaryProperties extends AbstractDatabaseTask {
     private long m_projectId;
     private DDataset m_dataset = null;
     private ResultSummary m_rsm = null;
+    
     
     public DatabaseRsummaryProperties(AbstractDatabaseCallback callback, long projectId, DDataset dataset) {
         super(callback, new TaskInfo("Load Properties for Identification Summary "+dataset.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
@@ -52,7 +56,7 @@ public class DatabaseRsummaryProperties extends AbstractDatabaseTask {
         if (m_rsm == null) {
             m_rsm = m_dataset.getResultSummary();
         }
-        return (m_rsm.getTransientData().getNumberOfProteinSets() == null);
+        return (m_rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).getNumberOfProteinSets() == null);
     }
     
     @Override
@@ -95,17 +99,17 @@ public class DatabaseRsummaryProperties extends AbstractDatabaseTask {
         countProteinSetsQuery.setParameter("rsmId", rsmId);
         Long proteinSetNumber = countProteinSetsQuery.getSingleResult();
 
-        rsm.getTransientData().setNumberOfProteinSet(Integer.valueOf(proteinSetNumber.intValue()));
+        rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).setNumberOfProteinSet(Integer.valueOf(proteinSetNumber.intValue()));
         
         // Count peptide instances 
         TypedQuery<Long> countPeptidesQuery = entityManagerMSI.createQuery("SELECT count(pi) FROM PeptideInstance pi WHERE pi.resultSummary.id=:rsmId AND pi.validatedProteinSetCount > 0", Long.class);
         countPeptidesQuery.setParameter("rsmId", rsmId);
-        rsm.getTransientData().setNumberOfPeptides(countPeptidesQuery.getSingleResult().intValue());
+        rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).setNumberOfPeptides(countPeptidesQuery.getSingleResult().intValue());
         
         // Count peptide matches 
         TypedQuery<Long> countPeptideMatchesQuery = entityManagerMSI.createQuery("SELECT  sum(pi.peptideMatchCount) FROM PeptideInstance pi WHERE pi.resultSummary.id=:rsmId AND pi.validatedProteinSetCount > 0", Long.class);
         countPeptideMatchesQuery.setParameter("rsmId", rsmId);
-        rsm.getTransientData().setNumberOfPeptideMatches(countPeptideMatchesQuery.getSingleResult().intValue());
-        
+        rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).setNumberOfPeptideMatches(countPeptideMatchesQuery.getSingleResult().intValue());
+
     }
 }

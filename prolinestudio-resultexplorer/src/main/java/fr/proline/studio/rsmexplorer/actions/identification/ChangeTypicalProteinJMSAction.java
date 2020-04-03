@@ -88,7 +88,7 @@ public class ChangeTypicalProteinJMSAction extends AbstractRSMAction {
                         // Protein Sets will have to be reloaded
                         ResultSummary rsm = d.getResultSummary();
                         if (rsm != null) {
-                            rsm.getTransientData().setProteinSetArray(null);
+                            rsm.getTransientData(null).setProteinSetArray(null);
                         }
                         
                         dataSetNode.setIsChanging(false);

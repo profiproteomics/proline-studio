@@ -21,6 +21,7 @@ import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -173,6 +174,9 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
+        
+        TransientMemoryCacheManager.getSingleton().linkCache(this, m_rsm);
+        
         //LOG.debug("dataChanged called for "+ (m_displayAllPepMatches?" leaf ": " parent"));
         //Get information from previous box:
         // -- PTM Dataset & RSM the ptm peptides belong to

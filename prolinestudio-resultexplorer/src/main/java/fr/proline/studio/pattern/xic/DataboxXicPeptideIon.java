@@ -25,6 +25,7 @@ import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
@@ -105,6 +106,9 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
+        
+        TransientMemoryCacheManager.getSingleton().linkCache(this, m_dataset.getResultSummary());
+        
         final boolean allPeptides = m_previousDataBox == null;
         DMasterQuantPeptide oldPeptide = m_masterQuantPeptide;
 

@@ -16,9 +16,11 @@
  */
 package fr.proline.studio.pattern;
 
+import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -73,6 +75,10 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
         final PTMSite ptmSite = (PTMSite) m_previousDataBox.getData(false, PTMSite.class); 
         final DPeptideInstance pepInstance = (DPeptideInstance) m_previousDataBox.getData(false, DPeptideInstance.class); 
        
+        ResultSummary rsm = ptmSite.getPTMdataset().getDataset().getResultSummary();
+        
+        TransientMemoryCacheManager.getSingleton().linkCache(this, rsm);
+        
         m_parentPeptideInstance = pepInstance;
         
         if ((ptmSite == null) || (pepInstance == null)) {
@@ -120,7 +126,7 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
         }
          
         DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback);
-        task.initFillPTMSite(getProjectId(), ptmSite.getPTMdataset().getDataset().getResultSummary(), ptmSite);
+        task.initFillPTMSite(getProjectId(), rsm, ptmSite);
         Long taskId = task.getId();
         m_previousTaskId = taskId;
         registerTask(task);            

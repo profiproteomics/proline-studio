@@ -19,6 +19,8 @@ package fr.proline.studio.dam.tasks;
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
+import fr.proline.studio.dam.memory.TransientMemoryClientInterface;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.math.BigInteger;
@@ -36,7 +38,7 @@ public class DatabaseRsetProperties extends AbstractDatabaseTask {
     private long m_projectId;
     private DDataset m_dataset = null;
     private ResultSet m_rset = null;
-    
+
     public DatabaseRsetProperties(AbstractDatabaseCallback callback, long projectId, DDataset dataset) {
         super(callback, new TaskInfo("Load Properties for Search Result "+dataset.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_projectId = projectId;
@@ -55,7 +57,7 @@ public class DatabaseRsetProperties extends AbstractDatabaseTask {
         if (m_rset == null) {
             m_rset = m_dataset.getResultSet();
         }
-        return (m_rset.getTransientData().getPeptideMatchesCount() == null);
+        return (m_rset.getTransientData(TransientMemoryCacheManager.getSingleton()).getPeptideMatchesCount() == null);
     }
     
     @Override
@@ -137,7 +139,7 @@ public class DatabaseRsetProperties extends AbstractDatabaseTask {
         countProteinMatchQuery.setParameter(1, rsetId);  
         BigInteger proteinMatchNumber = (BigInteger) countProteinMatchQuery.getSingleResult(); 
                 
-        rset.getTransientData().setProteinMatchesCount(Integer.valueOf(proteinMatchNumber.intValue()));
+        rset.getTransientData(TransientMemoryCacheManager.getSingleton()).setProteinMatchesCount(Integer.valueOf(proteinMatchNumber.intValue()));
 
         long step2 = System.currentTimeMillis();
         // Count Peptide Match
@@ -149,8 +151,9 @@ public class DatabaseRsetProperties extends AbstractDatabaseTask {
          countPeptideMatchQuery.setParameter(1, rsetId);  
          BigInteger peptideMatchNumber = (BigInteger) countPeptideMatchQuery.getSingleResult(); 
 
-        rset.getTransientData().setPeptideMatchesCount(Integer.valueOf(peptideMatchNumber.intValue()));
+        rset.getTransientData(TransientMemoryCacheManager.getSingleton()).setPeptideMatchesCount(Integer.valueOf(peptideMatchNumber.intValue()));
 
+        
         long step3 = System.currentTimeMillis();        
         m_logger.info("Time SQL REQUEST "+(step3-step2)+"   "+(step2-step1));
         

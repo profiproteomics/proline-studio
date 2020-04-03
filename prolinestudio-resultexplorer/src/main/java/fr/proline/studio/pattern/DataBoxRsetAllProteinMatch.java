@@ -22,6 +22,7 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.rsmexplorer.gui.RsetProteinsPanel;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinMatchesTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -75,6 +76,8 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
 
         final ResultSet _rset = (m_rset != null) ? m_rset : (ResultSet) m_previousDataBox.getData(false, ResultSet.class);
 
+        TransientMemoryCacheManager.getSingleton().linkCache(this, _rset);
+        
         final int loadingId = setLoading();
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -89,7 +92,7 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
 
                 if (subTask == null) {
 
-                    DProteinMatch[] proteinMatchArray = _rset.getTransientData().getProteinMatches();
+                    DProteinMatch[] proteinMatchArray = _rset.getTransientData(TransientMemoryCacheManager.getSingleton()).getProteinMatches();
                     
                     
                     ((RsetProteinsPanel) getDataBoxPanelInterface()).setDataProteinMatchArray(proteinMatchArray, finished);
@@ -100,6 +103,9 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
                 setLoaded(loadingId);
                 
                 if (finished) {
+                    
+                    
+                    
                     unregisterTask(taskId);
                     propagateDataChanged(ExtendedTableModelInterface.class);
                 }

@@ -23,6 +23,7 @@ import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.core.orm.uds.dto.DDatasetType.QuantitationMethodInfo;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
@@ -192,7 +193,7 @@ public class DataSetData extends AbstractData {
             if (rsmId != null) {
                 ResultSummary rsmFound = entityManagerMSI.find(ResultSummary.class, rsmId);
 
-                rsmFound.getTransientData().setDDataset(d);
+                rsmFound.getTransientData(TransientMemoryCacheManager.getSingleton()).setDDataset(d);
                 d.setResultSummary(rsmFound);
             }
             entityManagerMSI.getTransaction().commit();

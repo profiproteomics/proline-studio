@@ -19,6 +19,7 @@ package fr.proline.studio.pattern;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinsAndPeptidesTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -88,6 +89,7 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
     public void dataChanged() {
 
         final ResultSummary _rsm = (m_rsm != null) ? m_rsm : (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
+        TransientMemoryCacheManager.getSingleton().linkCache(this, _rsm);
         
         
         DProteinMatch proteinMatch = (m_previousDataBox==null) ? null : (DProteinMatch) m_previousDataBox.getData(false, DProteinMatch.class);

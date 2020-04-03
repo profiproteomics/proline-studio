@@ -21,6 +21,7 @@ import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -138,6 +139,8 @@ public class DataboxXicProteinSet extends AbstractDataBox {
     public void dataChanged() {
         final int loadingId = setLoading();
 
+        TransientMemoryCacheManager.getSingleton().linkCache(this, m_dataset.getResultSummary());
+        
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
             @Override

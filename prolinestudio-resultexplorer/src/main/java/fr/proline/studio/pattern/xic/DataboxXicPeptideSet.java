@@ -25,6 +25,7 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -159,6 +160,9 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
+        
+        TransientMemoryCacheManager.getSingleton().linkCache(this, m_dataset.getResultSummary());
+        
         final boolean allPeptides = (m_previousDataBox == null);
         List<DPeptideInstance> pepInstances = null;
         if (!allPeptides) {

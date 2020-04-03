@@ -22,6 +22,7 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptideSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinsAndPeptidesTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -90,11 +91,14 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
+        final ResultSummary _rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
+        TransientMemoryCacheManager.getSingleton().linkCache(this, _rsm);
+        
         Component component = (Component) m_previousDataBox.getData(false, Component.class);
         DrawVisualization drawVisualization = (DrawVisualization) m_previousDataBox.getData(false, DrawVisualization.class);
 
         
-        final ResultSummary _rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
+        
         
         ArrayList<LightProteinMatch> proteinMatchArray = component.getProteinArray(true);
         ArrayList<LightPeptideMatch> peptideMatchArray = component.getPeptideArray();

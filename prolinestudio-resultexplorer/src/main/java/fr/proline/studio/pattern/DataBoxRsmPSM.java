@@ -20,6 +20,7 @@ import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
@@ -93,6 +94,7 @@ public class DataBoxRsmPSM extends AbstractDataBox {
         
         final ResultSummary _rsm = (m_rsm!=null) ? m_rsm : (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
 
+        TransientMemoryCacheManager.getSingleton().linkCache(this, _rsm);
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
             
@@ -106,8 +108,8 @@ public class DataBoxRsmPSM extends AbstractDataBox {
                 
                if (subTask == null) {
 
-                    DPeptideMatch[] peptideMatchArray = _rsm.getTransientData().getPeptideMatches();
-                    long[] peptideMatchIdArray = _rsm.getTransientData().getPeptideMatchesId();
+                    DPeptideMatch[] peptideMatchArray = _rsm.getTransientData(null).getPeptideMatches();
+                    long[] peptideMatchIdArray = _rsm.getTransientData(null).getPeptideMatchesId();
                     ((PeptideMatchPanel)getDataBoxPanelInterface()).setData(taskId, peptideMatchArray, peptideMatchIdArray, finished);
                } else {
                     ((PeptideMatchPanel)getDataBoxPanelInterface()).dataUpdated(subTask, finished);

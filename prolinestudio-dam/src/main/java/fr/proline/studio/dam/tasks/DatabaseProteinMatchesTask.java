@@ -22,6 +22,8 @@ import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
+import fr.proline.studio.dam.memory.TransientMemoryClientInterface;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.*;
@@ -40,7 +42,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseTask {
     private ResultSet m_rset = null;
 
     private final int m_action;
-    
+
     private final static int LOAD_PROTEINS_FROM_PEPTIDE_MATCH  = 0;
     private final static int LOAD_ALL_PROTEINS_OF_RSET = 1;
     
@@ -80,7 +82,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseTask {
         super.abortTask();
         switch (m_action) {
             case LOAD_ALL_PROTEINS_OF_RSET:
-                m_rset.getTransientData().setProteinMatches(null);
+                m_rset.getTransientData(TransientMemoryCacheManager.getSingleton()).setProteinMatches(null);
                 break;
             case LOAD_PROTEINS_FROM_PEPTIDE_MATCH:
                 m_peptideMatch.setProteinMatches(null);
@@ -93,7 +95,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseTask {
         
          switch (m_action) {
             case LOAD_ALL_PROTEINS_OF_RSET:
-                return (m_rset.getTransientData().getProteinMatches() == null);
+                return (m_rset.getTransientData(TransientMemoryCacheManager.getSingleton()).getProteinMatches() == null);
             case LOAD_PROTEINS_FROM_PEPTIDE_MATCH:
                 return (m_peptideMatch.getProteinMatches() == null);
         }
@@ -132,8 +134,8 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseTask {
             
             int nbProteins = proteinMatchList.size();
             DProteinMatch[] proteins = proteinMatchList.toArray(new DProteinMatch[nbProteins]);
-            m_rset.getTransientData().setProteinMatches(proteins);
-            
+            m_rset.getTransientData(TransientMemoryCacheManager.getSingleton()).setProteinMatches(proteins);
+
             // Biosequence for each Protein Match
             DatabaseBioSequenceTask.fetchData(proteinMatchList, m_projectId);            
             
@@ -189,6 +191,6 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseTask {
         
         return true;
     }
-    
+
     
 }

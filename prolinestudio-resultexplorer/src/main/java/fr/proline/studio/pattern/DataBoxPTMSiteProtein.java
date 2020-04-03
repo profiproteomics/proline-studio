@@ -22,6 +22,7 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -171,6 +172,9 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
     
     @Override
     public void dataChanged() {
+        
+        TransientMemoryCacheManager.getSingleton().linkCache(this, m_rsm);
+        
         if(m_viewPTMResultV2)
             dataChangedV2();
         else
@@ -208,7 +212,7 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
             }
         };
 
-
+        
         // ask asynchronous loading of data
             
             DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback);

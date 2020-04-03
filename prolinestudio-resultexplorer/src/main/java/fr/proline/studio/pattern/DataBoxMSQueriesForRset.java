@@ -18,6 +18,7 @@ package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.dto.DMsQuery;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadMSQueriesTask;
@@ -87,6 +88,8 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
     public void dataChanged() {
         final ResultSet _rset =   ((m_rset!=null) ? m_rset : m_previousDataBox == null ? null : (ResultSet) m_previousDataBox.getData(false, ResultSet.class));
 
+        TransientMemoryCacheManager.getSingleton().linkCache(this, _rset);
+        
         final int loadingId = setLoading();
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 

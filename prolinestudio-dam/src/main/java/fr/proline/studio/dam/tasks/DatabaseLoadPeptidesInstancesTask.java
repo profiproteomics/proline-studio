@@ -31,6 +31,8 @@ import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideSet;
 import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
+import fr.proline.studio.dam.memory.TransientMemoryClientInterface;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.ArrayList;
@@ -72,6 +74,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
     // data kept for sub tasks
     private ArrayList<Long> m_peptideMatchIds = null;
     private HashMap<Long, DPeptideMatch> m_peptideMatchMap = null;
+
     
     public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, long projectId, DProteinMatch proteinMatch, ArrayList<ResultSummary> rsmList) {
         super(callback, SUB_TASK_COUNT, new TaskInfo("Load Peptide Sets for Protein Match "+proteinMatch.getAccession(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
@@ -116,7 +119,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
                 return false;
             }
             case LOAD_PEPTIDE_INSTANCES_FOR_RSM: {
-                return (m_rsm.getTransientData().getPeptideInstanceArray() == null);
+                return (m_rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).getPeptideInstanceArray() == null);
             }
                 
                 
@@ -253,7 +256,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
 
             int nbPeptides = peptideInstanceList.size();
             PeptideInstance[] peptideInstances = peptideInstanceList.toArray(new PeptideInstance[nbPeptides]);
-            m_rsm.getTransientData().setPeptideInstanceArray(peptideInstances);
+            m_rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).setPeptideInstanceArray(peptideInstances);
             
             DatabasePTMSitesTask.fetchReadablePTMData(entityManagerMSI, m_rsm.getResultSet().getId(), peptideMap);
             DatabasePTMSitesTask.fetchPTMDataForPeptides(entityManagerMSI, peptideMap);

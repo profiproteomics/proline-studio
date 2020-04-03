@@ -20,6 +20,7 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -94,6 +95,8 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
             return;
         }
 
+        TransientMemoryCacheManager.getSingleton().linkCache(this, m_rsm);
+        
         //m_logger.debug("DATA Changed : Update PTMSite Peptide WINDOWS. " + ptmSite.toString() + " data loaded " + ptmSite.isLoaded());
         if (m_currentPtmSite.isLoaded()) {
             m_previousTaskId = null;

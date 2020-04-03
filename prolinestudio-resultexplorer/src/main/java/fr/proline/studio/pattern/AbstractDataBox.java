@@ -18,6 +18,8 @@ package fr.proline.studio.pattern;
 
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
+import fr.proline.studio.dam.memory.TransientMemoryClientInterface;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -53,8 +55,8 @@ import org.jdesktop.swingx.JXTable;
  *
  * @author JM235353
  */
-public abstract class AbstractDataBox implements ChangeListener, ProgressInterface, SplittedPanelContainer.UserActions {
-    //private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.AbstractDataBox");
+public abstract class AbstractDataBox implements ChangeListener, ProgressInterface, SplittedPanelContainer.UserActions, TransientMemoryClientInterface {
+
     // Panel corresponding to this box
     protected DataBoxPanelInterface m_panel;
 
@@ -376,6 +378,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                 nextDataBox.deleteThis();
             }
         }
+        
+        TransientMemoryCacheManager.getSingleton().unlinkCache(this);
     }
 
     /**
@@ -647,6 +651,10 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         }
 
         return getTypeName();
+    }
+    
+    public String getMemoryClientName() {
+        return getFullName();
     }
 
     public String getDescription() {

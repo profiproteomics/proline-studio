@@ -32,6 +32,7 @@ import fr.proline.core.orm.msi.UsedPtm;
 import fr.proline.core.orm.uds.FragmentationRuleSet;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.DatabaseDataManager;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.graphics.PlotDataSpec;
 import fr.proline.studio.table.DataGroup;
 import fr.proline.studio.utils.SerializedPropertiesUtil;
@@ -632,14 +633,14 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                     }
                     return new GroupObject(String.valueOf(msiSearch.getQueriesCount()), this);
                 case ROWTYPE_PSM_NUMBER: {
-                    Object data = rset.getTransientData().getPeptideMatchesCount();
+                    Object data = rset.getTransientData(TransientMemoryCacheManager.getSingleton()).getPeptideMatchesCount();
                     if (data == null) {
                         return new GroupObject("", this);
                     }
                     return new GroupObject(data.toString(), this);
                 }
                 case ROWTYPE_PROTEIN_NUMBER: {
-                    Object data = rset.getTransientData().getProteinMatchesCount();
+                    Object data = rset.getTransientData(TransientMemoryCacheManager.getSingleton()).getProteinMatchesCount();
                     if (data == null) {
                         return new GroupObject("", this);
                     }
@@ -649,7 +650,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                     if (rsetDecoy == null) {
                         return new GroupObject("", this);
                     }
-                    Object data = rsetDecoy.getTransientData().getPeptideMatchesCount();
+                    Object data = rsetDecoy.getTransientData(TransientMemoryCacheManager.getSingleton()).getPeptideMatchesCount();
                     if (data == null) {
                         return new GroupObject("", this);
                     }
@@ -659,7 +660,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                     if (rsetDecoy == null) {
                         return new GroupObject("", this);
                     }
-                    Object data = rsetDecoy.getTransientData().getProteinMatchesCount();
+                    Object data = rsetDecoy.getTransientData(TransientMemoryCacheManager.getSingleton()).getProteinMatchesCount();
                     if (data == null) {
                         return new GroupObject("", this);
                     }
@@ -784,16 +785,16 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
 
             switch (rowIndex) {
                 case ROWTYPE_PROTEINSET_NUMBER:
-                    return new GroupObject(String.valueOf(rsm.getTransientData().getNumberOfProteinSet()), this);
+                    return new GroupObject(String.valueOf(rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).getNumberOfProteinSet()), this);
                 case ROWTYPE_PSM_NUMBER:
-                    return new GroupObject(String.valueOf(rsm.getTransientData().getNumberOfPeptideMatches()), this);
+                    return new GroupObject(String.valueOf(rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).getNumberOfPeptideMatches()), this);
                 case ROWTYPE_PEPTIDE_NUMBER:
-                    return new GroupObject(String.valueOf(rsm.getTransientData().getNumberOfPeptides()), this);
+                    return new GroupObject(String.valueOf(rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).getNumberOfPeptides()), this);
                 case ROWTYPE_PROTEINSET_DECOY_NUMBER:
                     if (rsmDecoy == null) {
                         return new GroupObject("", this);
                     }
-                    Integer number = rsmDecoy.getTransientData().getNumberOfProteinSet();
+                    Integer number = rsmDecoy.getTransientData(TransientMemoryCacheManager.getSingleton()).getNumberOfProteinSet();
                     if (number == null) {
                         return new GroupObject("", this);
                     }
@@ -802,7 +803,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                     if (rsmDecoy == null) {
                         return new GroupObject("", this);
                     }
-                    Integer psmDecoyNumber = rsmDecoy.getTransientData().getNumberOfPeptideMatches();
+                    Integer psmDecoyNumber = rsmDecoy.getTransientData(TransientMemoryCacheManager.getSingleton()).getNumberOfPeptideMatches();
                     if (psmDecoyNumber == null) {
                         psmDecoyNumber = 0;
                     }
@@ -811,7 +812,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                     if (rsmDecoy == null) {
                         return new GroupObject("", this);
                     }
-                    return new GroupObject(String.valueOf(rsmDecoy.getTransientData().getNumberOfPeptides()), this);
+                    return new GroupObject(String.valueOf(rsmDecoy.getTransientData(TransientMemoryCacheManager.getSingleton()).getNumberOfPeptides()), this);
                 default: {
                     String key = m_valuesName.get(rowIndex - ROW_COUNT);
                     String value = m_valuesMap.get(columnIndex).get(key);

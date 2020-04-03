@@ -23,6 +23,8 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
+import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
+import fr.proline.studio.dam.memory.TransientMemoryClientInterface;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.*;
@@ -64,9 +66,9 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     private HashMap<Long, DProteinSet> m_proteinSetMap = null;
     private ArrayList<Long> m_proteinSetIds = null;
 
+    
     public DatabaseProteinSetsTask(AbstractDatabaseCallback callback) {
-        super(callback);
-       
+       super(callback);
     }
     
     public void initLoadProteinSets(long projectId, ResultSummary rsm) {
@@ -91,7 +93,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         super.abortTask();
         switch (m_action) {
             case LOAD_PROTEIN_SET_FOR_RSM:
-                m_rsm.getTransientData().setProteinSetArray(null);
+                m_rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).setProteinSetArray(null);
                 break;
             case LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE:
                 m_peptideInstance.getTransientData().setProteinSetArray(null);
@@ -103,7 +105,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     public boolean needToFetch() {
         switch (m_action) {
             case LOAD_PROTEIN_SET_FOR_RSM:
-                return (m_rsm.getTransientData().getProteinSetArray() == null);
+                return (m_rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).getProteinSetArray() == null);
             case LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE:
                 return (m_peptideInstance.getTransientData().getProteinSetArray() == null);
         }
@@ -154,7 +156,8 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
             DProteinSet[] proteinSetArray = proteinSets.toArray(new DProteinSet[proteinSets.size()]);
             //Save in TransientData
-            m_rsm.getTransientData().setProteinSetArray(proteinSetArray);
+            m_rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).setProteinSetArray(proteinSetArray);
+
 
             //Load generic ProteinSet Data
             return fetchDataMainTask(entityManagerMSI, proteinSetArray);
@@ -343,7 +346,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
         DProteinSet[] proteinSetArray = null;
         if (m_action == LOAD_PROTEIN_SET_FOR_RSM) {
-            proteinSetArray = m_rsm.getTransientData().getProteinSetArray();
+            proteinSetArray = m_rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).getProteinSetArray();
             
             
         } else if (m_action == LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE) {
@@ -387,7 +390,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         DProteinSet[] proteinSetArray = null;
         if (m_action == LOAD_PROTEIN_SET_FOR_RSM) {
 
-            proteinSetArray = m_rsm.getTransientData().getProteinSetArray();
+            proteinSetArray = m_rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).getProteinSetArray();
         } else if (m_action == LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE) {
 
             proteinSetArray = m_peptideInstance.getTransientData().getProteinSetArray();
@@ -449,7 +452,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
         DProteinSet[] proteinSetArray = null;
         if (m_action == LOAD_PROTEIN_SET_FOR_RSM) {
-            proteinSetArray = m_rsm.getTransientData().getProteinSetArray();
+            proteinSetArray = m_rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).getProteinSetArray();
         } else if (m_action == LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE) {
             proteinSetArray = m_peptideInstance.getTransientData().getProteinSetArray();
         }

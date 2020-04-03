@@ -940,6 +940,12 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                         m_peakelListPerFeature.add(new ArrayList());
                     }
                 }
+                
+                // sort childFeatureList by quantChannel
+                m_childFeatureList.sort(new FeatureQuantIdComparator());
+
+                    
+                
             }
             entityManagerLCMS.getTransaction().commit();
 //            m_logger.info("fetchDataMainTaskChildFeatureForPeptideIonWithPeakels took "+(System.currentTimeMillis() - start)+" ms");
@@ -1052,5 +1058,13 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
         m_defaultPriority = Priority.LOW;
         m_currentPriority = Priority.LOW;
         return true;
+    }
+    
+    
+    private class FeatureQuantIdComparator implements Comparator<DFeature> {
+
+        public int compare(DFeature a, DFeature b) {
+            return (int) (a.getQuantChannelId()-b.getQuantChannelId());
+        }
     }
 }

@@ -92,7 +92,8 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
     public void dataChanged() {
 
         final ResultSummary _rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
-        TransientMemoryCacheManager.getSingleton().linkCache(this, _rsm);
+        // register the link to the Transient Data
+        linkCache( _rsm);
         
         Component component = (Component) m_previousDataBox.getData(false, Component.class);
         DrawVisualization drawVisualization = (DrawVisualization) m_previousDataBox.getData(false, DrawVisualization.class);

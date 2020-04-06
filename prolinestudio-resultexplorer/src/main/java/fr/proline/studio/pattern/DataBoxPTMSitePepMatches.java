@@ -76,8 +76,9 @@ public class DataBoxPTMSitePepMatches extends AbstractDataBox {
         final DPeptideInstance pepInstance = (DPeptideInstance) m_previousDataBox.getData(false, DPeptideInstance.class); 
        
         ResultSummary rsm = ptmSite.getPTMdataset().getDataset().getResultSummary();
-        
-        TransientMemoryCacheManager.getSingleton().linkCache(this, rsm);
+
+        // register the link to the Transient Data
+        linkCache(rsm);
         
         m_parentPeptideInstance = pepInstance;
         

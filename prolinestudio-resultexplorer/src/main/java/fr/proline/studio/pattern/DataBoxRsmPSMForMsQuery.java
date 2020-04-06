@@ -101,8 +101,9 @@ public class DataBoxRsmPSMForMsQuery extends AbstractDataBox{
         m_rset = _msqI.getResultSet();
         m_rsm = _msqI.getResultSummary();
 
-        TransientMemoryCacheManager.getSingleton().linkCache(this, m_rset);
-        TransientMemoryCacheManager.getSingleton().linkCache(this, m_rsm);
+        // register the link to the Transient Data
+        linkCache(m_rset);
+        linkCache(m_rsm);
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
             

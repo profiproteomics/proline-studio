@@ -495,8 +495,9 @@ public class CreateQuantitationDialog extends DefaultDialog {
 
         switch (m_step) {
             case STEP_PANEL_CREATE_EXPERIMENTAL_DESIGN:
-                //CreateXICDesignPanel-NEXT button
+                //verify sample, group name length
 
+                //CreateXICDesignPanel-NEXT button
                 //VDS: Can't checkDesignStructure and checkBiologicalGroupName be merged !!
                 if ((!checkDesignStructure(m_experimentalDesignNode, new HashSet<>())) || (!checkBiologicalGroupName(m_experimentalDesignNode))) {
                     return false;
@@ -613,10 +614,11 @@ public class CreateQuantitationDialog extends DefaultDialog {
 
         return false;
     }
-    
+
     /**
-     * step back 
-     * @return 
+     * step back
+     *
+     * @return
      */
     @Override
     protected boolean backCalled() {
@@ -759,22 +761,43 @@ public class CreateQuantitationDialog extends DefaultDialog {
         }
     }
 
+    String groupName4checkDesignStructure;
+
+    /**
+     * check also length of 1.XICNode,group, 2.sample, 3.sample Analysis,
+     * 4.group+sample name, according Database restriction, length should < 100
+     *
+     * @param parentNode
+     * @param duplicates
+     * @return
+     */
     private boolean checkDesignStructure(AbstractNode parentNode, Set<String> duplicates) {
+        String nodeName = parentNode.toString();
+        if (nodeName.length() > 100) {
+            showErrorOnNode(parentNode, "Name Length should less than 100.");
+            return false;
+        }
         AbstractNode.NodeTypes type = parentNode.getType();
         switch (type) {
             case DATA_SET:
+                groupName4checkDesignStructure = "";
                 if (parentNode.isLeaf()) {
                     showErrorOnNode(parentNode, "Your Experimental Design is empty.");
                     return false;
                 }
                 break;
             case BIOLOGICAL_GROUP:
+                groupName4checkDesignStructure = nodeName;
                 if (parentNode.isLeaf()) {
                     showErrorOnNode(parentNode, "You must add at least one Biological Sample for each Biological Group.");
                     return false;
                 }
                 break;
             case BIOLOGICAL_SAMPLE:
+                if ((groupName4checkDesignStructure.length() + nodeName.length()) > 100) {
+                    showErrorOnNode(parentNode, "Group name + sample name, the length should less than 100.");
+                    return false;
+                }
                 if (parentNode.isLeaf()) {
                     showErrorOnNode(parentNode, "You must add at least one Identification for each Biological Sample.");
                     return false;

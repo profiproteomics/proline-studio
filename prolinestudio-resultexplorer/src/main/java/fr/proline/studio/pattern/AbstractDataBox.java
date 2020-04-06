@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.pattern;
 
+import fr.proline.core.orm.util.TransientDataInterface;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
@@ -367,6 +368,9 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
 
     protected void deleteThis() {
 
+        // free Transient Data Memory
+        unlinkCache();
+        
         // cancel task possibily running
         if (!m_taskMap.isEmpty()) {
             AccessDatabaseThread.getAccessDatabaseThread().abortTasks(m_taskMap.keySet());
@@ -379,6 +383,22 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
             }
         }
         
+        
+    }
+    
+    protected void linkCache(TransientDataInterface cache) {
+        if (m_previousDataBox != null) {
+            m_previousDataBox.linkCache(cache);
+            return;
+        }
+        TransientMemoryCacheManager.getSingleton().linkCache(this, cache);
+    }
+    
+    private void unlinkCache() {
+        if (m_previousDataBox != null) {
+            m_previousDataBox.unlinkCache();
+            return;
+        }
         TransientMemoryCacheManager.getSingleton().unlinkCache(this);
     }
 

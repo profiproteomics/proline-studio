@@ -70,7 +70,8 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
             return;
         }
         
-        TransientMemoryCacheManager.getSingleton().linkCache(this, resultSummary);
+        // register the link to the Transient Data
+        linkCache(resultSummary);
 
         DPeptideSet peptideSet = proteinMatch.getPeptideSet(resultSummary.getId());
         if (peptideSet == null) {

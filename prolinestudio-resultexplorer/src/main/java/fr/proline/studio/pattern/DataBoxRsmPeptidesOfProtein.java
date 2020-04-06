@@ -88,7 +88,8 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
         final DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
         final ResultSummary rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
 
-        TransientMemoryCacheManager.getSingleton().linkCache(this, rsm);
+        // register the link to the Transient Data
+        linkCache(rsm);
         
         if (proteinMatch == null) {
             ((RsmPeptidesOfProteinPanel) getDataBoxPanelInterface()).setData(null, null, null);

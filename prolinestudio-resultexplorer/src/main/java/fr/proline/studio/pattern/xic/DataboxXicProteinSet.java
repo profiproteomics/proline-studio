@@ -139,7 +139,8 @@ public class DataboxXicProteinSet extends AbstractDataBox {
     public void dataChanged() {
         final int loadingId = setLoading();
 
-        TransientMemoryCacheManager.getSingleton().linkCache(this, m_dataset.getResultSummary());
+        // register the link to the Transient Data
+        linkCache(m_dataset.getResultSummary());
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 

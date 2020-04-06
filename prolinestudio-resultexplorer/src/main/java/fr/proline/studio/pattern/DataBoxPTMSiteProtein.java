@@ -172,8 +172,9 @@ public class DataBoxPTMSiteProtein extends AbstractDataBox {
     
     @Override
     public void dataChanged() {
-        
-        TransientMemoryCacheManager.getSingleton().linkCache(this, m_rsm);
+
+        // register the link to the Transient Data
+        linkCache(m_rsm);
         
         if(m_viewPTMResultV2)
             dataChangedV2();

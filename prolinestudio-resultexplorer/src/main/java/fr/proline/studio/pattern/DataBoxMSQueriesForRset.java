@@ -88,7 +88,8 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
     public void dataChanged() {
         final ResultSet _rset =   ((m_rset!=null) ? m_rset : m_previousDataBox == null ? null : (ResultSet) m_previousDataBox.getData(false, ResultSet.class));
 
-        TransientMemoryCacheManager.getSingleton().linkCache(this, _rset);
+        // register the link to the Transient Data
+        linkCache(_rset);
         
         final int loadingId = setLoading();
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {

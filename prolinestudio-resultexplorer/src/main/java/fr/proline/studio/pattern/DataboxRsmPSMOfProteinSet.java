@@ -89,8 +89,9 @@ public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
             ((PeptideMatchPanel) getDataBoxPanelInterface()).setData(-1, null, null, true);
             return;
         }
-        
-        TransientMemoryCacheManager.getSingleton().linkCache(this, _rsm);
+
+        // register the link to the Transient Data
+        linkCache(_rsm);
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
             

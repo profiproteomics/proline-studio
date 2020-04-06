@@ -161,7 +161,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     @Override
     public void dataChanged() {
         
-        TransientMemoryCacheManager.getSingleton().linkCache(this, m_dataset.getResultSummary());
+
         
         final boolean allPeptides = (m_previousDataBox == null);
         List<DPeptideInstance> pepInstances = null;
@@ -192,6 +192,11 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
             }
         }
 
+        // register the link to the Transient Data
+        if (m_dataset != null) {
+            linkCache(m_dataset.getResultSummary());
+        }
+        
         final int loadingId = setLoading();
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {

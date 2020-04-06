@@ -82,7 +82,8 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
-        TransientMemoryCacheManager.getSingleton().linkCache(this, m_rsm);
+        // register the link to the Transient Data
+        linkCache(m_rsm);
         
         final PeptideInstance _peptideInstance = (PeptideInstance) m_previousDataBox.getData(false, PeptideInstance.class);
 

@@ -175,7 +175,8 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
     @Override
     public void dataChanged() {
         
-        TransientMemoryCacheManager.getSingleton().linkCache(this, m_rsm);
+        // register the link to the Transient Data
+        linkCache( m_rsm);
         
         //LOG.debug("dataChanged called for "+ (m_displayAllPepMatches?" leaf ": " parent"));
         //Get information from previous box:

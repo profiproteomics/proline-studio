@@ -57,7 +57,7 @@ public class MemoryDialog extends DefaultDialog  {
     }
 
     private MemoryDialog(Window parent) {
-        super(parent, Dialog.ModalityType.MODELESS);
+        super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         setTitle("Memory Management");
 
         setSize(new Dimension(640, 480));
@@ -74,7 +74,7 @@ public class MemoryDialog extends DefaultDialog  {
     
     private void update() {
                
-        ArrayList<String> freeCacheList = TransientMemoryCacheManager.getSingleton().getFreeCacheList();
+        String[] freeCacheList = TransientMemoryCacheManager.getSingleton().getFreeCacheList();
         DefaultListModel<String> freeListModel = new DefaultListModel<>();
         for (String cacheName :  freeCacheList) {
             freeListModel.addElement(cacheName);
@@ -82,7 +82,7 @@ public class MemoryDialog extends DefaultDialog  {
         m_freeList.setModel(freeListModel);
         
 
-        ArrayList<String> usedCacheList = TransientMemoryCacheManager.getSingleton().getUsedCacheList();
+        String[] usedCacheList = TransientMemoryCacheManager.getSingleton().getUsedCacheList();
         DefaultListModel<String> usedListModel = new DefaultListModel<>();
         for (String cacheName :  usedCacheList) {
             usedListModel.addElement(cacheName);

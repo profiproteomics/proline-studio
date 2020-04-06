@@ -80,7 +80,8 @@ public class DataBoxRsetMSDiag extends AbstractDataBox {
 
         ResultSet _rset = (m_rset != null) ? m_rset : (ResultSet) m_previousDataBox.getData(false, ResultSet.class);
 
-        TransientMemoryCacheManager.getSingleton().linkCache(this, _rset);
+        // register the link to the Transient Data
+        linkCache(_rset);
         
         long rSetId = _rset.getId();
 

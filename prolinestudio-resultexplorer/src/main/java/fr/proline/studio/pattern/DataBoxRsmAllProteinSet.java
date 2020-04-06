@@ -82,7 +82,8 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
 
         final ResultSummary _rsm = (m_rsm != null) ? m_rsm : (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
 
-        TransientMemoryCacheManager.getSingleton().linkCache(this, _rsm);
+        // register the link to the Transient Data
+        linkCache(_rsm);
         
         final int loadingId = setLoading();
 

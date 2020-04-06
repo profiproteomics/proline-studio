@@ -20,6 +20,7 @@ package fr.proline.studio.dam.memory;
 import fr.proline.core.orm.util.TransientDataAllocationListener;
 import fr.proline.core.orm.util.TransientDataInterface;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import org.slf4j.Logger;
@@ -39,6 +40,8 @@ public class TransientMemoryCacheManager implements TransientDataAllocationListe
 
     public HashMap<TransientDataInterface, HashSet<TransientMemoryClientInterface>> m_cacheToClients = new HashMap<>();
     public HashMap<TransientMemoryClientInterface, HashSet<TransientDataInterface>> m_clientToCaches = new HashMap<>();
+    
+    public HashMap<TransientDataInterface, HashSet<String>> m_cacheToClientsName = new HashMap<>();
     
     public static TransientMemoryCacheManager getSingleton() {
         if (m_singleton == null) {
@@ -79,6 +82,14 @@ public class TransientMemoryCacheManager implements TransientDataAllocationListe
             m_clientToCaches.put(client, cacheSet);
         }
         cacheSet.add(cache);
+        
+        HashSet<String> nameSet = m_cacheToClientsName.get(cache);
+        if (nameSet == null) {
+            nameSet = new HashSet<>();
+            m_cacheToClientsName.put(cache, nameSet);
+        }
+        nameSet.add(client.getMemoryClientName());
+        
     }
     
     public void unlinkCache(TransientMemoryClientInterface client) {
@@ -109,33 +120,47 @@ public class TransientMemoryCacheManager implements TransientDataAllocationListe
             if (m_cacheToClients.get(cache).isEmpty()) {
                 cache.clearMemory();
                 m_cacheToClients.remove(cache);
+                m_cacheToClientsName.remove(cache);
             }
         }
     }
     
-    public ArrayList<String> getFreeCacheList() {
+    public String[] getFreeCacheList() {
         
         return getCacheList(true);
     }
 
-    public ArrayList<String> getUsedCacheList() {
+    public String[] getUsedCacheList() {
  
         return getCacheList(false);
     }
 
-    private ArrayList<String> getCacheList(boolean free) {
-        ArrayList<String> cacheList = new ArrayList<>();
+    private String[] getCacheList(boolean free) {
+        
+        ArrayList<String> clientNamesSet = new ArrayList();
+        
         for (TransientDataInterface cache : m_cacheToClients.keySet()) {
             if (free && m_cacheToClients.get(cache).isEmpty()) {
-                cacheList.add(cache.getMemoryName());
+                if (m_cacheToClientsName.get(cache) != null) {
+                    for (String name : m_cacheToClientsName.get(cache)) {
+                        clientNamesSet.add(name);
+                    }
+                }
             } else if (!free && !m_cacheToClients.get(cache).isEmpty()) {
                 for (TransientMemoryClientInterface client : m_cacheToClients.get(cache)) {
                     String clientName = client.getMemoryClientName();
-                    cacheList.add(clientName+": "+cache.getMemoryName());
+                    clientNamesSet.add(clientName);
                 }
             }
         }
-        return cacheList;
+        
+        
+        String[] clientNamesArray = new String[clientNamesSet.size()];
+        clientNamesSet.toArray(clientNamesArray);
+        Arrays.sort(clientNamesArray);
+
+
+        return clientNamesArray;
     }
 
     

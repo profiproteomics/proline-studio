@@ -95,7 +95,8 @@ public class DataBoxPTMSitePeptides extends AbstractDataBox {
             return;
         }
 
-        TransientMemoryCacheManager.getSingleton().linkCache(this, m_rsm);
+        // register the link to the Transient Data
+        linkCache(m_rsm);
         
         //m_logger.debug("DATA Changed : Update PTMSite Peptide WINDOWS. " + ptmSite.toString() + " data loaded " + ptmSite.isLoaded());
         if (m_currentPtmSite.isLoaded()) {

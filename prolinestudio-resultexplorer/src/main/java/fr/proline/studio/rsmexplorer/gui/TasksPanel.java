@@ -24,19 +24,24 @@ import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.CancelTask;
 import fr.proline.studio.dpm.task.jms.PurgeConsumer;
+import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.filter.ValueFilter;
+import fr.proline.studio.graphics.PlotInformation;
+import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.dialog.GetSystemInfoButtonAction;
 import fr.proline.studio.rsmexplorer.gui.renderer.PercentageRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.table.AbstractTableAction;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
-import fr.proline.studio.table.AbstractDecoratedGlobalTableModel;
+import fr.proline.studio.table.DecoratedTableModel;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
@@ -50,6 +55,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
@@ -67,7 +73,7 @@ public class TasksPanel extends AbstractTasksPanel {
     private LogTable m_logTable;
 
     private boolean m_firstDisplay = true;
-
+         
     public TasksPanel() {
         super();
         setLayout(new GridBagLayout());
@@ -75,12 +81,13 @@ public class TasksPanel extends AbstractTasksPanel {
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
-
+        
         c.weightx = 1;
         c.weighty = 1;
         add(createToolbarPanel(), c);
     }
-
+    
+    
     @Override
     protected AbstractJMSCallback getServiceNotificationCallback(JMSNotificationMessage[] sysInfoResult) {
         AbstractJMSCallback notifierCallback = new AbstractJMSCallback() {
@@ -101,21 +108,21 @@ public class TasksPanel extends AbstractTasksPanel {
         };
         return notifierCallback;
     }
-
+    
     //Nothing specific to do after cancel message was done : already taken into account be message response
     @Override
-    protected AbstractJMSCallback getPurgeConsumerCallback(JMSNotificationMessage[] purgerResult) {
+    protected AbstractJMSCallback getPurgeConsumerCallback(JMSNotificationMessage[] purgerResult){
         return null;
     }
-
+    
     // default start data collect is enough
     @Override
-    protected void startOtherDataCollecting() {
+    protected void startOtherDataCollecting(){
     }
-
+    
     // default stop data collect is enough
     @Override
-    protected void stopOtherDataCollecting() {
+    protected void stopOtherDataCollecting(){
     }
 
     private JPanel createToolbarPanel() {
@@ -136,7 +143,7 @@ public class TasksPanel extends AbstractTasksPanel {
     private JPanel createInternalPanel() {
 
         JPanel internalPanel = new JPanel();
-
+        
         internalPanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -147,21 +154,22 @@ public class TasksPanel extends AbstractTasksPanel {
         JScrollPane scrollPane = new JScrollPane();
         m_logTable = new LogTable();
         m_logTable.setModel(new CompoundTableModel(new LogTableModel(), true));
-
+        
         TableRowSorter<TableModel> sorter = new TableRowSorter<>(m_logTable.getModel());
         m_logTable.setRowSorter(sorter);
-
+            
         sorter.setComparator(LogTableModel.COLTYPE_TASKINFO_CRITICALITY, new Comparator<TaskInfo>() {
 
             @Override
             public int compare(TaskInfo o1, TaskInfo o2) {
                 int cmp = o2.getImportance() - o1.getImportance();
                 if (cmp != 0) {
-                    return cmp;
+                    return cmp; 
                 }
-                return o2.getId() - o1.getId();
+                return o2.getId()-o1.getId();
             }
-
+ 
+                
         });
 
         TableColumnModel columnModel = m_logTable.getColumnModel();
@@ -174,6 +182,7 @@ public class TasksPanel extends AbstractTasksPanel {
         columnModel.getColumn(LogTableModel.COLTYPE_TASKINFO_CATEGORY).setCellRenderer(defaultErrorRenderer);
         columnModel.getColumn(LogTableModel.COLTYPE_DESCRIPTION).setCellRenderer(defaultErrorRenderer);
 
+
         // set preferred width of different columns
         columnModel.getColumn(LogTableModel.COLTYPE_STEP).setMaxWidth(20);
         columnModel.getColumn(LogTableModel.COLTYPE_TASKINFO_ID).setMaxWidth(40);
@@ -182,6 +191,8 @@ public class TasksPanel extends AbstractTasksPanel {
         scrollPane.setViewportView(m_logTable);
         m_logTable.setFillsViewportHeight(true);
         m_logTable.setViewport(scrollPane.getViewport());
+
+
 
         c.gridx = 0;
         c.gridy = 0;
@@ -193,24 +204,24 @@ public class TasksPanel extends AbstractTasksPanel {
         return internalPanel;
 
     }
-
+    
     private JToolBar initToolbar() {
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
-
+        
         FilterButton filterButton = new FilterButton(((CompoundTableModel) m_logTable.getModel())) {
 
             @Override
             protected void filteringDone() {
             }
-
+            
         };
         EraserButton taskEraserButton = new EraserButton();
         GetSystemInfoButtonAction systemInfoButton = new GetSystemInfoButtonAction();
         toolbar.add(filterButton);
-        toolbar.add(taskEraserButton);
+        toolbar.add(taskEraserButton);        
         toolbar.add(systemInfoButton);
-
+        
         return toolbar;
     }
 
@@ -220,7 +231,8 @@ public class TasksPanel extends AbstractTasksPanel {
             return;
         }
         m_firstDisplay = false;
-
+        
+        
         m_logTable.setUpdating(true);
 
         LogTableModel tableModel = (LogTableModel) ((CompoundTableModel) m_logTable.getModel()).getBaseModel();
@@ -242,14 +254,14 @@ public class TasksPanel extends AbstractTasksPanel {
             selectedIndex = m_logTable.convertRowIndexToView(selectedIndex);
             m_logTable.getSelectionModel().setSelectionInterval(selectedIndex, selectedIndex);
             m_logTable.setUpdating(false); // at the end reallow the update
-
+            
             // TaskInfo selected can have been modified
             super.getDataBox().propagateDataChanged(TaskInfo.class);
         } else if (aSelection) {
             // selection lost
             m_logTable.setUpdating(false); // allow first the update
             m_logTable.getSelectionModel().clearSelection();
-
+            
             // TaskInfo selected can have been modified
             super.getDataBox().propagateDataChanged(TaskInfo.class);
         } else {
@@ -265,6 +277,7 @@ public class TasksPanel extends AbstractTasksPanel {
         return m_logTable.getTaskInfo(selectedRow);
 
     }
+    
 
     private class LogTable extends DecoratedMarkerTable {
 
@@ -277,14 +290,15 @@ public class TasksPanel extends AbstractTasksPanel {
             //displayColumnAsPercentage(LogTableModel.COLTYPE_PERCENTAGE, AbstractLayoutPainter.HorizontalAlignment.LEFT);
             //getRelativizer().setMin(0);
             //getRelativizer().setMax(100);
-            setDefaultRenderer(Float.class, new PercentageRenderer(getDefaultRenderer(String.class)));
+            
+            setDefaultRenderer(Float.class, new PercentageRenderer( getDefaultRenderer(String.class)) );            
         }
 
         @Override
         public void addTableModelListener(TableModelListener l) {
             getModel().addTableModelListener(l);
         }
-
+        
         /**
          * Called whenever the value of the selection changes.
          *
@@ -303,8 +317,8 @@ public class TasksPanel extends AbstractTasksPanel {
         public void setUpdating(boolean updating) {
             m_isUpdating = updating;
         }
-
-        @Override
+        
+                @Override
         public TablePopupMenu initPopupMenu() {
             TablePopupMenu popupMenu = new TablePopupMenu(false);
             popupMenu.addAction(new StopTaskAction());
@@ -317,7 +331,7 @@ public class TasksPanel extends AbstractTasksPanel {
         public void prepostPopupMenu() {
             // nothing to do
         }
-
+        
         private TaskInfo getTaskInfo(int row) {
             if (row == -1) {
                 return null;
@@ -332,11 +346,11 @@ public class TasksPanel extends AbstractTasksPanel {
             // Retrieve ProteinSet selected
             LogTableModel tableModel = (LogTableModel) compoundTableModel.getBaseModel();
             return tableModel.getTaskInfo(row);
-        }
+    }
 
     }
 
-    private static class LogTableModel extends AbstractDecoratedGlobalTableModel<TaskInfo> {
+    private static class LogTableModel extends DecoratedTableModel implements GlobalTableModelInterface {
 
         public static final int COLTYPE_STEP = 0;
         public static final int COLTYPE_TASKINFO_ID = 1;
@@ -345,46 +359,41 @@ public class TasksPanel extends AbstractTasksPanel {
         public static final int COLTYPE_DESCRIPTION = 4;
         public static final int COLTYPE_PERCENTAGE = 5;
         private static final String[] columnNames = {"", "id", "Category", "Criticality", "Task Description", "Progress"};
+        private ArrayList<TaskInfo> m_taskInfoList = null;
 
-        {
-            m_columnNames = columnNames;
+        public boolean updateData() {
+            if (m_taskInfoList == null) {
+                m_taskInfoList = new ArrayList<>(128);
+            }
+            boolean updateDone = TaskInfoManager.getTaskInfoManager().copyData(m_taskInfoList, false);
+
+            if (updateDone) {
+                fireTableDataChanged();
+            }
+            return updateDone;
         }
 
-        @Override
-        public Object getValueAt(int rowIndex, int columnIndex) {
-
-            TaskInfo taskInfo = m_entities.get(rowIndex);
-            switch (columnIndex) {
-                case COLTYPE_STEP: {
-                    return taskInfo;
-                }
-                case COLTYPE_TASKINFO_ID: {
-                    return taskInfo.getId();
-                }
-                case COLTYPE_TASKINFO_CATEGORY: {
-                    return taskInfo.getIdList();
-                }
-                case COLTYPE_TASKINFO_CRITICALITY: {
-                    return taskInfo;
-                }
-                case COLTYPE_DESCRIPTION: {
-                    return taskInfo.getTaskDescription();
-                }
-                case COLTYPE_PERCENTAGE: {
-                    if (taskInfo.isRunning()) {
-                        float percentage = taskInfo.getPercentage();
-                        if ((percentage < 0.001) || (percentage > 99.999)) {
-                            return Float.NaN;
-                        }
-                        return percentage;
-                    } else {
-                        return Float.NaN;
-                    }
-
-                }
-
+        public TaskInfo getTaskInfo(int index) {
+            if ((m_taskInfoList == null) || (index >= m_taskInfoList.size()) || (index < 0)) {
+                return null;
             }
-            return null; // should not happen
+
+            return m_taskInfoList.get(index);
+
+        }
+
+        public int findIndexOfTaskInfoById(int taskInfoId) {
+            if (taskInfoId == -1) {
+                return -1;
+            }
+
+            for (int i = 0; i < m_taskInfoList.size(); i++) {
+                if (m_taskInfoList.get(i).getId() == taskInfoId) {
+                    return i;
+                }
+            }
+
+            return -1;
         }
 
         @Override
@@ -405,23 +414,68 @@ public class TasksPanel extends AbstractTasksPanel {
         }
 
         @Override
-        public TableCellRenderer getRenderer(int row, int col) {
-            if (col == COLTYPE_PERCENTAGE) {
-                return new ScoreRenderer();
+        public int getRowCount() {
+            if (m_taskInfoList == null) {
+                return 0;
             }
-            return null;
+
+            return m_taskInfoList.size();
         }
 
         @Override
-        public Object getRowValue(Class c, int row) {
-            if (c.equals(TaskInfo.class)) {
-                return m_entities.get(row);
-            }
-            return null;
+        public int getColumnCount() {
+            return columnNames.length;
         }
 
         @Override
-        public int[] getKeysColumn() {
+        public String getColumnName(int col) {
+            return columnNames[col];
+        }
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+
+            TaskInfo taskInfo = m_taskInfoList.get(rowIndex);
+            switch (columnIndex) {
+                case COLTYPE_STEP: {
+                    return taskInfo;
+                }
+                case COLTYPE_TASKINFO_ID: {
+                    return taskInfo.getId();
+                }
+                case COLTYPE_TASKINFO_CATEGORY: {
+                    return taskInfo.getIdList();
+                }
+                case COLTYPE_TASKINFO_CRITICALITY: {
+                    return taskInfo;
+                }
+                case COLTYPE_DESCRIPTION: {
+                    return taskInfo.getTaskDescription();
+                }
+                case COLTYPE_PERCENTAGE: {
+                    if (taskInfo.isRunning()) {
+                        float percentage = taskInfo.getPercentage();
+                        if ((percentage<0.001) || (percentage>99.999)) {
+                            return Float.NaN;
+                        }
+                       return percentage;
+                    } else {
+                        return Float.NaN;
+                    }
+                    
+                }
+
+            }
+            return null; // should not happen
+        }
+
+        @Override
+        public String getToolTipForHeader(int col) {
+            return null; // no tooltip
+        }
+        
+        @Override
+        public String getTootlTipValue(int row, int col) {
             return null;
         }
 
@@ -440,7 +494,8 @@ public class TasksPanel extends AbstractTasksPanel {
             };
             filtersMap.put(COLTYPE_STEP, new ValueFilter("State", TaskInfo.PUBLIC_STATE_VALUES, PUBLIC_STATE_ICONS, ValueFilter.ValueFilterType.EQUAL, stepConverter, COLTYPE_STEP));
             filtersMap.put(COLTYPE_TASKINFO_ID, new IntegerFilter(getColumnName(COLTYPE_TASKINFO_ID), null, COLTYPE_TASKINFO_ID));
-
+            
+            
             ConvertValueInterface criticalityConverter = new ConvertValueInterface() {
                 @Override
                 public Object convertValue(Object o) {
@@ -456,39 +511,124 @@ public class TasksPanel extends AbstractTasksPanel {
 
         }
 
-        public boolean updateData() {
-            if (m_entities == null) {
-                m_entities = new ArrayList<>(128);
-            }
-            boolean updateDone = TaskInfoManager.getTaskInfoManager().copyData((ArrayList<TaskInfo>) m_entities, false);
-
-            if (updateDone) {
-                fireTableDataChanged();
-            }
-            return updateDone;
+        @Override
+        public boolean isLoaded() {
+            return true;
         }
 
-        public TaskInfo getTaskInfo(int index) {
-            if ((m_entities == null) || (index >= m_entities.size()) || (index < 0)) {
-                return null;
-            }
-
-            return m_entities.get(index);
-
+        @Override
+        public int getLoadingPercentage() {
+            return 100;
         }
 
-        public int findIndexOfTaskInfoById(int taskInfoId) {
-            if (taskInfoId == -1) {
-                return -1;
-            }
+        @Override
+        public Long getTaskId() {
+            return -1L; // not used
+        }
 
-            for (int i = 0; i < m_entities.size(); i++) {
-                if (m_entities.get(i).getId() == taskInfoId) {
-                    return i;
-                }
-            }
+        @Override
+        public LazyData getLazyData(int row, int col) {
+            return null; // not used
+        }
 
-            return -1;
+        @Override
+        public void givePriorityTo(Long taskId, int row, int col) {
+            return; // not used
+        }
+
+        @Override
+        public void sortingChanged(int col) {
+            return; // not used
+        }
+
+        @Override
+        public int getSubTaskId(int col) {
+           return -1; // not used
+        }
+
+        @Override
+        public String getDataColumnIdentifier(int columnIndex) {
+            return null; // not used
+        }
+
+        @Override
+        public Class getDataColumnClass(int columnIndex) {
+            return null; // not used
+        }
+
+        @Override
+        public Object getDataValueAt(int rowIndex, int columnIndex) {
+            return null; // not used
+        }
+
+        @Override
+        public int[] getKeysColumn() {
+            return null; // not used
+        }
+
+        @Override
+        public int getInfoColumn() {
+            return -1; // not used
+        }
+
+        @Override
+        public void setName(String name) {
+            // not used
+        }
+
+        @Override
+        public String getName() {
+            return null; // not used
+        }
+
+        @Override
+        public Map<String, Object> getExternalData() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public PlotInformation getPlotInformation() {
+            return null; // not used
+        }
+
+
+        @Override
+        public PlotType getBestPlotType() {
+            return null; // not used
+        }
+
+        @Override
+        public int[] getBestColIndex(PlotType plotType) {
+            return null; // not used
+        }
+
+
+        @Override
+        public String getExportRowCell(int row, int col) {
+            return null; // no specific export
+        }
+
+        @Override
+        public ArrayList<ExportFontData> getExportFonts(int row, int col) {
+            return null;
+        }
+        
+        @Override
+        public String getExportColumnName(int col) {
+            return getColumnName(col);
+        }
+
+        @Override
+        public TableCellRenderer getRenderer(int row, int col) {
+            if (col == COLTYPE_PERCENTAGE) {
+                return new ScoreRenderer();
+            }
+            return null;
+        }
+
+        @Override
+        public GlobalTableModelInterface getFrozzenModel() {
+            return this;
         }
 
         @Override
@@ -497,6 +637,24 @@ public class TasksPanel extends AbstractTasksPanel {
             list.add(new ExtraDataType(TaskInfo.class, true));
             registerSingleValuesAsExtraTypes(list);
             return list;
+        }
+
+        @Override
+        public Object getValue(Class c) {
+            return getSingleValue(c);
+        }
+
+        @Override
+        public Object getRowValue(Class c, int row) {
+            if (c.equals(TaskInfo.class)) {
+                return m_taskInfoList.get(row);
+            }
+            return null;
+        }
+        
+        @Override
+        public Object getColValue(Class c, int col) {
+            return null;
         }
 
     }
@@ -518,7 +676,7 @@ public class TasksPanel extends AbstractTasksPanel {
             return this;
         }
     }
-
+    
     public class TaskInfoImportanceRenderer extends DefaultTableCellRenderer {
 
         public TaskInfoImportanceRenderer() {
@@ -572,7 +730,7 @@ public class TasksPanel extends AbstractTasksPanel {
             return c;
         }
     }
-
+    
     public class EraserButton extends JButton implements ActionListener {
 
         public EraserButton() {
@@ -590,7 +748,8 @@ public class TasksPanel extends AbstractTasksPanel {
             updateData();
         }
     }
-
+    
+    
     private class StopTaskAction extends AbstractTableAction {
 
         public StopTaskAction() {
@@ -598,43 +757,45 @@ public class TasksPanel extends AbstractTasksPanel {
         }
 
         @Override
-        public void actionPerformed(int col, int row, int[] selectedRows, JTable table) {
+        public void actionPerformed(int col, int row, int[] selectedRows, JTable table) {           
             int nbSelectedRset = selectedRows.length;
-            if (nbSelectedRset != 1) {
-                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "Only one task can be aborted at the same time", "Cancel Task Error", JOptionPane.ERROR_MESSAGE);
+            if(nbSelectedRset != 1 ){
+                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(),"Only one task can be aborted at the same time","Cancel Task Error",JOptionPane.ERROR_MESSAGE);
                 return;
-            }
+            }                
             TaskInfo currentTaskInfo = getSelectedTaskInfo();
-            if (fr.profi.util.StringUtils.isEmpty(currentTaskInfo.getJmsMessageID())) {
-                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "Only server side tasks can be aborted", "Cancel Task Error", JOptionPane.ERROR_MESSAGE);
+            if(fr.profi.util.StringUtils.isEmpty(currentTaskInfo.getJmsMessageID())){
+                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(),"Only server side tasks can be aborted","Cancel Task Error",JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
-            if (currentTaskInfo.getPublicState() == TaskInfo.PUBLIC_STATE_RUNNING) {
+            
+            if( currentTaskInfo.getPublicState() == TaskInfo.PUBLIC_STATE_RUNNING){
                 CancelTask task = new CancelTask(currentTaskInfo.getJmsMessageID());
                 AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
-            } else if (currentTaskInfo.getPublicState() == TaskInfo.PUBLIC_STATE_WAITING) {
+            } else if ( currentTaskInfo.getPublicState() == TaskInfo.PUBLIC_STATE_WAITING){          
                 PurgeConsumer.getPurgeConsumer().clearMessage(currentTaskInfo.getJmsMessageID());
             } else {
-                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "Only pending or running task can be aborted", "Cancel Task Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(),"Only pending or running task can be aborted","Cancel Task Error",JOptionPane.ERROR_MESSAGE);
             }
         }
 
         @Override
         public void updateEnabled(int row, int col, int[] selectedRows, JTable table) {
-
+                               
             boolean enable = true;
-            if (selectedRows.length != 1) {
+            if(selectedRows.length != 1 )
                 enable = false;
-            } else {
+            else {
                 TaskInfo currentTaskInfo = getSelectedTaskInfo();
                 int currentPublicState = currentTaskInfo.getPublicState();
-                if (currentPublicState != TaskInfo.PUBLIC_STATE_WAITING && currentPublicState != TaskInfo.PUBLIC_STATE_RUNNING) {
+                if( currentPublicState != TaskInfo.PUBLIC_STATE_WAITING &&currentPublicState !=TaskInfo.PUBLIC_STATE_RUNNING ){
                     enable = false;
                 }
             }
-
-            setEnabled(enable);
+            
+            setEnabled(enable);            
         }
     }
 }
+   
+   

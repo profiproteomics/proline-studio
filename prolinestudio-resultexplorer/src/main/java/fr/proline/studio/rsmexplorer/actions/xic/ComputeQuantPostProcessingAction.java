@@ -42,6 +42,7 @@ import fr.proline.studio.utils.ResultCallback;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -75,7 +76,8 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
         final int posX = x;
         final int posY = y;
 
-        ArrayList<String> computedList = new ArrayList();
+        ArrayList<DataSetNode> computedList = new ArrayList();
+        ArrayList<DataSetNode> selectedDatasetNodeList = new ArrayList<>();
         m_nbLoadedQuanti = 0;
         for (AbstractNode n : selectedNodes) {
 
@@ -95,36 +97,31 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
                     if (success) {
                         // check if profilizer has already been launched
                         if (dataSet.getPostQuantProcessingConfig() != null) {
-                            node.setIsRefined(true);
-                            computedList.add(node.getDataset().getName());
+                            computedList.add(node);
+                        }else{
+                            selectedDatasetNodeList.add(node);
                         }
                         m_nbLoadedQuanti++;
-                        ArrayList<DataSetNode> selectedDatasetNodeList = new ArrayList<>();
-                        if (m_nbLoadedQuanti == selectedNodes.length) {//all loaded
+                        
+                        if (m_nbLoadedQuanti == selectedNodes.length) {//Last one is loaded, all loaded
+                            
                             if (!computedList.isEmpty()) {
                                 String[] options = {"Refine All", "Skip already refined"};
-                                String message = computedList + " Proteins Sets Abundances have already been refined \n(Compute Qaunt Post Processing done).";
+                                String computedNodeName = computedList.stream().map(node->node.getDataset().getName()).collect(Collectors.joining(","));
+                                String message = computedNodeName + ": Proteins Sets Abundances have already been refined \n(Compute Qaunt Post Processing done).";
                                 OptionDialog yesNoDialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Refine Proteins Sets Abundances", message);
                                 yesNoDialog.setButtonName(DefaultDialog.BUTTON_OK, options[0]);
                                 yesNoDialog.setButtonName(DefaultDialog.BUTTON_CANCEL, options[1]);
                                 yesNoDialog.setLocation(posX, posY);
                                 yesNoDialog.setVisible(true);
 
-                                if (yesNoDialog.getButtonClicked() != DefaultDialog.BUTTON_OK) {
-                                    for (AbstractNode an : selectedNodes) {
-                                        DataSetNode dn = ((DataSetNode) an);
-                                        if (!dn.isRefined()) {
-                                            selectedDatasetNodeList.add(dn);
-                                        }
-                                    }
-                                } else {
-                                    for (AbstractNode an : selectedNodes) {
+                                if (yesNoDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {                                
+                                    for (AbstractNode an : computedList) {
                                         DataSetNode dn = ((DataSetNode) an);
                                         selectedDatasetNodeList.add(dn);
                                     }
-
                                 }
-                            }
+                            }//else all no computed, 
                             if (!selectedDatasetNodeList.isEmpty()) {
                                 quantificationProfile(null, posX, posY, pID, selectedDatasetNodeList);
                             }

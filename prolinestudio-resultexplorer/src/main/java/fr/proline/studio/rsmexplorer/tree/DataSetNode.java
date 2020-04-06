@@ -423,15 +423,6 @@ public class DataSetNode extends AbstractNode {
         }
     }
 
-    //refined = compute quant post processing done
-    public boolean isRefined() {
-        return this.m_isRefined;
-    }
-
-    public void setIsRefined(boolean isRefined) {
-        this.m_isRefined = isRefined;
-    }
-
     /**
      * return the parent dataset of the current node, if the parent is a merged
      * dataset

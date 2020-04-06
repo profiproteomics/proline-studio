@@ -89,7 +89,8 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
     public void dataChanged() {
 
         final ResultSummary _rsm = (m_rsm != null) ? m_rsm : (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
-        TransientMemoryCacheManager.getSingleton().linkCache(this, _rsm);
+        // register the link to the Transient Data
+        linkCache(_rsm);
         
         
         DProteinMatch proteinMatch = (m_previousDataBox==null) ? null : (DProteinMatch) m_previousDataBox.getData(false, DProteinMatch.class);

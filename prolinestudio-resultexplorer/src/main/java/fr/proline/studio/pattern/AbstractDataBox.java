@@ -673,10 +673,16 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         return getTypeName();
     }
     
+    @Override
     public String getMemoryClientName() {
         return getFullName();
     }
-
+    @Override
+    public String getMemoryDataName() {
+        String dataName = getDataName();
+        return (dataName != null) ? dataName : "";
+    }
+    
     public String getDescription() {
         return m_description;
     }

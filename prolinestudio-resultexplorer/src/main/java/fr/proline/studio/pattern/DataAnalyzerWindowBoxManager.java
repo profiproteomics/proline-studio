@@ -83,5 +83,21 @@ public class DataAnalyzerWindowBoxManager {
     public static void openDataAnalyzer() {
         addTableInfo(null);
     }
+    
+    public static void updateToFreeMemory() {
+       if (m_windowBox == null) {
+           return;
+       }
+       
+       // After windows have been closed, forcing the update of the tree in data analyzer unlinks objects
+       if (m_windowBox.getEntryBox() instanceof DataboxDataAnalyzer) {
+                DataboxDataAnalyzer analyzer = (DataboxDataAnalyzer) m_windowBox.getEntryBox();
+                if (analyzer.getPanel() instanceof DataAnalyzerPanel) {
+                    DataAnalyzerPanel panel = (DataAnalyzerPanel) analyzer.getPanel();
+                    panel.getDataAnalyzerTree().updataDataNodes();
+                }
+       }
+       
+    }
 
 }

@@ -16,23 +16,21 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
+import fr.proline.studio.dam.memory.MemoryReference;
 import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.rsmexplorer.gui.admin.FragmentationRuleSetPanel;
-import fr.proline.studio.rsmexplorer.gui.admin.PeaklistSoftwarePanel;
-import fr.proline.studio.rsmexplorer.gui.admin.ProjectsPanel;
-import fr.proline.studio.rsmexplorer.gui.admin.UserAccountsPanel;
+import fr.proline.studio.pattern.DataAnalyzerWindowBoxManager;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.Window;
 import java.util.ArrayList;
 import javax.swing.DefaultListModel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.ListSelectionModel;
+import javax.swing.table.AbstractTableModel;
+import org.jdesktop.swingx.JXTable;
 
 /**
  *
@@ -44,8 +42,8 @@ public class MemoryDialog extends DefaultDialog  {
 
     private static MemoryDialog m_singletonDialog = null;
 
-    private JList<String> m_usedList = null;
-    private JList<String> m_freeList = null;
+    private MemoryTable m_usedTable = null;
+    private MemoryTable m_freeTable = null;
     
     
     
@@ -74,20 +72,14 @@ public class MemoryDialog extends DefaultDialog  {
     
     private void update() {
                
-        String[] freeCacheList = TransientMemoryCacheManager.getSingleton().getFreeCacheList();
-        DefaultListModel<String> freeListModel = new DefaultListModel<>();
-        for (String cacheName :  freeCacheList) {
-            freeListModel.addElement(cacheName);
-        }
-        m_freeList.setModel(freeListModel);
+        ArrayList<MemoryReference> freeCacheList = TransientMemoryCacheManager.getSingleton().getFreeCacheList();
+        MemoryTableModel freeModel = new MemoryTableModel(true, freeCacheList);
+        m_freeTable.setModel(freeModel);
         
 
-        String[] usedCacheList = TransientMemoryCacheManager.getSingleton().getUsedCacheList();
-        DefaultListModel<String> usedListModel = new DefaultListModel<>();
-        for (String cacheName :  usedCacheList) {
-            usedListModel.addElement(cacheName);
-        }
-        m_usedList.setModel(usedListModel); 
+        ArrayList<MemoryReference> usedCacheList = TransientMemoryCacheManager.getSingleton().getUsedCacheList();
+        MemoryTableModel usedModel = new MemoryTableModel(false, usedCacheList);
+        m_usedTable.setModel(usedModel); 
     }
 
     private void initInternalPanel() {
@@ -98,12 +90,12 @@ public class MemoryDialog extends DefaultDialog  {
         JTabbedPane tabbedPane = new JTabbedPane(); 
         
 
-        m_freeList = new JList<>();
-        JScrollPane freeListScrollPane = new JScrollPane(m_freeList);
+        m_freeTable = new MemoryTable();
+        JScrollPane freeListScrollPane = new JScrollPane(m_freeTable);
 
 
-        m_usedList = new JList<>();       
-        JScrollPane usedListScrollPane = new JScrollPane(m_usedList);
+        m_usedTable = new MemoryTable();       
+        JScrollPane usedListScrollPane = new JScrollPane(m_usedTable);
 
         tabbedPane.add("Recoverable Memory", freeListScrollPane);
         tabbedPane.add("Used Memory", usedListScrollPane);
@@ -137,12 +129,77 @@ public class MemoryDialog extends DefaultDialog  {
     @Override
     protected boolean okCalled() {
         
+        // Free unused memory caches
         TransientMemoryCacheManager.getSingleton().freeUnusedCache();
+        
+        // Remove data nodes in Data Analyzer
+        DataAnalyzerWindowBoxManager.updateToFreeMemory();
+        
+        // call garbage collector
         System.gc(); 
         
         return true;
     }
 
+    
+    private class MemoryTable extends JXTable {
+        
+        
+        public MemoryTable() {
+            setSortable(false);
+        }
+    }
+    
+    private static class MemoryTableModel extends AbstractTableModel {
+
+        private static final int COLUMN_CACHE = 0;
+        private static final int COLUMN_WINDOW = 1;
+        private static final int NB_COLS = 2;
+
+        private static final String[] FREE_COLUMN_NAMES = {"Cache", "Was Used in Window"};
+        private static final String[] USED_COLUMN_NAMES = {"Cache", "Used in Window"};
+        
+        private ArrayList<MemoryReference> m_memoryReferenceList = null;
+        private String[] m_columnNames;
+
+        public MemoryTableModel(boolean freeCacheModel, ArrayList<MemoryReference> memoryReferenceList) {
+            m_memoryReferenceList = memoryReferenceList;
+            m_columnNames = freeCacheModel ? FREE_COLUMN_NAMES : USED_COLUMN_NAMES;
+        }
+
+        public String getColumnName(int column) {
+            return m_columnNames[column];
+        }
+
+        public Class getColumnClass(int columnIndex) {
+            return String.class;
+        }
+
+        public int getRowCount() {
+            return m_memoryReferenceList.size();
+        }
+
+        public int getColumnCount() {
+            return NB_COLS;
+        }
+
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            switch(columnIndex) {
+                case COLUMN_CACHE: {
+                    String name = m_memoryReferenceList.get(rowIndex).getCacheName();
+                    if ((rowIndex == 0) || (! name.equals(m_memoryReferenceList.get(rowIndex-1).getCacheName()))) {
+                        return name;
+                    } else {
+                        return "";
+                    }
+                }
+                case COLUMN_WINDOW: {
+                    return m_memoryReferenceList.get(rowIndex).getClientName();
+                }
+            }
+            return null;
+        }
+    }
 
 
 }

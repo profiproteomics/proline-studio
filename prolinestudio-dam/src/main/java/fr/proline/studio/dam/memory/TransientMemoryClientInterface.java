@@ -11,4 +11,5 @@ package fr.proline.studio.dam.memory;
  */
 public interface TransientMemoryClientInterface {
     public String getMemoryClientName();
+    public String getMemoryDataName();
 }

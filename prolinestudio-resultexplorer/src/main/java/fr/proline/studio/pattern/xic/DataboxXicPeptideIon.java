@@ -122,10 +122,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
             m_isXICMode = ((XicMode) m_previousDataBox.getData(false, XicMode.class)).isXicMode();
         }
         
-        // register the link to the Transient Data
-        if (m_dataset!= null) {
-            linkCache(m_dataset.getResultSummary());
-        }
+
         
         
         final int loadingId = setLoading();
@@ -140,6 +137,11 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
             @Override
             public void run(boolean success, final long taskId, SubTask subTask, boolean finished) {
 
+                // register the link to the Transient Data
+                if (m_dataset != null) {
+                    linkCache(m_dataset.getResultSummary());
+                }
+ 
                 if (subTask == null) {
                     if (!allPeptides) {
                         ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideIonList, m_isXICMode, finished);

@@ -64,7 +64,6 @@ import javax.persistence.EntityManager;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.tree.TreePath;
 import org.openide.util.NbPreferences;
 import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
@@ -75,7 +74,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author JM235353
  */
-public class CreateQuantitationDialog extends DefaultDialog {
+public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
 
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
@@ -96,7 +95,7 @@ public class CreateQuantitationDialog extends DefaultDialog {
     private SelectRawFilesPanel m_selectRawFilePanel = null;
     private AbstractParamsPanel m_quantMethodParamsPanel;
     private DatabaseVerifySpectrumFromResultSets m_spectrumTask;
-    private QuantExperimentalDesignPanel m_experimentalDesignPanel;
+    //private QuantExperimentalDesignPanel m_experimentalDesignPanel;
     private List<PtmSpecificity> m_identifiedPtms = null;
 
     public static CreateQuantitationDialog getDialog(Window parent) {
@@ -761,141 +760,12 @@ public class CreateQuantitationDialog extends DefaultDialog {
         }
     }
 
-    String groupName4checkDesignStructure;
-
-    /**
-     * check also length of 1.XICNode,group, 2.sample, 3.sample Analysis,
-     * 4.group+sample name, according Database restriction, length should < 100
-     *
-     * @param parentNode
-     * @param duplicates
-     * @return
-     */
-    private boolean checkDesignStructure(AbstractNode parentNode, Set<String> duplicates) {
-        String nodeName = parentNode.toString();
-        if (nodeName.length() > 100) {
-            showErrorOnNode(parentNode, "Name Length should less than 100.");
-            return false;
-        }
-        AbstractNode.NodeTypes type = parentNode.getType();
-        switch (type) {
-            case DATA_SET:
-                groupName4checkDesignStructure = "";
-                if (parentNode.isLeaf()) {
-                    showErrorOnNode(parentNode, "Your Experimental Design is empty.");
-                    return false;
-                }
-                break;
-            case BIOLOGICAL_GROUP:
-                groupName4checkDesignStructure = nodeName;
-                if (parentNode.isLeaf()) {
-                    showErrorOnNode(parentNode, "You must add at least one Biological Sample for each Biological Group.");
-                    return false;
-                }
-                break;
-            case BIOLOGICAL_SAMPLE:
-                if ((groupName4checkDesignStructure.length() + nodeName.length()) > 100) {
-                    showErrorOnNode(parentNode, "Group name + sample name, the length should less than 100.");
-                    return false;
-                }
-                if (parentNode.isLeaf()) {
-                    showErrorOnNode(parentNode, "You must add at least one Identification for each Biological Sample.");
-                    return false;
-                }
-                break;
-            case BIOLOGICAL_SAMPLE_ANALYSIS:
-                if (parentNode.isLeaf()) {
-                    if (duplicates.contains(parentNode.toString())) {
-                        showErrorOnNode(parentNode, "Biological Sample Analysis is a duplicate. Please rename using right click!");
-                        return false;
-                    } else {
-                        duplicates.add(parentNode.toString());
-                        return true;
-                    }
-                }
-                break;
-        }
-
-        Enumeration children = parentNode.children();
-        //Iterate over Groups
-        while (children.hasMoreElements()) {
-            AbstractNode rsmNode = (AbstractNode) children.nextElement();
-            if (!checkDesignStructure(rsmNode, duplicates)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Issue 13023: check the biological group names and biological sample
-     * names: must be unique
-     *
-     * @param parentNode
-     * @return
-     */
-    private boolean checkBiologicalGroupName(AbstractNode parentNode) {
-        List<String> listBiologicalGroupName = new ArrayList();
-        Enumeration children = parentNode.children();
-        //Iterate over Groups
-        while (children.hasMoreElements()) {
-            AbstractNode rsmNode = (AbstractNode) children.nextElement();
-            AbstractNode.NodeTypes type = rsmNode.getType();
-            switch (type) {
-                case BIOLOGICAL_GROUP: {
-                    if (listBiologicalGroupName.contains(rsmNode.getData().getName())) {
-                        showErrorOnNode(rsmNode, "The Biological Group name must be unique.");
-                        return false;
-                    }
-                    listBiologicalGroupName.add(rsmNode.getData().getName());
-                    List<String> listBiologicalSampleName = new ArrayList();
-                    //Iterate over Samples
-                    Enumeration childrenS = rsmNode.children();
-                    while (childrenS.hasMoreElements()) {
-                        AbstractNode sampleNode = (AbstractNode) childrenS.nextElement();
-                        AbstractNode.NodeTypes typeS = sampleNode.getType();
-                        switch (typeS) {
-                            case BIOLOGICAL_SAMPLE: {
-                                if (listBiologicalSampleName.contains(sampleNode.getData().getName())) {
-                                    showErrorOnNode(sampleNode, "The Biological Sample name must be unique.");
-                                    return false;
-                                }
-                                listBiologicalSampleName.add(sampleNode.getData().getName());
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
     private boolean checkRawFiles() {
         boolean check = SelectRawFilesPanel.getPanel().check(this);
         if (!check) {
             setStatus(true, "You must specify a Raw(mzDb) File for each Sample Analysis.");
         }
         return check;
-    }
-
-    private void showErrorOnNode(AbstractNode node, String error) {
-        QuantExperimentalDesignTree experimentalDesignTree = m_experimentalDesignPanel.getExperimentalDesignTree();
-        // expand parentnode if needed
-        AbstractNode parentNode = (AbstractNode) node.getParent();
-        if (parentNode != null) {
-            TreePath pathToExpand = new TreePath(parentNode.getPath());
-            if (!experimentalDesignTree.isExpanded(pathToExpand)) {
-                experimentalDesignTree.expandPath(pathToExpand);
-            }
-        }
-        // scroll to node if needed
-        TreePath path = new TreePath(node.getPath());
-        experimentalDesignTree.scrollPathToVisible(path);
-
-        // display error
-        setStatus(true, error);
-        highlight(experimentalDesignTree, experimentalDesignTree.getPathBounds(path));
     }
 
     @Override

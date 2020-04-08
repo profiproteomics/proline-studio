@@ -36,6 +36,7 @@ import java.awt.Window;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,7 +49,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author CB205360
  */
-public class AggregateQuantitationDialog extends DefaultDialog {
+public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
 
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private static AggregateQuantitationDialog m_singletonDialog = null;
@@ -167,12 +168,12 @@ public class AggregateQuantitationDialog extends DefaultDialog {
                 m_designPanel.setBorder(BorderFactory.createTitledBorder(" Experimental Design "));
                 JScrollPane treePanel = new JScrollPane();
                 m_designPanel.setLayout(new BorderLayout());
-                QuantExperimentalDesignTree designTree = new QuantExperimentalDesignTree(m_experimentalDesignNode, true);
+                m_experimentalDesignTree = new QuantExperimentalDesignTree(m_experimentalDesignNode, true);
                 //m_designPanel.add(new WizardPanel(step1Title, step1Help), BorderLayout.NORTH);
-                treePanel.setViewportView(designTree);
+                treePanel.setViewportView(m_experimentalDesignTree);
                 m_designPanel.add(treePanel, BorderLayout.CENTER);
 
-                TreeUtils.expandTree(designTree, true);
+                TreeUtils.expandTree(m_experimentalDesignTree, true);
             }
             replaceInternalComponent(m_designPanel);
             revalidate();
@@ -207,6 +208,11 @@ public class AggregateQuantitationDialog extends DefaultDialog {
     @Override
     protected boolean okCalled() {
         if (m_step == STEP_PANEL_DEFINE_EXP_DESIGN) {
+            if (!checkDesignStructure(m_experimentalDesignNode, new HashSet<>())) {
+                return false;
+            } else if (!checkBiologicalGroupName(m_experimentalDesignNode)) {
+                return false;
+            }
             displayStep2QuantChannelsMapping();
             return false;
         }

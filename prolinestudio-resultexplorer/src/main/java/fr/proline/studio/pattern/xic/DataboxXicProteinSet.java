@@ -112,17 +112,17 @@ public class DataboxXicProteinSet extends AbstractDataBox {
     @Override
     public Long getRsetId() {
         if (m_dataset != null) {
-            return null;
+            return m_dataset.getResultSetId();
         }
-        return m_dataset.getResultSetId();
+        return null;
     }
 
     @Override
     public Long getRsmId() {
         if (m_dataset != null) {
-            return null;
+            return m_dataset.getResultSummaryId();
         }
-        return m_dataset.getResultSummaryId();
+        return null;
     }
 
     @Override

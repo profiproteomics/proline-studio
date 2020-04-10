@@ -17,49 +17,33 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
-import fr.proline.core.orm.msi.dto.DInfoPTM;
-import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
-import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.core.orm.msi.dto.DPeptidePTM;
-import fr.proline.core.orm.msi.dto.DProteinMatch;
-import fr.proline.core.orm.msi.dto.DPtmSiteProperties;
-import fr.proline.core.orm.msi.dto.DQuantPeptide;
+import fr.proline.core.orm.msi.dto.*;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dam.tasks.data.ptm.ComparableList;
 import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
-import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
-import fr.proline.studio.filter.*;
-import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
-import fr.proline.studio.table.ExportFontModelUtilities;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.export.ExportModelUtilities;
-import fr.proline.studio.filter.ConvertValueInterface;
-import fr.proline.studio.filter.DoubleFilter;
-import fr.proline.studio.filter.Filter;
-import fr.proline.studio.filter.IntegerFilter;
-import fr.proline.studio.filter.StringFilter;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.table.renderer.*;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PercentageRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
-import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
-import fr.proline.studio.table.LazyData;
-import fr.proline.studio.table.LazyTable;
-import fr.proline.studio.table.LazyTableModel;
-import fr.proline.studio.table.TableDefaultRendererManager;
+import fr.proline.studio.table.*;
+import fr.proline.studio.table.renderer.*;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.StringUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.swing.table.TableCellRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.table.TableCellRenderer;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  *

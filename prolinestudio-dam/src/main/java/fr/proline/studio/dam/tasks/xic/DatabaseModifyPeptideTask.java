@@ -143,7 +143,7 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
                     // nothing to do
                     // should not happen
                 } else {
-                    pmqSerializedMap.remove(DMasterQuantProteinSet.MASTER_QUANT_PROTEINSET_WITH_PEPTIDE_MODIFIED);
+                    pmqSerializedMap.put(DMasterQuantProteinSet.MASTER_QUANT_PROTEINSET_WITH_PEPTIDE_MODIFIED, Boolean.FALSE);
                     if (pmqSerializedMap.isEmpty()) {
                         masterQuantProteinSet.setSerializedProperties(null);
                     } else {
@@ -196,7 +196,7 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
             int nbPeptides = m_masterQuantPeptideList.size();
             ArrayList<Long> peptideInstanceIdList = new ArrayList<>(nbPeptides);
             for (int i=0;i<nbPeptides;i++) {
-                DMasterQuantPeptide masterQuantPeptide = m_masterQuantPeptideList.get(i);
+                DMasterQuantPeptide masterQuantPeptide = m_masterQuantPeptideList.get(i);                        
                 int level = masterQuantPeptide.getSelectionLevel();
                 if (level == 0) {
                     masterQuantPeptide.setSelectionLevel(2);

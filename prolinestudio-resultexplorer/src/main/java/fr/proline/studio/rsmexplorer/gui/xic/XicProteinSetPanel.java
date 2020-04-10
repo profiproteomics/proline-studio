@@ -365,17 +365,12 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
             // check if refine panel must be shown
             try {
-                for (int i = 0; i < proteinSets.size(); i++) {
-                    DMasterQuantProteinSet masterQuantProteinSet = proteinSets.get(i);
-                    Map<String, Object> pmqSerializedMap = masterQuantProteinSet.getSerializedPropertiesAsMap();
-                    if ((pmqSerializedMap != null) && (pmqSerializedMap.containsKey(DMasterQuantProteinSet.MASTER_QUANT_PROTEINSET_WITH_PEPTIDE_MODIFIED))) {
-                        // we must show refine panel
-                        m_refineProteinsPanel.setLocation(getX() + 20, getY() + 20);
-                        m_refineProteinsPanel.setVisible(true);
-                        break;
-                    }
-
-                }
+                boolean containsModifier =((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).containsModifiedQuantProteinSet();
+                if(containsModifier){
+                    // we must show refine panel
+                    m_refineProteinsPanel.setLocation(getX() + 20, getY() + 20);
+                    m_refineProteinsPanel.setVisible(true);    
+                }               
             } catch (Exception e) {
                 // should never happen
             }

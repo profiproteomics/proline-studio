@@ -124,7 +124,7 @@ public class PTMDataset {
         if(!isVersion2())
             return null;
         else {
-            Optional<PTMSite> ptmSite = m_proteinPTMSites.stream().filter(site -> site.getid().equals(id)).findFirst();
+            Optional<PTMSite> ptmSite = m_proteinPTMSites.stream().filter(site -> site.getId().equals(id)).findFirst();
             return ptmSite.orElse(null);            
         }
     }

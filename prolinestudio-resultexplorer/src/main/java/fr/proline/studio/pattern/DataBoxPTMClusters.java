@@ -35,6 +35,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dam.tasks.data.ptm.AggregatedMasterQuantPeptide;
 import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
 import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
@@ -43,7 +44,7 @@ import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
-import fr.proline.studio.rsmexplorer.gui.PTMClustersProteinPanel;
+import fr.proline.studio.rsmexplorer.gui.PTMClustersPanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.types.XicMode;
 import java.util.ArrayList;
@@ -71,7 +72,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     
     private final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.ptm");
 
-    private boolean m_viewSitesAsClusters;
+    private boolean m_loadSitesAsClusters;
     private long logStartTime;
     
     private PTMDataset m_ptmDataset;
@@ -127,7 +128,9 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     }
 
     public void setViewSitesOnly(boolean viewSitesAsClusters) {
-        m_viewSitesAsClusters = viewSitesAsClusters;
+        m_loadSitesAsClusters = viewSitesAsClusters;
+        if (m_loadSitesAsClusters)
+            m_typeName = "Dataset PTMs Sites";
     }
 
     private boolean isXicResult() {
@@ -170,7 +173,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     
     @Override
     public void createPanel() {
-        PTMClustersProteinPanel p = new PTMClustersProteinPanel();
+        PTMClustersPanel p = new PTMClustersPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);
@@ -201,7 +204,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                         m_ptmDataset = ptmDS.get(0);
                         m_logger.debug("  -- created "+m_ptmDataset.getPTMClusters().size()+" PTMCluster.");
                         m_loadPepMatchOnGoing=true;
-                        ((PTMClustersProteinPanel) getDataBoxPanelInterface()).setData(taskId, (ArrayList) m_ptmDataset.getPTMClusters(), finished);
+                        ((PTMClustersPanel) getDataBoxPanelInterface()).setData(taskId, (ArrayList) m_ptmDataset.getPTMClusters(), finished);
                         loadPeptideMatches();
 
                     }
@@ -222,7 +225,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         // ask asynchronous loading of data
         
         DatabasePTMsTask task = new DatabasePTMsTask(callback);
-        task.initLoadPTMDataset(getProjectId(), m_ptmDataset.getDataset(), ptmDS, m_viewSitesAsClusters);
+        task.initLoadPTMDataset(getProjectId(), m_ptmDataset.getDataset(), ptmDS, m_loadSitesAsClusters);
         m_logger.debug("DataBoxPTMClusters : **** Register task DatabasePTMsTask.initLoadPTMDataset. ID= "+task.getId());
         registerTask(task);
           
@@ -232,7 +235,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         TaskInfo ti =  getTaskInfo(taskId);
         String message = (ti != null && ti.hasTaskError()) ? ti.getTaskError().getErrorText() : "Error loading PTM Cluster";
         JOptionPane.showMessageDialog(((JPanel) getDataBoxPanelInterface()), message,"PTM Cluster loading error", JOptionPane.ERROR_MESSAGE);
-        ((PTMClustersProteinPanel) getDataBoxPanelInterface()).setData(taskId, null, isFinished);
+        ((PTMClustersPanel) getDataBoxPanelInterface()).setData(taskId, null, isFinished);
 
     }
     
@@ -324,7 +327,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                     setLoaded(loadingId);                    
                     Map<Long, Long> typicalProteinMatchIdByProteinMatchId = loadProteinMatchMapping();
                     m_ptmDataset.setQuantProteinSets(m_masterQuantProteinSetList, typicalProteinMatchIdByProteinMatchId);
-                    //((PTMClustersProteinPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
+                    //((PTMClustersPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                     unregisterTask(taskId);
                     setLoaded(loadingId);
                     startLoadingMasterQuantPeptides(m_ptmDataset.getPTMClusters());
@@ -399,65 +402,32 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                     DMasterQuantitationChannel masterQC = proteinPTMClusters.get(0).getPTMDataset().getDataset().getMasterQuantitationChannels().get(0);
                     Map<Long, DMasterQuantPeptide> mqPepById = masterQuantPeptideList.stream().collect(Collectors.toMap(x -> x.getPeptideInstanceId(), x -> x));
 
-                    float[] protAbundances = new float[masterQC.getGroupsCount()];
                     for (PTMCluster currentCluster : proteinPTMClusters) {
-                      // by default set to null
-                        currentCluster.setExpressionValue(Double.NaN);
                         if (currentCluster.getMasterQuantProteinSet() != null) {
 
                             // Update DMasterQuantPeptide for bestPtm
                             // Get BestPepMatch Parent DPeptideInstance
                             List<DPeptideInstance> parentPeptideInstances = currentCluster.getParentPeptideInstances();
+
+                            //
+                            // Best peptide match quantification
+                            //
                             Long bestPepMatchPepId = currentCluster.getBestPeptideMatch().getPeptide().getId();
                             Optional<DPeptideInstance> parentBestPepI = parentPeptideInstances.stream().filter(peI ->bestPepMatchPepId.equals(peI.getPeptideId())).findFirst();
                             if(parentBestPepI.isPresent()) {
                                 DMasterQuantPeptide mqPep = mqPepById.get(parentBestPepI.get().getId());
                                 currentCluster.setBestQuantPeptideMatch(mqPep);
                             }
-                            
-                            for (int groupNumber = 0 ; groupNumber < masterQC.getGroupsCount(); groupNumber++) {
-                                Stream<DQuantProteinSet> stream = masterQC.getQuantitationChannels(groupNumber+1).stream().map(c -> currentCluster.getMasterQuantProteinSet().getQuantProteinSetByQchIds().get(c.getId())).filter(q -> q!= null);
-                                protAbundances[groupNumber] = stream.collect(Collectors.averagingDouble(dqps -> dqps.getAbundance())).floatValue();
-                            }
 
-                            
-                            List<Double> expressionValues = new ArrayList<>(parentPeptideInstances.size());
-
-                            for (DPeptideInstance pep : parentPeptideInstances) {
-                                DMasterQuantPeptide mqPep = mqPepById.get(pep.getId());
-                                if (mqPep != null) {
-                                    float[] pepAbundances = new float[masterQC.getGroupsCount()];
-                                    for (int groupNumber = 0 ; groupNumber < masterQC.getGroupsCount(); groupNumber++) {
-                                        Stream<DQuantPeptide> stream = masterQC.getQuantitationChannels(groupNumber+1).stream().map(c -> mqPep.getQuantPeptideByQchIds().get(c.getId())).filter(q -> q!= null);
-                                        pepAbundances[groupNumber] = stream.collect(Collectors.averagingDouble(dqp -> dqp.getAbundance())).floatValue();
-                                    }
-                                    // Compute an expression metric from protAbundances and pepAbundances and set this value
-                                    // to PTMSite expression value
-                                    for (int groupNumber = 1 ; groupNumber < masterQC.getGroupsCount(); groupNumber++) {
-                                        double pepFC = Math.log(pepAbundances[groupNumber]/pepAbundances[groupNumber-1])/Math.log(2);
-                                        double protFC = Math.log(protAbundances[groupNumber]/protAbundances[groupNumber-1])/Math.log(2);
-                                        double diffFC = protFC - pepFC;
-                                        expressionValues.add(diffFC);
-                                    }
-                                }
-                            }
-                            
-                            Optional<Double> maxFinite = expressionValues.stream().filter( d -> Double.isFinite(d) ).max(Comparator.comparingDouble(Math::abs));
-                            Optional<Double> max = expressionValues.stream().max(Comparator.comparingDouble(Math::abs));
-
-                            if (maxFinite.isPresent()) {
-                                if (max.isPresent() && !Double.isNaN(max.get())) {
-                                    currentCluster.setExpressionValue(Math.max(maxFinite.get(), max.get()));
-                                } else {
-                                    currentCluster.setExpressionValue(maxFinite.get());
-                                }
-                            } else if (max.isPresent()) {
-                                currentCluster.setExpressionValue(max.get());
-                            }
+                            //
+                            // Sum of peptides
+                            //
+                            List<DMasterQuantPeptide> mqPeps = parentPeptideInstances.stream().map(parentPepI -> mqPepById.get(parentPepI.getId())).filter(mqp -> mqp != null).collect(Collectors.toList());
+                            currentCluster.setBestQuantPeptideMatch(new AggregatedMasterQuantPeptide(mqPeps, masterQC));
                         }
                     }
                     //Update Cluster Panel
-                    ((PTMClustersProteinPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);                    
+                    ((PTMClustersPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                 }
             }
         };
@@ -479,13 +449,13 @@ public class DataBoxPTMClusters extends AbstractDataBox {
             }
             
             if (parameterType.equals(DProteinMatch.class)) {
-                PTMCluster cluster = ((PTMClustersProteinPanel)getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
+                PTMCluster cluster = ((PTMClustersPanel)getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
                 if (cluster != null) {
                     return cluster.getProteinMatch();
                 }
             }
             if (parameterType.equals(DPeptideMatch.class)) {
-                PTMCluster cluster = ((PTMClustersProteinPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
+                PTMCluster cluster = ((PTMClustersPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
                 if (cluster != null) {
                     return cluster.getBestPeptideMatch();
                 }
@@ -499,13 +469,13 @@ public class DataBoxPTMClusters extends AbstractDataBox {
             }
              //XIC Specific ---- 
             if(parameterType.equals(DMasterQuantProteinSet.class) && isXicResult()) {
-                PTMCluster cluster = ((PTMClustersProteinPanel)getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
+                PTMCluster cluster = ((PTMClustersPanel)getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
                 if (cluster != null) {
                     return cluster.getMasterQuantProteinSet();
                 }
             }
             if (parameterType.equals(DProteinSet.class) && isXicResult()) {
-               PTMCluster cluster = ((PTMClustersProteinPanel)getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
+               PTMCluster cluster = ((PTMClustersPanel)getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
                 if (cluster != null && cluster.getMasterQuantProteinSet() != null) {
                     return cluster.getMasterQuantProteinSet().getProteinSet();
                 }     
@@ -533,16 +503,16 @@ public class DataBoxPTMClusters extends AbstractDataBox {
             if(parameterType.equals(PTMPeptideInstance.class) && !getArray){
                 if(m_loadPepMatchOnGoing)
                     return null;
-                List<PTMCluster> clusters = ((PTMClustersProteinPanel) getDataBoxPanelInterface()).getSelectedProteinPTMClusters();
+                List<PTMCluster> clusters = ((PTMClustersPanel) getDataBoxPanelInterface()).getSelectedPTMClusters();
                 List<PTMPeptideInstance> ptmPeptideInstances =  new ArrayList<>();
                 if(!clusters.isEmpty()){
                     Collections.sort(clusters);                    
                     //get First Selected Cluster, and consider only PTMCluster on same protein match
-                    Long protMatchId = ((PTMClustersProteinPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster().getProteinMatch().getId();
+                    Long protMatchId = ((PTMClustersPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster().getProteinMatch().getId();
                     clusters.stream().filter(cluster -> protMatchId.equals(cluster.getProteinMatch().getId())).forEach(cluster -> {ptmPeptideInstances.addAll(cluster.getParentPTMPeptideInstances()); });                    
                 }
                 return ptmPeptideInstances;
-//                PTMCluster cluster = ((PTMClustersProteinPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
+//                PTMCluster cluster = ((PTMClustersPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
 //                List<PTMPeptideInstance> ptmPeptideInstances =  new ArrayList<>();
 //                if(cluster != null)
 //                    ptmPeptideInstances = cluster.getParentPTMPeptideInstances();
@@ -554,15 +524,15 @@ public class DataBoxPTMClusters extends AbstractDataBox {
             if(parameterType.equals(PTMPeptideInstance.class) && getArray){
                 if(m_loadPepMatchOnGoing)
                     return null;
-                List<PTMCluster> clusters = ((PTMClustersProteinPanel) getDataBoxPanelInterface()).getSelectedProteinPTMClusters();
+                List<PTMCluster> clusters = ((PTMClustersPanel) getDataBoxPanelInterface()).getSelectedPTMClusters();
                 List<PTMPeptideInstance> ptmPeptideInstances =  new ArrayList<>();
                 if(!clusters.isEmpty()) { 
                     //get First Selected Cluster, and consider only PTMCluster on same protein match
-                    Long protMatchId = ((PTMClustersProteinPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster().getProteinMatch().getId();
+                    Long protMatchId = ((PTMClustersPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster().getProteinMatch().getId();
                     clusters.stream().filter(cluster -> protMatchId.equals(cluster.getProteinMatch().getId())).forEach(cluster -> {ptmPeptideInstances.addAll(cluster.getLeafPTMPeptideInstances()); });               
                 }
                 return ptmPeptideInstances;  
-//                PTMCluster cluster = ((PTMClustersProteinPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
+//                PTMCluster cluster = ((PTMClustersPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
 //                List<PTMPeptideInstance> ptmPeptideInstances =  new ArrayList<>();
 //                if(cluster != null)
 //                    ptmPeptideInstances = cluster.getLeafPTMPeptideInstances();

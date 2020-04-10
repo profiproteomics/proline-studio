@@ -84,7 +84,7 @@ public class PeptideView extends ViewPtmAbstract {
                     
             m_beginIndex = pep.getStartPosition();
             boolean isProteinNTerm = false;
-            Iterator<PTMSite> allSites = pep.getSites().iterator();
+            Iterator<PTMSite> allSites = pep.getPTMSites().iterator();
             while (allSites.hasNext()) {
                 PTMSite site = allSites.next();
                 if(site.isProteinNTermWithOutM()) {

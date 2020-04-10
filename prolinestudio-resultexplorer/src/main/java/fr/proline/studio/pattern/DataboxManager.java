@@ -37,7 +37,7 @@ public class DataboxManager {
     private final AbstractDataBox[] m_dataBoxStartingArray = {new DataBoxRsetAll(), new DataBoxRsetPSM(), new DataBoxRsetAllProteinMatch(),
         new DataBoxRsmPSM(), new DataBoxRsmPeptideInstances(), new DataBoxAdjacencyMatrixChoice(),
         new DataBoxRsmAllProteinSet(), new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxXicProteinSet(),
-        new DataBoxMSQueriesForRSM(), new DataBoxMSQueriesForRset(), new DataBoxPTMSiteProtein(), new DataBoxPTMClusters()};
+        new DataBoxMSQueriesForRSM(), new DataBoxMSQueriesForRset(), new DataBoxPTMClusters()};
 
     //VDS : If some databox takes parameter in constructor : config will be lost when adding the databox : newInstance called in AddDataBoxActionListener
     // Added specific code in AddDataBoxActionListener to configure these specific databox !
@@ -67,9 +67,6 @@ public class DataboxManager {
         new DataBoxAdjacencyMatrix(),
         new DataBoxRsmPSMForMsQuery(), 
         new DataboxRsetPSMForMsQuery(),
-        new DataBoxPTMSitePeptides(), 
-        new DataBoxPTMSitePeptidesGraphic(),
-        new DataBoxPTMSitePepMatches(),
         new DataBoxPTMPeptides(false, false), // Ident PTMs Peptides
         new DataBoxPTMPeptides(true, false),  // Quanti PTMs Peptides
         new DataBoxPTMPeptides(false, true),  // Ident PTMs Peptides Matches

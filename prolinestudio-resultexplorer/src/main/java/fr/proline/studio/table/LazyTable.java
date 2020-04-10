@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import org.openide.windows.WindowManager;
@@ -54,6 +56,8 @@ public abstract class LazyTable extends DecoratedMarkerTable implements Adjustme
     }
     protected LastAction m_lastAction = LastAction.ACTION_NONE;
 
+    private final HashMap<String, TableCellRenderer> m_rendererMap = new HashMap();
+    private final StringBuilder m_sb = new StringBuilder();
     private boolean m_sortForbidden = false;
     
     public LazyTable(JScrollBar verticalScrollbar) {
@@ -233,6 +237,18 @@ public abstract class LazyTable extends DecoratedMarkerTable implements Adjustme
 
         return super.getCellRenderer(row, column);
     }
-    private final HashMap<String, TableCellRenderer> m_rendererMap = new HashMap();
-    private final StringBuilder m_sb = new StringBuilder();
+
+    @Override
+    public void setModel(TableModel dataModel) {
+        super.setModel(dataModel);
+        dataModel.addTableModelListener(new TableModelListener() {
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                if (e.getFirstRow() == TableModelEvent.HEADER_ROW) {
+                    // means that the model structure changed
+                    m_rendererMap.clear();
+                }
+            }
+        });
+    }
 }

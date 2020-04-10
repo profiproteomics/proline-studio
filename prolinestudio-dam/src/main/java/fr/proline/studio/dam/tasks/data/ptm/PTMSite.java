@@ -51,7 +51,6 @@ public class PTMSite {
     private List<DPeptideInstance> m_parentPeptideInstances;
     
     private PTMDataset m_dataset;
-    private Object m_expressionValue;
 
     public PTMSite(AbstractJSONPTMSite jsonSite, DProteinMatch proteinMatch) {
         m_site = jsonSite;
@@ -61,7 +60,7 @@ public class PTMSite {
             m_id = ((JSONPTMSite2)m_site).id;
     }
 
-    public Long getid(){
+    public Long getId(){
         return m_id;
     }
     
@@ -244,6 +243,10 @@ public class PTMSite {
         return getPtmPositionByPeptideId().get(peptideId);
     }
 
+    public Float getLocalisationConfidence() {
+        return m_site.localizationConfidence;
+    }
+
     public DMasterQuantProteinSet getMasterQuantProteinSet() {
         return m_masterQuantProteinSet;
     }
@@ -270,14 +273,6 @@ public class PTMSite {
 
     public Integer getPositionOnProtein() {
         return m_site.seqPosition;
-    }
-
-    public void setExpressionValue(Object value) {
-        m_expressionValue =  value;
-    }
-
-    public Object getExpressionValue() {
-        return m_expressionValue;
     }
 
     public boolean isProteinNTerm() {

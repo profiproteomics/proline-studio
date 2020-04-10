@@ -174,10 +174,10 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        
+
         // register the link to the Transient Data
         linkCache( m_rsm);
-        
+
         //LOG.debug("dataChanged called for "+ (m_displayAllPepMatches?" leaf ": " parent"));
         //Get information from previous box:
         // -- PTM Dataset & RSM the ptm peptides belong to
@@ -206,7 +206,7 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
 
         final List<PTMSite> notLoadedPtmSite = new ArrayList<>();
         for (PTMPeptideInstance ptmPepInst : m_ptmPepInstances) {
-            ptmPepInst.getSites().stream().forEach(ptmSite -> {
+            ptmPepInst.getPTMSites().stream().forEach(ptmSite -> {
                 if (!ptmSite.isLoaded()) {
                     notLoadedPtmSite.add(ptmSite);
                 }

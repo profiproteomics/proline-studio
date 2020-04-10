@@ -22,8 +22,8 @@ import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
-import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.graphics.CrossSelectionInterface;
@@ -38,10 +38,9 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataAnalyzerWindowBoxManager;
 import fr.proline.studio.progress.ProgressInterface;
-import fr.proline.studio.rsmexplorer.gui.model.ProteinPTMSiteTableModel;
+import fr.proline.studio.rsmexplorer.gui.model.PTMClusterTableModel;
 import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
-import fr.proline.studio.rsmexplorer.gui.model.ProteinPTMSiteTableModelProcessing;
 import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
@@ -57,8 +56,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import javax.swing.ImageIcon;
 import javax.swing.JLayeredPane;
@@ -75,16 +72,20 @@ import javax.swing.table.TableRowSorter;
 import org.jdesktop.swingx.JXTable;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
+import java.util.List;
+import javax.swing.table.TableColumn;
+import org.jdesktop.swingx.table.TableColumnExt;
+
 /**
  *
  * @author JM235353
  */
-public class ProteinPTMSitePanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
+public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
     
     private AbstractDataBox m_dataBox;
     
-    private JScrollPane m_ptmProteinSiteScrollPane;
-    private PTMProteinSiteTable m_ptmProteinSiteTable;
+    private JScrollPane m_scrollPane;
+    private PTMClusterTable m_ptmClusterTable;
     
     private JTextField m_countModificationTextField;
 
@@ -97,52 +98,54 @@ public class ProteinPTMSitePanel extends HourglassPanel implements DataBoxPanelI
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
-    
+
     /**
      * Creates new form PTMProteinSitePanel
      */
-    public ProteinPTMSitePanel() {
-
+    public PTMClustersPanel() {
         initComponents();
-
     }
 
-    public void setData(Long taskId, ArrayList<PTMSite> proteinPTMSiteArray, boolean finished) {
+    
+    private boolean m_hideFirstTime = true;
+    public void setData(Long taskId, ArrayList<PTMCluster> ptmClusters, boolean finished) {
 
-        ProteinPTMSiteTableModel model = ((ProteinPTMSiteTableModel) ((CompoundTableModel)m_ptmProteinSiteTable.getModel()).getBaseModel());
-        
-        model.setData(taskId, proteinPTMSiteArray);
+        PTMClusterTableModel model = ((PTMClusterTableModel) ((CompoundTableModel) m_ptmClusterTable.getModel()).getBaseModel());
+        model.setData(taskId,ptmClusters);
 
         // select the first row
-        if ((proteinPTMSiteArray != null) && (proteinPTMSiteArray.size() > 0)) {
-            m_ptmProteinSiteTable.getSelectionModel().setSelectionInterval(0, 0);
-            m_markerContainerPanel.setMaxLineNumber(proteinPTMSiteArray.size());
+        if ((ptmClusters != null) && (ptmClusters.size() > 0)) {
+            m_ptmClusterTable.getSelectionModel().setSelectionInterval(0, 0);
+            m_markerContainerPanel.setMaxLineNumber(ptmClusters.size());
+            if (m_hideFirstTime) {
+                setColumnsVisibility();
+                m_hideFirstTime = false;
+            }
 
         }
         
         m_infoToggleButton.updateInfo();
         
         m_countModificationTextField.setText(model.getModificationsInfo());
-        
+
         
         if (finished) {
-            m_ptmProteinSiteTable.setSortable(true);
+            m_ptmClusterTable.setSortable(true);
         }
     }
 
     public void dataUpdated(SubTask subTask, boolean finished) {
-        m_ptmProteinSiteTable.dataUpdated(subTask, finished);
-        
-        ProteinPTMSiteTableModel model = ((ProteinPTMSiteTableModel) ((CompoundTableModel)m_ptmProteinSiteTable.getModel()).getBaseModel());
+        m_ptmClusterTable.dataUpdated(subTask, finished);
+        PTMClusterTableModel model = ((PTMClusterTableModel) ((CompoundTableModel) m_ptmClusterTable.getModel()).getBaseModel());
         m_countModificationTextField.setText(model.getModificationsInfo());
     }
 
 
     
-    public PTMSite getSelectedProteinPTMSite() {
+    public PTMCluster getSelectedProteinPTMCluster() {
 
         // Retrieve Selected Row
-        int selectedRow = m_ptmProteinSiteTable.getSelectedRow();
+        int selectedRow = m_ptmClusterTable.getSelectedRow();
 
 
         // nothing selected
@@ -152,18 +155,43 @@ public class ProteinPTMSitePanel extends HourglassPanel implements DataBoxPanelI
         }
 
         // convert according to the sorting
-        selectedRow = m_ptmProteinSiteTable.convertRowIndexToModel(selectedRow);
+        selectedRow = m_ptmClusterTable.convertRowIndexToModel(selectedRow);
 
-        CompoundTableModel compoundTableModel = ((CompoundTableModel)m_ptmProteinSiteTable.getModel());
+        CompoundTableModel compoundTableModel = ((CompoundTableModel) m_ptmClusterTable.getModel());
         selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
 
         // Retrieve ProteinPTMSite selected
-        ProteinPTMSiteTableModel tableModel = (ProteinPTMSiteTableModel) compoundTableModel.getBaseModel();
-        return tableModel.getProteinPTMSite(selectedRow);
+        PTMClusterTableModel tableModel = (PTMClusterTableModel) compoundTableModel.getBaseModel();
+        return tableModel.getProteinPTMCluster(selectedRow);
+    }
+    
+     public List<PTMCluster> getSelectedPTMClusters() {
+
+        // Retrieve Selected Row
+        int[] selectedRows = m_ptmClusterTable.getSelectedRows();
+        int nbSelectedRows = selectedRows.length;
+        List<PTMCluster> selectedPtmClusters= new ArrayList<>(nbSelectedRows);
+        // nothing selected
+        if (nbSelectedRows == 0) {
+            return selectedPtmClusters;
+        }
+       
+        // convert according to the sorting
+        CompoundTableModel compoundTableModel = ((CompoundTableModel) m_ptmClusterTable.getModel());
+        PTMClusterTableModel tableModel = (PTMClusterTableModel) compoundTableModel.getBaseModel();
+        for(int i=0; i<nbSelectedRows; i++){
+            int rowModelIndex  = m_ptmClusterTable.convertRowIndexToModel(selectedRows[i]);
+            int convertedSelectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(rowModelIndex);
+            
+            // Retrieve ProteinPTMSite selected
+            selectedPtmClusters.add(tableModel.getProteinPTMCluster(convertedSelectedRow));
+        }
+        
+        return selectedPtmClusters;
     }
 
     @Override
-    public void setDataBox(AbstractDataBox dataBox) {
+    public void setDataBox(AbstractDataBox dataBox) { 
         m_dataBox = dataBox;
     }
     
@@ -179,17 +207,17 @@ public class ProteinPTMSitePanel extends HourglassPanel implements DataBoxPanelI
     
     @Override
     public GlobalTableModelInterface getGlobalTableModelInterface() {
-        return (GlobalTableModelInterface) m_ptmProteinSiteTable.getModel();
+        return (GlobalTableModelInterface) m_ptmClusterTable.getModel();
     }
     
     @Override
     public JXTable getGlobalAssociatedTable() {
-        return m_ptmProteinSiteTable;
+        return m_ptmClusterTable;
     }
     
     @Override
     public CrossSelectionInterface getCrossSelectionInterface() {
-        return m_ptmProteinSiteTable;
+        return m_ptmClusterTable;
     }
     
     @Override
@@ -209,12 +237,9 @@ public class ProteinPTMSitePanel extends HourglassPanel implements DataBoxPanelI
 
     private void initComponents() {
 
-
         setLayout(new BorderLayout());
 
-        final JPanel proteinPTMSitePanel = createProteinPTMSitePanel();
-
-
+        final JPanel proteinPTMClusterPanel = createProteinPTMClusterPanel();
         final JLayeredPane layeredPane = new JLayeredPane();
 
         layeredPane.addComponentListener(new ComponentListener() {
@@ -223,7 +248,7 @@ public class ProteinPTMSitePanel extends HourglassPanel implements DataBoxPanelI
             public void componentResized(ComponentEvent e) {
                 final Component c = e.getComponent();
 
-                proteinPTMSitePanel.setBounds(0, 0, c.getWidth(), c.getHeight());
+                proteinPTMClusterPanel.setBounds(0, 0, c.getWidth(), c.getHeight());
                 layeredPane.revalidate();
                 layeredPane.repaint();
 
@@ -243,40 +268,51 @@ public class ProteinPTMSitePanel extends HourglassPanel implements DataBoxPanelI
         });
         add(layeredPane, BorderLayout.CENTER);
 
-        layeredPane.add(proteinPTMSitePanel, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(proteinPTMClusterPanel, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(m_infoToggleButton.getInfoPanel(), JLayeredPane.PALETTE_LAYER);  
         layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER+1));
-
+        setColumnsVisibility();
     }
     
+    private void setColumnsVisibility() {
+        // hide the rawAbundance  and selectionLevel columns
+        List<Integer> listIdsToHide = ((PTMClusterTableModel) ((CompoundTableModel) m_ptmClusterTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
+        List<TableColumn> columns = m_ptmClusterTable.getColumns(true);
+        for (Integer id : listIdsToHide) {
+            boolean columnVisible = ((TableColumnExt) columns.get(id)).isVisible();
+            if (columnVisible) {
+                m_ptmClusterTable.getColumnExt(m_ptmClusterTable.convertColumnIndexToView(id)).setVisible(false);
+            }
+        }
+    }
     
-    private JPanel createProteinPTMSitePanel() {
+    private JPanel createProteinPTMClusterPanel() {
         
-        JPanel proteinPTMSitePanel = new JPanel();
-        proteinPTMSitePanel.setBounds(0, 0, 500, 400);
-        proteinPTMSitePanel.setLayout(new BorderLayout());
+        JPanel proteinPTMClusterPanel = new JPanel();
+        proteinPTMClusterPanel.setBounds(0, 0, 500, 400);
+        proteinPTMClusterPanel.setLayout(new BorderLayout());
         
         JPanel internalPanel = createInternalPanel();
 
         JToolBar toolbar = initToolbar();
-        proteinPTMSitePanel.add(toolbar, BorderLayout.WEST);
-        proteinPTMSitePanel.add(internalPanel, BorderLayout.CENTER);
+        proteinPTMClusterPanel.add(toolbar, BorderLayout.WEST);
+        proteinPTMClusterPanel.add(internalPanel, BorderLayout.CENTER);
 
 
-        return proteinPTMSitePanel;
+        return proteinPTMClusterPanel;
     }
     
     private JToolBar initToolbar() {
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
-        m_settingsButton = new SettingsButton(((ProgressInterface) m_ptmProteinSiteTable.getModel()), m_ptmProteinSiteTable);
+        m_settingsButton = new SettingsButton(((ProgressInterface) m_ptmClusterTable.getModel()), m_ptmClusterTable);
         
         // Search Button
-        m_searchToggleButton = new SearchToggleButton(m_ptmProteinSiteTable, m_ptmProteinSiteTable, ((CompoundTableModel) m_ptmProteinSiteTable.getModel()));
+        m_searchToggleButton = new SearchToggleButton(m_ptmClusterTable, m_ptmClusterTable, ((CompoundTableModel) m_ptmClusterTable.getModel()));
         toolbar.add(m_searchToggleButton);
         
-        m_filterButton = new FilterButton(((CompoundTableModel) m_ptmProteinSiteTable.getModel())) {
+        m_filterButton = new FilterButton(((CompoundTableModel) m_ptmClusterTable.getModel())) {
 
             @Override
             protected void filteringDone() {
@@ -286,13 +322,13 @@ public class ProteinPTMSitePanel extends HourglassPanel implements DataBoxPanelI
             
         };
 
-        m_exportButton = new ExportButton(((CompoundTableModel) m_ptmProteinSiteTable.getModel()), "Protein Sets", m_ptmProteinSiteTable);
+        m_exportButton = new ExportButton(((CompoundTableModel) m_ptmClusterTable.getModel()), "Protein Sets", m_ptmClusterTable);
 
         toolbar.add(m_filterButton);
         toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
 
-        m_addCompareDataButton = new AddDataAnalyzerButton(((CompoundTableModel) m_ptmProteinSiteTable.getModel())) {
+        m_addCompareDataButton = new AddDataAnalyzerButton(((CompoundTableModel) m_ptmClusterTable.getModel())) {
            
             @Override
             public void actionPerformed() {
@@ -307,7 +343,7 @@ public class ProteinPTMSitePanel extends HourglassPanel implements DataBoxPanelI
         };
         toolbar.add(m_addCompareDataButton);
         
-        m_infoToggleButton = new InfoToggleButton(m_ptmProteinSiteTable, m_ptmProteinSiteTable);
+        m_infoToggleButton = new InfoToggleButton(m_ptmClusterTable, m_ptmClusterTable);
         
         toolbar.add(m_infoToggleButton);
         
@@ -325,61 +361,59 @@ public class ProteinPTMSitePanel extends HourglassPanel implements DataBoxPanelI
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
         // create objects
-        m_ptmProteinSiteScrollPane = new JScrollPane();
+        m_scrollPane = new JScrollPane();
         
-        m_ptmProteinSiteTable = new PTMProteinSiteTable();
-        ProteinPTMSiteTableModel model = new ProteinPTMSiteTableModel((LazyTable)m_ptmProteinSiteTable);
-        m_ptmProteinSiteTable.setModel(new CompoundTableModel(model, true));
+        m_ptmClusterTable = new PTMClusterTable();
+        PTMClusterTableModel model = new PTMClusterTableModel((LazyTable) m_ptmClusterTable);
+        m_ptmClusterTable.setModel(new CompoundTableModel(model, true));
         
         // hide the id column
-        m_ptmProteinSiteTable.getColumnExt(m_ptmProteinSiteTable.convertColumnIndexToView(ProteinPTMSiteTableModel.COLTYPE_PROTEIN_ID)).setVisible(false);
+        m_ptmClusterTable.getColumnExt(m_ptmClusterTable.convertColumnIndexToView(PTMClusterTableModel.COLTYPE_PROTEIN_ID)).setVisible(false);
         //m_ptmProteinSiteTable.displayColumnAsPercentage(PTMProteinSiteTableModel.COLTYPE_PEPTIDE_SCORE);
-        TableRowSorter<TableModel> sorter = new TableRowSorter<>(m_ptmProteinSiteTable.getModel());
-        m_ptmProteinSiteTable.setRowSorter(sorter);
+        TableRowSorter<TableModel> sorter = new TableRowSorter<>(m_ptmClusterTable.getModel());
+        m_ptmClusterTable.setRowSorter(sorter);
             
-        sorter.setComparator(ProteinPTMSiteTableModel.COLTYPE_MODIFICATION_LOC, new Comparator<String>() {
-
-            @Override
-            public int compare(String s1, String s2) {
-                int pos1;
-                if (s1.compareTo("N-term") == 0) {
-                    pos1 = -1;
-                } else if (s1.compareTo("C-term") == 0) {
-                    pos1 = Integer.MAX_VALUE;
-                } else {
-                    pos1 = Integer.valueOf(s1);
-                }
-                int pos2;
-                if (s2.compareTo("N-term") == 0) {
-                    pos2 = 0;
-                } else if (s2.compareTo("C-term") == 0) {
-                    pos2 = Integer.MAX_VALUE;
-                } else {
-                    pos2 = Integer.valueOf(s2);
-                }
-
-                return pos2-pos1;
-            }
- 
-                
-        });
-        
-        sorter.setComparator(ProteinPTMSiteTableModel.COLTYPE_PROTEIN_LOC, new Comparator<Integer>() {
-
-            @Override
-            public int compare(Integer s1, Integer s2) {
-                return s1-s2;
-            }
- 
-                
-        });
+//        sorter.setComparator(PTMClusterTableModel.COLTYPE_MODIFICATION_LOC, new Comparator<String>() {
+//            @Override
+//            public int compare(String s1, String s2) {
+//                int pos1;
+//                if (s1.compareTo("N-term") == 0) {
+//                    pos1 = -1;
+//                } else if (s1.compareTo("C-term") == 0) {
+//                    pos1 = Integer.MAX_VALUE;
+//                } else {
+//                    pos1 = Integer.valueOf(s1);
+//                }
+//                int pos2;
+//                if (s2.compareTo("N-term") == 0) {
+//                    pos2 = 0;
+//                } else if (s2.compareTo("C-term") == 0) {
+//                    pos2 = Integer.MAX_VALUE;
+//                } else {
+//                    pos2 = Integer.valueOf(s2);
+//                }
+//
+//                return pos2-pos1;
+//            }
+// 
+//                
+//        });
+//        
+//        sorter.setComparator(PTMClusterTableModel.COLTYPE_PROTEIN_LOC, new Comparator<Integer>() {
+//            @Override
+//            public int compare(Integer s1, Integer s2) {
+//                return s1-s2;
+//            }
+// 
+//                
+//        });
         
 
-        m_markerContainerPanel = new MarkerContainerPanel(m_ptmProteinSiteScrollPane, (PTMProteinSiteTable) m_ptmProteinSiteTable);
+        m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane, (PTMClusterTable) m_ptmClusterTable);
         
-        m_ptmProteinSiteScrollPane.setViewportView(m_ptmProteinSiteTable);
-        m_ptmProteinSiteTable.setFillsViewportHeight(true);
-        m_ptmProteinSiteTable.setViewport(m_ptmProteinSiteScrollPane.getViewport());
+        m_scrollPane.setViewportView(m_ptmClusterTable);
+        m_ptmClusterTable.setFillsViewportHeight(true);
+        m_ptmClusterTable.setViewport(m_scrollPane.getViewport());
 
         m_countModificationTextField = new JTextField();
         m_countModificationTextField.setEditable(false);
@@ -404,44 +438,36 @@ public class ProteinPTMSitePanel extends HourglassPanel implements DataBoxPanelI
     
 
     
-    private class PTMProteinSiteTable extends LazyTable implements ImportTableSelectionInterface, CrossSelectionInterface, InfoInterface  {
+    private class PTMClusterTable extends LazyTable implements ImportTableSelectionInterface, CrossSelectionInterface, InfoInterface  {
 
         
-        public PTMProteinSiteTable() {
-            super(m_ptmProteinSiteScrollPane.getVerticalScrollBar() );
+        public PTMClusterTable() {
+            super(m_scrollPane.getVerticalScrollBar() );
 
         }
         
         @Override
         public void tableChanged(TableModelEvent e) {
             super.tableChanged(e);
-            
-            try {
-            
-            if ((m_ptmProteinSiteTable != null) && (m_countModificationTextField != null)) {
+           
+            if ((m_ptmClusterTable != null) && (m_countModificationTextField != null)) {
 
-                CompoundTableModel model = (CompoundTableModel)m_ptmProteinSiteTable.getModel();
+                CompoundTableModel model = (CompoundTableModel) m_ptmClusterTable.getModel();
                 if (model != null) {
-                    
-                    // prepare a lost of current filtered ProteinPTMSite 
-                    // with no redundancy
-                    
-                    ArrayList<PTMSite> proteinPTMSiteArray = new ArrayList<>();
-                    
+
+                    // prepare a lost of current filtered ProteinPTMSite with no redundancy
+
+                    ArrayList<PTMCluster> proteinPTMCluster = new ArrayList<>();
+
                     int nbRows = model.getRowCount(); // loop through filtered DProteinPTMSite
                     for (int i = 0; i < nbRows; i++) {
-                        proteinPTMSiteArray.add((PTMSite) model.getRowValue(PTMSite.class, i));
+                        proteinPTMCluster.add((PTMCluster) model.getRowValue(PTMCluster.class, i));
                     }  
-                    
-                    String modification =  ProteinPTMSiteTableModelProcessing.calculateDataWORedundance(model, new ArrayList<>(), new ArrayList<>(), new HashMap<>(), proteinPTMSiteArray,  new HashMap<>());        
-                    m_countModificationTextField.setText(modification); 
+
                 }
 
             }
-            
-            } catch (Exception e2) {
-                //e2.printStackTrace();
-            }
+
         }
         
         @Override
@@ -462,21 +488,19 @@ public class ProteinPTMSitePanel extends HourglassPanel implements DataBoxPanelI
                 return;
             }
             //VDS: Order is important ! To be corrected using set of class for propagation
-            m_dataBox.propagateDataChanged(PTMSite.class);
+            //m_dataBox.propagateDataChanged(PTMSite.class);
+            //m_dataBox.propagateDataChanged(DPeptideMatch.class);
             m_dataBox.propagateDataChanged(DProteinSet.class);
             m_dataBox.propagateDataChanged(DProteinMatch.class);
             m_dataBox.propagateDataChanged(PTMPeptideInstance.class);
 
         }
 
-
-
         public void dataUpdated(SubTask subTask, boolean finished) {
             
             LazyTable.LastAction keepLastAction = m_lastAction;
             try {
-            
-            
+
             // retrieve selected row
             int rowSelected = getSelectionModel().getMinSelectionIndex();
             int rowSelectedInModel = (rowSelected == -1) ? -1 : convertRowIndexToModel(rowSelected);
@@ -485,19 +509,18 @@ public class ProteinPTMSitePanel extends HourglassPanel implements DataBoxPanelI
             
             selectionWillBeRestored(true);
             try {
-                ((ProteinPTMSiteTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
+                ((PTMClusterTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
+                setColumnsVisibility();
             } finally {
                 selectionWillBeRestored(false);
             }
 
-            
-            
+
             // restore selected row
             if (rowSelectedInModel != -1) {
                 int rowSelectedInView = convertRowIndexToView(rowSelectedInModel);
                 //getSelectionModel().setSelectionInterval(rowSelectedInView, rowSelectedInView);
                 setSelection(rowSelectedInView);
-
                 
                 // if the subtask correspond to the loading of the data of the sorted column,
                 // we keep the row selected visible
@@ -540,10 +563,11 @@ public class ProteinPTMSitePanel extends HourglassPanel implements DataBoxPanelI
             selectionTableModel.clearSelection();
             
             int firstRow = -1;
-            ProteinPTMSiteTableModel model = (ProteinPTMSiteTableModel) ((CompoundTableModel) m_ptmProteinSiteTable.getModel()).getBaseModel();
+            PTMClusterTableModel model = (PTMClusterTableModel) ((CompoundTableModel) m_ptmClusterTable.getModel()).getBaseModel();
+            
             int rowCount = model.getRowCount();
             for (int i=0;i<rowCount;i++) {
-                Object v = model.getValueAt(i, ProteinPTMSiteTableModel.COLTYPE_PROTEIN_ID);
+                Object v = model.getValueAt(i, PTMClusterTableModel.COLTYPE_PROTEIN_ID);
                 if (selectedData.remove(v)) {
                     if (firstRow == -1) {
                         firstRow = i;
@@ -567,12 +591,11 @@ public class ProteinPTMSitePanel extends HourglassPanel implements DataBoxPanelI
 
         @Override
         public TablePopupMenu initPopupMenu() {
-            m_popupMenu = new DisplayTablePopupMenu(ProteinPTMSitePanel.this);
+            m_popupMenu = new DisplayTablePopupMenu(PTMClustersPanel.this);
 
             return m_popupMenu;
         }
         private DisplayTablePopupMenu m_popupMenu;
-
 
 
         @Override
@@ -583,15 +606,11 @@ public class ProteinPTMSitePanel extends HourglassPanel implements DataBoxPanelI
         @Override
         public String getInfo() {
             int count = getModel().getRowCount();
-            ProteinPTMSiteTableModel model = (ProteinPTMSiteTableModel) ((CompoundTableModel) m_ptmProteinSiteTable.getModel()).getBaseModel();
+            PTMClusterTableModel model = (PTMClusterTableModel) ((CompoundTableModel) m_ptmClusterTable.getModel()).getBaseModel();
             String modifInfo = model.getModificationsInfo();
-            return count+((count>1) ? " PTM Proteins Sites" : " PTM Protein Site")+" \n "+modifInfo;
+            return count+((count>1) ? " PTM Clusters" : " PTM Cluster")+" \n "+modifInfo;
         }
-
-        
         
     }
-    
 
-    
 }

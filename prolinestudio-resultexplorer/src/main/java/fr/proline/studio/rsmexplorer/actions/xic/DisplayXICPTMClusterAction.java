@@ -111,7 +111,6 @@ public class DisplayXICPTMClusterAction extends AbstractRSMAction {
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
         int nbSelectedNodes = selectedNodes.length;
-        
 
         if (nbSelectedNodes <0) {
             setEnabled(false);
@@ -137,7 +136,6 @@ public class DisplayXICPTMClusterAction extends AbstractRSMAction {
                 return;
             }
         }
-
         
         setEnabled(true);
     }

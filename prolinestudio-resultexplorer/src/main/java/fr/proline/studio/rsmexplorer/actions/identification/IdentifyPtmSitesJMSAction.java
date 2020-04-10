@@ -109,12 +109,7 @@ public class IdentifyPtmSitesJMSAction extends AbstractRSMAction {
           Long projectId = dataset.getProject().getId();
           Long resultSummaryId = dataset.getResultSummaryId();
           IdentifyPtmSitesTask task;
-
-          if (dialog.getServiceVersion().equals("2.0")) {
-            task = new IdentifyPtmSitesTask(callback, dataset.getName(), projectId, resultSummaryId, null, dialog.getServiceVersion(), dialog.getPtms(), dialog.getClusteringMethodName());
-          } else {
-            task = new IdentifyPtmSitesTask(callback, dataset.getName(), projectId, resultSummaryId, null);
-          }
+          task = new IdentifyPtmSitesTask(callback, dataset.getName(), projectId, resultSummaryId, null, "2.0", dialog.getPtms(), dialog.getClusteringMethodName());
           AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
         }
       }

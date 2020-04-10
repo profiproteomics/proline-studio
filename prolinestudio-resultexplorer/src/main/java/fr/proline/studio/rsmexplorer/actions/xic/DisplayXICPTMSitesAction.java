@@ -51,53 +51,38 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
     public DisplayXICPTMSitesAction(AbstractTree tree) {
        super(NbBundle.getMessage(DisplayXICPTMSitesAction.class, "CTL_DisplayPtmSiteProtein"), tree);
     }
-    
+
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
-        DisplayPTMSitesAction.DisplayPTMSiteDialog dialog = new DisplayPTMSitesAction.DisplayPTMSiteDialog(WindowManager.getDefault().getMainWindow());
-        dialog.setLocation(x, y);
-        dialog.setVisible(true);        
-        if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
-            int nbNodes = selectedNodes.length;
-            for (int i = 0; i < nbNodes; i++) {
-                DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
-                actionImpl(dataSetNode, dialog.getServiceVersion());
-            }
+        int nbNodes = selectedNodes.length;
+        for (int i = 0; i < nbNodes; i++) {
+            DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
+            actionImpl(dataSetNode);
         }
-        
-
     }
-    
-    private void actionImpl(DataSetNode dataSetNode, String serviceVersion) {
-        
+
+    private void actionImpl(DataSetNode dataSetNode) {
+
         final DDataset dataSet = ((DataSetData) dataSetNode.getData()).getDataset();
-        
+
         if (!dataSetNode.hasResultSummary()) {
             return; // should not happen
         }
-        
+
         ResultSummary rsm = dataSetNode.getResultSummary();
         if (rsm != null) {
 
             // prepare window box
-            WindowBox wbox;
-             if (serviceVersion.equals("2.0")) {
-                wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV2(dataSet.getName());
-            } else if (serviceVersion.equals("2.1")){
-                 wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName(), true);
-            } else {
-                 wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV1(dataSet.getName());
-             }
-            wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));    
-               
+            WindowBox wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName(), true);
+            wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));
+
             // open a window to display the window box
             DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
             win.open();
             win.requestActive();
-            
+
         } else {
 
-            
             // we have to load the result set
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -108,22 +93,16 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
 
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                    WindowBox wbox;
-                     if (serviceVersion.equals("2.0")) {
-                        wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV2(dataSet.getName());
-                    } else {
-                        wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV1(dataSet.getName());            
-                    } 
+                    WindowBox wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName(), true);
                     // open a window to display the window box
                     DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
                     win.open();
                     win.requestActive();
-                    
+
                     // prepare window box
                     wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));
                 }
             };
-
 
             // ask asynchronous loading of data
             DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
@@ -131,6 +110,86 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         }
     }
+
+//    @Override
+//    public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
+//        DisplayPTMSitesAction.DisplayPTMSiteDialog dialog = new DisplayPTMSitesAction.DisplayPTMSiteDialog(WindowManager.getDefault().getMainWindow());
+//        dialog.setLocation(x, y);
+//        dialog.setVisible(true);
+//        if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+//            int nbNodes = selectedNodes.length;
+//            for (int i = 0; i < nbNodes; i++) {
+//                DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
+//                actionImpl(dataSetNode, dialog.getServiceVersion());
+//            }
+//        }
+//
+//
+//    }
+    
+//    private void actionImpl(DataSetNode dataSetNode, String serviceVersion) {
+//
+//        final DDataset dataSet = ((DataSetData) dataSetNode.getData()).getDataset();
+//
+//        if (!dataSetNode.hasResultSummary()) {
+//            return; // should not happen
+//        }
+//
+//        ResultSummary rsm = dataSetNode.getResultSummary();
+//        if (rsm != null) {
+//
+//            // prepare window box
+//            WindowBox wbox;
+//             if (serviceVersion.equals("2.0")) {
+//                wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV2(dataSet.getName());
+//            } else if (serviceVersion.equals("2.1")){
+//                 wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName(), true);
+//            } else {
+//                 wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV1(dataSet.getName());
+//             }
+//            wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));
+//
+//            // open a window to display the window box
+//            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+//            win.open();
+//            win.requestActive();
+//
+//        } else {
+//
+//
+//            // we have to load the result set
+//            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+//
+//                @Override
+//                public boolean mustBeCalledInAWT() {
+//                    return true;
+//                }
+//
+//                @Override
+//                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+//                    WindowBox wbox;
+//                     if (serviceVersion.equals("2.0")) {
+//                        wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV2(dataSet.getName());
+//                    } else {
+//                        wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV1(dataSet.getName());
+//                    }
+//                    // open a window to display the window box
+//                    DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+//                    win.open();
+//                    win.requestActive();
+//
+//                    // prepare window box
+//                    wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));
+//                }
+//            };
+//
+//
+//            // ask asynchronous loading of data
+//            DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+//            task.initLoadRsetAndRsm(dataSet);
+//            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+//        }
+//    }
     
 
     @Override

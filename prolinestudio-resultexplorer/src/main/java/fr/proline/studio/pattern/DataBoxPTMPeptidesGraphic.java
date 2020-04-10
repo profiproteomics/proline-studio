@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
 
     private static Logger m_logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
-    private boolean m_isClusterData;
 
     /**
      * Create a DataBoxPTMPeptidesGraphic : graphical view of
@@ -45,7 +44,6 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
      */
     public DataBoxPTMPeptidesGraphic() {
         super(DataboxType.DataBoxPTMPeptidesGraphic, DataboxStyle.STYLE_RSM);
-        m_isClusterData = false;
         m_displayAllPepMatches = false;
         m_isXICResult = false;
 
@@ -57,13 +55,9 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
         super.registerParameters();
     }
 
-    public void setIsClusterData(boolean isClusterData) {
-        this.m_isClusterData = isClusterData;
-    }
-
     @Override
     public void createPanel() {
-        PTMGraphicCtrlPanel p = new PTMGraphicCtrlPanel(m_isClusterData);
+        PTMGraphicCtrlPanel p = new PTMGraphicCtrlPanel(true);
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);

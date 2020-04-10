@@ -247,20 +247,12 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataBoxMSQueriesForRset();
                 case DataBoxRsetPSMForMsQuery:
                     return new DataboxRsetPSMForMsQuery();
-                case DataBoxPTMSiteProtein:
-                    return new DataBoxPTMSiteProtein();
                 case DataBoxDataAnalyzerResults:
                     return new DataBoxDataAnalyzerResults();
                 case DataBoxImage:
                     return new DataBoxImage();
                 case DataBoxSystemTasks:
                     return new DataBoxSystemTasks();
-                case DataBoxPTMSitePeptides:
-                    return new DataBoxPTMSitePeptides();
-                case DataBoxPTMSitePepMatches:
-                    return new DataBoxPTMSitePepMatches();
-                case DataBoxPTMSitePeptidesGraphic:
-                    return new DataBoxPTMSitePeptidesGraphic();
                 case DataBoxPTMPeptides:
                     return new DataBoxPTMPeptides(false, false);
                 case DataBoxXicPTMPeptides:
@@ -370,7 +362,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
 
         // free Transient Data Memory
         unlinkCache();
-        
+
         // cancel task possibily running
         if (!m_taskMap.isEmpty()) {
             AccessDatabaseThread.getAccessDatabaseThread().abortTasks(m_taskMap.keySet());
@@ -382,10 +374,10 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                 nextDataBox.deleteThis();
             }
         }
-        
-        
+
+
     }
-    
+
     protected void linkCache(TransientDataInterface cache) {
         if (m_previousDataBox != null) {
             m_previousDataBox.linkCache(cache);
@@ -393,7 +385,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         }
         TransientMemoryCacheManager.getSingleton().linkCache(this, cache);
     }
-    
+
     private void unlinkCache() {
         if (m_previousDataBox != null) {
             m_previousDataBox.unlinkCache();
@@ -672,7 +664,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
 
         return getTypeName();
     }
-    
+
     @Override
     public String getMemoryClientName() {
         return getFullName();
@@ -682,7 +674,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         String dataName = getDataName();
         return (dataName != null) ? dataName : "";
     }
-    
+
     public String getDescription() {
         return m_description;
     }

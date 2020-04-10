@@ -54,7 +54,7 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
 
     private static Logger logger = LoggerFactory.getLogger(PTMGraphicCtrlPanel.class);
     private PTMPeptidesGraphicView m_ptmPeptideAreaCtrl;
-    private PeptideOnProteinOverviewPanel m_proteinOvervewCtrl;
+    private PeptideOnProteinOverviewPanel m_proteinOverviewCtrl;
 
     protected AbstractDataBox m_dataBox;
 
@@ -64,7 +64,7 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
         if (isClusterData) {
             m_ptmPeptideAreaCtrl.setSuperCtrl(this);
         }
-        m_proteinOvervewCtrl = new PeptideOnProteinOverviewPanel(this);
+        m_proteinOverviewCtrl = new PeptideOnProteinOverviewPanel(this);
 
         initComponents();
     }
@@ -76,10 +76,10 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
         setLayout(new BorderLayout());
         JToolBar toolbar = initToolbar();
         m_ptmPeptideAreaCtrl.setSize(WIDTH - 30, HEIGHT - 50);
-        m_proteinOvervewCtrl.setPreferredSize(new Dimension(WIDTH - 30, 50));
+        m_proteinOverviewCtrl.setPreferredSize(new Dimension(WIDTH - 30, 50));
         JPanel centerPanel = new JPanel(new BorderLayout());
         centerPanel.add(m_ptmPeptideAreaCtrl, BorderLayout.CENTER);
-        centerPanel.add(m_proteinOvervewCtrl, BorderLayout.SOUTH);
+        centerPanel.add(m_proteinOverviewCtrl, BorderLayout.SOUTH);
         this.add(toolbar, BorderLayout.WEST);
         this.add(centerPanel, BorderLayout.CENTER);
     }
@@ -117,10 +117,10 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
             DPeptideInstance[] peptideInstances = m_selectedProteinMatch.getPeptideSet(this.m_dataBox.getRsmId()).getPeptideInstances();
 
             if (m_selectedProteinMatch.getDBioSequence() != null) {
-                m_proteinOvervewCtrl.setData(m_selectedProteinMatch.getAccession(), m_selectedProteinMatch.getDBioSequence().getSequence(), ptmPepInstances.get(0), ptmPepInstances, peptideInstances);
+                m_proteinOverviewCtrl.setData(m_selectedProteinMatch.getAccession(), m_selectedProteinMatch.getDBioSequence().getSequence(), ptmPepInstances.get(0), ptmPepInstances, peptideInstances);
             } else {
                 //sequence of protein begin = 0, end with length
-                m_proteinOvervewCtrl.setData(m_selectedProteinMatch.getAccession(), "0" + m_ptmPeptideAreaCtrl.getSequence().length(), ptmPepInstances.get(0), ptmPepInstances, peptideInstances);
+                m_proteinOverviewCtrl.setData(m_selectedProteinMatch.getAccession(), "0" + m_ptmPeptideAreaCtrl.getSequence().length(), ptmPepInstances.get(0), ptmPepInstances, peptideInstances);
             }
         }
 
@@ -128,7 +128,7 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
     }
 
     /**
-     * when selected petptied change, change next databox and table selected row
+     * when selected peptide change, change next databox and table selected row
      */
     protected void valueChanged() {
         m_dataBox.propagateDataChanged(PTMPeptideInstance.class);
@@ -137,7 +137,7 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
 
     public void setSelectedPTMPeptide(PTMPeptideInstance pepInstance) {
         this.m_ptmPeptideAreaCtrl.setSelectedPTMPeptide(pepInstance);
-        this.m_proteinOvervewCtrl.setSelectedPeptide(pepInstance);
+        this.m_proteinOverviewCtrl.setSelectedPeptide(pepInstance);
     }
 
     public PTMPeptideInstance getSelectedPTMPeptideInstance() {
@@ -199,14 +199,14 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
 
         if (source.equals(Source.PEPTIDE_AREA)) {
             if (message.equals(Message.SELECTED)) {
-                this.m_proteinOvervewCtrl.setSelectedPeptide(m_ptmPeptideAreaCtrl.getSelectedPTMPeptideInstance());
+                this.m_proteinOverviewCtrl.setSelectedPeptide(m_ptmPeptideAreaCtrl.getSelectedPTMPeptideInstance());
             }
         } else if (source.equals(Source.SEQUENCE)) {
             if (message.equals(Message.SELECTED)) {
-                int selectedOnProtein = m_proteinOvervewCtrl.getSelectedProteinPosition();
+                int selectedOnProtein = m_proteinOverviewCtrl.getSelectedProteinPosition();
                 this.m_ptmPeptideAreaCtrl.setViewPosition(selectedOnProtein);
             } else if (message.equals(Message.SEQUENCE)) {
-                String sequence = m_proteinOvervewCtrl.getProteinSequence();
+                String sequence = m_proteinOverviewCtrl.getProteinSequence();
                 this.m_ptmPeptideAreaCtrl.setProteinSequence(sequence);
                 
 

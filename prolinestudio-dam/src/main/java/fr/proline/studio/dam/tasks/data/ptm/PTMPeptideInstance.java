@@ -69,7 +69,7 @@ public class PTMPeptideInstance {
     return m_peptideInstance;
   }
 
-  public List<PTMSite> getSites() {
+  public List<PTMSite> getPTMSites() {
     return m_sites;
   }
    
@@ -83,19 +83,17 @@ public class PTMPeptideInstance {
 
   // !! VDS FIXME Add better solution to get Info ==> lazy data upload !!!
   public DPeptideMatch getBestPepMatch() {
-    DPeptideMatch pepMatch = getPeptideInstance().getBestPeptideMatch();
-    if (pepMatch == null) {
-        //m_logger.warn("--- PTMPeptide (Xic) table: UNABLE to get peptide match associated to peptide instance "+getPeptideInstance().toString());
-        //Try using ptmSite PTMSitePeptideInstance
-        Iterator<PTMSite> siteIT = getSites().iterator();
-        while (siteIT.hasNext()) {
-            PTMSite nextSite = siteIT.next();
-            PTMSitePeptideInstance ptmSitePepInst = nextSite.getPTMSitePeptideInstance(getPeptideInstance().getPeptideId());
-            if (ptmSitePepInst != null) {
-                pepMatch = ptmSitePepInst.getBestProbabilityPepMatch();
-                break;
-            }
-        }
+    DPeptideMatch pepMatch = null;
+    //m_logger.warn("--- PTMPeptide (Xic) table: UNABLE to get peptide match associated to peptide instance "+getPeptideInstance().toString());
+    //Try using ptmSite PTMSitePeptideInstance
+    Iterator<PTMSite> siteIT = getPTMSites().iterator();
+    while (siteIT.hasNext()) {
+      PTMSite nextSite = siteIT.next();
+      PTMSitePeptideInstance ptmSitePepInst = nextSite.getPTMSitePeptideInstance(getPeptideInstance().getPeptideId());
+      if (ptmSitePepInst != null) {
+        pepMatch = ptmSitePepInst.getBestProbabilityPepMatch();
+        break;
+      }
     }
     return pepMatch;
   }

@@ -114,7 +114,7 @@ public class PTMPeptidesGraphicModel {
         DProteinMatch pm = null;
         boolean onlyProtNTermPTMWithOutMExist = true;
         final Map<Integer, List<PTMSite>> ptmSiteByProteinPos = new HashMap<>();
-        Iterator<PTMSite> allSites = m_ptmPeptidesInstances.stream().flatMap(pi -> pi.getSites().stream()).collect(Collectors.toSet()).iterator();
+        Iterator<PTMSite> allSites = m_ptmPeptidesInstances.stream().flatMap(pi -> pi.getPTMSites().stream()).collect(Collectors.toSet()).iterator();
         while (allSites.hasNext()) {
             PTMSite nextPTMSite = allSites.next();
             if (pm == null) {

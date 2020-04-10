@@ -84,7 +84,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     // Dynamic columns list 1 : PTM Probability related
     private static final String COLTYPE_SITE_PROBA_SUFFIX = "Probability";
     private static final String COLTYPE_SITE_PROBA_TOOLTIP = "Probability of the specific site for this peptide";
-    private int m_ptmSiteCount;
+    private int m_ptmSiteCount = 0;
     
     // Dynamic columns list 2 : quantitation related
     public static final int DYNAMIC_COLTYPE_SELECTION_LEVEL = 0;
@@ -100,8 +100,10 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     private static final String[] m_toolTipQC = {"Selection level", "Identification peptides match count", "Peptides match count", "Raw abundance", "Abundance", "Retention time"};
 
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
+    private List<Integer> m_columnsIdsToHide = new ArrayList<>();
 
     private List<PTMPeptideInstance> m_ptmPepInstances = new ArrayList<>();
+
     static class Row {
         PTMPeptideInstance ptmPeptideInstance;
         DPeptideMatch peptideMatch;
@@ -122,8 +124,6 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     private String m_modelName;
     private boolean m_showPeptideMatches = false;
 
-    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-    
    /*
     * @param table : associated LazyTable
     * @param isXicResult : specify if quantitation data exist and should be displayed
@@ -140,7 +140,6 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
      *
      * @param taskId : Id of the task which should load data in background if necessary
      * @param ptmPeptides : List of the PTMPeptideInstance to display 
-     * @param Map<Long, DMasterQuantPeptide> quantPeptidesByPepInsId : DMasterQuantPeptide associated to PTMPeptideInstance to get Quant info for.
      * May be null if TableModel was not initialized with isXicResult = true.
      */
     public void setData(Long taskId, List<PTMPeptideInstance> ptmPeptides, Map<Long, DMasterQuantPeptide> quantPeptidesByPepInsId) {       
@@ -168,7 +167,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
         m_ptmPepInstances = ptmPeptides != null ? ptmPeptides : new ArrayList<>();
         m_ptmPepInstancesAsRow = new ArrayList<>();        
         m_ptmPepInstances.forEach(ptmPI -> {
-            DProteinMatch protMatchOfInterest = ptmPI.getSites().size() >0 ? ptmPI.getSites().get(0).getProteinMatch() : null ;
+            DProteinMatch protMatchOfInterest = ptmPI.getPTMSites().size() >0 ? ptmPI.getPTMSites().get(0).getProteinMatch() : null ;
             //Create PeptideMatch List to display according to m_showPeptideMatches
             List<DPeptideMatch> pepMatches = new ArrayList<>();
             if(m_showPeptideMatches){
@@ -177,7 +176,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
                 pepMatches.add(ptmPI.getBestPepMatch());
             }
             
-            ptmPI.getSites().forEach(site -> { 
+            ptmPI.getPTMSites().forEach(site -> {
                 // For each PTMSite of each peptide instance : 
                 // - get PTMSite display name
                 String colName = site.toProteinReadablePtmString();
@@ -208,26 +207,25 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
         m_ptmSiteCount = m_pepMatchProbaByIdByPTMSite.size();
         setDefaultColumnToHide();
         m_rendererMap.clear();
-        fireTableStructureChanged();                    
+        fireTableStructureChanged();
         fireTableDataChanged();
     }
     
-    private List<Integer> columnsIdsToHide = new ArrayList<>();
     private void setDefaultColumnToHide(){
-         columnsIdsToHide = new ArrayList();
-         columnsIdsToHide.add(COLTYPE_PEPTIDE_ID); 
+         m_columnsIdsToHide = new ArrayList();
+         m_columnsIdsToHide.add(COLTYPE_PEPTIDE_ID);
          int startQChColIndex = m_columnNames.length+m_ptmSiteCount;
          if (m_isXicResult){
             QuantChannelInfo qcInfo = (QuantChannelInfo)getSingleValue(QuantChannelInfo.class);            
             for (int i = qcInfo.getQuantChannels().length - 1; i >= 0; i--) {
-                columnsIdsToHide.add(startQChColIndex + DYNAMIC_COLTYPE_RAW_ABUNDANCE + (i * m_columnNamesQC.length));
-                columnsIdsToHide.add(startQChColIndex + DYNAMIC_COLTYPE_SELECTION_LEVEL + (i * m_columnNamesQC.length));                 
+                m_columnsIdsToHide.add(startQChColIndex + DYNAMIC_COLTYPE_RAW_ABUNDANCE + (i * m_columnNamesQC.length));
+                m_columnsIdsToHide.add(startQChColIndex + DYNAMIC_COLTYPE_SELECTION_LEVEL + (i * m_columnNamesQC.length));
             }
          }
     }
     
     public List<Integer> getDefaultColumnsToHide() {       
-        return columnsIdsToHide;
+        return m_columnsIdsToHide;
     }
         
     public void dataUpdated() {
@@ -291,6 +289,10 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
         return m_columnNames.length+m_ptmSiteCount+m_quantChannelCount*m_columnNamesQC.length;
     }
 
+    public int getPtmSitesColumnCount() {
+        return m_ptmSiteCount;
+    }
+
     @Override
     public String getColumnName(int col) {
         if(col <= LAST_STATIC_COLUMN) {
@@ -339,23 +341,6 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
                 return (pepMatch==null) ? Float.valueOf(0) : pepMatch.getScore();                        
             }                    
             case COLTYPE_PEPTIDE_PTM: {
-//                LazyData lazyData = getLazyData(rowIndex, columnIndex);
-//                if(pepMatch == null) {
-//                    lazyData.setData(null);
-//                    givePriorityTo(m_taskId, rowIndex, columnIndex);                    
-//                } else {                    
-//                    boolean ptmStringLoaded = pepMatch.getPeptide().getTransientData().isPeptideReadablePtmStringLoaded();
-//                    if (!ptmStringLoaded) {
-//                        return null;
-//                    }
-//                    String ptm = "";
-//                    PeptideReadablePtmString ptmString = pepMatch.getPeptide().getTransientData().getPeptideReadablePtmString();
-//                    if (ptmString != null) {
-//                        ptm = ptmString.getReadablePtmString();
-//                    }
-//                    lazyData.setData(ptm);            
-//                }
-//                return lazyData;
                 if(pepMatch == null)
                     return "UNKNOWN";
                 String ptm = "";
@@ -366,19 +351,6 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
                 return ptm;  
             }
             case COLTYPE_DELTA_MASS_PTM: {
-//                LazyData lazyData = getLazyData(rowIndex, columnIndex);
-//                if(pepMatch == null){
-//                    lazyData.setData(null);
-//                    givePriorityTo(m_taskId, rowIndex, columnIndex);
-//                } else {
-//                    double deltaMass = 0;
-//                    for (DPeptidePTM peptidePTM : pepMatch.getPeptidePTMArray()) {
-//                        DInfoPTM pepInfoPtm = DInfoPTM.getInfoPTMMap().get(peptidePTM.getIdPtmSpecificity());
-//                        deltaMass += pepInfoPtm.getMonoMass();
-//                    }
-//                    lazyData.setData(deltaMass);
-//                }
-//                return lazyData;
                 double deltaMass = 0;
                  if(pepMatch == null)
                     return deltaMass;
@@ -399,18 +371,6 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
                 }
                 return Float.valueOf(0);
                 
-//                LazyData lazyData = getLazyData(rowIndex, columnIndex);
-//                if(pepMatch == null){
-//                    lazyData.setData(null);
-//                    givePriorityTo(m_taskId, rowIndex, columnIndex); 
-//                } else {                   
-//                    DPtmSiteProperties properties = pepMatch.getPtmSiteProperties();
-//                    if (properties != null) {
-//                        lazyData.setData(properties.getMascotDeltaScore() * 100);
-//                    } else 
-//                        lazyData.setData(null);
-//                }
-//                return lazyData;
             }
             case COLTYPE_SPECTRUM_TITLE: {
                 return (pepMatch==null) ?  "UNKNOWN" : pepMatch.getMsQuery().getDSpectrum().getTitle();    
@@ -432,6 +392,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
                         lazyData.setData(null);
                         givePriorityTo(m_taskId, rowIndex, columnIndex);
                     } else {
+
                         int dynQchIndex = columnIndex - (m_columnNames.length+m_ptmSiteCount);
                         int nbQc = dynQchIndex / m_columnNamesQC.length;
                         int id = dynQchIndex - (nbQc * m_columnNamesQC.length);                        
@@ -594,12 +555,11 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
                         }
                         case DYNAMIC_COLTYPE_ABUNDANCE:
                         case DYNAMIC_COLTYPE_RAW_ABUNDANCE:{
-                            renderer =  new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);                        
-                                    //new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Float.class));            
+                            renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
                             break;
                         }
                         case DYNAMIC_COLTYPE_RETENTION_TIME:{
-                            renderer =   new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
+                            renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
                             break;
                         }
 

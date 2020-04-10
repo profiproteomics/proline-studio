@@ -70,12 +70,12 @@ public class PTMPeptidesGraphicView extends JPanel {
         repaint();
     }
 
-    public void setViewPosition(int sequencePositon) {
-        int selectedIndex = m_dataModel.getPeptideIndex(sequencePositon);
+    public void setViewPosition(int sequencePosition) {
+        int selectedIndex = m_dataModel.getPeptideIndex(sequencePosition);
         if (selectedIndex == -1) {
-            this.m_internalPanel.setHorizonScrollLocation(sequencePositon);
+            this.m_internalPanel.setHorizonScrollLocation(sequencePosition);
         } else {
-            this.m_internalPanel.setViewPosition(sequencePositon, selectedIndex);
+            this.m_internalPanel.setViewPosition(sequencePosition, selectedIndex);
         }
         repaint();
     }
@@ -85,10 +85,10 @@ public class PTMPeptidesGraphicView extends JPanel {
         this.m_internalPanel.updateData();
     }
 
-    public PTMPeptidesGraphicView(boolean isClusterData) {
+    public PTMPeptidesGraphicView(boolean showClustersData) {
         super();
         m_superCtrl = null;
-        m_internalPanel = new PTMPeptidesGraphicPanel(isClusterData);
+        m_internalPanel = new PTMPeptidesGraphicPanel(showClustersData);
         m_dataModel = new PTMPeptidesGraphicModel();
         m_internalPanel.setModel(m_dataModel);
         initComponents();
@@ -175,7 +175,7 @@ public class PTMPeptidesGraphicView extends JPanel {
         private boolean m_isDataNull;//when precedent databox change order or filter, we can have non selected row, in this case, nothing to show
         PeptideAreaCtrl m_peptideAreaCtrl;
 
-        public PTMPeptidesGraphicPanel(boolean isClusterData) {
+        public PTMPeptidesGraphicPanel(boolean showClusterData) {
             super();
             m_peptideAreaCtrl = new PeptideAreaCtrl();
             PTMMarkCtrl ctrlMark = new PTMMarkCtrl();
@@ -183,7 +183,7 @@ public class PTMPeptidesGraphicView extends JPanel {
 
             m_titlePane = new TitlePane(ctrlMark, ctrlSequence);
             m_peptidesPane = new PeptidePane();
-            if (isClusterData) {
+            if (showClusterData) {
                 m_peptidesNumberPane = new ColoredClusterMarkPane();
             } else {
                 m_peptidesNumberPane = new PeptideNumberPane();
@@ -521,24 +521,23 @@ public class PTMPeptidesGraphicView extends JPanel {
                 public void mouseMoved(MouseEvent e) {
                     int x = e.getX();
                     int y = e.getY();
-                    String tips = null;
+                    StringBuilder tips = new StringBuilder();
                     int index = (int) ((y - m_y0) / (ViewSetting.HEIGHT_AA * 1.5));
                     if (index >= 0 && index < m_dataModel.getRowCount()) {
                         PTMPeptideInstance pep = m_dataModel.getPeptideAt(index);
                         if (pep != null) {
                             List<PTMCluster> clusters = pep.getClusters();
                             int size = clusters.size();
-                            tips = GlobalValues.HTML_TAG_BEGIN + "<body>Clusters: ";
+                            tips.append(GlobalValues.HTML_TAG_BEGIN).append("<body>Clusters: ");
                             for (int j = 0; j < size; j++) {
                                 PTMCluster cluster = clusters.get(j);
                                 String htmlColor = CyclicColorPalette.getHTMLColoredBlock(getColor(cluster));
-                                tips += htmlColor + getColorId(cluster);
+                                tips.append(htmlColor).append(PTM_CLUSTER_ID.get(cluster)).append(' ');
                             }
-                            tips += "</body>" + GlobalValues.HTML_TAG_END;
-
+                            tips.append("</body>").append(GlobalValues.HTML_TAG_END);
                         }
                     }
-                    setToolTipText(tips);
+                    setToolTipText(tips.toString());
                 }
 
                 @Override
@@ -558,17 +557,13 @@ public class PTMPeptidesGraphicView extends JPanel {
                     int rgb = co.getRGB() | 0xFF000000;
                     c = new Color(rgb & 0x00FFFFFF);
                     PTM_CLUSTER_COLORS.put(cluster, c);
-                    int num = ('A') + PTM_CLUSTER_COLORS.size() - 1;
-                    String s = String.valueOf((char) num);
+                    //int num = ('A') + PTM_CLUSTER_COLORS.size() - 1;
+                    //String s = String.valueOf((char) num);
+                    String s = String.valueOf(cluster.getId());
                     PTM_CLUSTER_ID.put(cluster, s);// give it a color id, A,B, C...
 
                 }
                 return c;
-            }
-
-            public String getColorId(PTMCluster cluster) {
-                return PTM_CLUSTER_ID.get(cluster);
-
             }
 
             public void setBeginPoint(int x, int y) {
@@ -616,7 +611,7 @@ public class PTMPeptidesGraphicView extends JPanel {
                                 g2.setColor(getColor(cluster));
                                 g2.fillRect(xi0, y0, colorWidth, ViewSetting.WIDTH_AA);
                             }
-                            colorId = getColorId(clusters.get(0));//only the first
+                            colorId = PTM_CLUSTER_ID.get(clusters.get(0));//only the first
                         }
 
                         stringWidth = f.stringWidth(colorId);

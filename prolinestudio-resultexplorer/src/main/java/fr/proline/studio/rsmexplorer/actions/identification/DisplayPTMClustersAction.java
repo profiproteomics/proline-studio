@@ -48,10 +48,8 @@ public class DisplayPTMClustersAction  extends AbstractRSMAction {
         int nbNodes = selectedNodes.length;
         for (int i = 0; i < nbNodes; i++) {
             DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
-
             actionImpl(dataSetNode);
         }
-
     }
     
     private void actionImpl(DataSetNode dataSetNode) {

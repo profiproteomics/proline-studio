@@ -91,7 +91,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
     private final static int FILL_ALL_PTM_SITES_PEPINFO = 1;
     private final static int FILL_ALL_PTM_INFO = 2;
 
-    private boolean m_sitesAsClusters;
+    private boolean m_loadSitesAsClusters;
 
     public DatabasePTMsTask(AbstractDatabaseCallback callback) {
         super(callback);
@@ -111,13 +111,13 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         m_action = FILL_ALL_PTM_SITES_PEPINFO;
     }
 
-    public void initLoadPTMDataset(Long projectId, DDataset dataset, List<PTMDataset> ptmDataset, boolean sitesAsClusters) {
+    public void initLoadPTMDataset(Long projectId, DDataset dataset, List<PTMDataset> ptmDataset, boolean loadSitesAsClusters) {
         init(SUB_TASK_COUNT, new TaskInfo("Load PTM Dataset for " + dataset.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
         m_ptmDatasetOutput = ptmDataset;
         m_dataset = dataset;
         m_action = LOAD_PTMDATASET;
-        m_sitesAsClusters = sitesAsClusters;
+        m_loadSitesAsClusters = loadSitesAsClusters;
     }
 
     @Override
@@ -254,7 +254,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
             for (Long i : jsonDS.ptmIds) {
                 m_ptmDataset.addInfoPTM(DInfoPTM.getInfoPTMMap().get(i));
             }
-            if (!m_sitesAsClusters) {
+            if (!m_loadSitesAsClusters) {
                 //** Read and create PTMCluster
                 createPTMDatasetPTMCluster(jsonDS, entityManagerMSI);
             } else {
@@ -369,7 +369,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         m_ptmClustersByBestPepMatchId = new HashMap<>();
         for (JSONPTMCluster cluster : jsonDataset.ptmClusters) {
             PTMCluster ptmCluster = new PTMCluster(cluster, m_ptmDataset);
-            if (ptmCluster.getClusteredSites() == null || ptmCluster.getClusteredSites().isEmpty()) {
+            if (ptmCluster.getPTMSites() == null || ptmCluster.getPTMSites().isEmpty()) {
                 continue;
             }
             Long bestPepMatchID = cluster.bestPeptideMatchId;
@@ -403,8 +403,8 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         List<PTMCluster> allClusters = new ArrayList<>();
         m_ptmClustersByBestPepMatchId = new HashMap<>();
         for (PTMSite site: m_ptmDataset.getPTMSites()) {
-            PTMCluster ptmCluster = new PTMCluster(Arrays.asList(site.getid()), site.getPeptideIds() , m_ptmDataset);
-            if (ptmCluster.getClusteredSites() == null || ptmCluster.getClusteredSites().isEmpty()) {
+            PTMCluster ptmCluster = new PTMCluster(site.getId(), Arrays.asList(site.getId()), site.getPeptideIds() , m_ptmDataset);
+            if (ptmCluster.getPTMSites() == null || ptmCluster.getPTMSites().isEmpty()) {
                 continue;
             }
             Long bestPepMatchID = site.getBestProbabilityPepMatchId();
@@ -536,7 +536,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
                 List<PTMSite> sites = m_ptmSitesByBestPepMatchId.get(pmId);
                 if (sites != null && !sites.isEmpty()) {
                     sites.stream().forEach(site -> {
-                        PTMSite finalSite = m_ptmDataset.getPTMSite(site.getid());
+                        PTMSite finalSite = m_ptmDataset.getPTMSite(site.getId());
                         if (finalSite != null) {
                             finalSite.setBestProbabilityPepMatch(pm);
                         }

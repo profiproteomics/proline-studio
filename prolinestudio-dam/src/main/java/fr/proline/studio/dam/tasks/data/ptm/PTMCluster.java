@@ -21,13 +21,8 @@ import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,10 +35,14 @@ import org.slf4j.LoggerFactory;
  */
 public class PTMCluster implements Comparable<PTMCluster>{
     
-      private final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ptm");
+    private final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ptm");
 
     private final List<PTMSite> m_sites;
     private final List<Long> m_peptideIds;
+    private final Long m_id;
+
+    private List<Integer> m_positionsOnProtein;
+    private List<Float> m_probabilities;
 
     private DProteinMatch m_proteinMatch;    
     private DMasterQuantProteinSet m_masterQuantProteinSet;
@@ -54,16 +53,16 @@ public class PTMCluster implements Comparable<PTMCluster>{
     private List<DPeptideInstance> m_parentPeptideInstances;
 
     private final PTMDataset m_ptmDataset;
-    private Object m_expressionValue;
 
     public PTMCluster(JSONPTMCluster jsonValue, PTMDataset ptmds) {
-        this(Arrays.asList(jsonValue.ptmSiteLocations), Arrays.asList(jsonValue.peptideIds), ptmds);
+        this(jsonValue.id, Arrays.asList(jsonValue.ptmSiteLocations), Arrays.asList(jsonValue.peptideIds), ptmds);
     }
 
-    public PTMCluster(List<Long> ptmSiteIds, List<Long> peptideIds, PTMDataset ptmds) {
+    public PTMCluster(Long id, List<Long> ptmSiteIds, List<Long> peptideIds, PTMDataset ptmds) {
         m_ptmDataset = ptmds;
         m_peptideIds = peptideIds;
-        m_sites = m_ptmDataset.getPTMSites().stream().filter(site -> ptmSiteIds.contains(site.getid())).collect(Collectors.toList());
+        m_sites = m_ptmDataset.getPTMSites().stream().filter(site -> ptmSiteIds.contains(site.getId())).sorted(Comparator.comparing(PTMSite::getPositionOnProtein)).collect(Collectors.toList());
+        m_id = id;
 
         if(!m_sites.isEmpty()) {
             //Get ProteinMatch from one of the PTMSite : all should have same. VDS TODO To test ?
@@ -71,6 +70,10 @@ public class PTMCluster implements Comparable<PTMCluster>{
             m_masterQuantProteinSet = m_sites.get(0).getMasterQuantProteinSet();
         }
 
+    }
+
+    public Long getId() {
+        return m_id;
     }
 
     public DProteinMatch getProteinMatch(){
@@ -175,7 +178,7 @@ public class PTMCluster implements Comparable<PTMCluster>{
                             finalLeafPtmPepI.setStartPosition(associatedParentPTMPepInst.getStartPosition());
                             finalLeafPtmPepI.addCluster(this);
                             final PTMPeptideInstance leafPtmPepI = finalLeafPtmPepI;
-                            associatedParentPTMPepInst.getSites().forEach(parentSite -> leafPtmPepI.addPTMSite(parentSite) );
+                            associatedParentPTMPepInst.getPTMSites().forEach(parentSite -> leafPtmPepI.addPTMSite(parentSite) );
                             m_leafPTMPeptideInstances.add(finalLeafPtmPepI); 
                             m_ptmDataset.addLeafPTMPeptideInstance(leafPtmPepI, m_proteinMatch.getId());
                         } else {
@@ -190,7 +193,21 @@ public class PTMCluster implements Comparable<PTMCluster>{
         return m_leafPTMPeptideInstances;
     }
 
-    public List<PTMSite> getClusteredSites(){
+    public List<Integer> getPositionsOnProtein() {
+        if (m_positionsOnProtein == null) {
+            m_positionsOnProtein =  m_sites.stream().map(s -> s.getPositionOnProtein()).collect(ComparableList::new, ComparableList::add, ComparableList::addAll);
+        }
+        return m_positionsOnProtein;
+    }
+
+    public List<Float> getSiteConfidences() {
+        if (m_probabilities == null) {
+            m_probabilities = m_sites.stream().map(s -> s.getLocalisationConfidence()*100).collect(ComparableList::new, ComparableList::add, ComparableList::addAll);
+        }
+        return m_probabilities;
+    }
+
+    public List<PTMSite> getPTMSites(){
         return m_sites;
     }
     
@@ -206,14 +223,6 @@ public class PTMCluster implements Comparable<PTMCluster>{
         return m_masterQuantProteinSet;
     }
    
-    public void setExpressionValue(Object value) {
-        m_expressionValue =  value;
-    }
-
-    public Object getExpressionValue() {
-      return m_expressionValue;
-    }
-
     @Override
     public int compareTo(PTMCluster o) {                                 
         if(o == null)

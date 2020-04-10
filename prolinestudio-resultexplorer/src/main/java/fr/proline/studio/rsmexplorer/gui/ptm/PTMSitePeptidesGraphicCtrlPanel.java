@@ -22,7 +22,6 @@ import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.rsmexplorer.gui.PeptidesPTMSitePanelInterface;
 import fr.proline.studio.rsmexplorer.gui.ptm.mark.PTMMarkCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.pep.PeptideAreaCtrl;
 import fr.proline.studio.rsmexplorer.gui.ptm.mark.ProteinSequence;
@@ -37,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Karine XUE
  */
-public class PTMSitePeptidesGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface, SplittedPanelContainer.UserActions, PeptidesPTMSitePanelInterface {
+public class PTMSitePeptidesGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface, SplittedPanelContainer.UserActions {
 
     private static Logger logger = LoggerFactory.getLogger(PTMSitePeptidesGraphicCtrlPanel.class);
     protected PTMSitePeptidesGraphicDataMgr m_dataMgr;
@@ -88,7 +87,6 @@ public class PTMSitePeptidesGraphicCtrlPanel extends JPanel implements DataBoxPa
         return toolbar;
     }
 
-    @Override
     public void setData(PTMSite peptidesPTMSite, DPeptideInstance pepInst) {
         //logger.debug(this.getClass().getName() + " setData ->");
         if (peptidesPTMSite == null) {
@@ -119,29 +117,8 @@ public class PTMSitePeptidesGraphicCtrlPanel extends JPanel implements DataBoxPa
         this.repaint();
     }
 
-    public PTMSite getSelectedPTMSite() {
-        return this.m_currentPTMSite;
-    }
-
     /**
-     * used to set next Data Box
-     */
-    @Override
-    public DPeptideInstance getSelectedPeptideInstance() {
-        int selectedRowIndex = this.m_paintArea.getSelectedPeptideIndex();
-        //logger.debug("getSelectedPeptideInstance selectRowIndex: " + selectedRowIndex);
-        return this.m_dataMgr.getSelectedDPeptideInstance(selectedRowIndex);
-    }
-
-    @Override
-    public void setSelectedPeptide(DPeptideInstance pep) {
-        int row = this.m_dataMgr.getPeptideIndex(pep);
-        this.m_paintArea.setSelectedPeptideIndex(row);
-        repaint();
-    }
-
-    /**
-     * when selected petptied change, change next databox and table selected row
+     * when selected peptide change, change next databox and table selected row
      */
     protected void valueChanged() {
         m_dataBox.propagateDataChanged(PTMSite.class);

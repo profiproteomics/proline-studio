@@ -71,7 +71,7 @@ public class PeptideAreaModel {
         m_viewPeptideList = new ArrayList<>();
         boolean onlyProtNtermWO_M = true;
         //Identify if PTMPeptideInstance are all Protein NTerm peptide with missing 'M'
-        List<PTMSite> allSites = pPeptide.stream().flatMap(pi -> pi.getSites().stream()).collect(Collectors.toList());
+        List<PTMSite> allSites = pPeptide.stream().flatMap(pi -> pi.getPTMSites().stream()).collect(Collectors.toList());
         for(PTMSite site : allSites) {           
             onlyProtNtermWO_M = onlyProtNtermWO_M && site.isProteinNTermWithOutM();
         }

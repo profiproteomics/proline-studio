@@ -24,7 +24,9 @@ public class JSONPTMCluster {
     //
     // Variables defined in Proline OM that will be read out from the database
     //@todo : try to make them private instead of public
-    
+
+    public Long id;
+
     // Array of PTM site locations Ids
     public Long[] ptmSiteLocations;
     

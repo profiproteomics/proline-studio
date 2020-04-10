@@ -48,10 +48,7 @@ import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import javax.swing.table.TableCellRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -282,7 +279,7 @@ public class ProteinPTMSiteTableModel extends LazyTableModel implements GlobalTa
     m_taskId = taskId;
     m_modificationInfo = "";
     if(proteinPTMSiteArray!=null && !proteinPTMSiteArray.isEmpty()){
-        m_modificationInfo = ProteinPTMSiteTableModelProcessing.calculateDataWORedundance(this, m_modificationsArray, m_residuesArray, m_residuesMap, proteinPTMSiteArray, m_modificationsMap);
+        m_modificationInfo = calculateDataWORedundance(this, m_modificationsArray, m_residuesArray, m_residuesMap, proteinPTMSiteArray, m_modificationsMap);
         m_ptmDataset = proteinPTMSiteArray.get(0).getPTMdataset();
     }
     fireTableDataChanged();
@@ -543,6 +540,71 @@ public class ProteinPTMSiteTableModel extends LazyTableModel implements GlobalTa
   @Override
   public Object getColValue(Class c, int col) {
     return null;
+  }
+
+  public static String calculateDataWORedundance(ProteinPTMSiteTableModel model, ArrayList<String> modificationsArray, ArrayList<Character> residuesArray, HashMap<Character, Integer> residuesMap, List<PTMSite> proteinPTMSiteArray, HashMap<String, Integer> modificationsMap) {
+
+    int nbRows = model.getRowCount();
+
+    // List of different modifications and residues
+    TreeSet<String> modificationTreeSet = new TreeSet<>();
+    TreeSet<Character> residueTreeSet = new TreeSet<>();
+
+    for (int i = 0; i < nbRows; i++) {
+      String modification = (String) model.getValueAt(i, ProteinPTMSiteTableModel.COLTYPE_MODIFICATION);
+      modificationTreeSet.add(modification);
+
+      Character residue = (Character) model.getValueAt(i, ProteinPTMSiteTableModel.COLTYPE_RESIDUE_AA);
+      if (residue != null) {
+        residueTreeSet.add(residue);
+      }
+    }
+
+    modificationsArray.addAll(modificationTreeSet);
+
+    for (int i = 0; i < modificationsArray.size(); i++) {
+      modificationsMap.put(modificationsArray.get(i), i);
+    }
+
+    // List of different residues
+    residuesArray.addAll(residueTreeSet);
+    for (int i = 0; i < residuesArray.size(); i++) {
+      residuesMap.put(residuesArray.get(i), i);
+    }
+
+    // Count for each type of modification, the number of modifications
+    HashMap<String, Integer> globalDistinctModificationsMap = getModificationCount(model, proteinPTMSiteArray);
+
+    StringBuilder sb = new StringBuilder();
+    Iterator<String> it = globalDistinctModificationsMap.keySet().iterator();
+    while (it.hasNext()) {
+      String modification = it.next();
+      Integer nbModifications = globalDistinctModificationsMap.get(modification);
+      sb.append(modification).append(":").append(nbModifications);
+      if (it.hasNext()) {
+        sb.append("   ");
+      }
+    }
+
+    return sb.toString();
+
+  }
+
+  private static HashMap<String, Integer> getModificationCount(ProteinPTMSiteTableModel model, List<PTMSite> proteinPTMSiteArray) {
+
+    int rowCount = proteinPTMSiteArray.size();
+    HashMap<String, Integer> globalDistinctModificationsMap = new HashMap<>();
+
+    for (int i = 0; i < rowCount; i++) {
+      String modification = (String) model.getValueAt(i, ProteinPTMSiteTableModel.COLTYPE_MODIFICATION);
+      Integer nb = globalDistinctModificationsMap.get(modification);
+      if (nb == null) {
+        globalDistinctModificationsMap.put(modification, 1);
+      } else {
+        globalDistinctModificationsMap.put(modification, nb + 1);
+      }
+    }
+    return globalDistinctModificationsMap;
   }
 
 }

@@ -38,7 +38,7 @@ public class AxisTicks {
     private boolean m_isInteger;
     private boolean m_isEnum;
     
-    public AxisTicks(double min, double max, int maxTicks, boolean log, boolean isInteger, boolean isEnum) {
+    public AxisTicks(double min, double max, int maxTicks, boolean log, double logMinValue, boolean isInteger, boolean isEnum) {
         if (maxTicks <=1) {
             m_maxTicks = 2;
         } else {
@@ -49,8 +49,8 @@ public class AxisTicks {
         m_isEnum = isEnum;
         
         if (log) {
-            m_min = Math.log10(min);
-            m_max = Math.log10(max);
+            m_min = Math.log10(min<=logMinValue ? logMinValue : min);
+            m_max = Math.log10(max<=logMinValue ? (logMinValue*10) : max); // max must be greater than min
         } else {
             m_min = min;
             m_max = max;

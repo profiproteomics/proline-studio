@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.graphics;
 
+import static fr.proline.studio.graphics.Axis.LOG_MIN_VALUE;
 import fr.proline.studio.graphics.cursor.AbstractCursor;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
@@ -213,7 +214,7 @@ public class XAxis extends Axis {
         }
 
         int maxTicks = m_width / 30;
-        m_ticks = new AxisTicks(m_minValue, m_maxValue, maxTicks, m_log, m_isInteger, m_isEnum);
+        m_ticks = new AxisTicks(m_minValue, m_maxValue, maxTicks, m_log, LOG_MIN_VALUE, m_isInteger, m_isEnum);
         m_minTick = m_ticks.getTickMin();
         m_maxTick = m_ticks.getTickMax();
         m_tickSpacing = m_ticks.getTickSpacing();
@@ -486,16 +487,15 @@ public class XAxis extends Axis {
             int stringWidth = m_valuesFontMetrics.stringWidth(s);
 
             int posX = pX - stringWidth / 2;
-            if (posX > previousEndX + 2) { // check to avoid to overlap labels
+            int delta = pX-valueToPixel(Math.pow(10.0,x)); // used to check that tick is inside the visible area
+            if ((posX > previousEndX + 2) && (delta == 0)) { // check to avoid to overlap labels
                 g.drawString(s, posX, m_y + height + 4 + BasePlotPanel.GAP_AXIS_LINE);
                 previousEndX = posX + stringWidth;
             }
 
             x += m_tickSpacing;
             pX = valueToPixel(Math.pow(10, x));
-            if (pX > pixelStop) {
-                break;
-            }
+
 
             if (m_selected) {
                 g.setColor(Color.white);
@@ -507,7 +507,13 @@ public class XAxis extends Axis {
             for (int i = 2; i <= 9; i++) {
                 double xMinTick = Math.pow(10, x) * (((double) i) * 0.1d);
                 int pMinTick = valueToPixel(xMinTick);
-                g.drawLine(pMinTick, m_y + BasePlotPanel.GAP_AXIS_LINE, pMinTick, m_y + 4 + BasePlotPanel.GAP_AXIS_LINE);
+                if ((pMinTick<=pixelStop) && (pMinTick>=pixelStart)) {
+                    g.drawLine(pMinTick, m_y + BasePlotPanel.GAP_AXIS_LINE, pMinTick, m_y + 4 + BasePlotPanel.GAP_AXIS_LINE);
+                }
+            }
+            
+            if (pX > pixelStop) {
+                break;
             }
 
         }
@@ -600,10 +606,9 @@ public class XAxis extends Axis {
         }
         v = (Double.valueOf(v).isNaN()) ? 0 : v;
         if (m_log) {
-            double logV;
-            logV = (v == 0) ? 0 : Math.log10(v);
-            double min = Math.log10(m_minValue);
-            double max = Math.log10(m_maxValue);
+            double logV = ((v <= LOG_MIN_VALUE) || Double.isNaN(v)) ? Math.log10(LOG_MIN_VALUE) : Math.log10(v);
+            double min = Math.log10(m_minValue <= LOG_MIN_VALUE ? LOG_MIN_VALUE : m_minValue);
+            double max = Math.log10(m_maxValue <= LOG_MIN_VALUE ? LOG_MIN_VALUE*10 : m_maxValue);
             return m_x + (int) Math.round(((logV - min) / (max - min)) * m_width);                          
         } else {
             return m_x + (int) Math.round(((v - m_minValue) / (m_maxValue - m_minValue)) * m_width);
@@ -616,8 +621,8 @@ public class XAxis extends Axis {
             return pixel;
         }
         if (m_log) {
-            double min = Math.log10(m_minValue);
-            double max = Math.log10(m_maxValue);
+            double min = Math.log10(m_minValue <= LOG_MIN_VALUE ? LOG_MIN_VALUE : m_minValue);
+            double max = Math.log10(m_maxValue <= LOG_MIN_VALUE ? LOG_MIN_VALUE*10 : m_maxValue);
             double v = min + ((((double) pixel) - m_x) / ((double) m_width)) * (max - min);
             v = Math.pow(10, v);
             return v;
@@ -630,9 +635,19 @@ public class XAxis extends Axis {
     
     @Override
     public double deltaPixelToDeltaValue(int deltaPixel) {
-        double value1 = pixelToValue(m_width/2);
-        double value2 = pixelToValue(m_width/2+deltaPixel);
-        return value2-value1;
+        double value1 = pixelToValue(m_width / 2);
+        double value2 = pixelToValue(m_width / 2 + deltaPixel);
+        return value2 - value1;
+    }
+    
+    public double deltaPixelToLogMultValue(int deltaPixel) {
+        double min = Math.log10(m_minValue <= LOG_MIN_VALUE ? LOG_MIN_VALUE : m_minValue);
+        double max = Math.log10(m_maxValue <= LOG_MIN_VALUE ? LOG_MIN_VALUE*10 : m_maxValue);
+        double mult = Math.pow(10, (max - min) * (((double) deltaPixel) / ((double) m_width)));
+        if (Math.pow(10,min) / mult < LOG_MIN_VALUE) {
+            mult = Math.pow(10, min)/LOG_MIN_VALUE;
+        }
+        return mult;
     }
 
 }

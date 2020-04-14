@@ -600,26 +600,39 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
 
         // we let margins
         if (!xAsEnum) {
-            double deltaX = (m_xMax - m_xMin);
-            if (deltaX <= 10e-10) {
-                // no real delta
-                m_xMin = m_xMin - 1;  //JPM.TODO : enhance this
-                m_xMax = m_xMax + 1;
+            
+            boolean logX = m_plotPanel.getXAxis().isLog();
+            if (logX) {
+                m_xMax *= 2;
+                m_xMin /= 2;
             } else {
-                m_xMin = m_xMin - deltaX * 0.01;
-                m_xMax = m_xMax + deltaX * 0.01;
+                double deltaX = (m_xMax - m_xMin);
+                if (deltaX <= 10e-10) {
+                    // no real delta
+                    m_xMin = m_xMin - 1;  //JPM.TODO : enhance this
+                    m_xMax = m_xMax + 1;
+                } else {
+                    m_xMin = m_xMin - deltaX * 0.01;
+                    m_xMax = m_xMax + deltaX * 0.01;
+                }
             }
         }
 
         if (!yAsEnum) {
-            double deltaY = (m_yMax - m_yMin);
-            if (deltaY <= 10e-10) {
-                // no real delta
-                m_yMin = m_yMin - 1;  //JPM.TODO : enhance this
-                m_yMax = m_yMax + 1;
+            boolean logY = m_plotPanel.getYAxis().isLog();
+            if (logY) {
+                m_yMax *= 2;
+                m_yMin /= 2;
             } else {
-                m_yMin = m_yMin - deltaY * 0.01;
-                m_yMax = m_yMax + deltaY * 0.01;
+                double deltaY = (m_yMax - m_yMin);
+                if (deltaY <= 10e-10) {
+                    // no real delta
+                    m_yMin = m_yMin - 1;  //JPM.TODO : enhance this
+                    m_yMax = m_yMax + 1;
+                } else {
+                    m_yMin = m_yMin - deltaY * 0.01;
+                    m_yMax = m_yMax + deltaY * 0.01;
+                }
             }
         }
 

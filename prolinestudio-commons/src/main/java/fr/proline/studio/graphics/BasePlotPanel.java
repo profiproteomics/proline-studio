@@ -615,6 +615,11 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             plot.update(cols, parameterZ);
         }
     }
+    public void updatePlotsForLog() {
+        for (PlotBaseAbstract plot : m_plots) {
+            plot.update();
+        }
+    }
 
     /**
      * from plot list, get the bounds of Axis X and Y,
@@ -1022,12 +1027,22 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             double oldMinY = m_yAxis.getMinValue();
             double oldMaxY = m_yAxis.getMaxValue();
             if (m_panAxisGesture.getPanningAxis() == PanAxisGesture.X_AXIS_PAN) {
-                double delta = m_xAxis.pixelToValue(m_panAxisGesture.getPreviousX()) - m_xAxis.pixelToValue(e.getX());
-                m_xAxis.setRange(m_xAxis.getMinValue() + delta, m_xAxis.getMaxValue() + delta);
+                if (m_xAxis.isLog()) {
+                    double mult = m_xAxis.deltaPixelToLogMultValue(e.getX()-m_panAxisGesture.getPreviousX());
+                    m_xAxis.setRange(m_xAxis.getMinValue()/mult, m_xAxis.getMaxValue()/mult);
+                } else {
+                    double delta = m_xAxis.deltaPixelToDeltaValue(m_panAxisGesture.getPreviousX()-e.getX());
+                    m_xAxis.setRange(m_xAxis.getMinValue() + delta, m_xAxis.getMaxValue() + delta);
+                }
                 fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY, oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue());
             } else {
-                double delta = m_yAxis.pixelToValue(m_panAxisGesture.getPreviousY()) - m_yAxis.pixelToValue(e.getY());
-                m_yAxis.setRange(m_yAxis.getMinValue() + delta, m_yAxis.getMaxValue() + delta);
+                if (m_yAxis.isLog()) {
+                    double mult = m_yAxis.deltaPixelToLogMultValue(m_panAxisGesture.getPreviousY()-e.getY());
+                    m_yAxis.setRange(m_yAxis.getMinValue()/mult, m_yAxis.getMaxValue()/mult);
+                } else {
+                    double delta = m_yAxis.deltaPixelToDeltaValue(m_panAxisGesture.getPreviousY()-e.getY());
+                    m_yAxis.setRange(m_yAxis.getMinValue() + delta, m_yAxis.getMaxValue() + delta);       
+                }
                 fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY, oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue());
             }
             m_panAxisGesture.movePan(e.getX(), e.getY());
@@ -1444,12 +1459,28 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         double oldMaxX = m_xAxis.getMaxValue();
         double oldMinY = m_yAxis.getMinValue();
         double oldMaxY = m_yAxis.getMaxValue();
+
+        if (m_xAxis.isLog()) {
+            double mult = m_xAxis.deltaPixelToLogMultValue(deltaX);
+            m_xAxis.setRange(m_xAxis.getMinValue() / mult, m_xAxis.getMaxValue() / mult);
+        } else {
+            double delta = m_xAxis.deltaPixelToDeltaValue(deltaX);
+            m_xAxis.setRange(m_xAxis.getMinValue() + delta, m_xAxis.getMaxValue() + delta);
+        }
         
-        double deltaValueX = m_xAxis.deltaPixelToDeltaValue(deltaX);
-        m_xAxis.setRange(m_xAxis.getMinValue() - deltaValueX, m_xAxis.getMaxValue() - deltaValueX);
+        if (m_yAxis.isLog()) {
+            double mult = m_yAxis.deltaPixelToLogMultValue(-deltaY);
+            m_yAxis.setRange(m_yAxis.getMinValue() / mult, m_yAxis.getMaxValue() / mult);
+        } else {
+            double delta = m_yAxis.deltaPixelToDeltaValue(-deltaY);
+            m_yAxis.setRange(m_yAxis.getMinValue() + delta, m_yAxis.getMaxValue() + delta);
+        }
         
-        double deltaValueY = m_yAxis.deltaPixelToDeltaValue(deltaY);
-        m_yAxis.setRange(m_yAxis.getMinValue() - deltaValueY, m_yAxis.getMaxValue() - deltaValueY);
+        //double deltaValueX = m_xAxis.deltaPixelToDeltaValue(deltaX);
+        //m_xAxis.setRange(m_xAxis.getMinValue() - deltaValueX, m_xAxis.getMaxValue() - deltaValueX);
+        
+        //double deltaValueY = m_yAxis.deltaPixelToDeltaValue(deltaY);
+        //m_yAxis.setRange(m_yAxis.getMinValue() - deltaValueY, m_yAxis.getMaxValue() - deltaValueY);
         
         fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY, oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue());
     

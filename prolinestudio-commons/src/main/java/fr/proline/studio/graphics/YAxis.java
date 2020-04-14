@@ -83,7 +83,7 @@ public class YAxis extends Axis {
 
         int maxTicks = m_height / 20;
 
-        m_ticks = new AxisTicks(m_minValue, m_maxValue, maxTicks, m_log, m_isInteger, m_isEnum);
+        m_ticks = new AxisTicks(m_minValue, m_maxValue, maxTicks, m_log, LOG_MIN_VALUE, m_isInteger, m_isEnum);
 
         if (m_selected) {
             g.setColor(Color.white);
@@ -358,8 +358,9 @@ public class YAxis extends Axis {
             if (height > m_lastHeight) {
                 m_lastHeight = height;
             }
-
-            if (pY < previousEndY - m_lastHeight - 2) { // check to avoid to overlap labels
+            
+            int delta = pY-valueToPixel(Math.pow(10.0,y)); // used to check that tick is inside the visible area
+            if ((pY < previousEndY - m_lastHeight - 2) && (delta == 0)) { // check to avoid to overlap labels
                 g.drawString(s, m_lineXStart - stringWidth - 6, pY + halfAscent);
                 previousEndY = pY;
             }
@@ -368,9 +369,7 @@ public class YAxis extends Axis {
             y += m_tickSpacing;
             pY = valueToPixel(Math.pow(10, y));
 
-            if (pY < pixelStop) {
-                break;
-            }
+
 
             if (m_selected) {
                 g.setColor(Color.white);
@@ -382,8 +381,13 @@ public class YAxis extends Axis {
             for (int i = 2; i <= 9; i++) {
                 double yMinTick = Math.pow(10, y) * (((double) i) * 0.1d);
                 int pMinTick = valueToPixel(yMinTick);
-                g.drawLine(tickX, pMinTick, tickX - 3, pMinTick);
-
+                if ((pMinTick>=pixelStop) && (pMinTick<=pixelStart)) {
+                    g.drawLine(tickX, pMinTick, tickX - 3, pMinTick);
+                }
+            }
+            
+            if (pY < pixelStop) {
+                break;
             }
 
         }
@@ -474,9 +478,9 @@ public class YAxis extends Axis {
     @Override
     public int valueToPixel(double v) {
         if (m_log) {
-            double logV = ((v == 0) || Double.isNaN(v)) ? 0 : Math.log10(v);
-            double min = Math.log10(m_minValue);
-            double max = Math.log10(m_maxValue);
+            double logV = ((v <= LOG_MIN_VALUE) || Double.isNaN(v)) ? Math.log10(LOG_MIN_VALUE) : Math.log10(v);
+            double min = Math.log10(m_minValue <= LOG_MIN_VALUE ? LOG_MIN_VALUE : m_minValue);
+            double max = Math.log10(m_maxValue <= LOG_MIN_VALUE ? LOG_MIN_VALUE*10 : m_maxValue);
             return (m_y + m_height) - (int) Math.round(((logV - min) / (max - min)) * m_height);
         } else {
             return (m_y + m_height) - (int) Math.round(((v - m_minValue) / (m_maxValue - m_minValue)) * m_height);
@@ -487,8 +491,8 @@ public class YAxis extends Axis {
     public double pixelToValue(int pixel) {
 
         if (m_log) {
-            double min = Math.log10(m_minValue);
-            double max = Math.log10(m_maxValue);
+            double min = Math.log10(m_minValue <= LOG_MIN_VALUE ? LOG_MIN_VALUE : m_minValue);
+            double max = Math.log10(m_maxValue <= LOG_MIN_VALUE ? LOG_MIN_VALUE*10 : m_maxValue);
             double v = min + (((double) ((m_y + m_height) - pixel)) / ((double) m_height)) * (max - min);
             v = Math.pow(10, v);
             return v;
@@ -504,6 +508,16 @@ public class YAxis extends Axis {
         double value1 = pixelToValue(m_height/2);
         double value2 = pixelToValue(m_height/2+deltaPixel);
         return value2-value1;
+    }
+    
+    public double deltaPixelToLogMultValue(int deltaPixel) {
+        double min = Math.log10(m_minValue <= LOG_MIN_VALUE ? LOG_MIN_VALUE : m_minValue);
+        double max = Math.log10(m_maxValue <= LOG_MIN_VALUE ? LOG_MIN_VALUE*10 : m_maxValue);
+        double mult = Math.pow(10,(max-min)*(((double) deltaPixel)/((double) m_height))); 
+        if (Math.pow(10,min)/mult<LOG_MIN_VALUE) {
+            mult = Math.pow(10, min)/LOG_MIN_VALUE;
+        }
+        return mult;
     }
 
 }

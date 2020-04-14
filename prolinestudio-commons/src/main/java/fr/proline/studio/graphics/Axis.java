@@ -94,6 +94,8 @@ public abstract class Axis {
     protected int m_minimumAxisHeight = 0;
     protected int m_minimumAxisWidth = 0;
 
+    protected static final double LOG_MIN_VALUE = 10e-9;
+            
     public boolean displayAxis() {
         return !m_isPixel;
     }
@@ -227,6 +229,10 @@ public abstract class Axis {
             }
 
             if (min < max) {
+                if (m_axis.isLog()) {
+                    min = Math.pow(10, min);
+                    max = Math.pow(10, max);
+                }
                 m_axis.setRange(min, max);
                 m_axis.m_plotPanel.repaintUpdateDoubleBuffer();
             } else {
@@ -276,13 +282,8 @@ public abstract class Axis {
     public void setLog(boolean log) {
         m_log = log;
         m_df = null; // reinit for display
-        /*if (log) {
-         m_minValue = Math.log10(m_minValue);
-         m_maxValue = Math.log10(m_maxValue);
-         } else {
-         m_minValue = Math.pow(10, m_minValue);
-         m_maxValue = Math.pow(10, m_minValue);
-         }*/
+        
+        m_plotPanel.updatePlotsForLog();
     }
 
     public boolean isLog() {
@@ -290,7 +291,7 @@ public abstract class Axis {
     }
 
     public boolean canBeInLog() {
-        return m_log || (m_minValue >= 10e-9) && (!m_isEnum);
+        return (!m_isEnum);
     }
 
     public void setSize(int x, int y, int width, int height) {
@@ -342,12 +343,20 @@ public abstract class Axis {
     public abstract double pixelToValue(int pixel);
     
     public abstract double deltaPixelToDeltaValue(int deltaPixel);
+    
+    public abstract double deltaPixelToLogMultValue(int deltaPixel);
 
     public double getMinValue() {
+        if ((m_log) && (m_minValue<=LOG_MIN_VALUE)) {
+            return LOG_MIN_VALUE;
+        }
         return m_minValue;
     }
 
     public double getMaxValue() {
+        if ((m_log) && (m_maxValue<=LOG_MIN_VALUE*10)) {
+            return LOG_MIN_VALUE*10;
+        }
         return m_maxValue;
     }
 

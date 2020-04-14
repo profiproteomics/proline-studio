@@ -33,13 +33,11 @@ import java.util.HashSet;
 import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
 import javax.swing.event.TreeModelEvent;
@@ -48,6 +46,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreeNode;
@@ -487,28 +486,17 @@ public class TreeFileChooserPanel extends JPanel {
 
 }
 
-class IconCellRenderer extends JLabel implements TreeCellRenderer {
+class IconCellRenderer extends DefaultTreeCellRenderer {
 
-    protected Color m_textSelectionColor;
-    protected Color m_textNonSelectionColor;
-    protected Color m_bkSelectionColor;
-    protected Color m_bkNonSelectionColor;
-    protected Color m_borderSelectionColor;
-
-    protected boolean m_selected;
 
     public IconCellRenderer() {
         super();
-        m_textSelectionColor = UIManager.getColor("Tree.selectionForeground");
-        m_textNonSelectionColor = UIManager.getColor("Tree.textForeground");
-        m_bkSelectionColor = UIManager.getColor("Tree.selectionBackground");
-        m_bkNonSelectionColor = UIManager.getColor("Tree.textBackground");
-        m_borderSelectionColor = UIManager.getColor("Tree.selectionBorderColor");
-        setOpaque(false);
     }
 
     @Override
-    public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+    public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean isLeaf, int row, boolean hasFocus) {
+        Component c = super.getTreeCellRendererComponent(tree, value, selected, expanded, isLeaf, row, hasFocus);
+        
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
         Object obj = node.getUserObject();
         setText(obj.toString());
@@ -526,32 +514,9 @@ class IconCellRenderer extends JLabel implements TreeCellRenderer {
         } else {
             setIcon(null);
         }
-        setFont(tree.getFont());
-        setForeground(sel ? m_textSelectionColor : m_textNonSelectionColor);
-        setBackground(sel ? m_bkSelectionColor : m_bkNonSelectionColor);
-        m_selected = sel;
-        return this;
+        return c;
     }
 
-    @Override
-    public void paintComponent(Graphics g) {
-        Color bColor = getBackground();
-        Icon icon = getIcon();
-
-        g.setColor(bColor);
-        int offset = 0;
-        if (icon != null && getText() != null) {
-            offset = (icon.getIconWidth() + getIconTextGap());
-        }
-        g.fillRect(offset, 0, getWidth() - 1 - offset,
-                getHeight() - 1);
-
-        if (m_selected) {
-            g.setColor(m_borderSelectionColor);
-            g.drawRect(offset, 0, getWidth() - 1 - offset, getHeight() - 1);
-        }
-        super.paintComponent(g);
-    }
 }
 
 class IconData {

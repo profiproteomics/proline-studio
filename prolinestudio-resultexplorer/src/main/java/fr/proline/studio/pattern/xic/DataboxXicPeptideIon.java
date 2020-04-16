@@ -25,7 +25,7 @@ import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
+import fr.proline.core.orm.msi.dto.MasterQuantPeptideProperties;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
@@ -39,6 +39,7 @@ import fr.proline.studio.types.XicMode;
 import java.util.ArrayList;
 import java.util.List;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import java.util.Map;
 
 /**
  *
@@ -107,8 +108,6 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
-
-        
         final boolean allPeptides = m_previousDataBox == null;
         DMasterQuantPeptide oldPeptide = m_masterQuantPeptide;
 
@@ -121,10 +120,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
             }
             m_isXICMode = ((XicMode) m_previousDataBox.getData(false, XicMode.class)).isXicMode();
         }
-        
 
-        
-        
         final int loadingId = setLoading();
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -141,10 +137,18 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                 if (m_dataset != null) {
                     linkCache(m_dataset.getResultSummary());
                 }
- 
+
                 if (subTask == null) {
                     if (!allPeptides) {
-                        ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideIonList, m_isXICMode, finished);
+                        MasterQuantPeptideProperties properties = m_masterQuantPeptide.getMasterQuantPeptideProperties();
+                        List<Long> selectedPepIonIds = null;
+                        if (properties != null) {
+                            MasterQuantPeptideProperties.PepIonAbundanceSummarizingConfig config = properties.getMqPepIonAbundanceSummarizingConfig();
+                            Map<Long, Integer> pepSelectLevelMap = config.getmMqPeptideIonSelLevelById();
+                            selectedPepIonIds = config.getSelectedMasterQuantPeptideIonIds();
+                        }
+
+                        ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), selectedPepIonIds, m_masterQuantPeptideIonList, m_isXICMode, finished);
                     } else {
                         AbstractDatabaseCallback mapCallback = new AbstractDatabaseCallback() {
 
@@ -156,7 +160,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                             @Override
                             public void run(boolean success, long task2Id, SubTask subTask, boolean finished) {
                                 m_quantChannelInfo = new QuantChannelInfo(m_dataset);
-                                ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideIonList, m_isXICMode, finished);
+                                ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), null, m_masterQuantPeptideIonList, m_isXICMode, finished);
 
                                 if (finished) {
                                     unregisterTask(task2Id);

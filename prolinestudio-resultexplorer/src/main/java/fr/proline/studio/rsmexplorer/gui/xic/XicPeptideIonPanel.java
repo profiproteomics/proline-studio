@@ -244,7 +244,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         return internalPanel;
     }                 
     
-    public void setData(Long taskId, DQuantitationChannel[] quantChannels,  List<DMasterQuantPeptideIon> peptideIons, boolean isXICMode, boolean finished) {
+    public void setData(Long taskId, DQuantitationChannel[] quantChannels,  List<Long> selectedPepIonIds, List<DMasterQuantPeptideIon> peptideIons, boolean isXICMode, boolean finished) {
         boolean qcChanged = true;
         if (m_quantChannels != null && m_quantChannels.length == quantChannels.length) {
             for (int q = 0; q < m_quantChannels.length; q++) {
@@ -253,7 +253,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         }
         m_quantChannels = quantChannels;
         m_isXICMode = isXICMode;
-       ((QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel()).setData(taskId, quantChannels, peptideIons, m_isXICMode);
+       ((QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel()).setData(taskId, quantChannels, selectedPepIonIds, peptideIons, m_isXICMode);
         //m_quantPeptideIonTable.setColumnControlVisible(((QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel()).getColumnCount() < XicProteinSetPanel.NB_MAX_COLUMN_CONTROL);     
 
         // select the first row

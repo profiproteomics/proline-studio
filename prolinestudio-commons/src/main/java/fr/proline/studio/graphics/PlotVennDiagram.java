@@ -128,6 +128,16 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
     }
 
     @Override
+    public boolean canLogXAxis() {
+        return false;
+    }
+
+    @Override
+    public boolean canLogYAxis() {
+        return false;
+    }
+    
+    @Override
     public void parametersChanged() {
         int labelIndex = 0;
         int areaIndex = 0;

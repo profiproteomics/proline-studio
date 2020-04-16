@@ -810,6 +810,16 @@ public class PlotLinear extends PlotXYAbstract {
         return true;
     }
 
+    @Override
+    public boolean canLogXAxis() {
+        return true;
+    }
+
+    @Override
+    public boolean canLogYAxis() {
+        return true;
+    }
+    
     private void sortData() {
         int dataSize = m_dataX == null ? 0 : m_dataX.length;
         int j;

@@ -524,6 +524,16 @@ public class PlotHistogram extends PlotXYAbstract {
     }
     
     @Override
+    public boolean canLogXAxis() {
+        return false;
+    }
+
+    @Override
+    public boolean canLogYAxis() {
+        return false;
+    }
+    
+    @Override
     public boolean isMouseOnPlot(double x, double y) {
         return findPoint(x, y) != -1;
     }

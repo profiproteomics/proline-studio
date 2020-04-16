@@ -25,7 +25,6 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -160,9 +159,6 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        
-
-        
         final boolean allPeptides = (m_previousDataBox == null);
         List<DPeptideInstance> pepInstances = null;
         if (!allPeptides) {
@@ -196,7 +192,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         if (m_dataset != null) {
             linkCache(m_dataset.getResultSummary());
         }
-        
+
         final int loadingId = setLoading();
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -306,18 +302,18 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
             if (parameterType.equals(XicMode.class)) {
                 return new XicMode(isXICMode());
             }
-             if (parameterType.equals(Integer.class)) {
-                 ArrayList<Long>  selection = ((XicPeptidePanel) this.m_panel).getCrossSelectionInterface().getSelection();
-                 ArrayList<Integer> result = new ArrayList();
-                 for (Long l : selection){
-                     result.add(l.intValue());
-                 }
+            if (parameterType.equals(Integer.class)) {
+                ArrayList<Long> selection = ((XicPeptidePanel) this.m_panel).getCrossSelectionInterface().getSelection();
+                ArrayList<Integer> result = new ArrayList();
+                for (Long l : selection) {
+                    result.add(l.intValue());
+                }
                 return result;
             }
         }
         return super.getData(getArray, parameterType);
     }
-   
+
     @Override
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
         if (parameterType != null && isList) {

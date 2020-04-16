@@ -17,10 +17,13 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
+import fr.proline.studio.graphics.PlotXYAbstract;
+import static fr.proline.studio.graphics.PlotXYAbstract.LOG_ALGO_OPTION2;
 import fr.proline.studio.gui.AbstractParameterListTree;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.BooleanParameter;
+import fr.proline.studio.parameter.DoubleParameter;
 import fr.proline.studio.parameter.FileParameter;
 import fr.proline.studio.parameter.IntegerParameter;
 import fr.proline.studio.parameter.ObjectParameter;
@@ -55,7 +58,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
     private static ApplicationSettingsDialog m_singletonDialog = null;
     private AbstractParameterListTree m_parameterListTree;
-    private ParameterList m_jmsParameterList, m_generalParameterList, m_tablePrameterList, m_msParameterList;
+    private ParameterList m_jmsParameterList, m_generalParameterList, m_tablePrameterList, m_msParameterList, m_plotParameterList;
     private JPanel m_cards;
     private final Hashtable<String, JPanel> m_existingPanels;
     private final Hashtable<String, ParameterList> m_existingLists;
@@ -190,9 +193,9 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
 
             @Override
             public void valueChanged(String value, Object associatedValue) {
-                int m_width = Integer.parseInt(defaultFixedColumnSize.getStringValue());
-                int m_selection = Integer.parseInt(columnsParameter.getStringValue());
-                showParameter(defaultFixedColumnSize, m_selection == DecoratedTable.FIXED_COLUMNS_SIZE || m_selection == DecoratedTable.SMART_COLUMNS_SIZE, m_width);
+                int width = Integer.parseInt(defaultFixedColumnSize.getStringValue());
+                int selection = Integer.parseInt(columnsParameter.getStringValue());
+                showParameter(defaultFixedColumnSize, selection == DecoratedTable.FIXED_COLUMNS_SIZE || selection == DecoratedTable.SMART_COLUMNS_SIZE, width);
                 updateParameterListPanel();
             }
 
@@ -206,6 +209,41 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         return m_tablePrameterList;
     }
 
+    private ParameterList getPlotParameters() {
+        m_plotParameterList = new ParameterList(PlotXYAbstract.PLOT_PARAMETER_LIST_KEY);
+
+        Object[] logOptions = {PlotXYAbstract.LOG_ALGO_OPTION1, PlotXYAbstract.LOG_ALGO_OPTION2};
+        JComboBox comboBox = new JComboBox(logOptions);
+        
+        Object[] objectTable = { PlotXYAbstract.LOG_SUPPRESS_VALUES, PlotXYAbstract.LOG_REPLACE_VALUES };
+        ObjectParameter logAlgoParameter = new ObjectParameter(PlotXYAbstract.LOG_ALGO_KEY, PlotXYAbstract.LOG_ALGO_NAME, comboBox, logOptions, objectTable, PlotXYAbstract.DEFAULT_LOG_ALGO, null);
+        m_plotParameterList.add(logAlgoParameter);
+
+        DoubleParameter replaceValue = new DoubleParameter(PlotXYAbstract.DEFAULT_LOG_REPLACE_VALUE_KEY, PlotXYAbstract.DEFAULT_LOG_REPLACE_VALUE_NAME, JTextField.class, new Double(1), new Double(10e-14), new Double(10e14));
+        m_plotParameterList.add(replaceValue);
+
+        m_plotParameterList.loadParameters(m_preferences);
+
+        AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(m_plotParameterList) {
+
+            @Override
+            public void valueChanged(String value, Object associatedValue) {
+                double valueDouble = Double.parseDouble(replaceValue.getStringValue());
+                int selection = Integer.parseInt(logAlgoParameter.getStringValue());
+                showParameter(replaceValue, selection == PlotXYAbstract.LOG_REPLACE_VALUES, valueDouble);
+                updateParameterListPanel();
+            }
+
+        };
+
+        logAlgoParameter.addLinkedParameters(linkedParameters);
+
+        int selection = Integer.parseInt(logAlgoParameter.getStringValue());
+        linkedParameters.valueChanged((String) logOptions[selection], objectTable[selection]);
+
+        return m_plotParameterList;
+    }
+    
     private JComponent createInternalComponent() {
 
         JPanel externalPanel = new JPanel();
@@ -222,6 +260,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         m_parameterListTree.addNodes(getMsFilesParameters());
         m_parameterListTree.addNodes(getTableParameters());
         m_parameterListTree.addNodes(getGeneralParameters());
+        m_parameterListTree.addNodes(getPlotParameters());
         m_parameterListTree.expandAllRows();
 
         JScrollPane scrollPane = new JScrollPane(m_parameterListTree.getTree());

@@ -94,7 +94,7 @@ public abstract class Axis {
     protected int m_minimumAxisHeight = 0;
     protected int m_minimumAxisWidth = 0;
 
-    protected static final double LOG_MIN_VALUE = 10e-9;
+    protected static final double LOG_MIN_VALUE = 10e-13;
             
     public boolean displayAxis() {
         return !m_isPixel;

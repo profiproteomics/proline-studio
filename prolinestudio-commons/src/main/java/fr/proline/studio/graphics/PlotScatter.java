@@ -52,7 +52,11 @@ import javax.swing.JTextField;
 import org.openide.windows.WindowManager;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.ExtraDataForTableModelInterface;
+import fr.proline.studio.extendedtablemodel.LogAdapterModel;
 import fr.proline.studio.graphics.measurement.WidthMeasurement;
+import fr.proline.studio.parameter.DoubleParameter;
+import fr.proline.studio.parameter.ObjectParameter;
+import org.openide.util.NbPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -476,9 +480,51 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
 
         int size = m_compareDataInterface.getRowCount();
         if (size == 0) {
-
             return;
         }
+        
+
+ 
+        
+        boolean logX = m_plotPanel.getXAxis().isLog();
+        boolean logY = m_plotPanel.getYAxis().isLog();
+        boolean log = logX || logY;
+        if (log) {
+            
+            // JPM : the system of parameters should be changed
+            // to load them without using them in a user interface is too complex
+            ParameterList plotParameterList = new ParameterList(PLOT_PARAMETER_LIST_KEY);
+            
+            Object[] logOptions = {PlotXYAbstract.LOG_ALGO_OPTION1, PlotXYAbstract.LOG_ALGO_OPTION2};
+            Object[] objectTable = { PlotXYAbstract.LOG_SUPPRESS_VALUES, PlotXYAbstract.LOG_REPLACE_VALUES };
+            ObjectParameter logAlgoParameter = new ObjectParameter(PlotXYAbstract.LOG_ALGO_KEY, PlotXYAbstract.LOG_ALGO_NAME, null, logOptions, objectTable, PlotXYAbstract.DEFAULT_LOG_ALGO, null);
+            plotParameterList.add(logAlgoParameter);
+
+            DoubleParameter replaceValue = new DoubleParameter(PlotXYAbstract.DEFAULT_LOG_REPLACE_VALUE_KEY, PlotXYAbstract.DEFAULT_LOG_REPLACE_VALUE_NAME, JTextField.class, new Double(1), new Double(10e-14), new Double(10e14));
+            plotParameterList.add(replaceValue);
+
+            plotParameterList.loadParameters(NbPreferences.root());
+
+
+            String algo = plotParameterList.getValues().get(PlotXYAbstract.LOG_ALGO_KEY);
+            boolean algoSupressValues = ((algo == null) || (Integer.parseInt(algo) == PlotXYAbstract.LOG_SUPPRESS_VALUES));
+
+            if (! (m_compareDataInterface instanceof LogAdapterModel)) {
+                m_compareDataInterface = new LogAdapterModel(m_compareDataInterface);
+                
+            }
+            if (algoSupressValues) {
+                ((LogAdapterModel) m_compareDataInterface).update(LogAdapterModel.POLICY.REMOVE_INCORRECT_VALUES, logX ? m_cols[COL_X_ID] : -1, logY ? m_cols[COL_Y_ID] : -1, null);
+            } else {
+                String value = plotParameterList.getValues().get(PlotXYAbstract.DEFAULT_LOG_REPLACE_VALUE_KEY);
+                double replaceValueD = (value == null) ? 1d : Double.parseDouble(value);
+                ((LogAdapterModel) m_compareDataInterface).update(LogAdapterModel.POLICY.REPLACE_BY_VALUE, logX ? m_cols[COL_X_ID] : -1, logY ? m_cols[COL_Y_ID] : -1, replaceValueD);
+            }
+        } else if (m_compareDataInterface instanceof LogAdapterModel) {
+            m_compareDataInterface = ((LogAdapterModel) m_compareDataInterface).getInnerModel();
+        }
+        size = m_compareDataInterface.getRowCount();
+        
 
         m_dataX = new double[size];
         m_dataY = new double[size];
@@ -600,8 +646,7 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
 
         // we let margins
         if (!xAsEnum) {
-            
-            boolean logX = m_plotPanel.getXAxis().isLog();
+
             if (logX) {
                 m_xMax *= 2;
                 m_xMin /= 2;
@@ -619,7 +664,7 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         }
 
         if (!yAsEnum) {
-            boolean logY = m_plotPanel.getYAxis().isLog();
+
             if (logY) {
                 m_yMax *= 2;
                 m_yMin /= 2;
@@ -761,6 +806,8 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         int clipHeight = yAxis.valueToPixel(yAxis.getMinValue()) - clipY;
         g.setClip(clipX, clipY, clipWidth, clipHeight);
 
+        boolean isLog = xAxis.isLog() || yAxis.isLog();
+        
         ColorOrGradient colorOrGradient = m_colorParameter.getColor();
         boolean useGradient = !colorOrGradient.isColorSelected();
 
@@ -782,7 +829,12 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
             int x = xAxis.valueToPixel(m_dataX[i]) + ((m_jitterX != null) ? m_jitterX[i] : 0);
             int y = yAxis.valueToPixel(m_dataY[i]) + ((m_jitterY != null) ? m_jitterY[i] : 0);
 
-            Color c = selectColor(plotColor, useGradient, i);
+            Color c = null;
+            if (isLog && ((LogAdapterModel) m_compareDataInterface).isOnError(i)) {
+                c = Color.red;
+            } else {
+                c = selectColor(plotColor, useGradient, i);
+            }
             g.setColor(c);
 
             g.fillOval(x - 3, y - 3, 6, 6);
@@ -850,6 +902,16 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         return true;
     }
 
+    @Override
+    public boolean canLogXAxis() {
+        return true;
+    }
+
+    @Override
+    public boolean canLogYAxis() {
+        return true;
+    }
+    
     @Override
     public boolean isMouseOnPlot(double x, double y) {
         return findPoint(x, y) != -1;

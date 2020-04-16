@@ -25,21 +25,23 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
  */
 public abstract class PlotXYAbstract extends PlotBaseAbstract {
 
+    public static final String PLOT_PARAMETER_LIST_KEY = "Plots";
+    
+    public static final int LOG_SUPPRESS_VALUES = 0;
+    public static final int LOG_REPLACE_VALUES = 1;
+    public static final int DEFAULT_LOG_ALGO = 0;
+    
+    public static final String LOG_ALGO_KEY = "Log_Algo";
+    public static final String LOG_ALGO_NAME = "Log Axis Algorithm";
+    public static final String LOG_ALGO_OPTION1 = "Suppress Negative and Null values";
+    public static final String LOG_ALGO_OPTION2 = "Replace Negative and Null Values";
+    
+    public static final String DEFAULT_LOG_REPLACE_VALUE_KEY = "Replacement_Value";
+    public static final String DEFAULT_LOG_REPLACE_VALUE_NAME = "Replacement Value";
+    
     public PlotXYAbstract(BasePlotPanel plotPanel, PlotType plotType, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface) {
         super(plotPanel, plotType, compareDataInterface, crossSelectionInterface);
     }
-
-//    @Override
-//    public boolean inside(int x, int y) {
-//
-//        XAxis xAxis = m_plotPanel.getXAxis();
-//        YAxis yAxis = m_plotPanel.getYAxis();
-//        int x1 = xAxis.valueToPixel(xAxis.getMinValue());
-//        int x2 = xAxis.valueToPixel(xAxis.getMaxValue());
-//        int y1 = yAxis.valueToPixel(yAxis.getMaxValue());
-//        int y2 = yAxis.valueToPixel(yAxis.getMinValue());
-//        return (x >= x1) && (x <= x2) && (y >= y1) && (y <= y2);
-//    }
 
     @Override
     public String getEnumValueY(int index, boolean fromData, Axis axis) {

@@ -504,8 +504,6 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
     }
     
     public boolean canLog() {
-        
-      
         if (!m_numericAxis || m_log) {
             return false;
         };

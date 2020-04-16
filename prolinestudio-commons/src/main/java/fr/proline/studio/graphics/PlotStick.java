@@ -682,7 +682,17 @@ public class PlotStick extends PlotXYAbstract {
 
     @Override
     public boolean needsYAxis() {
+        return false;
+    }
+    
+    @Override
+    public boolean canLogXAxis() {
         return true;
+    }
+
+    @Override
+    public boolean canLogYAxis() {
+        return false;
     }
 
     private void sortData() {

@@ -147,14 +147,14 @@ public class DoubleParameter extends AbstractParameter {
             ((JTextField) m_parameterComponent).setText(v);
         }
         if (v != null && m_startValue != null) {
-            m_edited = !(Float.parseFloat(v) == m_startValue);
+            m_edited = !(Double.parseDouble(v) == m_startValue);
         }
     }
 
     @Override
     public String getStringValue() {
         String v = getObjectValue().toString();
-        if (!v.contains(".")) {
+        if (!v.contains(".") && !v.contains("e")) {
             v = v + ".0";  // JPM.WART : force to have a double (needed for python usage)
         }
         return v;

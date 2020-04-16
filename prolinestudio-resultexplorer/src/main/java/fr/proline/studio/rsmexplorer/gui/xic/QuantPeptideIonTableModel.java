@@ -51,13 +51,18 @@ import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.types.QuantitationType;
 import fr.proline.studio.types.XicGroup;
+import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.StringUtils;
+import java.awt.Color;
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +77,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
     public static final int COLTYPE_PEPTIDE_ID = 0;
     public static final int COLTYPE_PEPTIDE_ION_ID = 1;
     public static final int COLTYPE_PEPTIDE_ION_NAME = 2;
-    public static final int COLTYPE_PEPTIDE_ION_SELECTD = 3;
+    public static final int COLTYPE_PEPTIDE_ION_STATUS = 3;
     public static final int COLTYPE_PEPTIDE_PTM = 4;
     public static final int COLTYPE_PEPTIDE_SCORE = 5;
     public static final int COLTYPE_PEPTIDE_ION_CHARGE = 6;
@@ -81,9 +86,9 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
     public static final int COLTYPE_PEPTIDE_PROTEIN_SET_COUNT = 9;
     public static final int COLTYPE_PEPTIDE_PROTEIN_SET_NAMES = 10;
     public static final int LAST_STATIC_COLUMN = COLTYPE_PEPTIDE_PROTEIN_SET_NAMES;
-    private static final String[] m_columnNames = {"Peptide Id", "QPeptideIon Id", "Peptide Sequence", "Selected Best", "PTMs", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets"};
-    private static final String[] m_columnNamesForFilter = {"Peptide Id", "QPeptideIon Id", "Peptide Sequence", "Selected Best", "PTMs", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets"};
-    private static final String[] m_toolTipColumns = {"Peptide Id", "MasterQuantPeptideIon Id", "Identified Peptide Sequence", "Selected Best", "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Retention time (min)", "Protein Set Count", "Protein Sets"};
+    private static final String[] m_columnNames = {"Peptide Id", "QPeptideIon Id", "Peptide Sequence", "Status", "PTMs", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets"};
+    private static final String[] m_columnNamesForFilter = {"Peptide Id", "QPeptideIon Id", "Peptide Sequence", "Status", "PTMs", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets"};
+    private static final String[] m_toolTipColumns = {"Peptide Id", "MasterQuantPeptideIon Id", "Identified Peptide Sequence", "Status", "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Retention time (min)", "Protein Set Count", "Protein Sets"};
 
     public static final int COLTYPE_SELECTION_LEVEL = 0;
     public static final int COLTYPE_PSM = 1;
@@ -275,12 +280,12 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                 return lazyData;
 
             }
-            case COLTYPE_PEPTIDE_ION_SELECTD: {
+            case COLTYPE_PEPTIDE_ION_STATUS: {
                 LazyData lazyData = getLazyData(row, col);
                 if (peptideIon.getId() == m_selectedId) {
-                    lazyData.setData("Selected");
+                    lazyData.setData(STATUS_VALIDATED);
                 } else {
-                    lazyData.setData("");
+                    lazyData.setData(STATUS_INVALIDATED);
                 }
                 return lazyData;
             }
@@ -625,6 +630,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
      * @return
      */
     public List<Integer> getDefaultColumnsToHide() {
+
         List<Integer> listIds = new ArrayList();
         listIds.add(COLTYPE_PEPTIDE_ID);
         listIds.add(COLTYPE_PEPTIDE_ION_ID);
@@ -674,11 +680,11 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                 }
 
             }
-            case COLTYPE_PEPTIDE_ION_SELECTD: {
+            case COLTYPE_PEPTIDE_ION_STATUS: {
                 if (peptideIon.getId() == m_selectedId) {
-                    return "selected";
+                    return STATUS_VALIDATED;
                 } else {
-                    return "";
+                    return STATUS_INVALIDATED;
                 }
             }
             case COLTYPE_PEPTIDE_PTM: {
@@ -869,7 +875,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
             case COLTYPE_PEPTIDE_ION_NAME: {
                 return String.class;
             }
-            case COLTYPE_PEPTIDE_ION_SELECTD:
+            case COLTYPE_PEPTIDE_ION_STATUS:
                 return String.class;
             case COLTYPE_PEPTIDE_SCORE: {
                 return Float.class;
@@ -968,6 +974,10 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
         TableCellRenderer renderer = null;
 
         switch (col) {
+            case COLTYPE_PEPTIDE_ION_STATUS: {
+                renderer = new StatusRenderer();
+                break;
+            }
 
             case COLTYPE_PEPTIDE_ION_NAME: {
                 renderer = new PeptideRenderer();
@@ -1098,6 +1108,35 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
 
         }
         return null;
+    }
+
+    private String STATUS_VALIDATED = "validated";
+    private String STATUS_INVALIDATED = "invalidated";
+
+    private class StatusRenderer extends DefaultTableCellRenderer {
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+
+            DMasterQuantPeptideIon peptide = (DMasterQuantPeptideIon) getRowValue(DMasterQuantPeptideIon.class, row);
+            boolean status = (peptide.getId() == m_selectedId);
+            if (status == Boolean.TRUE) {
+                this.setIcon(IconManager.getIcon(IconManager.IconType.TICK_SMALL));
+                this.setToolTipText(STATUS_VALIDATED);
+            } else {
+                this.setIcon(IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));
+                this.setToolTipText(STATUS_INVALIDATED);
+
+            }
+            if (isSelected) {
+                this.setBackground(javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground"));
+                this.setForeground(Color.WHITE);
+            } else {
+                this.setBackground(javax.swing.UIManager.getDefaults().getColor("Table.background"));
+                this.setForeground(Color.BLACK);
+            }
+            return this;
+        }
     }
 
 }

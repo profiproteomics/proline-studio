@@ -111,6 +111,16 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
     public boolean needsYAxis() {
         return false;
     }
+    
+    @Override
+    public boolean canLogXAxis() {
+        return false;
+    }
+    
+    @Override
+    public boolean canLogYAxis() {
+        return true;
+    }
 
     @Override
     public double getNearestXData(double x) {

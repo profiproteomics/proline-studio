@@ -1151,7 +1151,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         boolean isXAxis = axis.equals(m_xAxis);
 
         JPopupMenu popup = new JPopupMenu();
-        popup.add(new LogAction(axis));
+        popup.add(new LogAction(axis, isXAxis));
         popup.add(new GridAction(axis.equals(m_xAxis)));
         popup.add(new RangeAction(axis, axis.equals(m_xAxis)));
 
@@ -1300,10 +1300,12 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     public class LogAction extends AbstractAction {
 
         private final Axis m_axis;
+        private final boolean m_isXAxis;
 
-        public LogAction(Axis axis) {
+        public LogAction(Axis axis, boolean isXAxis) {
             super(axis.isLog() ? "Linear Axis" : "Log10 Axis");
             m_axis = axis;
+            m_isXAxis = isXAxis;
         }
 
         @Override
@@ -1315,7 +1317,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
         @Override
         public boolean isEnabled() {
-            return m_axis.canBeInLog();
+            return ( m_axis.canBeInLog() && (m_isXAxis ? m_plots.get(0).canLogXAxis() : m_plots.get(0).canLogYAxis()) );
         }
     }
 

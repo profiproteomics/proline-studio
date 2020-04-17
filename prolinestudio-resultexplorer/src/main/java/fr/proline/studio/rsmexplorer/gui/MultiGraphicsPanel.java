@@ -50,6 +50,7 @@ import fr.proline.studio.extendedtablemodel.SecondAxisTableModelInterface;
 import fr.proline.studio.graphics.DoubleYAxisPlotPanel;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_X_ID;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_Y_ID;
+import fr.proline.studio.graphics.PlotPanel;
 import fr.proline.studio.graphics.XAxis;
 import fr.proline.studio.graphics.YAxis;
 import fr.proline.studio.graphics.core.GraphicsToolbarPanel;
@@ -111,11 +112,9 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(0, 5, 0, 5);
-        if (m_isDoubleYAxis) {
-            m_plotPanel = new DoubleYAxisPlotPanel();
-        } else {
-            m_plotPanel = new BasePlotPanel();
-        }
+        
+        PlotPanel panel = new PlotPanel(m_isDoubleYAxis);
+        m_plotPanel = panel.getBasePlotPanel();
         m_plotPanel.setPlotToolbarListener(this);
         JPanel selectPanel = createSelectPanel();
 
@@ -126,7 +125,7 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
         c.gridy++;
         c.weightx = 1;
         c.weighty = 1;
-        internalPanel.add(m_plotPanel, c);
+        internalPanel.add(panel, c);
 
         return internalPanel;
     }
@@ -495,7 +494,7 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
         }
         plotPanel.preparePaint();
 
-        if (plotPanel.hasMainPlots()) {
+        /*if (plotPanel.hasMainPlots()) {
             //add to max the quantity equivalent to 5 pixels
             mainPlotMaxY += (mainPlotMaxY / plotPanel.getYAxis().getHeight()) * 5;
             plotPanel.setYAxisBounds(0, mainPlotMaxY);
@@ -504,7 +503,7 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
         if (plotPanel.hasAuxiliaryPlots()) {
             secondPlotMaxY += (secondPlotMaxY / plotPanel.getSecondYAxis().getHeight()) * 5;
             plotPanel.setSecondaryYAxisBounds(0, secondPlotMaxY);
-        }
+        }*/
 
     }
 

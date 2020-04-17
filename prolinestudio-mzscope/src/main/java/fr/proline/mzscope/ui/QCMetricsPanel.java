@@ -237,7 +237,7 @@ class MetricsDetailsPanel extends JPanel {
         
         toolbar.add(Box.createHorizontalGlue());
         this.add(toolbar, BorderLayout.NORTH);
-        PlotPanel panel = new PlotPanel();
+        PlotPanel panel = new PlotPanel(false);
         m_plotPanel = panel.getBasePlotPanel();
         this.add(panel, BorderLayout.CENTER);
     }

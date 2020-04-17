@@ -475,7 +475,7 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
 
     @Override
     public PlotDataSpec getDataSpecAt(int i) {
-            return null;
+        return m_lastModel.getDataSpecAt(i);
     }
 
 }

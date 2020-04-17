@@ -47,7 +47,7 @@ public class LinearPlotDemo extends JFrame {
 
    public LinearPlotDemo() {
       super("LinearPlot demo");
-      plotPanel = new PlotPanel();
+      plotPanel = new PlotPanel(false);
       final BasePlotPanel basePlot = plotPanel.getBasePlotPanel();
       basePlot.setPlotTitle("graph title");
       basePlot.setDrawCursor(true);

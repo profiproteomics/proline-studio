@@ -46,7 +46,7 @@ public class MultiPlotDemo extends JFrame {
      
      public MultiPlotDemo() {
       super("MultiPlot demo");
-      plotPanel = new PlotPanel();
+      plotPanel = new PlotPanel(false);
       final BasePlotPanel basePlot = plotPanel.getBasePlotPanel();
       basePlot.setPlotTitle("MultiPlot title");
       

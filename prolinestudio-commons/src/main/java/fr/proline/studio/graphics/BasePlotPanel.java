@@ -152,7 +152,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
      */
     protected boolean m_isEnumAxisUpdated = false;
 
-    private MOUSE_MODE m_mouseMode = MOUSE_MODE.NORMAL_MODE;
+    protected MOUSE_MODE m_mouseMode = MOUSE_MODE.NORMAL_MODE;
 
     
     public BasePlotPanel() {
@@ -627,21 +627,27 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
      * @param plot
      */
     public void updateAxis(PlotBaseAbstract plot) {
-        this.m_isEnumAxisUpdated = false;
+        updateAxis(plot.getDoubleBufferingPolicy());
+    }
+    
+    private void updateAxis(boolean useDoubleBuffering) {
+        updateAxis();
+        m_useDoubleBuffering = useDoubleBuffering;
+    }
+    protected void updateAxis() {
+        m_isEnumAxisUpdated = false;
         double[] tab = getMinMaxPlots();//get Axis X, Y bounds, tab is doube[4]= [minX, maxX, minY, maxY]
 
         XAxis xAxis = getXAxis();
-        //xAxis.setLog(false);  // we do no longer change the log setting
         xAxis.setSelected(false);
         xAxis.setRange((Double.isNaN(m_xAxisBounds[0])) ? tab[0] : m_xAxisBounds[0], (Double.isNaN(m_xAxisBounds[1])) ? tab[1] : m_xAxisBounds[1]);
 
         YAxis yAxis = getYAxis();
-        //yAxis.setLog(false);  // we do no longer change the log setting
         yAxis.setSelected(false);
         yAxis.setRange((Double.isNaN(m_yAxisBounds[0])) ? tab[2] : m_yAxisBounds[0], (Double.isNaN(m_yAxisBounds[1])) ? tab[3] : m_yAxisBounds[1]);
 
         m_updateDoubleBuffer = true;
-        m_useDoubleBuffering = plot.getDoubleBufferingPolicy();
+        //m_useDoubleBuffering = plot.getDoubleBufferingPolicy();
     }
 
     public void setXAxisTitle(String title) {
@@ -957,7 +963,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     
     public void viewAll() {
         for (PlotBaseAbstract plot : m_plots) {
-            updateAxis(plot);
+            updateAxis(plot.getDoubleBufferingPolicy());
         }
         repaint();
     }
@@ -1467,7 +1473,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             m_xAxis.setRange(m_xAxis.getMinValue() / mult, m_xAxis.getMaxValue() / mult);
         } else {
             double delta = m_xAxis.deltaPixelToDeltaValue(deltaX);
-            m_xAxis.setRange(m_xAxis.getMinValue() + delta, m_xAxis.getMaxValue() + delta);
+            m_xAxis.setRange(m_xAxis.getMinValue() - delta, m_xAxis.getMaxValue() - delta);
         }
         
         if (m_yAxis.isLog()) {

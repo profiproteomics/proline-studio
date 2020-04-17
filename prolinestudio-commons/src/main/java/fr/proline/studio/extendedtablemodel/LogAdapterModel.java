@@ -198,8 +198,8 @@ public class LogAdapterModel implements ExtendedTableModelInterface {
     
 
     @Override
-    public PlotDataSpec getDataSpecAt(int i) {
-        return  m_innerModel.getDataSpecAt(i);
+    public PlotDataSpec getDataSpecAt(int rowIndex) {
+        return  m_innerModel.getDataSpecAt(m_row2sourceRowConversion[rowIndex]);
     }
 
     @Override

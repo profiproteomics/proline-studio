@@ -48,7 +48,7 @@ public class ScatterPlotDemo extends JFrame {
       super("ScatterPlot demo");
       JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
       split.setDividerLocation(150);
-      plotPanel = new PlotPanel();
+      plotPanel = new PlotPanel(false);
       Sample sample = new Sample(3000);
       final BasePlotPanel basePlot = plotPanel.getBasePlotPanel();
       PlotScatter scatter = new PlotScatter(basePlot, sample, null, 0, 3);

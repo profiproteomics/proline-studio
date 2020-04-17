@@ -125,7 +125,7 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
 
    public void initComponents() {
       // Create Scan Charts
-      PlotPanel plotPanel = new PlotPanel();
+      PlotPanel plotPanel = new PlotPanel(false);
       spectrumPlotPanel = plotPanel.getBasePlotPanel();
       spectrumPlotPanel.addListener(this);
       spectrumPlotPanel.setDrawCursor(true);

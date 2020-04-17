@@ -171,7 +171,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
         m_secondYAxis.setColorOnTitle(m_secondYAxisColor);
     }
 
-    private void updateAxis() {
+    protected void updateAxis() {
         updateAxis(m_mainPlots, m_xAxis, m_yAxis, m_xAxisBounds, m_yAxisBounds);
         updateAxis(m_secondPlots, m_secondXAxis, m_secondYAxis, m_secondXBounds, m_secondYBounds); //suppose only one plot use seconde Y Axis
         if (m_xAxis != null && m_secondXAxis != null) {
@@ -184,7 +184,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
             /**
              * concate 2 xAxis to get the largest xAxis
              */
-            m_secondXAxis.setRange(Math.min(m_xAxis.getMinValue(), m_secondXAxis.getMinValue()), m_secondXAxis.getMaxValue());
+            m_secondYAxis.setRange(Math.min(m_yAxis.getMinValue(), m_secondYAxis.getMinValue()), m_secondYAxis.getMaxValue());
         }
         //CBy : que se passe-t-il si le main plot represente des valeurs entre -100 et 0 ? MaxY == 0 mais
         // on a tout de meme un mainPlot
@@ -521,8 +521,42 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
                 yAxis.setSelected(false);
                 m_secondYAxis.setSelected(false);
             }
-
             if (SwingUtilities.isLeftMouseButton(e)) {
+                
+                // Action according to mode
+                if (m_mouseMode == MOUSE_MODE.SELECTION_MODE) {
+                    m_selectionGesture.startSelection(x, y);
+                } else {
+                    // check if we are over a moveable object
+                    MoveableInterface movable = null;
+                    PlotBaseAbstract plotWithMovable = null;
+                    for (PlotBaseAbstract plot : m_plots) {
+                        movable = plot.getOverMovable(x, y);
+                        if (movable != null) {
+                            plotWithMovable = plot;
+                            break;
+                        }
+                    }
+                    
+                    if (movable == null) {
+                        // we move the panel itself !
+                        movable = this;
+                    }
+                    
+                    if (movable != null) {
+                        m_moveGesture.startMoving(x, y, movable);
+                        if (movable instanceof AbstractCursor) {
+                            plotWithMovable.selectCursor((AbstractCursor) movable);
+                        }
+                        setCursor(new Cursor(Cursor.MOVE_CURSOR));
+                    }
+                }
+                
+
+            } else if (SwingUtilities.isRightMouseButton(e)) {
+                m_zoomGesture.startZooming(x, y);
+            }
+            /*if (SwingUtilities.isLeftMouseButton(e)) {
                 // check if we are over a moveable object
                 MoveableInterface movable = null;
                 PlotBaseAbstract plotWithMovable = null;
@@ -545,7 +579,7 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
 
             } else if (SwingUtilities.isRightMouseButton(e)) {
                 m_zoomGesture.startZooming(x, y);
-            }
+            }*/
             repaint();
         } else if (!SwingUtilities.isRightMouseButton(e) && m_xAxis != null && m_xAxis.inside(x, y)) {
             m_panAxisGesture.startPanning(x, y, PanAxisGesture.X_AXIS_PAN);
@@ -763,17 +797,43 @@ public class DoubleYAxisPlotPanel extends BasePlotPanel {
             double oldMinY = m_yAxis.getMinValue();
             double oldMaxY = m_yAxis.getMaxValue();
             if (m_panAxisGesture.getPanningAxis() == PanAxisGesture.X_AXIS_PAN) {
-                double delta = m_xAxis.pixelToValue(m_panAxisGesture.getPreviousX()) - m_xAxis.pixelToValue(e.getX());
-                m_xAxis.setRange(m_xAxis.getMinValue() + delta, m_xAxis.getMaxValue() + delta);
-                m_secondXAxis.setRange(m_secondXAxis.getMinValue() + delta, m_secondXAxis.getMaxValue() + delta);
+
+                if (m_xAxis.isLog()) {
+                    double mult = m_xAxis.deltaPixelToLogMultValue(e.getX()-m_panAxisGesture.getPreviousX());
+                    m_xAxis.setRange(m_xAxis.getMinValue()/mult, m_xAxis.getMaxValue()/mult);
+                } else {
+                    double delta = m_xAxis.deltaPixelToDeltaValue(m_panAxisGesture.getPreviousX()-e.getX());
+                    m_xAxis.setRange(m_xAxis.getMinValue() + delta, m_xAxis.getMaxValue() + delta);
+                }
                 fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY, oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue());
+            
+                if (m_secondXAxis.isLog()) {
+                    double mult = m_secondXAxis.deltaPixelToLogMultValue(e.getX()-m_panAxisGesture.getPreviousX());
+                    m_secondXAxis.setRange(m_secondXAxis.getMinValue()/mult, m_secondXAxis.getMaxValue()/mult);
+                } else {
+                    double delta = m_secondXAxis.deltaPixelToDeltaValue(m_panAxisGesture.getPreviousX()-e.getX());
+                    m_secondXAxis.setRange(m_secondXAxis.getMinValue() + delta, m_secondXAxis.getMaxValue() + delta);
+                }
+                
             } else if (m_panAxisGesture.getPanningAxis() == PanAxisGesture.Y_AT_RIGHT_AXIS_PAN) {
-                double delta = m_secondYAxis.pixelToValue(m_panAxisGesture.getPreviousYAtRight()) - m_secondYAxis.pixelToValue(e.getY());
-                m_secondYAxis.setRange(m_secondYAxis.getMinValue() + delta, m_secondYAxis.getMaxValue() + delta);
+                 if (m_secondYAxis.isLog()) {
+                    double mult = m_secondYAxis.deltaPixelToLogMultValue(m_panAxisGesture.getPreviousY()-e.getY());
+                    m_secondYAxis.setRange(m_secondYAxis.getMinValue()/mult, m_secondYAxis.getMaxValue()/mult);
+                } else {
+                    double delta = m_secondYAxis.deltaPixelToDeltaValue(m_panAxisGesture.getPreviousY()-e.getY());
+                    m_secondYAxis.setRange(m_secondYAxis.getMinValue() + delta, m_secondYAxis.getMaxValue() + delta);       
+                }
+                
             } else {
-                double delta = m_yAxis.pixelToValue(m_panAxisGesture.getPreviousY()) - m_yAxis.pixelToValue(e.getY());
-                m_yAxis.setRange(m_yAxis.getMinValue() + delta, m_yAxis.getMaxValue() + delta);
+                if (m_yAxis.isLog()) {
+                    double mult = m_yAxis.deltaPixelToLogMultValue(m_panAxisGesture.getPreviousY()-e.getY());
+                    m_yAxis.setRange(m_yAxis.getMinValue()/mult, m_yAxis.getMaxValue()/mult);
+                } else {
+                    double delta = m_yAxis.deltaPixelToDeltaValue(m_panAxisGesture.getPreviousY()-e.getY());
+                    m_yAxis.setRange(m_yAxis.getMinValue() + delta, m_yAxis.getMaxValue() + delta);       
+                }
                 fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY, oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue());
+            
             }
             m_panAxisGesture.movePan(e.getX(), e.getY());
             m_updateDoubleBuffer = true;

@@ -36,7 +36,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.extendedtablemodel.LogAdapterModel;
+import static fr.proline.studio.graphics.PlotBaseAbstract.COL_X_ID;
+import static fr.proline.studio.graphics.PlotBaseAbstract.COL_Y_ID;
+import static fr.proline.studio.graphics.PlotXYAbstract.PLOT_PARAMETER_LIST_KEY;
+import fr.proline.studio.parameter.DoubleParameter;
+import fr.proline.studio.parameter.ObjectParameter;
 import java.awt.Stroke;
+import javax.swing.JTextField;
+import org.openide.util.NbPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -430,6 +438,47 @@ public class PlotLinear extends PlotXYAbstract {
             return;
         }
 
+        boolean logX = m_plotPanel.getXAxis().isLog();
+        boolean logY = m_plotPanel.getYAxis().isLog();
+        boolean log = logX || logY;
+        if (log) {
+            
+            // JPM : the system of parameters should be changed
+            // to load them without using them in a user interface is too complex
+            ParameterList plotParameterList = new ParameterList(PLOT_PARAMETER_LIST_KEY);
+            
+            Object[] logOptions = {PlotXYAbstract.LOG_ALGO_OPTION1, PlotXYAbstract.LOG_ALGO_OPTION2};
+            Object[] objectTable = { PlotXYAbstract.LOG_SUPPRESS_VALUES, PlotXYAbstract.LOG_REPLACE_VALUES };
+            ObjectParameter logAlgoParameter = new ObjectParameter(PlotXYAbstract.LOG_ALGO_KEY, PlotXYAbstract.LOG_ALGO_NAME, null, logOptions, objectTable, PlotXYAbstract.DEFAULT_LOG_ALGO, null);
+            plotParameterList.add(logAlgoParameter);
+
+            DoubleParameter replaceValue = new DoubleParameter(PlotXYAbstract.DEFAULT_LOG_REPLACE_VALUE_KEY, PlotXYAbstract.DEFAULT_LOG_REPLACE_VALUE_NAME, JTextField.class, new Double(1), new Double(10e-14), new Double(10e14));
+            plotParameterList.add(replaceValue);
+
+            plotParameterList.loadParameters(NbPreferences.root());
+
+
+            String algo = plotParameterList.getValues().get(PlotXYAbstract.LOG_ALGO_KEY);
+            boolean algoSupressValues = ((algo == null) || (Integer.parseInt(algo) == PlotXYAbstract.LOG_SUPPRESS_VALUES));
+
+            if (! (m_compareDataInterface instanceof LogAdapterModel)) {
+                m_compareDataInterface = new LogAdapterModel(m_compareDataInterface);
+                
+            }
+            if (algoSupressValues) {
+                ((LogAdapterModel) m_compareDataInterface).update(LogAdapterModel.POLICY.REMOVE_INCORRECT_VALUES, logX ? m_cols[COL_X_ID] : -1, logY ? m_cols[COL_Y_ID] : -1, null);
+            } else {
+                String value = plotParameterList.getValues().get(PlotXYAbstract.DEFAULT_LOG_REPLACE_VALUE_KEY);
+                double replaceValueD = (value == null) ? 1d : Double.parseDouble(value);
+                ((LogAdapterModel) m_compareDataInterface).update(LogAdapterModel.POLICY.REPLACE_BY_VALUE, logX ? m_cols[COL_X_ID] : -1, logY ? m_cols[COL_Y_ID] : -1, replaceValueD);
+            }
+        } else if (m_compareDataInterface instanceof LogAdapterModel) {
+            m_compareDataInterface = ((LogAdapterModel) m_compareDataInterface).getInnerModel();
+        }
+        size = m_compareDataInterface.getRowCount();
+        
+        
+        
         m_dataX = new double[size];
         m_dataY = new double[size];
         m_dataSpec = new PlotDataSpec[size];
@@ -502,26 +551,36 @@ public class PlotLinear extends PlotXYAbstract {
 
         // we let margins
         if (!xAsEnum || (xAsEnum && m_xMin == m_xMax)) {
-            double deltaX = (m_xMax - m_xMin);
-            if (deltaX <= 10e-10) {
-                // no real delta
-                m_xMin = m_xMin - 1;  //JPM.TODO : enhance this
-                m_xMax = m_xMax + 1;
+            if (logX) {
+                m_xMax *= 2;
+                m_xMin /= 2;
             } else {
-                // m_xMin = m_xMin - deltaX * 0.01; // no need to have a margin on xMin
-                m_xMax = m_xMax + deltaX * 0.01;
+                double deltaX = (m_xMax - m_xMin);
+                if (deltaX <= 10e-10) {
+                    // no real delta
+                    m_xMin = m_xMin - 1;  //JPM.TODO : enhance this
+                    m_xMax = m_xMax + 1;
+                } else {
+                    // m_xMin = m_xMin - deltaX * 0.01; // no need to have a margin on xMin
+                    m_xMax = m_xMax + deltaX * 0.01;
+                }
             }
         }
 
         if (!yAsEnum || (yAsEnum && m_yMin == m_yMax)) {
-            double deltaY = (m_yMax - m_yMin);
-            if (deltaY <= 10e-10) {
-                // no real delta
-                m_yMin = m_yMin - 1;  //JPM.TODO : enhance this
-                m_yMax = m_yMax + 1;
+            if (logY) {
+                m_yMax *= 2;
+                m_yMin /= 2;
             } else {
-                //m_yMin = m_yMin - deltaY * 0.01; // no need to have a margin on yMin
-                m_yMax = m_yMax + deltaY * 0.01;
+                double deltaY = (m_yMax - m_yMin);
+                if (deltaY <= 10e-10) {
+                    // no real delta
+                    m_yMin = m_yMin - 1;  //JPM.TODO : enhance this
+                    m_yMax = m_yMax + 1;
+                } else {
+                    //m_yMin = m_yMin - deltaY * 0.01; // no need to have a margin on yMin
+                    m_yMax = m_yMax + deltaY * 0.01;
+                }
             }
         }
 
@@ -530,7 +589,12 @@ public class PlotLinear extends PlotXYAbstract {
 
         double yLabel = m_yMax;
         if (m_compareDataInterface.getExternalData() != null) {
-            m_yMax *= 1.2; // we let place at the top to be able to put information
+             // we let place at the top to be able to put information
+            if (logY) {
+                m_yMax *= 10;
+            } else {
+                m_yMax *= 1.2;
+            }
         }
         DecimalFormat df = new DecimalFormat("#.00");
 
@@ -731,7 +795,7 @@ public class PlotLinear extends PlotXYAbstract {
                 }
                 if (m_isDrawPoints && isDef) {
                     int radius = DEFAULT_POINT_RADIUS;
-                    if (m_dataSpec[i].getFill().equals(PlotDataSpec.FILL.EMPTY)) {
+                    if ((m_dataSpec[i]!=null) && (m_dataSpec[i].getFill().equals(PlotDataSpec.FILL.EMPTY))) {
                         g.drawOval(x - radius, y - radius, radius * 2, radius * 2);
                     } else {
                         g.fillOval(x - radius, y - radius, radius * 2, radius * 2);

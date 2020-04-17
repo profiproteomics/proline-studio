@@ -64,7 +64,7 @@ public class SignalEditorPanel extends JPanel {
     
    public SignalEditorPanel(Signal signal) {
       m_signal = signal;
-      m_plotPanel = new PlotPanel();
+      m_plotPanel = new PlotPanel(false);
       m_smoothedSignals = new HashMap<>();
       
       BasePlotPanel basePlot = m_plotPanel.getBasePlotPanel();

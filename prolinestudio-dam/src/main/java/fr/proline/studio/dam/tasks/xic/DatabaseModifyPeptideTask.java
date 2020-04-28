@@ -53,41 +53,45 @@ import javax.persistence.TypedQuery;
 public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
 
     private int m_action;
-    
+    private int m_selectLevel;
+
     private ArrayList<DMasterQuantPeptide> m_masterQuantPeptideList;
     private ArrayList<DMasterQuantProteinSet> m_masterQuantProteinSetModified;
     private long m_projectId;
-    
+
     //private ArrayList<Long> m_proteinSetIds;
-    
-    
     private final static int MODIFY_MASTER_QUANT_PEPTIDE = 0;
     private final static int REMOVE_PEPTIDEMODIFIED_ON_PROTEIN = 1;
-    
+
     public DatabaseModifyPeptideTask(AbstractDatabaseCallback callback) {
         super(callback, null);
 
     }
-    
+
     public void initDisablePeptide(long projectId, ArrayList<DMasterQuantPeptide> masterQuantPeptideList, ArrayList<DMasterQuantProteinSet> masterQuantProteinSetModified) {
+        initDisablePeptide(projectId, masterQuantPeptideList, masterQuantProteinSetModified, -1);
+    }
+
+    public void initDisablePeptide(long projectId, ArrayList<DMasterQuantPeptide> masterQuantPeptideList, ArrayList<DMasterQuantProteinSet> masterQuantProteinSetModified, int selectLevel) {
         setTaskInfo(new TaskInfo("Disable Peptide", true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
-        
+
         m_action = MODIFY_MASTER_QUANT_PEPTIDE;
+        m_selectLevel = selectLevel;
         m_projectId = projectId;
         m_masterQuantPeptideList = masterQuantPeptideList;
         m_masterQuantProteinSetModified = masterQuantProteinSetModified;
         setPriority(Priority.TOP);
     }
-    
+
     public void initRemovePeptideModifiedOnProtein(long projectId, ArrayList<DMasterQuantProteinSet> masterQuantProteinSetModified) {
         setTaskInfo(new TaskInfo("Proteins Refined", true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
-        
+
         m_action = REMOVE_PEPTIDEMODIFIED_ON_PROTEIN;
         m_projectId = projectId;
         m_masterQuantProteinSetModified = masterQuantProteinSetModified;
         setPriority(Priority.TOP);
     }
-    
+
     @Override
     public boolean needToFetch() {
         switch (m_action) {
@@ -115,25 +119,24 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
         try {
 
             entityManagerMSI.getTransaction().begin();
-            
+
             int nb = m_masterQuantProteinSetModified.size();
             ArrayList<Long> masterQuantProteinSetModifiedIDs = new ArrayList(nb);
             HashMap<Long, DMasterQuantProteinSet> map = new HashMap<>();
-            for (int i=0;i<nb;i++) {
+            for (int i = 0; i < nb; i++) {
                 DMasterQuantProteinSet dmasterQuantProteinSet = m_masterQuantProteinSetModified.get(i);
                 Long id = dmasterQuantProteinSet.getId();
                 masterQuantProteinSetModifiedIDs.add(dmasterQuantProteinSet.getId());
                 map.put(id, dmasterQuantProteinSet);
-                
+
             }
-            
-            
+
             String queryMasterQuantProteinSet = "SELECT q"
-                + " FROM MasterQuantComponent q "
-                + " WHERE q.id IN (:mqproteinSetIds) ";
+                    + " FROM MasterQuantComponent q "
+                    + " WHERE q.id IN (:mqproteinSetIds) ";
             TypedQuery<MasterQuantComponent> masterQuantProteinSetsQuery = entityManagerMSI.createQuery(queryMasterQuantProteinSet, MasterQuantComponent.class);
             masterQuantProteinSetsQuery.setParameter("mqproteinSetIds", masterQuantProteinSetModifiedIDs);
-            
+
             List<MasterQuantComponent> masterQuantProteinSets = masterQuantProteinSetsQuery.getResultList();
             Iterator<MasterQuantComponent> it = masterQuantProteinSets.iterator();
             while (it.hasNext()) {
@@ -151,10 +154,9 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
                     }
                     map.get(masterQuantProteinSet.getId()).setSerializedProperties(masterQuantProteinSet.getSerializedProperties());
                     entityManagerMSI.merge(masterQuantProteinSet);
-                }                      
+                }
             }
-            
-            
+
             /*String queryDMasterQuantProteinSet = "SELECT new fr.proline.core.orm.msi.dto.DMasterQuantProteinSet"
                     + "(q.id,  q.selectionLevel, q.objectTreeId,  q.serializedProperties,  p.resultSummary.id,  p.id) "
                     + " FROM MasterQuantComponent q,  ProteinSet p "
@@ -163,8 +165,6 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
             masterQuantDProteinSetsQuery.setParameter("mproteinSetIds", m_proteinSetIds);
             List<DMasterQuantProteinSet> dMasterQuantProteinSets = masterQuantDProteinSetsQuery.getResultList();
             m_masterQuantProteinSetModified.addAll(dMasterQuantProteinSets);*/
-            
-            
             entityManagerMSI.getTransaction().commit();
 
         } catch (Exception e) {
@@ -184,10 +184,9 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
 
         return true;
     }
-    
+
     public boolean modifyMasterQuantPeptide() {
 
-        
         EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
 
@@ -195,31 +194,37 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
 
             int nbPeptides = m_masterQuantPeptideList.size();
             ArrayList<Long> peptideInstanceIdList = new ArrayList<>(nbPeptides);
-            for (int i=0;i<nbPeptides;i++) {
-                DMasterQuantPeptide masterQuantPeptide = m_masterQuantPeptideList.get(i);                        
+            for (int i = 0; i < nbPeptides; i++) {
+                DMasterQuantPeptide masterQuantPeptide = m_masterQuantPeptideList.get(i);
                 int level = masterQuantPeptide.getSelectionLevel();
-                if (level == 0) {
-                    masterQuantPeptide.setSelectionLevel(2);
+                if (m_selectLevel == -1) {
+                    if (level == 0) {
+                        masterQuantPeptide.setSelectionLevel(2);
+                    } else {
+                        masterQuantPeptide.setSelectionLevel(0);
+                    }
                 } else {
-                    masterQuantPeptide.setSelectionLevel(0);
+                    if (level == m_selectLevel) {
+                        continue;// do nothng
+                    } else {
+                        masterQuantPeptide.setSelectionLevel(m_selectLevel);//SELECTED_AUTO = 2 SELECTED_MANUAL = 3
+                    }
                 }
                 // Change the selection level of the peptide
                 MasterQuantComponent peptideMasterQuantComponent = entityManagerMSI.find(MasterQuantComponent.class, masterQuantPeptide.getId());
                 peptideMasterQuantComponent.setSelectionLevel(masterQuantPeptide.getSelectionLevel());
                 entityManagerMSI.merge(peptideMasterQuantComponent);
-                
+
                 // Load Protein Sets which contain this peptide and modify them
-                DPeptideInstance peptideInstance = masterQuantPeptide.getPeptideInstance();   
+                DPeptideInstance peptideInstance = masterQuantPeptide.getPeptideInstance();
                 long id = peptideInstance.getId();
                 peptideInstanceIdList.add(id);
             }
 
-
-
             // Load Protein Sets which contain this peptide and modify them
             TypedQuery<ProteinSet> proteinSetsQuery = entityManagerMSI.createQuery("SELECT prots FROM fr.proline.core.orm.msi.ProteinSet prots, fr.proline.core.orm.msi.PeptideSet peps, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem peps_to_pepi WHERE peps.proteinSet=prots AND peps.id=peps_to_pepi.id.peptideSetId AND peps_to_pepi.id.peptideInstanceId IN (:peptideInstanceId) AND prots.isValidated=true ORDER BY peps.score DESC", ProteinSet.class);
             proteinSetsQuery.setParameter("peptideInstanceId", peptideInstanceIdList);
-           
+
             List<ProteinSet> proteinSets = proteinSetsQuery.getResultList();
             Iterator<ProteinSet> it = proteinSets.iterator();
             while (it.hasNext()) {
@@ -233,20 +238,19 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
                 entityManagerMSI.merge(proteinSet);*/
 
                 String queryDMasterQuantProteinSet = "SELECT new fr.proline.core.orm.msi.dto.DMasterQuantProteinSet"
-                + "(q.id,  q.selectionLevel, q.objectTreeId,  q.serializedProperties,  p.resultSummary.id,  p.id) "
-                + " FROM MasterQuantComponent q,  ProteinSet p "
-                + " WHERE p.id = :proteinSetId AND   q.id = p.masterQuantComponentId "
-                + " ORDER BY q.id ASC ";
+                        + "(q.id,  q.selectionLevel, q.objectTreeId,  q.serializedProperties,  p.resultSummary.id,  p.id) "
+                        + " FROM MasterQuantComponent q,  ProteinSet p "
+                        + " WHERE p.id = :proteinSetId AND   q.id = p.masterQuantComponentId "
+                        + " ORDER BY q.id ASC ";
                 TypedQuery<DMasterQuantProteinSet> masterQuantProteinSetsQuery = entityManagerMSI.createQuery(queryDMasterQuantProteinSet, DMasterQuantProteinSet.class);
                 masterQuantProteinSetsQuery.setParameter("proteinSetId", proteinSet.getId());
                 DMasterQuantProteinSet masterQuantProteinSet = masterQuantProteinSetsQuery.getSingleResult();
 
                 m_masterQuantProteinSetModified.add(masterQuantProteinSet);
-                
+
                 MasterQuantComponent proteinSetMasterQuantComponent = entityManagerMSI.find(MasterQuantComponent.class, proteinSet.getMasterQuantComponentId());
                 if (proteinSetMasterQuantComponent != null) {
-                    
-                    
+
                     Map<String, Object> pmqSerializedMap = proteinSetMasterQuantComponent.getSerializedPropertiesAsMap();
                     if (pmqSerializedMap == null) {
                         pmqSerializedMap = new HashMap();
@@ -255,7 +259,7 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
                     proteinSetMasterQuantComponent.setSerializedPropertiesAsMap(pmqSerializedMap);
                     entityManagerMSI.merge(proteinSetMasterQuantComponent);
                     masterQuantProteinSet.setSerializedProperties(proteinSetMasterQuantComponent.getSerializedProperties()); // update corresponding DMasterQuantProteinSet
-     
+
                     ObjectTree proteinSetMasterobjectTree = entityManagerMSI.find(ObjectTree.class, proteinSetMasterQuantComponent.getObjectTreeId());
                     String quantProtSetdata = proteinSetMasterobjectTree.getClobData();
 
@@ -267,17 +271,16 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
                     // retrieve list of peptides
                     Long resultSummaryId = proteinSetMasterQuantComponent.getResultSummary().getId();
                     String queryPep = "SELECT pi.id "
-                                + "FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem pspi, "
-                                + "fr.proline.core.orm.msi.PeptideSet pepSet "
-                                + "WHERE pi.resultSummary.id=:rsmId AND pi.id = pspi.peptideInstance.id AND "
-                                + "pspi.peptideSet.id = pepSet.id AND pepSet.proteinSet.id=:proteinSetId "
-                                + "ORDER BY pi.id ASC";
+                            + "FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem pspi, "
+                            + "fr.proline.core.orm.msi.PeptideSet pepSet "
+                            + "WHERE pi.resultSummary.id=:rsmId AND pi.id = pspi.peptideInstance.id AND "
+                            + "pspi.peptideSet.id = pepSet.id AND pepSet.proteinSet.id=:proteinSetId "
+                            + "ORDER BY pi.id ASC";
                     Query peptidesQuery = entityManagerMSI.createQuery(queryPep);
                     peptidesQuery.setParameter("rsmId", resultSummaryId);
                     peptidesQuery.setParameter("proteinSetId", proteinSet.getId());
                     List<Long> peptideInstanceIds = (List<Long>) peptidesQuery.getResultList();
 
-                    
                     HashMap<Long, Peptide> peptideMap = new HashMap<>();
 
                     List<DPeptideInstance> peptideInstanceList = new ArrayList();
@@ -309,7 +312,7 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
                         Integer pmCdPrettyRank = (Integer) resCur[9];
                         Integer pmSdPrettyRank = (Integer) resCur[10];
                         String pmSerializedProp = (String) resCur[11];
-                        DPeptideMatch pm = new DPeptideMatch(pmId, pmRank, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId, pmCdPrettyRank, pmSdPrettyRank, pmSerializedProp );
+                        DPeptideMatch pm = new DPeptideMatch(pmId, pmRank, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId, pmCdPrettyRank, pmSdPrettyRank, pmSerializedProp);
 
                         Peptide p = (Peptide) resCur[12];
                         p.getTransientData().setPeptideReadablePtmStringLoaded();
@@ -321,10 +324,9 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
 
                         peptideInstanceList.add(dpi);
                     }
-                    
-                    
+
                     int nbPI = peptideInstanceList.size();
-                    
+
                     String queryDMasterQuantPeptide = "SELECT q.id, q.selectionLevel, q.objectTreeId,  q.serializedProperties,  pi.resultSummary.id, pi.id "
                             + "FROM MasterQuantComponent q, PeptideInstance pi "
                             + " WHERE pi.id IN (:listPeptideInstanceId) AND  q.id = pi.masterQuantComponentId "
@@ -359,7 +361,6 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
                         listMasterQP.add(masterQuantPeptide);
                     }
 
-                    
                     List<ObjectTree> listOt = new ArrayList();
                     if (listObjectTreeId.size() > 0) {
                         String otQuery = "SELECT ot FROM fr.proline.core.orm.msi.ObjectTree ot WHERE id IN (:listId) ";
@@ -367,13 +368,13 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
                         queryObjectTree.setParameter("listId", listObjectTreeId);
                         listOt = queryObjectTree.getResultList();
                     }
-                    
+
                     int nbMP = listMasterQP.size();
                     List<DMasterQuantPeptide> masterQuantPeptideList = new ArrayList<>();
-                    for (int i=0;i<nbMP;i++) {
+                    for (int i = 0; i < nbMP; i++) {
                         masterQuantPeptideList.add(null);
                     }
-                    
+
                     for (DMasterQuantPeptide masterQuantPeptide : listMasterQP) {
                         int index = -1;
                         for (int k = 0; k < nbMP; k++) {
@@ -405,12 +406,11 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
                         masterQuantPeptideList.set(index, masterQuantPeptide);
                     }
 
-                    
                     // calculate the raw abundance
                     for (Map.Entry<Long, DQuantProteinSet> entrySet : quantProteinSetByQchIds.entrySet()) {
                         Long qcId = entrySet.getKey();
                         DQuantProteinSet quantProteinSet = quantProteinSetByQchIds.get(qcId);
-                        
+
                         float rawAbundance = 0;
                         for (DMasterQuantPeptide masterQuantPeptide : listMasterQP) {
                             if (masterQuantPeptide.getSelectionLevel() != 2) {
@@ -422,13 +422,11 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
                                 rawAbundance += quantPeptideCur.getRawAbundance();
                             }
                         }
-                        
+
                         quantProteinSet.setRawAbundance(new Float(rawAbundance));
 
                     }
 
-                    
-                    
                     // save the raw abundances for Master Protein Set
                     ObjectMapper mapper = JsonSerializer.getMapper();
                     mapper.disable(MapperFeature.USE_GETTERS_AS_SETTERS);
@@ -439,12 +437,9 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
 
                 }
 
-                
-
             }
 
             entityManagerMSI.getTransaction().commit();
-
 
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
@@ -463,5 +458,5 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
 
         return true;
     }
-    
+
 }

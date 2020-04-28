@@ -88,6 +88,8 @@ import fr.proline.studio.utils.ResultCallback;
 import java.util.Map;
 import javax.swing.Icon;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.table.renderer.GrayedRenderer;
+import javax.swing.table.TableCellRenderer;
 
 /**
  *
@@ -341,9 +343,15 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         m_isXICMode = isXICMode;
         ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).setData(taskId, quantChannels, proteinSets, isXICMode);
-        URLCellRenderer renderer = (URLCellRenderer) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getRenderer(0, QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_NAME);
-        m_quantProteinSetTable.addMouseListener(renderer);
-        m_quantProteinSetTable.addMouseMotionListener(renderer);
+        URLCellRenderer urlRenderer;
+        TableCellRenderer renderer = ((CompoundTableModel) m_quantProteinSetTable.getModel()).getRenderer(0, QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_NAME);
+        if (renderer instanceof GrayedRenderer) {
+            urlRenderer = (URLCellRenderer) ((GrayedRenderer) renderer).getBaseRenderer();
+        } else {
+            urlRenderer = (URLCellRenderer) renderer;
+        }
+        m_quantProteinSetTable.addMouseListener(urlRenderer);
+        m_quantProteinSetTable.addMouseMotionListener(urlRenderer);
 
         // select the first row
         if ((proteinSets != null) && (proteinSets.size() > 0)) {
@@ -364,12 +372,12 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
             // check if refine panel must be shown
             try {
-                boolean containsModifier =((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).containsModifiedQuantProteinSet();
-                if(containsModifier){
+                boolean containsModifier = ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).containsModifiedQuantProteinSet();
+                if (containsModifier) {
                     // we must show refine panel
                     m_refineProteinsPanel.setLocation(getX() + 20, getY() + 20);
-                    m_refineProteinsPanel.setVisible(true);    
-                }               
+                    m_refineProteinsPanel.setVisible(true);
+                }
             } catch (Exception e) {
                 // should never happen
             }

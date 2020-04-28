@@ -36,14 +36,18 @@ import org.openide.windows.WindowManager;
 
 /**
  *
- * Panel with a generic behaviour to work as a floatting panel.
- * -> possibility to drag it and to close it.
- * 
+ * Panel with a generic behaviour to work as a floatting panel. -> possibility
+ * to drag it and to close it.
+ *
  * @author JM235353
  */
 public class DefaultFloatingPanel extends HourglassPanel {
 
-    private JButton[] m_actionButtonArray = null;
+    protected JButton[] m_actionButtonArray = null;
+
+    public DefaultFloatingPanel() {
+
+    }
 
     public DefaultFloatingPanel(String infoText, String[] actionName, ActionListener[] a, Icon[] icon) {
         setBorder(BorderFactory.createLineBorder(Color.darkGray, 1, true));
@@ -71,71 +75,23 @@ public class DefaultFloatingPanel extends HourglassPanel {
         if (infoLabel != null) {
             add(infoLabel);
         }
-        
+
         int nbActions = actionName.length;
         m_actionButtonArray = new JButton[nbActions];
-        for (int i=0;i<nbActions;i++) {
+        for (int i = 0; i < nbActions; i++) {
             m_actionButtonArray[i] = new JButton(actionName[i], icon[i]);
             m_actionButtonArray[i].setMargin(new Insets(1, 1, 1, 1));
             m_actionButtonArray[i].setFocusPainted(false);
 
             m_actionButtonArray[i].addActionListener(a[i]);
-            
+
             add(m_actionButtonArray[i]);
         }
-
 
         Dimension d = getPreferredSize();
         setBounds(0, 0, (int) d.getWidth(), (int) d.getHeight());
 
-        MouseAdapter dragGestureAdapter = new MouseAdapter() {
-            int dX, dY;
-
-            @Override
-            public void mouseDragged(MouseEvent e) {
-                Component panel = e.getComponent();
-
-                int newX = e.getLocationOnScreen().x - dX;
-                int newY = e.getLocationOnScreen().y - dY;
-
-                Component parentComponent = panel.getParent();
-                int parentX = parentComponent.getX();
-                if (newX < parentX) {
-                    newX = parentX;
-                }
-                int parentY = parentComponent.getY();
-                if (newY < parentY) {
-                    newY = parentY;
-                }
-                int parentWidth = parentComponent.getWidth();
-                if (newX + panel.getWidth() > parentWidth - parentX) {
-                    newX = parentWidth - parentX - panel.getWidth();
-                }
-                int parentHeight = parentComponent.getHeight();
-                if (newY + panel.getHeight() > parentHeight - parentY) {
-                    newY = parentHeight - parentY - panel.getHeight();
-                }
-
-                panel.setLocation(newX, newY);
-
-                dX = e.getLocationOnScreen().x - panel.getX();
-                dY = e.getLocationOnScreen().y - panel.getY();
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-                JPanel panel = (JPanel) e.getComponent();
-                panel.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
-                dX = e.getLocationOnScreen().x - panel.getX();
-                dY = e.getLocationOnScreen().y - panel.getY();
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                JPanel panel = (JPanel) e.getComponent();
-                panel.setCursor(null);
-            }
-        };
+        MouseAdapter dragGestureAdapter = new DragGestureAdapter();
 
         addMouseMotionListener(dragGestureAdapter);
         addMouseListener(dragGestureAdapter);
@@ -144,14 +100,68 @@ public class DefaultFloatingPanel extends HourglassPanel {
 
     }
 
+    public class DragGestureAdapter extends MouseAdapter {
+
+        public DragGestureAdapter() {
+        }
+
+        int dX, dY;
+
+        @Override
+        public void mouseDragged(MouseEvent e) {
+            Component panel = e.getComponent();
+
+            int newX = e.getLocationOnScreen().x - dX;
+            int newY = e.getLocationOnScreen().y - dY;
+
+            Component parentComponent = panel.getParent();
+            int parentX = parentComponent.getX();
+            if (newX < parentX) {
+                newX = parentX;
+            }
+            int parentY = parentComponent.getY();
+            if (newY < parentY) {
+                newY = parentY;
+            }
+            int parentWidth = parentComponent.getWidth();
+            if (newX + panel.getWidth() > parentWidth - parentX) {
+                newX = parentWidth - parentX - panel.getWidth();
+            }
+            int parentHeight = parentComponent.getHeight();
+            if (newY + panel.getHeight() > parentHeight - parentY) {
+                newY = parentHeight - parentY - panel.getHeight();
+            }
+
+            panel.setLocation(newX, newY);
+
+            dX = e.getLocationOnScreen().x - panel.getX();
+            dY = e.getLocationOnScreen().y - panel.getY();
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            JPanel panel = (JPanel) e.getComponent();
+            panel.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+            dX = e.getLocationOnScreen().x - panel.getX();
+            dY = e.getLocationOnScreen().y - panel.getY();
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            JPanel panel = (JPanel) e.getComponent();
+            panel.setCursor(null);
+        }
+    }
+
     public void actionStarted() {
         int nbActions = m_actionButtonArray.length;
         for (int i = 0; i < nbActions; i++) {
             m_actionButtonArray[i].setEnabled(false);
         }
-        
+
         setLoading(1, true);
     }
+
     public void actionFinished(boolean success, String errorMessage) {
         int nbActions = m_actionButtonArray.length;
         for (int i = 0; i < nbActions; i++) {
@@ -167,8 +177,4 @@ public class DefaultFloatingPanel extends HourglassPanel {
         }
     }
 
-
-
-    
-    
 }

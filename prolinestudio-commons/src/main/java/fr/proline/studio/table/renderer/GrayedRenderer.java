@@ -23,19 +23,20 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 /**
- * This renderer encapsulates another renderer so it can be grayed.
- * In fact to gray it is not possible due to optimizations in JTable. So the text
- * font is modified to italic
+ * This renderer encapsulates another renderer so it can be grayed. In fact to
+ * gray it is not possible due to optimizations in JTable. So the text font is
+ * modified to italic
+ *
  * @author JM235353
  */
 public class GrayedRenderer implements TableCellRenderer, Serializable {
-    
+
     private final TableCellRenderer m_renderer;
     private boolean innerRenderIsGrayable = false;
-    
+
     public GrayedRenderer(TableCellRenderer renderer) {
         m_renderer = renderer;
-        innerRenderIsGrayable =  (m_renderer instanceof GrayableTableCellRenderer);
+        innerRenderIsGrayable = (m_renderer instanceof GrayableTableCellRenderer);
         if (innerRenderIsGrayable) {
             ((GrayableTableCellRenderer) m_renderer).setGrayed(true);
         }
@@ -44,12 +45,15 @@ public class GrayedRenderer implements TableCellRenderer, Serializable {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component c = m_renderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        if (! innerRenderIsGrayable) {
+        if (!innerRenderIsGrayable) {
             c.setFont(c.getFont().deriveFont(Font.ITALIC));
             // does not work c.setForeground(Color.lightGray);
         }
         return c;
     }
 
-    
+    public TableCellRenderer getBaseRenderer() {
+        return m_renderer;
+    }
+
 }

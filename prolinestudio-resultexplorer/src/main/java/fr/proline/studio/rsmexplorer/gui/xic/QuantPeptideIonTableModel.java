@@ -44,6 +44,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.TimeRenderer;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.StatusRenderer;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
@@ -51,18 +52,13 @@ import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.types.QuantitationType;
 import fr.proline.studio.types.XicGroup;
-import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.StringUtils;
-import java.awt.Color;
-import java.awt.Component;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -281,13 +277,11 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
 
             }
             case COLTYPE_PEPTIDE_ION_STATUS: {
-                LazyData lazyData = getLazyData(row, col);
                 if (peptideIon.getId() == m_selectedId) {
-                    lazyData.setData(STATUS_VALIDATED);
+                    return Boolean.TRUE;
                 } else {
-                    lazyData.setData(STATUS_INVALIDATED);
+                    return Boolean.FALSE;
                 }
-                return lazyData;
             }
             case COLTYPE_PEPTIDE_PTM: {
                 LazyData lazyData = getLazyData(row, col);
@@ -476,7 +470,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
     public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<Long> selectedPepIonIds, List<DMasterQuantPeptideIon> peptideIons, boolean isXICMode) {
 
         if (selectedPepIonIds != null && !selectedPepIonIds.isEmpty()) {
-            m_logger.debug("selectedPeptideIonIdList is {}", selectedPepIonIds);
+            //m_logger.debug("selectedPeptideIonIdList is {}", selectedPepIonIds);
             m_selectedId = selectedPepIonIds.get(0);
         }
         boolean structureChanged = true;
@@ -682,9 +676,9 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
             }
             case COLTYPE_PEPTIDE_ION_STATUS: {
                 if (peptideIon.getId() == m_selectedId) {
-                    return STATUS_VALIDATED;
+                    return StatusRenderer.STATUS_VALIDATED;
                 } else {
-                    return STATUS_INVALIDATED;
+                    return StatusRenderer.STATUS_INVALIDATED;
                 }
             }
             case COLTYPE_PEPTIDE_PTM: {
@@ -1110,33 +1104,5 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
         return null;
     }
 
-    private String STATUS_VALIDATED = "validated";
-    private String STATUS_INVALIDATED = "invalidated";
-
-    private class StatusRenderer extends DefaultTableCellRenderer {
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-
-            DMasterQuantPeptideIon peptide = (DMasterQuantPeptideIon) getRowValue(DMasterQuantPeptideIon.class, row);
-            boolean status = (peptide.getId() == m_selectedId);
-            if (status == Boolean.TRUE) {
-                this.setIcon(IconManager.getIcon(IconManager.IconType.TICK_SMALL));
-                this.setToolTipText(STATUS_VALIDATED);
-            } else {
-                this.setIcon(IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));
-                this.setToolTipText(STATUS_INVALIDATED);
-
-            }
-            if (isSelected) {
-                this.setBackground(javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground"));
-                this.setForeground(Color.WHITE);
-            } else {
-                this.setBackground(javax.swing.UIManager.getDefaults().getColor("Table.background"));
-                this.setForeground(Color.BLACK);
-            }
-            return this;
-        }
-    }
 
 }

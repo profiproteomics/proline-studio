@@ -637,53 +637,6 @@ public class QuantPeptideInstTableModel  extends LazyTableModel implements Globa
 
     }
 
-    @Override
-    public void setValueAt(Object aValue, int row, int col) {
-
-        Integer rowKey = row;
-        if (m_modifiedLevels.contains(rowKey)) {
-            m_modifiedLevels.remove(rowKey);
-        } else {
-            m_modifiedLevels.add(rowKey);
-        }
-
-        ((XicPeptidePanel) m_databox.getPanel()).displayValidatePanel(!m_modifiedLevels.isEmpty());
-
-        /*
-         DMasterQuantPeptide masterQuantPeptide = m_quantPeptides.get(row);
-         masterQuantPeptide.setSelectionLevel(((Boolean) aValue) ? 2 : 0);
-
-        
-         final ArrayList<DMasterQuantProteinSet> masterQuantProteinSetModified = new ArrayList<>();
-        
-         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-         @Override
-         public boolean mustBeCalledInAWT() {
-         return true;
-         }
-
-         @Override
-         public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
-         if (!success) {
-         return; // should not happen
-         }
-
-         // propagate modifications to the previous views
-         DataBoxViewerManager.loadedDataModified(m_projectId, m_databox.getRsetId(), m_databox.getRsmId(), DMasterQuantProteinSet.class, masterQuantProteinSetModified, DataBoxViewerManager.REASON_PEPTIDE_SUPPRESSED);
-         }
-         };
-
-         // ask asynchronous loading of data
-         DatabaseModifyPeptideTask task = new DatabaseModifyPeptideTask(callback);
-         task.initDisablePeptide(m_projectId, masterQuantPeptide, masterQuantProteinSetModified);
-         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-        
-        
-         fireTableCellUpdated(row, col);*/
-    }
-
     public void cancelModifications() {
         if (m_modifiedLevels.isEmpty()) {
             return;

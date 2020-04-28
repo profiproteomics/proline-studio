@@ -21,6 +21,7 @@ import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dam.tasks.data.SelectLevel;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.export.ExportFontData;
@@ -65,7 +66,6 @@ import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLayeredPane;
@@ -80,6 +80,15 @@ import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.openide.windows.WindowManager;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Insets;
+import java.awt.event.MouseAdapter;
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.JRadioButton;
+import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,11 +103,12 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
 
     private JScrollPane m_peptideScrollPane;
     private QuantPeptideTable m_quantPeptideTable;
+    private QuantPeptideTableModel m_quantPeptideTableModel;
 
     private MarkerContainerPanel m_markerContainerPanel;
 
-    private DefaultFloatingPanel m_validateModificationsPanel;
-
+    // private DefaultFloatingPanel m_validateModificationsPanel;
+    private ModifyStatusFloatPanel m_validateModificationsPanel;
     private boolean m_displayForProteinSet;
     private DQuantitationChannel[] m_quantChannels;
     private boolean m_isXICMode;
@@ -109,6 +119,7 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
     private JButton m_graphicsButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
     private SearchToggleButton m_searchToggleButton;
+    private JButton m_modifyStatusButton;
     private InfoToggleButton m_infoToggleButton;
 
     private final boolean m_canGraph;
@@ -120,51 +131,13 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
         initComponents(xicMode);
     }
 
-    public void displayValidatePanel(boolean visible) {
-
-        if (m_validateModificationsPanel.isVisible() ^ visible) {
-            if (visible) {
-                m_validateModificationsPanel.setLocation(getX() + 80, getY() + 20);
-                m_validateModificationsPanel.setVisible(true);
-            } else {
-                m_validateModificationsPanel.setVisible(false);
-            }
-        }
-
-    }
-
     private void initComponents(boolean xicMode) {
         setLayout(new BorderLayout());
 
         ToolTipManager.sharedInstance().setInitialDelay(0);
         ToolTipManager.sharedInstance().setDismissDelay(5000);
-
+        m_validateModificationsPanel = new ModifyStatusFloatPanel();
         final JPanel peptidePanel = createPeptidePanel(xicMode);
-
-        ActionListener validateModificationsAction = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                m_validateModificationsPanel.actionStarted();
-                m_quantPeptideTable.validateModifications();
-            }
-
-        };
-
-        ActionListener cancelModificationsAction = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                m_validateModificationsPanel.actionStarted();
-                m_quantPeptideTable.cancelModifications();
-            }
-
-        };
-
-        String[] actionText = {"Validate", "Cancel"};
-        ActionListener[] actionListeners = {validateModificationsAction, cancelModificationsAction};
-        Icon[] icons = {IconManager.getIcon(IconManager.IconType.OK), IconManager.getIcon(IconManager.IconType.CANCEL)};
-
-        m_validateModificationsPanel = new DefaultFloatingPanel("Validate Modifications : ", actionText, actionListeners, icons);
-
         final JLayeredPane layeredPane = new JLayeredPane();
 
         layeredPane.addComponentListener(new ComponentListener() {
@@ -196,6 +169,8 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
         layeredPane.add(peptidePanel, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(m_infoToggleButton.getInfoPanel(), new Integer(JLayeredPane.PALETTE_LAYER + 1));
         layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER + 2));
+
+        m_validateModificationsPanel.setLocation(getX() + 80, getY() + 20);
         layeredPane.add(m_validateModificationsPanel, JLayeredPane.PALETTE_LAYER);
 
     }
@@ -285,11 +260,29 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
             }
         };
         toolbar.add(m_addCompareDataButton);
-
+        m_modifyStatusButton = new JButton(IconManager.getIcon(IconManager.IconType.REFINE));
+        m_modifyStatusButton.setToolTipText("Modify Status");
+        ActionListener modifyStatusButtonAction = createModifyStatusButtonAction();
+        m_modifyStatusButton.addActionListener(modifyStatusButtonAction);
+        toolbar.add(m_modifyStatusButton);
         m_infoToggleButton = new InfoToggleButton(m_quantPeptideTable, m_quantPeptideTable);
         toolbar.add(m_infoToggleButton);
 
         return toolbar;
+    }
+
+    private ActionListener createModifyStatusButtonAction() {
+        ActionListener modifyStatusButtonAction = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int[] selectedRows = m_quantPeptideTable.getSelectedRows();
+                if (selectedRows.length > 0) {
+                    m_validateModificationsPanel.setSelectedRows(selectedRows);
+                    m_validateModificationsPanel.setVisible(true);
+                }
+            }
+        };
+        return modifyStatusButtonAction;
     }
 
     private JPanel createInternalPanel(boolean xicMode) {
@@ -306,8 +299,8 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
         m_peptideScrollPane = new JScrollPane();
 
         m_quantPeptideTable = new QuantPeptideTable();
-        QuantPeptideTableModel baseModel = new QuantPeptideTableModel((LazyTable) m_quantPeptideTable, xicMode);
-        m_quantPeptideTable.setModel(new CompoundTableModel(baseModel, true));
+        m_quantPeptideTableModel = new QuantPeptideTableModel((LazyTable) m_quantPeptideTable, xicMode);
+        m_quantPeptideTable.setModel(new CompoundTableModel(m_quantPeptideTableModel, true));
         CustomColumnControlButton customColumnControl = new CustomColumnControlButton(m_quantPeptideTable);
         m_quantPeptideTable.setColumnControl(customColumnControl);
         // hide the id column
@@ -344,10 +337,10 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
         m_quantChannels = quantChannels;
         m_isXICMode = isXICMode;
         m_displayForProteinSet = displayForProteinSet;
-        ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).setData(taskId, m_dataBox.getProjectId(), quantChannels, peptides, m_isXICMode);
+        m_quantPeptideTableModel.setData(taskId, m_dataBox.getProjectId(), quantChannels, peptides, m_isXICMode);
 
         if (!m_isXICMode) {
-            ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).setOverviewType(QuantPeptideTableModel.COLTYPE_RAW_ABUNDANCE);
+            m_quantPeptideTableModel.setOverviewType(QuantPeptideTableModel.COLTYPE_RAW_ABUNDANCE);
         }
         // select the first row
         if ((peptides != null) && (peptides.size() > 0)) {
@@ -379,7 +372,7 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
 
     private void setColumnsVisibility() {
         // hide the rawAbundance  and selectionLevel columns
-        List<Integer> listIdsToHide = ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
+        List<Integer> listIdsToHide = m_quantPeptideTableModel.getDefaultColumnsToHide();
         List<TableColumn> columns = m_quantPeptideTable.getColumns(true);
         for (Integer id : listIdsToHide) {
             boolean columnVisible = ((TableColumnExt) columns.get(id)).isVisible();
@@ -410,7 +403,7 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
 
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
-        ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).setDatabox(dataBox);
+        m_quantPeptideTableModel.setDatabox(dataBox);
         m_dataBox = dataBox;
 
     }
@@ -465,18 +458,7 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
 
         public QuantPeptideTable() {
             super(m_peptideScrollPane.getVerticalScrollBar());
-
-        }
-
-        public void validateModifications() {
-            QuantPeptideTableModel quantPeptideTableModel = ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel());
-            quantPeptideTableModel.validateModifications(m_validateModificationsPanel);
-        }
-
-        public void cancelModifications() {
-            QuantPeptideTableModel quantPeptideTableModel = ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel());
-            quantPeptideTableModel.cancelModifications();
-            m_validateModificationsPanel.actionFinished(true, null);
+            setStutusColonneListner();
         }
 
         @Override
@@ -489,8 +471,7 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
             Integer[] overviewValues = {0, 1, 2};
 
             List<TableColumn> columns = getColumns(true);
-            QuantPeptideTableModel quantPeptideTableModel = ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel());
-            int overviewType = quantPeptideTableModel.getOverviewType();
+            int overviewType = m_quantPeptideTableModel.getOverviewType();
             boolean overviewColumnVisible = ((TableColumnExt) columns.get(QuantPeptideTableModel.COLTYPE_OVERVIEW)).isVisible();
 
             int defaultIndex = 0;
@@ -531,14 +512,12 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
 
             Integer index = (Integer) m_overviewParameter.getAssociatedObjectValue();
 
-            QuantPeptideTableModel model = ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel());
-
             if (index == 1) {
-                model.setOverviewType(QuantPeptideTableModel.COLTYPE_ABUNDANCE);
+                m_quantPeptideTableModel.setOverviewType(QuantPeptideTableModel.COLTYPE_ABUNDANCE);
             } else if (index == 2) {
-                model.setOverviewType(QuantPeptideTableModel.COLTYPE_RAW_ABUNDANCE);
+                m_quantPeptideTableModel.setOverviewType(QuantPeptideTableModel.COLTYPE_RAW_ABUNDANCE);
             } else if (index == 0) {
-                model.setOverviewType(QuantPeptideTableModel.COLTYPE_PSM);
+                m_quantPeptideTableModel.setOverviewType(QuantPeptideTableModel.COLTYPE_PSM);
             }
 
         }
@@ -562,6 +541,9 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
             }
             int realColumnIndex = convertColumnIndexToModel(colIndex);
             int realRowIndex = convertRowIndexToModel(rowIndex);
+            if (realColumnIndex == QuantPeptideTableModel.COLTYPE_MQPEPTIDE_SELECTION_LEVEL) {
+                return super.getToolTipText(e);
+            }
             CompoundTableModel tableModel = (CompoundTableModel) getModel();
             return tableModel.getTootlTipValue(realRowIndex, realColumnIndex);
         }
@@ -733,6 +715,213 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
             int count = getModel().getRowCount();
             return count + ((count > 1) ? " Peptides" : " Peptide");
         }
+
+        private void setStutusColonneListner() {
+            addMouseListener(createChangeStatusMouseAdapter());
+        }
+
+        private MouseAdapter createChangeStatusMouseAdapter() {
+            MouseAdapter changeStatusMouseAdapter = new MouseAdapter() {
+
+                /**
+                 * if mousePressed right on the colonne
+                 * QuantPeptideTableModel.COLTYPE_MQPEPTIDE_SELECTION_LEVEL,
+                 * popup
+                 *
+                 * @param e
+                 */
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    if (SwingUtilities.isLeftMouseButton(e)) {
+                        int col = m_quantPeptideTable.columnAtPoint(e.getPoint());
+                        int row = m_quantPeptideTable.rowAtPoint(e.getPoint());
+                        int colModelIndex = m_quantPeptideTable.convertColumnIndexToModel(col);
+                        int rowModelIndex = m_quantPeptideTable.convertRowIndexToModel(row);
+                        if (m_quantPeptideTable.convertColumnIndexToModel(col) == QuantPeptideTableModel.COLTYPE_MQPEPTIDE_SELECTION_LEVEL) {
+                            if (row != -1) {
+                                if (e.isShiftDown() || e.isControlDown()) {//multi select
+                                    m_validateModificationsPanel.setSelectedButtonDisabled(null);
+                                    m_validateModificationsPanel.selectedRow(-1);
+                                    m_validateModificationsPanel.setVisible(false);
+                                } else {
+                                    m_quantPeptideTable.getSelectionModel().setSelectionInterval(row, row);
+                                    if (m_validateModificationsPanel != null && m_quantPeptideTableModel.isRowEditable(rowModelIndex)) {
+                                        m_validateModificationsPanel.selectedRow(rowModelIndex);
+                                        m_validateModificationsPanel.setVisible(true);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            return changeStatusMouseAdapter;
+        }
     }
 
+    class ModifyStatusFloatPanel extends DefaultFloatingPanel {
+
+        String cmd_validated = "Validated";
+        String cmd_invalidated = "Invalidated";
+        String cmd_other = "other action";
+        JRadioButton _validButton;
+        JRadioButton _invalidButton;
+        JRadioButton _otherButton;
+        ButtonGroup m_buttonGroup;
+        ArrayList<JRadioButton> _buttonList;
+        DMasterQuantPeptide _selectedPeptide; //for single select
+        ArrayList<Integer> _selectedRows;
+
+        ModifyStatusFloatPanel() {
+            //model
+            _selectedRows = new ArrayList();
+            _buttonList = new ArrayList();
+            //create 3 radio buttons
+            _validButton = new JRadioButton(cmd_validated);
+            _invalidButton = new JRadioButton(cmd_invalidated);
+            _otherButton = new JRadioButton(cmd_other);
+            _validButton.setActionCommand(cmd_validated);
+            _invalidButton.setActionCommand(cmd_invalidated);
+            _otherButton.setActionCommand(cmd_other);
+            _buttonList.add(_invalidButton);
+            _buttonList.add(_validButton);
+            _buttonList.add(_otherButton);
+
+            m_buttonGroup = new ButtonGroup();
+            m_buttonGroup.add(_validButton);
+            m_buttonGroup.add(_invalidButton);
+            m_buttonGroup.add(_otherButton);
+
+            /**
+             * create close Button
+             */
+            JButton closeButton = new JButton(IconManager.getIcon(IconManager.IconType.CROSS_SMALL7));
+            closeButton.setMargin(new Insets(0, 0, 0, 0));
+            closeButton.setFocusPainted(false);
+            closeButton.setContentAreaFilled(false);
+
+            closeButton.addActionListener(createCancelAction());
+
+            /**
+             * create OK, cancel Button
+             */
+            JButton okButton = new JButton("OK", IconManager.getIcon(IconManager.IconType.OK));
+            JButton cancelButton = new JButton("Cancel", IconManager.getIcon(IconManager.IconType.CANCEL));
+            m_actionButtonArray = new JButton[2];
+            m_actionButtonArray[0] = okButton;
+            m_actionButtonArray[1] = cancelButton;
+            ActionListener okAction = createOkAction();
+            ActionListener cancelAction = createCancelAction();
+            okButton.addActionListener(okAction);
+            cancelButton.addActionListener(cancelAction);
+            //drag Listener
+            MouseAdapter dragGestureAdapter;
+            dragGestureAdapter = new DefaultFloatingPanel.DragGestureAdapter();
+
+            addMouseMotionListener(dragGestureAdapter);
+            addMouseListener(dragGestureAdapter);
+            //layout
+            setBorder(BorderFactory.createLineBorder(Color.darkGray, 1, true));
+            setOpaque(true);
+            setLayout(new FlowLayout());
+            this.add(closeButton);
+            this.add(_validButton);
+            this.add(_invalidButton);
+            this.add(_otherButton);
+            this.add(okButton);
+            this.add(cancelButton);
+            Dimension d = getPreferredSize();
+            setBounds(0, 0, (int) d.getWidth(), (int) d.getHeight());
+            setVisible(false);
+        }
+
+        private ActionListener createOkAction() {
+            ActionListener okAction = new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    actionStarted();
+                    String command = m_buttonGroup.getSelection().getActionCommand();
+                    if (command.equals(cmd_validated)) {
+                        m_quantPeptideTableModel.validateModifications(m_validateModificationsPanel, _selectedRows, SelectLevel.SELECTED_MANUAL);
+                    } else if (command.equals(cmd_invalidated)) {
+                        m_quantPeptideTableModel.validateModifications(m_validateModificationsPanel, _selectedRows, SelectLevel.DESELECTED_MANUAL);
+                    } else if (command.equals(cmd_other)) {
+                        ///nothing actually
+                        actionFinished(true, "");
+                    }
+                    m_buttonGroup.clearSelection();
+                }
+            };
+            return okAction;
+        }
+
+        private ActionListener createCancelAction() {
+            ActionListener cancelAction = new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    setSelectedButtonDisabled(null);
+                    m_buttonGroup.clearSelection();
+                    setVisible(false);
+                }
+            };
+            return cancelAction;
+        }
+
+        private void selectedRow(int modelRow) {//for single selected
+            if (modelRow == -1) {
+                _selectedPeptide = null;
+            } else {
+                _selectedRows.clear();
+                _selectedRows.add(modelRow);
+
+                _selectedPeptide = (DMasterQuantPeptide) m_quantPeptideTableModel.getRowValue(DMasterQuantPeptide.class, modelRow);
+                if (_selectedPeptide != null) {//single select
+                    int selectLevel = _selectedPeptide.getSelectionLevel();
+                    if (selectLevel < 2) {
+                        setSelectedButtonDisabled(_invalidButton);
+                    } else if (selectLevel >= 2) {
+                        setSelectedButtonDisabled(_validButton);
+                    } else {//impossible actually
+                        setSelectedButtonDisabled(_otherButton);
+                    }
+                }
+            }
+        }
+
+        private void setSelectedButtonDisabled(JRadioButton button) {
+            for (JRadioButton oneButton : _buttonList) {
+                if (oneButton.equals(button)) {
+                    oneButton.setEnabled(false);
+                    oneButton.setSelected(true);
+                } else {
+                    oneButton.setEnabled(true);
+                    oneButton.setSelected(false);
+                }
+            }
+        }
+
+        public void actionFinished(boolean success, String errorMessage) {
+            _selectedPeptide = null;
+            _selectedRows.clear();
+            setSelectedButtonDisabled(null);
+            m_buttonGroup.clearSelection();
+            super.actionFinished(success, errorMessage);
+        }
+
+        /**
+         *
+         * @param selectedRows: non empty array
+         */
+        private void setSelectedRows(int[] selectedViewRows) {
+            int modelIndex;
+            for (int row : selectedViewRows) {
+                modelIndex = m_quantPeptideTable.convertRowIndexToModel(row);
+                _selectedRows.add(modelIndex);
+            }
+            setSelectedButtonDisabled(null);
+            m_buttonGroup.clearSelection();
+        }
+
+    }
 }

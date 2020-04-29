@@ -21,12 +21,10 @@ import fr.proline.studio.graphics.cursor.AbstractCursor;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 
 /**
  * X Axis
@@ -68,7 +66,7 @@ public class XAxis extends Axis {
         }
 
         // display title
-        if (m_title != null) {
+        if ((m_title != null) && (m_displayTitle)) {
             if (m_titleFont == null) {
                 m_titleFont = g.getFont().deriveFont(Font.BOLD, 11);
                 m_titleFontMetrics = g.getFontMetrics(m_titleFont);
@@ -642,6 +640,7 @@ public class XAxis extends Axis {
         return value2 - value1;
     }
     
+    @Override
     public double deltaPixelToLogMultValue(int deltaPixel) {
         double min = Math.log10(m_minValue <= LOG_MIN_VALUE ? LOG_MIN_VALUE : m_minValue);
         double max = Math.log10(m_maxValue <= LOG_MIN_VALUE ? LOG_MIN_VALUE*10 : m_maxValue);

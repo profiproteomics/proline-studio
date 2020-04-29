@@ -228,14 +228,19 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         // Retrieve Quant Peptide
         DMasterQuantPeptide peptide = m_quantPeptides.get(row);
         DPeptideInstance peptideInstance = peptide.getPeptideInstance();
+        //VDS TO DO : use getrepresentativePepMatch
+        DPeptideMatch mqPepMatch = peptideInstance!= null ? peptideInstance.getBestPeptideMatch() : null;
 
         switch (col) {
             case COLTYPE_PEPTIDE_ID: {
                 return peptide.getId() == -1 ? "" : Long.toString(peptide.getId());
             }
             case COLTYPE_MQPEPTIDE_SELECTION_LEVEL: {
-                if (m_isXICMode) {
-                    return Boolean.toString(peptide.getSelectionLevel() == 2);
+                if (m_isXICMode) {                  
+                   if (m_modifiedLevels.contains(row)) {
+                        return Boolean.toString(peptide.getSelectionLevel() != 2); // FLIPPED value -> modified value not saved in database
+                    }
+                    return Boolean.toString(peptide.getSelectionLevel() == 2); // 2 = enable ; 1 = peptide disabled by algorithm, 0 = peptide disabled by human                                                       
                 } else {
                     return "";
                 }
@@ -244,8 +249,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 if (peptideInstance == null) {
                     return "";
                 } else {
-                    if (peptideInstance.getBestPeptideMatch() != null) {
-                        return peptideInstance.getBestPeptideMatch().getPeptide().getSequence();
+                    if (peptideInstance.getPeptide() != null) {
+                        return peptideInstance.getPeptide().getSequence();
                     } else {
                         return "";
                     }
@@ -254,13 +259,13 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             case COLTYPE_PEPTIDE_PTM: {
                 if (peptideInstance == null) {
                     return "";
-                } else if (peptideInstance.getBestPeptideMatch() != null) {
-                    boolean ptmStringLoadeed = peptideInstance.getBestPeptideMatch().getPeptide().getTransientData().isPeptideReadablePtmStringLoaded();
+                } else if (peptideInstance.getPeptide() != null) {
+                    boolean ptmStringLoadeed = peptideInstance.getPeptide().getTransientData().isPeptideReadablePtmStringLoaded();
                     if (!ptmStringLoadeed) {
                         return null;
                     }
                     String ptm = "";
-                    PeptideReadablePtmString ptmString = peptideInstance.getBestPeptideMatch().getPeptide().getTransientData().getPeptideReadablePtmString();
+                    PeptideReadablePtmString ptmString = peptideInstance.getPeptide().getTransientData().getPeptideReadablePtmString();
                     if (ptmString != null) {
                         ptm = ptmString.getReadablePtmString();
                     }
@@ -274,8 +279,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
                 if (peptideInstance == null) {
                     return "";
-                } else if (peptideInstance.getBestPeptideMatch() != null) {
-                    Float score = Float.valueOf((float) peptideInstance.getBestPeptideMatch().getScore());
+                } else if (mqPepMatch != null) {
+                    Float score = Float.valueOf((float) mqPepMatch.getScore());
                     return String.valueOf(score);
                 } else {
                     return "";
@@ -313,18 +318,18 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 }
             }
             case COLTYPE_PEPTIDE_CHARGE: {
-                if (peptideInstance == null) {
+                if (mqPepMatch == null) {
                     return "";
                 } else {
-                    return String.valueOf(peptideInstance.getBestPeptideMatch().getCharge());
+                    return String.valueOf(mqPepMatch.getCharge());
                 }
 
             }
             case COLTYPE_PEPTIDE_MOZ: {
-                if (peptideInstance == null) {
+                if (mqPepMatch == null) {
                     return "";
                 } else {
-                    return String.valueOf(peptideInstance.getBestPeptideMatch().getExperimentalMoz());
+                    return String.valueOf(mqPepMatch.getExperimentalMoz());
                 }
 
             }
@@ -719,6 +724,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         // Retrieve Quant Peptide
         DMasterQuantPeptide peptide = m_quantPeptides.get(row);
         DPeptideInstance peptideInstance = peptide.getPeptideInstance();
+        //VDS TO DO : use getrepresentativePepMatch
+        DPeptideMatch mqPepMatch = peptide.getRepresentativePepMatch();
 
         switch (col) {
             case COLTYPE_PEPTIDE_ID: {
@@ -742,8 +749,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, row, col);
                 } else {
-                    if (peptideInstance.getBestPeptideMatch() != null) {
-                        lazyData.setData(peptideInstance.getBestPeptideMatch());
+                    if (mqPepMatch != null) {
+                        lazyData.setData(mqPepMatch);
                     } else {
                         lazyData.setData(null);
                     }
@@ -757,21 +764,22 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 if (peptideInstance == null) {
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, row, col);
-                } else if (peptideInstance.getBestPeptideMatch() != null) {
-                    boolean ptmStringLoaded = peptideInstance.getBestPeptideMatch().getPeptide().getTransientData().isPeptideReadablePtmStringLoaded();
+                } else {// if (peptideInstance.getBestPeptideMatch() != null) {
+                    boolean ptmStringLoaded = peptideInstance.getPeptide().getTransientData().isPeptideReadablePtmStringLoaded();
                     if (!ptmStringLoaded) {
                         return null;
                     }
                     String ptm = "";
-                    PeptideReadablePtmString ptmString = peptideInstance.getBestPeptideMatch().getPeptide().getTransientData().getPeptideReadablePtmString();
+                    PeptideReadablePtmString ptmString = peptideInstance.getPeptide().getTransientData().getPeptideReadablePtmString();
                     if (ptmString != null) {
                         ptm = ptmString.getReadablePtmString();
                     }
 
                     lazyData.setData(ptm);
-                } else {
-                    lazyData.setData("");
-                }
+                } 
+//                else {
+//                    lazyData.setData("");
+//                }
 
                 return lazyData;
             }
@@ -780,8 +788,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 if (peptideInstance == null) {
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, row, col);
-                } else if (peptideInstance.getBestPeptideMatch() != null) {
-                    Float score = Float.valueOf((float) peptideInstance.getBestPeptideMatch().getScore());
+                } else if (mqPepMatch != null) {
+                    Float score = mqPepMatch.getScore();
                     lazyData.setData(score);
                 } else {
                     lazyData.setData(null);
@@ -828,11 +836,11 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             }
             case COLTYPE_PEPTIDE_CHARGE: {
                 LazyData lazyData = getLazyData(row, col);
-                if (peptideInstance == null) {
+                if (mqPepMatch == null) {
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, row, col);
                 } else {
-                    lazyData.setData(peptideInstance.getBestPeptideMatch().getCharge());
+                    lazyData.setData(mqPepMatch.getCharge());
                 }
                 return lazyData;
 
@@ -840,11 +848,11 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             case COLTYPE_PEPTIDE_MOZ: {
                 LazyData lazyData = getLazyData(row, col);
 
-                if (peptideInstance == null) {
+                if (mqPepMatch == null) {
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, row, col);
                 } else {
-                    lazyData.setData(peptideInstance.getBestPeptideMatch().getExperimentalMoz());
+                    lazyData.setData(mqPepMatch.getExperimentalMoz());
                 }
                 return lazyData;
 

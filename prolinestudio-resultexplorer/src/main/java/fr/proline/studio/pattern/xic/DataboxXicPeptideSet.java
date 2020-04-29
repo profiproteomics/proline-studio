@@ -285,7 +285,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                 if (pi == null) {
                     return null;
                 }
-                return pi.getBestPeptideMatch();
+                return pi.getBestPeptideMatch(); //VDS or representativePepMatch ? Warning, representative may not belong to same RSM
             }
             if (parameterType.equals(DDataset.class)) {
                 return m_dataset;
@@ -376,12 +376,9 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
             DPeptideInstance peptideInstance = mqp.getPeptideInstance();
 
             if (peptideInstance != null) {
-                DPeptideMatch pm = peptideInstance.getBestPeptideMatch();
-                if (pm != null) {
-                    Peptide peptide = pm.getPeptide();
-                    if (peptide != null) {
-                        return peptide.getSequence();
-                    }
+                Peptide peptide = peptideInstance.getPeptide();
+                if (peptide != null) {
+                    return peptide.getSequence();
                 }
             }
         }

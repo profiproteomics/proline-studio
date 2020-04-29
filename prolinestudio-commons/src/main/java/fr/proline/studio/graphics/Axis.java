@@ -35,6 +35,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -53,6 +54,9 @@ public abstract class Axis {
 
     protected static final Stroke DASHED = new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER, 10.0f, new float[]{2.0f, 2.0f}, 0.0f);
     protected static final Logger m_logger = LoggerFactory.getLogger(Axis.class);
+    
+    protected ArrayList<PlotBaseAbstract> m_plots = null;
+    
     protected String m_title = null;
     protected Font m_titleFont = null;
     protected FontMetrics m_titleFontMetrics;
@@ -245,10 +249,36 @@ public abstract class Axis {
     }
 
     public Axis(BasePlotPanel p) {
+        m_plots = new ArrayList();
         m_plotPanel = p;
         m_rangePanel = new AxisRangePanel(this);
     }
 
+    public ArrayList<PlotBaseAbstract> getPlots() {
+        return m_plots;
+    }
+
+    public boolean hasPlot(PlotBaseAbstract plot) {
+        return m_plots.contains(plot);
+    }
+    
+    public boolean hasPlots() {
+        return !m_plots.isEmpty();
+    }
+    
+    public void setPlot(PlotBaseAbstract plot) {
+        m_plots.clear();
+        m_plots.add(plot);
+    }
+    
+    public void clearPlots() {
+        m_plots.clear();
+    }
+    
+    public void addPlot(PlotXYAbstract plot) {
+        m_plots.add(plot);
+    }
+    
     public int getX() {
         return m_x;
     }
@@ -283,9 +313,15 @@ public abstract class Axis {
         m_log = log;
         m_df = null; // reinit for display
         
-        m_plotPanel.updatePlotsForLog();
+        updatePlotsForLog();
     }
 
+    public void updatePlotsForLog() {
+        for (PlotBaseAbstract plot : m_plots) {
+            plot.update();
+        }
+    }
+    
     public boolean isLog() {
         return m_log;
     }
@@ -436,7 +472,6 @@ public abstract class Axis {
 
     public interface EnumYInterface {
 
-        public String getEnumValueY(int index, boolean fromData);
         public String getEnumValueY(int index, boolean fromData, Axis axis);
     }
 }

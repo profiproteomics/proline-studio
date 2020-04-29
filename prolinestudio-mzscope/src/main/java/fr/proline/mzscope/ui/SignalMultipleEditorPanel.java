@@ -63,7 +63,7 @@ public class SignalMultipleEditorPanel extends JPanel {
         linear.setPlotInformation(wrappedSignal.getPlotInformation());
         linear.setStrokeFixed(true);
         linear.setAntiAliasing(true);
-        basePlot.addPlot(linear); 
+        basePlot.addPlot(linear, true); 
         m_plots.add(linear);
       }
       

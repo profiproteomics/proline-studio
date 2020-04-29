@@ -43,9 +43,5 @@ public abstract class PlotXYAbstract extends PlotBaseAbstract {
         super(plotPanel, plotType, compareDataInterface, crossSelectionInterface);
     }
 
-    @Override
-    public String getEnumValueY(int index, boolean fromData, Axis axis) {
-       return getEnumValueY(index, fromData);
-    }
 
 }

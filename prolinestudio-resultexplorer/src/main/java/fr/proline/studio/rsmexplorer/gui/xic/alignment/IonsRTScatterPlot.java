@@ -110,10 +110,8 @@ public class IonsRTScatterPlot extends PlotScatter {
     }
 
     @Override
-    public void paint(Graphics2D g) {
+    public void paint(Graphics2D g, XAxis xAxis, YAxis yAxis) {
 
-        XAxis xAxis = m_plotPanel.getXAxis();
-        YAxis yAxis = m_plotPanel.getYAxis();
 
         // set clipping area
         int clipX = xAxis.valueToPixel(xAxis.getMinValue());

@@ -191,7 +191,7 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
             for (Peakel p : f.getPeakels()) {
                 maxY = Math.max(p.getApexIntensity(), maxY);
                 PlotLinear plot = new PlotLinear(graphPlot, new PeakelWrapper(p, index++), null, 0, 1);
-                graphPlot.addPlot(plot);
+                graphPlot.addPlot(plot, true);
             }
             graphPlot.getYAxis().setRange(0, maxY);
             graphPlot.lockMinYValue();

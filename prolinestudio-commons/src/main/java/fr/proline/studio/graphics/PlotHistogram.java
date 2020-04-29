@@ -438,10 +438,8 @@ public class PlotHistogram extends PlotXYAbstract {
     }
 
     @Override
-    public void paint(Graphics2D g) {
-        
-        XAxis xAxis = m_plotPanel.getXAxis();
-        YAxis yAxis = m_plotPanel.getYAxis(); 
+    public void paint(Graphics2D g, XAxis xAxis, YAxis yAxis) {
+
         
         // set clipping area
         int clipX = xAxis.valueToPixel(xAxis.getMinValue());
@@ -690,7 +688,7 @@ public class PlotHistogram extends PlotXYAbstract {
     }
 
     @Override
-    public String getEnumValueY(int index, boolean fromData) {
+    public String getEnumValueY(int index, boolean fromData, Axis axis) {
         return null; // should not be called
     }
     

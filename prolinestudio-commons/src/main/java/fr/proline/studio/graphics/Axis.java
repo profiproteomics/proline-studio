@@ -88,6 +88,7 @@ public abstract class Axis {
     protected boolean m_isInteger = false;
     protected boolean m_isEnum = false;
     protected boolean m_isPixel = false;
+    protected boolean m_displayTitle = true;
 
     protected BasePlotPanel m_plotPanel;
 
@@ -102,6 +103,14 @@ public abstract class Axis {
             
     public boolean displayAxis() {
         return !m_isPixel;
+    }
+    
+    public boolean displayTitle() {
+        return m_displayTitle;
+    }
+    
+    public void setDisplayTitle(boolean b) {
+        m_displayTitle = b;
     }
 
     /**

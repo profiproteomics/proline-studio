@@ -236,19 +236,24 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         m_isEnumAxisUpdated = true;
     }
 
-        @Override
+    @Override
     public void paint(Graphics g) {
+        
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        
         if (!m_isEnumAxisUpdated) {
             updateEnumAxis();
         }
 
-        Graphics2D g2d = (Graphics2D) g;
-        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-
         boolean displayYAxisAtRight = ((m_yAxisRight != null) && (m_yAxisRight.hasPlots()) && (m_yAxisRight.displayAxis()));
         
-        int xAxisX = GAP_FIGURES_Y + GAP_AXIS_TITLE + GAP_AXIS_LINE;
-        int yAxisWidth = GAP_FIGURES_Y + GAP_AXIS_TITLE + GAP_AXIS_LINE;
+        // To let space for Axis Title when it is displayed
+        int gapForAxisXTtile = m_xAxis.displayTitle() ? GAP_AXIS_TITLE : 0;
+        int gapForAxisYTitle = m_yAxis.displayTitle() ? GAP_AXIS_TITLE : 0;
+
+        int xAxisX = GAP_FIGURES_Y + gapForAxisYTitle + GAP_AXIS_LINE;
+        int yAxisWidth = GAP_FIGURES_Y + gapForAxisYTitle + GAP_AXIS_LINE;
         int yAxisRightWidth = (displayYAxisAtRight) ? yAxisWidth : 0;
         // height and width of the panel
         
@@ -284,60 +289,51 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         int figuresXHeight = GAP_FIGURES_X;
 
         //2 draw axis X
-        //m_logger.debug("draw Axis");
         boolean hasPlot = ((m_xAxis != null) && (m_xAxis.hasPlots()));
         if (hasPlot) {
             if ((m_xAxis != null) && (m_xAxis.displayAxis())) {
-                int xAxisY = height - figuresXHeight - GAP_AXIS_TITLE/*-GAP_TOP_AXIS*/;
-                int xAxisHeight = figuresXHeight + GAP_AXIS_TITLE + GAP_AXIS_LINE;
+                int xAxisY = height - figuresXHeight - gapForAxisXTtile;
+                int xAxisHeight = figuresXHeight + gapForAxisXTtile + GAP_AXIS_LINE;
                 // set default size
                 m_xAxis.setSize(xAxisX, xAxisY, xAxisWidth, xAxisHeight);
-                //m_secondXAxis.setSize(xAxisX, xAxisY, xAxisWidth, xAxisHeight);
+
                 // prepare paint
                 m_xAxis.preparePaint(g2d);
-                //m_secondXAxis.preparePaint(g2d);
 
-                XAxis realXAxis = m_xAxis;
-                //if (m_isMainPlotEmpty) {
-                //    realXAxis = m_secondXAxis;
-                //}
                 // set correct size
-                figuresXHeight = realXAxis.getMiniMumAxisHeight(figuresXHeight);
-                xAxisY = height - figuresXHeight - GAP_AXIS_TITLE;
-                xAxisHeight = figuresXHeight + GAP_AXIS_TITLE + GAP_AXIS_LINE;
+                figuresXHeight = m_xAxis.getMiniMumAxisHeight(figuresXHeight);
+                xAxisY = height - figuresXHeight - gapForAxisXTtile;
+                xAxisHeight = figuresXHeight + gapForAxisXTtile + GAP_AXIS_LINE;
                 m_xAxis.setSize(xAxisX, xAxisY, xAxisWidth, xAxisHeight);
-                //then set size of the second Axis Y
-                //m_secondXAxis.setSize(xAxisX, xAxisY, xAxisWidth, xAxisHeight);
+
 
                 //prepare plotArea begin point & width
                 m_plotArea.x = m_xAxis.getX() + 1;
                 m_plotArea.width = m_xAxis.getWidth();
-                realXAxis.paint(g2d);
-                //m_logger.debug("___->paint main xAxis done");
+                m_xAxis.paint(g2d);
 
             }
             //3.1 draw main axis Y
             int yAxisX = 0;
             int yAxisY = GAP_END_AXIS + titleY;
 
-            int yAxisHeight = height - figuresXHeight - GAP_AXIS_TITLE - GAP_END_AXIS - titleY;
+            int yAxisHeight = height - figuresXHeight - gapForAxisXTtile - GAP_END_AXIS - titleY;
             if ((m_yAxis != null) && (m_yAxis.displayAxis())) {
 
                 m_yAxis.setSize(yAxisX, yAxisY, yAxisWidth, yAxisHeight);
-                // yAxis.setSize(0, GAP_END_AXIS + titleY, GAP_FIGURES_Y + GAP_AXIS_TITLE + GAP_AXIS_LINE/*+GAP_TOP_AXIS*/, height - figuresXHeight - GAP_AXIS_TITLE - GAP_END_AXIS - titleY);
+                
                 //prepare plotArea begin point & height
                 m_plotArea.y = m_yAxis.getY() + 1;
                 m_plotArea.height = m_yAxis.getHeight();
                 m_yAxis.paint(g2d);
             }
             //3.2 draw second axis Y & paint a rectangle to indicate the plot color on 2nd Axis Y
-            {
-                if (displayYAxisAtRight) {
-                    //m_logger.debug("->seconde Axis Y");                    
-                    m_yAxisRight.setSize(m_plotArea.width + yAxisRightWidth, yAxisY, yAxisRightWidth, yAxisHeight);
-                    m_yAxisRight.paint(g2d);
-                }
+            if (displayYAxisAtRight) {
+                //m_logger.debug("->seconde Axis Y");                    
+                m_yAxisRight.setSize(m_plotArea.width + yAxisRightWidth, yAxisY, yAxisRightWidth, yAxisHeight);
+                m_yAxisRight.paint(g2d);
             }
+ 
             //4 paint plot with grid
             if (m_plotArea.width >= 0 && m_plotArea.height >= 0) {
                 //for test m_useDoubleBuffering = true;
@@ -1309,6 +1305,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
         JPopupMenu popup = new JPopupMenu();
         popup.add(new LogAction(axis, isXAxis));
+        popup.add(new TitleAction(axis, (isXAxis) ? null : m_yAxisRight));
         popup.add(new GridAction(axis.equals(m_xAxis)));
         popup.add(new RangeAction(axis, axis.equals(m_xAxis)));
 
@@ -1474,6 +1471,31 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         }
     }
 
+    public class TitleAction extends AbstractAction {
+
+        Axis m_axis1;
+        Axis m_axis2;
+
+        public TitleAction(Axis axis1, Axis axis2) {
+            super(axis1.displayTitle() ? "Hide Title" : "Display Title");
+            m_axis1 = axis1;
+            m_axis2 = axis2;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            boolean displayTitle = !m_axis1.displayTitle();
+            m_axis1.setDisplayTitle(displayTitle);
+            if (m_axis2 != null) {
+               m_axis2.setDisplayTitle(displayTitle); 
+            }
+            
+            m_updateDoubleBuffer = true;
+            repaint();
+        }
+
+    }
+    
     public class GridAction extends AbstractAction {
 
         private final boolean m_xAxis;

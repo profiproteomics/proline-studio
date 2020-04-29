@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
+import fr.proline.studio.corewrapper.data.QuantPostProcessingParams;
 import fr.proline.studio.parameter.AbstractParameter;
 import fr.proline.studio.parameter.BooleanParameter;
 import fr.proline.studio.parameter.DoubleParameter;
@@ -68,7 +69,7 @@ public class QuantPostProcessingPanel extends JPanel {
     private JCheckBox m_discardMissCleavedPeptidesChB;
     private JCheckBox m_discardModifiedPeptidesChB;
 
-    private final String DISCARD_OXIDIZED_PEPTIDES = "discard_oxidized_peptides";//only in V1
+   // private final String DISCARD_OXIDIZED_PEPTIDES = "discard_oxidized_peptides";//only in V1
     private JCheckBox m_discardPeptidesSharingPeakelsChB;
     private JCheckBox m_applyProfileClusteringChB;
 
@@ -78,28 +79,28 @@ public class QuantPostProcessingPanel extends JPanel {
     private JComboBox<String> m_modifiedPeptidesFilteringMethodCB;
     private JComboBox<String> m_ionAbundanceSummarizingMethodCB;
 
-    private final static String[] ABUNDANCE_SUMMARIZING_METHOD_VALUES = {"Mean", "Mean of top 3 peptides", "Median", "Median Biological Profile", "Median Profile", "Sum", "Median Ratio Fitting"};
-    private final static String[] ABUNDANCE_SUMMARIZING_METHOD_KEYS = {"MEAN", "MEAN_OF_TOP3", "MEDIAN", "MEDIAN_BIOLOGICAL_PROFILE", "MEDIAN_PROFILE", "SUM", "LFQ"};
-    private final static String[] MODIFIED_PEPTIDE_FILTERING_METHOD_VALUES = {"Discard all forms", "Discard modified forms only"};
-    private final static String[] MODIFIED_PEPTIDE_FILTERING_METHOD_KEYS = {"DISCARD_ALL_FORMS", "DISCARD_MODIFIED_FORMS"};
-    private final static String[] ION_ABUNDANCE_SUMMARIZING_METHOD_VALUES = {"Best Ion", "Sum"};
-    private final static String[] ION_ABUNDANCE_SUMMARIZING_METHOD_KEYS = {"BEST_ION","SUM"};
-  
-    /**
-     * parameters key
-     */
-    private final static String USE_ONLY_SPECIFIC_PEPTIDES = "use_only_specific_peptides";
-    private final static String DISCARD_MISS_CLEAVED_PEPTIDES = "discard_miss_cleaved_peptides"; //v2
-    private final static String DISCARD_MISS_CLEAVED_PEPTIDES_V1 = "discard_missed_cleaved_peptides";//V1
-    private final static String DISCARD_MODIFIED_PEPTIDES = "discard_modified_peptides";//V2
-    private final static String MODIFIED_PEPTIDE_FILTERING_METHOD = "modified_peptide_filtering_method";
-    private final static String PTM_DEFINITION_IDS_TO_DISCARD = "ptm_definition_ids_to_discard";//V2
-    private final static String DISCARD_PEPTIDES_SHARING_PEAKELS = "discard_peptides_sharing_peakels";
-    private final static String ABUNDANCE_SUMMARIZING_METHOD = "abundance_summarizing_method";//V2, shown in protein, but registed in global parameters
-    private final static String ABUNDANCE_SUMMARIZING_METHOD_V1 = "abundance_summarizer_method";//V1
-
-    private final static String APPLY_NORMALIZATION = "apply_normalization";//double used by peptide & protein
-    private final static String ION_ABUNDANCE_SUMMARIZING_METHOD = "pep_ion_abundance_summarizing_method";//ion_peptide_aggreagation_method";
+//    private final static String[] ABUNDANCE_SUMMARIZING_METHOD_VALUES = {"Mean", "Mean of top 3 peptides", "Median", "Median Biological Profile", "Median Profile", "Sum", "Median Ratio Fitting"};
+//    private final static String[] ABUNDANCE_SUMMARIZING_METHOD_KEYS = {"MEAN", "MEAN_OF_TOP3", "MEDIAN", "MEDIAN_BIOLOGICAL_PROFILE", "MEDIAN_PROFILE", "SUM", "LFQ"};
+//    private final static String[] MODIFIED_PEPTIDE_FILTERING_METHOD_VALUES = {"Discard all forms", "Discard modified forms only"};
+//    private final static String[] MODIFIED_PEPTIDE_FILTERING_METHOD_KEYS = {"DISCARD_ALL_FORMS", "DISCARD_MODIFIED_FORMS"};
+//    private final static String[] ION_ABUNDANCE_SUMMARIZING_METHOD_VALUES = {"Best Ion", "Sum"};
+//    private final static String[] ION_ABUNDANCE_SUMMARIZING_METHOD_KEYS = {"BEST_ION","SUM"};
+//  
+//    /**
+//     * parameters key
+//     */
+//    private final static String USE_ONLY_SPECIFIC_PEPTIDES = "use_only_specific_peptides";
+//    private final static String DISCARD_MISS_CLEAVED_PEPTIDES = "discard_miss_cleaved_peptides"; //v2
+//    private final static String DISCARD_MISS_CLEAVED_PEPTIDES_V1 = "discard_missed_cleaved_peptides";//V1
+//    private final static String DISCARD_MODIFIED_PEPTIDES = "discard_modified_peptides";//V2
+//    private final static String MODIFIED_PEPTIDE_FILTERING_METHOD = "modified_peptide_filtering_method";
+//    private final static String PTM_DEFINITION_IDS_TO_DISCARD = "ptm_definition_ids_to_discard";//V2
+//    private final static String DISCARD_PEPTIDES_SHARING_PEAKELS = "discard_peptides_sharing_peakels";
+//    private final static String ABUNDANCE_SUMMARIZING_METHOD = "abundance_summarizing_method";//V2, shown in protein, but registed in global parameters
+//    private final static String ABUNDANCE_SUMMARIZING_METHOD_V1 = "abundance_summarizer_method";//V1
+//
+//    private final static String APPLY_NORMALIZATION = "apply_normalization";//double used by peptide & protein
+//    private final static String ION_ABUNDANCE_SUMMARIZING_METHOD = "pep_ion_abundance_summarizing_method";//ion_peptide_aggreagation_method";
 
     private JTextField m_peptideStatTestsAlpha;
     private JCheckBox m_applyPepNormalizationChB;
@@ -264,19 +265,19 @@ public class QuantPostProcessingPanel extends JPanel {
         m_useOnlySpecificPeptidesParameter = new BooleanParameter("useOnlySpecificPeptides", "Use Only Specific Peptides", m_useOnlySpecificPeptidesChB, true);
         m_parameterList.add(m_useOnlySpecificPeptidesParameter);
 
-        m_abundanceSummarizingMethodCB = new JComboBox(ABUNDANCE_SUMMARIZING_METHOD_VALUES);
+        m_abundanceSummarizingMethodCB = new JComboBox(QuantPostProcessingParams.getAbundanceSummarizingMethodValues());
         m_abundanceSummarizingMethodCB.setEnabled(!m_readOnly);
-        m_abundanceSummarizingMethodParameter = new ObjectParameter<>("abundanceSummarizerMethod", "Abundance Summarizer Method", m_abundanceSummarizingMethodCB, ABUNDANCE_SUMMARIZING_METHOD_VALUES, ABUNDANCE_SUMMARIZING_METHOD_KEYS, 5, null);
+        m_abundanceSummarizingMethodParameter = new ObjectParameter<>("abundanceSummarizerMethod", "Abundance Summarizer Method", m_abundanceSummarizingMethodCB, QuantPostProcessingParams.getAbundanceSummarizingMethodValues(), QuantPostProcessingParams.getAbundanceSummarizingMethodKeys(), 5, null);
         m_parameterList.add(m_abundanceSummarizingMethodParameter);
         
-        m_ionAbundanceSummarizingMethodCB = new JComboBox(ION_ABUNDANCE_SUMMARIZING_METHOD_VALUES);
+        m_ionAbundanceSummarizingMethodCB = new JComboBox(QuantPostProcessingParams.getIonAbundanceSummarizingMethodValues());
         m_ionAbundanceSummarizingMethodCB.setEnabled(!m_readOnly);
-        m_ionAbundanceSummarizingMethodParameter = new ObjectParameter<>("ionAbundanceSummarizerMethod", "Ion Abundance Summarizer Method", m_ionAbundanceSummarizingMethodCB, ION_ABUNDANCE_SUMMARIZING_METHOD_VALUES, ION_ABUNDANCE_SUMMARIZING_METHOD_KEYS, 0, null);
+        m_ionAbundanceSummarizingMethodParameter = new ObjectParameter<>("ionAbundanceSummarizerMethod", "Ion Abundance Summarizer Method", m_ionAbundanceSummarizingMethodCB, QuantPostProcessingParams.getIonAbundanceSummarizingMethodValues(), QuantPostProcessingParams.getIonAbundanceSummarizingMethodKeys(), 0, null);
         m_parameterList.add(m_ionAbundanceSummarizingMethodParameter);
 
-        m_modifiedPeptidesFilteringMethodCB = new JComboBox(MODIFIED_PEPTIDE_FILTERING_METHOD_VALUES);
+        m_modifiedPeptidesFilteringMethodCB = new JComboBox(QuantPostProcessingParams.getModifiedPeptideFilteringMethodValues());
         m_modifiedPeptidesFilteringMethodCB.setEnabled(!m_readOnly);
-        m_modifiedPeptidesFilteringMethodParameter = new ObjectParameter<>("modifiedPeptidesFilteringMethod", "Modified Peptides Filtering Method", m_modifiedPeptidesFilteringMethodCB, MODIFIED_PEPTIDE_FILTERING_METHOD_VALUES, MODIFIED_PEPTIDE_FILTERING_METHOD_KEYS, 0, null);
+        m_modifiedPeptidesFilteringMethodParameter = new ObjectParameter<>("modifiedPeptidesFilteringMethod", "Modified Peptides Filtering Method", m_modifiedPeptidesFilteringMethodCB, QuantPostProcessingParams.getModifiedPeptideFilteringMethodValues(), QuantPostProcessingParams.getModifiedPeptideFilteringMethodKeys(), 0, null);
         m_parameterList.add(m_modifiedPeptidesFilteringMethodParameter);
     }
 
@@ -659,10 +660,10 @@ public class QuantPostProcessingPanel extends JPanel {
         Map<String, Object> params = new HashMap<>();
         params.put("config_version", "2.0"); //Panel for PostProcessing config parameters version  2.0
 
-        params.put(USE_ONLY_SPECIFIC_PEPTIDES, m_useOnlySpecificPeptidesChB.isSelected());
-        params.put(DISCARD_MISS_CLEAVED_PEPTIDES, m_discardMissCleavedPeptidesChB.isSelected());
-        params.put(DISCARD_MODIFIED_PEPTIDES, m_discardModifiedPeptidesChB.isSelected());
-        params.put(ION_ABUNDANCE_SUMMARIZING_METHOD, ION_ABUNDANCE_SUMMARIZING_METHOD_KEYS[m_ionAbundanceSummarizingMethodCB.getSelectedIndex()]);        
+        params.put(QuantPostProcessingParams.USE_ONLY_SPECIFIC_PEPTIDES, m_useOnlySpecificPeptidesChB.isSelected());
+        params.put(QuantPostProcessingParams.DISCARD_MISS_CLEAVED_PEPTIDES, m_discardMissCleavedPeptidesChB.isSelected());
+        params.put(QuantPostProcessingParams.DISCARD_MODIFIED_PEPTIDES, m_discardModifiedPeptidesChB.isSelected());
+        params.put(QuantPostProcessingParams.ION_ABUNDANCE_SUMMARIZING_METHOD, QuantPostProcessingParams.getIonAbundanceSummarizingMethodKeys()[m_ionAbundanceSummarizingMethodCB.getSelectedIndex()]);
 
         List<Long> ptmIds = new ArrayList();
         for (BooleanParameter ptmToDiscardParameter : m_peptidesModificationListParameter) {
@@ -671,16 +672,16 @@ public class QuantPostProcessingPanel extends JPanel {
                 ptmIds.add(ptmId);
             }
         }
-        params.put(PTM_DEFINITION_IDS_TO_DISCARD, ptmIds);//list of PTM
-        params.put(MODIFIED_PEPTIDE_FILTERING_METHOD, MODIFIED_PEPTIDE_FILTERING_METHOD_KEYS[m_modifiedPeptidesFilteringMethodCB.getSelectedIndex()]);
-        params.put(DISCARD_PEPTIDES_SHARING_PEAKELS, m_discardPeptidesSharingPeakelsChB.isSelected()); //last one 
-        params.put(ABUNDANCE_SUMMARIZING_METHOD, ABUNDANCE_SUMMARIZING_METHOD_KEYS[m_abundanceSummarizingMethodCB.getSelectedIndex()]);//shown in Protein tab
+        params.put(QuantPostProcessingParams.PTM_DEFINITION_IDS_TO_DISCARD, ptmIds);//list of PTM
+        params.put(QuantPostProcessingParams.MODIFIED_PEPTIDE_FILTERING_METHOD, QuantPostProcessingParams.getModifiedPeptideFilteringMethodKeys()[m_modifiedPeptidesFilteringMethodCB.getSelectedIndex()]);
+        params.put(QuantPostProcessingParams.DISCARD_PEPTIDES_SHARING_PEAKELS, m_discardPeptidesSharingPeakelsChB.isSelected()); //last one 
+        params.put(QuantPostProcessingParams.ABUNDANCE_SUMMARIZING_METHOD, QuantPostProcessingParams.getAbundanceSummarizingMethodKeys()[m_abundanceSummarizingMethodCB.getSelectedIndex()]);//shown in Protein tab
         params.put("apply_profile_clustering", m_applyProfileClusteringChB.isSelected());
 
         //for tab Pep. Configuration
         Map<String, Object> peptideStatConfigMap = new HashMap<>();
         peptideStatConfigMap.put("stat_tests_alpha", m_peptideStatTestsAlpha.getText());
-        peptideStatConfigMap.put(APPLY_NORMALIZATION, m_applyPepNormalizationChB.isSelected());
+        peptideStatConfigMap.put(QuantPostProcessingParams.APPLY_NORMALIZATION, m_applyPepNormalizationChB.isSelected());
         peptideStatConfigMap.put("apply_miss_val_inference", m_applyPepMissValInferenceChB.isSelected());
         peptideStatConfigMap.put("apply_variance_correction", m_applyPepVarianceCorrectionChB.isSelected());
         peptideStatConfigMap.put("apply_ttest", m_applyPepTTestChB.isSelected());
@@ -689,7 +690,7 @@ public class QuantPostProcessingPanel extends JPanel {
         //for tab Prot. Configuration
         Map<String, Object> proteinStatConfigMap = new HashMap<>();
         proteinStatConfigMap.put("stat_tests_alpha", m_proteinStatTestsAlpha.getText());
-        proteinStatConfigMap.put(APPLY_NORMALIZATION, m_applyProtNormalizationChB.isSelected());
+        proteinStatConfigMap.put(QuantPostProcessingParams.APPLY_NORMALIZATION, m_applyProtNormalizationChB.isSelected());
         proteinStatConfigMap.put("apply_miss_val_inference", m_applyProtMissValInferenceChB.isSelected());
         proteinStatConfigMap.put("apply_variance_correction", m_applyProtVarianceCorrectionChB.isSelected());
         proteinStatConfigMap.put("apply_ttest", m_applyProtTTestChB.isSelected());
@@ -706,26 +707,26 @@ public class QuantPostProcessingPanel extends JPanel {
      */
     public void setRefinedParams(Map<String, Object> refinedParams) {
         boolean isVersion2 = false;
-        Object isDiscardModifiedPeptide = refinedParams.get(DISCARD_MODIFIED_PEPTIDES);
+        Object isDiscardModifiedPeptide = refinedParams.get(QuantPostProcessingParams.DISCARD_MODIFIED_PEPTIDES);
         if (isDiscardModifiedPeptide != null) {
             isVersion2 = true;
         }
 
-        m_useOnlySpecificPeptidesChB.setSelected(Boolean.valueOf(refinedParams.get(USE_ONLY_SPECIFIC_PEPTIDES).toString()));//V1&V2
+        m_useOnlySpecificPeptidesChB.setSelected(Boolean.valueOf(refinedParams.get(QuantPostProcessingParams.USE_ONLY_SPECIFIC_PEPTIDES).toString()));//V1&V2
 
-        Object isDmcPep = isVersion2 ? refinedParams.get(DISCARD_MISS_CLEAVED_PEPTIDES) : refinedParams.get(DISCARD_MISS_CLEAVED_PEPTIDES_V1);
+        Object isDmcPep = isVersion2 ? refinedParams.get(QuantPostProcessingParams.DISCARD_MISS_CLEAVED_PEPTIDES) : refinedParams.get(QuantPostProcessingParams.DISCARD_MISS_CLEAVED_PEPTIDES_V1);
         m_discardMissCleavedPeptidesChB.setSelected(Boolean.valueOf(isDmcPep.toString()));
 
         boolean isV1DiscardOxidPepSelected = false;
         if (!isVersion2) {//V1
-            isV1DiscardOxidPepSelected = Boolean.valueOf(refinedParams.get(DISCARD_OXIDIZED_PEPTIDES).toString());
+            isV1DiscardOxidPepSelected = Boolean.valueOf(refinedParams.get(QuantPostProcessingParams.DISCARD_OXIDIZED_PEPTIDES).toString());
             m_discardModifiedPeptidesChB.setSelected(isV1DiscardOxidPepSelected);
             m_modifiedPeptidesFilteringMethodLabel.setEnabled(false);
         } else {//V2
             m_discardModifiedPeptidesChB.setSelected(Boolean.valueOf(isDiscardModifiedPeptide.toString()));//V2
         }
 
-        ArrayList ptmIdListFromParam = (ArrayList) refinedParams.get(PTM_DEFINITION_IDS_TO_DISCARD);//return is an Integer ArrayList, not desired Long ArrayList
+        ArrayList ptmIdListFromParam = (ArrayList) refinedParams.get(QuantPostProcessingParams.PTM_DEFINITION_IDS_TO_DISCARD);//return is an Integer ArrayList, not desired Long ArrayList
         List<Long> ptmIdList = new ArrayList();
         if (ptmIdListFromParam != null) {
             //convert Integer ArrayList to Long ArrayList
@@ -750,22 +751,24 @@ public class QuantPostProcessingPanel extends JPanel {
             }
         }
 
-        String pmfMethod = isVersion2 ? (String) refinedParams.get(MODIFIED_PEPTIDE_FILTERING_METHOD) : "";
+        String pmfMethod = isVersion2 ? (String) refinedParams.get(QuantPostProcessingParams.MODIFIED_PEPTIDE_FILTERING_METHOD) : "";
         int index = 0;
-        for (int i = 0; i < MODIFIED_PEPTIDE_FILTERING_METHOD_KEYS.length; i++) {
-            if (MODIFIED_PEPTIDE_FILTERING_METHOD_KEYS[i].equals(pmfMethod)) {
+        String[] modifPepFilteringMethodKeys = QuantPostProcessingParams.getModifiedPeptideFilteringMethodKeys();        
+        for (int i = 0; i < modifPepFilteringMethodKeys.length; i++) {
+            if (modifPepFilteringMethodKeys[i].equals(pmfMethod)) {
                 index = i;
                 break;
             }
         }
         m_modifiedPeptidesFilteringMethodCB.setSelectedIndex(index);//V2
 
-        m_discardPeptidesSharingPeakelsChB.setSelected(Boolean.valueOf(refinedParams.get(DISCARD_PEPTIDES_SHARING_PEAKELS).toString()));//V1&V2
+        m_discardPeptidesSharingPeakelsChB.setSelected(Boolean.valueOf(refinedParams.get(QuantPostProcessingParams.DISCARD_PEPTIDES_SHARING_PEAKELS).toString()));//V1&V2
         
-        String summarisedMethodKey = isVersion2 ? (String) refinedParams.get(ABUNDANCE_SUMMARIZING_METHOD) : (String) refinedParams.get(ABUNDANCE_SUMMARIZING_METHOD_V1);
+        String[] abundanceSummarizingMethodKeys = QuantPostProcessingParams.getAbundanceSummarizingMethodKeys();
+        String summarisedMethodKey = isVersion2 ? (String) refinedParams.get(QuantPostProcessingParams.ABUNDANCE_SUMMARIZING_METHOD) : (String) refinedParams.get(QuantPostProcessingParams.ABUNDANCE_SUMMARIZING_METHOD_V1);
         index = 0;
-        for (int i = 0; i < ABUNDANCE_SUMMARIZING_METHOD_KEYS.length; i++) {
-            if (ABUNDANCE_SUMMARIZING_METHOD_KEYS[i].equals(summarisedMethodKey)) {
+        for (int i = 0; i < abundanceSummarizingMethodKeys.length; i++) {
+            if (abundanceSummarizingMethodKeys[i].equals(summarisedMethodKey)) {
                 index = i;
                 break;
             }
@@ -773,10 +776,11 @@ public class QuantPostProcessingPanel extends JPanel {
         m_abundanceSummarizingMethodCB.setSelectedIndex(index);
         //VDS TODO :If not completeMode should be set to false 
              
-        String ionPepSummarisingMethodKey = isVersion2 ? (String) refinedParams.get(ION_ABUNDANCE_SUMMARIZING_METHOD) : (String) ION_ABUNDANCE_SUMMARIZING_METHOD_KEYS[0];
+        String ionPepSummarisingMethodKey = isVersion2 ? (String) refinedParams.get(QuantPostProcessingParams.ION_ABUNDANCE_SUMMARIZING_METHOD) : QuantPostProcessingParams.ION_ABUNDANCE_SUMMARIZING_BEST_ION_METHOD_KEY;
+        String[] ionAbundanceSummarizingMethodKeys = QuantPostProcessingParams.getIonAbundanceSummarizingMethodKeys();        
         index = 0;
-        for (int i = 0; i < ION_ABUNDANCE_SUMMARIZING_METHOD_KEYS.length; i++) {
-            if (ION_ABUNDANCE_SUMMARIZING_METHOD_KEYS[i].equals(ionPepSummarisingMethodKey)) {
+        for (int i = 0; i < ionAbundanceSummarizingMethodKeys.length; i++) {
+            if (ionAbundanceSummarizingMethodKeys[i].equals(ionPepSummarisingMethodKey)) {
                 index = i;
                 break;
             }
@@ -788,7 +792,7 @@ public class QuantPostProcessingPanel extends JPanel {
         Map<String, Object> peptideStatConfigMap = (Map<String, Object>) refinedParams.get("peptide_stat_config");
 
         m_peptideStatTestsAlpha.setText(peptideStatConfigMap.get("stat_tests_alpha").toString());//VDS TODO :If not completeMode should be set to 0.01
-        m_applyPepNormalizationChB.setSelected(Boolean.valueOf(peptideStatConfigMap.get(APPLY_NORMALIZATION).toString()));
+        m_applyPepNormalizationChB.setSelected(Boolean.valueOf(peptideStatConfigMap.get(QuantPostProcessingParams.APPLY_NORMALIZATION).toString()));
         m_applyPepMissValInferenceChB.setSelected(Boolean.valueOf(peptideStatConfigMap.get("apply_miss_val_inference").toString()));//VDS TODO :If not completeMode should be set to false
         m_applyPepVarianceCorrectionChB.setSelected(Boolean.valueOf(peptideStatConfigMap.get("apply_variance_correction").toString()));//VDS TODO :If not completeMode should be set to false
         m_applyPepTTestChB.setSelected(Boolean.valueOf(peptideStatConfigMap.get("apply_ttest").toString()));//VDS TODO :If not completeMode should be set to false
@@ -798,7 +802,7 @@ public class QuantPostProcessingPanel extends JPanel {
 
         m_proteinStatTestsAlpha.setText(proteinStatConfigMap.get("stat_tests_alpha").toString());//VDS TODO :If not completeMode should be set to 0.01
 
-        m_applyProtNormalizationChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get(APPLY_NORMALIZATION).toString()));
+        m_applyProtNormalizationChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get(QuantPostProcessingParams.APPLY_NORMALIZATION).toString()));
         m_applyProtMissValInferenceChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get("apply_miss_val_inference").toString()));//VDS TODO :If not completeMode should be set to false
         m_applyProtVarianceCorrectionChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get("apply_variance_correction").toString()));//VDS TODO :If not completeMode should be set to false
         m_applyProtTTestChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get("apply_ttest").toString()));//VDS TODO :If not completeMode should be set to false

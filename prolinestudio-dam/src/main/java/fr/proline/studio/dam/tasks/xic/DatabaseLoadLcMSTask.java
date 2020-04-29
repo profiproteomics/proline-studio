@@ -122,8 +122,8 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
 
     public void initLoadMasterFeatureForPeptide(long projectId, DMasterQuantPeptide masterQuantPeptide, List<Feature> masterFeatureList) {
         String peptideName = "";
-        if (masterQuantPeptide != null && masterQuantPeptide.getPeptideInstance() != null && masterQuantPeptide.getPeptideInstance().getBestPeptideMatch() != null && masterQuantPeptide.getPeptideInstance().getBestPeptideMatch().getPeptide() != null) {
-            peptideName = masterQuantPeptide.getPeptideInstance().getBestPeptideMatch().getPeptide().getSequence();
+        if (masterQuantPeptide != null && masterQuantPeptide.getPeptideInstance() != null && masterQuantPeptide.getPeptideInstance().getPeptide() != null) {
+            peptideName = masterQuantPeptide.getPeptideInstance().getPeptide().getSequence();
         }
         init(SUB_TASK_COUNT_MASTER_FEATURE, new TaskInfo("Load Master Features for Peptide " + peptideName, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;

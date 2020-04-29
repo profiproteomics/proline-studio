@@ -18,11 +18,9 @@ package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.settings.FilePreferences;
-import java.util.Map;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javax.swing.BorderFactory;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.TitledBorder;
 import org.openide.util.NbPreferences;

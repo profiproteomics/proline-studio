@@ -175,8 +175,8 @@ public class XICComparePeptideTableModel implements ExtendedTableModelInterface,
     public PlotInformation getPlotInformation() {
         PlotInformation plotInformation = new PlotInformation();
         plotInformation.setSelected(m_isSelected);
-        if (m_quantPeptide.getPeptideInstance() != null && m_quantPeptide.getPeptideInstance().getBestPeptideMatch() != null) {
-            Peptide peptide = m_quantPeptide.getPeptideInstance().getBestPeptideMatch().getPeptide();
+        if (m_quantPeptide.getPeptideInstance() != null && m_quantPeptide.getPeptideInstance().getPeptide() != null) {
+            Peptide peptide = m_quantPeptide.getPeptideInstance().getPeptide();
             StringBuilder sb = new StringBuilder(peptide.getSequence());
             if (peptide.getTransientData().isPeptideReadablePtmStringLoaded() && peptide.getTransientData().getPeptideReadablePtmString() != null) {
                 sb.append(" - ").append(peptide.getTransientData().getPeptideReadablePtmString().getReadablePtmString());

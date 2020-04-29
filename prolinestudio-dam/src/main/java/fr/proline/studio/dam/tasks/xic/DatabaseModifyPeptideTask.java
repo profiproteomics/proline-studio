@@ -319,7 +319,7 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
                         peptideMap.put(p.getId(), p);
 
                         dpi.setBestPeptideMatch(pm);
-
+                        dpi.setPeptide(p);
                         pm.setPeptide(p);
 
                         peptideInstanceList.add(dpi);

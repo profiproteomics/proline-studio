@@ -97,7 +97,7 @@ public class YAxis extends Axis {
             paintLinear(g, m_ticks);
         }
 
-        if (m_title != null) {
+        if ((m_title != null) && (m_displayTitle)) {
             drawTitle(g);
         }
     }

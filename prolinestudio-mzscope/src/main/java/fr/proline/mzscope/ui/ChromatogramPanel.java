@@ -154,7 +154,7 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
       chromatogramPlot.setStrokeFixed(true);
       chromatogramPlot.addMeasurement(new IntegralMeasurement(chromatogramPlot));
       //chromatogramPlot.addMeasurement(new WidthMeasurement(chromatogramPlot));
-      chromatogramPlotPanel.addPlot(chromatogramPlot);
+      chromatogramPlotPanel.addPlot(chromatogramPlot, true);
       chromatogramPlots.add(chromatogramPlot);
       
       // if a a zoom range was set, restore it

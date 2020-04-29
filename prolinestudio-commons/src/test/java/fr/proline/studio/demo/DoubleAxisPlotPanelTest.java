@@ -16,9 +16,9 @@
  */
 package fr.proline.studio.demo;
 
+import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotLinear;
-import fr.proline.studio.graphics.DoubleYAxisPlotPanel;
 import fr.proline.studio.sampledata.Sample;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -35,11 +35,11 @@ import org.openide.util.Exceptions;
  */
 public class DoubleAxisPlotPanelTest extends JFrame {
 
-    private DoubleYAxisPlotPanel graphicsPanel;
+    private BasePlotPanel graphicsPanel;
 
     public DoubleAxisPlotPanelTest() {
         super("Graphics Panel demo");
-        graphicsPanel = new DoubleYAxisPlotPanel();
+        graphicsPanel = new BasePlotPanel();
 
         graphicsPanel.setPlotTitle("Double Y Axis");
 
@@ -69,17 +69,16 @@ public class DoubleAxisPlotPanelTest extends JFrame {
         pInfo2.setPlotColor(Color.orange);
         pInfo2.setPlotTitle("blue linear");
         p2.setPlotInformation(pInfo2);
-        graphicsPanel.addMainPlot(p1);
-        graphicsPanel.addMainPlot(p11);
-        graphicsPanel.addMainPlot(p12);
-        graphicsPanel.addAuxiliaryPlot(p2);
+        graphicsPanel.addPlot(p1, true);
+        graphicsPanel.addPlot(p11, true);
+        graphicsPanel.addPlot(p12, true);
+        graphicsPanel.addPlot(p2, false);
         Color color = p2.getPlotInformation().getPlotColor();
         graphicsPanel.setSecondAxisPlotInfo("Protein " , color);
-        
-        graphicsPanel.preparePaint();
+
         
         graphicsPanel.setYAxisBounds(0, 20);
-        graphicsPanel.setSecondaryYAxisBounds(-10, 200);
+        graphicsPanel.setYAxisRightBounds(-10, 200);
         
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(graphicsPanel, BorderLayout.CENTER);

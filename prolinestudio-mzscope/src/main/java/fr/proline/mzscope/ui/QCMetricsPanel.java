@@ -277,7 +277,7 @@ class MetricsDetailsPanel extends JPanel {
         plot.setIsPaintMarker(true);
         plot.setStrokeFixed(true);
         m_plotPanel.clearPlots();
-        m_plotPanel.addPlot(plot);
+        m_plotPanel.addPlot(plot, true);
         m_plotPanel.repaintUpdateDoubleBuffer();
       } else {
           logger.warn("Should not append : time range and values size are not equal !");

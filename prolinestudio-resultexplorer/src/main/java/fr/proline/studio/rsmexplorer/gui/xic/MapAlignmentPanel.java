@@ -368,7 +368,7 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         plotInfo.setPlotColor(CyclicColorPalette.GRAY_DARK);
         regressionCurve.setPlotInformation(plotInfo);
         regressionCurve.setStroke(1f);
-        m_alignmentGraphicPanel.addPlot(regressionCurve);
+        m_alignmentGraphicPanel.addPlot(regressionCurve, true);
         // restore axis titles
         m_alignmentGraphicPanel.getXAxis().setTitle(xAxisTitle);
         m_alignmentGraphicPanel.getYAxis().setTitle(yAxisTitle);
@@ -642,7 +642,7 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
                     m_ionsScatterPlot.setYMin(yMin - 2 * tolerance);
                 }
                 graphicPanel.setPlot(m_ionsScatterPlot);
-                graphicPanel.addPlot(alignmentCurve);
+                graphicPanel.addPlot(alignmentCurve, true);
             }
         }
         graphicPanel.repaint();

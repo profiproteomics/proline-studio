@@ -132,7 +132,7 @@ public class PlotLinear extends PlotXYAbstract {
 
         m_parameterListArray = new ArrayList<>(1);
         m_parameterListArray.add(colorParameterList);
-        this.m_tolerance = 0;
+        m_tolerance = 0;
     }
 
     /**
@@ -142,7 +142,7 @@ public class PlotLinear extends PlotXYAbstract {
      * @param tolerance
      */
     public void setTolerance(double tolerance) {
-        this.m_tolerance = tolerance;
+        m_tolerance = tolerance;
     }
 
     @Override
@@ -202,7 +202,7 @@ public class PlotLinear extends PlotXYAbstract {
         }
         String labelY;
         if (m_plotPanel.getYAxis().isEnum()) {
-            labelY = m_plotPanel.getEnumValueY(indexFound, true);
+            labelY = m_plotPanel.getEnumValueY(indexFound, true, m_plotPanel.getYAxis());
         } else {
             labelY = DataFormat.format(m_dataY[indexFound], 4);
         }
@@ -457,14 +457,17 @@ public class PlotLinear extends PlotXYAbstract {
 
             plotParameterList.loadParameters(NbPreferences.root());
 
-
+            // ************* Plot linear: we can not suppress values : algo is set to keep values
+            
+            if (!(m_compareDataInterface instanceof LogAdapterModel)) {
+                m_compareDataInterface = new LogAdapterModel(m_compareDataInterface);
+            }
+                        
+            /*
             String algo = plotParameterList.getValues().get(PlotXYAbstract.LOG_ALGO_KEY);
             boolean algoSupressValues = ((algo == null) || (Integer.parseInt(algo) == PlotXYAbstract.LOG_SUPPRESS_VALUES));
 
-            if (! (m_compareDataInterface instanceof LogAdapterModel)) {
-                m_compareDataInterface = new LogAdapterModel(m_compareDataInterface);
-                
-            }
+
             if (algoSupressValues) {
                 ((LogAdapterModel) m_compareDataInterface).update(LogAdapterModel.POLICY.REMOVE_INCORRECT_VALUES, logX ? m_cols[COL_X_ID] : -1, logY ? m_cols[COL_Y_ID] : -1, null);
             } else {
@@ -472,6 +475,13 @@ public class PlotLinear extends PlotXYAbstract {
                 double replaceValueD = (value == null) ? 1d : Double.parseDouble(value);
                 ((LogAdapterModel) m_compareDataInterface).update(LogAdapterModel.POLICY.REPLACE_BY_VALUE, logX ? m_cols[COL_X_ID] : -1, logY ? m_cols[COL_Y_ID] : -1, replaceValueD);
             }
+            */
+            
+            //String value = plotParameterList.getValues().get(PlotXYAbstract.DEFAULT_LOG_REPLACE_VALUE_KEY);
+            //double replaceValueD = (value == null) ? 1d : Double.parseDouble(value);
+            double replaceValueD = 0.1d; // Double.NaN;
+            ((LogAdapterModel) m_compareDataInterface).update(LogAdapterModel.POLICY.REPLACE_BY_VALUE, -1, logY ? m_cols[COL_Y_ID] : -1, replaceValueD);
+            
         } else if (m_compareDataInterface instanceof LogAdapterModel) {
             m_compareDataInterface = ((LogAdapterModel) m_compareDataInterface).getInnerModel();
         }
@@ -550,7 +560,7 @@ public class PlotLinear extends PlotXYAbstract {
         m_yMax = maxY;
 
         // we let margins
-        if (!xAsEnum || (xAsEnum && m_xMin == m_xMax)) {
+        if (!xAsEnum) {
             if (logX) {
                 m_xMax *= 2;
                 m_xMin /= 2;
@@ -567,7 +577,7 @@ public class PlotLinear extends PlotXYAbstract {
             }
         }
 
-        if (!yAsEnum || (yAsEnum && m_yMin == m_yMax)) {
+        if (!yAsEnum) {
             if (logY) {
                 m_yMax *= 2;
                 m_yMin /= 2;
@@ -747,6 +757,8 @@ public class PlotLinear extends PlotXYAbstract {
         int clipHeight = yAxis.valueToPixel(yAxis.getMinValue()) - clipY + 1;
         g.setClip(clipX, clipY, clipWidth, clipHeight);
 
+        boolean isLog = xAxis.isLog() || yAxis.isLog();
+        
         ColorOrGradient colorOrGradient = m_colorParameter.getColor();
         boolean useGradient = !colorOrGradient.isColorSelected();
 
@@ -782,7 +794,7 @@ public class PlotLinear extends PlotXYAbstract {
                 }
                 int x = xAxis.valueToPixel(m_dataX[i]);
                 int y = yAxis.valueToPixel(m_dataY[i]);
-                boolean isDef = !Double.valueOf(m_dataX[i]).isNaN() && !Double.valueOf(m_dataY[i]).isNaN();
+                boolean isDef = !Double.valueOf(m_dataX[i]).isNaN() && !Double.valueOf(m_dataY[i]).isNaN();                
                 g.setColor(plotColor);
                 if (m_userStrock != null) {
                     g.setStroke(m_userStrock);
@@ -793,6 +805,11 @@ public class PlotLinear extends PlotXYAbstract {
                         g.setStroke(m_strokeLine);
                     }
                 }
+                
+                boolean errorOnLog = (isLog && ((LogAdapterModel) m_compareDataInterface).isOnError(i));
+                if (errorOnLog || !isDef) {
+                    g.setColor(Color.red);
+                }
                 if (m_isDrawPoints && isDef) {
                     int radius = DEFAULT_POINT_RADIUS;
                     if ((m_dataSpec[i]!=null) && (m_dataSpec[i].getFill().equals(PlotDataSpec.FILL.EMPTY))) {
@@ -800,8 +817,13 @@ public class PlotLinear extends PlotXYAbstract {
                     } else {
                         g.fillOval(x - radius, y - radius, radius * 2, radius * 2);
                     }
+                } else if (errorOnLog || !isDef) {
+                    int radius = DEFAULT_POINT_RADIUS;
+                    g.fillOval(x - radius, y - radius, radius * 2, radius * 2);
                 }
+                
                 if (m_isDrawGap || (!m_isDrawGap && isDef && isDef0)) {
+                    g.setColor(plotColor);
                     g.drawLine(x0, y0, x, y);
                 }
                 x0 = x;
@@ -816,12 +838,6 @@ public class PlotLinear extends PlotXYAbstract {
         }
     }
 
-    @Override
-    public void paint(Graphics2D g) {
-        XAxis xAxis = m_plotPanel.getXAxis();
-        YAxis yAxis = m_plotPanel.getYAxis();
-        this.paint(g, xAxis, yAxis);
-    }
 
     /**
      * if tolerance is not 0, draw a line parallel with the main curve
@@ -980,7 +996,7 @@ public class PlotLinear extends PlotXYAbstract {
     }
 
     @Override
-    public String getEnumValueY(int index, boolean fromData) {
+    public String getEnumValueY(int index, boolean fromData, Axis axis) {
         if ((index < 0) || (index >= m_dataY.length)) {
             return "";
         }

@@ -77,7 +77,11 @@ import fr.proline.studio.pattern.xic.DataboxChildFeature;
 import fr.proline.studio.table.AbstractTableAction;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.swing.JTable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -701,6 +705,8 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
     
     public class ExctractXICAction extends AbstractTableAction {
 
+        private Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+        
         private AbstractDataBox m_box;
 
         private boolean m_all;
@@ -724,6 +730,18 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             final DataboxChildFeature databoxChildFeature = (DataboxChildFeature) m_box;
             QuantChannelInfo quantChannelInfo = (QuantChannelInfo) databoxChildFeature.getData(false, QuantChannelInfo.class);
             DQuantitationChannel[] qChannels = quantChannelInfo.getQuantChannels();
+            
+            // tolerance set to 5ppm if we do not find it in the config
+            double ppm = 5; 
+            try {
+                Map<String, Object> configMap = quantChannelInfo.getDataset().getQuantProcessingConfigAsMap();
+                LinkedHashMap map = (LinkedHashMap) configMap.get("cross_assignment_config");
+                map = (LinkedHashMap) map.get("ft_mapping_params");
+                String mozTolString = (String) map.get("moz_tol");
+                ppm = Double.valueOf(mozTolString);
+            } catch (Exception e) {
+                m_logger.error(getClass().getSimpleName() + " moz_tol not found ", e);
+            } 
             
             HashMap<Long, DQuantitationChannel> qChannelMap = new HashMap<>();
             
@@ -787,7 +805,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
                 return;
             }
             
-            double ppm = 5; // tolerance set to 5ppm, could be changed
+            
 
 
             final int loadingId = m_loadingXICId++;

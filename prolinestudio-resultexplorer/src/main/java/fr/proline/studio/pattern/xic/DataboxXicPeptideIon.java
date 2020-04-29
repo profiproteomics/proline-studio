@@ -145,8 +145,10 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                         List<Long> selectedPepIonIds = null;
                         if (properties != null) {
                             MasterQuantPeptideProperties.PepIonAbundanceSummarizingConfig config = properties.getMqPepIonAbundanceSummarizingConfig();
-                            Map<Long, Integer> pepSelectLevelMap = config.getmMqPeptideIonSelLevelById();
-                            selectedPepIonIds = config.getSelectedMasterQuantPeptideIonIds();
+                            if (config != null) {
+                                Map<Long, Integer> pepSelectLevelMap = config.getmMqPeptideIonSelLevelById();
+                                selectedPepIonIds = config.getSelectedMasterQuantPeptideIonIds();
+                            }
                         }
                         
                         ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), selectedPepIonIds, m_masterQuantPeptideIonList, m_isXICMode, finished);

@@ -145,7 +145,7 @@ public class SignalEditorPanel extends JPanel {
       linear.setPlotInformation(wrappedSignal.getPlotInformation());
       linear.setStrokeFixed(true);
       linear.setAntiAliasing(true);
-      basePlot.addPlot(linear);
+      basePlot.addPlot(linear, true);
       basePlot.repaintUpdateDoubleBuffer();
       m_smoothedSignals.put(s, linear);
    }

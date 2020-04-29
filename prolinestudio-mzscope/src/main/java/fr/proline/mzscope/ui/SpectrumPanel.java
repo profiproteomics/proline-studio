@@ -353,7 +353,7 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
             }
 
             PlotXYAbstract plot = buildPlot(spectrum, CyclicColorPalette.getColor(5));                        
-            spectrumPlotPanel.addPlot(plot);
+            spectrumPlotPanel.addPlot(plot, true);
             
             if (currentScan != null) {
                 spectrumPlotPanel.getXAxis().setRange(xMin, xMax);

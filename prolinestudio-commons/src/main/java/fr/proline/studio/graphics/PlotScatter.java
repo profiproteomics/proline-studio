@@ -187,7 +187,7 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         } else if (infoColumn == m_cols[COL_Y_ID]) {
             boolean yAsEnum = m_plotPanel.getYAxis().isEnum();
             if (yAsEnum) {
-                infoValue = getEnumValueY(indexFound, true);
+                infoValue = getEnumValueY(indexFound, true, m_plotPanel.getYAxis());
             } else {
                 infoValue = m_compareDataInterface.getDataValueAt(indexFound, m_compareDataInterface.getInfoColumn()).toString();
             }
@@ -211,7 +211,7 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         m_sb.append(" : ");
         boolean yAsEnum = m_plotPanel.getYAxis().isEnum();
         if (yAsEnum) {
-            m_sb.append(getEnumValueY(indexFound, true));
+            m_sb.append(getEnumValueY(indexFound, true, m_plotPanel.getYAxis()));
         } else {
             m_sb.append(m_plotPanel.getYAxis().getExternalDecimalFormat().format(m_dataY[indexFound]));
         }
@@ -861,12 +861,6 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
 
     }
 
-    @Override
-    public void paint(Graphics2D g) {
-        XAxis xAxis = m_plotPanel.getXAxis();
-        YAxis yAxis = m_plotPanel.getYAxis();
-        this.paint(g, xAxis, yAxis);
-    }
 
     private Color selectColor(Color plotColor, boolean useGradient, int i) {
         Color c = null;
@@ -1140,7 +1134,7 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
     }
 
     @Override
-    public String getEnumValueY(int index, boolean fromData) {
+    public String getEnumValueY(int index, boolean fromData, Axis axis) {
 
         if (fromData) {
             if ((index < 0) || (index >= m_dataY.length)) {

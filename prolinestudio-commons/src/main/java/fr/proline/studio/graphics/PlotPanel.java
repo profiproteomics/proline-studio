@@ -34,11 +34,7 @@ public class PlotPanel extends JPanel {
    
    public PlotPanel(boolean isDoubleYAxis) {
 
-       if (isDoubleYAxis) {
-           m_basePlotPanel = new DoubleYAxisPlotPanel();
-       } else {
-           m_basePlotPanel = new BasePlotPanel();
-       }
+      m_basePlotPanel = new BasePlotPanel();
 
       m_layeredPane = new JLayeredPane();
       setLayout(new BorderLayout());

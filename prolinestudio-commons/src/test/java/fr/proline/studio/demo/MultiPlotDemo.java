@@ -64,7 +64,7 @@ public class MultiPlotDemo extends JFrame {
       //basePlot.setMargins(new Insets(10, 0, 10, 0));
       //basePlot.getYAxis().setRange(0.0, 2.0);
       PlotScatter scatter = new PlotScatter(basePlot, sample, null, 5, 0);
-      basePlot.addPlot(scatter);
+      basePlot.addPlot(scatter, true);
       basePlot.setDrawCursor(true);
       basePlot.repaint();
       getContentPane().setLayout(new BorderLayout());

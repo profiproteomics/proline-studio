@@ -47,7 +47,6 @@ import javax.swing.JToolBar;
 import org.openide.windows.WindowManager;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.SecondAxisTableModelInterface;
-import fr.proline.studio.graphics.DoubleYAxisPlotPanel;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_X_ID;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_Y_ID;
 import fr.proline.studio.graphics.PlotPanel;
@@ -365,9 +364,6 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
                     columnXYIndex[COL_Y_ID] = cols[1];
 
                     m_plotPanel.updatePlots(cols, zParameter);
-                    if (m_plotPanel instanceof DoubleYAxisPlotPanel) {
-                        ((DoubleYAxisPlotPanel) m_plotPanel).preparePaint();
-                    }
                     m_plotPanel.repaint();
                 }
             };
@@ -460,12 +456,12 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
             PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valuesList.get(i), crossSelectionInterface, columnXYIndex[COL_X_ID], columnXYIndex[COL_Y_ID]);
             plotGraphics.setPlotInformation(m_valuesList.get(i).getPlotInformation());
             plotGraphics.setIsPaintMarker(false);
-            m_plotPanel.addPlot(plotGraphics);
+            m_plotPanel.addPlot(plotGraphics, true);
         }
     }
 
     private void setPlotsWithDoubleYAxis() {
-        DoubleYAxisPlotPanel plotPanel = ((DoubleYAxisPlotPanel) m_plotPanel);
+  
         double mainPlotMaxY = Double.NEGATIVE_INFINITY;
         double secondPlotMaxY = Double.NEGATIVE_INFINITY;
         for (int i = 0; i < m_valuesList.size(); i++) {
@@ -475,7 +471,7 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
             mainPlotMaxY = Math.max(mainPlotMaxY, plotGraphics.getYMax());
             plotGraphics.setPlotInformation(m_valuesList.get(i).getPlotInformation());
             plotGraphics.setIsPaintMarker(false);
-            plotPanel.addMainPlot(plotGraphics);
+            m_plotPanel.addPlot(plotGraphics, true);
         }
         //plot on second Axis Y
         if (m_valueOn2Yxis != null && m_valueOn2Yxis.getRowCount() != 0) {//creat a plot which show PlotLinear on 2nd Axis  
@@ -484,26 +480,17 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
             secondPlotMaxY = plotGraphics.getYMax();
             plotGraphics.setPlotInformation(m_valueOn2Yxis.getPlotInformation());
             plotGraphics.setIsPaintMarker(false);
-            plotPanel.addAuxiliaryPlot(plotGraphics);
+            m_plotPanel.addPlot(plotGraphics, false);
             Color color = m_valueOn2Yxis.getPlotInformation().getPlotColor();
             String axisTitle = m_valueOn2Yxis.getName();
             if (axisTitle == null) {
                 axisTitle = "";
             }
-            plotPanel.setSecondAxisPlotInfo(axisTitle + " " + m_valueOn2Yxis.getDataColumnIdentifier(columnXYIndex[COL_Y_ID]), color);
-        }
-        plotPanel.preparePaint();
-
-        /*if (plotPanel.hasMainPlots()) {
-            //add to max the quantity equivalent to 5 pixels
-            mainPlotMaxY += (mainPlotMaxY / plotPanel.getYAxis().getHeight()) * 5;
-            plotPanel.setYAxisBounds(0, mainPlotMaxY);
+            m_plotPanel.setSecondAxisPlotInfo(axisTitle + " " + m_valueOn2Yxis.getDataColumnIdentifier(columnXYIndex[COL_Y_ID]), color);
         }
 
-        if (plotPanel.hasAuxiliaryPlots()) {
-            secondPlotMaxY += (secondPlotMaxY / plotPanel.getSecondYAxis().getHeight()) * 5;
-            plotPanel.setSecondaryYAxisBounds(0, secondPlotMaxY);
-        }*/
+        m_plotPanel.updateAxis();
+
 
     }
 

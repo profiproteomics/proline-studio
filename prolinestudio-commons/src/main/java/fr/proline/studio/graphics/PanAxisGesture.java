@@ -33,7 +33,6 @@ public class PanAxisGesture {
 
     private boolean m_isPanning = false;
     private int m_x1, m_x2, m_y1, m_y2;
-    private int m_yAtRight1, m_yAtRight2;
     private int m_panningAxis;
     private int m_action = ACTION_NONE;
 
@@ -54,24 +53,23 @@ public class PanAxisGesture {
         m_y1 = y;
         m_x2 = x;
         m_y2 = y;
-        m_yAtRight1 = y;
-        m_yAtRight2 = y;
         m_isPanning = true;
         m_panningAxis = panningAxis;
         m_action = ACTION_NONE;
     }
 
     public void movePan(int x, int y) {
+        
+        
+        boolean yPanning = (m_panningAxis == Y_AXIS_PAN) || (m_panningAxis == Y_AT_RIGHT_AXIS_PAN);
+                
         m_x2 = x;
-        if (m_panningAxis == Y_AXIS_PAN) {
+        if (yPanning) {
             m_y2 = y;
-        } else {
-            m_yAtRight2 = y;
         }
 
         if (((Math.abs(m_x2 - m_x1) <= MIN_PANNING_DELTA) && m_panningAxis == X_AXIS_PAN)
-                || ((Math.abs(m_y2 - m_y1) <= MIN_PANNING_DELTA) && m_panningAxis == Y_AXIS_PAN)
-                || ((Math.abs(m_yAtRight2 - m_yAtRight1) <= MIN_PANNING_DELTA) && m_panningAxis == Y_AT_RIGHT_AXIS_PAN)) {
+                || ((Math.abs(m_y2 - m_y1) <= MIN_PANNING_DELTA) && yPanning)) {
             m_action = ACTION_NONE;
         } else {
             m_action = ACTION_PAN;
@@ -91,9 +89,6 @@ public class PanAxisGesture {
         return m_y2;
     }
 
-    public int getPreviousYAtRight() {
-        return m_yAtRight2;
-    }
 
     public int getAction() {
         return m_action;

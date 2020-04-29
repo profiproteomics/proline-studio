@@ -21,10 +21,12 @@ import fr.proline.studio.graphics.cursor.AbstractCursor;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 /**
  * X Axis
@@ -87,7 +89,7 @@ public class XAxis extends Axis {
         }
 
     }
-
+    
     @Override
     public void paintCursor(Graphics2D g, AbstractCursor cursor, boolean selected) {
 

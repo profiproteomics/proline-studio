@@ -167,7 +167,7 @@ public class YAxis extends Axis {
 
         int height;
         if (m_isEnum) {
-            label = m_plotPanel.getEnumValueY((int) Math.round(y), false); //JPM.WART
+            label = m_plotPanel.getEnumValueY((int) Math.round(y), false, this); //JPM.WART
             stringWidth = m_valuesFontMetrics.stringWidth(label);
             height = (int) Math.round(StrictMath.ceil(m_valuesFontMetrics.getLineMetrics(label, g).getHeight()));
         } else {
@@ -266,7 +266,7 @@ public class YAxis extends Axis {
             int stringWidth;
 
             if (m_isEnum) {
-                label = m_plotPanel.getEnumValueY((int) Math.round(y), false); //JPM.WART
+                label = m_plotPanel.getEnumValueY((int) Math.round(y), false, this); //JPM.WART
                 if (label == null) {
                     label = " ";
                 }
@@ -290,7 +290,7 @@ public class YAxis extends Axis {
             }
             //draw ticket & it's label
             int tickX = ((m_isLeftAxis) ? m_lineXStart : m_lineXStart + 4);
-            int tickStringX = ((m_isLeftAxis) ? m_lineXStart - stringWidth - 6 : m_lineXStart + 4);
+            int tickStringX = ((m_isLeftAxis) ? m_lineXStart - stringWidth - 6 : m_lineXStart + 6);
 
             if (pY < previousEndY - m_lastHeight - 2) { // check to avoid to overlap labels
                 g.drawString(label, tickStringX, pY + halfAscent);

@@ -90,11 +90,7 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
         return false;
     }
 
-    public abstract void paint(Graphics2D g);
-
-    public void paint(Graphics2D g, XAxis xAxis, YAxis yAxis) {
-
-    }
+    public abstract void paint(Graphics2D g, XAxis xAxis, YAxis yAxis);
 
     /**
      * usualy used to show tooltips information

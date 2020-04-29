@@ -152,7 +152,7 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
     }
 
     @Override
-    public void paint(Graphics2D g2d) {
+    public void paint(Graphics2D g2d, XAxis xAxis, YAxis yAxis) {
 
         if (m_setList == null) {
             return;
@@ -178,8 +178,8 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
 
             // must be updated because axis depend of the pixel height and width for venn diagram
             m_plotPanel.updateAxis(this);
-            m_plotPanel.getXAxis().setSize(0, height, width, 0);
-            m_plotPanel.getYAxis().setSize(0, 0, 0, height);
+            xAxis.setSize(0, height, width, 0);
+            yAxis.setSize(0, 0, 0, height);
         }
 
         if (m_setList.getGeneratedAreas() == null) {
@@ -544,14 +544,14 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
         return null;
     }
 
-    @Override
+    /*@Override
     public String getEnumValueY(int index, boolean fromData) {
         return null;
-    }
+    }*/
 
     @Override
     public String getEnumValueY(int index, boolean fromData, Axis axis) {
-        return getEnumValueY(index, fromData);
+        return null;
     }
 
     @Override

@@ -168,7 +168,7 @@ public class PlotStick extends PlotXYAbstract {
         }
         String labelY;
         if (m_plotPanel.getYAxis().isEnum()) {
-            labelY = m_plotPanel.getEnumValueY(indexFound, true);
+            labelY = m_plotPanel.getEnumValueY(indexFound, true, m_plotPanel.getYAxis());
         } else {
             labelY = m_plotPanel.getYAxis().getExternalDecimalFormat().format(m_dataY[indexFound]);
         }
@@ -442,7 +442,7 @@ public class PlotStick extends PlotXYAbstract {
         
 
         // we let margins
-        if (!xAsEnum || (xAsEnum && m_xMin == m_xMax)) { 
+        if (!xAsEnum) { 
             double deltaX = (m_xMax - m_xMin);
             if (deltaX <= 10e-10) {
                 // no real delta
@@ -454,7 +454,7 @@ public class PlotStick extends PlotXYAbstract {
             }
         }
 
-        if (!yAsEnum || (yAsEnum && m_yMin == m_yMax)) { 
+        if (!yAsEnum) { 
             double deltaY = (m_yMax - m_yMin);
             if (deltaY <= 10e-10) {
                 // no real delta
@@ -617,10 +617,8 @@ public class PlotStick extends PlotXYAbstract {
     }
 
     @Override
-    public void paint(Graphics2D g) {
+    public void paint(Graphics2D g, XAxis xAxis, YAxis yAxis) {
 
-        XAxis xAxis = m_plotPanel.getXAxis();
-        YAxis yAxis = m_plotPanel.getYAxis();
 
         // set clipping area
         int clipX = xAxis.valueToPixel(xAxis.getMinValue());
@@ -774,7 +772,7 @@ public class PlotStick extends PlotXYAbstract {
     }
 
     @Override
-    public String getEnumValueY(int index, boolean fromData) {
+    public String getEnumValueY(int index, boolean fromData, Axis axis) {
         if ((index < 0) || (index >= m_dataY.length)) {
             return "";
         }

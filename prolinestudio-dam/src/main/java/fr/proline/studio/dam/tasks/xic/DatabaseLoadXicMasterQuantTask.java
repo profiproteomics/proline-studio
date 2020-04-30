@@ -1025,17 +1025,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             }            
         }
         
-        Map<String, Object> postProcessingParam = new HashMap<>();
-        try {
-            //Get PeptideIonAbundance Summarizer method.
-            postProcessingParam = m_dataset.getPostQuantProcessingConfigAsMap();
-        } catch (Exception ex) {  }
-        boolean isBestIonSummarizingMethod = false;
-        if(postProcessingParam!= null && !postProcessingParam.isEmpty() && postProcessingParam.containsKey(QuantPostProcessingParams.ION_ABUNDANCE_SUMMARIZING_METHOD)){
-            String method = postProcessingParam.get(QuantPostProcessingParams.ION_ABUNDANCE_SUMMARIZING_METHOD).toString();
-            isBestIonSummarizingMethod = QuantPostProcessingParams.ION_ABUNDANCE_SUMMARIZING_BEST_ION_METHOD_KEY.equals(method);
-        }
-                
+        boolean isBestIonSummarizingMethod = mayBestIonPropertySet();                
         // load dPeptideInstance and PeptideMatch
         List<DPeptideInstance> peptideInstanceList = new ArrayList();
         String querySelect;
@@ -1148,16 +1138,18 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     if(!mqpepIonIds.isEmpty()){
                         //Get MQPepIon RepresentativePeptideMatch
                         Long bestMQPepIonId = mqpepIonIds.get(0);
-                        DMasterQuantPeptideIon mqpi = new DMasterQuantPeptideIon();
-                        mqpi.setId(bestMQPepIonId);
-                        List<Long> bestMQPepIonIds = new ArrayList<>();
-                        bestMQPepIonIds.add(bestMQPepIonId);                        
-                        m_masterQuantPeptideIonList.clear();
-                        m_masterQuantPeptideIonList.add(mqpi);
-                        fetchPeptideIonData(entityManagerMSI, bestMQPepIonIds);
-                        mqpi = m_masterQuantPeptideIonList.get(0);
-                        //MQpepIon should have been loaded
-                        masterQuantPeptide.setRepresentativePepMatch(mqpi.getRepresentativePepMatch());
+                        if(bestMQPepIonId != null && bestMQPepIonId >0){
+                            DMasterQuantPeptideIon mqpi = new DMasterQuantPeptideIon();
+                            mqpi.setId(bestMQPepIonId);
+                            List<Long> bestMQPepIonIds = new ArrayList<>();
+                            bestMQPepIonIds.add(bestMQPepIonId);                        
+                            m_masterQuantPeptideIonList.clear();
+                            m_masterQuantPeptideIonList.add(mqpi);
+                            fetchPeptideIonData(entityManagerMSI, bestMQPepIonIds);
+                            mqpi = m_masterQuantPeptideIonList.get(0);
+                            //MQpepIon should have been loaded
+                            masterQuantPeptide.setRepresentativePepMatch(mqpi.getRepresentativePepMatch());
+                        }
                     }
                 }
             }
@@ -1398,6 +1390,24 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         return true;
     }
 
+    private boolean mayBestIonPropertySet(){
+        boolean isBestIonSummarizingMethod = false;
+        Map<String, Object> postProcessingParam = new HashMap<>();
+        try {
+            //Get PeptideIonAbundance Summarizer method.
+            postProcessingParam = m_dataset.getPostQuantProcessingConfigAsMap();
+        } catch (Exception ex) {
+        }
+                
+        if(postProcessingParam == null)
+            isBestIonSummarizingMethod = true; //If no ComputePostProcessing, information may exist anyway 
+        else if(!postProcessingParam.isEmpty() && postProcessingParam.containsKey(QuantPostProcessingParams.ION_ABUNDANCE_SUMMARIZING_METHOD)){
+            String method = postProcessingParam.get(QuantPostProcessingParams.ION_ABUNDANCE_SUMMARIZING_METHOD).toString();
+            isBestIonSummarizingMethod = QuantPostProcessingParams.ION_ABUNDANCE_SUMMARIZING_BEST_ION_METHOD_KEY.equals(method);
+        }
+        return isBestIonSummarizingMethod;
+    }
+    
     private DCluster getPeptideCluster(Long masterQuantPeptideId) {
         // cluster info 
         if (m_dMasterQuantProteinSet != null) {
@@ -1811,12 +1821,21 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         peptidesIonQuery.setParameter("masterQuantPeptideId", (m_masterQuantPeptide == null ? -1 : m_masterQuantPeptide.getId()));
                         List<Long> listIds = (List<Long>) peptidesIonQuery.getResultList();
                         m_masterQuantPeptideIonIds = listIds;
-
+                        MasterQuantPeptideProperties property = m_masterQuantPeptide.getMasterQuantPeptideProperties();
+                        
+                        Map<Long,Integer> seqLevelByIonId = new HashMap<>();
+                        if(property != null && property.getMqPepIonAbundanceSummarizingConfig() != null&& property.getMqPepIonAbundanceSummarizingConfig().getMqPeptideIonSelLevelById() != null)
+                            seqLevelByIonId = property.getMqPepIonAbundanceSummarizingConfig().getMqPeptideIonSelLevelById();
+                                                
                         for (Long m_masterQuantPeptideIonId : m_masterQuantPeptideIonIds) {
                             DMasterQuantPeptideIon mqpi = new DMasterQuantPeptideIon();
                             mqpi.setId(m_masterQuantPeptideIonId);
+                            Integer level = seqLevelByIonId.get(mqpi.getId());
+                            if(level != null)
+                                mqpi.setUsedInPeptide(level >=2); //Should specify used value only in known case.
                             m_masterQuantPeptideIonList.add(mqpi);
                         }
+                        
                         if (!m_masterQuantPeptideIonIds.isEmpty()) {
                             fetchPeptideIonData(entityManagerMSI, m_masterQuantPeptideIonIds);
                         }
@@ -1906,6 +1925,9 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     break;
                 }
             }
+            //Get used in petide information from initial MQPeptideIon (if it was set...) 
+            if(m_masterQuantPeptideIonList.get(index).isUsedInPeptide() != null)
+                mQuantPeptideIon.setUsedInPeptide(m_masterQuantPeptideIonList.get(index).isUsedInPeptide());
             m_masterQuantPeptideIonList.set(index, mQuantPeptideIon);
             indexes.add(index);
         } // end for

@@ -237,9 +237,9 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             }
             case COLTYPE_MQPEPTIDE_SELECTION_LEVEL: {
                 if (m_isXICMode) {                  
-                   if (m_modifiedLevels.contains(row)) {
-                        return Boolean.toString(peptide.getSelectionLevel() != 2); // FLIPPED value -> modified value not saved in database
-                    }
+//                   if (m_modifiedLevels.contains(row)) {
+//                        return Boolean.toString(peptide.getSelectionLevel() != 2); // FLIPPED value -> modified value not saved in database
+//                    }
                     return Boolean.toString(peptide.getSelectionLevel() == 2); // 2 = enable ; 1 = peptide disabled by algorithm, 0 = peptide disabled by human                                                       
                 } else {
                     return "";
@@ -718,8 +718,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     }
 
     @Override
-    public Object getValueAt(final int row, int col
-    ) {
+    public Object getValueAt(final int row, int col) {
 
         // Retrieve Quant Peptide
         DMasterQuantPeptide peptide = m_quantPeptides.get(row);

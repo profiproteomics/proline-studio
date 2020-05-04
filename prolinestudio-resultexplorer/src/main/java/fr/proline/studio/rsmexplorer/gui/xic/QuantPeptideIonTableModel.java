@@ -24,6 +24,7 @@ import fr.proline.core.orm.msi.dto.DQuantPeptideIon;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
+import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon.PepIonStatus;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.ConvertValueInterface;
@@ -44,7 +45,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.TimeRenderer;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.StatusRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.XicStatusRenderer;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
@@ -217,6 +218,8 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
     public Class getColumnClass(int col) {
         if (col == COLTYPE_PEPTIDE_ION_ID) {
             return Long.class;
+        } else if (col == COLTYPE_PEPTIDE_ION_STATUS) {
+            return PepIonStatus.class;
         }
         return LazyData.class;
     }
@@ -277,11 +280,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
 
             }
             case COLTYPE_PEPTIDE_ION_STATUS: {
-                if (peptideIon.getId() == m_selectedId) {
-                    return Boolean.TRUE;
-                } else {
-                    return Boolean.FALSE;
-                }
+                 return peptideIon.getPepIonStatus();
             }
             case COLTYPE_PEPTIDE_PTM: {
                 LazyData lazyData = getLazyData(row, col);
@@ -465,14 +464,8 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
         //return null; // should never happen
     }
     private final StringBuilder m_sb = new StringBuilder();
-    private long m_selectedId = -1;
 
-    public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<Long> selectedPepIonIds, List<DMasterQuantPeptideIon> peptideIons, boolean isXICMode) {
-
-        if (selectedPepIonIds != null && !selectedPepIonIds.isEmpty()) {
-            //m_logger.debug("selectedPeptideIonIdList is {}", selectedPepIonIds);
-            m_selectedId = selectedPepIonIds.get(0);
-        }
+    public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<DMasterQuantPeptideIon> peptideIons, boolean isXICMode) {
         boolean structureChanged = true;
         m_isXICMode = isXICMode;
         if (m_quantChannels != null && m_quantChannels.length == quantChannels.length) {
@@ -675,11 +668,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
 
             }
             case COLTYPE_PEPTIDE_ION_STATUS: {
-                if (peptideIon.getId() == m_selectedId) {
-                    return StatusRenderer.STATUS_VALIDATED;
-                } else {
-                    return StatusRenderer.STATUS_INVALIDATED;
-                }
+                 return XicStatusRenderer.getPepIonStatusText(peptideIon.getPepIonStatus());
             }
             case COLTYPE_PEPTIDE_PTM: {
                 DPeptideInstance peptideInstance = peptideIon.getPeptideInstance();
@@ -969,7 +958,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
 
         switch (col) {
             case COLTYPE_PEPTIDE_ION_STATUS: {
-                renderer = new StatusRenderer();
+                renderer = new XicStatusRenderer();
                 break;
             }
 
@@ -1103,6 +1092,5 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
         }
         return null;
     }
-
 
 }

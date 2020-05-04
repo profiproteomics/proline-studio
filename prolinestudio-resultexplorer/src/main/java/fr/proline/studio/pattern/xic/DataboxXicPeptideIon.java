@@ -142,14 +142,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                 if (subTask == null) {
                     if (!allPeptides) {
                         MasterQuantPeptideProperties properties = m_masterQuantPeptide.getMasterQuantPeptideProperties();
-                        List<Long> selectedPepIonIds = null;                        
-                        if (properties != null && properties.getMqPepIonAbundanceSummarizingConfig()!=null ) {
-                            MasterQuantPeptideProperties.PepIonAbundanceSummarizingConfig config = properties.getMqPepIonAbundanceSummarizingConfig();
-                            Map<Long, Integer> pepSelectLevelMap = config.getMqPeptideIonSelLevelById();
-                            selectedPepIonIds = config.getSelectedMasterQuantPeptideIonIds();
-                        }
-                        
-                        ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), selectedPepIonIds, m_masterQuantPeptideIonList, m_isXICMode, finished);
+                        ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideIonList, m_isXICMode, finished);
                     } else {
                         AbstractDatabaseCallback mapCallback = new AbstractDatabaseCallback() {
                             
@@ -161,7 +154,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                             @Override
                             public void run(boolean success, long task2Id, SubTask subTask, boolean finished) {
                                 m_quantChannelInfo = new QuantChannelInfo(m_dataset);
-                                ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), null, m_masterQuantPeptideIonList, m_isXICMode, finished);
+                                ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideIonList, m_isXICMode, finished);
                                 
                                 if (finished) {
                                     unregisterTask(task2Id);

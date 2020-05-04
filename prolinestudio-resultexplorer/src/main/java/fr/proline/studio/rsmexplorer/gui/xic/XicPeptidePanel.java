@@ -732,10 +732,10 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
                     if (SwingUtilities.isLeftMouseButton(e)) {
                         int col = m_quantPeptideTable.columnAtPoint(e.getPoint());
                         int row = m_quantPeptideTable.rowAtPoint(e.getPoint());
-                        int colModelIndex = m_quantPeptideTable.convertColumnIndexToModel(col);
-                        int rowModelIndex = m_quantPeptideTable.convertRowIndexToModel(row);
-                        if (m_quantPeptideTable.convertColumnIndexToModel(col) == QuantPeptideTableModel.COLTYPE_MQPEPTIDE_SELECTION_LEVEL) {
-                            if (row != -1) {
+                        if (row != -1) {
+                            int colModelIndex = m_quantPeptideTable.convertColumnIndexToModel(col);
+                            int rowModelIndex = m_quantPeptideTable.convertRowIndexToModel(row);
+                            if (m_quantPeptideTable.convertColumnIndexToModel(col) == QuantPeptideTableModel.COLTYPE_MQPEPTIDE_SELECTION_LEVEL) {
                                 if (e.isShiftDown() || e.isControlDown()) {//multi select
                                     m_modifyStatusDialog.selectedRow(-1);
                                     m_modifyStatusDialog.setVisible(false);

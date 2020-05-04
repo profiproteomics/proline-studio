@@ -19,7 +19,6 @@ package fr.proline.studio.filter;
 import fr.proline.studio.gui.DefaultDialog;
 import java.awt.Dialog;
 import java.awt.Window;
-import javax.swing.*;
 
 /**
  * Dialog to set the filters

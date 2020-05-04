@@ -21,13 +21,11 @@ import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.dam.tasks.data.SelectLevel;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.graphics.CrossSelectionInterface;
-import fr.proline.studio.gui.DefaultFloatingPanel;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.info.InfoInterface;
@@ -80,12 +78,13 @@ import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.openide.windows.WindowManager;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.rsmexplorer.gui.renderer.XicStatusRenderer;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 import javax.swing.SwingUtilities;
@@ -108,7 +107,7 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
     private MarkerContainerPanel m_markerContainerPanel;
 
     // private DefaultFloatingPanel m_validateModificationsPanel;
-    private ModifyStatusFloatPanel m_validateModificationsPanel;
+    private ModifyStatusDialog m_modifyStatusDialog;
     private boolean m_displayForProteinSet;
     private DQuantitationChannel[] m_quantChannels;
     private boolean m_isXICMode;
@@ -136,7 +135,7 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
 
         ToolTipManager.sharedInstance().setInitialDelay(0);
         ToolTipManager.sharedInstance().setDismissDelay(5000);
-        m_validateModificationsPanel = new ModifyStatusFloatPanel();
+        m_modifyStatusDialog = new ModifyStatusDialog();
         final JPanel peptidePanel = createPeptidePanel(xicMode);
         final JLayeredPane layeredPane = new JLayeredPane();
 
@@ -169,10 +168,6 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
         layeredPane.add(peptidePanel, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(m_infoToggleButton.getInfoPanel(), new Integer(JLayeredPane.PALETTE_LAYER + 1));
         layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER + 2));
-
-        m_validateModificationsPanel.setLocation(getX() + 80, getY() + 20);
-        layeredPane.add(m_validateModificationsPanel, JLayeredPane.PALETTE_LAYER);
-
     }
 
     private JPanel createPeptidePanel(boolean xicMode) {
@@ -277,8 +272,10 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
             public void actionPerformed(ActionEvent e) {
                 int[] selectedRows = m_quantPeptideTable.getSelectedRows();
                 if (selectedRows.length > 0) {
-                    m_validateModificationsPanel.setSelectedRows(selectedRows);
-                    m_validateModificationsPanel.setVisible(true);
+                    m_modifyStatusDialog.setSelectedRows(selectedRows);
+                    m_modifyStatusDialog.setVisible(true);
+                    Point p = m_modifyStatusButton.getLocationOnScreen();
+                    m_modifyStatusDialog.setLocation(p.x + 5, p.y + 5);
                 }
             }
         };
@@ -740,14 +737,14 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
                         if (m_quantPeptideTable.convertColumnIndexToModel(col) == QuantPeptideTableModel.COLTYPE_MQPEPTIDE_SELECTION_LEVEL) {
                             if (row != -1) {
                                 if (e.isShiftDown() || e.isControlDown()) {//multi select
-                                    m_validateModificationsPanel.setSelectedButtonDisabled(null);
-                                    m_validateModificationsPanel.selectedRow(-1);
-                                    m_validateModificationsPanel.setVisible(false);
+                                    m_modifyStatusDialog.selectedRow(-1);
+                                    m_modifyStatusDialog.setVisible(false);
                                 } else {
                                     m_quantPeptideTable.getSelectionModel().setSelectionInterval(row, row);
-                                    if (m_validateModificationsPanel != null && m_quantPeptideTableModel.isRowEditable(rowModelIndex)) {
-                                        m_validateModificationsPanel.selectedRow(rowModelIndex);
-                                        m_validateModificationsPanel.setVisible(true);
+                                    if (m_modifyStatusDialog != null && m_quantPeptideTableModel.isRowEditable(rowModelIndex)) {
+                                        m_modifyStatusDialog.selectedRow(rowModelIndex);
+                                        m_modifyStatusDialog.setLocation(e.getLocationOnScreen());
+                                        m_modifyStatusDialog.setVisible(true);
                                     }
                                 }
                             }
@@ -760,112 +757,84 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
         }
     }
 
-    class ModifyStatusFloatPanel extends DefaultFloatingPanel {
+    public void modifyStatusActionFinished(boolean success, String errorMessage) {
+        m_modifyStatusDialog.actionFinished(success, errorMessage);
+    }
 
+    class ModifyStatusDialog extends DefaultDialog {
+
+        private JPanel _helpPanel;
+        private ModifyStatusPanel _internalPanel;
         String cmd_validated = "Validated";
         String cmd_invalidated = "Invalidated";
-        String cmd_other = "other action";
+        String cmd_reset = "Reset manual status to auto";
         JRadioButton _validButton;
         JRadioButton _invalidButton;
-        JRadioButton _otherButton;
-        ButtonGroup m_buttonGroup;
+        ButtonGroup _buttonGroup;
         ArrayList<JRadioButton> _buttonList;
+        JButton _resetButton;
         DMasterQuantPeptide _selectedPeptide; //for single select
         ArrayList<Integer> _selectedRows;
 
-        ModifyStatusFloatPanel() {
-            //model
-            _selectedRows = new ArrayList();
-            _buttonList = new ArrayList();
-            //create 3 radio buttons
-            _validButton = new JRadioButton(cmd_validated);
-            _invalidButton = new JRadioButton(cmd_invalidated);
-            _otherButton = new JRadioButton(cmd_other);
-            _validButton.setActionCommand(cmd_validated);
-            _invalidButton.setActionCommand(cmd_invalidated);
-            _otherButton.setActionCommand(cmd_other);
-            _buttonList.add(_invalidButton);
-            _buttonList.add(_validButton);
-            _buttonList.add(_otherButton);
+        public ModifyStatusDialog() {
+            super();
+            _internalPanel = new ModifyStatusPanel();
+            super.setHelpHeaderText("Modify validated/Invalidated status");
+            super.setInternalComponent(_internalPanel);
+            setButtonVisible(BUTTON_HELP, false);//use only cancel, ok button
+        }
 
-            m_buttonGroup = new ButtonGroup();
-            m_buttonGroup.add(_validButton);
-            m_buttonGroup.add(_invalidButton);
-            m_buttonGroup.add(_otherButton);
+        @Override
+        protected boolean okCalled() {
+            int DESELECTED_MANUAL = 0; //0
+            int DESELECTED_AUTO = 1; //1
+            int SELECTED_AUTO = 2; //2
+            int SELECTED_MANUAL = 3; //3
+            int RESET_AUTO = 4;         //NaN  
 
-            /**
-             * create close Button
-             */
-            JButton closeButton = new JButton(IconManager.getIcon(IconManager.IconType.CROSS_SMALL7));
-            closeButton.setMargin(new Insets(0, 0, 0, 0));
-            closeButton.setFocusPainted(false);
-            closeButton.setContentAreaFilled(false);
+            actionStarted();
+            String command = _buttonGroup.getSelection().getActionCommand();
+            if (command.equals(cmd_validated)) {
+                m_quantPeptideTableModel.validateModifications(XicPeptidePanel.this, _selectedRows, XicStatusRenderer.SelectLevel.SELECTED_MANUAL);
+            } else if (command.equals(cmd_invalidated)) {
+                m_quantPeptideTableModel.validateModifications(XicPeptidePanel.this, _selectedRows, XicStatusRenderer.SelectLevel.DESELECTED_MANUAL);
+            }
+            _buttonGroup.clearSelection();
+            super.m_buttonClicked = BUTTON_OK;
+            return false;//  dialog should visible till to actionFinished
+        }
 
-            closeButton.addActionListener(createCancelAction());
+        private ActionListener createResetAction() {
+            ActionListener resetAction = new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    m_quantPeptideTableModel.validateModifications(XicPeptidePanel.this, _selectedRows, XicStatusRenderer.SelectLevel.RESET_AUTO);
+                }
+            };
+            return resetAction;
 
-            /**
-             * create OK, cancel Button
-             */
-            JButton okButton = new JButton("OK", IconManager.getIcon(IconManager.IconType.OK));
-            JButton cancelButton = new JButton("Cancel", IconManager.getIcon(IconManager.IconType.CANCEL));
-            m_actionButtonArray = new JButton[2];
-            m_actionButtonArray[0] = okButton;
-            m_actionButtonArray[1] = cancelButton;
-            ActionListener okAction = createOkAction();
-            ActionListener cancelAction = createCancelAction();
-            okButton.addActionListener(okAction);
-            cancelButton.addActionListener(cancelAction);
-            //drag Listener
-            MouseAdapter dragGestureAdapter;
-            dragGestureAdapter = new DefaultFloatingPanel.DragGestureAdapter();
+        }
 
-            addMouseMotionListener(dragGestureAdapter);
-            addMouseListener(dragGestureAdapter);
-            //layout
-            setBorder(BorderFactory.createLineBorder(Color.darkGray, 1, true));
-            setOpaque(true);
-            setLayout(new FlowLayout());
-            this.add(closeButton);
-            this.add(_validButton);
-            this.add(_invalidButton);
-            this.add(_otherButton);
-            this.add(okButton);
-            this.add(cancelButton);
-            Dimension d = getPreferredSize();
-            setBounds(0, 0, (int) d.getWidth(), (int) d.getHeight());
+        @Override
+        protected boolean cancelCalled() {
+            _buttonGroup.clearSelection();
             setVisible(false);
+            return true;//@todo  
         }
 
-        private ActionListener createOkAction() {
-            ActionListener okAction = new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    actionStarted();
-                    String command = m_buttonGroup.getSelection().getActionCommand();
-                    if (command.equals(cmd_validated)) {
-                        m_quantPeptideTableModel.validateModifications(m_validateModificationsPanel, _selectedRows, SelectLevel.SELECTED_MANUAL);
-                    } else if (command.equals(cmd_invalidated)) {
-                        m_quantPeptideTableModel.validateModifications(m_validateModificationsPanel, _selectedRows, SelectLevel.DESELECTED_MANUAL);
-                    } else if (command.equals(cmd_other)) {
-                        ///nothing actually
-                        actionFinished(true, "");
-                    }
-                    m_buttonGroup.clearSelection();
-                }
-            };
-            return okAction;
+        public void actionFinished(boolean success, String errorMessage) {
+            _selectedPeptide = null;
+            _selectedRows.clear();
+            _buttonGroup.clearSelection();
+            _internalPanel.setLoaded(1);
+            setVisible(false);
+            if (!success) {
+                setStatus(success, errorMessage);//set dialog status
+            }
         }
 
-        private ActionListener createCancelAction() {
-            ActionListener cancelAction = new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    setSelectedButtonDisabled(null);
-                    m_buttonGroup.clearSelection();
-                    setVisible(false);
-                }
-            };
-            return cancelAction;
+        public void actionStarted() {
+            _internalPanel.setLoading(1, true);
         }
 
         private void selectedRow(int modelRow) {//for single selected
@@ -879,34 +848,14 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
                 if (_selectedPeptide != null) {//single select
                     int selectLevel = _selectedPeptide.getSelectionLevel();
                     if (selectLevel < 2) {
-                        setSelectedButtonDisabled(_invalidButton);
+                        _invalidButton.setSelected(true);
+                        //@todo add manul/auto icon
                     } else if (selectLevel >= 2) {
-                        setSelectedButtonDisabled(_validButton);
-                    } else {//impossible actually
-                        setSelectedButtonDisabled(_otherButton);
+                        _validButton.setSelected(true);
+                        //add manul/auto icon
                     }
                 }
             }
-        }
-
-        private void setSelectedButtonDisabled(JRadioButton button) {
-            for (JRadioButton oneButton : _buttonList) {
-                if (oneButton.equals(button)) {
-                    oneButton.setEnabled(false);
-                    oneButton.setSelected(true);
-                } else {
-                    oneButton.setEnabled(true);
-                    oneButton.setSelected(false);
-                }
-            }
-        }
-
-        public void actionFinished(boolean success, String errorMessage) {
-            _selectedPeptide = null;
-            _selectedRows.clear();
-            setSelectedButtonDisabled(null);
-            m_buttonGroup.clearSelection();
-            super.actionFinished(success, errorMessage);
         }
 
         /**
@@ -919,8 +868,42 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
                 modelIndex = m_quantPeptideTable.convertRowIndexToModel(row);
                 _selectedRows.add(modelIndex);
             }
-            setSelectedButtonDisabled(null);
-            m_buttonGroup.clearSelection();
+            _buttonGroup.clearSelection();
+        }
+
+        class ModifyStatusPanel extends HourglassPanel {
+
+            ModifyStatusPanel() {
+                //model
+                _selectedRows = new ArrayList();
+                _buttonList = new ArrayList();
+
+                //create 2 radio buttons
+                _validButton = new JRadioButton(cmd_validated);
+                _invalidButton = new JRadioButton(cmd_invalidated);
+                _validButton.setActionCommand(cmd_validated);
+                _invalidButton.setActionCommand(cmd_invalidated);
+                _buttonList.add(_invalidButton);
+                _buttonList.add(_validButton);
+
+                _buttonGroup = new ButtonGroup();
+                _buttonGroup.add(_validButton);
+                _buttonGroup.add(_invalidButton);
+                //create reset button
+                _resetButton = new JButton(cmd_reset);
+                _resetButton.addActionListener(createResetAction());
+
+                //layout
+                setBorder(BorderFactory.createLineBorder(Color.darkGray, 1, true));
+                setOpaque(true);
+                setLayout((new BoxLayout(this, BoxLayout.Y_AXIS)));
+                add(_validButton);
+                add(_invalidButton);
+                add(_resetButton);
+
+                Dimension d = getPreferredSize();
+                setBounds(0, 0, (int) d.getWidth(), (int) d.getHeight());
+            }
         }
 
     }

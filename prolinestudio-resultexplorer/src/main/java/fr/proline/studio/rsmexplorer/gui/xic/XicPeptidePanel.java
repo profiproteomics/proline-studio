@@ -768,6 +768,7 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
 
         private JPanel _helpPanel;
         private ModifyStatusPanel _internalPanel;
+
         String cmd_validated = "Validated";
         String cmd_invalidated = "Invalidated";
         String cmd_reset = "Reset manual status to auto";
@@ -781,10 +782,13 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
         public ModifyStatusDialog() {
             super(WindowManager.getDefault().getMainWindow(), Dialog.ModalityType.APPLICATION_MODAL);
             _internalPanel = new ModifyStatusPanel();
-            super.setTitle("Modify Status Dialog");
-            super.setHelpHeaderText("Modify validated/Invalidated status");
+            String dialog_title = "Modify Status Dialog";
+            super.setTitle(dialog_title);
+            String help_text = "<html>Modify validated/Invalidated status.<br> You can also clic the reset button to<br> change for each status manual -> auto </html>";
+            super.setHelpHeaderText(help_text);
             super.setInternalComponent(_internalPanel);
             setButtonVisible(BUTTON_HELP, false);//use only cancel, ok button
+            this.setSize(200,150);
         }
 
         @Override
@@ -852,12 +856,10 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
                     int selectLevel = _selectedPeptide.getSelectionLevel();
                     if (selectLevel < 2) {
                         _invalidButtonPane.getRadioButton().setSelected(true);
-                        //_invalidButton.setIcon(IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));
-                        //@todo add manul/auto icon
+                        //@todo _invalidButtonPane.setIcon(IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));
                     } else if (selectLevel >= 2) {
                         _validButtonPane.getRadioButton().setSelected(true);
-                        //_validButton.setIcon(IconManager.getIcon(IconManager.IconType.TICK_SMALL));
-                        //@todo add manul/auto icon
+                        //@todo _validButtonPane.setIcon(IconManager.getIcon(IconManager.IconType.TICK_SMALL));
                     }
                 }
             }
@@ -907,14 +909,14 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
                 setLayout(new GridBagLayout());
                 GridBagConstraints c = new GridBagConstraints();
                 c.anchor = GridBagConstraints.NORTHWEST;
-                c.insets = new java.awt.Insets(5, 5, 5, 0);
+                c.insets = new java.awt.Insets(0, 1, 1, 0);
                 c.gridx = 0;
                 c.gridy = 0;
                 this.add(_validButtonPane, c);
                 c.gridy++;
                 this.add(_invalidButtonPane, c);
                 c.gridy++;
-                this.add(Box.createRigidArea(new Dimension(10, 10)));
+                this.add(new JPanel(), c);//invisible
                 c.gridy++;
                 this.add(_resetButton, c);
 

@@ -53,7 +53,6 @@ import javax.persistence.TypedQuery;
 public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
 
     private int m_action;
-    private int m_selectLevel;
 
     private ArrayList<DMasterQuantPeptide> m_masterQuantPeptideList;
     private ArrayList<DMasterQuantProteinSet> m_masterQuantProteinSetModified;
@@ -69,14 +68,9 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
     }
 
     public void initDisablePeptide(long projectId, ArrayList<DMasterQuantPeptide> masterQuantPeptideList, ArrayList<DMasterQuantProteinSet> masterQuantProteinSetModified) {
-        initDisablePeptide(projectId, masterQuantPeptideList, masterQuantProteinSetModified, -1);
-    }
-
-    public void initDisablePeptide(long projectId, ArrayList<DMasterQuantPeptide> masterQuantPeptideList, ArrayList<DMasterQuantProteinSet> masterQuantProteinSetModified, int selectLevel) {
         setTaskInfo(new TaskInfo("Disable Peptide", true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
 
         m_action = MODIFY_MASTER_QUANT_PEPTIDE;
-        m_selectLevel = selectLevel;
         m_projectId = projectId;
         m_masterQuantPeptideList = masterQuantPeptideList;
         m_masterQuantProteinSetModified = masterQuantProteinSetModified;
@@ -196,20 +190,6 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
             ArrayList<Long> peptideInstanceIdList = new ArrayList<>(nbPeptides);
             for (int i = 0; i < nbPeptides; i++) {
                 DMasterQuantPeptide masterQuantPeptide = m_masterQuantPeptideList.get(i);
-                int level = masterQuantPeptide.getSelectionLevel();
-                if (m_selectLevel == -1) {
-                    if (level == 0) {
-                        masterQuantPeptide.setSelectionLevel(2);
-                    } else {
-                        masterQuantPeptide.setSelectionLevel(0);
-                    }
-                } else {
-                    if (level == m_selectLevel) {
-                        continue;// do nothng
-                    } else {
-                        masterQuantPeptide.setSelectionLevel(m_selectLevel);//SELECTED_AUTO = 2 SELECTED_MANUAL = 3
-                    }
-                }
                 // Change the selection level of the peptide
                 MasterQuantComponent peptideMasterQuantComponent = entityManagerMSI.find(MasterQuantComponent.class, masterQuantPeptide.getId());
                 peptideMasterQuantComponent.setSelectionLevel(masterQuantPeptide.getSelectionLevel());
@@ -319,7 +299,7 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
                         peptideMap.put(p.getId(), p);
 
                         dpi.setBestPeptideMatch(pm);
-                        dpi.setPeptide(p);
+
                         pm.setPeptide(p);
 
                         peptideInstanceList.add(dpi);

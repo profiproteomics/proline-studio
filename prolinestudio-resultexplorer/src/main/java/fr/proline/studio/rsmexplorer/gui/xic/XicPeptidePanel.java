@@ -81,11 +81,14 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.renderer.XicStatusRenderer;
 import java.awt.Color;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
+import javax.swing.Box;
 import javax.swing.ButtonGroup;
+import javax.swing.Icon;
+import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
@@ -768,17 +771,17 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
         String cmd_validated = "Validated";
         String cmd_invalidated = "Invalidated";
         String cmd_reset = "Reset manual status to auto";
-        JRadioButton _validButton;
-        JRadioButton _invalidButton;
+        XRadioButtonPanel _validButtonPane;
+        XRadioButtonPanel _invalidButtonPane;
         ButtonGroup _buttonGroup;
-        ArrayList<JRadioButton> _buttonList;
         JButton _resetButton;
         DMasterQuantPeptide _selectedPeptide; //for single select
         ArrayList<Integer> _selectedRows;
 
         public ModifyStatusDialog() {
-            super();
+            super(WindowManager.getDefault().getMainWindow(), Dialog.ModalityType.APPLICATION_MODAL);
             _internalPanel = new ModifyStatusPanel();
+            super.setTitle("Modify Status Dialog");
             super.setHelpHeaderText("Modify validated/Invalidated status");
             super.setInternalComponent(_internalPanel);
             setButtonVisible(BUTTON_HELP, false);//use only cancel, ok button
@@ -786,12 +789,6 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
 
         @Override
         protected boolean okCalled() {
-            int DESELECTED_MANUAL = 0; //0
-            int DESELECTED_AUTO = 1; //1
-            int SELECTED_AUTO = 2; //2
-            int SELECTED_MANUAL = 3; //3
-            int RESET_AUTO = 4;         //NaN  
-
             actionStarted();
             String command = _buttonGroup.getSelection().getActionCommand();
             if (command.equals(cmd_validated)) {
@@ -819,7 +816,7 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
         protected boolean cancelCalled() {
             _buttonGroup.clearSelection();
             setVisible(false);
-            return true;//@todo  
+            return true;
         }
 
         public void actionFinished(boolean success, String errorMessage) {
@@ -837,7 +834,13 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
             _internalPanel.setLoading(1, true);
         }
 
-        private void selectedRow(int modelRow) {//for single selected
+        /**
+         * single selected, trigger by mouse clic on column
+         * QuantPeptideTableModel.COLTYPE_MQPEPTIDE_SELECTION_LEVEL
+         *
+         * @param modelRow : index of select row (convert to model row index)
+         */
+        private void selectedRow(int modelRow) {
             if (modelRow == -1) {
                 _selectedPeptide = null;
             } else {
@@ -848,27 +851,35 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
                 if (_selectedPeptide != null) {//single select
                     int selectLevel = _selectedPeptide.getSelectionLevel();
                     if (selectLevel < 2) {
-                        _invalidButton.setSelected(true);
+                        _invalidButtonPane.getRadioButton().setSelected(true);
+                        //_invalidButton.setIcon(IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));
                         //@todo add manul/auto icon
                     } else if (selectLevel >= 2) {
-                        _validButton.setSelected(true);
-                        //add manul/auto icon
+                        _validButtonPane.getRadioButton().setSelected(true);
+                        //_validButton.setIcon(IconManager.getIcon(IconManager.IconType.TICK_SMALL));
+                        //@todo add manul/auto icon
                     }
                 }
             }
         }
 
         /**
+         * multi select, trigger by m_modifyStatusButton
          *
-         * @param selectedRows: non empty array
+         * @param selectedRows: non empty array, table row orignal index, not
+         * model index
          */
         private void setSelectedRows(int[] selectedViewRows) {
-            int modelIndex;
-            for (int row : selectedViewRows) {
-                modelIndex = m_quantPeptideTable.convertRowIndexToModel(row);
-                _selectedRows.add(modelIndex);
+            if (selectedViewRows.length == 1) {
+                selectedRow(m_quantPeptideTable.convertRowIndexToModel(selectedViewRows[0]));
+            } else {
+                int modelIndex;
+                for (int row : selectedViewRows) {
+                    modelIndex = m_quantPeptideTable.convertRowIndexToModel(row);
+                    _selectedRows.add(modelIndex);
+                }
+                _buttonGroup.clearSelection();
             }
-            _buttonGroup.clearSelection();
         }
 
         class ModifyStatusPanel extends HourglassPanel {
@@ -876,19 +887,16 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
             ModifyStatusPanel() {
                 //model
                 _selectedRows = new ArrayList();
-                _buttonList = new ArrayList();
 
                 //create 2 radio buttons
-                _validButton = new JRadioButton(cmd_validated);
-                _invalidButton = new JRadioButton(cmd_invalidated);
-                _validButton.setActionCommand(cmd_validated);
-                _invalidButton.setActionCommand(cmd_invalidated);
-                _buttonList.add(_invalidButton);
-                _buttonList.add(_validButton);
+                _validButtonPane = new XRadioButtonPanel(cmd_validated, IconManager.getIcon(IconManager.IconType.TICK_SMALL));
+                _invalidButtonPane = new XRadioButtonPanel(cmd_invalidated, IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));
+                _validButtonPane.getRadioButton().setActionCommand(cmd_validated);
+                _invalidButtonPane.getRadioButton().setActionCommand(cmd_invalidated);
 
                 _buttonGroup = new ButtonGroup();
-                _buttonGroup.add(_validButton);
-                _buttonGroup.add(_invalidButton);
+                _buttonGroup.add(_validButtonPane.getRadioButton());
+                _buttonGroup.add(_invalidButtonPane.getRadioButton());
                 //create reset button
                 _resetButton = new JButton(cmd_reset);
                 _resetButton.addActionListener(createResetAction());
@@ -896,15 +904,75 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
                 //layout
                 setBorder(BorderFactory.createLineBorder(Color.darkGray, 1, true));
                 setOpaque(true);
-                setLayout((new BoxLayout(this, BoxLayout.Y_AXIS)));
-                add(_validButton);
-                add(_invalidButton);
-                add(_resetButton);
+                setLayout(new GridBagLayout());
+                GridBagConstraints c = new GridBagConstraints();
+                c.anchor = GridBagConstraints.NORTHWEST;
+                c.insets = new java.awt.Insets(5, 5, 5, 0);
+                c.gridx = 0;
+                c.gridy = 0;
+                this.add(_validButtonPane, c);
+                c.gridy++;
+                this.add(_invalidButtonPane, c);
+                c.gridy++;
+                this.add(Box.createRigidArea(new Dimension(10, 10)));
+                c.gridy++;
+                this.add(_resetButton, c);
 
                 Dimension d = getPreferredSize();
                 setBounds(0, 0, (int) d.getWidth(), (int) d.getHeight());
             }
         }
 
+    }
+
+    class XRadioButtonPanel extends JPanel {
+
+        private JRadioButton _radioButton;
+        private JLabel _label;
+
+        public XRadioButtonPanel() {
+            setLayout(new GridBagLayout());
+            add(getRadioButton());
+            add(getLabel());
+        }
+
+        public XRadioButtonPanel(String text, Icon icon) {
+            this();
+            setText(text);
+            setIcon(icon);
+        }
+
+        public JRadioButton getRadioButton() {
+            if (_radioButton == null) {
+                _radioButton = new JRadioButton();
+            }
+            return _radioButton;
+        }
+
+        protected JLabel getLabel() {
+            if (_label == null) {
+                _label = new JLabel();
+                _label.setHorizontalTextPosition(JLabel.LEFT);
+                _label.setVerticalTextPosition(JLabel.BOTTOM);
+                _label.setLabelFor(getRadioButton());
+            }
+            return _label;
+        }
+
+        public void setText(String text) {
+            getLabel().setText(text);
+        }
+
+        public String getText() {
+            return getLabel().getText();
+        }
+
+        public void setIcon(Icon icon) {
+            getLabel().setIcon(icon);
+        }
+
+        public Icon getIcon() {
+            return getLabel().getIcon();
+        }
     }
 }

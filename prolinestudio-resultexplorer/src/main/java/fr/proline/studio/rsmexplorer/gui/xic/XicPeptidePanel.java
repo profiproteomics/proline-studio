@@ -788,7 +788,6 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
             super.setHelpHeaderText(help_text);
             super.setInternalComponent(_internalPanel);
             setButtonVisible(BUTTON_HELP, false);//use only cancel, ok button
-            this.setSize(200,150);
         }
 
         @Override
@@ -800,7 +799,6 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
             } else if (command.equals(cmd_invalidated)) {
                 m_quantPeptideTableModel.validateModifications(XicPeptidePanel.this, _selectedRows, XicStatusRenderer.SelectLevel.DESELECTED_MANUAL);
             }
-            _buttonGroup.clearSelection();
             super.m_buttonClicked = BUTTON_OK;
             return false;//  dialog should visible till to actionFinished
         }
@@ -854,12 +852,22 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
                 _selectedPeptide = (DMasterQuantPeptide) m_quantPeptideTableModel.getRowValue(DMasterQuantPeptide.class, modelRow);
                 if (_selectedPeptide != null) {//single select
                     int selectLevel = _selectedPeptide.getSelectionLevel();
-                    if (selectLevel < 2) {
-                        _invalidButtonPane.getRadioButton().setSelected(true);
-                        //@todo _invalidButtonPane.setIcon(IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));
-                    } else if (selectLevel >= 2) {
-                        _validButtonPane.getRadioButton().setSelected(true);
-                        //@todo _validButtonPane.setIcon(IconManager.getIcon(IconManager.IconType.TICK_SMALL));
+                    switch (selectLevel) {
+                        case 0:
+                        case 1:
+                            _invalidButtonPane.getRadioButton().setSelected(true);
+                            _invalidButtonPane.addIcon(selectLevel);
+                            _validButtonPane.removeOptionIcon();
+                            break;
+                        case 2:
+                        case 3:
+                            _validButtonPane.getRadioButton().setSelected(true);
+                            _validButtonPane.addIcon(selectLevel);
+                            _invalidButtonPane.removeOptionIcon();
+                            break;
+                        default:
+                            _validButtonPane.removeOptionIcon();
+                            _invalidButtonPane.removeOptionIcon();
                     }
                 }
             }
@@ -880,6 +888,8 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
                     modelIndex = m_quantPeptideTable.convertRowIndexToModel(row);
                     _selectedRows.add(modelIndex);
                 }
+                _validButtonPane.removeOptionIcon();
+                _invalidButtonPane.removeOptionIcon();
                 _buttonGroup.clearSelection();
             }
         }
@@ -931,17 +941,17 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
 
         private JRadioButton _radioButton;
         private JLabel _label;
+        private JLabel _optionIconLabel;
 
-        public XRadioButtonPanel() {
+        public XRadioButtonPanel(String text, ImageIcon icon) {
             setLayout(new GridBagLayout());
             add(getRadioButton());
-            add(getLabel());
-        }
-
-        public XRadioButtonPanel(String text, Icon icon) {
-            this();
-            setText(text);
-            setIcon(icon);
+            _label = new JLabel(text);
+            _label.setHorizontalTextPosition(JLabel.LEFT);
+            _label.setVerticalTextPosition(JLabel.BOTTOM);
+            _label.setLabelFor(getRadioButton());
+            _label.setIcon(icon);
+            add(_label);
         }
 
         public JRadioButton getRadioButton() {
@@ -951,30 +961,35 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
             return _radioButton;
         }
 
-        protected JLabel getLabel() {
-            if (_label == null) {
-                _label = new JLabel();
-                _label.setHorizontalTextPosition(JLabel.LEFT);
-                _label.setVerticalTextPosition(JLabel.BOTTOM);
-                _label.setLabelFor(getRadioButton());
+        public void addIcon(int selectLevel) {
+            boolean isManual = false;
+            switch (selectLevel) {
+                case 0:
+                case 3:
+                    isManual = true;
+                    break;
+                case 1:
+                case 2:
+                    isManual = false;
             }
-            return _label;
+            if (_optionIconLabel != null) {
+                remove(_optionIconLabel);
+            }
+            ImageIcon icon = null;
+            if (isManual) {
+                icon = new ImageIcon(IconManager.getIcon(IconManager.IconType.NAVIGATE).getImage().getScaledInstance(16, 16, Image.SCALE_DEFAULT));
+            } else {
+                icon = new ImageIcon(IconManager.getIcon(IconManager.IconType.GEAR).getImage().getScaledInstance(16, 16, Image.SCALE_DEFAULT));
+            }
+            _optionIconLabel = new JLabel(icon);
+            add(_optionIconLabel);
         }
 
-        public void setText(String text) {
-            getLabel().setText(text);
+        private void removeOptionIcon() {
+            if (_optionIconLabel != null) {
+                remove(_optionIconLabel);
+            }
         }
 
-        public String getText() {
-            return getLabel().getText();
-        }
-
-        public void setIcon(Icon icon) {
-            getLabel().setIcon(icon);
-        }
-
-        public Icon getIcon() {
-            return getLabel().getIcon();
-        }
     }
 }

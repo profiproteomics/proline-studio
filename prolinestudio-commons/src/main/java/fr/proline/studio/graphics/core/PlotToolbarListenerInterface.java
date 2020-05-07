@@ -14,7 +14,8 @@ public interface PlotToolbarListenerInterface {
     public enum BUTTONS {
         GRID,
         EXPORT_SELECTION,
-        IMPORT_SELECTION
+        IMPORT_SELECTION,
+        VIEW_ALL_MAP
     }
 
     public void stateModified(BUTTONS b);

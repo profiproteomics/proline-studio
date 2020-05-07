@@ -68,7 +68,7 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
     public abstract boolean canLogXAxis();
 
     public abstract boolean canLogYAxis();
-    
+
 
     public abstract double getNearestXData(double x);
 

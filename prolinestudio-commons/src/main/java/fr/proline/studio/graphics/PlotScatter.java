@@ -53,9 +53,12 @@ import org.openide.windows.WindowManager;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.ExtraDataForTableModelInterface;
 import fr.proline.studio.extendedtablemodel.LogAdapterModel;
+import fr.proline.studio.graphics.core.PlotToolbarListenerInterface;
 import fr.proline.studio.graphics.measurement.WidthMeasurement;
+import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.DoubleParameter;
 import fr.proline.studio.parameter.ObjectParameter;
+import javax.swing.JComboBox;
 import org.openide.util.NbPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +95,21 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
     private long[] m_ids;
     private HashMap<Long, Integer> m_idToIndex;
 
+    
+    public static final String PLOT_PARAMETER_LIST_KEY = "Plots";
+    
+    public static final int LOG_SUPPRESS_VALUES = 0;
+    public static final int LOG_REPLACE_VALUES = 1;
+    public static final int DEFAULT_LOG_ALGO = 0;
+    
+    public static final String LOG_ALGO_KEY = "Log_Algo";
+    public static final String LOG_ALGO_NAME = "Log Axis Algorithm";
+    public static final String LOG_ALGO_OPTION1 = "Suppress Negative and Null values";
+    public static final String LOG_ALGO_OPTION2 = "Replace Negative and Null Values";
+    
+    public static final String DEFAULT_LOG_REPLACE_VALUE_KEY = "Replacement_Value";
+    public static final String DEFAULT_LOG_REPLACE_VALUE_NAME = "Replacement Value";
+    
     private static final int SELECT_SENSIBILITY = 8;
 
     private static final String PLOT_SCATTER_COLOR_KEY = "PLOT_SCATTER_COLOR";
@@ -101,6 +119,9 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
     private final ColorOrGradientParameter m_colorParameter;
     private final IntegerParameter m_jitterXParameter;
     private final IntegerParameter m_jitterYParameter;
+    
+    private final ObjectParameter m_logAlgoParameter;
+    private final DoubleParameter m_replaceValue;
 
     private ArrayList<ParameterList> m_parameterListArray = null;
 
@@ -137,12 +158,47 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         m_jitterYParameter = new IntegerParameter(PLOT_SCATTER_Y_JITTER_KEY, "Y Jitter", JSlider.class, 0, 0, 20);
         settingsParameterList.add(m_jitterXParameter);
         settingsParameterList.add(m_jitterYParameter);
+        
+        // Log parameter
+        ParameterList plotParameterList = new ParameterList(PlotScatter.PLOT_PARAMETER_LIST_KEY);
+
+        Object[] logOptions = {PlotScatter.LOG_ALGO_OPTION1, PlotScatter.LOG_ALGO_OPTION2};
+        JComboBox comboBox = new JComboBox(logOptions);
+        
+        Object[] objectTable = { PlotScatter.LOG_SUPPRESS_VALUES, PlotScatter.LOG_REPLACE_VALUES };
+        m_logAlgoParameter = new ObjectParameter(PlotScatter.LOG_ALGO_KEY, PlotScatter.LOG_ALGO_NAME, comboBox, logOptions, objectTable, PlotScatter.DEFAULT_LOG_ALGO, null);
+        plotParameterList.add(m_logAlgoParameter);
+
+        m_replaceValue = new DoubleParameter(PlotScatter.DEFAULT_LOG_REPLACE_VALUE_KEY, PlotScatter.DEFAULT_LOG_REPLACE_VALUE_NAME, JTextField.class, new Double(1), new Double(10e-14), new Double(10e14));
+        plotParameterList.add(m_replaceValue);
+
+        plotParameterList.loadParameters(NbPreferences.root());
+
+        AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(plotParameterList) {
+
+            @Override
+            public void valueChanged(String value, Object associatedValue) {
+                double valueDouble = Double.parseDouble(m_replaceValue.getStringValue());
+                int selection = Integer.parseInt(m_logAlgoParameter.getStringValue());
+                showParameter(m_replaceValue, selection == PlotScatter.LOG_REPLACE_VALUES, valueDouble);
+                updateParameterListPanel();
+            }
+
+        };
+
+        m_logAlgoParameter.addLinkedParameters(linkedParameters);
+
+        int selection = Integer.parseInt(m_logAlgoParameter.getStringValue());
+        linkedParameters.valueChanged((String) logOptions[selection], objectTable[selection]);
 
         m_parameterListArray = new ArrayList<>(2);
         m_parameterListArray.add(colorParameteList);
         m_parameterListArray.add(settingsParameterList);
+        m_parameterListArray.add(plotParameterList);
 
         addMeasurement(new WidthMeasurement(this));
+        
+        m_plotPanel.enableButton(PlotToolbarListenerInterface.BUTTONS.VIEW_ALL_MAP, true);
     }
 
     @Override
@@ -424,6 +480,12 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
     @Override
     public void parametersChanged() {
         updateJitter();
+        boolean logX = m_plotPanel.getXAxis().isLog();
+        boolean logY = m_plotPanel.getYAxis().isLog();
+        boolean log = logX || logY;
+        if (log) {
+            update();
+        }
     }
 
     private void updateJitter() {
@@ -491,23 +553,8 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         boolean log = logX || logY;
         if (log) {
             
-            // JPM : the system of parameters should be changed
-            // to load them without using them in a user interface is too complex
-            ParameterList plotParameterList = new ParameterList(PLOT_PARAMETER_LIST_KEY);
-            
-            Object[] logOptions = {PlotXYAbstract.LOG_ALGO_OPTION1, PlotXYAbstract.LOG_ALGO_OPTION2};
-            Object[] objectTable = { PlotXYAbstract.LOG_SUPPRESS_VALUES, PlotXYAbstract.LOG_REPLACE_VALUES };
-            ObjectParameter logAlgoParameter = new ObjectParameter(PlotXYAbstract.LOG_ALGO_KEY, PlotXYAbstract.LOG_ALGO_NAME, null, logOptions, objectTable, PlotXYAbstract.DEFAULT_LOG_ALGO, null);
-            plotParameterList.add(logAlgoParameter);
-
-            DoubleParameter replaceValue = new DoubleParameter(PlotXYAbstract.DEFAULT_LOG_REPLACE_VALUE_KEY, PlotXYAbstract.DEFAULT_LOG_REPLACE_VALUE_NAME, JTextField.class, new Double(1), new Double(10e-14), new Double(10e14));
-            plotParameterList.add(replaceValue);
-
-            plotParameterList.loadParameters(NbPreferences.root());
-
-
-            String algo = plotParameterList.getValues().get(PlotXYAbstract.LOG_ALGO_KEY);
-            boolean algoSupressValues = ((algo == null) || (Integer.parseInt(algo) == PlotXYAbstract.LOG_SUPPRESS_VALUES));
+            String algo = m_logAlgoParameter.getStringValue();
+            boolean algoSupressValues = ((algo == null) || (Integer.parseInt(algo) == PlotScatter.LOG_SUPPRESS_VALUES));
 
             if (! (m_compareDataInterface instanceof LogAdapterModel)) {
                 m_compareDataInterface = new LogAdapterModel(m_compareDataInterface);
@@ -516,7 +563,7 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
             if (algoSupressValues) {
                 ((LogAdapterModel) m_compareDataInterface).update(LogAdapterModel.POLICY.REMOVE_INCORRECT_VALUES, logX ? m_cols[COL_X_ID] : -1, logY ? m_cols[COL_Y_ID] : -1, null);
             } else {
-                String value = plotParameterList.getValues().get(PlotXYAbstract.DEFAULT_LOG_REPLACE_VALUE_KEY);
+                String value = m_replaceValue.getStringValue();
                 double replaceValueD = (value == null) ? 1d : Double.parseDouble(value);
                 ((LogAdapterModel) m_compareDataInterface).update(LogAdapterModel.POLICY.REPLACE_BY_VALUE, logX ? m_cols[COL_X_ID] : -1, logY ? m_cols[COL_Y_ID] : -1, replaceValueD);
             }
@@ -905,7 +952,7 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
     public boolean canLogYAxis() {
         return true;
     }
-    
+
     @Override
     public boolean isMouseOnPlot(double x, double y) {
         return findPoint(x, y) != -1;

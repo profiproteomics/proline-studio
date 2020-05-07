@@ -39,10 +39,11 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.LogAdapterModel;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_X_ID;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_Y_ID;
-import static fr.proline.studio.graphics.PlotXYAbstract.PLOT_PARAMETER_LIST_KEY;
+import fr.proline.studio.graphics.core.PlotToolbarListenerInterface;
 import fr.proline.studio.parameter.DoubleParameter;
 import fr.proline.studio.parameter.ObjectParameter;
 import java.awt.Stroke;
+import java.awt.geom.Point2D;
 import javax.swing.JTextField;
 import org.openide.util.NbPreferences;
 import org.slf4j.Logger;
@@ -133,6 +134,8 @@ public class PlotLinear extends PlotXYAbstract {
         m_parameterListArray = new ArrayList<>(1);
         m_parameterListArray.add(colorParameterList);
         m_tolerance = 0;
+        
+        m_plotPanel.enableButton(PlotToolbarListenerInterface.BUTTONS.VIEW_ALL_MAP, true);
     }
 
     /**
@@ -443,43 +446,11 @@ public class PlotLinear extends PlotXYAbstract {
         boolean log = logX || logY;
         if (log) {
             
-            // JPM : the system of parameters should be changed
-            // to load them without using them in a user interface is too complex
-            ParameterList plotParameterList = new ParameterList(PLOT_PARAMETER_LIST_KEY);
-            
-            Object[] logOptions = {PlotXYAbstract.LOG_ALGO_OPTION1, PlotXYAbstract.LOG_ALGO_OPTION2};
-            Object[] objectTable = { PlotXYAbstract.LOG_SUPPRESS_VALUES, PlotXYAbstract.LOG_REPLACE_VALUES };
-            ObjectParameter logAlgoParameter = new ObjectParameter(PlotXYAbstract.LOG_ALGO_KEY, PlotXYAbstract.LOG_ALGO_NAME, null, logOptions, objectTable, PlotXYAbstract.DEFAULT_LOG_ALGO, null);
-            plotParameterList.add(logAlgoParameter);
-
-            DoubleParameter replaceValue = new DoubleParameter(PlotXYAbstract.DEFAULT_LOG_REPLACE_VALUE_KEY, PlotXYAbstract.DEFAULT_LOG_REPLACE_VALUE_NAME, JTextField.class, new Double(1), new Double(10e-14), new Double(10e14));
-            plotParameterList.add(replaceValue);
-
-            plotParameterList.loadParameters(NbPreferences.root());
-
-            // ************* Plot linear: we can not suppress values : algo is set to keep values
-            
             if (!(m_compareDataInterface instanceof LogAdapterModel)) {
                 m_compareDataInterface = new LogAdapterModel(m_compareDataInterface);
             }
-                        
-            /*
-            String algo = plotParameterList.getValues().get(PlotXYAbstract.LOG_ALGO_KEY);
-            boolean algoSupressValues = ((algo == null) || (Integer.parseInt(algo) == PlotXYAbstract.LOG_SUPPRESS_VALUES));
 
-
-            if (algoSupressValues) {
-                ((LogAdapterModel) m_compareDataInterface).update(LogAdapterModel.POLICY.REMOVE_INCORRECT_VALUES, logX ? m_cols[COL_X_ID] : -1, logY ? m_cols[COL_Y_ID] : -1, null);
-            } else {
-                String value = plotParameterList.getValues().get(PlotXYAbstract.DEFAULT_LOG_REPLACE_VALUE_KEY);
-                double replaceValueD = (value == null) ? 1d : Double.parseDouble(value);
-                ((LogAdapterModel) m_compareDataInterface).update(LogAdapterModel.POLICY.REPLACE_BY_VALUE, logX ? m_cols[COL_X_ID] : -1, logY ? m_cols[COL_Y_ID] : -1, replaceValueD);
-            }
-            */
-            
-            //String value = plotParameterList.getValues().get(PlotXYAbstract.DEFAULT_LOG_REPLACE_VALUE_KEY);
-            //double replaceValueD = (value == null) ? 1d : Double.parseDouble(value);
-            double replaceValueD = 0.1d; // Double.NaN;
+            double replaceValueD = 0.1d;
             ((LogAdapterModel) m_compareDataInterface).update(LogAdapterModel.POLICY.REPLACE_BY_VALUE, -1, logY ? m_cols[COL_Y_ID] : -1, replaceValueD);
             
         } else if (m_compareDataInterface instanceof LogAdapterModel) {
@@ -824,6 +795,21 @@ public class PlotLinear extends PlotXYAbstract {
                 
                 if (m_isDrawGap || (!m_isDrawGap && isDef && isDef0)) {
                     g.setColor(plotColor);
+                    if (!isDef || !isDef0) { // there is an error, plot the line as an error
+                        if (x0 != x) { // avoid first point
+                            prepareGradientErrorColors(plotColor);
+                            if (y0 < y) {
+                                m_gradientStart.setLocation(x0, y0);
+                                m_gradientEnd.setLocation(x, y);
+                            } else {
+                                m_gradientStart.setLocation(x, y);
+                                m_gradientEnd.setLocation(x0, y0);
+                            }
+                            LinearGradientPaint gradient = new LinearGradientPaint(m_gradientStart, m_gradientEnd, ERROR_GRADIENT_STEPS, ERROR_GRADIENT_COLORS);
+                            g.setPaint(gradient);
+                        }
+
+                    }
                     g.drawLine(x0, y0, x, y);
                 }
                 x0 = x;
@@ -837,6 +823,16 @@ public class PlotLinear extends PlotXYAbstract {
             }
         }
     }
+    private void prepareGradientErrorColors(Color plotColor) {
+        ERROR_GRADIENT_COLORS[0] = plotColor;
+        ERROR_GRADIENT_COLORS[1] = new Color(plotColor.getRed(), plotColor.getGreen(), plotColor.getBlue(), 64);
+        ERROR_GRADIENT_COLORS[2] = new Color(plotColor.getRed(), plotColor.getGreen(), plotColor.getBlue(), 0);
+                        
+    }
+    private static final Point2D m_gradientStart = new Point2D.Double();
+    private static final Point2D m_gradientEnd = new Point2D.Double();
+    private static final float[] ERROR_GRADIENT_STEPS = {0.0f, 0.3f, 1.0f};
+    private static final Color[] ERROR_GRADIENT_COLORS = new Color[3];
 
 
     /**
@@ -899,6 +895,7 @@ public class PlotLinear extends PlotXYAbstract {
     public boolean canLogYAxis() {
         return true;
     }
+
     
     private void sortData() {
         int dataSize = m_dataX == null ? 0 : m_dataX.length;

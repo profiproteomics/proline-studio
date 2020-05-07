@@ -115,6 +115,7 @@ public class PlotVennDiagram extends PlotMultiDataAbstract {
         m_plotPanel.enableButton(PlotToolbarListenerInterface.BUTTONS.GRID, false);
         m_plotPanel.enableButton(PlotToolbarListenerInterface.BUTTONS.EXPORT_SELECTION, false);
         m_plotPanel.enableButton(PlotToolbarListenerInterface.BUTTONS.IMPORT_SELECTION, false);
+        m_plotPanel.enableButton(PlotToolbarListenerInterface.BUTTONS.VIEW_ALL_MAP, false);
     }
 
     @Override

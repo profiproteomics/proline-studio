@@ -30,8 +30,9 @@ public class ZoomGesture {
     public static final int ACTION_UNZOOM = 2;
 
     private boolean m_isZooming = false;
+    private boolean m_basePlot = true; // basePlot of viewAll
     private int m_action = ACTION_NONE;
-
+    
     /**
      * pixel value
      */
@@ -51,12 +52,13 @@ public class ZoomGesture {
         return m_isZooming;
     }
 
-    public void startZooming(int x, int y) {
+    public void startZooming(int x, int y, boolean basePlot) {
         m_x1 = x;
         m_y1 = y;
         m_x2 = x;
         m_y2 = y;
         m_isZooming = true;
+        m_basePlot = basePlot;
         m_action = ACTION_NONE;
     }
 
@@ -127,5 +129,8 @@ public class ZoomGesture {
     public int getAction() {
         return m_action;
     }
-
+    
+    public boolean isBasePlot() {
+        return m_basePlot;
+    }
 }

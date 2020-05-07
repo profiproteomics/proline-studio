@@ -46,6 +46,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import org.openide.windows.WindowManager;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.graphics.core.PlotToolbarListenerInterface;
 
 /**
  * Histogram Plot
@@ -102,6 +103,8 @@ public class PlotHistogram extends PlotXYAbstract {
         m_parameterListArray = new ArrayList<>(2);
         m_parameterListArray.add(parameterColorList);
         m_parameterListArray.add(parameterSettingsList);
+        
+        m_plotPanel.enableButton(PlotToolbarListenerInterface.BUTTONS.VIEW_ALL_MAP, true);
         
     }
 
@@ -530,6 +533,7 @@ public class PlotHistogram extends PlotXYAbstract {
     public boolean canLogYAxis() {
         return false;
     }
+
     
     @Override
     public boolean isMouseOnPlot(double x, double y) {

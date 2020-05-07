@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.graphics.core.PlotToolbarListenerInterface;
 
 /**
  * Stick plot
@@ -108,6 +109,8 @@ public class PlotStick extends PlotXYAbstract {
         
         m_parameterListArray = new  ArrayList<>(1);
         m_parameterListArray.add(colorParameterList);
+        
+         m_plotPanel.enableButton(PlotToolbarListenerInterface.BUTTONS.VIEW_ALL_MAP, false);
     }
 
     @Override

@@ -54,6 +54,7 @@ public abstract class GraphicsToolbarPanel extends HourglassPanel implements Plo
     protected JToggleButton m_normalModeButton = null;
     protected JToggleButton m_selectionModeButton = null;
     protected JButton m_zoomButton = null;
+    protected JToggleButton m_viewAllMapButton = null;
     protected JToggleButton m_gridButton = null;
 
     protected JButton m_importSelectionButton = null; // should be moved
@@ -212,6 +213,16 @@ public abstract class GraphicsToolbarPanel extends HourglassPanel implements Plo
         extendableButtonPanel.registerButton(viewAlltButton);
         extendablePanelGroup.add(extendableButtonPanel);
         
+        // -- Map Button
+        m_viewAllMapButton = new JToggleButton(IconManager.getIcon(IconManager.IconType.VIEW_ALL));
+        m_viewAllMapButton.setSelected(false);
+        m_viewAllMapButton.setFocusPainted(false);
+        m_viewAllMapButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                m_plotPanel.displayViewAllMap(m_viewAllMapButton.isSelected());
+            }
+        });
         
         // -- Grid Button
         m_gridButton = new JToggleButton(IconManager.getIcon(IconManager.IconType.GRID));
@@ -233,6 +244,7 @@ public abstract class GraphicsToolbarPanel extends HourglassPanel implements Plo
         m_toolbar.addSeparator(); // ----
         m_toolbar.add(m_zoomButton);
         m_toolbar.add(m_gridButton);
+        m_toolbar.add(m_viewAllMapButton);
         
         fillToolbar(m_toolbar);
         return m_toolbar;
@@ -255,11 +267,16 @@ public abstract class GraphicsToolbarPanel extends HourglassPanel implements Plo
     @Override
     public void stateModified(BUTTONS b) {
         switch (b) {
-            case GRID:
+            case GRID: {
                 if (!m_plotPanel.displayGrid()) {
                     m_gridButton.setSelected(false);
                 }
                 break;
+            }
+            case VIEW_ALL_MAP: {
+                m_viewAllMapButton.setSelected(m_plotPanel.isViewAllMapDisplayed());
+                break;
+            }
         }
 
     }
@@ -275,6 +292,9 @@ public abstract class GraphicsToolbarPanel extends HourglassPanel implements Plo
                 break;
             case EXPORT_SELECTION:
                 m_exportSelectionButton.setEnabled(v);
+                break;
+            case VIEW_ALL_MAP:
+                m_viewAllMapButton.setEnabled(v);
                 break;
         }
     }

@@ -25,20 +25,6 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
  */
 public abstract class PlotXYAbstract extends PlotBaseAbstract {
 
-    public static final String PLOT_PARAMETER_LIST_KEY = "Plots";
-    
-    public static final int LOG_SUPPRESS_VALUES = 0;
-    public static final int LOG_REPLACE_VALUES = 1;
-    public static final int DEFAULT_LOG_ALGO = 0;
-    
-    public static final String LOG_ALGO_KEY = "Log_Algo";
-    public static final String LOG_ALGO_NAME = "Log Axis Algorithm";
-    public static final String LOG_ALGO_OPTION1 = "Suppress Negative and Null values";
-    public static final String LOG_ALGO_OPTION2 = "Replace Negative and Null Values";
-    
-    public static final String DEFAULT_LOG_REPLACE_VALUE_KEY = "Replacement_Value";
-    public static final String DEFAULT_LOG_REPLACE_VALUE_NAME = "Replacement Value";
-    
     public PlotXYAbstract(BasePlotPanel plotPanel, PlotType plotType, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface) {
         super(plotPanel, plotType, compareDataInterface, crossSelectionInterface);
     }

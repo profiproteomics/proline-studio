@@ -17,8 +17,7 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
-import fr.proline.studio.graphics.PlotXYAbstract;
-import static fr.proline.studio.graphics.PlotXYAbstract.LOG_ALGO_OPTION2;
+import fr.proline.studio.graphics.PlotScatter;
 import fr.proline.studio.gui.AbstractParameterListTree;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.AbstractLinkedParameters;
@@ -210,16 +209,16 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
     }
 
     private ParameterList getPlotParameters() {
-        m_plotParameterList = new ParameterList(PlotXYAbstract.PLOT_PARAMETER_LIST_KEY);
+        m_plotParameterList = new ParameterList(PlotScatter.PLOT_PARAMETER_LIST_KEY);
 
-        Object[] logOptions = {PlotXYAbstract.LOG_ALGO_OPTION1, PlotXYAbstract.LOG_ALGO_OPTION2};
+        Object[] logOptions = {PlotScatter.LOG_ALGO_OPTION1, PlotScatter.LOG_ALGO_OPTION2};
         JComboBox comboBox = new JComboBox(logOptions);
         
-        Object[] objectTable = { PlotXYAbstract.LOG_SUPPRESS_VALUES, PlotXYAbstract.LOG_REPLACE_VALUES };
-        ObjectParameter logAlgoParameter = new ObjectParameter(PlotXYAbstract.LOG_ALGO_KEY, PlotXYAbstract.LOG_ALGO_NAME, comboBox, logOptions, objectTable, PlotXYAbstract.DEFAULT_LOG_ALGO, null);
+        Object[] objectTable = { PlotScatter.LOG_SUPPRESS_VALUES, PlotScatter.LOG_REPLACE_VALUES };
+        ObjectParameter logAlgoParameter = new ObjectParameter(PlotScatter.LOG_ALGO_KEY, PlotScatter.LOG_ALGO_NAME, comboBox, logOptions, objectTable, PlotScatter.DEFAULT_LOG_ALGO, null);
         m_plotParameterList.add(logAlgoParameter);
 
-        DoubleParameter replaceValue = new DoubleParameter(PlotXYAbstract.DEFAULT_LOG_REPLACE_VALUE_KEY, PlotXYAbstract.DEFAULT_LOG_REPLACE_VALUE_NAME, JTextField.class, new Double(1), new Double(10e-14), new Double(10e14));
+        DoubleParameter replaceValue = new DoubleParameter(PlotScatter.DEFAULT_LOG_REPLACE_VALUE_KEY, PlotScatter.DEFAULT_LOG_REPLACE_VALUE_NAME, JTextField.class, new Double(1), new Double(10e-14), new Double(10e14));
         m_plotParameterList.add(replaceValue);
 
         m_plotParameterList.loadParameters(m_preferences);
@@ -230,7 +229,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
             public void valueChanged(String value, Object associatedValue) {
                 double valueDouble = Double.parseDouble(replaceValue.getStringValue());
                 int selection = Integer.parseInt(logAlgoParameter.getStringValue());
-                showParameter(replaceValue, selection == PlotXYAbstract.LOG_REPLACE_VALUES, valueDouble);
+                showParameter(replaceValue, selection == PlotScatter.LOG_REPLACE_VALUES, valueDouble);
                 updateParameterListPanel();
             }
 

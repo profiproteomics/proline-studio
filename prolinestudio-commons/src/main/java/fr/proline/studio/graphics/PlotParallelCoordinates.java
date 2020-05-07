@@ -98,6 +98,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         
          // disable selection buttons
         m_plotPanel.enableButton(PlotToolbarListenerInterface.BUTTONS.GRID, false);
+        m_plotPanel.enableButton(PlotToolbarListenerInterface.BUTTONS.VIEW_ALL_MAP, false);
         //m_plotPanel.enableButton(BasePlotPanel.PlotToolbarListener.BUTTONS.IMPORT_SELECTION, false);
     }
 
@@ -172,6 +173,19 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         int width = m_plotPanel.getWidth();
         int height = m_plotPanel.getHeight();
         
+        if ((width != m_previousWidth) || (height != m_previousHeight)) {
+            // size of the panel has been changed, we are obliged to update the axis whose range
+            // correspond to the size of the panel
+            m_plotPanel.updateAxis();
+            xAxis.setSize(0, height, width, 0);
+            yAxis.setSize(0, 0, 0, height);
+            
+            m_previousWidth = width;
+            m_previousHeight = height;
+        }
+
+        
+        
         int nbAxis = m_axisList.size();
         
         int deltaAxis = getAxisDelta(width, nbAxis);
@@ -212,6 +226,8 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
 
         
     }
+    private int m_previousWidth = 0;
+    private int m_previousHeight = 0;
     
     @Override
     public void paintOver(Graphics2D g) {

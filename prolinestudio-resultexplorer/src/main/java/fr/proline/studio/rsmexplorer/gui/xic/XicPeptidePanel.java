@@ -901,8 +901,8 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
                 _selectedRows = new ArrayList();
 
                 //create 2 radio buttons
-                _validButtonPane = new XRadioButtonPanel(cmd_validated, IconManager.getIcon(IconManager.IconType.TICK_SMALL));
-                _invalidButtonPane = new XRadioButtonPanel(cmd_invalidated, IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));
+                _validButtonPane = new XRadioButtonPanel(cmd_validated, IconManager.getIcon(IconManager.IconType.VALIDATED));
+                _invalidButtonPane = new XRadioButtonPanel(cmd_invalidated, IconManager.getIcon(IconManager.IconType.INVALIDATED));
                 _validButtonPane.getRadioButton().setActionCommand(cmd_validated);
                 _invalidButtonPane.getRadioButton().setActionCommand(cmd_invalidated);
 

@@ -60,15 +60,6 @@ public class XicStatusRenderer extends DefaultTableCellRenderer {
 
     }
 
-    private JPanel getRenderer(ImageIcon[] iconArray) {
-        JPanel result = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        for (ImageIcon icon : iconArray) {
-            JLabel label = new JLabel(icon);
-            result.add(label);
-        }
-        return result;
-    }
-
     public static String getPepIonStatusText(PepIonStatus status) {
         switch (status) {
             case UNKNOWN:
@@ -89,32 +80,22 @@ public class XicStatusRenderer extends DefaultTableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Object status = value;
-        ImageIcon yesIcon = IconManager.getIcon(IconManager.IconType.TICK_SMALL);
-        ImageIcon noIcon = IconManager.getIcon(IconManager.IconType.CROSS_SMALL16);
-        ImageIcon manualIcon = new ImageIcon(IconManager.getIcon(IconManager.IconType.NAVIGATE).getImage().getScaledInstance(16, 16, Image.SCALE_DEFAULT));
-        ImageIcon unKnowIcon = IconManager.getIcon(IconManager.IconType.BOOK_QUESTION);
-        ImageIcon usedIcon = IconManager.getIcon(IconManager.IconType.PIN);
-        Component renderer = null;
         if (status instanceof SelectLevel) {
             SelectLevel statusValue = (SelectLevel) status;
             switch (statusValue) {
                 case DESELECTED_MANUAL: //0 
-                    renderer = getRenderer(new ImageIcon[]{noIcon, manualIcon});
-                    break;
                 case DESELECTED_AUTO: //1
-                    renderer = getRenderer(new ImageIcon[]{noIcon});
+                    this.setIcon(IconManager.getIcon(IconManager.IconType.INVALIDATED));
                     break;
                 case SELECTED_AUTO: //2
-                    renderer = getRenderer(new ImageIcon[]{yesIcon});
-                    break;
                 case SELECTED_MANUAL: //3
-                    renderer = getRenderer(new ImageIcon[]{yesIcon, manualIcon});
+                    this.setIcon(IconManager.getIcon(IconManager.IconType.VALIDATED));
                     break;
                 default:
-                    renderer = getRenderer(new ImageIcon[]{unKnowIcon});
+                    this.setIcon(IconManager.getIcon(IconManager.IconType.TEST));
 
             }
-            ((JPanel) renderer).setToolTipText(statusValue.getDescription());
+            this.setToolTipText(statusValue.getDescription());
 
         } else if (status instanceof PepIonStatus) {
             switch ((PepIonStatus) status) {
@@ -136,17 +117,16 @@ public class XicStatusRenderer extends DefaultTableCellRenderer {
                     this.setIcon(IconManager.getIcon(IconManager.IconType.TEST));
             }
             this.setToolTipText(getPepIonStatusText((PepIonStatus) status));
-            renderer = this;
         }
 
         if (isSelected) {
-            renderer.setBackground(javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground"));
-            renderer.setForeground(Color.WHITE);
+            this.setBackground(javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground"));
+            this.setForeground(Color.WHITE);
         } else {
-            renderer.setBackground(javax.swing.UIManager.getDefaults().getColor("Table.background"));
-            renderer.setForeground(Color.BLACK);
+            this.setBackground(javax.swing.UIManager.getDefaults().getColor("Table.background"));
+            this.setForeground(Color.BLACK);
         }
 
-        return renderer;
+        return this;
     }
 }

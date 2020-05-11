@@ -17,7 +17,7 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import fr.proline.studio.rsmexplorer.gui.TaskDescriptionPanel;
+import fr.proline.studio.rsmexplorer.gui.tasklog.TaskDescriptionPanel;
 
 /**
  * Management of one TaskInfo to display

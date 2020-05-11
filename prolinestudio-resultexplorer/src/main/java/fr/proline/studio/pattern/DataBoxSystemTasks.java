@@ -16,7 +16,7 @@
  */
 package fr.proline.studio.pattern;
 
-import fr.proline.studio.rsmexplorer.gui.SystemTasksPanel;
+import fr.proline.studio.rsmexplorer.gui.tasklog.SystemTasksPanel;
 
 /**
  *

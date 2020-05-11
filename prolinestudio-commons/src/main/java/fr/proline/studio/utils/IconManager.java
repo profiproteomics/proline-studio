@@ -218,7 +218,11 @@ public class IconManager {
         EXPAND,
         ARROW_MOVE_UP_BIG,
         ARROW_MOVE_DOWN_BIG,
-        VIEW_ALL
+        VIEW_ALL,
+        INVALIDATED,
+        VALIDATED,
+        VALIDATED_AND_USED,
+        VALIDATED_AND_NOTUSED
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private final static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -243,7 +247,7 @@ public class IconManager {
     }
 
     public static ImageIcon getGrayedIcon(IconType iconType) {
-    
+
         ImageIcon grayedIcon = m_grayedIconMap.get(iconType);
         if (grayedIcon == null) {
             String path = getIconFilePath(iconType);
@@ -579,9 +583,9 @@ public class IconManager {
                 return "fr/proline/studio/images/arrow-right.png";
             case ARROW_UP:
                 return "fr/proline/studio/images/arrow-up.png";
-             case ARROW_MOVE_UP:
+            case ARROW_MOVE_UP:
                 return "fr/proline/studio/images/move-up.png";
-              case ARROW_MOVE_DOWN:
+            case ARROW_MOVE_DOWN:
                 return "fr/proline/studio/images/move-down.png";
             case ARROW_INSERT_UP:
                 return "fr/proline/studio/images/insert-up.png";
@@ -719,6 +723,14 @@ public class IconManager {
                 return "fr/proline/studio/images/arrow-270.png";
             case VIEW_ALL:
                 return "fr/proline/studio/images/view-all.png";
+            case INVALIDATED:
+                return "fr/proline/studio/images/invalidated.png";
+            case VALIDATED:
+                return "fr/proline/studio/images/validated.png";
+            case VALIDATED_AND_USED:
+                return "fr/proline/studio/images/validated_and_used.png";
+            case VALIDATED_AND_NOTUSED:
+                return "fr/proline/studio/images/validated_and_notused.png";
         }
 
         return null; // can not happen

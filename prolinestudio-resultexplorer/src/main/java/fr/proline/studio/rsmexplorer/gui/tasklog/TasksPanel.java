@@ -14,7 +14,7 @@
  * You should have received a copy of the CeCILL License 
  * along with this program; If not, see <http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html>.
  */
-package fr.proline.studio.rsmexplorer.gui;
+package fr.proline.studio.rsmexplorer.gui.tasklog;
 
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.dam.taskinfo.TaskInfo;

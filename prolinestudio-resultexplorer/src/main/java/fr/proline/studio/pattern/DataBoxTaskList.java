@@ -17,7 +17,7 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import fr.proline.studio.rsmexplorer.gui.TasksPanel;
+import fr.proline.studio.rsmexplorer.gui.tasklog.TasksPanel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.Timer;

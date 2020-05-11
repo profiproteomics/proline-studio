@@ -25,11 +25,11 @@ import javax.swing.table.DefaultTableCellRenderer;
 public class XicStatusRenderer extends DefaultTableCellRenderer {
 
     public static enum SelectLevel {
-        DESELECTED_MANUAL(0, "DESELECTED MANUAL"),
-        DESELECTED_AUTO(1, "DESELECTED AUTO"),
-        SELECTED_AUTO(2, "SELECTED AUTO"),
-        SELECTED_MANUAL(3, "SELECTED MANUAL"),
-        RESET_AUTO(-1, "RESET AUTO");
+        DESELECTED_MANUAL(0, "Deselected Manual"),
+        DESELECTED_AUTO(1, "Deselected Auto"),
+        SELECTED_AUTO(2, "Selected Auto"),
+        SELECTED_MANUAL(3, "Selected Manual"),
+        RESET_AUTO(-1, "Reset auto");
 
         private int _intValue;
         private String _description;
@@ -72,17 +72,17 @@ public class XicStatusRenderer extends DefaultTableCellRenderer {
     public static String getPepIonStatusText(PepIonStatus status) {
         switch (status) {
             case UNKNOWN:
-                return "UNKNOWN";
+                return "Unknown";
             case INVALIDATED:
-                return "INVALIDATED";
+                return "Invalidated";
             case VALIDATED:
-                return "VALIDATED";
+                return "Validated";
             case USED_VALIDATED:
-                return "USED VALIDATED";
+                return "Validated Used";
             case UNUSED_VALIDATED:
-                return "UNUSED VALIDATED";
+                return "Validated Not Used";
             default:
-                return "OTHER";
+                return "Other";
         }
     }
 
@@ -94,7 +94,7 @@ public class XicStatusRenderer extends DefaultTableCellRenderer {
         ImageIcon manualIcon = new ImageIcon(IconManager.getIcon(IconManager.IconType.NAVIGATE).getImage().getScaledInstance(16, 16, Image.SCALE_DEFAULT));
         ImageIcon unKnowIcon = IconManager.getIcon(IconManager.IconType.BOOK_QUESTION);
         ImageIcon usedIcon = IconManager.getIcon(IconManager.IconType.PIN);
-        JPanel renderer = null;
+        Component renderer = null;
         if (status instanceof SelectLevel) {
             SelectLevel statusValue = (SelectLevel) status;
             switch (statusValue) {
@@ -114,33 +114,29 @@ public class XicStatusRenderer extends DefaultTableCellRenderer {
                     renderer = getRenderer(new ImageIcon[]{unKnowIcon});
 
             }
-            renderer.setToolTipText(statusValue.getDescription());
+            ((JPanel) renderer).setToolTipText(statusValue.getDescription());
 
         } else if (status instanceof PepIonStatus) {
             switch ((PepIonStatus) status) {
 
                 case INVALIDATED:
-                    renderer = getRenderer(new ImageIcon[]{noIcon});
-                    //this.setIcon(IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));
+                    this.setIcon(IconManager.getIcon(IconManager.IconType.INVALIDATED));
                     break;
                 case VALIDATED:
-                    renderer = getRenderer(new ImageIcon[]{yesIcon, unKnowIcon});
-                    //this.setIcon(IconManager.getIcon(IconManager.IconType.TICK_SMALL));
+                    this.setIcon(IconManager.getIcon(IconManager.IconType.VALIDATED));
                     break;
                 case USED_VALIDATED:
-                    renderer = getRenderer(new ImageIcon[]{yesIcon, usedIcon});
-                    //this.setIcon(IconManager.getIcon(IconManager.IconType.TICK_SMALL));
+                    this.setIcon(IconManager.getIcon(IconManager.IconType.VALIDATED_AND_USED));
                     break;
                 case UNUSED_VALIDATED:
-                    renderer = getRenderer(new ImageIcon[]{yesIcon});
-                    //this.setIcon(IconManager.getIcon(IconManager.IconType.TICK_SMALL));
+                    this.setIcon(IconManager.getIcon(IconManager.IconType.VALIDATED_AND_NOTUSED));
                     break;
                 case UNKNOWN:
                 default:
-                    renderer = getRenderer(new ImageIcon[]{unKnowIcon});
-                //this.setIcon(IconManager.getIcon(IconManager.IconType.TEST));
+                    this.setIcon(IconManager.getIcon(IconManager.IconType.TEST));
             }
-            renderer.setToolTipText(getPepIonStatusText((PepIonStatus) status));
+            this.setToolTipText(getPepIonStatusText((PepIonStatus) status));
+            renderer = this;
         }
 
         if (isSelected) {

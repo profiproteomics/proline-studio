@@ -261,17 +261,29 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
             
             int y1 = firstAxis.getPositionByRowIndex(rowIndex);
             int x1 = firstAxis.getX();
-            Color c = (paintSelection) ? selectColor(plotColor, useGradient, rowIndex) : m_colorParameter.getColor();
-            g.setColor(c);
-            for (int j = 0; j < m_axisList.size(); j++) {
+            boolean error1 = firstAxis.isOnError(rowIndex);
+            Color normalColor = (paintSelection) ? selectColor(plotColor, useGradient, rowIndex, false) : m_colorParameter.getColor();
+            Color errorColor = (paintSelection) ? selectColor(plotColor, useGradient, rowIndex, true) : ERROR_COLOR_NOT_SELECTED;
+            
+            for (int j = 1; j < m_axisList.size(); j++) {
                 ParallelCoordinatesAxis secondAxis = m_axisList.get(j);
                 int y2 = secondAxis.getPositionByRowIndex(rowIndex);
                 int x2 = secondAxis.getX();
+                boolean error2 = secondAxis.isOnError(rowIndex);
 
+                if (!error1 && !error2) {
+                    g.setColor(normalColor);
+                } else {
+                    g.setColor(errorColor);
+                }
                 g.drawLine(x1, y1, x2, y2);
                 x1 = x2;
                 y1 = y2;
+                error1 = error2;
             }
+
+            
+            
         }
     }
     
@@ -318,28 +330,28 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
 
     }
     
-      private Color selectColor(Color plotColor, boolean useGradient, int rowIndex) {
+      private Color selectColor(Color plotColor, boolean useGradient, int rowIndex, boolean error) {
         Color c;
         if (useGradient) {
             ParallelCoordinatesAxis selectedAxis = m_axisList.get(m_mainSelectedAxisIndex);
 
             int height = selectedAxis.getHeight();
             int heightInAxis = selectedAxis.getRelativePositionByRowIndex(rowIndex);
-            c = getColorInGradient(heightInAxis, height);
+            c = getColorInGradient(heightInAxis, height, error);
         } else {
             c = plotColor;
         }
         return c;
     }
     
-    private Color getColorInGradient(int heightInAxis, int height) {
+    private Color getColorInGradient(int heightInAxis, int height, boolean error) {
         double f = ((double)heightInAxis)/((double)height);
         for (int i = 0; i < m_gradientFractions.length - 1; i++) {
             float f1 = m_gradientFractions[i];
             float f2 = m_gradientFractions[i + 1];
             if ((f >= f1) && (f <= f2)) {
                 Color c1 = m_gradientColors[i];
-                Color c2 = m_gradientColors[i + 1];
+                Color c2 = (i==0 &&  error) ? ERROR_COLOR : m_gradientColors[i + 1];
                 double fInInterval = (f - f1) / (f2 - f1);
                 int r = (int) Math.round(((double) (c2.getRed() - c1.getRed())) * fInInterval + (double) c1.getRed());
                 int g = (int) Math.round(((double) (c2.getGreen() - c1.getGreen())) * fInInterval + (double) c1.getGreen());
@@ -352,8 +364,10 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         if (f <= m_gradientFractions[0]) {
             return m_gradientColors[0];
         }
-        return m_gradientColors[m_gradientFractions.length - 1];
+        return error ? ERROR_COLOR : m_gradientColors[m_gradientFractions.length - 1];
     }
+    private static final Color ERROR_COLOR = new Color(192,0,0,128);
+    private static final Color ERROR_COLOR_NOT_SELECTED = new Color(128,0,0,128);
 
     @Override
     public String getToolTipText(double x, double y) {
@@ -501,7 +515,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
             return null;
         }
  
-        
+        int countLog = 0;
         int nbNumberAxisSelected = 0;
         boolean stringAxisSelected = false;
         boolean canLog = true;
@@ -509,6 +523,9 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
             if (axis.isSelected() ) {
                 if (axis.isNumeric()) {
                     nbNumberAxisSelected++;
+                    if (axis.isLog()) {
+                        countLog++;
+                    }
                     if (!axis.canLog()) {
                         canLog = false;
                     }
@@ -576,7 +593,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
                 m_plotPanel.repaintUpdateDoubleBuffer();
             }
         });
-        normalizeAction.setEnabled((nbNumberAxisSelected>1) && (!stringAxisSelected));
+        normalizeAction.setEnabled((nbNumberAxisSelected>1) && (!stringAxisSelected) && ((countLog==nbNumberAxisSelected) || (countLog==0)) );
 
         JPopupMenu menu = new JPopupMenu();
         menu.add(logAction);

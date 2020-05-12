@@ -91,16 +91,8 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
         super(getDataboxType(xicResult, showAllPepMatches), DataboxStyle.STYLE_RSM);
         m_displayAllPepMatches = showAllPepMatches;
         m_isXICResult = xicResult;
-
-        // Name of this databox
-        if (m_isXICResult) {
-            m_typeName = m_displayAllPepMatches ? "Quantified PSM PTMs info" : "Quantified Peptides PTMs info";
-            m_description = m_displayAllPepMatches ? "PTMs information of quantified PSMs of a [Group] Modification Site" : "PTMs information of quantified Peptides of a [Group] Modification Site";
-
-        } else {
-            m_typeName = m_displayAllPepMatches ? "PSM PTMs info" : "Peptides PTMs info";
-            m_description = m_displayAllPepMatches ? "PTMs information of PSM of a [Group] Modification Site" : "PTMs information of Peptides of a [Group] Modification Site";
-        }
+        m_typeName = m_displayAllPepMatches ? "PSMs" : "Peptides";
+        m_description = m_displayAllPepMatches ? "PSMs matching a modification site or cluster" : "Peptides matching of modification site or cluster";
         m_logger.debug(" ----> Created DataBoxPTMPeptides " + m_typeName);
 
         // Register Possible in parameters          
@@ -121,6 +113,11 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
     }
 
     @Override
+    protected DPeptideMatch getSelectedPeptideMatch() {
+        return ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).getSelectedPeptideMatch();
+    }
+
+    @Override
     protected PTMPeptideInstance getSelectedPTMPeptide() {
         return ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).getSelectedPTMPeptideInstance();
     }
@@ -132,7 +129,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
 
         if (panel.isShowed()) {
             if (m_ptmPepInstances == null || m_ptmPepInstances.isEmpty()) {
-                panel.setData(null, null, null, false);
+                panel.setData(null, null, null, null, false);
                 return;
             }
 
@@ -152,7 +149,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                 if (m_isXICResult) {
                     loadXicAndPropagate();
                 } else {
-                    ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, m_ptmPepInstances, null, true);
+                    ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, m_ptmPepInstances, m_ptmClusters, null, true);
                     propagateDataChanged(PTMPeptideInstance.class);
                     propagateDataChanged(DPeptideMatch.class);
                     propagateDataChanged(ExtendedTableModelInterface.class);
@@ -185,7 +182,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                         for (DMasterQuantPeptide masterQPep : m_masterQuantPeptideList) {
                             qpepByPepId.put(masterQPep.getPeptideInstanceId(), masterQPep);
                         }
-                        ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(taskId, m_ptmPepInstances, qpepByPepId, finished);
+                        ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(taskId, m_ptmPepInstances, m_ptmClusters, qpepByPepId, finished);
 
                     } else {
                         AbstractDatabaseCallback mapCallback = new AbstractDatabaseCallback() {
@@ -207,7 +204,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                                     qpepByPepId.put(masterQPep.getPeptideInstanceId(), masterQPep);
                                 }
                                 //m_logger.debug(" DB PTM peptide : DatabaseLoadLcMSTask run m_quantChannelInfo defined CALL setData ");                                
-                                ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(taskId, m_ptmPepInstances, qpepByPepId, finished);
+                                ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(taskId, m_ptmPepInstances, m_ptmClusters, qpepByPepId, finished);
                                 unregisterTask(task2Id);
                                 propagateDataChanged(PTMPeptideInstance.class);
                                 propagateDataChanged(ExtendedTableModelInterface.class);

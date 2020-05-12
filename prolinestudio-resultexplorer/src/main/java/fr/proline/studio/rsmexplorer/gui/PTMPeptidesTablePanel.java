@@ -19,6 +19,7 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
@@ -31,9 +32,7 @@ import fr.proline.studio.info.InfoInterface;
 import fr.proline.studio.info.InfoToggleButton;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.parameter.SettingsButton;
-import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.pattern.DataAnalyzerWindowBoxManager;
+import fr.proline.studio.pattern.*;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
@@ -60,8 +59,6 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import org.jdesktop.swingx.JXTable;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
-import fr.proline.studio.pattern.DataBoxPTMPeptides;
-import fr.proline.studio.pattern.MsQueryInfoRset;
 import fr.proline.studio.rsmexplorer.gui.model.PTMPeptidesTableModel;
 import fr.proline.studio.table.CustomColumnControlButton;
 import fr.proline.studio.table.LazyTable;
@@ -122,28 +119,26 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
     }
 
     public PTMPeptideInstance getSelectedPTMPeptideInstance() {
-
-        CompoundTableModel compoundTableModel = ((CompoundTableModel) m_ptmPeptidesTable.getModel());
-        // Retrieve ProteinPTMSite selected
-        m_ptmPeptidesTableModel = (PTMPeptidesTableModel) compoundTableModel.getBaseModel();
-
         if (m_ptmPeptidesTableModel.getRowCount() <= 0) {
             return null;
         }
+        PTMPeptidesTableModel.Row row = m_ptmPeptidesTableModel.getPTMPeptideInstanceAt(getSelectedRowInTableModel());
+        return row != null ? row.ptmPeptideInstance : null;
+    }
 
-        // Retrieve Selected Row
-        int selectedRow = getSelectedRowInTableModel();
-
-        return m_ptmPeptidesTableModel.getPTMPeptideInstanceAt(selectedRow);
+    public DPeptideMatch getSelectedPeptideMatch() {
+        if (m_ptmPeptidesTableModel.getRowCount() <= 0) {
+            return null;
+        }
+        PTMPeptidesTableModel.Row row = m_ptmPeptidesTableModel.getPTMPeptideInstanceAt(getSelectedRowInTableModel());
+        return row != null ? row.peptideMatch : null;
     }
 
     public int getSelectedIndex() {
         if (m_ptmPeptidesTableModel.getRowCount() <= 0) {
             return -1;
         }
-        // Retrieve Selected Row
-        int selectedRow = getSelectedRowInTableModel();
-        return selectedRow;
+        return getSelectedRowInTableModel();
     }
 
     /**
@@ -184,17 +179,18 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
         }
     }
 
-    public void setData(Long taskId, List<PTMPeptideInstance> ptmPeptides, Map<Long, DMasterQuantPeptide> quantPeptidesByPepInsId, boolean finished) {
+    public void setData(Long taskId, List<PTMPeptideInstance> ptmPeptides, List<PTMCluster> ptmClusters, Map<Long, DMasterQuantPeptide> quantPeptidesByPepInsId, boolean finished) {
 
         if (Objects.equals(ptmPeptides, m_ptmPeptideInstances)) {
             return;
         }
 
         m_ptmPeptideInstances = ptmPeptides;
+
         int previousPtmSitesColumnCount = m_ptmPeptidesTableModel.getPtmSitesColumnCount();
         List<Boolean> prevColumnsVisibility = m_ptmPeptidesTable.getColumns(true).stream().map(tc -> ((TableColumnExt)tc).isVisible()).collect(Collectors.toList());
 
-        m_ptmPeptidesTableModel.setData(taskId, m_ptmPeptideInstances, quantPeptidesByPepInsId);
+        m_ptmPeptidesTableModel.setData(taskId, m_ptmPeptideInstances, ptmClusters, quantPeptidesByPepInsId);
         
         // select the first row
         if (m_ptmPeptideInstances != null) {
@@ -476,14 +472,9 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
             if (selectionWillBeRestored) {
                 return;
             }
-
-            if (m_displayPeptidesMatches) {
-                m_dataBox.propagateDataChanged(DPeptideMatch.class);
-                m_dataBox.propagateDataChanged(MsQueryInfoRset.class);
-            } else {
-                m_dataBox.propagateDataChanged(DPeptideMatch.class);
-                m_dataBox.propagateDataChanged(PTMPeptideInstance.class);
-            }
+            m_dataBox.propagateDataChanged(PTMPeptideInstance.class);
+            m_dataBox.propagateDataChanged(DPeptideMatch.class);
+            m_dataBox.propagateDataChanged(MsQueryInfoRsm.class);
         }
 
         public void selectionWillBeRestored(boolean b) {

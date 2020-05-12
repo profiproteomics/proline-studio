@@ -403,7 +403,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         List<PTMCluster> allClusters = new ArrayList<>();
         m_ptmClustersByBestPepMatchId = new HashMap<>();
         for (PTMSite site: m_ptmDataset.getPTMSites()) {
-            PTMCluster ptmCluster = new PTMCluster(site.getId(), Arrays.asList(site.getId()), site.getPeptideIds() , m_ptmDataset);
+            PTMCluster ptmCluster = new PTMCluster(site.getId(), site.getLocalisationConfidence(), Arrays.asList(site.getId()), site.getPeptideIds() , m_ptmDataset);
             if (ptmCluster.getPTMSites() == null || ptmCluster.getPTMSites().isEmpty()) {
                 continue;
             }
@@ -546,7 +546,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
                 List<PTMCluster> clusters = m_ptmClustersByBestPepMatchId.get(pmId);
                 if (clusters != null && !clusters.isEmpty()) {
                     clusters.stream().forEach(cluster -> {
-                        cluster.setBestPeptideMatch(pm);
+                        cluster.setRepresentativePepMatch(pm);
                     });
                 }
             }
@@ -740,6 +740,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
                 //PARENT PepInstance
                 if(!parentPeptideInstancesByPepId.containsKey(p.getId())){                 
                     DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptide().getId(), pi.getValidatedProteinSetCount(), pi.getElutionTime());
+                    dpi.setResultSummary(pi.getResultSummary());
                     dpi.setPeptide(p);
                     dpi.setPeptideMatches(new ArrayList<>());
                     parentPeptideInstancesByPepId.put(p.getId(), dpi);

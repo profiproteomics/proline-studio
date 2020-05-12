@@ -88,7 +88,7 @@ public class PTMSite {
         m_bestPeptideMatch = peptideMatch;
     }
 
-    public DPeptideMatch getBestProbabilityPepMatch() {
+    public DPeptideMatch getMostConfidentPepMatch() {
         return m_bestPeptideMatch;
     }
 
@@ -139,7 +139,7 @@ public class PTMSite {
             parentPTMPeptideInst.setStartPosition(getPositionOnProtein() - getPositionOnPeptide(peptideId));
             parentPTMPeptideInst.addPTMSite(this);
             List<DPeptideInstance> leafPeptideInstances = leafPepInstanceByPepId.get(peptideId);
-            PTMSitePeptideInstance ptmSitePeptideInstance = new PTMSitePeptideInstance(this, parentPTMPeptideInst, leafPeptideInstances, getBestProbabilityPepMatch(leafPeptideInstances));
+            PTMSitePeptideInstance ptmSitePeptideInstance = new PTMSitePeptideInstance(this, parentPTMPeptideInst, leafPeptideInstances, getMostConfidentPepMatch(leafPeptideInstances));
             m_ptmSitePeptideInstanceByPepId.put(peptideId, ptmSitePeptideInstance);
         }
     }
@@ -168,7 +168,7 @@ public class PTMSite {
         return (m_ptmSitePeptideInstanceByPepId != null);
     }
 
-    private DPeptideMatch getBestProbabilityPepMatch(List<DPeptideInstance> peptideInstances) {
+    private DPeptideMatch getMostConfidentPepMatch(List<DPeptideInstance> peptideInstances) {
 
         List<DPeptideMatch> pepMatches = peptideInstances.stream().flatMap(pi -> Optional.ofNullable(pi.getPeptideMatches()).map(Collection::stream).orElseGet(Stream::empty)).collect(Collectors.toList());
 

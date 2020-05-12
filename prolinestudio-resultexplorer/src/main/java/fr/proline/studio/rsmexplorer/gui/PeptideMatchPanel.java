@@ -159,10 +159,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     }
 
     public void dataUpdated(SubTask subTask, boolean finished) {
-
         ((PeptideMatchTable) m_peptideMatchTable).dataUpdated(subTask, finished);
-
-
     }
 
     private String getTopComponentName() {

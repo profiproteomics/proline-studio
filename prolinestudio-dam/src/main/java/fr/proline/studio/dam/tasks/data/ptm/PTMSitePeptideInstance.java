@@ -25,12 +25,12 @@ public class PTMSitePeptideInstance {
 
   private final PTMPeptideInstance m_parentPTMPeptideInstance;
   private final PTMSite m_site;
-  private final DPeptideMatch m_bestPeptideMatch;
+  private final DPeptideMatch m_representativePepMatch;
   private final List<DPeptideInstance> m_leafPepInstances;
 
-  public PTMSitePeptideInstance(PTMSite site, PTMPeptideInstance ptmPeptide, List<DPeptideInstance> leafPeptideInstances, DPeptideMatch bestPeptideMatch) {
+  public PTMSitePeptideInstance(PTMSite site, PTMPeptideInstance ptmPeptide, List<DPeptideInstance> leafPeptideInstances, DPeptideMatch representativePepMatch) {
     m_parentPTMPeptideInstance = ptmPeptide;
-    m_bestPeptideMatch = bestPeptideMatch;
+    m_representativePepMatch = representativePepMatch;
     m_leafPepInstances = leafPeptideInstances;
     m_site = site;
   }
@@ -43,8 +43,8 @@ public class PTMSitePeptideInstance {
     return m_site;
   }
 
-  public DPeptideMatch getBestProbabilityPepMatch() {
-    return m_bestPeptideMatch;
+  public DPeptideMatch getRepresentativePepMatch() {
+    return m_representativePepMatch;
   }
 
   public List<DPeptideInstance> getLeafPepInstances() {

@@ -23,6 +23,7 @@ package fr.proline.studio.graphics.parallelcoordinates;
  */
 public class NumberValue extends AbstractValue {
     
+    private boolean m_error = false;
     private Number m_n;
     
     public NumberValue(Number n, int rowIndex) {
@@ -75,6 +76,17 @@ public class NumberValue extends AbstractValue {
     
     public void log() {
         m_n = Math.log10(m_n.doubleValue());
+    }
+    
+    public boolean error() {
+        if (isNan()) {
+            return true;
+        }
+        return m_error;
+    }
+    
+    public void setError(boolean b) {
+        m_error = b;
     }
     
 }

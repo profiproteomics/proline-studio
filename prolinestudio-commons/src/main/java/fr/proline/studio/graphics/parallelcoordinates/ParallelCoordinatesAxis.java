@@ -156,10 +156,20 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
     }
     
     public void setRange(Double rangeMin, Double rangeMax, boolean forceNaN) {
+        
+        // to be able to position correctly the selection zone
+        double vMin = (m_rangeMax-m_rangeMinWithNaN)*(1-m_selectionMinPercentage)+m_rangeMinWithNaN;
+        double vMax = (m_rangeMax-m_rangeMinWithNaN)*(1-m_selectionMaxPercentage)+m_rangeMinWithNaN;
+        
         m_rangeMin = rangeMin;
         m_rangeMinWithNaN = rangeMin;
         m_rangeMax = rangeMax;
         m_forceNaN = forceNaN;
+        
+        // set position of selected zone correctly
+        m_selectionMinPercentage = 1-(vMin-m_rangeMin)/(m_rangeMax-m_rangeMin);
+        m_selectionMaxPercentage = 1-(vMax-m_rangeMin)/(m_rangeMax-m_rangeMin);
+        
     }
     
     public void paint(Graphics2D g, int plotWidth) {
@@ -217,7 +227,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
             if (m_discreteAxis) {
                 min = (m_firstNonNanValueIndex == -1) || (vMin < m_rangeMin) ? "NaN" : Integer.toString((int) Math.round(Math.floor(m_rangeMin)));
             } else {
-                min = (m_firstNonNanValueIndex == -1) || (vMin < m_rangeMin) ? "NaN" : String.format("%6.5e", m_rangeMin);
+                min = String.format("%6.5e", m_rangeMin);
             }
                g.drawString(min, xForLabel(min, plotWidth), m_y+m_heightTotal+fontHeight+4);
             
@@ -226,7 +236,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
             if (m_discreteAxis) {
                 max = (m_firstNonNanValueIndex == -1) || (vMax < m_rangeMin) ? "NaN" : Integer.toString((int) Math.round(Math.floor(m_rangeMax)));
             } else {
-                max = (m_firstNonNanValueIndex == -1) || (vMax < m_rangeMin) ? "NaN" : String.format("%6.5e", m_rangeMax);
+                max = String.format("%6.5e", m_rangeMax);
             }
             g.drawString(max, xForLabel(max, plotWidth), PAD_Y_UP/2+fontHeight+4);
             
@@ -367,6 +377,10 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
             }
             for (int i = m_values.size() - 1; i > m_firstNonNanValueIndex; i--) {
                 ((NumberValue) m_values.get(i)).setValue(naNValue);
+                ((NumberValue) m_values.get(i)).setError(true);
+            }
+            for (int i = m_firstNonNanValueIndex; i >=0; i--) {
+                ((NumberValue) m_values.get(i)).setError(false);
             }
         }
     }
@@ -377,6 +391,23 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
             v.setValue(Double.NaN);
         }
 
+    }
+    
+    private void setNegativeValuesAsNaN() {
+        int indexFound = -1;
+        for (int i = m_firstNonNanValueIndex;i>=0;i--) {
+            NumberValue v = (NumberValue) m_values.get(i);
+            if (v.doubleValue()<1e-14) {
+                v.setValue(Double.NaN);
+                indexFound = i;
+            } else {
+                break;
+            }
+            
+        }
+        if (indexFound!=-1) {
+            m_firstNonNanValueIndex = indexFound - 1;
+        }
     }
     
     private void searchFirstNonNaNValue() {
@@ -457,6 +488,11 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
 
     }
     
+    public boolean isOnError(int rowIndex) {
+        AbstractValue v = m_rowIndexToValueMap.get(rowIndex);
+        return v.error();
+    }
+    
     public int getX() {
         return m_x + AXIS_WIDTH/2;
     }
@@ -503,33 +539,57 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
 
     }
     
+    public boolean isLog() {
+        return m_log;
+    }
+    
     public boolean canLog() {
         if (!m_numericAxis || m_log) {
             return false;
         };
 
-        return m_rangeMin>10e-9;
+        return true;
     }
     
     public void log() {
 
+        // calculate logged vmin and vmax
+        double vMin = (m_rangeMax-m_rangeMinWithNaN)*(1-m_selectionMinPercentage)+m_rangeMinWithNaN;
+        double vMax = (m_rangeMax-m_rangeMinWithNaN)*(1-m_selectionMaxPercentage)+m_rangeMinWithNaN;
+        vMin = Math.log10(vMin);
+        vMax = Math.log10(vMax);
+
+        
         m_log = true;
         
         // put back NaN value
        putBackNaN();
+       
+       // treat values <10e-14 as NaN values
+       setNegativeValuesAsNaN();
         
         // log other values
         for (int i = m_firstNonNanValueIndex; i >= 0; i--) {
             NumberValue v = (NumberValue) m_values.get(i);
             ((NumberValue) v).log();
         }
-
-        // search the limit between real values and NaN values
-        searchFirstNonNaNValue();
         
+        m_hasNan = m_firstNonNanValueIndex != -1;
+
         // replace NaN values for display
         manageNaN();
         
+        // update range
+        m_rangeMin = ((NumberValue)m_values.get(m_firstNonNanValueIndex)).doubleValue();
+        m_rangeMinWithNaN = m_rangeMin;
+        m_rangeMax = ((NumberValue)m_values.get(0)).doubleValue();
+        
+        
+        // set position of selected zone correctly
+        m_selectionMinPercentage = 1-(vMin-m_rangeMin)/(m_rangeMax-m_rangeMin);
+        m_selectionMaxPercentage = 1-(vMax-m_rangeMin)/(m_rangeMax-m_rangeMin);
+        
+        // modify column name
         m_columnName = "log10("+m_columnName+")";
     }
     

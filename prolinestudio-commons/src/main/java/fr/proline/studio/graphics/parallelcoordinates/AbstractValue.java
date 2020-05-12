@@ -53,4 +53,8 @@ public abstract class AbstractValue implements Comparable<AbstractValue> {
         return false;
     }
     
+    public boolean error() {
+        return false;
+    }
+    
 }

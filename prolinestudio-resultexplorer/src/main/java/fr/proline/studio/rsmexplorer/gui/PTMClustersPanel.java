@@ -108,6 +108,7 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
 
     
     private boolean m_hideFirstTime = true;
+
     public void setData(Long taskId, ArrayList<PTMCluster> ptmClusters, boolean finished) {
 
         PTMClusterTableModel model = ((PTMClusterTableModel) ((CompoundTableModel) m_ptmClusterTable.getModel()).getBaseModel());
@@ -125,13 +126,12 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
         }
         
         m_infoToggleButton.updateInfo();
-        
         m_countModificationTextField.setText(model.getModificationsInfo());
-
         
         if (finished) {
             m_ptmClusterTable.setSortable(true);
         }
+
     }
 
     public void dataUpdated(SubTask subTask, boolean finished) {
@@ -440,10 +440,12 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
     
     private class PTMClusterTable extends LazyTable implements ImportTableSelectionInterface, CrossSelectionInterface, InfoInterface  {
 
+       private boolean selectionWillBeRestored = false;
+       private DisplayTablePopupMenu m_popupMenu;
+
         
         public PTMClusterTable() {
             super(m_scrollPane.getVerticalScrollBar() );
-
         }
         
         @Override
@@ -463,11 +465,8 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
                     for (int i = 0; i < nbRows; i++) {
                         proteinPTMCluster.add((PTMCluster) model.getRowValue(PTMCluster.class, i));
                     }  
-
                 }
-
             }
-
         }
         
         @Override
@@ -527,13 +526,10 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
                 if (((keepLastAction == LazyTable.LastAction.ACTION_SELECTING ) || (keepLastAction == LazyTable.LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((CompoundTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
                     scrollRowToVisible(rowSelectedInView);
                 }
-                    
             }
 
             } finally {
-
                 m_lastAction = keepLastAction;
- 
             }
             
             if (finished) {
@@ -544,7 +540,6 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
         public void selectionWillBeRestored(boolean b) {
             selectionWillBeRestored = b;
         }
-        private boolean selectionWillBeRestored = false;
 
         @Override
         public int getLoadingPercentage() {
@@ -592,10 +587,8 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
         @Override
         public TablePopupMenu initPopupMenu() {
             m_popupMenu = new DisplayTablePopupMenu(PTMClustersPanel.this);
-
             return m_popupMenu;
         }
-        private DisplayTablePopupMenu m_popupMenu;
 
 
         @Override

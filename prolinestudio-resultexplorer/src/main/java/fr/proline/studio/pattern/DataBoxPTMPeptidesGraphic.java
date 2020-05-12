@@ -17,6 +17,7 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
@@ -140,6 +141,12 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
     @Override
     protected PTMPeptideInstance getSelectedPTMPeptide() {
         return ((PTMGraphicCtrlPanel) getDataBoxPanelInterface()).getSelectedPTMPeptideInstance();
+    }
+
+
+    @Override
+    protected DPeptideMatch getSelectedPeptideMatch() {
+        return ((PTMGraphicCtrlPanel) getDataBoxPanelInterface()).getSelectedPTMPeptideInstance().getRepresentativePepMatch(m_ptmClusters);
     }
 
     @Override

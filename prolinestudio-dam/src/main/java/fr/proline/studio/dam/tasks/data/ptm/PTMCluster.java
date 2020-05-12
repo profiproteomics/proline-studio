@@ -40,14 +40,15 @@ public class PTMCluster implements Comparable<PTMCluster>{
     private final List<PTMSite> m_sites;
     private final List<Long> m_peptideIds;
     private final Long m_id;
+    private final Float m_localizationConfidence;
 
     private List<Integer> m_positionsOnProtein;
     private List<Float> m_probabilities;
 
     private DProteinMatch m_proteinMatch;    
     private DMasterQuantProteinSet m_masterQuantProteinSet;
-    private DPeptideMatch m_bestPeptideMatch;
-    private DMasterQuantPeptide m_bestQuantPeptideMatch;
+    private DPeptideMatch m_representativePepMatch;
+    private DMasterQuantPeptide m_representativeMQPepMatch;
     private List<PTMPeptideInstance> m_parentPTMPeptideInstances;
     private List<PTMPeptideInstance> m_leafPTMPeptideInstances;
     private List<DPeptideInstance> m_parentPeptideInstances;
@@ -55,12 +56,13 @@ public class PTMCluster implements Comparable<PTMCluster>{
     private final PTMDataset m_ptmDataset;
 
     public PTMCluster(JSONPTMCluster jsonValue, PTMDataset ptmds) {
-        this(jsonValue.id, Arrays.asList(jsonValue.ptmSiteLocations), Arrays.asList(jsonValue.peptideIds), ptmds);
+        this(jsonValue.id, jsonValue.localizationConfidence, Arrays.asList(jsonValue.ptmSiteLocations), Arrays.asList(jsonValue.peptideIds), ptmds);
     }
 
-    public PTMCluster(Long id, List<Long> ptmSiteIds, List<Long> peptideIds, PTMDataset ptmds) {
+    public PTMCluster(Long id, Float confidence, List<Long> ptmSiteIds, List<Long> peptideIds, PTMDataset ptmds) {
         m_ptmDataset = ptmds;
         m_peptideIds = peptideIds;
+        m_localizationConfidence = confidence;
         m_sites = m_ptmDataset.getPTMSites().stream().filter(site -> ptmSiteIds.contains(site.getId())).sorted(Comparator.comparing(PTMSite::getPositionOnProtein)).collect(Collectors.toList());
         m_id = id;
 
@@ -84,20 +86,24 @@ public class PTMCluster implements Comparable<PTMCluster>{
         return m_ptmDataset;
     }
     
-    public void setBestPeptideMatch(DPeptideMatch peptideMatch) {
-        m_bestPeptideMatch = peptideMatch;
+    public void setRepresentativePepMatch(DPeptideMatch peptideMatch) {
+        m_representativePepMatch = peptideMatch;
     }
 
-    public DPeptideMatch getBestPeptideMatch() {
-        return m_bestPeptideMatch;
+    public DPeptideMatch getRepresentativePepMatch() {
+        return m_representativePepMatch;
     }
     
-    public void setBestQuantPeptideMatch(DMasterQuantPeptide quantPeptideMatch) {
-        m_bestQuantPeptideMatch = quantPeptideMatch;
+    public void setRepresentativeMQPepMatch(DMasterQuantPeptide quantPeptideMatch) {
+        m_representativeMQPepMatch = quantPeptideMatch;
     }
 
-    public DMasterQuantPeptide getBestQuantPeptideMatch() {
-        return m_bestQuantPeptideMatch;
+    public Float getLocalizationConfidence() {
+        return m_localizationConfidence;
+    }
+
+    public DMasterQuantPeptide getRepresentativeMQPepMatch() {
+        return m_representativeMQPepMatch;
     }
 
     public List<DPeptideInstance> getParentPeptideInstances() {

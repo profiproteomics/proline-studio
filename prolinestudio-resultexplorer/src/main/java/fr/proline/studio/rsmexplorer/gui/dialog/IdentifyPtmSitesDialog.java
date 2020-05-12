@@ -63,8 +63,8 @@ public class IdentifyPtmSitesDialog extends DefaultDialog {
     c.gridwidth = 1;
 
     JLabel label = new JLabel("Clustering method:");
-    m_clusteringMethodCbx = new JComboBox<>(new String[] {"Exact Position Matching"});
-    m_clusteringMethodCbx.setEnabled(false);
+    m_clusteringMethodCbx = new JComboBox<>(new String[] {"Exact Position Matching", "Isomorphic Matching"});
+    m_clusteringMethodCbx.setEnabled(true);
     
     parametersPanel.add(label, c);
     c.gridx++;

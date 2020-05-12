@@ -94,9 +94,18 @@ public class DataBoxRsmPSMForMsQuery extends AbstractDataBox{
     public void dataChanged() {
         long oldMsQId = m_msQuery == null? -1: m_msQuery.getId();
         final MsQueryInfoRsm _msqI = (MsQueryInfoRsm) m_previousDataBox.getData(false, MsQueryInfoRsm.class);
+        
+        if (_msqI == null) {
+          m_msQuery = null;
+          m_rset = null;
+          m_rsm = null;
+          ((PeptideMatchPanel)getDataBoxPanelInterface()).setData(-1L, null, null, true);
+          return;
+        }
         if (_msqI != null && _msqI.getMsQuery() != null && oldMsQId == _msqI.getMsQuery().getId()){
             return ;
         }
+
         m_msQuery = _msqI.getMsQuery();
         m_rset = _msqI.getResultSet();
         m_rsm = _msqI.getResultSummary();
@@ -124,6 +133,7 @@ public class DataBoxRsmPSMForMsQuery extends AbstractDataBox{
                         peptideMatchIdArray[i] = m_peptideMatches.get(i).getId();
                     }
                     ((PeptideMatchPanel)getDataBoxPanelInterface()).setData(taskId, peptideMatchArray, peptideMatchIdArray, finished);
+                    
                } else {
                     ((PeptideMatchPanel)getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                 }

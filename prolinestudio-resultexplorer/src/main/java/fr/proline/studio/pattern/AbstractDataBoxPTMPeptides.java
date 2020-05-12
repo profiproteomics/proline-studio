@@ -21,10 +21,10 @@ import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
 import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
@@ -50,6 +50,8 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
 
     protected PTMDataset m_ptmDataset;
     protected List<PTMPeptideInstance> m_ptmPepInstances;
+    protected List<PTMCluster> m_ptmClusters;
+
     protected boolean m_isXICResult = true;
     protected boolean m_displayAllPepMatches = false;
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.ptm");
@@ -82,9 +84,7 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
         if (m_isXICResult) {
             outParameter.addParameter(ExtendedTableModelInterface.class, false);
         }
-        if (m_displayAllPepMatches) {
-            outParameter.addParameter(MsQueryInfoRset.class, false);
-        }
+        outParameter.addParameter(MsQueryInfoRsm.class, false);
         registerOutParameter(outParameter);
     }
 
@@ -131,12 +131,23 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
             if (parameterType.equals(DPeptideMatch.class)) {
                 PTMPeptideInstance selectedParentPepInstance = getSelectedPTMPeptide();
                 if (selectedParentPepInstance != null) {
-                    return selectedParentPepInstance.getBestPepMatch();
+                    return selectedParentPepInstance.getRepresentativePepMatch(m_ptmClusters);
                 }
             }
 
             if (parameterType.equals(ExtendedTableModelInterface.class)) {
                 return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
+            }
+
+            if (parameterType.equals(MsQueryInfoRsm.class)) {
+                PTMPeptideInstance selectedParentPepInstance = getSelectedPTMPeptide();
+                if (selectedParentPepInstance != null) {
+                    DPeptideMatch match = getSelectedPeptideMatch();
+                    if (match != null) {
+                        return new MsQueryInfoRsm(match.getMsQuery(), selectedParentPepInstance.getPeptideInstance().getResultSummary());
+                        //return new MsQueryInfoRsm(match.getMsQuery(), m_ptmDataset.getDataset().getResultSummary());
+                    }
+                }
             }
         }
 
@@ -198,6 +209,7 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
 
         m_ptmDataset = newPtmDataset;
         m_ptmPepInstances = newPtmPepInstances;
+        m_ptmClusters = (List<PTMCluster>) m_previousDataBox.getData(false, PTMCluster.class, true);
         m_rsm = m_ptmDataset.getDataset().getResultSummary();
         updateData();
     }
@@ -235,14 +247,14 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                 setLoaded(loadingId);
                 if (!success) {
-                    ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, null, null, finished);
+                    ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, null, null, null, finished);
                 } else {
                     m_previousPTMTaskId = null;
                     unregisterTask(taskId);
                     if (m_isXICResult) {
                         loadXicAndPropagate();
                     } else {
-                        ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, m_ptmPepInstances, null, finished);
+                        ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, m_ptmPepInstances, m_ptmClusters, null, finished);
                         propagateDataChanged(PTMPeptideInstance.class);
                         propagateDataChanged(ExtendedTableModelInterface.class);
                     }
@@ -260,6 +272,8 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
         m_previousPTMTaskId = taskId;
         registerTask(task);
     }
+
+    abstract protected DPeptideMatch getSelectedPeptideMatch();
 
     abstract protected PTMPeptideInstance getSelectedPTMPeptide();
 

@@ -24,6 +24,7 @@ import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DPtmSiteProperties;
 import fr.proline.core.orm.msi.dto.DQuantPeptide;
+import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.export.ExportModelUtilities;
@@ -58,8 +59,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import javax.swing.table.TableCellRenderer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -78,8 +77,8 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     public static final int COLTYPE_SPECTRUM_TITLE = 6;   
     public static final int LAST_STATIC_COLUMN = COLTYPE_SPECTRUM_TITLE;
     
-    private static final String[] m_columnNames = {"Id", "Peptide", "Score", "PTMs", "PTMs D.Mass", "PTMs Probability", "Spectrum title"};
-    private static final String[] m_columnTooltips = {"Peptide Id (Instance Id)", "Peptide Sequence", "Score of the peptide match", "All PTMs modifications associated with this peptide", "All PTMs delta mass", "All PTMs probability", "Peptide match query title"};
+    private static final String[] m_columnNames = {"Id", "Peptide", "Score", "PTMs", "PTMs D.Mass", "PTMs Confid.(%)", "Spectrum title"};
+    private static final String[] m_columnTooltips = {"Peptide match Id", "Peptide Sequence", "Score of the peptide match", "PTMs associated with this peptide", "PTMs delta mass", "PTMs localisation confidence", "Peptide match query title"};
 
     // Dynamic columns list 1 : PTM Probability related
     private static final String COLTYPE_SITE_PROBA_SUFFIX = "Probability";
@@ -103,10 +102,11 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     private List<Integer> m_columnsIdsToHide = new ArrayList<>();
 
     private List<PTMPeptideInstance> m_ptmPepInstances = new ArrayList<>();
+    private List<PTMCluster> m_ptmClusters;
 
-    static class Row {
-        PTMPeptideInstance ptmPeptideInstance;
-        DPeptideMatch peptideMatch;
+    public static class Row {
+        public PTMPeptideInstance ptmPeptideInstance;
+        public DPeptideMatch peptideMatch;
 
         public Row(PTMPeptideInstance peptideInstance, DPeptideMatch peptideMatch) {
             this.ptmPeptideInstance = peptideInstance;
@@ -137,12 +137,11 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     
     /**
      * Set data for this table Model
-     *
-     * @param taskId : Id of the task which should load data in background if necessary
-     * @param ptmPeptides : List of the PTMPeptideInstance to display 
-     * May be null if TableModel was not initialized with isXicResult = true.
+     *  @param taskId : Id of the task which should load data in background if necessary
+     * @param ptmPeptides : List of the PTMPeptideInstance to display
+     * @param ptmClusters
      */
-    public void setData(Long taskId, List<PTMPeptideInstance> ptmPeptides, Map<Long, DMasterQuantPeptide> quantPeptidesByPepInsId) {       
+    public void setData(Long taskId, List<PTMPeptideInstance> ptmPeptides, List<PTMCluster> ptmClusters, Map<Long, DMasterQuantPeptide> quantPeptidesByPepInsId) {
 
         m_taskId = taskId;
        
@@ -151,7 +150,8 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
            return;
        
         m_quantPeptidesByPepInsId = quantPeptidesByPepInsId;    
-        
+        m_ptmClusters = ptmClusters;
+
         //Update Quant Channel info
         if(m_isXicResult){
             QuantChannelInfo qcInfo = ((QuantChannelInfo) getSingleValue(QuantChannelInfo.class));
@@ -173,7 +173,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
             if(m_showPeptideMatches){
                 pepMatches.addAll( ptmPI.getPepMatchesOnProteinMatch(protMatchOfInterest));
             } else {                 
-                pepMatches.add(ptmPI.getBestPepMatch());
+                pepMatches.add(ptmPI.getRepresentativePepMatch(m_ptmClusters));
             }
             
             ptmPI.getPTMSites().forEach(site -> {
@@ -257,11 +257,11 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
         return m_dynamiqueColumnNamesByProtLoc.get(keyCol);
     }
 
-    public PTMPeptideInstance getPTMPeptideInstanceAt(int row) {
+    public PTMPeptidesTableModel.Row getPTMPeptideInstanceAt(int row) {
         if (row < 0 || (row >= getRowCount())) {
             return null;
         }
-        return m_ptmPepInstancesAsRow.get(row).ptmPeptideInstance;
+        return m_ptmPepInstancesAsRow.get(row);
     }
 
     //Return first row where a peptideMatch of PTMPeptideInstance is displayed
@@ -722,7 +722,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
 
     @Override
     public Object getRowValue(Class c, int row) {
-        return getPTMPeptideInstanceAt(row);
+        return getPTMPeptideInstanceAt(row).ptmPeptideInstance;
     }
 
     @Override

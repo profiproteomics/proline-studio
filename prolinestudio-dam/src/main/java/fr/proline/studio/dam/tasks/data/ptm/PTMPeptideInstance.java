@@ -19,6 +19,9 @@ package fr.proline.studio.dam.tasks.data.ptm;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -32,6 +35,8 @@ import java.util.stream.Collectors;
  *
  */
 public class PTMPeptideInstance {
+
+  protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.DAM.Task");
 
   private final DPeptideInstance m_peptideInstance;
   private final List<PTMSite> m_sites = new ArrayList<>();
@@ -81,34 +86,49 @@ public class PTMPeptideInstance {
       return m_clusters;
   }
 
-  // !! VDS FIXME Add better solution to get Info ==> lazy data upload !!!
-  public DPeptideMatch getBestPepMatch() {
+
+  public DPeptideMatch getRepresentativePepMatch() {
+    return _getRepresentativePepMatch(m_clusters);
+  }
+
+  public DPeptideMatch getRepresentativePepMatch(List<PTMCluster> clusters) {
+    List<PTMCluster> matchingClusters = m_clusters.stream().filter(clusters::contains).collect(Collectors.toList());
+    return matchingClusters.isEmpty() ? null : _getRepresentativePepMatch(matchingClusters);
+  }
+
+  public DPeptideMatch _getRepresentativePepMatch(List<PTMCluster> clusters) {
+
+    //TODO: to be improved in case of searching the representative PSM for multiple clusters simultaneously
+    if (clusters.size() > 1) {
+      m_logger.debug("searching a representative PSM for multiple clusters simultaneously not yet implemented: use only the first cluster");
+    }
+    PTMCluster cluster = m_clusters.get(0);
     DPeptideMatch pepMatch = null;
-    //m_logger.warn("--- PTMPeptide (Xic) table: UNABLE to get peptide match associated to peptide instance "+getPeptideInstance().toString());
+
     //Try using ptmSite PTMSitePeptideInstance
-    Iterator<PTMSite> siteIT = getPTMSites().iterator();
+    Iterator<PTMSite> siteIT = cluster.getPTMSites().iterator();
     while (siteIT.hasNext()) {
       PTMSite nextSite = siteIT.next();
       PTMSitePeptideInstance ptmSitePepInst = nextSite.getPTMSitePeptideInstance(getPeptideInstance().getPeptideId());
       if (ptmSitePepInst != null) {
-        pepMatch = ptmSitePepInst.getBestProbabilityPepMatch();
+        pepMatch = ptmSitePepInst.getRepresentativePepMatch();
         break;
       }
     }
     return pepMatch;
   }
-  
-    public List<DPeptideMatch> getPepMatchesOnProteinMatch(DProteinMatch proteinMatch) {
-        List<DPeptideMatch> pepMatches = new ArrayList<>();
-        List<Long> allowedProtMatchIds = m_sites.get(0).getPTMdataset().getProtMatchesIdForAccession(proteinMatch.getAccession());
-        pepMatches.addAll(m_peptideInstance.getPeptideMatches().stream().filter(dpm -> allowedProtMatchIds.contains(dpm.getSequenceMatch().getId().getProteinMatchId())).collect(Collectors.toList()));
-        return pepMatches;
-    }
 
-    @Override
-    public String toString() {
-        return "PTMPeptideInstance{" + this.getSequence()+" Position=("+ this.getStartPosition()+"-" + this.getStopPosition() +this.m_sites.toString()+ "}";
-    }
-  
-  
+  public List<DPeptideMatch> getPepMatchesOnProteinMatch(DProteinMatch proteinMatch) {
+    List<DPeptideMatch> pepMatches = new ArrayList<>();
+    List<Long> allowedProtMatchIds = m_sites.get(0).getPTMdataset().getProtMatchesIdForAccession(proteinMatch.getAccession());
+    pepMatches.addAll(m_peptideInstance.getPeptideMatches().stream().filter(dpm -> allowedProtMatchIds.contains(dpm.getSequenceMatch().getId().getProteinMatchId())).collect(Collectors.toList()));
+    return pepMatches;
+  }
+
+  @Override
+  public String toString() {
+    return "PTMPeptideInstance{" + this.getSequence() + " Position=(" + this.getStartPosition() + "-" + this.getStopPosition() + this.m_sites.toString() + "}";
+  }
+
+
 }

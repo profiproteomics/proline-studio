@@ -134,7 +134,7 @@ public class PeptidesPTMSiteTableModel extends DecoratedTableModel implements Gl
             for (DPeptideInstance parentPeptideInstance : dpInstanceList) {
                 // TODO this check is mandatory to avoid NullPointer, but the problem must be handled: PTMSite and parentPepInstance parameters are inconsistent
                 if (m_currentPtmSite.getPTMSitePeptideInstance(parentPeptideInstance.getPeptideId()) != null) {
-                    DPeptideMatch bestPM = m_currentPtmSite.getPTMSitePeptideInstance(parentPeptideInstance.getPeptideId()).getBestProbabilityPepMatch();
+                    DPeptideMatch bestPM = m_currentPtmSite.getPTMSitePeptideInstance(parentPeptideInstance.getPeptideId()).getRepresentativePepMatch();
                     m_ptmSitePeptides.add(new Row(parentPeptideInstance, bestPM));
                 }
             }

@@ -23,6 +23,7 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.GroupParameter;
+import fr.proline.studio.pattern.ParameterSubtypeEnum;
 import fr.proline.studio.rsmexplorer.gui.xic.ExperimentalDesignPanel;
 
 
@@ -45,13 +46,13 @@ public class DataboxExperimentalDesign extends AbstractDataBox {
         // Register Possible in parameters
         // One Dataset 
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(DDataset.class, false); 
+        inParameter.addParameter(DDataset.class); 
         registerInParameter(inParameter);
 
 
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DDataset.class, false);
+        outParameter.addParameter(DDataset.class);
         registerOutParameter(outParameter);
     }
     
@@ -109,13 +110,17 @@ public class DataboxExperimentalDesign extends AbstractDataBox {
     }
    
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType != null) {
-            if (parameterType.equals(DDataset.class)) {
-                return m_dataset;
+            
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+
+                if (parameterType.equals(DDataset.class)) {
+                    return m_dataset;
+                }
             }
         }
-        return super.getData(getArray, parameterType);
+        return super.getData(parameterType, parameterSubtype);
     }
    
     @Override

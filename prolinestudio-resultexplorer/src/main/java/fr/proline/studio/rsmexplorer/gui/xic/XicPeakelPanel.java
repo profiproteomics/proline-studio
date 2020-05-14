@@ -180,7 +180,7 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
                 // prepare window box
                 WindowBox wbox = WindowBoxFactory.getGraphicsWindowBox("Peakel Graphic", m_dataBox, true);
 
-                wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(false, ExtendedTableModelInterface.class));
+                wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(ExtendedTableModelInterface.class));
 
                 // open a window to display the window box
                 DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);

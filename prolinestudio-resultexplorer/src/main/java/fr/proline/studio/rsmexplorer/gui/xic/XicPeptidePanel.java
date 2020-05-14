@@ -233,7 +233,7 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
                     }
                     // prepare window box
                     WindowBox wbox = WindowBoxFactory.getMultiGraphicsWindowBox("Peptide Graphic", m_dataBox, false);
-                    wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(false, List.class));
+                    wbox.setEntryData(m_dataBox.getProjectId(), null);  //JPM.DATABOX : it can work with null, there must be a wart somewhere so it works..
 
                     // open a window to display the window box
                     DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);

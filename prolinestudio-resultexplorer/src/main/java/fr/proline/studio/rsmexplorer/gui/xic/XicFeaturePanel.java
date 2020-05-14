@@ -73,6 +73,7 @@ import javax.swing.event.TableModelListener;
 import org.jdesktop.swingx.JXTable;
 import org.openide.windows.WindowManager;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.pattern.ParameterSubtypeEnum;
 import fr.proline.studio.pattern.xic.DataboxChildFeature;
 import fr.proline.studio.table.AbstractTableAction;
 import java.util.HashMap;
@@ -217,7 +218,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
                 }
                 // prepare window box
                 WindowBox wbox = WindowBoxFactory.getMultiGraphicsWindowBox("Feature Graphic", m_dataBox, false);
-                wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(false, List.class));
+                wbox.setEntryData(m_dataBox.getProjectId(), null); //JPM.DATABOX : it works with null, there must be a wart somewhere so it works..
 
                 // open a window to display the window box
                 DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
@@ -265,7 +266,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
                         return;
                     }
                 }
-                MzScopeInterface mzscopeInterface = (MzScopeInterface)m_dataBox.getData(false, MzScopeInterface.class);
+                MzScopeInterface mzscopeInterface = (MzScopeInterface)m_dataBox.getData(MzScopeInterface.class);
                 MzScopeWindowBoxManager.addMzdbScope(mzscopeInterface);
                 
             }
@@ -728,7 +729,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             }
 
             final DataboxChildFeature databoxChildFeature = (DataboxChildFeature) m_box;
-            QuantChannelInfo quantChannelInfo = (QuantChannelInfo) databoxChildFeature.getData(false, QuantChannelInfo.class);
+            QuantChannelInfo quantChannelInfo = (QuantChannelInfo) databoxChildFeature.getData(QuantChannelInfo.class);
             DQuantitationChannel[] qChannels = quantChannelInfo.getQuantChannels();
             
             // tolerance set to 5ppm if we do not find it in the config
@@ -754,7 +755,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
                 featureList = getSelectedFeatures();
             } else {
                 // all features
-                featureList = (List<DFeature>) databoxChildFeature.getData(true, DFeature.class);
+                featureList = (List<DFeature>) databoxChildFeature.getData(DFeature.class, ParameterSubtypeEnum.LIST_DATA);
             }
 
             

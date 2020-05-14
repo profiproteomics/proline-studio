@@ -63,21 +63,21 @@ public class DataBoxRsmPSMForMsQuery extends AbstractDataBox{
         // Register Possible in parameters
         // One MsQuery & rsm & rs, rsm could be null
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(MsQueryInfoRsm.class, false);
+        inParameter.addParameter(MsQueryInfoRsm.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
         // One or Multiple PeptideMatch
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DPeptideMatch.class, false);
+        outParameter.addParameter(DPeptideMatch.class);
         registerOutParameter(outParameter);
         
         outParameter = new GroupParameter();
-        outParameter.addParameter(ExtendedTableModelInterface.class, false);
+        outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
         
         outParameter = new GroupParameter();
-        outParameter.addParameter(CrossSelectionInterface.class, false);
+        outParameter.addParameter(CrossSelectionInterface.class);
         registerOutParameter(outParameter);
     }
     
@@ -93,7 +93,7 @@ public class DataBoxRsmPSMForMsQuery extends AbstractDataBox{
     @Override
     public void dataChanged() {
         long oldMsQId = m_msQuery == null? -1: m_msQuery.getId();
-        final MsQueryInfoRsm _msqI = (MsQueryInfoRsm) m_previousDataBox.getData(false, MsQueryInfoRsm.class);
+        final MsQueryInfoRsm _msqI = (MsQueryInfoRsm) m_previousDataBox.getData(MsQueryInfoRsm.class);
         
         if (_msqI == null) {
           m_msQuery = null;
@@ -155,19 +155,22 @@ public class DataBoxRsmPSMForMsQuery extends AbstractDataBox{
     }
     
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null ) {
-            if (parameterType.equals(DPeptideMatch.class)) {
-                return ((PeptideMatchPanel)getDataBoxPanelInterface()).getSelectedPeptideMatch();
-            }
-            if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
-            }
-            if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface)getDataBoxPanelInterface()).getCrossSelectionInterface();
+            
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+                if (parameterType.equals(DPeptideMatch.class)) {
+                    return ((PeptideMatchPanel) getDataBoxPanelInterface()).getSelectedPeptideMatch();
+                }
+                if (parameterType.equals(ExtendedTableModelInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
+                }
+                if (parameterType.equals(CrossSelectionInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
+                }
             }
         }
-        return super.getData(getArray, parameterType);
+        return super.getData(parameterType, parameterSubtype);
     }
  
     @Override
@@ -194,7 +197,7 @@ public class DataBoxRsmPSMForMsQuery extends AbstractDataBox{
 
     @Override
     public String getImportantOutParameterValue() {
-        DPeptideMatch p = (DPeptideMatch) getData(false, DPeptideMatch.class);
+        DPeptideMatch p = (DPeptideMatch) getData(DPeptideMatch.class);
         if (p != null) {
             Peptide peptide = p.getPeptide();
             if (peptide != null) {

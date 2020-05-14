@@ -45,13 +45,13 @@ public class DataBoxRsetAll extends AbstractDataBox {
         // Register Possible in parameters
         // One ResultSummary
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(Project.class, false);
+        inParameter.addParameter(Project.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
         // One or Multiple PeptideMatch
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(ResultSet.class, true);
+        outParameter.addParameter(ResultSet.class);
         registerOutParameter(outParameter);
 
     }
@@ -69,7 +69,7 @@ public class DataBoxRsetAll extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
-            Project p = (m_project != null) ? m_project : (Project) m_previousDataBox.getData(false, Project.class);
+            Project p = (m_project != null) ? m_project : (Project) m_previousDataBox.getData(Project.class);
 
             final ArrayList<ResultSet> resultSetArrayList = new ArrayList<>();
             
@@ -104,14 +104,17 @@ public class DataBoxRsetAll extends AbstractDataBox {
     }
     
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null ) {
-            if (parameterType.equals(ResultSet.class)) {
-                return ((RsetAllPanel)getDataBoxPanelInterface()).getSelectedResultSet();
+            
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+                if (parameterType.equals(ResultSet.class)) {
+                    return ((RsetAllPanel) getDataBoxPanelInterface()).getSelectedResultSet();
+                }
             }
 
         }
-        return super.getData(getArray, parameterType);
+        return super.getData(parameterType, parameterSubtype);
     }
     
     @Override

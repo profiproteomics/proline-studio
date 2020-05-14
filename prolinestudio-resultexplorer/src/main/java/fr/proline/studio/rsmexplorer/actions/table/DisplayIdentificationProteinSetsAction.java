@@ -50,7 +50,7 @@ public class DisplayIdentificationProteinSetsAction extends AbstractTableAction 
             return; // should not happen
         }
         
-        ResultSummary rsm = (ResultSummary) m_box.getData(false, ResultSummary.class);
+        ResultSummary rsm = (ResultSummary) m_box.getData(ResultSummary.class);
 
         // prepare window box
         WindowBox wbox = WindowBoxFactory.getProteinSetsWindowBox(m_box.getDataName(), false);

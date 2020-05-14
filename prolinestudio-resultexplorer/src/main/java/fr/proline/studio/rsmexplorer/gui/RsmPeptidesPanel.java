@@ -147,7 +147,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
+                ResultSummary rsm = (ResultSummary) m_dataBox.getData(ResultSummary.class);
                 ResultSummary decoyRsm = rsm.getDecoyResultSummary();
                 if (decoyRsm == null) {
                     return;
@@ -327,7 +327,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
     public void setData(long taskId, PeptideInstance[] peptideInstances, boolean finished) {
 
-        ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
+        ResultSummary rsm = (ResultSummary) m_dataBox.getData(ResultSummary.class);
         if (rsm != null) {
             m_decoyButton.setEnabled(rsm.getDecoyResultSummary() != null);
         }

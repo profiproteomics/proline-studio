@@ -20,7 +20,6 @@ import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
-import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
@@ -54,18 +53,18 @@ public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
         // Register Possible in parameters
         // One ResultSummary
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(ResultSummary.class, false);
-        inParameter.addParameter(DProteinSet.class, false);
+        inParameter.addParameter(ResultSummary.class);
+        inParameter.addParameter(DProteinSet.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
         // One or Multiple PeptideMatch
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DPeptideMatch.class, true);
+        outParameter.addParameter(DPeptideMatch.class);
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();
-        outParameter.addParameter(ExtendedTableModelInterface.class, true);
+        outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
        
     }
@@ -82,8 +81,8 @@ public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
     @Override
     public void dataChanged() {
         
-        ResultSummary _rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
-        final DProteinSet proteinSet = (DProteinSet) m_previousDataBox.getData(false, DProteinSet.class);
+        ResultSummary _rsm = (ResultSummary) m_previousDataBox.getData(ResultSummary.class);
+        final DProteinSet proteinSet = (DProteinSet) m_previousDataBox.getData(DProteinSet.class);
 
         if (proteinSet == null) {
             ((PeptideMatchPanel) getDataBoxPanelInterface()).setData(-1, null, null, true);
@@ -130,19 +129,21 @@ public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
     }
     
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null ) {
-            if (parameterType.equals(DPeptideMatch.class)) {
-                return ((PeptideMatchPanel)getDataBoxPanelInterface()).getSelectedPeptideMatch();
-            }
-            if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
-            }
-            if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface)getDataBoxPanelInterface()).getCrossSelectionInterface();
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+                if (parameterType.equals(DPeptideMatch.class)) {
+                    return ((PeptideMatchPanel) getDataBoxPanelInterface()).getSelectedPeptideMatch();
+                }
+                if (parameterType.equals(ExtendedTableModelInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
+                }
+                if (parameterType.equals(CrossSelectionInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
+                }
             }
         }
-        return super.getData(getArray, parameterType);
+        return super.getData(parameterType, parameterSubtype);
     }
  
     @Override
@@ -153,7 +154,7 @@ public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
 
     @Override
     public String getImportantOutParameterValue() {
-        DPeptideMatch p = (DPeptideMatch) getData(false, DPeptideMatch.class);
+        DPeptideMatch p = (DPeptideMatch) getData(DPeptideMatch.class);
         if (p != null) {
             Peptide peptide = p.getPeptide();
             if (peptide != null) {

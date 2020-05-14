@@ -296,7 +296,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
 
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(ProjectId.class, false);
+        outParameter.addParameter(ProjectId.class);
         registerOutParameter(outParameter);
     }
 
@@ -537,34 +537,22 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
 
     }
 
-    // VDS FIXME : getArray : ?? Not used 
-    public Object getData(boolean getArray, Class parameterType) {
+    public final Object getData(Class parameterType) {
+        return getData(parameterType, ParameterSubtypeEnum.SINGLE_DATA);
+    }
+    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
 
         if ((parameterType != null) && (parameterType.equals(ProjectId.class))) {
-            if ((m_projectId == null) || (m_projectId.getId() == -1L)) {
+            if ((m_projectId == null) || (m_projectId.getId() == -1L)) {   //JPM.DATABOX : strange to check projectID == -1 and search previously
                 if (m_previousDataBox != null) {
-                    return m_previousDataBox.getData(getArray, parameterType);
+                    return m_previousDataBox.getData(parameterType, parameterSubtype);
                 }
             }
             return m_projectId;
         }
 
         if (m_previousDataBox != null) {
-            return m_previousDataBox.getData(getArray, parameterType);
-        }
-        return null;
-    }
-
-    // VDS: FIXME
-    // isList => return a List of object from data => transformToList ?? 
-    public Object getData(boolean getArray, Class parameterType, boolean isList) {
-
-        if ((parameterType != null) && (parameterType.equals(ProjectId.class))) {
-            return m_projectId;
-        }
-
-        if (m_previousDataBox != null) {
-            return m_previousDataBox.getData(getArray, parameterType, isList);
+            return m_previousDataBox.getData(parameterType, parameterSubtype);
         }
         return null;
     }
@@ -594,7 +582,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     }
 
     public long getProjectId() {
-        ProjectId projectId = (ProjectId) getData(false, ProjectId.class);
+        ProjectId projectId = (ProjectId) getData(ProjectId.class);
         if (projectId == null) {
             return -1;
         }

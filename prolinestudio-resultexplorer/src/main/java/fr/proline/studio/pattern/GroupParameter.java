@@ -24,14 +24,18 @@ import java.util.ArrayList;
  */
 public class GroupParameter  {
     
-    private ArrayList<DataParameter> m_parameterList = new ArrayList<>(1);
+    private final ArrayList<DataParameter> m_parameterList = new ArrayList<>(1);
     
-    public void addParameter(Class c, boolean isList) {
-        m_parameterList.add(new DataParameter(c, isList));
+    public void addParameter(Class type) {
+        m_parameterList.add(new DataParameter(type, ParameterSubtypeEnum.SINGLE_DATA));
     }
     
-    public void addParameter(Class c, boolean isList, boolean isCompulsory) {
-        m_parameterList.add(new DataParameter(c, isList, isCompulsory));
+    public void addParameter(Class type, ParameterSubtypeEnum subtype) {
+        m_parameterList.add(new DataParameter(type, subtype));
+    }
+    
+    public void addParameter(Class type, ParameterSubtypeEnum subtype, boolean isCompulsory) {
+        m_parameterList.add(new DataParameter(type, subtype, isCompulsory));
     }
 
     public ArrayList<DataParameter> getParameterList() {

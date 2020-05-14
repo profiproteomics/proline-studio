@@ -46,7 +46,7 @@ public class DataboxGraphics extends AbstractDataBox  {
         // Register Possible in parameters
         // One ResultSummary
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(ExtendedTableModelInterface.class, false);
+        inParameter.addParameter(ExtendedTableModelInterface.class);
         registerInParameter(inParameter);
         
     }
@@ -69,8 +69,8 @@ public class DataboxGraphics extends AbstractDataBox  {
 
     @Override
     public void dataChanged() {
-        final ExtendedTableModelInterface values = (m_values!=null) ? m_values : (ExtendedTableModelInterface) m_previousDataBox.getData(false, ExtendedTableModelInterface.class);
-        final CrossSelectionInterface crossSelectionInterface = (m_values!=null) ? null : (CrossSelectionInterface) m_previousDataBox.getData(false, CrossSelectionInterface.class);
+        final ExtendedTableModelInterface values = (m_values!=null) ? m_values : (ExtendedTableModelInterface) m_previousDataBox.getData(ExtendedTableModelInterface.class);
+        final CrossSelectionInterface crossSelectionInterface = (m_values!=null) ? null : (CrossSelectionInterface) m_previousDataBox.getData(CrossSelectionInterface.class);
         ((GraphicsPanel)getDataBoxPanelInterface()).setData(values, crossSelectionInterface);
     }
     

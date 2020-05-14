@@ -46,17 +46,17 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
         // Register Possible in parameters
         // One PeptideMatch
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(DPeptideMatch.class, false);
+        inParameter.addParameter(DPeptideMatch.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
         // One or Multiple ProteinMatch
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DProteinMatch.class, true);
+        outParameter.addParameter(DProteinMatch.class);
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();
-        outParameter.addParameter(ExtendedTableModelInterface.class, true);
+        outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
        
     }
@@ -73,7 +73,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        final DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
+        final DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(DPeptideMatch.class);
 
         if (peptideMatch == null) {
             ((RsetProteinsPanel)getDataBoxPanelInterface()).setDataPeptideMatch(null);
@@ -129,18 +129,21 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
     
     
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null) {
-            if (parameterType.equals(DProteinMatch.class)) {
-                return ((RsetProteinsPanel) getDataBoxPanelInterface()).getSelectedProteinMatch();
-            }
-            if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
-            }
-            if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface)getDataBoxPanelInterface()).getCrossSelectionInterface();
+            
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+                if (parameterType.equals(DProteinMatch.class)) {
+                    return ((RsetProteinsPanel) getDataBoxPanelInterface()).getSelectedProteinMatch();
+                }
+                if (parameterType.equals(ExtendedTableModelInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
+                }
+                if (parameterType.equals(CrossSelectionInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
+                }
             }
         }
-        return super.getData(getArray, parameterType);
+        return super.getData(parameterType, parameterSubtype);
     }
 }

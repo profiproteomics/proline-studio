@@ -432,11 +432,11 @@ public class ProjectExplorerPanel extends JPanel {
                         ArrayList<DataParameter> listP = inp.getParameterList();
                         for (DataParameter dataParam : listP) {
                             if (dataParam.equalsData(ResultSummary.class)) {
-                                ResultSummary rsm = (ResultSummary) ((DataBoxViewerTopComponent) topComponent).getData(false, ResultSummary.class);
+                                ResultSummary rsm = (ResultSummary) ((DataBoxViewerTopComponent) topComponent).getData(ResultSummary.class);
                                 openedData.add(new ClearProjectData(projectId, rsm));
                                 openedData.add(new ClearProjectData(projectId, rsm.getResultSet()));
                             } else if (dataParam.equalsData(ResultSet.class)) {
-                                ResultSet rs = (ResultSet) ((DataBoxViewerTopComponent) topComponent).getData(false, ResultSet.class);
+                                ResultSet rs = (ResultSet) ((DataBoxViewerTopComponent) topComponent).getData(ResultSet.class);
                                 openedData.add(new ClearProjectData(projectId, rs));
                             }
                         }
@@ -446,11 +446,11 @@ public class ProjectExplorerPanel extends JPanel {
                         ArrayList<DataParameter> listP = outp.getParameterList();
                         for (DataParameter dataParam : listP) {
                             if (dataParam.equalsData(ResultSummary.class)) {
-                                ResultSummary rsm = (ResultSummary) ((DataBoxViewerTopComponent) topComponent).getData(false, ResultSummary.class);
+                                ResultSummary rsm = (ResultSummary) ((DataBoxViewerTopComponent) topComponent).getData(ResultSummary.class);
                                 openedData.add(new ClearProjectData(projectId, rsm));
                                 openedData.add(new ClearProjectData(projectId, rsm.getResultSet()));
                             } else if (dataParam.equalsData(ResultSet.class)) {
-                                ResultSet rs = (ResultSet) ((DataBoxViewerTopComponent) topComponent).getData(false, ResultSet.class);
+                                ResultSet rs = (ResultSet) ((DataBoxViewerTopComponent) topComponent).getData(ResultSet.class);
                                 openedData.add(new ClearProjectData(projectId, rs));
                             }
                         }

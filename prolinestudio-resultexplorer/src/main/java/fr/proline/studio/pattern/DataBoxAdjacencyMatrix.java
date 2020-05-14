@@ -56,22 +56,22 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
         // Register Possible in parameters
         // One ResultSummary
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(DrawVisualization.class, false);
-        inParameter.addParameter(Component.class, false);
+        inParameter.addParameter(DrawVisualization.class);
+        inParameter.addParameter(Component.class);
         registerInParameter(inParameter);
         
         
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DPeptideMatch.class, false);
+        outParameter.addParameter(DPeptideMatch.class);
         registerOutParameter(outParameter);
         
         outParameter = new GroupParameter();
-        outParameter.addParameter(DPeptideInstance.class, false);
+        outParameter.addParameter(DPeptideInstance.class);
         registerOutParameter(outParameter);
         
         outParameter = new GroupParameter();
-        outParameter.addParameter(DProteinMatch.class, false);
+        outParameter.addParameter(DProteinMatch.class);
         registerOutParameter(outParameter);
         
         
@@ -91,12 +91,12 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
-        final ResultSummary _rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
+        final ResultSummary _rsm = (ResultSummary) m_previousDataBox.getData(ResultSummary.class);
         // register the link to the Transient Data
         linkCache( _rsm);
         
-        Component component = (Component) m_previousDataBox.getData(false, Component.class);
-        DrawVisualization drawVisualization = (DrawVisualization) m_previousDataBox.getData(false, DrawVisualization.class);
+        Component component = (Component) m_previousDataBox.getData(Component.class);
+        DrawVisualization drawVisualization = (DrawVisualization) m_previousDataBox.getData(DrawVisualization.class);
 
         
         
@@ -149,37 +149,43 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
     }
     private Long m_previousTaskId = null;
     
-        @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    @Override
+    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null ) {
-            if (parameterType.equals(DPeptideMatch.class)) {
-                return ((MatrixPanel)getDataBoxPanelInterface()).getSelectedPeptideMatch();
-            }
-            if (parameterType.equals(DProteinMatch.class)) {
-                return ((MatrixPanel)getDataBoxPanelInterface()).getSelectedProteinMatch();
-            }
-            if (parameterType.equals(DPeptideInstance.class)) {
-                DPeptideMatch peptideMatch = ((MatrixPanel)getDataBoxPanelInterface()).getSelectedPeptideMatch();
-                DProteinMatch pm = ((MatrixPanel)getDataBoxPanelInterface()).getSelectedProteinMatch();
-                if ((pm != null) && (peptideMatch != null)) {
-                    ResultSummary rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
-                    if (rsm != null) {
-                        DPeptideSet peptideSet = pm.getPeptideSet(rsm.getId());
-                        DPeptideInstance[] peptideInstances = peptideSet.getPeptideInstances();
-                        if (peptideInstances != null) {
-                            for (DPeptideInstance peptideInstance : peptideInstances) {
-                                if (peptideInstance.getPeptideId() == peptideMatch.getPeptide().getId()) {
-                                    return peptideInstance;
+            
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+                
+                if (parameterType.equals(DPeptideMatch.class)) {
+                    return ((MatrixPanel) getDataBoxPanelInterface()).getSelectedPeptideMatch();
+                }
+                
+                if (parameterType.equals(DProteinMatch.class)) {
+                    return ((MatrixPanel) getDataBoxPanelInterface()).getSelectedProteinMatch();
+                }
+                
+                if (parameterType.equals(DPeptideInstance.class)) {
+                    DPeptideMatch peptideMatch = ((MatrixPanel) getDataBoxPanelInterface()).getSelectedPeptideMatch();
+                    DProteinMatch pm = ((MatrixPanel) getDataBoxPanelInterface()).getSelectedProteinMatch();
+                    if ((pm != null) && (peptideMatch != null)) {
+                        ResultSummary rsm = (ResultSummary) m_previousDataBox.getData(ResultSummary.class);
+                        if (rsm != null) {
+                            DPeptideSet peptideSet = pm.getPeptideSet(rsm.getId());
+                            DPeptideInstance[] peptideInstances = peptideSet.getPeptideInstances();
+                            if (peptideInstances != null) {
+                                for (DPeptideInstance peptideInstance : peptideInstances) {
+                                    if (peptideInstance.getPeptideId() == peptideMatch.getPeptide().getId()) {
+                                        return peptideInstance;
+                                    }
                                 }
                             }
                         }
+
                     }
-                    
+
                 }
-               
             }
         }
-        return super.getData(getArray, parameterType);
+        return super.getData(parameterType, parameterSubtype);
     }
     
 }

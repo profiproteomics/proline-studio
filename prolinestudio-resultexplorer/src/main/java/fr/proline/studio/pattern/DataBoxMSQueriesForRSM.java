@@ -19,7 +19,6 @@ package fr.proline.studio.pattern;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMsQuery;
-import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadMSQueriesTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -49,26 +48,26 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
         // Register Possible in parameters
         // One ResultSummary
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(ResultSummary.class, false);
+        inParameter.addParameter(ResultSummary.class);
         registerInParameter(inParameter);
         
         
         // Register possible out parameters
         // One or Multiple PeptideMatchId for one msQuery
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DMsQuery.class, false);
+        outParameter.addParameter(DMsQuery.class);
         registerOutParameter(outParameter);
         
         outParameter = new GroupParameter();
-        outParameter.addParameter(ResultSummary.class, false);
+        outParameter.addParameter(ResultSummary.class);
         registerOutParameter(outParameter);
         
         outParameter = new GroupParameter();
-        outParameter.addParameter(ResultSet.class, false);
+        outParameter.addParameter(ResultSet.class);
         registerOutParameter(outParameter);
         
         outParameter = new GroupParameter();
-        outParameter.addParameter(MsQueryInfoRsm.class, false);
+        outParameter.addParameter(MsQueryInfoRsm.class);
         registerOutParameter(outParameter);
 
        
@@ -85,8 +84,8 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
 
     @Override
     public void dataChanged() {
-        ResultSummary _rsm = (m_rsm!=null) ? m_rsm : m_previousDataBox == null ? null : (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
-        final ResultSet _rset =  (_rsm != null)? _rsm.getResultSet() : ( m_previousDataBox == null ? null : (ResultSet) m_previousDataBox.getData(false, ResultSet.class));
+        ResultSummary _rsm = (m_rsm!=null) ? m_rsm : m_previousDataBox == null ? null : (ResultSummary) m_previousDataBox.getData(ResultSummary.class);
+        final ResultSet _rset =  (_rsm != null)? _rsm.getResultSet() : ( m_previousDataBox == null ? null : (ResultSet) m_previousDataBox.getData(ResultSet.class));
 
         // register the link to the Transient Data
         linkCache(_rsm);
@@ -136,23 +135,27 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
     }
     
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType != null) {
-            if (parameterType.equals(DMsQuery.class)) {
-                return ((MSQueriesPanel)getDataBoxPanelInterface()).getSelectedMsQuery();
-            }
-            if (parameterType.equals(ResultSummary.class)) {
-                return m_rsm;
-            }
-            if (parameterType.equals(ResultSet.class)) {
-                return m_rsm.getResultSet();
-            }
-            if (parameterType.equals(MsQueryInfoRsm.class)) {
-                DMsQuery msq = ((MSQueriesPanel)getDataBoxPanelInterface()).getSelectedMsQuery();
-                return new MsQueryInfoRsm(msq, m_rsm);
+            
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+
+                if (parameterType.equals(DMsQuery.class)) {
+                    return ((MSQueriesPanel) getDataBoxPanelInterface()).getSelectedMsQuery();
+                }
+                if (parameterType.equals(ResultSummary.class)) {
+                    return m_rsm;
+                }
+                if (parameterType.equals(ResultSet.class)) {
+                    return m_rsm.getResultSet();
+                }
+                if (parameterType.equals(MsQueryInfoRsm.class)) {
+                    DMsQuery msq = ((MSQueriesPanel) getDataBoxPanelInterface()).getSelectedMsQuery();
+                    return new MsQueryInfoRsm(msq, m_rsm);
+                }
             }
         }
-        return super.getData(getArray, parameterType);
+        return super.getData(parameterType, parameterSubtype);
     }
     
     @Override
@@ -163,7 +166,7 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
 
     @Override
     public String getImportantOutParameterValue() {
-        DMsQuery q = (DMsQuery) getData(false, DMsQuery.class);
+        DMsQuery q = (DMsQuery) getData(DMsQuery.class);
         if (q != null) {
             int id = q.getInitialId();
             return String.valueOf(id);

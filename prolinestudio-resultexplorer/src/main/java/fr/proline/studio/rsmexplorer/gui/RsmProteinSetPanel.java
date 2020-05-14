@@ -101,7 +101,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         
         // update toolbar
         boolean mergedData = false;
-        ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
+        ResultSummary rsm = (ResultSummary) m_dataBox.getData(ResultSummary.class);
         if (rsm != null) {
 
             if (m_firstPanel) {
@@ -289,7 +289,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 @Override
                 public void actionPerformed(ActionEvent e) {
 
-                    ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
+                    ResultSummary rsm = (ResultSummary) m_dataBox.getData(ResultSummary.class);
                     ResultSummary decoyRsm = rsm.getDecoyResultSummary();
                     if (decoyRsm == null) {
                         return;

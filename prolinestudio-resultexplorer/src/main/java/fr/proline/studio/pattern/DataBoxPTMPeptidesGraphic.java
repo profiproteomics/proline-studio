@@ -65,7 +65,7 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
     }
 
     private void loadPeptidesInstances() {
-        DProteinMatch proteinMatch = (DProteinMatch) m_previousDataBox.getData(false, DProteinMatch.class);
+        DProteinMatch proteinMatch = (DProteinMatch) m_previousDataBox.getData(DProteinMatch.class);
 
         ArrayList<ResultSummary> rsmList = new ArrayList<>(1);
         rsmList.add(m_rsm);

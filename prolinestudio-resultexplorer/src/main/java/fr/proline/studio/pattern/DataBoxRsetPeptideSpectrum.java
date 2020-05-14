@@ -47,14 +47,14 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
 
         // Register in parameters
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(DPeptideMatch.class, false);
+        inParameter.addParameter(DPeptideMatch.class);
         registerInParameter(inParameter);
 
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DMsQuery.class, false);
-        outParameter.addParameter(DSpectrum.class, false);
-        outParameter.addParameter(PeptideFragmentationData.class, false);
+        outParameter.addParameter(DMsQuery.class);
+        outParameter.addParameter(DSpectrum.class);
+        outParameter.addParameter(PeptideFragmentationData.class);
         registerOutParameter(outParameter);
     }
 
@@ -68,7 +68,7 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        final DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
+        final DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(DPeptideMatch.class);
 
         if (m_previousPeptideMatch == peptideMatch) {
             return;
@@ -172,34 +172,37 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
     private Long m_previousFragmentationTaskId = null;
 
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType != null) {
-            if (parameterType.equals(DMsQuery.class)) {
-                DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
-                if (peptideMatch != null) {
-                    DMsQuery msQuery = peptideMatch.getMsQuery();
-                    if (msQuery != null) {
-                        return msQuery;
-                    }
-                }
-            }
-            if (parameterType.equals(DSpectrum.class)) {
-                DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
-                if (peptideMatch != null) {
-                    DMsQuery msQuery = peptideMatch.getMsQuery();
-                    if (msQuery != null) {
-                        DSpectrum spectrum = msQuery.getDSpectrum();
-                        if (spectrum != null) {
-                            return spectrum;
+            
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+                if (parameterType.equals(DMsQuery.class)) {
+                    DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(DPeptideMatch.class);
+                    if (peptideMatch != null) {
+                        DMsQuery msQuery = peptideMatch.getMsQuery();
+                        if (msQuery != null) {
+                            return msQuery;
                         }
                     }
                 }
-            }
-            if (parameterType.equals(PeptideFragmentationData.class)) {
-                return m_fragmentationData;
+                if (parameterType.equals(DSpectrum.class)) {
+                    DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(DPeptideMatch.class);
+                    if (peptideMatch != null) {
+                        DMsQuery msQuery = peptideMatch.getMsQuery();
+                        if (msQuery != null) {
+                            DSpectrum spectrum = msQuery.getDSpectrum();
+                            if (spectrum != null) {
+                                return spectrum;
+                            }
+                        }
+                    }
+                }
+                if (parameterType.equals(PeptideFragmentationData.class)) {
+                    return m_fragmentationData;
+                }
             }
         }
-        return super.getData(getArray, parameterType);
+        return super.getData(parameterType, parameterSubtype);
     }
 
 }

@@ -1644,7 +1644,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             masterQuantProteinSet.setNbPeptides(nbPep);
             masterQuantProteinSet.setNbQuantifiedPeptides(nbPepQuant);
 
-            // load status and peptideNumber by QcId            
+            // load status and peptideNumber by QcId   
+            // VDS version 2.2.0  load quantPeptideNumberByQchIds is deprecated as it is now saved in quantProteinSet. Keep for previous SpectralCount. To be removed in version++
             Map<Long, String> quantStatusByQchIds = new HashMap();
             Map<Long, Integer> quantPeptideNumberByQchIds = new HashMap();
             for (DQuantitationChannel qch : listQC) {

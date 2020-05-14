@@ -44,6 +44,7 @@ import javax.swing.table.TableCellRenderer;
  *
  * @author MB243701
  */
+//VDS Should we add peptides_count column... See where it is really used 
 public class ProteinQuantTableModel extends LazyTableModel implements GlobalTableModelInterface {
 
     public static final int COLTYPE_QC_ID = 0;

@@ -33,6 +33,7 @@ import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.GroupParameter;
+import fr.proline.studio.pattern.ParameterSubtypeEnum;
 import fr.proline.studio.rsmexplorer.gui.xic.MapAlignmentPanel;
 import fr.proline.studio.rsmexplorer.gui.xic.MapTimePanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
@@ -73,16 +74,16 @@ public class DataboxMapAlignment extends AbstractDataBox {
         // Register Possible in parameters
         // One Dataset 
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(DDataset.class, false);
+        inParameter.addParameter(DDataset.class);
         registerInParameter(inParameter);
 
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(ExtendedTableModelInterface.class, true);
+        outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();
-        outParameter.addParameter(CrossSelectionInterface.class, true);
+        outParameter.addParameter(CrossSelectionInterface.class);
         registerOutParameter(outParameter);
         m_RT_Tolerance = 0.0;
 
@@ -106,17 +107,20 @@ public class DataboxMapAlignment extends AbstractDataBox {
      * @return
      */
     @Override
-    public Object getData(boolean getArray, Class parameterType, boolean isList) {
-        //logger.debug("get Data");
-        if (parameterType != null && isList) {
-            if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                return getCompareDataInterfaceList();
-            }
-            if (parameterType.equals(CrossSelectionInterface.class)) {
-                return getCrossSelectionInterfaceList();
+    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+
+        if (parameterType != null) {
+            
+            if (parameterSubtype == ParameterSubtypeEnum.LIST_DATA) {
+                if (parameterType.equals(ExtendedTableModelInterface.class)) {
+                    return getCompareDataInterfaceList();
+                }
+                if (parameterType.equals(CrossSelectionInterface.class)) {
+                    return getCrossSelectionInterfaceList();
+                }
             }
         }
-        return super.getData(getArray, parameterType, isList);
+        return super.getData(parameterType, parameterSubtype);
     }
 
     private List<ExtendedTableModelInterface> getCompareDataInterfaceList() {
@@ -180,8 +184,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
         final int loadingId = setLoading();
 
         if (m_dataset == null) {
-            m_dataset = (DDataset) m_previousDataBox.getData(false, DDataset.class);
-
+            m_dataset = (DDataset) m_previousDataBox.getData(DDataset.class);
         }
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -242,8 +245,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
             final int loadingId = setLoading();
 
             if (m_dataset == null) {
-                m_dataset = (DDataset) m_previousDataBox.getData(false, DDataset.class);
-
+                m_dataset = (DDataset) m_previousDataBox.getData(DDataset.class);
             }
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 

@@ -80,7 +80,7 @@ public class WindowBoxFactory {
 
     private static AbstractDataBox[] createBoxArray(AbstractDataBox databox, String dataName) {
 
-        ResultSet rset = (ResultSet) databox.getData(false, ResultSet.class);
+        ResultSet rset = (ResultSet) databox.getData( ResultSet.class);
 
         AbstractDataBox[] boxes;
         if (databox instanceof DataBoxRsetProteinsForPeptideMatch) {
@@ -330,7 +330,7 @@ public class WindowBoxFactory {
         boxes[0].setDataName(dataName);
         ((DataBoxPTMClusters) boxes[0]).setXicResult(true);
         ((DataBoxPTMClusters) boxes[0]).setViewSitesOnly(viewSites);
-        boxes[1] = new DataBoxPTMPeptides();
+        boxes[1] = new DataBoxPTMPeptides(true, false);
         boxes[2] = new DataBoxPTMPeptides(false,true);
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);        
         boxes[3] = new DataBoxPTMPeptidesGraphic();

@@ -23,7 +23,6 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -54,19 +53,19 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
 
         // or one PeptideInstance
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(PeptideInstance.class, false);
+        inParameter.addParameter(PeptideInstance.class);
         registerInParameter(inParameter);
 
 
         // Register possible out parameters
         // One or Multiple ProteinSet
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DProteinSet.class, true);
-        outParameter.addParameter(ResultSummary.class, false);
+        outParameter.addParameter(DProteinSet.class);
+        outParameter.addParameter(ResultSummary.class);
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();
-        outParameter.addParameter(ExtendedTableModelInterface.class, true);
+        outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
     }
 
@@ -85,7 +84,7 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
         // register the link to the Transient Data
         linkCache(m_rsm);
         
-        final PeptideInstance _peptideInstance = (PeptideInstance) m_previousDataBox.getData(false, PeptideInstance.class);
+        final PeptideInstance _peptideInstance = (PeptideInstance) m_previousDataBox.getData(PeptideInstance.class);
 
 
         if (_peptideInstance == null) {
@@ -147,24 +146,27 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
     
     
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null ) {
-            if (parameterType.equals(DProteinSet.class)) {
-                return ((RsmProteinSetPanel)getDataBoxPanelInterface()).getSelectedProteinSet();
-            }
-            if (parameterType.equals(ResultSummary.class)) {
-                if (m_rsm != null) {
-                    return m_rsm;
+            
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+                if (parameterType.equals(DProteinSet.class)) {
+                    return ((RsmProteinSetPanel) getDataBoxPanelInterface()).getSelectedProteinSet();
+                }
+                if (parameterType.equals(ResultSummary.class)) {
+                    if (m_rsm != null) {
+                        return m_rsm;
+                    }
+                }
+                if (parameterType.equals(ExtendedTableModelInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
+                }
+                if (parameterType.equals(CrossSelectionInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
                 }
             }
-            if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
-            }
-            if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface)getDataBoxPanelInterface()).getCrossSelectionInterface();
-            }
         }
-        return super.getData(getArray, parameterType);
+        return super.getData(parameterType, parameterSubtype);
     }
  
     @Override
@@ -184,7 +186,7 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
 
     @Override
     public String getImportantOutParameterValue() {
-        DProteinSet p = (DProteinSet) getData(false, DProteinSet.class);
+        DProteinSet p = (DProteinSet) getData(DProteinSet.class);
         if (p != null) {
             DProteinMatch pm = p.getTypicalProteinMatch();
             if (pm != null) {

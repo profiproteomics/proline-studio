@@ -19,6 +19,7 @@ package fr.proline.studio.rsmexplorer;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.pattern.GroupParameter;
+import fr.proline.studio.pattern.ParameterSubtypeEnum;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.table.TableInfo;
 import java.awt.Graphics;
@@ -159,8 +160,11 @@ public class DataBoxViewerTopComponent extends TopComponent {
         return m_windowBox.getEntryBox().getOutParameters();
     }
     
-    public Object getData(boolean getArray, Class parameterType){
-        return m_windowBox.getEntryBox().getData(getArray, parameterType);
+    public Object getData(Class parameterType){
+        return getData(parameterType, null);
+    }
+    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype){
+        return m_windowBox.getEntryBox().getData(parameterType, parameterSubtype);
     }
     
     public long getProjectId(){

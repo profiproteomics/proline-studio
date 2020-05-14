@@ -58,14 +58,17 @@ public class DataboxDataAnalyzer extends AbstractDataBox {
     }
 
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType != null) {
-            if (parameterType.equals(ProcessEngineInfo.class)) {
-                return ((DataAnalyzerPanel) getDataBoxPanelInterface()).getProcessEngineInfoToDisplay();
+            
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+                if (parameterType.equals(ProcessEngineInfo.class)) {
+                    return ((DataAnalyzerPanel) getDataBoxPanelInterface()).getProcessEngineInfoToDisplay();
+                }
             }
 
         }
-        return super.getData(getArray, parameterType);
+        return super.getData(parameterType, parameterSubtype);
     }
 
 }

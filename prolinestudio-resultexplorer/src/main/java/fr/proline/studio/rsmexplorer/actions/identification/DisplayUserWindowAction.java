@@ -62,17 +62,17 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
         ArrayList<GroupParameter> outParameters = new ArrayList<>();
         if ((!forRsm()) && (dataSetNode.hasResultSet())) {
             GroupParameter outParameter = new GroupParameter();
-            outParameter.addParameter(ResultSet.class, false);
+            outParameter.addParameter(ResultSet.class);
             outParameters.add(outParameter);
         }
         if ((forRsm()) && (dataSetNode.hasResultSummary())) {
             GroupParameter outParameter = new GroupParameter();
-            outParameter.addParameter(ResultSummary.class, false);
+            outParameter.addParameter(ResultSummary.class);
             outParameters.add(outParameter);
         }
         if (m_windowType == WindowSavedManager.SAVE_WINDOW_FOR_QUANTI && dataSetNode.isQuantitation()){
             GroupParameter outParameter = new GroupParameter();
-            outParameter.addParameter(DDataset.class, false);
+            outParameter.addParameter(DDataset.class);
             outParameters.add(outParameter);
         }
 

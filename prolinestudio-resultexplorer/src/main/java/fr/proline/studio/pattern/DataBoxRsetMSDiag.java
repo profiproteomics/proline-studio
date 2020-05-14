@@ -18,7 +18,6 @@ package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.rsmexplorer.gui.RsetMSDiagPanel;
@@ -55,7 +54,7 @@ public class DataBoxRsetMSDiag extends AbstractDataBox {
         m_messages_back.add(resultMessageHashMap); // first element is the settings (as hashmap type)
 
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(ResultSet.class, false);
+        inParameter.addParameter(ResultSet.class);
         registerInParameter(inParameter);
 
         // Register possible out parameters
@@ -78,7 +77,7 @@ public class DataBoxRsetMSDiag extends AbstractDataBox {
 
         final int loadingId = setLoading(true);
 
-        ResultSet _rset = (m_rset != null) ? m_rset : (ResultSet) m_previousDataBox.getData(false, ResultSet.class);
+        ResultSet _rset = (m_rset != null) ? m_rset : (ResultSet) m_previousDataBox.getData(ResultSet.class);
 
         // register the link to the Transient Data
         linkCache(_rset);

@@ -38,8 +38,8 @@ public class DataBoxRsetPeptideSpectrumError extends AbstractDataBox {
 
         // Register in parameters
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(DPeptideMatch.class, false);
-        inParameter.addParameter(PeptideFragmentationData.class, false);
+        inParameter.addParameter(DPeptideMatch.class);
+        inParameter.addParameter(PeptideFragmentationData.class);
         registerInParameter(inParameter);
 
         // Register possible out parameters
@@ -57,7 +57,7 @@ public class DataBoxRsetPeptideSpectrumError extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
-        final PeptideFragmentationData fragmentationData = (PeptideFragmentationData) m_previousDataBox.getData(false, PeptideFragmentationData.class);
+        final PeptideFragmentationData fragmentationData = (PeptideFragmentationData) m_previousDataBox.getData(PeptideFragmentationData.class);
         final DPeptideMatch peptideMatch = (fragmentationData != null) ? fragmentationData.getPeptideMatch() : null;
 
         if ((m_previousPeptideMatch == peptideMatch) && (fragmentationData == null)) {

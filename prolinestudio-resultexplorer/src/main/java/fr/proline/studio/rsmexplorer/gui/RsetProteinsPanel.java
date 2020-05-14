@@ -164,7 +164,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
                 public void actionPerformed(ActionEvent e) {
 
 
-                    ResultSet rset = (ResultSet) m_dataBox.getData(false, ResultSet.class);
+                    ResultSet rset = (ResultSet) m_dataBox.getData(ResultSet.class);
                     ResultSet decoyRset = rset.getDecoyResultSet();
                     if (decoyRset == null) {
                         return;
@@ -287,7 +287,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
             }
         }
 
-        ResultSet rset = (ResultSet) m_dataBox.getData(false, ResultSet.class);
+        ResultSet rset = (ResultSet) m_dataBox.getData(ResultSet.class);
         if ((m_decoyButton != null) && (rset != null)) {
             m_decoyButton.setEnabled(rset.getDecoyResultSet() != null);
         }

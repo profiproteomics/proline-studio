@@ -19,7 +19,6 @@ package fr.proline.studio.pattern;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
-import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinsAndPeptidesTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -50,20 +49,20 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
         // Register Possible in parameters
         // One ResultSummary
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(ResultSummary.class, false);
-        inParameter.addParameter(DProteinSet.class, false);
+        inParameter.addParameter(ResultSummary.class);
+        inParameter.addParameter(DProteinSet.class);
         registerInParameter(inParameter);
         
         inParameter = new GroupParameter();
-        inParameter.addParameter(ResultSummary.class, false);
-        inParameter.addParameter(DProteinMatch.class, false);
+        inParameter.addParameter(ResultSummary.class);
+        inParameter.addParameter(DProteinMatch.class);
         registerInParameter(inParameter);
         
         
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DrawVisualization.class, false);
-        outParameter.addParameter(Component.class, false);
+        outParameter.addParameter(DrawVisualization.class);
+        outParameter.addParameter(Component.class);
         registerOutParameter(outParameter);
     }
     
@@ -88,15 +87,15 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
-        final ResultSummary _rsm = (m_rsm != null) ? m_rsm : (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
+        final ResultSummary _rsm = (m_rsm != null) ? m_rsm : (ResultSummary) m_previousDataBox.getData( ResultSummary.class);
         // register the link to the Transient Data
         linkCache(_rsm);
         
         
-        DProteinMatch proteinMatch = (m_previousDataBox==null) ? null : (DProteinMatch) m_previousDataBox.getData(false, DProteinMatch.class);
+        DProteinMatch proteinMatch = (m_previousDataBox==null) ? null : (DProteinMatch) m_previousDataBox.getData(DProteinMatch.class);
         
         if (proteinMatch == null) {
-            DProteinSet proteinSet = (m_previousDataBox==null) ? null : (DProteinSet) m_previousDataBox.getData(false, DProteinSet.class);
+            DProteinSet proteinSet = (m_previousDataBox==null) ? null : (DProteinSet) m_previousDataBox.getData(DProteinSet.class);
             if (proteinSet != null) {
                 proteinMatch = proteinSet.getTypicalProteinMatch();
             }
@@ -150,22 +149,26 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
         }
     }
     
-        @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    @Override
+    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null ) {
-            if (parameterType.equals(Component.class)) {
-                return ((MatrixSelectionPanel) getDataBoxPanelInterface()).getCurrentComponent();
-            }
-            if (parameterType.equals(DrawVisualization.class)) {
-                return ((MatrixSelectionPanel) getDataBoxPanelInterface()).getDrawVisualization();
-            }
-            if (parameterType.equals(ResultSummary.class)) {
-                if (m_rsm != null) {
-                    return m_rsm;
+            
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+
+                if (parameterType.equals(Component.class)) {
+                    return ((MatrixSelectionPanel) getDataBoxPanelInterface()).getCurrentComponent();
+                }
+                if (parameterType.equals(DrawVisualization.class)) {
+                    return ((MatrixSelectionPanel) getDataBoxPanelInterface()).getDrawVisualization();
+                }
+                if (parameterType.equals(ResultSummary.class)) {
+                    if (m_rsm != null) {
+                        return m_rsm;
+                    }
                 }
             }
         }
-        return super.getData(getArray, parameterType);
+        return super.getData(parameterType, parameterSubtype);
     }
     
 }

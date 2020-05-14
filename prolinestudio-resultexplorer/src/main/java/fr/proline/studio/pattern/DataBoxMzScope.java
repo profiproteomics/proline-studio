@@ -51,7 +51,7 @@ public class DataBoxMzScope extends AbstractDataBox{
         // Register Possible in parameters
         // One Map 
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(File.class, false);
+        inParameter.addParameter(File.class);
         registerInParameter(inParameter);
 
         // Register possible out parameters
@@ -105,13 +105,13 @@ public class DataBoxMzScope extends AbstractDataBox{
     }
     
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType != null) {
 //            if (parameterType.equals(?.class)) {
 //                return ?;
 //            }
         }
-        return super.getData(getArray, parameterType);
+        return super.getData(parameterType, parameterSubtype);
     }
     
     @Override

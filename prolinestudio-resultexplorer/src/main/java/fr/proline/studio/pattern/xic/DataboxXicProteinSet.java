@@ -21,7 +21,6 @@ import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -30,6 +29,7 @@ import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.GroupParameter;
+import fr.proline.studio.pattern.ParameterSubtypeEnum;
 import fr.proline.studio.rsmexplorer.gui.xic.ProteinQuantPanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XicProteinSetPanel;
@@ -37,7 +37,6 @@ import fr.proline.studio.types.XicMode;
 import java.util.ArrayList;
 import java.util.List;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
-import fr.proline.studio.rsmexplorer.gui.xic.XicAbundanceProteinTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,36 +62,32 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         // Register Possible in parameters
         // One ResultSummary
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(DDataset.class, false);
+        inParameter.addParameter(DDataset.class);
         registerInParameter(inParameter);
 
         // Register possible out parameters
         // One or Multiple ProteinSet 
         //VDS : Only one ?!
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DProteinSet.class, false);
-        outParameter.addParameter(DMasterQuantProteinSet.class, false);
-        outParameter.addParameter(DDataset.class, false);
-        outParameter.addParameter(ResultSummary.class, false);
-        outParameter.addParameter(QuantChannelInfo.class, false);
-        outParameter.addParameter(XicMode.class, false);
+        outParameter.addParameter(DProteinSet.class);
+        outParameter.addParameter(DMasterQuantProteinSet.class);
+        outParameter.addParameter(DDataset.class);
+        outParameter.addParameter(ResultSummary.class);
+        outParameter.addParameter(QuantChannelInfo.class);
+        outParameter.addParameter(XicMode.class);
 
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();
-        outParameter.addParameter(ExtendedTableModelInterface.class, false);
+        outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();
-        outParameter.addParameter(ExtendedTableModelInterface.class, true);
+        outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();
-        outParameter.addParameter(CrossSelectionInterface.class, true);
-        registerOutParameter(outParameter);
-
-        outParameter = new GroupParameter();
-        outParameter.addParameter(XicAbundanceProteinTableModel.class, true);
+        outParameter.addParameter(CrossSelectionInterface.class);
         registerOutParameter(outParameter);
 
     }
@@ -234,49 +229,58 @@ public class DataboxXicProteinSet extends AbstractDataBox {
     }
 
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+                
         if (parameterType != null) {
-            if (parameterType.equals(ResultSummary.class)) {
-                return m_dataset.getResultSummary();
+            
+            // Returning single data
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+                if (parameterType.equals(ResultSummary.class)) {
+                    return m_dataset.getResultSummary();
+                }
+                if (parameterType.equals(DDataset.class)) {
+                    return m_dataset;
+                }
+                if (parameterType.equals(QuantChannelInfo.class)) {
+                    return m_quantChannelInfo;
+                }
+                if (parameterType.equals(DProteinSet.class)) {
+                    return ((XicProteinSetPanel) getDataBoxPanelInterface()).getSelectedProteinSet();
+                }
+                if (parameterType.equals(DMasterQuantProteinSet.class)) {
+                    return ((XicProteinSetPanel) getDataBoxPanelInterface()).getSelectedMasterQuantProteinSet();
+                }
+                if (parameterType.equals(ExtendedTableModelInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
+                }
+                if (parameterType.equals(CrossSelectionInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
+                }
+                if (parameterType.equals(XicMode.class)) {
+                    return new XicMode(isXICMode());
+                }
             }
-            if (parameterType.equals(DDataset.class)) {
-                return m_dataset;
+            
+            // Returning a list of data
+            if (parameterSubtype == ParameterSubtypeEnum.LIST_DATA) {
+                if (parameterType.equals(ExtendedTableModelInterface.class)) {
+                    return getCompareDataInterfaceList();
+                }
+                if (parameterType.equals(CrossSelectionInterface.class)) {
+                    return getCrossSelectionInterfaceList();
+                }
             }
-            if (parameterType.equals(QuantChannelInfo.class)) {
-                return m_quantChannelInfo;
-            }
-            if (parameterType.equals(DProteinSet.class)) {
-                return ((XicProteinSetPanel) getDataBoxPanelInterface()).getSelectedProteinSet();
-            }
-            if (parameterType.equals(DMasterQuantProteinSet.class)) {
-                return ((XicProteinSetPanel) getDataBoxPanelInterface()).getSelectedMasterQuantProteinSet();
-            }
-            if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
-            }
-            if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
-            }
-            if (parameterType.equals(XicMode.class)) {
-                return new XicMode(isXICMode());
-            }
+            
+
+            
 
         }
-        return super.getData(getArray, parameterType);
+        
+ 
+        return super.getData(parameterType, parameterSubtype);
+        
     }
 
-    @Override
-    public Object getData(boolean getArray, Class parameterType, boolean isList) {
-        if (parameterType != null && isList) {
-            if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                return getCompareDataInterfaceList();
-            }
-            if (parameterType.equals(CrossSelectionInterface.class)) {
-                return getCrossSelectionInterfaceList();
-            }
-        }
-        return super.getData(getArray, parameterType, isList);
-    }
 
     @Override
     public String getFullName() {
@@ -311,7 +315,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
 
     @Override
     public String getImportantOutParameterValue() {
-        DProteinSet p = (DProteinSet) getData(false, DProteinSet.class);
+        DProteinSet p = (DProteinSet) getData(DProteinSet.class);
         if (p != null) {
             DProteinMatch pm = p.getTypicalProteinMatch();
             if (pm != null) {

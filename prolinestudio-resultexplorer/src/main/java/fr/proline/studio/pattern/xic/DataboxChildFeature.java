@@ -40,6 +40,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.pattern.ParameterSubtypeEnum;
 import fr.proline.studio.rsmexplorer.gui.xic.PeakTableModel;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -72,24 +73,24 @@ public class DataboxChildFeature extends AbstractDataBox {
         // Register Possible in parameters
         // One Map 
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(DMasterQuantPeptideIon.class, false);
+        inParameter.addParameter(DMasterQuantPeptideIon.class);
         registerInParameter(inParameter);
 
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(Feature.class, false);
+        outParameter.addParameter(Feature.class);
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();
-        outParameter.addParameter(ExtendedTableModelInterface.class, true);
+        outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
 
         outParameter = new GroupParameter();
-        outParameter.addParameter(CrossSelectionInterface.class, true);
+        outParameter.addParameter(CrossSelectionInterface.class);
         registerOutParameter(outParameter);
         
         outParameter = new GroupParameter();
-        outParameter.addParameter(DFeature.class, true);
+        outParameter.addParameter(DFeature.class, ParameterSubtypeEnum.LIST_DATA);
         registerOutParameter(outParameter);
 
     }
@@ -108,8 +109,8 @@ public class DataboxChildFeature extends AbstractDataBox {
         m_extractedXICSet = null;
         
         DMasterQuantPeptideIon oldIon = m_masterQuantPeptideIon;
-        m_masterQuantPeptideIon = (DMasterQuantPeptideIon) m_previousDataBox.getData(false, DMasterQuantPeptideIon.class);
-        m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(false, QuantChannelInfo.class);
+        m_masterQuantPeptideIon = (DMasterQuantPeptideIon) m_previousDataBox.getData(DMasterQuantPeptideIon.class);
+        m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(QuantChannelInfo.class);
 
         if (m_masterQuantPeptideIon != null && (oldIon != null && m_masterQuantPeptideIon.equals(oldIon))) {
             return;
@@ -310,42 +311,50 @@ public class DataboxChildFeature extends AbstractDataBox {
         return m_masterQuantPeptideIon;
     }
 
+    
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
-        if (parameterType != null) {
-            if (parameterType.equals(Feature.class)) {
-                return ((XicFeaturePanel) getDataBoxPanelInterface()).getSelectedFeature();
-            }
-            if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
-            }
-            if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
-            }
-            if (parameterType.equals(MzScopeInterface.class)) {
-                return ((XicFeaturePanel) getDataBoxPanelInterface()).getMzScopeInterface();
-            }
-            if (parameterType.equals(DFeature.class)) {
-                return m_childFeatureList;
-            }
+    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+        
+        if (parameterType!= null ) {
 
+            // Returning single data
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+                if (parameterType.equals(MzScopeInterface.class)) {
+                    return ((XicFeaturePanel) getDataBoxPanelInterface()).getMzScopeInterface();
+                }
+
+                if (parameterType.equals(Feature.class)) {
+                    return ((XicFeaturePanel) getDataBoxPanelInterface()).getSelectedFeature();
+                }
+                
+                if (parameterType.equals(ExtendedTableModelInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
+                }
+                
+                if (parameterType.equals(CrossSelectionInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
+                }
+            }
             
+            // Returning a list of data
+            if (parameterSubtype == ParameterSubtypeEnum.LIST_DATA) {
+                if (parameterType.equals(DFeature.class)) {
+                    return m_childFeatureList;
+                }
+                
+                if (parameterType.equals(ExtendedTableModelInterface.class)) {
+                    return getCompareDataInterfaceList();
+                }
+                
+                if (parameterType.equals(CrossSelectionInterface.class)) {
+                    return getCrossSelectionInterfaceList();
+                }
+            }
+  
         }
-        return super.getData(getArray, parameterType);
+        return super.getData(parameterType, parameterSubtype);
     }
 
-    @Override
-    public Object getData(boolean getArray, Class parameterType, boolean isList) {
-        if (parameterType != null && isList) {
-            if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                return getCompareDataInterfaceList();
-            }
-            if (parameterType.equals(CrossSelectionInterface.class)) {
-                return getCrossSelectionInterfaceList();
-            }
-        }
-        return super.getData(getArray, parameterType, isList);
-    }
 
    /**
      * Return potential extra data available for the corresponding parameter of class type

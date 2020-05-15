@@ -448,9 +448,9 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                             }
                         } else {
                             Map<Long, String> quantStatusByQCIds = proteinSet.getQuantStatusByQchIds();
-                            Map<Long, Integer> quantPepNumberByQCIds = proteinSet.getQuantPeptideNumberByQchIds();
-                            String status = quantStatusByQCIds.get(m_quantChannels[nbQc].getId());
-                            Integer pepNumber = quantPepNumberByQCIds.getOrDefault(m_quantChannels[nbQc].getId(),0);
+                            String status = proteinSet.getQuantStatusByQchIds().getOrDefault(m_quantChannels[nbQc].getId(), "");
+                            Integer pepNumber = proteinSet.getQuantPeptideNumberByQchIds().get(m_quantChannels[nbQc].getId());
+                            if(pepNumber == null || pepNumber <0) pepNumber = 0;
                             switch (id) {
                                 case COLTYPE_PEP_NUMBER:
 //                                    lazyData.setData(pepNumber);

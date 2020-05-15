@@ -121,7 +121,8 @@ public class PTMSitePeptidesGraphicCtrlPanel extends JPanel implements DataBoxPa
      * when selected peptide change, change next databox and table selected row
      */
     protected void valueChanged() {
-        m_dataBox.propagateDataChanged(PTMSite.class);
+        m_dataBox.addDataChanged(PTMSite.class);
+        m_dataBox.propagateDataChanged();
         this.repaint();
     }
 

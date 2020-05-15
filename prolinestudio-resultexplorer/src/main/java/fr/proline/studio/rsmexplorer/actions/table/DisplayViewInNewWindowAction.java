@@ -76,8 +76,9 @@ public class DisplayViewInNewWindowAction extends AbstractAction {
         
         Class[] classes = m_sourceBox.getImportantInParameterClass();
         for (int i=0;i<classes.length;i++) {
-            dataBoxFrozenCopy.propagateDataChanged(classes[i]);
+            dataBoxFrozenCopy.addDataChanged(classes[i]);
         }
+        dataBoxFrozenCopy.propagateDataChanged();
 
 
 

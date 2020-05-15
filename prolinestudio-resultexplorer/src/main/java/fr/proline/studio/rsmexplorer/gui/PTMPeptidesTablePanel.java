@@ -288,8 +288,8 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
         m_filterButton = new FilterButton(((CompoundTableModel) m_ptmPeptidesTable.getModel())) {
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class
-                );
+                m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.propagateDataChanged();
                 m_infoToggleButton.updateInfo();
             }
         };
@@ -472,9 +472,10 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
             if (selectionWillBeRestored) {
                 return;
             }
-            m_dataBox.propagateDataChanged(PTMPeptideInstance.class);
-            m_dataBox.propagateDataChanged(DPeptideMatch.class);
-            m_dataBox.propagateDataChanged(MsQueryInfoRsm.class);
+            m_dataBox.addDataChanged(PTMPeptideInstance.class);
+            m_dataBox.addDataChanged(DPeptideMatch.class);
+            m_dataBox.addDataChanged(MsQueryInfoRsm.class);
+            m_dataBox.propagateDataChanged();
         }
 
         public void selectionWillBeRestored(boolean b) {

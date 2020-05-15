@@ -212,7 +212,8 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                     setLoaded(loadingId);
                     unregisterTask(taskId);
                     m_logger.debug(" Task "+taskId+" DONE. Should propagate changes ");
-                    propagateDataChanged(ExtendedTableModelInterface.class);
+                    addDataChanged(ExtendedTableModelInterface.class);
+                    propagateDataChanged();
                 }
             }
         };
@@ -262,8 +263,9 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                     } else {
                         setLoaded(loadingId);                        
                         ((PTMClustersPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
-                        propagateDataChanged(PTMPeptideInstance.class);
-                        propagateDataChanged(ExtendedTableModelInterface.class);
+                        addDataChanged(PTMPeptideInstance.class);
+                        addDataChanged(ExtendedTableModelInterface.class);
+                        propagateDataChanged();
                     }
                     unregisterTask(taskId);
                 }
@@ -326,7 +328,8 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                     m_ptmDataset.setQuantProteinSets(m_masterQuantProteinSetList, typicalProteinMatchIdByProteinMatchId);
                     unregisterTask(taskId);
                     startLoadingMasterQuantPeptides(m_ptmDataset.getPTMClusters());
-                    propagateDataChanged(ExtendedTableModelInterface.class);
+                    addDataChanged(ExtendedTableModelInterface.class);
+                    propagateDataChanged();
                 }
             }
         };

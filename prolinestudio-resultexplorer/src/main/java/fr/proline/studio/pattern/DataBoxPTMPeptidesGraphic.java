@@ -114,7 +114,8 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
         if (notLoadedPtmSite.isEmpty()) {
             resetPrevPTMTaskId();
             graphicView.setData(m_ptmPepInstances);
-            propagateDataChanged(PTMPeptideInstance.class);
+            addDataChanged(PTMPeptideInstance.class);
+            propagateDataChanged();
 
         } else {
 

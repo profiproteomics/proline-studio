@@ -228,7 +228,8 @@ public class MapTimePanel extends HourglassPanel implements DataBoxPanelInterfac
                 return;
             }
             if (m_dataBox != null) {
-                m_dataBox.propagateDataChanged(MapAlignment.class);
+                m_dataBox.addDataChanged(MapAlignment.class);
+                m_dataBox.propagateDataChanged();
             }
 
         }

@@ -142,10 +142,11 @@ public class PTMPeptidesGraphicView extends JPanel {
     public void setData(List<PTMPeptideInstance> peptidesInstances) {
         m_dataModel.setData(peptidesInstances, m_dataBox.getProjectId());
         if (peptidesInstances == null) {
-            this.m_internalPanel.clean();
+            m_internalPanel.clean();
         } else {
-            this.m_internalPanel.updateData();
-            m_dataBox.propagateDataChanged(PTMPeptideInstance.class);
+            m_internalPanel.updateData();
+            m_dataBox.addDataChanged(PTMPeptideInstance.class);
+            m_dataBox.propagateDataChanged();
         }
         setScrollLocation(this.m_dataModel.getLowerStartInProtSeq());
         this.repaint();
@@ -495,7 +496,8 @@ public class PTMPeptidesGraphicView extends JPanel {
                     if (m_superCtrl != null) {
                         m_superCtrl.onMessage(PTMGraphicCtrlPanel.Source.PEPTIDE_AREA, PTMGraphicCtrlPanel.Message.SELECTED);
                     }
-                    m_dataBox.propagateDataChanged(PTMPeptideInstance.class);
+                    m_dataBox.addDataChanged(PTMPeptideInstance.class);
+                    m_dataBox.propagateDataChanged();
                     repaint();
                 }
             }

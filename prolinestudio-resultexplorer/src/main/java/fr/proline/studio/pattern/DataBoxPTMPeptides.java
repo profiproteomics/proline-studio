@@ -141,9 +141,10 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                     loadXicAndPropagate();
                 } else {
                     ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, m_ptmPepInstances, m_ptmClusters, null, true);
-                    propagateDataChanged(PTMPeptideInstance.class);
-                    propagateDataChanged(DPeptideMatch.class);
-                    propagateDataChanged(ExtendedTableModelInterface.class);
+                    addDataChanged(PTMPeptideInstance.class);
+                    addDataChanged(DPeptideMatch.class);
+                    addDataChanged(ExtendedTableModelInterface.class);
+                    propagateDataChanged();
                 }
             } else {
                 loadPtmSite(notLoadedPtmSite);
@@ -197,8 +198,9 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                                 //m_logger.debug(" DB PTM peptide : DatabaseLoadLcMSTask run m_quantChannelInfo defined CALL setData ");                                
                                 ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(taskId, m_ptmPepInstances, m_ptmClusters, qpepByPepId, finished);
                                 unregisterTask(task2Id);
-                                propagateDataChanged(PTMPeptideInstance.class);
-                                propagateDataChanged(ExtendedTableModelInterface.class);
+                                addDataChanged(PTMPeptideInstance.class);
+                                addDataChanged(ExtendedTableModelInterface.class);
+                                propagateDataChanged();
                             }
                         };
                         // ask asynchronous loading of data
@@ -220,8 +222,9 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                     m_previousXICTaskId = null;
                     setLoaded(loadingId);
                     unregisterTask(taskId);
-                    propagateDataChanged(PTMPeptideInstance.class);
-                    propagateDataChanged(ExtendedTableModelInterface.class);
+                    addDataChanged(PTMPeptideInstance.class);
+                    addDataChanged(ExtendedTableModelInterface.class);
+                    propagateDataChanged();
                 }
             }
         };

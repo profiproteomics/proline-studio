@@ -147,8 +147,9 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
                 ((RsetPeptideSpectrumPanel) getDataBoxPanelInterface()).setData(peptideMatch, m_fragmentationData);
                 //propagateDataChanged(DPeptideMatch.class);
                 if (m_fragmentationData != null || (m_fragmentationData == null && previousValue != null)) {
-                   // _databox.propagateDataChanged(PeptideFragmentationData.class);
-                    propagateDataChanged(DPeptideMatch.class);
+                   // _databox.addDataChanged(PeptideFragmentationData.class);
+                    addDataChanged(DPeptideMatch.class);
+                    propagateDataChanged();
                 }
 
                 if (finished) {

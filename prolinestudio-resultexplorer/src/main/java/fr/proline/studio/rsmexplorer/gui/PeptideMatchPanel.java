@@ -300,7 +300,8 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.propagateDataChanged();
                 m_infoToggleButton.updateInfo();
             }
             
@@ -485,9 +486,8 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                 return;
             }
 
-
-
-            m_dataBox.propagateDataChanged(DPeptideMatch.class);
+            m_dataBox.addDataChanged(DPeptideMatch.class);
+            m_dataBox.propagateDataChanged();
 
         }
 

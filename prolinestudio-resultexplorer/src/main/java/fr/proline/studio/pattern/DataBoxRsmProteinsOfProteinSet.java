@@ -109,7 +109,8 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
                 
                 setLoaded(loadingId);
                 unregisterTask(taskId);
-                propagateDataChanged(ExtendedTableModelInterface.class);
+                addDataChanged(ExtendedTableModelInterface.class);
+                propagateDataChanged();
             }
         };
 

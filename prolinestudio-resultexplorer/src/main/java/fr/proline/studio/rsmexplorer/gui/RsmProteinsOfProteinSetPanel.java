@@ -216,7 +216,8 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.propagateDataChanged();
                 m_infoToggleButton.updateInfo();
             }
             
@@ -406,8 +407,8 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
             super.valueChanged(e);
 
-            m_dataBox.propagateDataChanged(DProteinMatch.class);
-
+            m_dataBox.addDataChanged(DProteinMatch.class);
+            m_dataBox.propagateDataChanged();
 
         }
 

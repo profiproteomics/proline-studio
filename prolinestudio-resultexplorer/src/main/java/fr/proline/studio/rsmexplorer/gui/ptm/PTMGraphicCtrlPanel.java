@@ -131,7 +131,8 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
      * when selected peptide change, change next databox and table selected row
      */
     protected void valueChanged() {
-        m_dataBox.propagateDataChanged(PTMPeptideInstance.class);
+        m_dataBox.addDataChanged(PTMPeptideInstance.class);
+        m_dataBox.propagateDataChanged();
         this.repaint();
     }
 

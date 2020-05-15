@@ -427,7 +427,8 @@ public class DataAnalyzerPanel extends JPanel implements DataBoxPanelInterface, 
     
     public void displayBelow(GraphNode node, boolean inNewTab, String name,  ArrayList<SplittedPanelContainer.PanelLayout> layout, int index) {
         m_WillDisplayProcessEngineInfo = new ProcessEngineInfo(node, inNewTab, name, layout, index);
-        m_dataBox.propagateDataChanged(ProcessEngineInfo.class);
+        m_dataBox.addDataChanged(ProcessEngineInfo.class);
+        m_dataBox.propagateDataChanged();
         
     }
     public ProcessEngineInfo getProcessEngineInfoToDisplay() {

@@ -166,7 +166,8 @@ public class DataboxXicProteinSet extends AbstractDataBox {
                             ((XicProteinSetPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantProteinSetList, m_isXICMode, finished);
                             if (finished) {
                                 unregisterTask(task2Id);
-                                propagateDataChanged(ExtendedTableModelInterface.class);
+                                addDataChanged(ExtendedTableModelInterface.class);
+                                propagateDataChanged();
                             }
                         }
                     };

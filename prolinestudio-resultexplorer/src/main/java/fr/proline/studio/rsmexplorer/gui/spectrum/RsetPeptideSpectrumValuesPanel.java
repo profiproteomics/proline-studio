@@ -161,7 +161,8 @@ public class RsetPeptideSpectrumValuesPanel extends HourglassPanel implements Da
 
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.propagateDataChanged();
             }
 
         };
@@ -286,13 +287,15 @@ public class RsetPeptideSpectrumValuesPanel extends HourglassPanel implements Da
             popupMenu.addAction(new RestrainAction() {
                 @Override
                 public void filteringDone() {
-                    m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                    m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                    m_dataBox.propagateDataChanged();
                 }
             });
             popupMenu.addAction(new ClearRestrainAction() {
                 @Override
                 public void filteringDone() {
-                    m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                    m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                    m_dataBox.propagateDataChanged();
                 }
             });
 

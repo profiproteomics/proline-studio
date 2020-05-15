@@ -208,7 +208,8 @@ public class DataboxMapAlignment extends AbstractDataBox {
                     ((MapAlignmentPanel) getDataBoxPanelInterface()).setData(m_quantChannelInfo, getCompareDataInterfaceList(), getCrossSelectionInterfaceList());
 
                     if (finished) {
-                        propagateDataChanged(ExtendedTableModelInterface.class);
+                        addDataChanged(ExtendedTableModelInterface.class);
+                        propagateDataChanged();
                     }
                 }
             }

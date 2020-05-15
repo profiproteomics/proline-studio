@@ -123,7 +123,8 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
                 
                 if (finished) {
                     unregisterTask(taskId);
-                    propagateDataChanged(ExtendedTableModelInterface.class);
+                    addDataChanged(ExtendedTableModelInterface.class);
+                    propagateDataChanged();
                 }
             }
         };

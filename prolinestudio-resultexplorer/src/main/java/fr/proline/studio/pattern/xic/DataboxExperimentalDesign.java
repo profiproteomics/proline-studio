@@ -89,7 +89,8 @@ public class DataboxExperimentalDesign extends AbstractDataBox {
                 
                 if (finished) {
                     unregisterTask(taskId); 
-                    propagateDataChanged(DDataset.class); 
+                    addDataChanged(DDataset.class); 
+                    propagateDataChanged();
                 }
             }
         };

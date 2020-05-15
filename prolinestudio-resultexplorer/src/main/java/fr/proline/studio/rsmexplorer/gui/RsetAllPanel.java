@@ -366,7 +366,8 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
             super.valueChanged(e);
 
-            m_dataBox.propagateDataChanged(ResultSet.class);
+            m_dataBox.addDataChanged(ResultSet.class);
+            m_dataBox.propagateDataChanged();
 
         }
 

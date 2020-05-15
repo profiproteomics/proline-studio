@@ -367,8 +367,9 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
                     }
 
                     if (selectionChanged) {
-                        m_dataBox.propagateDataChanged(DProteinMatch.class);
-                        m_dataBox.propagateDataChanged(DPeptideMatch.class);
+                        m_dataBox.addDataChanged(DProteinMatch.class);
+                        m_dataBox.addDataChanged(DPeptideMatch.class);
+                        m_dataBox.propagateDataChanged();
                         repaint();
                     }
 

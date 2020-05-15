@@ -159,7 +159,8 @@ public class DataboxChildFeature extends AbstractDataBox {
 
                 if (finished) {
                     unregisterTask(taskId);
-                    propagateDataChanged(ExtendedTableModelInterface.class);
+                    addDataChanged(ExtendedTableModelInterface.class);
+                    propagateDataChanged();
                 }
 
             }
@@ -415,7 +416,8 @@ public class DataboxChildFeature extends AbstractDataBox {
     
     public void propagateModelChangeWithoutModifyingZoom() {
         m_keepZoom = Boolean.TRUE;
-        propagateDataChanged(ExtendedTableModelInterface.class);
+        addDataChanged(ExtendedTableModelInterface.class);
+        propagateDataChanged();
         m_keepZoom = Boolean.FALSE;
     }
     

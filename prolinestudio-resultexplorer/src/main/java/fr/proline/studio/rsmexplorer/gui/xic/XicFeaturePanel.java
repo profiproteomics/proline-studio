@@ -190,7 +190,8 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
 
             @Override
             protected void filteringDone() {
-                 m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                 m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                 m_dataBox.propagateDataChanged();
             }
         };
 
@@ -453,7 +454,8 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
                 return;
             }
  
-            m_dataBox.propagateDataChanged(Feature.class);
+            m_dataBox.addDataChanged(Feature.class);
+            m_dataBox.propagateDataChanged();
             ((DataboxChildFeature) m_dataBox).propagateModelChangeWithoutModifyingZoom();
 
 

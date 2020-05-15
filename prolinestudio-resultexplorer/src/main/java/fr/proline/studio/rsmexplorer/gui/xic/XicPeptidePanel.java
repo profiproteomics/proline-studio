@@ -202,7 +202,8 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
 
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.propagateDataChanged();
                 m_infoToggleButton.updateInfo();
             }
 
@@ -562,7 +563,8 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
                 return;
             }
 
-            m_dataBox.propagateDataChanged(DMasterQuantPeptide.class);
+            m_dataBox.addDataChanged(DMasterQuantPeptide.class);
+            m_dataBox.propagateDataChanged();
 
         }
 

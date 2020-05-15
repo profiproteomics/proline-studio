@@ -152,7 +152,8 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
 
             @Override
             protected void filteringDone() {
-                 m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                 m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                 m_dataBox.propagateDataChanged();
             }
         };
 
@@ -325,7 +326,8 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
                 return;
             }
             if (m_dataBox != null) {
-                m_dataBox.propagateDataChanged(Peak.class);
+                m_dataBox.addDataChanged(Peak.class);
+                m_dataBox.propagateDataChanged();
             }
 
         }

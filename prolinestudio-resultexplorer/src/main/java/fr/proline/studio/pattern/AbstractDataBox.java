@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.jdesktop.swingx.JXTable;
@@ -446,13 +447,24 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         return null;
     }
 
-    
     public boolean isDataDependant(Class dataType) {
         Iterator<GroupParameter> it = m_inParameters.iterator();
         while (it.hasNext()) {
             GroupParameter parameter = it.next();
             if (parameter.isDataDependant(dataType)) {
                 return true;
+            }
+        }
+        return false;
+    }
+    public boolean isDataDependant(HashSet<Class> dataTypeSet) {
+        Iterator<GroupParameter> it = m_inParameters.iterator();
+        while (it.hasNext()) {
+            GroupParameter parameter = it.next();
+            for (Class dataType : dataTypeSet) {
+                if (parameter.isDataDependant(dataType)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -561,17 +573,56 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         throw new UnsupportedOperationException();
     }
 
-    public void propagateDataChanged(Class dataType) {
+
+    private static void propagateDataChanged(AbstractDataBox a) {
+        
+        if (queueList.contains(a)) {
+            // nothing to do, propagation for this box will be propagated
+            return;
+        }
+        
+        // add the box to the gueue
+        queueList.add(a);
+        
+        if (queueList.size() > 1) {
+            // a box is being treated, we will treat this one later
+            return;
+        }
+
+        // treats all box one by one (first in, first out)
+        // during this operation, new boxes can be added to the queue.
+        while (!queueList.isEmpty()) {
+            AbstractDataBox currentBox = queueList.peekFirst();
+            currentBox.propagateDataChanged(currentBox.m_dataChangedList);
+            currentBox.m_dataChangedList.clear();
+            queueList.pop();
+        }
+
+    }
+    private static LinkedList<AbstractDataBox> queueList = new LinkedList();
+    
+    
+    private HashSet<Class> m_dataChangedList = new HashSet<>();    
+    public void addDataChanged(Class dataType) {
+        m_dataChangedList.add(dataType);
+    }
+    public void propagateDataChanged() {
+        // propagation is queued up and can be treated later
+        propagateDataChanged(this);
+    }
+    private void propagateDataChanged(HashSet<Class> dataTypeSet) {
+
         if (m_nextDataBoxArray != null) {
             for (AbstractDataBox nextDataBox : m_nextDataBoxArray) {
-                if (nextDataBox.isDataDependant(dataType)) { 
+                if (nextDataBox.isDataDependant(dataTypeSet)) {
                     //m_logger.debug("nexDataBox:{} isDataDependant for datatype: {}",nextDataBox.getTypeName(), dataType.getName());
                     nextDataBox.dataChanged();
                 }
-                nextDataBox.propagateDataChanged(dataType);
+            }
+            for (AbstractDataBox nextDataBox : m_nextDataBoxArray) {
+                nextDataBox.propagateDataChanged(dataTypeSet);
             }
         }
-
     }
 
     public void setProjectId(long projectId) {

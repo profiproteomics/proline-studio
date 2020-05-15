@@ -114,7 +114,8 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
                
                 if (finished) {
                     unregisterTask(taskId);
-                    propagateDataChanged(ExtendedTableModelInterface.class);
+                    addDataChanged(ExtendedTableModelInterface.class);
+                    propagateDataChanged();
                 }
             }
         };

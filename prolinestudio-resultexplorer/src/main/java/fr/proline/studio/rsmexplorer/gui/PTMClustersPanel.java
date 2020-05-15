@@ -316,7 +316,8 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
 
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.propagateDataChanged();
                 m_infoToggleButton.updateInfo();
             }
             
@@ -487,11 +488,13 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
                 return;
             }
             //VDS: Order is important ! To be corrected using set of class for propagation
-            //m_dataBox.propagateDataChanged(PTMSite.class);
-            //m_dataBox.propagateDataChanged(DPeptideMatch.class);
-            m_dataBox.propagateDataChanged(DProteinSet.class);
-            m_dataBox.propagateDataChanged(DProteinMatch.class);
-            m_dataBox.propagateDataChanged(PTMPeptideInstance.class);
+            //m_dataBox.addDataChanged(PTMSite.class);
+            //m_dataBox.addDataChanged(DPeptideMatch.class);
+            m_dataBox.addDataChanged(DProteinSet.class);
+            m_dataBox.addDataChanged(DProteinMatch.class);
+            m_dataBox.addDataChanged(PTMPeptideInstance.class);
+            m_dataBox.propagateDataChanged();
+            
 
         }
 

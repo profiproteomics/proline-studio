@@ -104,11 +104,10 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
                 setLoaded(loadingId);
                 
                 if (finished) {
-                    
-                    
-                    
+
                     unregisterTask(taskId);
-                    propagateDataChanged(ExtendedTableModelInterface.class);
+                    addDataChanged(ExtendedTableModelInterface.class);
+                    propagateDataChanged();
                 }
                 
             }

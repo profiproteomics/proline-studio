@@ -253,7 +253,8 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.propagateDataChanged();
                 m_infoToggleButton.updateInfo();
             }
 
@@ -558,13 +559,15 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             popupMenu.addAction(new RestrainAction() {
                 @Override
                 public void filteringDone() {
-                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                    m_dataBox.addDataChanged(CompareDataInterface.class);
+                    m_dataBox.propagateDataChanged();
                 }
             });
             popupMenu.addAction(new ClearRestrainAction() {
                 @Override
                 public void filteringDone() {
-                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                    m_dataBox.addDataChanged(CompareDataInterface.class);
+                    m_dataBox.propagateDataChanged();
                 }
             });
 
@@ -607,8 +610,9 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 return;
             }
 
-            m_dataBox.propagateDataChanged(DProteinSet.class);
-            m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+            m_dataBox.addDataChanged(DProteinSet.class);
+            m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+            m_dataBox.propagateDataChanged();
 
         }
 

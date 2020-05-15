@@ -256,14 +256,16 @@ public class TasksPanel extends AbstractTasksPanel {
             m_logTable.setUpdating(false); // at the end reallow the update
             
             // TaskInfo selected can have been modified
-            super.getDataBox().propagateDataChanged(TaskInfo.class);
+            getDataBox().addDataChanged(TaskInfo.class);
+            getDataBox().propagateDataChanged();
         } else if (aSelection) {
             // selection lost
             m_logTable.setUpdating(false); // allow first the update
             m_logTable.getSelectionModel().clearSelection();
             
             // TaskInfo selected can have been modified
-            super.getDataBox().propagateDataChanged(TaskInfo.class);
+            getDataBox().addDataChanged(TaskInfo.class);
+            getDataBox().propagateDataChanged();
         } else {
             m_logTable.setUpdating(false);
         }
@@ -310,7 +312,8 @@ public class TasksPanel extends AbstractTasksPanel {
             super.valueChanged(e);
 
             if (!m_isUpdating) {
-                getDataBox().propagateDataChanged(TaskInfo.class);
+                getDataBox().addDataChanged(TaskInfo.class);
+                getDataBox().propagateDataChanged();
             }
         }
 

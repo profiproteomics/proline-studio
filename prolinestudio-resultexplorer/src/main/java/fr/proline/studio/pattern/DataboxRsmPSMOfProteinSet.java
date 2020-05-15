@@ -114,8 +114,8 @@ public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
                
                 if (finished) {
                     unregisterTask(taskId);
-                    //propagateDataChanged(ValuesForStatsAbstract.class);
-                    propagateDataChanged(ExtendedTableModelInterface.class);
+                    addDataChanged(ExtendedTableModelInterface.class);
+                    propagateDataChanged();
                 }
             }
         };

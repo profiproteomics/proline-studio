@@ -151,7 +151,8 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
 
             @Override
             protected void filteringDone() {
-                 m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                 m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                 m_dataBox.propagateDataChanged();
             }
         };
 
@@ -335,8 +336,8 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
                 return;
             }
  
-            m_dataBox.propagateDataChanged(Peakel.class);
-
+            m_dataBox.addDataChanged(Peakel.class);
+            m_dataBox.propagateDataChanged();
         }
         
         public boolean selectPeakel(Long peakelId, String searchText) {

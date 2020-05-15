@@ -262,8 +262,9 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
                         loadXicAndPropagate();
                     } else {
                         ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, m_ptmPepInstances, m_ptmClusters, null, finished);
-                        propagateDataChanged(PTMPeptideInstance.class);
-                        propagateDataChanged(ExtendedTableModelInterface.class);
+                        addDataChanged(PTMPeptideInstance.class);
+                        addDataChanged(ExtendedTableModelInterface.class);
+                        propagateDataChanged();
                     }
                 }
             }

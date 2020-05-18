@@ -24,7 +24,8 @@ public class XicStatusRenderer extends DefaultTableCellRenderer {
         DESELECTED_AUTO(1, "Deselected Auto"),
         SELECTED_AUTO(2, "Selected Auto"),
         SELECTED_MANUAL(3, "Selected Manual"),
-        RESET_AUTO(-1, "Reset auto");
+        UNKNOWN(-1, "Invalid"),
+        RESET_AUTO(-2, "Reset auto");
 
         private int _intValue;
         private String _description;

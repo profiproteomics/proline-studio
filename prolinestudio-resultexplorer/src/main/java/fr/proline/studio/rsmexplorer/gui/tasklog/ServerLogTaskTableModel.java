@@ -174,7 +174,6 @@ public class ServerLogTaskTableModel extends AbstractDecoratedGlobalTableModel<L
         }
     }
 
-    //@tod Attention to non  used col, 
     @Override
     public TableCellRenderer getRenderer(int row, int col) {
         TableCellRenderer renderer = null;
@@ -186,7 +185,7 @@ public class ServerLogTaskTableModel extends AbstractDecoratedGlobalTableModel<L
                 renderer = new DurationCellRenderer();
                 break;
             default:
-
+                renderer = new DefaultTableCellRenderer();
         }
 
         return renderer;

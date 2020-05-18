@@ -18,10 +18,12 @@ import java.util.Calendar;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.WindowConstants;
 import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
@@ -72,9 +74,18 @@ public class ServerLogFileNameDialog extends DefaultDialog {
                 if (success) {
                     m_logger.debug("Retrive file \"" + m_file.getName() + "\" from server succes.");
                     JDialog logViewDialog = new JDialog(WindowManager.getDefault().getMainWindow(), "Parse Tasks On The Server", Dialog.ModalityType.APPLICATION_MODAL);
-                    logViewDialog.getRootPane().setLayout(new BorderLayout());
-                    ServerLogControlPanel logPanel = new ServerLogControlPanel(m_file);
-                    logViewDialog.getRootPane().add(logPanel, BorderLayout.CENTER);
+                    logViewDialog.getContentPane().setLayout(new BorderLayout());
+                    JInternalFrame taskFlowFrame;
+                    JTextPane taskFlowTextPane;
+
+                    taskFlowTextPane = new JTextPane();
+                    taskFlowFrame = new JInternalFrame("Log Task Flow", true, true);
+                    taskFlowFrame.setSize(700, 650);
+                    taskFlowFrame.setLocation(30,30);
+                    taskFlowFrame.setVisible(false);
+                    logViewDialog.getLayeredPane().add(taskFlowFrame);
+                    ServerLogControlPanel logPanel = new ServerLogControlPanel(m_file, taskFlowFrame);
+                    logViewDialog.getContentPane().add(logPanel, BorderLayout.CENTER);
                     logViewDialog.pack();
                     logViewDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
                     logViewDialog.setVisible(true);

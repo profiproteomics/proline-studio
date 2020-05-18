@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * @author KX257079
  */
 public class ServerLogControlPanel extends JPanel implements ControlInterface {
-
+    
     protected static final Logger m_logger = LoggerFactory.getLogger(ServerLogControlPanel.class);
     private TaskConsolePane m_taskConsole;
     private ServerLogTaskListView m_taskQueueView;
@@ -55,8 +55,8 @@ public class ServerLogControlPanel extends JPanel implements ControlInterface {
     Utility.DATE_FORMAT m_dateFormat = Utility.DATE_FORMAT.SHORT;
     InfoToggleButton m_infoToggleButton;
     boolean m_isBigFile;
-
-    public ServerLogControlPanel(File localFile) {
+    
+    ServerLogControlPanel(File localFile, JInternalFrame taskFlowFrame) {
         super();
         m_file = localFile;
         m_taskQueueView = new ServerLogTaskListView(this);
@@ -64,11 +64,14 @@ public class ServerLogControlPanel extends JPanel implements ControlInterface {
         m_taskConsole = new TaskConsolePane();
         m_isBigFile = false;
         this.setBackground(Color.white);
+        m_taskFlowFrame = taskFlowFrame;
+        m_taskFlowTextPane = new JTextPane();
+        m_taskFlowFrame.add(new JScrollPane(m_taskFlowTextPane));
         initComponent();
         this.setSize(1400, 800);
         logParse();
     }
-
+    
     private void initComponent() {
         //upPane
         JPanel upPane = new JPanel(new BorderLayout());
@@ -93,27 +96,22 @@ public class ServerLogControlPanel extends JPanel implements ControlInterface {
         this.add(mainPanel, BorderLayout.CENTER);
         this.add(initToolbar(), BorderLayout.WEST);
         //invisible TaskFlowPane
-        m_taskFlowTextPane = new JTextPane();
-        m_taskFlowFrame = new JInternalFrame("Log Task Flow", true, true);
-        m_taskFlowFrame.add(new JScrollPane(m_taskFlowTextPane));
-        m_taskFlowFrame.setSize(700, 750);
-        m_taskFlowFrame.setVisible(false);
 
     }
-
+    
     private JToolBar initToolbar() {
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
-
+        
         FilterButton filterButton = new FilterButton(m_taskQueueView.getCompoundTableModel()) {
             @Override
             protected void filteringDone() {
             }
         };
         toolbar.add(filterButton);
-
+        
         JButton showTaskFlowBt = new JButton(IconManager.getIcon(IconManager.IconType.DOCUMENT_LIST));
-
+        showTaskFlowBt.setToolTipText("Show task flow");
         showTaskFlowBt.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -121,32 +119,30 @@ public class ServerLogControlPanel extends JPanel implements ControlInterface {
             }
         });
         toolbar.add(showTaskFlowBt);
-
+        
         m_infoToggleButton = new InfoToggleButton(null, m_taskQueueView.getTable());
         toolbar.add(m_infoToggleButton);
-
+        
         return toolbar;
     }
-
+    
     private void logParse() {
         try {
             LogLineReader logReader;
             m_logger.info("File to analyse: " + m_file.getName() + ".");
             long fileLength = m_file.length();
             long bigFileSize = Config.getBigFileSize();
-
+            
             if (fileLength > bigFileSize) {
                 m_isBigFile = true;
             }
             String fileName = m_file.getName();
             logReader = new LogLineReader(m_file.getName(), m_dateFormat, m_isBigFile, false);
-
+            
             LogReaderWorker readWorker = new LogReaderWorker(this, m_taskFlowTextPane, m_file, m_dateFormat, logReader);
-            m_taskFlowFrame.setVisible(true);
-            m_taskFlowFrame.requestFocus();
             readWorker.execute();
             repaint();
-
+            
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex + "\n" + ex.getStackTrace()[0], "Exception", JOptionPane.ERROR_MESSAGE);
             StackTraceElement[] trace = ex.getStackTrace();
@@ -157,7 +153,7 @@ public class ServerLogControlPanel extends JPanel implements ControlInterface {
             m_logger.error(ex + "\n" + result);
         }
     }
-
+    
     public void valueChanged(LogTask selectedTask) {
         //long begin = System.currentTimeMillis();
         String order = "";
@@ -171,7 +167,7 @@ public class ServerLogControlPanel extends JPanel implements ControlInterface {
         //begin = System.currentTimeMillis();
         if (selectedTask == null) {
             m_taskConsole.setData("");
-
+            
         } else {
             m_taskConsole.setData("In loading...");
             ArrayList<LogTask.LogLine> trace = selectedTask.getTrace();
@@ -182,7 +178,7 @@ public class ServerLogControlPanel extends JPanel implements ControlInterface {
             taskLoader.execute();
         }
     }
-
+    
     public synchronized void setData(ArrayList<LogTask> tasks, String fileName) {
         m_logger.debug("setData {} tasks for {}", tasks.size(), fileName);
         m_taskQueueView.setData(tasks, fileName);
@@ -193,25 +189,30 @@ public class ServerLogControlPanel extends JPanel implements ControlInterface {
         }
         super.requestFocus();
     }
-
+    
     public void clear() {
         m_taskQueueView.setData(null, null);
         m_taskView.setData(null);
         m_taskConsole.setData("");
     }
-
+    
     @Override
     public boolean isBigFile() {
         return m_isBigFile;
     }
-
+    
     @Override
     public String getAnalysedTaskName() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
     @Override
     public TaskConsolePane getConsole() {
         return m_taskConsole;
+    }
+    
+    void setTaskFlowComponent(JInternalFrame m_taskFlowFrame, JTextPane m_taskFlowTextPane) {
+        m_taskFlowFrame = m_taskFlowFrame;
+        m_taskFlowTextPane = this.m_taskFlowTextPane;
     }
 }

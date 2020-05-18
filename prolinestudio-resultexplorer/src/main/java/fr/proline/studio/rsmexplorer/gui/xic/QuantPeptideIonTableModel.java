@@ -668,7 +668,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
 
             }
             case COLTYPE_PEPTIDE_ION_STATUS: {
-                 return XicStatusRenderer.getPepIonStatusText(peptideIon.getPepIonStatus());
+                 return peptideIon.getPepIonStatus().toString();
             }
             case COLTYPE_PEPTIDE_PTM: {
                 DPeptideInstance peptideInstance = peptideIon.getPeptideInstance();

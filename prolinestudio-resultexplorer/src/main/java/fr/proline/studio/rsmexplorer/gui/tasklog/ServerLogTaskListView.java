@@ -6,35 +6,23 @@
 package fr.proline.studio.rsmexplorer.gui.tasklog;
 
 import fr.proline.logviewer.model.LogTask;
-import fr.proline.logviewer.model.Utility;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.info.InfoInterface;
-import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
-import static fr.proline.studio.rsmexplorer.gui.tasklog.ServerLogControlPanel.m_logger;
-import fr.proline.studio.rsmexplorer.gui.xic.XicPeptidePanel;
-import fr.proline.studio.table.AbstractTableAction;
 import fr.proline.studio.table.DecoratedMarkerTable;
-import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.TablePopupMenu;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.util.ArrayList;
-import java.util.Comparator;
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,11 +106,10 @@ public class ServerLogTaskListView extends JScrollPane {
 
         public ServerLogTaskTable() {
             super();
-            setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            //setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         }
 
         public void init() {
-            //this.setRowSorter(createSorter((ServerLogTaskTableModel) this.getModel()));
             this.setColumnsVisibility();
         }
 
@@ -133,31 +120,12 @@ public class ServerLogTaskListView extends JScrollPane {
             }
         }
 
-        private TableRowSorter<TableModel> createSorter(ServerLogTaskTableModel model) {
-            TableRowSorter<TableModel> sorter = new TableRowSorter<>(model);
-            Comparator c1 = new Comparator<String>() {
-                public int compare(String s1, String s2) {
-                    long delta = Utility.parseTime(s1) - Utility.parseTime(s2);
-                    if (delta == 0) {
-                        return 0;
-                    } else {
-                        return (delta) > 0 ? 1 : -1;
-                    }
-                }
-
-            };
-
-            sorter.setComparator(ServerLogTaskTableModel.COLTYPE_START_TIME, c1);
-            sorter.setComparator(ServerLogTaskTableModel.COLTYPE_STOP_TIME, c1);
-            return sorter;
-        }
-
         @Override
         public void valueChanged(ListSelectionEvent e) {
             super.valueChanged(e);
             ListSelectionModel lsm = (ListSelectionModel) e.getSource();
             if (!lsm.isSelectionEmpty()) {
-                int sortedIndex = lsm.getMinSelectionIndex();
+                int sortedIndex = lsm.getMinSelectionIndex();//only the first one
                 int selectedIndex = m_table.convertRowIndexToModel(sortedIndex);
                 LogTask task = m_taskList.get(selectedIndex);
                 String taskOrder = (task == null) ? "" : "" + task.getTaskOrder();
@@ -189,10 +157,7 @@ public class ServerLogTaskListView extends JScrollPane {
         @Override
         public TablePopupMenu initPopupMenu() {
             TablePopupMenu popupMenu = new TablePopupMenu();
-            popupMenu.addAction(new TestAction());
-
             return popupMenu;
-            //return new TablePopupMenu();
         }
 
         @Override
@@ -205,23 +170,6 @@ public class ServerLogTaskListView extends JScrollPane {
             this.getModel().addTableModelListener(l);
         }
 
-    }
-
-    private class TestAction extends AbstractTableAction {
-
-        public TestAction() {
-            super("Test ...");
-        }
-
-        @Override
-        public void actionPerformed(int col, int row, int[] selectedRows, JTable table) {
-
-        }
-
-        @Override
-        public void updateEnabled(int row, int col, int[] selectedRows, JTable table) {
-            setEnabled(true);
-        }
     }
 
 }

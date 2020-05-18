@@ -97,7 +97,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     public static final int COLTYPE_PEPTIDE_CLUSTER = 11;
     public static final int LAST_STATIC_COLUMN = COLTYPE_PEPTIDE_CLUSTER;
     private static final String[] m_columnNames = {"Id", "Status", "Peptide Sequence", "PTMs", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets", "Overview", "Cluster"};
-    private static final String[] m_toolTipColumns = {"MasterQuantPeptide Id", "Status Validate or Invalidate Peptide", "Identified Peptide Sequence", "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Retention Time (min)", "Number of Protein Set identified by this Peptide", "List of Protein Sets identified by this Peptide", "Overview", "Cluster Number"};
+    private static final String[] m_toolTipColumns = {"MasterQuantPeptide Id", "Peptide Status: Validated or Invalidate (manually or automatically) or invalid for quatitation,", "Identified Peptide Sequence", "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Retention Time (min)", "Number of Protein Set identified by this Peptide", "List of Protein Sets identified by this Peptide", "Overview", "Cluster Number"};
 
     public static final int COLTYPE_SELECTION_LEVEL = 0;
     public static final int COLTYPE_IDENT_PSM = 1;

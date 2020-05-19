@@ -85,7 +85,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
     public static final int LAST_STATIC_COLUMN = COLTYPE_PEPTIDE_PROTEIN_SET_NAMES;
     private static final String[] m_columnNames = {"Peptide Id", "QPeptideIon Id", "Peptide Sequence", "Status", "PTMs", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets"};
     private static final String[] m_columnNamesForFilter = {"Peptide Id", "QPeptideIon Id", "Peptide Sequence", "Status", "PTMs", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets"};
-    private static final String[] m_toolTipColumns = {"Peptide Id", "MasterQuantPeptideIon Id", "Identified Peptide Sequence", "Status", "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Retention time (min)", "Protein Set Count", "Protein Sets"};
+    private static final String[] m_toolTipColumns = {"Peptide Id", "MasterQuantPeptideIon Id", "Identified Peptide Sequence", "Peptide ion status: invalid, valid, valid and used for peptide abundance calculation, valid but not used for peptide abundance calculation.", "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Retention time (min)", "Protein Set Count", "Protein Sets"};
 
     public static final int COLTYPE_SELECTION_LEVEL = 0;
     public static final int COLTYPE_PSM = 1;
@@ -668,7 +668,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
 
             }
             case COLTYPE_PEPTIDE_ION_STATUS: {
-                 return peptideIon.getPepIonStatus().toString();
+                 return XicStatusRenderer.getPepIonStatusText(peptideIon.getPepIonStatus());
             }
             case COLTYPE_PEPTIDE_PTM: {
                 DPeptideInstance peptideInstance = peptideIon.getPeptideInstance();

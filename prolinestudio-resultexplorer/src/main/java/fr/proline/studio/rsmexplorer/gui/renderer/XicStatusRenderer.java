@@ -20,11 +20,12 @@ import javax.swing.table.DefaultTableCellRenderer;
 public class XicStatusRenderer extends DefaultTableCellRenderer {
 
     public static enum SelectLevel {
-        DESELECTED_MANUAL(0, "Deselected Manual"),
-        DESELECTED_AUTO(1, "Deselected Auto"),
-        SELECTED_AUTO(2, "Selected Auto"),
-        SELECTED_MANUAL(3, "Selected Manual"),
-        RESET_AUTO(-1, "Reset auto");
+        DESELECTED_MANUAL(0, "Invalidated manually"),
+        DESELECTED_AUTO(1, "Invalidated automatically"),
+        SELECTED_AUTO(2, "Validated automatically"),
+        SELECTED_MANUAL(3, "Validated Manual"),
+        UNKNOWN(-1, "Invalid (not quantified)"),
+        RESET_AUTO(-2, "Reset auto");
 
         private int _intValue;
         private String _description;
@@ -64,9 +65,9 @@ public class XicStatusRenderer extends DefaultTableCellRenderer {
             case VALIDATED:
                 return "Validated";
             case USED_VALIDATED:
-                return "Validated Used";
+                return "Validated/Used";
             case UNUSED_VALIDATED:
-                return "Validated Not Used";
+                return "Validated/Not Used";
             default:
                 return "Other";
         }
@@ -87,12 +88,12 @@ public class XicStatusRenderer extends DefaultTableCellRenderer {
                     this.setIcon(IconManager.getIcon(IconManager.IconType.VALIDATED));
                     break;
                 default:
-                    this.setIcon(IconManager.getIcon(IconManager.IconType.TEST));
+                    this.setIcon(IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));
 
             }
             this.setToolTipText(statusValue.getDescription());
 
-        } else if (status instanceof PepIonStatus) {
+        } else if (status instanceof PepIonStatus) {    
             switch ((PepIonStatus) status) {
 
                 case INVALIDATED:
@@ -109,7 +110,7 @@ public class XicStatusRenderer extends DefaultTableCellRenderer {
                     break;
                 case UNKNOWN:
                 default:
-                    this.setIcon(IconManager.getIcon(IconManager.IconType.TEST));
+                    this.setIcon(IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));
             }
             this.setToolTipText(getPepIonStatusText((PepIonStatus) status));
         }

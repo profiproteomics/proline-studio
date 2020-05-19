@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.tasklog;
 
+import fr.proline.logviewer.gui.ColorPalette;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.DownloadFileTask;
@@ -20,6 +21,7 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -73,22 +75,7 @@ public class ServerLogFileNameDialog extends DefaultDialog {
 
                 if (success) {
                     m_logger.debug("Retrive file \"" + m_file.getName() + "\" from server succes.");
-                    JDialog logViewDialog = new JDialog(WindowManager.getDefault().getMainWindow(), "Parse Tasks On The Server", Dialog.ModalityType.APPLICATION_MODAL);
-                    logViewDialog.getContentPane().setLayout(new BorderLayout());
-                    JInternalFrame taskFlowFrame;
-                    JTextPane taskFlowTextPane;
-
-                    taskFlowTextPane = new JTextPane();
-                    taskFlowFrame = new JInternalFrame("Log Task Flow", true, true);
-                    taskFlowFrame.setSize(700, 650);
-                    taskFlowFrame.setLocation(30,30);
-                    taskFlowFrame.setVisible(false);
-                    logViewDialog.getLayeredPane().add(taskFlowFrame);
-                    ServerLogControlPanel logPanel = new ServerLogControlPanel(m_file, taskFlowFrame);
-                    logViewDialog.getContentPane().add(logPanel, BorderLayout.CENTER);
-                    logViewDialog.pack();
-                    logViewDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-                    logViewDialog.setVisible(true);
+                    createLogParserDialog();
                 } else {
                     JOptionPane.showMessageDialog(rootPane, "Retrive File \"" + m_file.getName() + "\" failed.\n"
                             + " The file name/path error or it does not exist a so file(by example a off day)");
@@ -106,6 +93,32 @@ public class ServerLogFileNameDialog extends DefaultDialog {
         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
         return true;
+    }
+
+    private JDialog createLogParserDialog() {
+
+        JDialog logViewDialog = new JDialog(WindowManager.getDefault().getMainWindow(), "Parse Tasks On The Server", Dialog.ModalityType.APPLICATION_MODAL);
+        logViewDialog.getContentPane().setLayout(new BorderLayout());
+        //task flow
+        JInternalFrame taskFlowFrame;
+        JTextPane taskFlowTextPane;
+        taskFlowTextPane = new JTextPane();
+        taskFlowFrame = new JInternalFrame("Log Task Flow", true, true);
+        taskFlowFrame.setSize(700, 650);
+        taskFlowFrame.setVisible(false);
+        logViewDialog.getLayeredPane().add(taskFlowFrame, JLayeredPane.PALETTE_LAYER);
+        //color palette
+        ColorPalette colorPalette = new ColorPalette();
+        colorPalette.setLocation(800, 2);
+        colorPalette.setVisible(true);
+        logViewDialog.getLayeredPane().add(colorPalette, JLayeredPane.PALETTE_LAYER+1);
+        //main logPanel
+        ServerLogControlPanel logPanel = new ServerLogControlPanel(m_file, taskFlowFrame);
+        logViewDialog.getContentPane().add(logPanel, BorderLayout.CENTER);
+        logViewDialog.pack();
+        logViewDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        logViewDialog.setVisible(true);
+        return logViewDialog;
     }
 
     private JPanel createInternalPanel() {

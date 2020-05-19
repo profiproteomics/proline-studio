@@ -9,27 +9,24 @@ import fr.proline.logviewer.gui.Config;
 import fr.proline.logviewer.gui.ControlInterface;
 import fr.proline.logviewer.gui.LogReaderWorker;
 import fr.proline.logviewer.gui.TaskConsolePane;
-import fr.proline.logviewer.gui.ColorPalette;
 import fr.proline.logviewer.gui.TaskLoaderWorker;
 import fr.proline.logviewer.gui.TaskView;
 import fr.proline.logviewer.model.LogLineReader;
 import fr.proline.logviewer.model.LogTask;
 import fr.proline.logviewer.model.TaskInJsonCtrl;
 import fr.proline.logviewer.model.Utility;
+import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.info.InfoToggleButton;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JInternalFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -75,12 +72,7 @@ public class ServerLogControlPanel extends JPanel implements ControlInterface {
     private void initComponent() {
         //upPane
         JPanel upPane = new JPanel(new BorderLayout());
-        ColorPalette colorPalette = new ColorPalette(0, 0);
-        colorPalette.setAlignmentX(RIGHT_ALIGNMENT);
-        JPanel colorPane = new JPanel(new FlowLayout());
-        colorPane.add(new JLabel("Number of task in it's color: "));
-        colorPane.add(colorPalette);
-        upPane.add(colorPane, BorderLayout.NORTH);
+        
         upPane.add(m_taskQueueView, BorderLayout.CENTER);
         //bottonPane
         JScrollPane taskPane = new JScrollPane(m_taskView);
@@ -90,26 +82,27 @@ public class ServerLogControlPanel extends JPanel implements ControlInterface {
         JSplitPane mainPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         mainPanel.setTopComponent(upPane);
         mainPanel.setBottomComponent(contentBottomPanel);
-        mainPanel.setDividerLocation(300);
+        mainPanel.setDividerLocation(280);
         //this
         this.setLayout(new BorderLayout());
         this.add(mainPanel, BorderLayout.CENTER);
         this.add(initToolbar(), BorderLayout.WEST);
         //invisible TaskFlowPane
+        m_taskFlowFrame.setLocation(700, 300);
 
     }
     
     private JToolBar initToolbar() {
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
-        
+        //FilerButton
         FilterButton filterButton = new FilterButton(m_taskQueueView.getCompoundTableModel()) {
             @Override
             protected void filteringDone() {
             }
         };
         toolbar.add(filterButton);
-        
+        //Show Task flow button
         JButton showTaskFlowBt = new JButton(IconManager.getIcon(IconManager.IconType.DOCUMENT_LIST));
         showTaskFlowBt.setToolTipText("Show task flow");
         showTaskFlowBt.addActionListener(new ActionListener() {
@@ -119,7 +112,10 @@ public class ServerLogControlPanel extends JPanel implements ControlInterface {
             }
         });
         toolbar.add(showTaskFlowBt);
-        
+        //Export Button
+        ExportButton exportButton = new ExportButton((m_taskQueueView.getCompoundTableModel()), "Tasks", m_taskQueueView.getTable());
+        toolbar.add(exportButton);
+        //
         m_infoToggleButton = new InfoToggleButton(null, m_taskQueueView.getTable());
         toolbar.add(m_infoToggleButton);
         
@@ -140,6 +136,7 @@ public class ServerLogControlPanel extends JPanel implements ControlInterface {
             logReader = new LogLineReader(m_file.getName(), m_dateFormat, m_isBigFile, false);
             
             LogReaderWorker readWorker = new LogReaderWorker(this, m_taskFlowTextPane, m_file, m_dateFormat, logReader);
+            m_taskFlowFrame.setVisible(true);
             readWorker.execute();
             repaint();
             

@@ -63,7 +63,7 @@ public class ServerLogControlPanel extends LogControlPanel {
         m_progressBar = progressBar;
         m_taskFlowFrame = taskFlowFrame;
         m_taskFlowTextPane = new JTextPane();
-        m_taskFlowFrame.getContentPane().add(m_taskFlowTextPane);
+        m_taskFlowFrame.getContentPane().add(new JScrollPane(m_taskFlowTextPane));
         initComponent();
         this.setSize(1400, 800);
         parseFile();

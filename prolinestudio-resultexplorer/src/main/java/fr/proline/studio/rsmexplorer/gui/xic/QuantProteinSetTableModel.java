@@ -929,11 +929,11 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                                     return "";                                    
                             }
                         } else {                            
-                            //Integer pepNumber = proteinSet.getQuantPeptideNumberByQchIds().get(m_quantChannels[nbQc].getId());
+                            Integer pepNumber = proteinSet.getQuantPeptideNumberByQchIds().get(m_quantChannels[nbQc].getId());
                             switch (id) {
                                 case COLTYPE_PEP_NUMBER:
-                                    //return (pepNumber == null ? Integer.toString(0) : Integer.toString(pepNumber));
-                                    return (quantProteinSet.getPeptidesCount() == null ? Integer.toString(0) : Integer.toString(quantProteinSet.getPeptidesCount()));
+                                    return (pepNumber == null ? Integer.toString(0) : Integer.toString(pepNumber));
+                                    //return (quantProteinSet.getPeptidesCount() == null ? Integer.toString(0) : Integer.toString(quantProteinSet.getPeptidesCount()));
                                 case COLTYPE_SELECTION_LEVEL:
                                     return (quantProteinSet.getSelectionLevel() == null ? Integer.toString(0) : Integer.toString(quantProteinSet.getSelectionLevel()));
                                 case COLTYPE_ABUNDANCE:

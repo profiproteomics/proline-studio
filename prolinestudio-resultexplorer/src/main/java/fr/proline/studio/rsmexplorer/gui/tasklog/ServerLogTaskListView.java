@@ -5,6 +5,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui.tasklog;
 
+import fr.proline.logviewer.gui.TaskListInterface;
 import fr.proline.logviewer.model.LogTask;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.export.ExportModelInterface;
@@ -31,7 +32,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author KX257079
  */
-public class ServerLogTaskListView extends JScrollPane {
+public class ServerLogTaskListView extends JScrollPane implements TaskListInterface {
 
     protected static final Logger m_logger = LoggerFactory.getLogger(ServerLogTaskListView.class);
     private ServerLogControlPanel m_ctrl;
@@ -64,6 +65,7 @@ public class ServerLogTaskListView extends JScrollPane {
         return m_table;
     }
 
+    @Override
     public void setData(ArrayList<LogTask> tasks, String fileName) {
         if (tasks != null) {
             m_logger.debug("setData {} tasks for {}", tasks.size(), fileName);
@@ -72,16 +74,14 @@ public class ServerLogTaskListView extends JScrollPane {
         }
         ((TitledBorder) this.getBorder()).setTitle("List of Tasks" + "     " + fileName);
         //todo reuse m_taskTable.removeAll();//must
-        if (tasks == null) {
+        if (tasks == null || tasks.isEmpty()) {
             m_taskList = new ArrayList<>();
         } else {
             m_taskList = tasks;
-        }
-        initColumnsize();
-        m_tableModel.setData(m_taskList);
-        if (tasks != null) {
+            m_tableModel.setData(m_taskList);
             m_table.getSelectionModel().setSelectionInterval(0, 0);
         }
+        initColumnsize();
     }
 
     /**

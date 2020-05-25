@@ -24,6 +24,7 @@ import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.WindowConstants;
@@ -111,13 +112,23 @@ public class ServerLogFileNameDialog extends DefaultDialog {
         ColorPalette colorPalette = new ColorPalette();
         colorPalette.setLocation(800, 2);
         colorPalette.setVisible(true);
-        logViewDialog.getLayeredPane().add(colorPalette, JLayeredPane.PALETTE_LAYER+1);
+        logViewDialog.getLayeredPane().add(colorPalette, JLayeredPane.PALETTE_LAYER + 1);
+
+        JProgressBar progressBar = new JProgressBar(0, 100);
+        progressBar.setValue(0);
+        progressBar.setStringPainted(true);
+        progressBar.setSize(400, 50);
+        progressBar.setVisible(false);
+        progressBar.setLocation(200, 200);
+        logViewDialog.getLayeredPane().add(progressBar, JLayeredPane.PALETTE_LAYER + 2);
+
         //main logPanel
-        ServerLogControlPanel logPanel = new ServerLogControlPanel(m_file, taskFlowFrame);
+        ServerLogControlPanel logPanel = new ServerLogControlPanel(m_file, taskFlowFrame, progressBar);
         logViewDialog.getContentPane().add(logPanel, BorderLayout.CENTER);
         logViewDialog.pack();
         logViewDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         logViewDialog.setVisible(true);
+
         return logViewDialog;
     }
 

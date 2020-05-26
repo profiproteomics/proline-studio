@@ -457,8 +457,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                             }
                             switch (id) {
                                 case COLTYPE_PEP_NUMBER:
-                                    lazyData.setData(pepNumber);
-//                                    lazyData.setData((quantProteinSet.getPeptidesCount()== null || quantProteinSet.getPeptidesCount()== 0 ) ? pepNumber : quantProteinSet.getPeptidesCount());
+                                    lazyData.setData((quantProteinSet.getPeptidesCount()== null || quantProteinSet.getPeptidesCount()== 0 ) ? pepNumber : quantProteinSet.getPeptidesCount());
                                     break;
                                 case COLTYPE_SELECTION_LEVEL:
                                     lazyData.setData(quantProteinSet.getSelectionLevel());
@@ -932,12 +931,14 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                                 case COLTYPE_STATUS: //Should only occur for spectral count
                                     return "";
                             }
-                        } else {
+                        } else {                            
                             Integer pepNumber = proteinSet.getQuantPeptideNumberByQchIds().get(m_quantChannels[nbQc].getId());
+                            if (pepNumber == null || pepNumber < 0) {
+                                pepNumber = 0;
+                            }                            
                             switch (id) {
                                 case COLTYPE_PEP_NUMBER:
-                                    return (pepNumber == null ? Integer.toString(0) : Integer.toString(pepNumber));
-                                //return (quantProteinSet.getPeptidesCount() == null ? Integer.toString(0) : Integer.toString(quantProteinSet.getPeptidesCount()));
+                                    return ( (quantProteinSet.getPeptidesCount()== null || quantProteinSet.getPeptidesCount()== 0) ? Integer.toString(pepNumber) : Integer.toString(quantProteinSet.getPeptidesCount()));
                                 case COLTYPE_SELECTION_LEVEL:
                                     return (quantProteinSet.getSelectionLevel() == null ? Integer.toString(0) : Integer.toString(quantProteinSet.getSelectionLevel()));
                                 case COLTYPE_ABUNDANCE:

@@ -1593,7 +1593,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             proteinSetQuery.setParameter("psId", masterQuantProteinSet.getProteinSetId());
             DProteinSet dProteinSet = proteinSetQuery.getSingleResult();
             if (dProteinSet == null) {
-                m_logger.debug("--- NOT FOUND  DProteinSet for MQPrS " + masterQuantProteinSet.getId());
+                m_logger.debug("--- NOT FOUND  DProteinSet for MQPrS " + masterQuantProteinSet.getId()); //VDS : should continue or stop with exception, else NPE ! 
             }
             // typical protein match id
             proteinMatchQuery.setParameter("pmId", dProteinSet.getProteinMatchId());
@@ -1631,6 +1631,16 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 nbPep = (Integer) nb[1];
                 nbPepQuant = ((Long) nb[0]).intValue();
             }
+            
+            //try to get nbPepQuant from masterQuantProteinSet
+            MasterQuantProteinSetProperties mqPSprop = masterQuantProteinSet.getMasterQuantProtSetProperties();
+            if(mqPSprop!= null){
+                int nbPepQuantSpecific2ProtSet = mqPSprop.getSelectedMasterQuantPeptideIds().size();
+                m_logger.debug(" **** global nbPepQuant "+nbPepQuant+" specific to mqProtSet "+nbPepQuantSpecific2ProtSet);
+                nbPepQuant = nbPepQuantSpecific2ProtSet;
+            }
+
+            
 
             //If queryCountPepAndQuantPep return an empty result (or empty nbPep ?! not sure it's possible)
             if (nbPep == 0) {

@@ -16,21 +16,12 @@
  */
 package fr.proline.studio.dam.tasks.xic;
 
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.proline.core.orm.msi.MasterQuantComponent;
-import fr.proline.core.orm.msi.ObjectTree;
-import fr.proline.core.orm.msi.Peptide;
-import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
-import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.core.orm.msi.dto.DQuantPeptide;
-import fr.proline.core.orm.msi.dto.DQuantProteinSet;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
-import fr.proline.core.orm.util.JsonSerializer;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -39,11 +30,9 @@ import static fr.proline.studio.dam.tasks.AbstractDatabaseTask.TASK_LIST_INFO;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 /**

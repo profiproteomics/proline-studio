@@ -17,6 +17,7 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
+import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
@@ -109,7 +110,8 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
 
     // private DefaultFloatingPanel m_validateModificationsPanel;
     private ModifyStatusDialog m_modifyStatusDialog;
-    private boolean m_displayForProteinSet;
+    //private boolean m_displayForProteinSet;
+    private DMasterQuantProteinSet m_proteinSetToDisplayFor;
     private DQuantitationChannel[] m_quantChannels;
     private boolean m_isXICMode;
 
@@ -200,8 +202,7 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
 
             @Override
             protected void filteringDone() {
-                m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
-                m_dataBox.propagateDataChanged();
+                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
                 m_infoToggleButton.updateInfo();
             }
 
@@ -232,7 +233,7 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
                     }
                     // prepare window box
                     WindowBox wbox = WindowBoxFactory.getMultiGraphicsWindowBox("Peptide Graphic", m_dataBox, false);
-                    wbox.setEntryData(m_dataBox.getProjectId(), null);  //JPM.DATABOX : it can work with null, there must be a wart somewhere so it works..
+                    wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(false, List.class));
 
                     // open a window to display the window box
                     DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
@@ -326,7 +327,7 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
         return internalPanel;
     }
 
-    public void setData(Long taskId, boolean displayForProteinSet, DQuantitationChannel[] quantChannels, List<DMasterQuantPeptide> peptides, boolean isXICMode, boolean finished) {
+    public void setData(Long taskId, DMasterQuantProteinSet proteinSetToDisplayFor, DQuantitationChannel[] quantChannels, List<DMasterQuantPeptide> peptides, boolean isXICMode, boolean finished) {
         boolean qcChanged = true;
         if (m_quantChannels != null && m_quantChannels.length == quantChannels.length) {
             for (int q = 0; q < m_quantChannels.length; q++) {
@@ -335,8 +336,8 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
         }
         m_quantChannels = quantChannels;
         m_isXICMode = isXICMode;
-        m_displayForProteinSet = displayForProteinSet;
-        m_quantPeptideTableModel.setData(taskId, m_dataBox.getProjectId(), quantChannels, peptides, m_isXICMode);
+        m_proteinSetToDisplayFor = proteinSetToDisplayFor;
+        m_quantPeptideTableModel.setData(taskId, m_dataBox.getProjectId(), quantChannels, peptides, m_proteinSetToDisplayFor, m_isXICMode);
 
         if (!m_isXICMode) {
             m_quantPeptideTableModel.setOverviewType(QuantPeptideTableModel.COLTYPE_RAW_ABUNDANCE);
@@ -379,7 +380,7 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
                 m_quantPeptideTable.getColumnExt(m_quantPeptideTable.convertColumnIndexToView(id)).setVisible(false);
             }
         }
-        if (!m_displayForProteinSet) {
+        if (m_proteinSetToDisplayFor == null) {
             // hide the cluster column
             boolean columnVisible = ((TableColumnExt) columns.get(QuantPeptideTableModel.COLTYPE_PEPTIDE_CLUSTER)).isVisible();
             if (columnVisible) {
@@ -404,7 +405,6 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
     public void setDataBox(AbstractDataBox dataBox) {
         m_quantPeptideTableModel.setDatabox(dataBox);
         m_dataBox = dataBox;
-
     }
 
     @Override
@@ -560,14 +560,8 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
             if (selectionWillBeRestored) {
                 return;
             }
-            
-            if (e.getValueIsAdjusting()) {
-                // value is adjusting, so valueChanged will be called again
-                return;
-            }
 
-            m_dataBox.addDataChanged(DMasterQuantPeptide.class);
-            m_dataBox.propagateDataChanged();
+            m_dataBox.propagateDataChanged(DMasterQuantPeptide.class);
 
         }
 
@@ -1002,4 +996,3 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
 
     }
 }
-

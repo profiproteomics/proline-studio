@@ -5,9 +5,9 @@
  */
 package fr.proline.studio.rsmexplorer.gui.tasklog;
 
-import fr.proline.logviewer.gui.TaskExecutionPanel;
-import fr.proline.logviewer.model.LogTask;
-import fr.proline.logviewer.model.Utility;
+import fr.proline.logparser.gui.TaskExecutionPanel;
+import fr.proline.logparser.model.LogTask;
+import fr.proline.logparser.model.Utility;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.LongFilter;
 import fr.proline.studio.filter.StringDiffFilter;

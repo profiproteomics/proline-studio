@@ -58,7 +58,7 @@ public class ServerLogFileNameDialog extends DefaultDialog {
 
     protected static final Logger m_logger = LoggerFactory.getLogger(ServerLogFileNameDialog.class);
     private static String LOG_REMOTE_PATH = "./logs/";
-    private static String LOG_LOCAL_PATH = "cortexlogs/";
+    private static String LOG_LOCAL_PATH = "cortexlogs";
     private static String LOG_DEBUG_FILE_NAME = "proline_cortex_debug";
     private static String LOG_TODAY_DEBUG_FILE_NAME = "proline_cortex_debug.txt";
     private static String LOG_FILE_NAME = "proline_cortex_log";
@@ -85,7 +85,7 @@ public class ServerLogFileNameDialog extends DefaultDialog {
         if (!m_localPath.isDirectory()) {
             m_localPath.mkdir();
         }
-        m_localPath = new File(LOG_LOCAL_PATH + host + "/");
+        m_localPath = new File(LOG_LOCAL_PATH + "/" + host);
         if (!m_localPath.isDirectory()) {
             m_localPath.mkdir();
         }
@@ -247,7 +247,7 @@ public class ServerLogFileNameDialog extends DefaultDialog {
         }
         int begin = remoteFilePath.lastIndexOf("/") + 1;
         String fileName = remoteFilePath.substring(begin);
-        File localFile = new File(m_localPath + fileName);
+        File localFile = new File(m_localPath + "/" + fileName);
         AbstractJMSCallback callback;
         callback = new AbstractJMSCallback() {
             @Override
@@ -275,7 +275,7 @@ public class ServerLogFileNameDialog extends DefaultDialog {
                         int next = index + 1;
                         retriveFile(filePath, isDebugFile, next);
                     } else {
-                        if (index == 0 && ! m_isTodayDebug) {//first file do not exist => this day, we have not debug log file
+                        if (index == 0 && !m_isTodayDebug) {//first file do not exist => this day, we have not debug log file
                             JOptionPane.showMessageDialog(rootPane, "Retrive File \"" + localFile.getName() + "\" failed.\n"
                                     + " The file name/path error or it does not exist a so file(by example a off day)");
                         } else {

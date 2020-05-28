@@ -54,19 +54,14 @@ public class DataBoxRsetPSM extends AbstractDataBox {
         m_typeName = "PSMs";
         m_description = "All PSMs of a Search Result";
         
-        // Register Possible in parameters
-        // One ResultSummary
+        // Register in parameters
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(ResultSet.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
-        // One or Multiple PeptideMatch
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DPeptideMatch.class);
-        registerOutParameter(outParameter);
-
-        outParameter = new GroupParameter();
         outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
        
@@ -84,7 +79,7 @@ public class DataBoxRsetPSM extends AbstractDataBox {
     @Override
     public void dataChanged() {
         
-        final ResultSet _rset = (m_rset!=null) ? m_rset : (ResultSet) m_previousDataBox.getData(ResultSet.class);
+        final ResultSet _rset = (m_rset!=null) ? m_rset : (ResultSet) getData(ResultSet.class);
 
         // register the link to the Transient Data
         linkCache(_rset);
@@ -139,7 +134,7 @@ public class DataBoxRsetPSM extends AbstractDataBox {
     private Long m_previousTaskId = null;
     
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType != null) {
 
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -162,7 +157,7 @@ public class DataBoxRsetPSM extends AbstractDataBox {
             }
             
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
  
     @Override

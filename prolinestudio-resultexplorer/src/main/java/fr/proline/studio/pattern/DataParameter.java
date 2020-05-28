@@ -57,9 +57,9 @@ public class DataParameter {
         }
         return false;
     }
-    
-    public boolean equalsData(Class dataC) {
-        return m_type.equals(dataC);
+   
+    public boolean equalsData(Class dataC, ParameterSubtypeEnum subtype) {
+        return m_type.equals(dataC) && ((subtype==null) || (m_subtype==null) || (m_subtype.equals(subtype))); // subtype null corresponds to subtype not specified
     }
 
     public boolean isCompatibleWithOutParameter(DataParameter outParameter) {

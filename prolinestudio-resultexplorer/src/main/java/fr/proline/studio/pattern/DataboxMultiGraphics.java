@@ -70,14 +70,16 @@ public class DataboxMultiGraphics extends AbstractDataBox {
             m_description = "Display data as linear plot";
         }
 
-        // Register Possible in parameters
+        // Register in parameters
         if (!m_displayDoubleYAxis) {
             GroupParameter inParameter = new GroupParameter();
+            inParameter.addParameter(Integer.class, ParameterSubtypeEnum.PEPTIDES_SELECTION_LIST, false /* not compulsory */);
             inParameter.addParameter(ExtendedTableModelInterface.class);
             inParameter.addParameter(CrossSelectionInterface.class);
             registerInParameter(inParameter);
         } else {
             GroupParameter inParameter = new GroupParameter();
+            inParameter.addParameter(Integer.class, ParameterSubtypeEnum.PEPTIDES_SELECTION_LIST, false /* not compulsory */);
             inParameter.addParameter(ExtendedTableModelInterface.class);
             inParameter.addParameter(CrossSelectionInterface.class);
             inParameter.addParameter(SecondAxisTableModelInterface.class);
@@ -106,10 +108,10 @@ public class DataboxMultiGraphics extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        List<ExtendedTableModelInterface> dataModelInterfaceSet1 = (List<ExtendedTableModelInterface>) m_previousDataBox.getData(ExtendedTableModelInterface.class, ParameterSubtypeEnum.LIST_DATA);
+        List<ExtendedTableModelInterface> dataModelInterfaceSet1 = (List<ExtendedTableModelInterface>) getData(ExtendedTableModelInterface.class, ParameterSubtypeEnum.LIST_DATA);
         //obtain select index in next bloc
         if ((dataModelInterfaceSet1 != null && !dataModelInterfaceSet1.isEmpty() && (dataModelInterfaceSet1.get(0) instanceof XICComparePeptideTableModel))) {
-            m_selectedIndexList = (ArrayList<Integer>) m_previousDataBox.getData(Integer.class, ParameterSubtypeEnum.PEPTIDES_SELECTION_LIST);
+            m_selectedIndexList = (ArrayList<Integer>) getData(Integer.class, ParameterSubtypeEnum.PEPTIDES_SELECTION_LIST);
             //m_logger.debug("multiGraphic, get Selected Index : {}, data size {}", selectedIndex, dataModelInterfaceSet1.size());
             if (!m_hideSelection && m_selectedIndexList != null && !m_selectedIndexList.isEmpty()) {//***### here, set selection
                 XICComparePeptideTableModel data;
@@ -127,9 +129,9 @@ public class DataboxMultiGraphics extends AbstractDataBox {
             keepZoom = Boolean.FALSE;
         }
 
-        //final List<ExtendedTableModelInterface> dataModelInterfaceSet1 = (List<ExtendedTableModelInterface>) m_previousDataBox.getData(false, ExtendedTableModelInterface.class, true);
-        final List<CrossSelectionInterface> crossSelectionInterfaceL = (List<CrossSelectionInterface>) m_previousDataBox.getData(CrossSelectionInterface.class, ParameterSubtypeEnum.LIST_DATA);
-        SecondAxisTableModelInterface dataModelInterfaceSet2 = m_displayDoubleYAxis ? (SecondAxisTableModelInterface) m_previousDataBox.getData(SecondAxisTableModelInterface.class) : null;
+        //final List<ExtendedTableModelInterface> dataModelInterfaceSet1 = (List<ExtendedTableModelInterface>) getData(false, ExtendedTableModelInterface.class, true);
+        final List<CrossSelectionInterface> crossSelectionInterfaceL = (List<CrossSelectionInterface>) getData(CrossSelectionInterface.class, ParameterSubtypeEnum.LIST_DATA);
+        SecondAxisTableModelInterface dataModelInterfaceSet2 = m_displayDoubleYAxis ? (SecondAxisTableModelInterface) getData(SecondAxisTableModelInterface.class) : null;
 
         boolean valueUnchanged = Objects.equals(dataModelInterfaceSet1, m_plotValues) && Objects.equals(crossSelectionInterfaceL, m_crossSelectionValues) && Objects.equals(dataModelInterfaceSet2, m_plotSecondAxisValues);
         if (valueUnchanged) {

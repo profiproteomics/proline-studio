@@ -62,36 +62,27 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         m_typeName = "Quanti. Peptides Ions";
         m_description = "All Peptides Ions of a Quanti. Peptide";
 
-        // Register Possible in parameters
-        // One Dataset and list of Peptide
+        // Register in parameters
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(DDataset.class);
-        registerInParameter(inParameter);
         
-        inParameter = new GroupParameter();
+        inParameter.addParameter(DDataset.class, ParameterSubtypeEnum.SINGLE_DATA, false /* not compulsory */);
+        inParameter.addParameter(QuantChannelInfo.class, ParameterSubtypeEnum.SINGLE_DATA, false /* not compulsory */);
         inParameter.addParameter(DMasterQuantPeptide.class);
+        inParameter.addParameter(XicMode.class);
+        
         registerInParameter(inParameter);
 
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DMasterQuantPeptideIon.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
-        outParameter.addParameter(QuantChannelInfo.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
-        outParameter.addParameter(DPeptideMatch.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
-        outParameter.addParameter(DDataset.class);
+
         outParameter.addParameter(ResultSummary.class);
-        registerOutParameter(outParameter);
+        outParameter.addParameter(DDataset.class);
+        outParameter.addParameter(DMasterQuantPeptideIon.class);
+        outParameter.addParameter(QuantChannelInfo.class);
+        outParameter.addParameter(DPeptideMatch.class);
         
-        outParameter = new GroupParameter();
         outParameter.addParameter(ExtendedTableModelInterface.class);
+        
         registerOutParameter(outParameter);
         
     }
@@ -215,7 +206,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
     }
     
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         
         if (parameterType != null) {
             
@@ -257,7 +248,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                 }
             }
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
     
     @Override

@@ -58,7 +58,7 @@ public class DataboxRsetPSMForMsQuery extends AbstractDataBox{
         m_description = "All PSMs corresponding to a MsQuery for a Search Result";
         
         
-        // Register Possible in parameters
+        // Register in parameters
         // One MsQuery & rsm & rs, rsm could be null
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(MsQueryInfoRset.class);
@@ -68,13 +68,7 @@ public class DataboxRsetPSMForMsQuery extends AbstractDataBox{
         // One or Multiple PeptideMatch
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DPeptideMatch.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
         outParameter.addParameter(ExtendedTableModelInterface.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
         outParameter.addParameter(CrossSelectionInterface.class);
         registerOutParameter(outParameter);
     }
@@ -91,7 +85,7 @@ public class DataboxRsetPSMForMsQuery extends AbstractDataBox{
     @Override
     public void dataChanged() {
         long oldMsQId = m_msQuery == null? -1: m_msQuery.getId();
-        final MsQueryInfoRset _msqI = (MsQueryInfoRset) m_previousDataBox.getData(MsQueryInfoRset.class);
+        final MsQueryInfoRset _msqI = (MsQueryInfoRset) getData(MsQueryInfoRset.class);
         if ((_msqI == null) || (_msqI != null && _msqI.getMsQuery() != null && oldMsQId == _msqI.getMsQuery().getId())){
             return ;
         }
@@ -143,7 +137,7 @@ public class DataboxRsetPSMForMsQuery extends AbstractDataBox{
     }
     
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null ) {
             
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -158,7 +152,7 @@ public class DataboxRsetPSMForMsQuery extends AbstractDataBox{
                 }
             }
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
  
     @Override

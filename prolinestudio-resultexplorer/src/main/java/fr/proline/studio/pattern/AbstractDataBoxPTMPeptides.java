@@ -64,7 +64,7 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
 
     protected void registerParameters() {
 
-        // Register Possible in parameters          
+        // Register in parameters          
         // One ResultSummary
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(PTMPeptideInstance.class, m_displayAllPepMatches ? ParameterSubtypeEnum.LEAF_PTMPeptideInstance : ParameterSubtypeEnum.PARENT_PTMPeptideInstance);
@@ -75,14 +75,17 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
             inParameter.addParameter(QuantChannelInfo.class);
             inParameter.addParameter(DMasterQuantProteinSet.class);
         }
+        inParameter.addParameter(PTMCluster.class, ParameterSubtypeEnum.LIST_DATA);
         registerInParameter(inParameter);
 
+        
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(PTMPeptideInstance.class);
         outParameter.addParameter(PTMPeptideInstance.class, ParameterSubtypeEnum.PARENT_PTMPeptideInstance);
         outParameter.addParameter(PTMPeptideInstance.class, ParameterSubtypeEnum.LEAF_PTMPeptideInstance);
         outParameter.addParameter(DPeptideMatch.class);
         outParameter.addParameter(DPeptideInstance.class);
+        outParameter.addParameter(DPeptideInstance.class, ParameterSubtypeEnum.LIST_DATA);
         outParameter.addParameter(ResultSummary.class);
         outParameter.addParameter(PTMDataset.class);
         if (m_isXICResult) {
@@ -101,7 +104,7 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
     }
 
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         DataBoxPanelInterface panel = getDataBoxPanelInterface();
 
         if (parameterType != null && (!(panel instanceof SplittedPanelContainer.ReactiveTabbedComponent)
@@ -159,32 +162,37 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
                     }
                 }
             }
+            
+            if (parameterSubtype == ParameterSubtypeEnum.LIST_DATA) {
+                if (parameterType.equals(DPeptideInstance.class)) {
+                    if (m_ptmPepInstances == null) {
+                        return new ArrayList<DPeptideInstance>();
+                    }
+                    return m_ptmPepInstances.stream().map(ptpPepInst -> ptpPepInst.getPeptideInstance()).collect(Collectors.toList());
+
+                }
+            }
    
             if (parameterType.equals(PTMPeptideInstance.class)) {
 
 
                 //FIXME TODO  !!! VDS BIG WART !!! TO BE REMOVED WITH Propagate refactoring
-            // Use "getArray" to specify parent (==> display best PepMatch) (if false) or leaf (==> display all peptife matches) PTMPeptideInstance... if true
-            // if !getArray Return same data only if PARENT
+                // Use "getArray" to specify parent (==> display best PepMatch) (if false) or leaf (==> display all peptife matches) PTMPeptideInstance... if true
+                // if !getArray Return same data only if PARENT
                 if ((parameterSubtype.equals(ParameterSubtypeEnum.PARENT_PTMPeptideInstance) && !m_displayAllPepMatches) || (parameterSubtype.equals(ParameterSubtypeEnum.LEAF_PTMPeptideInstance) && m_displayAllPepMatches)) {
                     if (m_ptmPepInstances == null) {
-                        return new ArrayList<DPeptideInstance>();
+                        return new ArrayList<PTMPeptideInstance>();
                     }
                     List<PTMPeptideInstance> ptmPepInstances = new ArrayList(m_ptmPepInstances);
                     return ptmPepInstances;
                 }
+
                 
-                if ( parameterSubtype.equals(ParameterSubtypeEnum.PARENT_PTMPeptideInstance) || parameterSubtype.equals(ParameterSubtypeEnum.LEAF_PTMPeptideInstance) ) {
-                    if (m_ptmPepInstances == null) {
-                        return new ArrayList<DPeptideInstance>();
-                    }
-                    return m_ptmPepInstances.stream().map(ptpPepInst -> ptpPepInst.getPeptideInstance()).collect(Collectors.toList());
-                }
             }
 
         }
 
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
 
 
@@ -262,7 +270,7 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
                         loadXicAndPropagate();
                     } else {
                         ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, m_ptmPepInstances, m_ptmClusters, null, finished);
-                        addDataChanged(PTMPeptideInstance.class);
+                        addDataChanged(PTMPeptideInstance.class, null); //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
                         addDataChanged(ExtendedTableModelInterface.class);
                         propagateDataChanged();
                     }

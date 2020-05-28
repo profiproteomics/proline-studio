@@ -52,7 +52,12 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
         m_typeName = "Graphical Peptides PTMs info";
         m_description = "PTMs information of Peptides of a [Group] Modification Site using graphical display.";
 
-        // Register Possible in parameters          
+        
+        GroupParameter inParameter = new GroupParameter();
+        inParameter.addParameter(DProteinMatch.class);
+        registerInParameter(inParameter);
+        
+        // Register in parameters          
         super.registerParameters();
     }
 
@@ -65,7 +70,7 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
     }
 
     private void loadPeptidesInstances() {
-        DProteinMatch proteinMatch = (DProteinMatch) m_previousDataBox.getData(DProteinMatch.class);
+        DProteinMatch proteinMatch = (DProteinMatch) getData(DProteinMatch.class);
 
         ArrayList<ResultSummary> rsmList = new ArrayList<>(1);
         rsmList.add(m_rsm);
@@ -114,7 +119,7 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
         if (notLoadedPtmSite.isEmpty()) {
             resetPrevPTMTaskId();
             graphicView.setData(m_ptmPepInstances);
-            addDataChanged(PTMPeptideInstance.class);
+            addDataChanged(PTMPeptideInstance.class, null);  //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
             propagateDataChanged();
 
         } else {

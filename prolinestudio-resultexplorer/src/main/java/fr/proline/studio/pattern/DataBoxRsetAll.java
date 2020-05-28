@@ -42,14 +42,12 @@ public class DataBoxRsetAll extends AbstractDataBox {
         // Name of this databox
         m_typeName = "Search Results";
         
-        // Register Possible in parameters
-        // One ResultSummary
+        // Register in parameters
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(Project.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
-        // One or Multiple PeptideMatch
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(ResultSet.class);
         registerOutParameter(outParameter);
@@ -69,7 +67,7 @@ public class DataBoxRsetAll extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
-            Project p = (m_project != null) ? m_project : (Project) m_previousDataBox.getData(Project.class);
+            Project p = (m_project != null) ? m_project : (Project) getData(Project.class);
 
             final ArrayList<ResultSet> resultSetArrayList = new ArrayList<>();
             
@@ -104,7 +102,7 @@ public class DataBoxRsetAll extends AbstractDataBox {
     }
     
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null ) {
             
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -114,7 +112,7 @@ public class DataBoxRsetAll extends AbstractDataBox {
             }
 
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
     
     @Override

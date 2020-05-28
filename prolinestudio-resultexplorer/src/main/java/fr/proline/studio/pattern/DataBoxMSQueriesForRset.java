@@ -47,28 +47,16 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
         m_typeName = "MSQueries";
         m_description = "All MSQueries of a Search Result";
         
-        // Register Possible in parameters
-        // One ResultSet
+        // Register in parameters
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(ResultSet.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
-        // One or Multiple PeptideMatchId for one msQuery
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DMsQuery.class);
-        registerOutParameter(outParameter);
-        
-        
-        outParameter = new GroupParameter();
         outParameter.addParameter(ResultSet.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
         outParameter.addParameter(MsQueryInfoRset.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
         outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
        
@@ -85,7 +73,7 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
 
     @Override
     public void dataChanged() {
-        final ResultSet _rset =   ((m_rset!=null) ? m_rset : m_previousDataBox == null ? null : (ResultSet) m_previousDataBox.getData(ResultSet.class));
+        final ResultSet _rset =   ((m_rset!=null) ? m_rset : (ResultSet) getData(ResultSet.class));
 
         // register the link to the Transient Data
         linkCache(_rset);
@@ -136,7 +124,7 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
     }
     
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType != null) {
             
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -159,7 +147,7 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
                 }
             }
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
     
     @Override

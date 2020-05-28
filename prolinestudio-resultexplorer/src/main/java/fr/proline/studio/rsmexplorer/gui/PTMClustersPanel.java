@@ -492,7 +492,7 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
             //m_dataBox.addDataChanged(DPeptideMatch.class);
             m_dataBox.addDataChanged(DProteinSet.class);
             m_dataBox.addDataChanged(DProteinMatch.class);
-            m_dataBox.addDataChanged(PTMPeptideInstance.class);
+            m_dataBox.addDataChanged(PTMPeptideInstance.class, null);  //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
             m_dataBox.propagateDataChanged();
             
 

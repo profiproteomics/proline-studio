@@ -45,20 +45,16 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
         m_typeName = "Proteins";
         m_description = "All Proteins of a Search Result";
         
-        // Register Possible in parameters
+        // Register in parameters
         // One PeptideMatch
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(ResultSet.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
-        // One or Multiple ProteinMatch
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DProteinMatch.class);
         outParameter.addParameter(ResultSet.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
         outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
     }
@@ -74,7 +70,7 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
-        final ResultSet _rset = (m_rset != null) ? m_rset : (ResultSet) m_previousDataBox.getData( ResultSet.class);
+        final ResultSet _rset = (m_rset != null) ? m_rset : (ResultSet) getData( ResultSet.class);
 
         // register the link to the Transient Data
         linkCache(_rset);
@@ -128,7 +124,7 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
     private Long m_previousTaskId = null;
     
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null ) {
             
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -148,7 +144,7 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
                 }
             }
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
     
         @Override

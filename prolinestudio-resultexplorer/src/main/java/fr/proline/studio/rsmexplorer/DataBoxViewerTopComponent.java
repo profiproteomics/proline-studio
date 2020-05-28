@@ -27,7 +27,6 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -152,11 +151,11 @@ public class DataBoxViewerTopComponent extends TopComponent {
     private boolean firstPaint = true;
 
     
-    public HashSet<GroupParameter> getInParameters(){
+    public GroupParameter getInParameters(){
         return m_windowBox.getEntryBox().getInParameters();
     }
     
-    public ArrayList<GroupParameter> getOutParameters(){
+    public GroupParameter getOutParameters(){
         return m_windowBox.getEntryBox().getOutParameters();
     }
     

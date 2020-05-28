@@ -71,20 +71,19 @@ public class DataboxMapAlignment extends AbstractDataBox {
         m_description = "Graphical display of XIC Map Alignment.";
 
         m_compareRT2Maps = new HashMap<Long, IonsRTTableModel>();
-        // Register Possible in parameters
-        // One Dataset 
+        // Register in parameters
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(DDataset.class);
         registerInParameter(inParameter);
 
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
+        
         outParameter.addParameter(ExtendedTableModelInterface.class);
-        registerOutParameter(outParameter);
-
-        outParameter = new GroupParameter();
         outParameter.addParameter(CrossSelectionInterface.class);
+        
         registerOutParameter(outParameter);
+        
         m_RT_Tolerance = 0.0;
 
         m_isCloudLoaded = false;
@@ -107,7 +106,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
      * @return
      */
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
 
         if (parameterType != null) {
             
@@ -120,7 +119,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
                 }
             }
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
 
     private List<ExtendedTableModelInterface> getCompareDataInterfaceList() {
@@ -184,7 +183,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
         final int loadingId = setLoading();
 
         if (m_dataset == null) {
-            m_dataset = (DDataset) m_previousDataBox.getData(DDataset.class);
+            m_dataset = (DDataset) getData(DDataset.class);
         }
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -246,7 +245,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
             final int loadingId = setLoading();
 
             if (m_dataset == null) {
-                m_dataset = (DDataset) m_previousDataBox.getData(DDataset.class);
+                m_dataset = (DDataset) getData(DDataset.class);
             }
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 

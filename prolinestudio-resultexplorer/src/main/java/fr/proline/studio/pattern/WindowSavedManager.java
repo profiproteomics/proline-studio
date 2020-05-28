@@ -47,22 +47,20 @@ public class WindowSavedManager {
         boolean quanti = false;
         
         AbstractDataBox entryBox = boxList.get(0);
-        HashSet<GroupParameter> entryParameterSet = entryBox.getInParameters();
-        Iterator<GroupParameter> entryParameterIt = entryParameterSet.iterator();
-        while (entryParameterIt.hasNext()) {
-            GroupParameter groupParameter = entryParameterIt.next();
-            ArrayList<DataParameter> parametersList = groupParameter.getParameterList();
-            for (int i=0;i<parametersList.size();i++) {
-                DataParameter parameter = parametersList.get(i);
-                if (parameter.equalsData(ResultSet.class)) {
-                    rset = true;
-                } else if (parameter.equalsData(ResultSummary.class)) {
-                    rsm = true;
-                }else if (parameter.equalsData(DDataset.class)){
-                    quanti = true;
-                }
+        GroupParameter inParameter = entryBox.getInParameters();
+
+        ArrayList<DataParameter> parametersList = inParameter.getParameterList();
+        for (int i = 0; i < parametersList.size(); i++) {
+            DataParameter parameter = parametersList.get(i);
+            if (parameter.equalsData(ResultSet.class, ParameterSubtypeEnum.SINGLE_DATA)) {
+                rset = true;
+            } else if (parameter.equalsData(ResultSummary.class, ParameterSubtypeEnum.SINGLE_DATA)) {
+                rsm = true;
+            } else if (parameter.equalsData(DDataset.class, ParameterSubtypeEnum.SINGLE_DATA)) {
+                quanti = true;
             }
         }
+
         
         StringBuilder sb = new StringBuilder();
         

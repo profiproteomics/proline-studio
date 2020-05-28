@@ -43,7 +43,7 @@ public class DataboxGraphics extends AbstractDataBox  {
         m_typeName = "Customisable Graphical Display";
         m_description = "Plots data as Histogram / Scatter Plot / Venn Diagram / Parallel Coordinates";
 
-        // Register Possible in parameters
+        // Register in parameters
         // One ResultSummary
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(ExtendedTableModelInterface.class);
@@ -69,8 +69,8 @@ public class DataboxGraphics extends AbstractDataBox  {
 
     @Override
     public void dataChanged() {
-        final ExtendedTableModelInterface values = (m_values!=null) ? m_values : (ExtendedTableModelInterface) m_previousDataBox.getData(ExtendedTableModelInterface.class);
-        final CrossSelectionInterface crossSelectionInterface = (m_values!=null) ? null : (CrossSelectionInterface) m_previousDataBox.getData(CrossSelectionInterface.class);
+        final ExtendedTableModelInterface values = (m_values!=null) ? m_values : (ExtendedTableModelInterface) getData(ExtendedTableModelInterface.class);
+        final CrossSelectionInterface crossSelectionInterface = (m_values!=null) ? null : (CrossSelectionInterface) getData(CrossSelectionInterface.class);
         ((GraphicsPanel)getDataBoxPanelInterface()).setData(values, crossSelectionInterface);
     }
     

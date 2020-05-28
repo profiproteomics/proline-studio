@@ -49,19 +49,14 @@ public class DataboxRsmPSMOfPeptide extends AbstractDataBox {
         m_typeName = "PSMs";
         m_description = "All PSMs of a Peptide";
         
-        // Register Possible in parameters
-        // One ResultSummary
+        // Register in parameters
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(PeptideInstance.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
-        // One or Multiple PeptideMatch
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DPeptideMatch.class);
-        registerOutParameter(outParameter);
-
-        outParameter = new GroupParameter();
         outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
        
@@ -79,7 +74,7 @@ public class DataboxRsmPSMOfPeptide extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
-        final PeptideInstance peptideInstance = (PeptideInstance) m_previousDataBox.getData(PeptideInstance.class);
+        final PeptideInstance peptideInstance = (PeptideInstance) getData(PeptideInstance.class);
 
         if (peptideInstance == null) {
              ((PeptideMatchPanel)getDataBoxPanelInterface()).setData(-1, null, null, true);
@@ -124,7 +119,7 @@ public class DataboxRsmPSMOfPeptide extends AbstractDataBox {
     }
     
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null ) {
             
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -139,7 +134,7 @@ public class DataboxRsmPSMOfPeptide extends AbstractDataBox {
                 }
             }
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
  
 

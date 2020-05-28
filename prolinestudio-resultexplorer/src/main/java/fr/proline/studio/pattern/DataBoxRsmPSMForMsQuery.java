@@ -60,23 +60,16 @@ public class DataBoxRsmPSMForMsQuery extends AbstractDataBox{
         m_description = "All PSMs corresponding to a MsQuery for an Identification Summary";
         
         
-        // Register Possible in parameters
+        // Register in parameters
         // One MsQuery & rsm & rs, rsm could be null
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(MsQueryInfoRsm.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
-        // One or Multiple PeptideMatch
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DPeptideMatch.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
         outParameter.addParameter(ExtendedTableModelInterface.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
         outParameter.addParameter(CrossSelectionInterface.class);
         registerOutParameter(outParameter);
     }
@@ -93,7 +86,7 @@ public class DataBoxRsmPSMForMsQuery extends AbstractDataBox{
     @Override
     public void dataChanged() {
         long oldMsQId = m_msQuery == null? -1: m_msQuery.getId();
-        final MsQueryInfoRsm _msqI = (MsQueryInfoRsm) m_previousDataBox.getData(MsQueryInfoRsm.class);
+        final MsQueryInfoRsm _msqI = (MsQueryInfoRsm) getData(MsQueryInfoRsm.class);
         
         if (_msqI == null) {
           m_msQuery = null;
@@ -156,7 +149,7 @@ public class DataBoxRsmPSMForMsQuery extends AbstractDataBox{
     }
     
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null ) {
             
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -171,7 +164,7 @@ public class DataBoxRsmPSMForMsQuery extends AbstractDataBox{
                 }
             }
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
  
     @Override

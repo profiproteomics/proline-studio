@@ -57,7 +57,7 @@ public class DataBoxRsetPeptideSpectrumError extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
-        final PeptideFragmentationData fragmentationData = (PeptideFragmentationData) m_previousDataBox.getData(PeptideFragmentationData.class);
+        final PeptideFragmentationData fragmentationData = (PeptideFragmentationData) getData(PeptideFragmentationData.class);
         final DPeptideMatch peptideMatch = (fragmentationData != null) ? fragmentationData.getPeptideMatch() : null;
 
         if ((m_previousPeptideMatch == peptideMatch) && (fragmentationData == null)) {

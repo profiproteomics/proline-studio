@@ -145,7 +145,7 @@ public class PTMPeptidesGraphicView extends JPanel {
             m_internalPanel.clean();
         } else {
             m_internalPanel.updateData();
-            m_dataBox.addDataChanged(PTMPeptideInstance.class);
+            m_dataBox.addDataChanged(PTMPeptideInstance.class, null); //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
             m_dataBox.propagateDataChanged();
         }
         setScrollLocation(this.m_dataModel.getLowerStartInProtSeq());
@@ -496,7 +496,7 @@ public class PTMPeptidesGraphicView extends JPanel {
                     if (m_superCtrl != null) {
                         m_superCtrl.onMessage(PTMGraphicCtrlPanel.Source.PEPTIDE_AREA, PTMGraphicCtrlPanel.Message.SELECTED);
                     }
-                    m_dataBox.addDataChanged(PTMPeptideInstance.class);
+                    m_dataBox.addDataChanged(PTMPeptideInstance.class, null);  //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
                     m_dataBox.propagateDataChanged();
                     repaint();
                 }

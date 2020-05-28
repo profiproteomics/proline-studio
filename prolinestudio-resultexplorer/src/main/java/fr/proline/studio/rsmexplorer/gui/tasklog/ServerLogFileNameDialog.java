@@ -2,7 +2,6 @@ package fr.proline.studio.rsmexplorer.gui.tasklog;
 
 import fr.proline.logparser.gui.ColorPalette;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
-import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.DownloadFileTask;
 import fr.proline.studio.gui.DefaultDialog;
@@ -16,7 +15,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Calendar;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -40,39 +38,23 @@ import org.slf4j.LoggerFactory;
  */
 public class ServerLogFileNameDialog extends DefaultDialog {
 
-    protected static final Logger m_logger = LoggerFactory.getLogger(ServerLogFileNameDialog.class);
-    private static String LOG_REMOTE_PATH = "./logs/";
-    private static String LOG_LOCAL_PATH = "cortexlogs/";
-    private static String LOG_DEBUG_FILE_NAME = "proline_cortex_debug";
-    private static String LOG_TODAY_DEBUG_FILE_NAME = "proline_cortex_debug.txt";
-    private static String LOG_FILE_NAME = "proline_cortex_log";
-    private static String LOG_FILE_SUFFIX = ".txt";
-    private JPanel m_internalPanel;
-    private JComboBox m_dateChooser;
-    private JTextField m_fileNameTxtField;
-    private JCheckBox m_debugFileCheckBox;
-    private int m_dateAdjust;
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+    JPanel m_internalPanel;
+    JComboBox m_dateChooser;
+    JTextField m_fileNameTxtField;
+    JCheckBox m_debugFileCheckBox;
+    int m_dateAdjust;
     /**
      * localFile
      */
-    ArrayList<File> m_fileList;
-    File m_localPath;
+    File m_file;
+    static String LOG_FILE_SUFFIX = ".txt";
 
     public ServerLogFileNameDialog() {
         super(WindowManager.getDefault().getMainWindow(), Dialog.ModalityType.APPLICATION_MODAL);
         m_dateAdjust = 0;
         m_internalPanel = createInternalPanel();
-        m_fileList = new ArrayList();
-        ServerConnectionManager serverConnectionManager = ServerConnectionManager.getServerConnectionManager();
-        String host = serverConnectionManager.getServerURL();
-        m_localPath = new File(LOG_LOCAL_PATH);
-        if (!m_localPath.isDirectory()) {
-            m_localPath.mkdir();
-        }
-        m_localPath = new File(LOG_LOCAL_PATH + host + "/");
-        if (!m_localPath.isDirectory()) {
-            m_localPath.mkdir();
-        }
+        m_file = null;
         String dialog_title = "Server Log File Parser";
         super.setTitle(dialog_title);
         String help_text = "<html>Take a Log File on the server & view tasks. <br> You shold choice the date & type of log file</html>";
@@ -81,7 +63,40 @@ public class ServerLogFileNameDialog extends DefaultDialog {
         super.setButtonVisible(DefaultDialog.BUTTON_HELP, false);//use only cancel, ok button
     }
 
-    private JDialog createLogParserDialog(ArrayList<File> fileList) {
+    @Override
+    protected boolean okCalled() {
+        AbstractJMSCallback callback = new AbstractJMSCallback() {
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success) {
+
+                if (success) {
+                    m_logger.debug("Retrive file \"" + m_file.getName() + "\" from server succes.");
+                    createLogParserDialog();
+                } else {
+                    JOptionPane.showMessageDialog(rootPane, "Retrive File \"" + m_file.getName() + "\" failed.\n"
+                            + " The file name/path error or it does not exist a so file(by example a off day)");
+                }
+            }
+
+        };
+        String name = m_fileNameTxtField.getText();
+        int begin = name.lastIndexOf("\\") + 1;
+
+        m_file = new File(name.substring(begin));
+        String remoteFilePath = m_fileNameTxtField.getText();
+
+        DownloadFileTask task = new DownloadFileTask(callback, remoteFilePath, m_file);
+        AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+
+        return true;
+    }
+
+    private JDialog createLogParserDialog() {
 
         JDialog logViewDialog = new JDialog(WindowManager.getDefault().getMainWindow(), "Parse Tasks On The Server", Dialog.ModalityType.APPLICATION_MODAL);
         logViewDialog.getContentPane().setLayout(new BorderLayout());
@@ -106,9 +121,9 @@ public class ServerLogFileNameDialog extends DefaultDialog {
         progressBar.setVisible(false);
         progressBar.setLocation(200, 200);
         logViewDialog.getLayeredPane().add(progressBar, JLayeredPane.PALETTE_LAYER + 2);
-        ServerLogControlPanel logPanel;
+
         //main logPanel
-        logPanel = new ServerLogControlPanel(fileList, taskFlowFrame, progressBar);
+        ServerLogControlPanel logPanel = new ServerLogControlPanel(m_file, taskFlowFrame, progressBar);
         logViewDialog.getContentPane().add(logPanel, BorderLayout.CENTER);
         logViewDialog.pack();
         logViewDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -119,7 +134,7 @@ public class ServerLogFileNameDialog extends DefaultDialog {
 
     private JPanel createInternalPanel() {
         //FileName
-        m_fileNameTxtField = new JTextField(LOG_REMOTE_PATH + getDebugLogFileName(0, 0));
+        m_fileNameTxtField = new JTextField("logs\\" + getDebugLogFileName(0, 0));
         //Date Combobox
         int maxDuration = 7;
         String[] dateChoice = new String[maxDuration];
@@ -191,128 +206,21 @@ public class ServerLogFileNameDialog extends DefaultDialog {
         } else {
             fileName = getLogFileName(m_dateAdjust);
         }
-        m_fileNameTxtField.setText(LOG_REMOTE_PATH + fileName);
-    }
-
-    @Override
-    protected boolean okCalled() {
-        //retriveConfig();
-        String remoteFilePath = m_fileNameTxtField.getText();
-        String debugFileP = this.getPrefix(remoteFilePath);
-        boolean isDebugFile = (debugFileP != null);
-
-        if (isDebugFile) {
-            if (remoteFilePath.equals(LOG_REMOTE_PATH + LOG_TODAY_DEBUG_FILE_NAME)) {//today
-                m_isTodayDebug = true;
-            }
-            retriveFile(debugFileP, isDebugFile, 0);
-        } else {
-            //only one file
-            retriveFile(remoteFilePath, isDebugFile, 0);
-        }
-
-        return true;
-    }
-    boolean m_isTodayDebug = false;
-
-    /**
-     * when isDebugFile, filePath is only debugfilePrefix as
-     * ./logs/proline_cortex_debug_.yyyy-MM-dd
-     *
-     * @param filePath, for normal log file, as
-     * ./logs/proline_cortex_log.yyyy-MM-dd
-     * @param isDebugFile
-     * @param index
-     */
-    private void retriveFile(String filePath, boolean isDebugFile, int index) {
-        String remoteFilePath = filePath;
-        if (isDebugFile) {
-            remoteFilePath = filePath + "." + index + LOG_FILE_SUFFIX;
-        }
-        int begin = remoteFilePath.lastIndexOf("/") + 1;
-        String fileName = remoteFilePath.substring(begin);
-        File localFile = new File(m_localPath +"/"+ fileName);
-        AbstractJMSCallback callback;
-        callback = new AbstractJMSCallback() {
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
-
-            @Override
-            public void run(boolean success) {
-                if (!isDebugFile) {
-                    if (success) {
-                        m_logger.debug("Retrive file \"" + localFile.getName() + "\" from server succes.");
-                        m_fileList.add(localFile);
-                        createLogParserDialog(m_fileList);
-                    } else {
-
-                        JOptionPane.showMessageDialog(rootPane, "Retrive File \"" + localFile.getName() + "\" failed.\n"
-                                + " The file name/path error or it does not exist a so file(by example a off day)");
-                    }
-                } else {
-                    if (success) {
-                        m_logger.debug("Retrive file \"" + localFile.getName() + "\" from server succes.");
-
-                        m_fileList.add(localFile);
-                        int next = index + 1;
-                        retriveFile(filePath, isDebugFile, next);
-                    } else {
-                        if (index == 0 && ! m_isTodayDebug) {//first file do not exist => this day, we have not debug log file
-                            JOptionPane.showMessageDialog(rootPane, "Retrive File \"" + localFile.getName() + "\" failed.\n"
-                                    + " The file name/path error or it does not exist a so file(by example a off day)");
-                        } else {
-                            if (m_isTodayDebug) {
-                                retriveFile(LOG_REMOTE_PATH + LOG_TODAY_DEBUG_FILE_NAME, !isDebugFile, index);//the last log file to retrive, 
-                            } else {
-                                JOptionPane.showMessageDialog(rootPane, "Retrive end " + filePath + " stop at " + index);
-                                m_logger.debug("retrive multi file end");
-                                createLogParserDialog(m_fileList);
-                            }
-                        }
-                    }
-                }
-            }
-
-        };
-
-        DownloadFileTask task = new DownloadFileTask(callback, remoteFilePath, localFile);
-        AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+        m_fileNameTxtField.setText("logs\\" + fileName);
     }
 
     private String getLogFileName(int ajuste) {
-
+        String LOG_FILE_NAME = "proline_cortex_log";
         return LOG_FILE_NAME + "." + getDateInFileName(ajuste) + LOG_FILE_SUFFIX;
     }
 
     private String getDebugLogFileName(int dateAjuste, int cutIndex) {
+        String LOG_DEBUG_FILE_NAME = "proline_cortex_debug";
         if (dateAjuste <= 0) {
-            return LOG_TODAY_DEBUG_FILE_NAME;
+            return LOG_DEBUG_FILE_NAME + LOG_FILE_SUFFIX;
         } else {
             return LOG_DEBUG_FILE_NAME + "_." + getDateInFileName(dateAjuste) + "." + cutIndex + LOG_FILE_SUFFIX;
         }
-    }
-
-    /**
-     *
-     * @param debugFileName, often = LOG_REMOTE_PATH +
-     * LOG_DEBUG_FILE_NAME+"_."+date+"."+LOG_FILE_SUFFIX;
-     * @return file name with path, without .\d+.txt
-     */
-    private String getPrefix(String debugFileName) {
-        if (debugFileName.contains(LOG_REMOTE_PATH + LOG_DEBUG_FILE_NAME)) {
-            if (m_debugFileCheckBox.isSelected()) {
-                if (debugFileName.contains(LOG_REMOTE_PATH + LOG_TODAY_DEBUG_FILE_NAME)) {//today
-                    return LOG_REMOTE_PATH + LOG_DEBUG_FILE_NAME + "_." + getDateInFileName(0);
-                } else {
-                    String regex = ".\\d+" + LOG_FILE_SUFFIX;
-                    String fileNamePrefix = debugFileName.replaceFirst(regex, "");
-                    return fileNamePrefix;
-                }
-            }
-        }
-        return null;
     }
 
     private String getDateInFileName(int ajuste) {

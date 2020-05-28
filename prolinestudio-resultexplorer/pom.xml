@@ -18,7 +18,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     
- <repositories>
+    <repositories>
         
         <repository>
             <id>nexus-ebi-release-repo</id>
@@ -365,9 +365,9 @@
             <version>4.2.13.Final</version>
         </dependency> 
         <dependency>
-	  <groupId>org.python</groupId>
-	  <artifactId>jython</artifactId>
-	  <version>2.2</version>
+            <groupId>org.python</groupId>
+            <artifactId>jython</artifactId>
+            <version>2.2</version>
         </dependency>
 
         <dependency>
@@ -378,7 +378,7 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
         </dependency>
-           <!--
+        <!--
         <dependency>
             <groupId>no.uib</groupId>
             <artifactId>ols-dialog</artifactId>
@@ -392,7 +392,7 @@
         </dependency>
         -->   
         <dependency>
-             <groupId>org.apache.httpcomponents</groupId>
+            <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>       
             <version>4.5.2</version>
             <scope>runtime</scope>
@@ -403,20 +403,20 @@
             <version>1.10</version>
             <scope>runtime</scope>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>uk.ac.ebi.pride.toolsuite</groupId>
             <artifactId>ols-dialog</artifactId>
             <version>3.4.13-EDyP</version>
             
         </dependency>
-<!--        <dependency>
+        <!--        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.7.3</version> 
 
         </dependency>-->
         
-                       <dependency>
+        <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
             <version>4.1.42.Final</version>    
@@ -491,7 +491,7 @@
                 <configuration>
                     <publicPackages>
                         <publicPackage>fr.proline.studio.rsmexplorer</publicPackage>
-                   </publicPackages>
+                    </publicPackages>
                 </configuration>
             </plugin>   
             

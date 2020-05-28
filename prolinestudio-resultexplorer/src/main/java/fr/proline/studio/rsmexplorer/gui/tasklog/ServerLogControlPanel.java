@@ -1,7 +1,18 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/* 
+ * Copyright (C) 2019 VD225637
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
+ * ; either version 2.1 
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * CeCILL License V2.1 for more details.
+ *
+ * You should have received a copy of the CeCILL License 
+ * along with this program; If not, see <http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html>.
  */
 package fr.proline.studio.rsmexplorer.gui.tasklog;
 
@@ -20,6 +31,7 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.prefs.Preferences;
 import javax.swing.JButton;
 import javax.swing.JInternalFrame;
@@ -44,7 +56,7 @@ public class ServerLogControlPanel extends LogControlPanel {
 
     private JInternalFrame m_taskFlowFrame;
     private JTextPane m_taskFlowTextPane;
-    private File m_file;
+    private ArrayList<File> m_fileList;
     Utility.DATE_FORMAT m_dateFormat = Utility.DATE_FORMAT.SHORT;
     InfoToggleButton m_infoToggleButton;
     private int BIG_FILE_SIZE = 4 * 1024 * 1024;//4 Mega
@@ -52,10 +64,10 @@ public class ServerLogControlPanel extends LogControlPanel {
     LogReaderWorker m_readWorker;
     JProgressBar m_progressBar;
 
-    ServerLogControlPanel(File localFile, JInternalFrame taskFlowFrame, JProgressBar progressBar) {
+    public ServerLogControlPanel(ArrayList<File> localFileList, JInternalFrame taskFlowFrame, JProgressBar progressBar) {
         super();
         initParameters();
-        m_file = localFile;
+        m_fileList = localFileList;
         m_taskQueueView = new ServerLogTaskListView(this);
         m_taskView = new TaskView();
         m_taskConsole = new TaskConsolePane();
@@ -147,14 +159,12 @@ public class ServerLogControlPanel extends LogControlPanel {
     private void parseFile() {
         try {
             LogLineReader logReader;
-            m_logger.info("File to analyse: " + m_file.getName() + ".");
-            long fileLength = m_file.length();
+            String fileName = m_fileList.get(0).getName();
+            m_logger.info("File to analyse: " + fileName + ".");
 
-            boolean m_isBigFile = (fileLength > BIG_FILE_SIZE) ? true : false;
-            String fileName = m_file.getName();
-            m_logReader = new LogLineReader(m_file.getName(), m_dateFormat, m_isBigFile, false);
+            m_logReader = new LogLineReader(fileName, m_dateFormat, isBigFile(), false);
 
-            m_readWorker = new LogReaderWorker(this, m_taskFlowTextPane, m_file, m_dateFormat, m_logReader);
+            m_readWorker = new LogReaderWorker(this, m_taskFlowTextPane, m_fileList, m_dateFormat, m_logReader);
             m_taskFlowFrame.setVisible(true);
             m_readWorker.execute();
         } catch (Exception ex) {
@@ -170,7 +180,11 @@ public class ServerLogControlPanel extends LogControlPanel {
 
     @Override
     public boolean isBigFile() {
-        return m_file.length() > BIG_FILE_SIZE;
+        long size = 0;
+        for (File file : m_fileList) {
+            size += file.length();
+        }
+        return size > BIG_FILE_SIZE;
     }
 
     static int MAX_LINE_TO_SHOW = 5000;

@@ -5,12 +5,12 @@
  */
 package fr.proline.studio.rsmexplorer.gui.tasklog;
 
-import fr.proline.logviewer.gui.LogControlPanel;
-import fr.proline.logviewer.gui.LogReaderWorker;
-import fr.proline.logviewer.gui.TaskConsolePane;
-import fr.proline.logviewer.gui.TaskView;
-import fr.proline.logviewer.model.LogLineReader;
-import fr.proline.logviewer.model.Utility;
+import fr.proline.logparser.gui.LogControlPanel;
+import fr.proline.logparser.gui.LogReaderWorker;
+import fr.proline.logparser.gui.TaskConsolePane;
+import fr.proline.logparser.gui.TaskView;
+import fr.proline.logparser.model.LogLineReader;
+import fr.proline.logparser.model.Utility;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.info.InfoToggleButton;

@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.tasklog;
 
-import fr.proline.logviewer.gui.ColorPalette;
+import fr.proline.logparser.gui.ColorPalette;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.DownloadFileTask;

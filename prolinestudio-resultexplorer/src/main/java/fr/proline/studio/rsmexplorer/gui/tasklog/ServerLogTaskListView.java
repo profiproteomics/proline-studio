@@ -5,8 +5,8 @@
  */
 package fr.proline.studio.rsmexplorer.gui.tasklog;
 
-import fr.proline.logviewer.gui.TaskListInterface;
-import fr.proline.logviewer.model.LogTask;
+import fr.proline.logparser.gui.TaskListInterface;
+import fr.proline.logparser.model.LogTask;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;

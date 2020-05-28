@@ -47,24 +47,16 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
         m_typeName = "Peptides";
         m_description = "All Peptides of a Protein Match";
         
-        // Register Possible in parameters
-        // One ProteinMatch AND one ResultSummary
+        // Register in parameters
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(DProteinMatch.class);
         inParameter.addParameter(ResultSummary.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
-        // One or Multiple  PeptideInstance
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DPeptideInstance.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
         outParameter.addParameter(DPeptideMatch.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
         outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
        
@@ -83,9 +75,9 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        final DProteinMatch proteinMatch = (DProteinMatch) m_previousDataBox.getData(DProteinMatch.class);
-        final DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(DPeptideMatch.class);
-        final ResultSummary rsm = (ResultSummary) m_previousDataBox.getData(ResultSummary.class);
+        final DProteinMatch proteinMatch = (DProteinMatch) getData(DProteinMatch.class);
+        final DPeptideMatch peptideMatch = (DPeptideMatch) getData(DPeptideMatch.class);
+        final ResultSummary rsm = (ResultSummary) getData(ResultSummary.class);
 
         // register the link to the Transient Data
         linkCache(rsm);
@@ -141,7 +133,7 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
     private Long m_previousTaskId = null;
     
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null) {
             
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -162,7 +154,7 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
                 }
             }
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
     
     @Override

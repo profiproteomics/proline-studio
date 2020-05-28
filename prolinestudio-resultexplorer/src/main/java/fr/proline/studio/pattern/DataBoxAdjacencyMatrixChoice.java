@@ -46,23 +46,22 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
         m_typeName = "Proteins Adjacency Matrices";
         m_description = "All Adjacency Matrices";
         
-        // Register Possible in parameters
-        // One ResultSummary
+        // Register in parameters
         GroupParameter inParameter = new GroupParameter();
+        
         inParameter.addParameter(ResultSummary.class);
         inParameter.addParameter(DProteinSet.class);
-        registerInParameter(inParameter);
-        
-        inParameter = new GroupParameter();
-        inParameter.addParameter(ResultSummary.class);
         inParameter.addParameter(DProteinMatch.class);
+        
         registerInParameter(inParameter);
         
         
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
+        
         outParameter.addParameter(DrawVisualization.class);
         outParameter.addParameter(Component.class);
+        
         registerOutParameter(outParameter);
     }
     
@@ -87,15 +86,15 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
-        final ResultSummary _rsm = (m_rsm != null) ? m_rsm : (ResultSummary) m_previousDataBox.getData( ResultSummary.class);
+        final ResultSummary _rsm = (m_rsm != null) ? m_rsm : (ResultSummary) getData( ResultSummary.class);
         // register the link to the Transient Data
         linkCache(_rsm);
         
         
-        DProteinMatch proteinMatch = (m_previousDataBox==null) ? null : (DProteinMatch) m_previousDataBox.getData(DProteinMatch.class);
+        DProteinMatch proteinMatch = (DProteinMatch) getData(DProteinMatch.class);
         
         if (proteinMatch == null) {
-            DProteinSet proteinSet = (m_previousDataBox==null) ? null : (DProteinSet) m_previousDataBox.getData(DProteinSet.class);
+            DProteinSet proteinSet = (DProteinSet) getData(DProteinSet.class);
             if (proteinSet != null) {
                 proteinMatch = proteinSet.getTypicalProteinMatch();
             }
@@ -150,7 +149,7 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
     }
     
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null ) {
             
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -168,7 +167,7 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
                 }
             }
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
     
 }

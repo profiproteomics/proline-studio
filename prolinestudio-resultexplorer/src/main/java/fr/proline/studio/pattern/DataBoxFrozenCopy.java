@@ -92,20 +92,20 @@ public class DataBoxFrozenCopy extends AbstractDataBox {
         }
         
         // register out parameters
+        GroupParameter outParameter = new GroupParameter();
         Iterator<Class> itClass = m_frozenDataMap.keySet().iterator();
         while (itClass.hasNext()) {
             Class c = itClass.next();
-            GroupParameter outParameter = new GroupParameter();
             outParameter.addParameter(c);
-            registerOutParameter(outParameter);
         }
+        registerOutParameter(outParameter);
 
         
         
     }
 
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         HashMap<ParameterSubtypeEnum, Object> map = m_frozenDataMap.get(parameterType);
         if (map == null) {
             return null;

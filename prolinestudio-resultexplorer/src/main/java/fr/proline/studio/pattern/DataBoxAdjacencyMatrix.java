@@ -53,9 +53,10 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
         m_typeName = DESCRIPTION;
         m_description = DESCRIPTION;
         
-        // Register Possible in parameters
+        // Register in parameters
         // One ResultSummary
         GroupParameter inParameter = new GroupParameter();
+        inParameter.addParameter(ResultSummary.class);
         inParameter.addParameter(DrawVisualization.class);
         inParameter.addParameter(Component.class);
         registerInParameter(inParameter);
@@ -64,13 +65,7 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DPeptideMatch.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
         outParameter.addParameter(DPeptideInstance.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
         outParameter.addParameter(DProteinMatch.class);
         registerOutParameter(outParameter);
         
@@ -91,12 +86,12 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
-        final ResultSummary _rsm = (ResultSummary) m_previousDataBox.getData(ResultSummary.class);
+        final ResultSummary _rsm = (ResultSummary) getData(ResultSummary.class);
         // register the link to the Transient Data
         linkCache( _rsm);
         
-        Component component = (Component) m_previousDataBox.getData(Component.class);
-        DrawVisualization drawVisualization = (DrawVisualization) m_previousDataBox.getData(DrawVisualization.class);
+        Component component = (Component) getData(Component.class);
+        DrawVisualization drawVisualization = (DrawVisualization) getData(DrawVisualization.class);
 
         
         
@@ -150,7 +145,7 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
     private Long m_previousTaskId = null;
     
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null ) {
             
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -167,7 +162,7 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
                     DPeptideMatch peptideMatch = ((MatrixPanel) getDataBoxPanelInterface()).getSelectedPeptideMatch();
                     DProteinMatch pm = ((MatrixPanel) getDataBoxPanelInterface()).getSelectedProteinMatch();
                     if ((pm != null) && (peptideMatch != null)) {
-                        ResultSummary rsm = (ResultSummary) m_previousDataBox.getData(ResultSummary.class);
+                        ResultSummary rsm = (ResultSummary) getData(ResultSummary.class);
                         if (rsm != null) {
                             DPeptideSet peptideSet = pm.getPeptideSet(rsm.getId());
                             DPeptideInstance[] peptideInstances = peptideSet.getPeptideInstances();
@@ -185,7 +180,7 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
                 }
             }
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
     
 }

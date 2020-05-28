@@ -17,6 +17,7 @@
 package fr.proline.studio.pattern;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Group of parameters
@@ -28,6 +29,10 @@ public class GroupParameter  {
     
     public void addParameter(Class type) {
         m_parameterList.add(new DataParameter(type, ParameterSubtypeEnum.SINGLE_DATA));
+    }
+    
+    public void addParameter(Class type, boolean isCompulsory) {
+        m_parameterList.add(new DataParameter(type, ParameterSubtypeEnum.SINGLE_DATA, isCompulsory));
     }
     
     public void addParameter(Class type, ParameterSubtypeEnum subtype) {
@@ -42,14 +47,22 @@ public class GroupParameter  {
         return m_parameterList;
     }
     
-    public boolean isDataDependant(Class dataType) {
-        int nbParameters  = m_parameterList.size();
-        for (int i=0;i<nbParameters;i++) {
+    public void addParameter(GroupParameter groupParameter) {
+        for (DataParameter dataParameter : groupParameter.getParameterList()) {
+            m_parameterList.add(dataParameter);
+        }
+    }
+    
+    public boolean isDataDependant(Class dataType, ParameterSubtypeEnum subtype) {
+
+        int nbParameters = m_parameterList.size();
+        for (int i = 0; i < nbParameters; i++) {
             DataParameter parameter = m_parameterList.get(i);
-            if (parameter.equalsData(dataType)) {
+            if (parameter.equalsData(dataType, subtype)) {
                 return true;
             }
         }
+
         return false;
     }
     

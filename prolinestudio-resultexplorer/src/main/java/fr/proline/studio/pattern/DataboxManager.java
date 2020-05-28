@@ -108,7 +108,7 @@ public class DataboxManager {
                 for (int i = 0; i < m_dataBoxContinuingArray.length; i++) {
 
                     AbstractDataBox databox = m_dataBoxContinuingArray[i];
-                    if (databox.getClass().equals(previousDatabox.getClass())) {
+                    if (databox.m_type.equals(previousDatabox.m_type)) {
                         // do not allow the same databox twice
                         continue;
                     }

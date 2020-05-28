@@ -70,27 +70,21 @@ public class DataboxChildFeature extends AbstractDataBox {
         m_typeName = "XIC Features";
         m_description = "All Features for a Quanti. Peptide Ion";
 
-        // Register Possible in parameters
+        // Register in parameters
         // One Map 
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(DMasterQuantPeptideIon.class);
+        inParameter.addParameter(QuantChannelInfo.class);
         registerInParameter(inParameter);
 
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(Feature.class);
-        registerOutParameter(outParameter);
-
-        outParameter = new GroupParameter();
-        outParameter.addParameter(ExtendedTableModelInterface.class);
-        registerOutParameter(outParameter);
-
-        outParameter = new GroupParameter();
-        outParameter.addParameter(CrossSelectionInterface.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
         outParameter.addParameter(DFeature.class, ParameterSubtypeEnum.LIST_DATA);
+
+        outParameter.addParameter(ExtendedTableModelInterface.class);
+        outParameter.addParameter(CrossSelectionInterface.class);
+
         registerOutParameter(outParameter);
 
     }
@@ -109,8 +103,8 @@ public class DataboxChildFeature extends AbstractDataBox {
         m_extractedXICSet = null;
         
         DMasterQuantPeptideIon oldIon = m_masterQuantPeptideIon;
-        m_masterQuantPeptideIon = (DMasterQuantPeptideIon) m_previousDataBox.getData(DMasterQuantPeptideIon.class);
-        m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(QuantChannelInfo.class);
+        m_masterQuantPeptideIon = (DMasterQuantPeptideIon) getData(DMasterQuantPeptideIon.class);
+        m_quantChannelInfo = (QuantChannelInfo) getData(QuantChannelInfo.class);
 
         if (m_masterQuantPeptideIon != null && (oldIon != null && m_masterQuantPeptideIon.equals(oldIon))) {
             return;
@@ -314,7 +308,7 @@ public class DataboxChildFeature extends AbstractDataBox {
 
     
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         
         if (parameterType!= null ) {
 
@@ -353,7 +347,7 @@ public class DataboxChildFeature extends AbstractDataBox {
             }
   
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
 
 

@@ -82,43 +82,30 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         m_typeName = "Dataset PTMs Clusters"; //May be Quant PTM Protein Sites... 
         m_description = "Clusters of Modification Sites of a Dataset";//May be Ident or Quant dataset...
         
-        // Register Possible in parameters
-        // One PTMDatasert ResultSummary
+        // Register in parameters
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(PTMDataset.class);
-        registerInParameter(inParameter);
         
-        inParameter = new GroupParameter();
+        inParameter.addParameter(PTMDataset.class);
         inParameter.addParameter(DDataset.class);
+        
         registerInParameter(inParameter);
         
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(ResultSummary.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
+
         outParameter.addParameter(PTMPeptideInstance.class, ParameterSubtypeEnum.LEAF_PTMPeptideInstance);
         outParameter.addParameter(PTMPeptideInstance.class, ParameterSubtypeEnum.PARENT_PTMPeptideInstance);
         outParameter.addParameter(PTMDataset.class);
-        registerOutParameter(outParameter);
 
-        outParameter = new GroupParameter();
         outParameter.addParameter(DProteinMatch.class); 
-        outParameter.addParameter(ResultSummary.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
         outParameter.addParameter(DPeptideMatch.class);
-        outParameter.addParameter(ResultSummary.class);
-        registerOutParameter(outParameter);
         
-        outParameter = new GroupParameter();
-        outParameter.addParameter(ExtendedTableModelInterface.class);
-        registerOutParameter(outParameter);
+        outParameter.addParameter(PTMCluster.class, ParameterSubtypeEnum.LIST_DATA);
 
-        outParameter = new GroupParameter();
+        outParameter.addParameter(ExtendedTableModelInterface.class);
         outParameter.addParameter(CrossSelectionInterface.class);
+        
         registerOutParameter(outParameter);
                         
     }
@@ -136,18 +123,18 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     public void setXicResult(boolean isXICResult) {
         m_isXicResult = isXICResult;
         m_style = (m_isXicResult) ? DataboxStyle.STYLE_XIC : DataboxStyle.STYLE_SC;
-        if(m_isXicResult)
+        if (m_isXicResult) {
             registerXicOutParameter();
+        }
     }
     
     private void registerXicOutParameter(){
         GroupParameter outParameter = new GroupParameter();
+        
         outParameter.addParameter(DMasterQuantProteinSet.class);
         outParameter.addParameter(DProteinSet.class);
-        registerOutParameter(outParameter);        
-                
-        outParameter = new GroupParameter();
         outParameter.addParameter(QuantChannelInfo.class);
+        
         registerOutParameter(outParameter);
     }
     
@@ -263,7 +250,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                     } else {
                         setLoaded(loadingId);                        
                         ((PTMClustersPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
-                        addDataChanged(PTMPeptideInstance.class);
+                        addDataChanged(PTMPeptideInstance.class, null);  //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
                         addDataChanged(ExtendedTableModelInterface.class);
                         propagateDataChanged();
                     }
@@ -440,7 +427,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     
     
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null ) {
             
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -524,7 +511,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
           
         }
         
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
             
     @Override

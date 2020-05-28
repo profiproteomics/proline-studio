@@ -131,7 +131,7 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
      * when selected peptide change, change next databox and table selected row
      */
     protected void valueChanged() {
-        m_dataBox.addDataChanged(PTMPeptideInstance.class);
+        m_dataBox.addDataChanged(PTMPeptideInstance.class, null); //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
         m_dataBox.propagateDataChanged();
         this.repaint();
     }

@@ -472,7 +472,7 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
             if (selectionWillBeRestored) {
                 return;
             }
-            m_dataBox.addDataChanged(PTMPeptideInstance.class);
+            m_dataBox.addDataChanged(PTMPeptideInstance.class, null);  //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
             m_dataBox.addDataChanged(DPeptideMatch.class);
             m_dataBox.addDataChanged(MsQueryInfoRsm.class);
             m_dataBox.propagateDataChanged();

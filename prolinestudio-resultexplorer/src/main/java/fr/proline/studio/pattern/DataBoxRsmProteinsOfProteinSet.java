@@ -46,8 +46,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
         m_typeName = "Proteins";
         m_description = "All Proteins of a Protein Set";
         
-        // Register Possible in parameters
-        // One ProteinSet
+        // Register in parameters
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(DProteinSet.class);
         registerInParameter(inParameter);
@@ -56,9 +55,6 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
         // One ProteinMatch
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DProteinMatch.class);
-        registerOutParameter(outParameter);
-
-        outParameter = new GroupParameter();
         outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
        
@@ -74,7 +70,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
     
     @Override
     public void dataChanged() {
-        final DProteinSet proteinSet = (DProteinSet) m_previousDataBox.getData(DProteinSet.class);
+        final DProteinSet proteinSet = (DProteinSet) getData(DProteinSet.class);
 
         if (proteinSet == null) {
             ((RsmProteinsOfProteinSetPanel)getDataBoxPanelInterface()).setData(null, null);
@@ -129,7 +125,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
     
     
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType != null) {
             
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -144,7 +140,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
                 }
             }
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
     
     @Override

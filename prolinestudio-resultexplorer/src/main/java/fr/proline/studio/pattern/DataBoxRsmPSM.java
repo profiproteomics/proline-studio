@@ -53,7 +53,7 @@ public class DataBoxRsmPSM extends AbstractDataBox {
         m_typeName = "PSMs";
         m_description = "All PSMs of an Identification Summary or corresponding to a Peptide Instance";
         
-        // Register Possible in parameters
+        // Register in parameters
         // One ResultSummary
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(ResultSummary.class);
@@ -63,17 +63,8 @@ public class DataBoxRsmPSM extends AbstractDataBox {
         // One or Multiple PeptideMatch
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DPeptideMatch.class);
-        registerOutParameter(outParameter);
-
-        outParameter = new GroupParameter();
         outParameter.addParameter(ResultSummary.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
         outParameter.addParameter(ResultSet.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
         outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
        
@@ -91,7 +82,7 @@ public class DataBoxRsmPSM extends AbstractDataBox {
     @Override
     public void dataChanged() {
         
-        final ResultSummary _rsm = (m_rsm!=null) ? m_rsm : (ResultSummary) m_previousDataBox.getData(ResultSummary.class);
+        final ResultSummary _rsm = (m_rsm!=null) ? m_rsm : (ResultSummary) getData(ResultSummary.class);
 
         // register the link to the Transient Data
         linkCache(_rsm);
@@ -132,7 +123,7 @@ public class DataBoxRsmPSM extends AbstractDataBox {
     }
     
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null ) {
             
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -160,7 +151,7 @@ public class DataBoxRsmPSM extends AbstractDataBox {
                 }
             }
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
  
     @Override

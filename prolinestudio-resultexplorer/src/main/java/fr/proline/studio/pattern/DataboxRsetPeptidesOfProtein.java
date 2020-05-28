@@ -55,7 +55,7 @@ public class DataboxRsetPeptidesOfProtein extends AbstractDataBox {
         m_typeName = "Peptides";
         m_description = "All Peptides of a Protein Match";
 
-        // Register Possible in parameters
+        // Register in parameters
         // One ProteinMatch AND one ResultSet
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(DProteinMatch.class);
@@ -63,12 +63,8 @@ public class DataboxRsetPeptidesOfProtein extends AbstractDataBox {
         registerInParameter(inParameter);
 
         // Register possible out parameters
-        // One or Multiple  PeptideInstance
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DPeptideMatch.class);
-        registerOutParameter(outParameter);
-
-        outParameter = new GroupParameter();
         outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
 
@@ -86,8 +82,8 @@ public class DataboxRsetPeptidesOfProtein extends AbstractDataBox {
     public void dataChanged() {
         
 
-        final DProteinMatch proteinMatch = (DProteinMatch) m_previousDataBox.getData(DProteinMatch.class);
-        final ResultSet rset = (ResultSet) m_previousDataBox.getData(ResultSet.class);
+        final DProteinMatch proteinMatch = (DProteinMatch) getData(DProteinMatch.class);
+        final ResultSet rset = (ResultSet) getData(ResultSet.class);
 
         if (proteinMatch == null) {
             ((PeptideMatchPanel) getDataBoxPanelInterface()).setData(-1, null, null, true);
@@ -149,7 +145,7 @@ public class DataboxRsetPeptidesOfProtein extends AbstractDataBox {
     
     
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null) {
             
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -164,7 +160,7 @@ public class DataboxRsetPeptidesOfProtein extends AbstractDataBox {
                 }
             }
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
     
     @Override

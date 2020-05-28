@@ -43,19 +43,14 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
         m_typeName = "Proteins";
         m_description = "Proteins for a Peptide Match";
         
-        // Register Possible in parameters
-        // One PeptideMatch
+        // Register in parameters
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(DPeptideMatch.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
-        // One or Multiple ProteinMatch
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DProteinMatch.class);
-        registerOutParameter(outParameter);
-
-        outParameter = new GroupParameter();
         outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
        
@@ -73,7 +68,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        final DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(DPeptideMatch.class);
+        final DPeptideMatch peptideMatch = (DPeptideMatch) getData(DPeptideMatch.class);
 
         if (peptideMatch == null) {
             ((RsetProteinsPanel)getDataBoxPanelInterface()).setDataPeptideMatch(null);
@@ -130,7 +125,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
     
     
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null) {
             
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -145,6 +140,6 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
                 }
             }
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
 }

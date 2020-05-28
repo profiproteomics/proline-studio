@@ -86,7 +86,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
         m_description = m_displayAllPepMatches ? "PSMs matching a modification site or cluster" : "Peptides matching of modification site or cluster";
         m_logger.debug(" ----> Created DataBoxPTMPeptides " + m_typeName);
 
-        // Register Possible in parameters          
+        // Register in parameters          
         super.registerParameters();
     }
 
@@ -126,11 +126,11 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
 
             //Get QuantInfo        
             if (m_isXICResult) {
-                m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(QuantChannelInfo.class);
+                m_quantChannelInfo = (QuantChannelInfo) getData(QuantChannelInfo.class);
                 if (m_quantChannelInfo != null) {
                     panel.addSingleValue(m_quantChannelInfo);
                 }
-                m_masterQuantProteinSet = (DMasterQuantProteinSet) m_previousDataBox.getData(DMasterQuantProteinSet.class);
+                m_masterQuantProteinSet = (DMasterQuantProteinSet) getData(DMasterQuantProteinSet.class);
             }
 
             final List<PTMSite> notLoadedPtmSite = getNotLoadedPTMSite();
@@ -141,7 +141,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                     loadXicAndPropagate();
                 } else {
                     ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, m_ptmPepInstances, m_ptmClusters, null, true);
-                    addDataChanged(PTMPeptideInstance.class);
+                    addDataChanged(PTMPeptideInstance.class, null);  //   //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
                     addDataChanged(DPeptideMatch.class);
                     addDataChanged(ExtendedTableModelInterface.class);
                     propagateDataChanged();
@@ -198,7 +198,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                                 //m_logger.debug(" DB PTM peptide : DatabaseLoadLcMSTask run m_quantChannelInfo defined CALL setData ");                                
                                 ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(taskId, m_ptmPepInstances, m_ptmClusters, qpepByPepId, finished);
                                 unregisterTask(task2Id);
-                                addDataChanged(PTMPeptideInstance.class);
+                                addDataChanged(PTMPeptideInstance.class, null); //  //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
                                 addDataChanged(ExtendedTableModelInterface.class);
                                 propagateDataChanged();
                             }
@@ -222,7 +222,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                     m_previousXICTaskId = null;
                     setLoaded(loadingId);
                     unregisterTask(taskId);
-                    addDataChanged(PTMPeptideInstance.class);
+                    addDataChanged(PTMPeptideInstance.class, null); //  //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
                     addDataChanged(ExtendedTableModelInterface.class);
                     propagateDataChanged();
                 }
@@ -256,7 +256,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
     }
 
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
 
         DataBoxPanelInterface panel = getDataBoxPanelInterface();
 
@@ -290,13 +290,13 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
             }
             
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
 
     private List<XICComparePeptideTableModel> getTableModelInterfaceList() {
         List<XICComparePeptideTableModel> list = new ArrayList();
         if (m_quantChannelInfo == null && m_previousDataBox != null) {
-            m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(QuantChannelInfo.class);
+            m_quantChannelInfo = (QuantChannelInfo) getData(QuantChannelInfo.class);
         }
 
         if (m_quantChannelInfo != null && m_masterQuantPeptideList != null) {

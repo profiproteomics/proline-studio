@@ -45,28 +45,17 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
         m_typeName = "MSQueries";
         m_description = "All MSQueries of an Identification Summary";
         
-        // Register Possible in parameters
-        // One ResultSummary
+        // Register in parameters
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(ResultSummary.class);
         registerInParameter(inParameter);
         
         
         // Register possible out parameters
-        // One or Multiple PeptideMatchId for one msQuery
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DMsQuery.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
         outParameter.addParameter(ResultSummary.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
         outParameter.addParameter(ResultSet.class);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
         outParameter.addParameter(MsQueryInfoRsm.class);
         registerOutParameter(outParameter);
 
@@ -84,8 +73,8 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
 
     @Override
     public void dataChanged() {
-        ResultSummary _rsm = (m_rsm!=null) ? m_rsm : m_previousDataBox == null ? null : (ResultSummary) m_previousDataBox.getData(ResultSummary.class);
-        final ResultSet _rset =  (_rsm != null)? _rsm.getResultSet() : ( m_previousDataBox == null ? null : (ResultSet) m_previousDataBox.getData(ResultSet.class));
+        ResultSummary _rsm = (m_rsm!=null) ? m_rsm : (ResultSummary) getData(ResultSummary.class);
+        final ResultSet _rset = (_rsm != null)? _rsm.getResultSet() : (ResultSet) getData(ResultSet.class);
 
         // register the link to the Transient Data
         linkCache(_rsm);
@@ -135,7 +124,7 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
     }
     
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType != null) {
             
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -155,7 +144,7 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
                 }
             }
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
     
     @Override

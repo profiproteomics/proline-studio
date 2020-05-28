@@ -43,7 +43,7 @@ public class DataboxExperimentalDesign extends AbstractDataBox {
         m_typeName = "Experimental Design";
         m_description = "Experimental Design of the quantitation";
 
-        // Register Possible in parameters
+        // Register in parameters
         // One Dataset 
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(DDataset.class); 
@@ -111,7 +111,7 @@ public class DataboxExperimentalDesign extends AbstractDataBox {
     }
    
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType != null) {
             
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -121,7 +121,7 @@ public class DataboxExperimentalDesign extends AbstractDataBox {
                 }
             }
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
    
     @Override

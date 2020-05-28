@@ -68,7 +68,7 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        final DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(DPeptideMatch.class);
+        final DPeptideMatch peptideMatch = (DPeptideMatch) getData(DPeptideMatch.class);
 
         if (m_previousPeptideMatch == peptideMatch) {
             return;
@@ -173,12 +173,12 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
     private Long m_previousFragmentationTaskId = null;
 
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType != null) {
             
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
                 if (parameterType.equals(DMsQuery.class)) {
-                    DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(DPeptideMatch.class);
+                    DPeptideMatch peptideMatch = (DPeptideMatch) getData(DPeptideMatch.class);
                     if (peptideMatch != null) {
                         DMsQuery msQuery = peptideMatch.getMsQuery();
                         if (msQuery != null) {
@@ -187,7 +187,7 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
                     }
                 }
                 if (parameterType.equals(DSpectrum.class)) {
-                    DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(DPeptideMatch.class);
+                    DPeptideMatch peptideMatch = (DPeptideMatch) getData(DPeptideMatch.class);
                     if (peptideMatch != null) {
                         DMsQuery msQuery = peptideMatch.getMsQuery();
                         if (msQuery != null) {
@@ -203,7 +203,7 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
                 }
             }
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
 
 }

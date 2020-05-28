@@ -48,23 +48,17 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
         m_typeName = "Protein Set";
         m_description = "All Protein Sets coresponding to a Peptide Instance";
 
-        // Register Possible in parameters
-        // One ResultSummary
+        // Register in parameters
 
-        // or one PeptideInstance
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(PeptideInstance.class);
         registerInParameter(inParameter);
 
 
         // Register possible out parameters
-        // One or Multiple ProteinSet
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DProteinSet.class);
         outParameter.addParameter(ResultSummary.class);
-        registerOutParameter(outParameter);
-
-        outParameter = new GroupParameter();
         outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
     }
@@ -84,7 +78,7 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
         // register the link to the Transient Data
         linkCache(m_rsm);
         
-        final PeptideInstance _peptideInstance = (PeptideInstance) m_previousDataBox.getData(PeptideInstance.class);
+        final PeptideInstance _peptideInstance = (PeptideInstance) getData(PeptideInstance.class);
 
 
         if (_peptideInstance == null) {
@@ -147,7 +141,7 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
     
     
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null ) {
             
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -167,7 +161,7 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
                 }
             }
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
  
     @Override

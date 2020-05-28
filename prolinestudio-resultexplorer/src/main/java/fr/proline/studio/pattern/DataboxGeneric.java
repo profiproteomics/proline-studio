@@ -43,7 +43,7 @@ public class DataboxGeneric extends AbstractDataBox {
         m_description = typeName;
         m_removeStripAndSort = removeStripAndSort;
         
-        // Register Possible in parameters
+        // Register in parameters
         // One ResultSummary
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(ExtendedTableModelInterface.class);
@@ -75,13 +75,12 @@ public class DataboxGeneric extends AbstractDataBox {
             
              ArrayList<ExtraDataType> extraDataTypeList = m_entryModel.getExtraDataTypes();
              if (extraDataTypeList != null) {
-                 for(ExtraDataType extraDataType : extraDataTypeList) {
+                 GroupParameter outParameter = new GroupParameter();
+                 for (ExtraDataType extraDataType : extraDataTypeList) {
                      Class c = extraDataType.getTypeClass();
-
-                     GroupParameter outParameter = new GroupParameter();
                      outParameter.addParameter(c);
-                     registerOutParameter(outParameter);
                  }
+                 registerOutParameter(outParameter);
              }
             
         }
@@ -92,7 +91,7 @@ public class DataboxGeneric extends AbstractDataBox {
     public void dataChanged() {
         GlobalTableModelInterface dataInterface = m_entryModel;
         if (dataInterface == null) {
-            dataInterface = (GlobalTableModelInterface) m_previousDataBox.getData(GlobalTableModelInterface.class);
+            dataInterface = (GlobalTableModelInterface) getData(GlobalTableModelInterface.class);
         }
 
         ((GenericPanel) getDataBoxPanelInterface()).setData(dataInterface);
@@ -100,7 +99,7 @@ public class DataboxGeneric extends AbstractDataBox {
     }
     
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType != null) {
             
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -120,7 +119,7 @@ public class DataboxGeneric extends AbstractDataBox {
                 }
             }
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
     
 }

@@ -83,13 +83,9 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
             m_description = "Short list of Quanti. Peptides";
         }
 
-        // Register Possible in parameters
-        // One Dataset and list of Peptide
+        // Register in parameters
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(DDataset.class);
-        registerInParameter(inParameter);
-
-        inParameter = new GroupParameter();
         inParameter.addParameter(DProteinSet.class);
         inParameter.addParameter(DMasterQuantProteinSet.class);
         inParameter.addParameter(QuantChannelInfo.class);
@@ -98,24 +94,20 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
 
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DMasterQuantPeptide.class);
-        outParameter.addParameter(XicMode.class);
         outParameter.addParameter(DDataset.class);
         outParameter.addParameter(ResultSummary.class);
+        
+        outParameter.addParameter(DMasterQuantPeptide.class);
+        outParameter.addParameter(XicMode.class);
+        
         outParameter.addParameter(QuantChannelInfo.class);
         outParameter.addParameter(DPeptideMatch.class);
-        registerOutParameter(outParameter);
 
-        outParameter = new GroupParameter();
         outParameter.addParameter(ExtendedTableModelInterface.class);
-        registerOutParameter(outParameter);
-
-        outParameter = new GroupParameter();
         outParameter.addParameter(CrossSelectionInterface.class);
-        registerOutParameter(outParameter);
 
-        outParameter = new GroupParameter();
         outParameter.addParameter(SecondAxisTableModelInterface.class);
+
         registerOutParameter(outParameter);
 
     }
@@ -270,7 +262,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     }
 
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType != null) {
             
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -341,7 +333,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
 
             
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
 
 
@@ -354,7 +346,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     private List<ExtendedTableModelInterface> getTableModelInterfaceList() {
         if (m_quantChannelInfo == null) {
             if (m_previousDataBox != null) {
-                m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(QuantChannelInfo.class);
+                m_quantChannelInfo = (QuantChannelInfo) getData(QuantChannelInfo.class);
                 if (m_quantChannelInfo == null) {
                     return null;
                 }

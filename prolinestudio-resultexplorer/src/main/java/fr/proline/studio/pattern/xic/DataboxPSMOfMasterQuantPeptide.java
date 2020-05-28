@@ -56,20 +56,17 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
         m_typeName = "PSM / Quanti. Peptide";
         m_description = "All PSM of a Quanti. Peptide";
 
-        // Register Possible in parameters
-        // One ResultSummary
+        // Register in parameters
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(DMasterQuantPeptide.class);
         registerInParameter(inParameter);
 
         // Register possible out parameters
-        // One or Multiple PeptideMatch
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DPeptideMatch.class);
-        registerOutParameter(outParameter);
 
-        outParameter = new GroupParameter();
+        outParameter.addParameter(DPeptideMatch.class);
         outParameter.addParameter(ExtendedTableModelInterface.class);
+
         registerOutParameter(outParameter);
 
     }
@@ -85,9 +82,9 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
-        m_masterQuantPeptide = (DMasterQuantPeptide) m_previousDataBox.getData(DMasterQuantPeptide.class);
-        m_dataset = (DDataset) m_previousDataBox.getData(DDataset.class);
-        m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(QuantChannelInfo.class);
+        m_masterQuantPeptide = (DMasterQuantPeptide) getData(DMasterQuantPeptide.class);
+        m_dataset = (DDataset) getData(DDataset.class);
+        m_quantChannelInfo = (QuantChannelInfo) getData(QuantChannelInfo.class);
 
         if (m_masterQuantPeptide == null) {
             ((XicPeptideMatchPanel) getDataBoxPanelInterface()).setData((long)-1, null, m_quantChannelInfo, null, null, true);
@@ -140,7 +137,7 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
     }
 
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         
         if (parameterType != null) {
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -155,7 +152,7 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
                 }
             }
         }
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
 
 }

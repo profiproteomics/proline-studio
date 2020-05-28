@@ -59,35 +59,26 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         m_typeName = "Quanti Protein Sets";
         m_description = "All Protein Sets of a Quantitation";
 
-        // Register Possible in parameters
-        // One ResultSummary
+        // Register in parameters
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(DDataset.class);
         registerInParameter(inParameter);
 
         // Register possible out parameters
-        // One or Multiple ProteinSet 
-        //VDS : Only one ?!
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DProteinSet.class);
-        outParameter.addParameter(DMasterQuantProteinSet.class);
+        
         outParameter.addParameter(DDataset.class);
         outParameter.addParameter(ResultSummary.class);
+        
+        outParameter.addParameter(DProteinSet.class);
+        outParameter.addParameter(DMasterQuantProteinSet.class);
         outParameter.addParameter(QuantChannelInfo.class);
         outParameter.addParameter(XicMode.class);
 
-        registerOutParameter(outParameter);
-
-        outParameter = new GroupParameter();
         outParameter.addParameter(ExtendedTableModelInterface.class);
-        registerOutParameter(outParameter);
-
-        outParameter = new GroupParameter();
-        outParameter.addParameter(ExtendedTableModelInterface.class);
-        registerOutParameter(outParameter);
-
-        outParameter = new GroupParameter();
+        outParameter.addParameter(ExtendedTableModelInterface.class, ParameterSubtypeEnum.LIST_DATA);
         outParameter.addParameter(CrossSelectionInterface.class);
+        
         registerOutParameter(outParameter);
 
     }
@@ -166,7 +157,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
                             ((XicProteinSetPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantProteinSetList, m_isXICMode, finished);
                             if (finished) {
                                 unregisterTask(task2Id);
-                                addDataChanged(ExtendedTableModelInterface.class);
+                                addDataChanged(ExtendedTableModelInterface.class, null);  //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
                                 propagateDataChanged();
                             }
                         }
@@ -230,7 +221,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
     }
 
     @Override
-    public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
                 
         if (parameterType != null) {
             
@@ -278,7 +269,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         }
         
  
-        return super.getData(parameterType, parameterSubtype);
+        return super.getDataImpl(parameterType, parameterSubtype);
         
     }
 

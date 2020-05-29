@@ -19,10 +19,12 @@ package fr.proline.studio.rsmexplorer.gui.tasklog;
 import fr.proline.logparser.gui.TaskExecutionPanel;
 import fr.proline.logparser.model.LogTask;
 import fr.proline.logparser.model.Utility;
+import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.LongFilter;
 import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.table.AbstractDecoratedGlobalTableModel;
+import fr.proline.studio.utils.StringUtils;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.LinkedHashMap;
@@ -100,10 +102,10 @@ public class ServerLogTaskTableModel extends AbstractDecoratedGlobalTableModel<L
                 return String.class;
             }
             case COLTYPE_START_TIME: {
-                return String.class;
+                return Long.class;
             }
             case COLTYPE_STOP_TIME: {
-                return String.class;
+                return Long.class;
             }
             case COLTYPE_THREAD_NAME: {
                 return String.class;
@@ -147,14 +149,7 @@ public class ServerLogTaskTableModel extends AbstractDecoratedGlobalTableModel<L
                 return taskInfo.getProjectId();
             }
             case COLTYPE_STATUS: {
-                LogTask.STATUS s = taskInfo.getStatus();
-                if (s == LogTask.STATUS.FAILED) {
-                    return "<html><font color=\"red\">" + s + "</font></html>";
-                } else if (s == LogTask.STATUS.WARNING || s == LogTask.STATUS.FINISHED_WARN) {
-                    return "<html><font color=\"orange\">" + s + "</font></html>";
-                } else {
-                    return s.toString();
-                }
+                return taskInfo.getStatus().getLabelTxt();
             }
             case COLTYPE_THREAD_NAME: {
                 return taskInfo.getThreadName();
@@ -169,10 +164,10 @@ public class ServerLogTaskTableModel extends AbstractDecoratedGlobalTableModel<L
                 return taskInfo.getDataSet();
             }
             case COLTYPE_START_TIME: {
-                return Utility.formatTime(taskInfo.getStartTime());
+                return taskInfo.getStartTime();
             }
             case COLTYPE_STOP_TIME: {
-                return Utility.formatTime(taskInfo.getStopTime());
+                return taskInfo.getStopTime();
             }
             case COLTYPE_DURATION: {
                 return taskInfo.getDuration();
@@ -191,6 +186,12 @@ public class ServerLogTaskTableModel extends AbstractDecoratedGlobalTableModel<L
         switch (col) {
             case COLTYPE_NB_TASK_PARALELLE:
                 renderer = new TaskNbCellRenderer();
+                break;
+            case COLTYPE_START_TIME:
+                renderer = new DateCellRenderer(COLTYPE_START_TIME);
+                break;
+            case COLTYPE_STOP_TIME:
+                renderer = new DateCellRenderer(COLTYPE_STOP_TIME);
                 break;
             case COLTYPE_DURATION:
                 renderer = new DurationCellRenderer();
@@ -221,20 +222,60 @@ public class ServerLogTaskTableModel extends AbstractDecoratedGlobalTableModel<L
         filtersMap.put(COLTYPE_THREAD_NAME, new StringDiffFilter(getColumnName(COLTYPE_THREAD_NAME), null, COLTYPE_THREAD_NAME));//String
         filtersMap.put(COLTYPE_CALL_SERVICE, new StringDiffFilter(getColumnName(COLTYPE_CALL_SERVICE), null, COLTYPE_CALL_SERVICE));//String
         filtersMap.put(COLTYPE_META_INFO, new StringDiffFilter(getColumnName(COLTYPE_META_INFO), null, COLTYPE_META_INFO));//String
-        filtersMap.put(COLTYPE_STATUS, new StringDiffFilter(getColumnName(COLTYPE_STATUS), null, COLTYPE_STATUS));//String
-        filtersMap.put(COLTYPE_PROJECT_ID, new IntegerFilter(getColumnName(COLTYPE_PROJECT_ID), null, COLTYPE_PROJECT_ID));//Integer
+        ConvertValueInterface statusConvert = new ConvertValueInterface() {
+            @Override
+            public Object convertValue(Object o) {
+                if (o == null) {
+                    return null;
+                }
+                return StringUtils.extractTextFromHtml((String) o);
+            }
+        };
+        filtersMap.put(COLTYPE_STATUS, new StringDiffFilter(getColumnName(COLTYPE_STATUS), statusConvert, COLTYPE_STATUS));//String
+        filtersMap.put(COLTYPE_PROJECT_ID,
+                new IntegerFilter(getColumnName(COLTYPE_PROJECT_ID), null, COLTYPE_PROJECT_ID));//Integer
 
-        filtersMap.put(COLTYPE_START_TIME, new StringDiffFilter(getColumnName(COLTYPE_START_TIME), null, COLTYPE_START_TIME));//String
-        filtersMap.put(COLTYPE_STOP_TIME, new StringDiffFilter(getColumnName(COLTYPE_STOP_TIME), null, COLTYPE_STOP_TIME));//String
+        filtersMap.put(COLTYPE_START_TIME,
+                new LongFilter(getColumnName(COLTYPE_START_TIME), null, COLTYPE_START_TIME));//String
+        filtersMap.put(COLTYPE_STOP_TIME,
+                new LongFilter(getColumnName(COLTYPE_STOP_TIME), null, COLTYPE_STOP_TIME));//String
 
-        filtersMap.put(COLTYPE_DURATION, new LongFilter(getColumnName(COLTYPE_DURATION), null, COLTYPE_DURATION));//Long
-        filtersMap.put(COLTYPE_NB_TASK_PARALELLE, new IntegerFilter(getColumnName(COLTYPE_NB_TASK_PARALELLE), null, COLTYPE_NB_TASK_PARALELLE));//Integer
+        filtersMap.put(COLTYPE_DURATION,
+                new LongFilter(getColumnName(COLTYPE_DURATION), null, COLTYPE_DURATION));//Long
+        filtersMap.put(COLTYPE_NB_TASK_PARALELLE,
+                new IntegerFilter(getColumnName(COLTYPE_NB_TASK_PARALELLE), null, COLTYPE_NB_TASK_PARALELLE));//Integer
 
     }
 
     @Override
     public String getToolTipForHeader(int col) {
         return m_columnNames[col];
+
+    }
+
+    public class DateCellRenderer extends DefaultTableCellRenderer {
+
+        int _colType;
+
+        public DateCellRenderer(int colType) {
+            _colType = colType;
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            JLabel lb = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            int modelIndex = table.convertRowIndexToModel(row);
+            LogTask task = ServerLogTaskTableModel.this.getTask(modelIndex);
+            //we don't use value in order to avoid exception
+            String toShow;
+            if (_colType == COLTYPE_START_TIME) {
+                toShow = Utility.formatTime(task.getStartTime());
+            } else {
+                toShow = Utility.formatTime(task.getStopTime());
+            }
+            lb.setText(toShow);
+            return lb;
+        }
     }
 
     public class DurationCellRenderer extends DefaultTableCellRenderer {

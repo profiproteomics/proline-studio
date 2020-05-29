@@ -69,7 +69,6 @@ public class QuantPostProcessingPanel extends JPanel {
     private JCheckBox m_discardMissCleavedPeptidesChB;
     private JCheckBox m_discardModifiedPeptidesChB;
 
-   // private final String DISCARD_OXIDIZED_PEPTIDES = "discard_oxidized_peptides";//only in V1
     private JCheckBox m_discardPeptidesSharingPeakelsChB;
     private JCheckBox m_applyProfileClusteringChB;
 
@@ -78,29 +77,6 @@ public class QuantPostProcessingPanel extends JPanel {
     private JLabel m_modifiedPeptidesFilteringMethodLabel;
     private JComboBox<String> m_modifiedPeptidesFilteringMethodCB;
     private JComboBox<String> m_ionAbundanceSummarizingMethodCB;
-
-//    private final static String[] ABUNDANCE_SUMMARIZING_METHOD_VALUES = {"Mean", "Mean of top 3 peptides", "Median", "Median Biological Profile", "Median Profile", "Sum", "Median Ratio Fitting"};
-//    private final static String[] ABUNDANCE_SUMMARIZING_METHOD_KEYS = {"MEAN", "MEAN_OF_TOP3", "MEDIAN", "MEDIAN_BIOLOGICAL_PROFILE", "MEDIAN_PROFILE", "SUM", "LFQ"};
-//    private final static String[] MODIFIED_PEPTIDE_FILTERING_METHOD_VALUES = {"Discard all forms", "Discard modified forms only"};
-//    private final static String[] MODIFIED_PEPTIDE_FILTERING_METHOD_KEYS = {"DISCARD_ALL_FORMS", "DISCARD_MODIFIED_FORMS"};
-//    private final static String[] ION_ABUNDANCE_SUMMARIZING_METHOD_VALUES = {"Best Ion", "Sum"};
-//    private final static String[] ION_ABUNDANCE_SUMMARIZING_METHOD_KEYS = {"BEST_ION","SUM"};
-//  
-//    /**
-//     * parameters key
-//     */
-//    private final static String USE_ONLY_SPECIFIC_PEPTIDES = "use_only_specific_peptides";
-//    private final static String DISCARD_MISS_CLEAVED_PEPTIDES = "discard_miss_cleaved_peptides"; //v2
-//    private final static String DISCARD_MISS_CLEAVED_PEPTIDES_V1 = "discard_missed_cleaved_peptides";//V1
-//    private final static String DISCARD_MODIFIED_PEPTIDES = "discard_modified_peptides";//V2
-//    private final static String MODIFIED_PEPTIDE_FILTERING_METHOD = "modified_peptide_filtering_method";
-//    private final static String PTM_DEFINITION_IDS_TO_DISCARD = "ptm_definition_ids_to_discard";//V2
-//    private final static String DISCARD_PEPTIDES_SHARING_PEAKELS = "discard_peptides_sharing_peakels";
-//    private final static String ABUNDANCE_SUMMARIZING_METHOD = "abundance_summarizing_method";//V2, shown in protein, but registed in global parameters
-//    private final static String ABUNDANCE_SUMMARIZING_METHOD_V1 = "abundance_summarizer_method";//V1
-//
-//    private final static String APPLY_NORMALIZATION = "apply_normalization";//double used by peptide & protein
-//    private final static String ION_ABUNDANCE_SUMMARIZING_METHOD = "pep_ion_abundance_summarizing_method";//ion_peptide_aggreagation_method";
 
     private JTextField m_peptideStatTestsAlpha;
     private JCheckBox m_applyPepNormalizationChB;
@@ -152,7 +128,7 @@ public class QuantPostProcessingPanel extends JPanel {
         // completeMode can be changed in the preferences file with the Profilizer key
         Preferences preferences = NbPreferences.root();
         this.completeMode = preferences.getBoolean("Profi", false);
-        m_parameterList = new ParameterList(QuantPostProcessingDialog.SETTINGS_KEY);
+        m_parameterList = new ParameterList(QuantPostProcessingParams.SETTINGS_KEY);
         m_peptideModificationListChB = new ArrayList<>();
         m_peptidesModificationListParameter = new ArrayList<>();
         createParameters();
@@ -706,11 +682,23 @@ public class QuantPostProcessingPanel extends JPanel {
      * @param refinedParams
      */
     public void setRefinedParams(Map<String, Object> refinedParams) {
+        //Get config_version
+        boolean isVersion3 = false;
         boolean isVersion2 = false;
-        Object isDiscardModifiedPeptide = refinedParams.get(QuantPostProcessingParams.DISCARD_MODIFIED_PEPTIDES);
-        if (isDiscardModifiedPeptide != null) {
-            isVersion2 = true;
+        boolean isVersion1 = false;
+        String version = (String) refinedParams.get(QuantPostProcessingParams.CONFIG_VERSION);
+        if(version == null){
+            isVersion1 = true;
+        } else if("2.0".equals(version)) {
+            isVersion2= true;
+        } else {
+            isVersion3 = true;
         }
+            
+        Object isDiscardModifiedPeptide = refinedParams.get(QuantPostProcessingParams.DISCARD_MODIFIED_PEPTIDES);
+//        if (isDiscardModifiedPeptide != null) {
+//            isVersion2 = true;
+//        }
 
         m_useOnlySpecificPeptidesChB.setSelected(Boolean.valueOf(refinedParams.get(QuantPostProcessingParams.USE_ONLY_SPECIFIC_PEPTIDES).toString()));//V1&V2
 

@@ -12,6 +12,10 @@ package fr.proline.studio.corewrapper.data;
  */
 public class QuantPostProcessingParams {
     
+    public final static String SETTINGS_KEY = "QuantPostProcessing";
+    public final static String CURRENT_VERSION ="2.0";
+    public final static String PARAM_VERSION_KEY = SETTINGS_KEY + ".parametersVersion";
+     
     //V1 Only params
     public final static String DISCARD_OXIDIZED_PEPTIDES = "discard_oxidized_peptides";
     public final static String DISCARD_MISS_CLEAVED_PEPTIDES_V1 = "discard_missed_cleaved_peptides";//V1
@@ -67,6 +71,8 @@ public class QuantPostProcessingParams {
     public final static String APPLY_NORMALIZATION = "apply_normalization";
     public final static String ION_ABUNDANCE_SUMMARIZING_METHOD = "pep_ion_abundance_summarizing_method";
 
+    public final static String CONFIG_VERSION = "config_version";
+    
     public static final String[] getAbundanceSummarizingMethodValues(){
         return ABUNDANCE_SUMMARIZING_METHOD_VALUES;
     }

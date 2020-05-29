@@ -216,7 +216,7 @@ public class ServerLogFileNameDialog extends DefaultDialog {
         String remoteFilePath = m_fileNameTxtField.getText();
         String debugFileP = this.getPrefix(remoteFilePath);
         boolean isDebugFile = (debugFileP != null);
-
+        m_fileList = new ArrayList();
         if (isDebugFile) {
             if (remoteFilePath.equals(LOG_REMOTE_PATH + LOG_TODAY_DEBUG_FILE_NAME)) {//today
                 m_isTodayDebug = true;
@@ -224,7 +224,7 @@ public class ServerLogFileNameDialog extends DefaultDialog {
             retriveFile(debugFileP, isDebugFile, 0);
         } else {
             //only one file
-            retriveFile(remoteFilePath, isDebugFile, 0);
+            retriveFile(remoteFilePath, isDebugFile, -1);
         }
 
         return true;
@@ -282,7 +282,7 @@ public class ServerLogFileNameDialog extends DefaultDialog {
                             if (m_isTodayDebug) {
                                 retriveFile(LOG_REMOTE_PATH + LOG_TODAY_DEBUG_FILE_NAME, !isDebugFile, index);//the last log file to retrive, 
                             } else {
-                                JOptionPane.showMessageDialog(rootPane, "Retrive end " + filePath + " stop at " + index);
+                                //JOptionPane.showMessageDialog(rootPane, "Retrive end " + filePath + " stop at " + index);
                                 m_logger.debug("retrive multi file end");
                                 createLogParserDialog(m_fileList);
                             }
@@ -292,8 +292,18 @@ public class ServerLogFileNameDialog extends DefaultDialog {
             }
 
         };
-
-        DownloadFileTask task = new DownloadFileTask(callback, remoteFilePath, localFile);
+        DownloadFileTask task = null;
+        /**
+         * if !isDebugFile if isDebugFile && !m_isTodayDebug && index == 0 =>
+         * otherday first debug file in these 2 upon cases, if remote file don't
+         * existe, there will be an "Error handling JMS Message" Exception we
+         * need show the StudioExceptions.notify. In other case, we need not.
+         */
+        if (!isDebugFile || isDebugFile && !m_isTodayDebug && index == 0) {
+            task = new DownloadFileTask(callback, remoteFilePath, localFile, true);
+        } else {
+            task = new DownloadFileTask(callback, remoteFilePath, localFile, false);
+        }
         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
     }
 

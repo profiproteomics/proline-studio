@@ -17,6 +17,7 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.core.orm.msi.PtmSpecificity;
+import fr.proline.studio.corewrapper.data.QuantPostProcessingParams;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
@@ -31,6 +32,7 @@ import java.util.Map;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +45,6 @@ public class QuantPostProcessingDialog extends DefaultDialog {
 
     private QuantPostProcessingPanel m_quantPostProcessingPanel;
 
-    public final static String SETTINGS_KEY = "QuantPostProcessing";
 
     //public QuantPostProcessingMultipleDialog(Window parent, ArrayList<DataSetNode> nodeList) {
     public QuantPostProcessingDialog(Window parent, ArrayList<PtmSpecificity> ptms, boolean isAggregation) {
@@ -68,7 +69,7 @@ public class QuantPostProcessingDialog extends DefaultDialog {
             return false;
         }
 
-        JFileChooser fileChooser = SettingsUtils.getFileChooser(SETTINGS_KEY);
+        JFileChooser fileChooser = SettingsUtils.getFileChooser(QuantPostProcessingParams.SETTINGS_KEY);
         int result = fileChooser.showSaveDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
             File f = fileChooser.getSelectedFile();
@@ -77,9 +78,9 @@ public class QuantPostProcessingDialog extends DefaultDialog {
             // Save Parameters  
             ParameterList parameterList = m_quantPostProcessingPanel.getParameterList();
             parameterList.saveParameters(filePreferences);
-
-            SettingsUtils.addSettingsPath(SETTINGS_KEY, f.getAbsolutePath());
-            SettingsUtils.writeDefaultDirectory(SETTINGS_KEY, f.getParent());
+            filePreferences.put(QuantPostProcessingParams.PARAM_VERSION_KEY, QuantPostProcessingParams.CURRENT_VERSION);
+            SettingsUtils.addSettingsPath(QuantPostProcessingParams.SETTINGS_KEY, f.getAbsolutePath());
+            SettingsUtils.writeDefaultDirectory(QuantPostProcessingParams.SETTINGS_KEY, f.getParent());
         }
 
         return false;
@@ -88,7 +89,7 @@ public class QuantPostProcessingDialog extends DefaultDialog {
     @Override
     protected boolean loadCalled() {
 
-        SettingsDialog settingsDialog = new SettingsDialog(this, SETTINGS_KEY);
+        SettingsDialog settingsDialog = new SettingsDialog(this, QuantPostProcessingParams.SETTINGS_KEY);
         settingsDialog.setLocationRelativeTo(this);
         settingsDialog.setVisible(true);
 
@@ -101,12 +102,18 @@ public class QuantPostProcessingDialog extends DefaultDialog {
                     File settingsFile = settingsDialog.getSelectedFile();
                     FilePreferences filePreferences = new FilePreferences(settingsFile, null, "");
 
-                    Preferences preferences = NbPreferences.root();
-                    String[] keys = filePreferences.keys();
-                    for (String key : keys) {
-                        String value = filePreferences.get(key, null);
-                        preferences.put(key, value);
+                    String version = filePreferences.get(QuantPostProcessingParams.PARAM_VERSION_KEY, "1.0");
+                     if (!version.equals(QuantPostProcessingParams.CURRENT_VERSION)) {
+                        String msg = "Can't load " + version + " post processing parameters to " + QuantPostProcessingParams.CURRENT_VERSION + " one. All parameters may not have been taken into account !";
+                         JOptionPane.showMessageDialog(this, msg, "Load Post Processing parameters error", JOptionPane.ERROR_MESSAGE);
                     }
+                     
+//                    Preferences preferences = NbPreferences.root();
+//                    String[] keys = filePreferences.keys();
+//                    for (String key : keys) {
+//                        String value = filePreferences.get(key, null);
+//                        preferences.put(key, value);
+//                    }
 
                     m_quantPostProcessingPanel.loadParameters(filePreferences);
                 } catch (Exception e) {

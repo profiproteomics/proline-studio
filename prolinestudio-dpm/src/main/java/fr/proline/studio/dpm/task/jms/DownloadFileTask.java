@@ -17,11 +17,13 @@
 package fr.proline.studio.dpm.task.jms;
 
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.TASK_LIST_INFO;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
+import fr.proline.studio.utils.StudioExceptions;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -32,6 +34,7 @@ import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
+import javax.swing.SwingUtilities;
 
 /**
  *
@@ -41,11 +44,18 @@ public class DownloadFileTask extends AbstractJMSTask {
 
     private final String m_remoteFileURL;
     private final File m_localFile;
+    private boolean m_showError; //used by ServerLogFileNameDialog.java
 
     public DownloadFileTask(AbstractJMSCallback callback, String remoteFileURL, File localFile) {
         super(callback, new TaskInfo("Download file " + remoteFileURL, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_remoteFileURL = remoteFileURL;
         m_localFile = localFile;
+        m_showError = true;
+    }
+
+    public DownloadFileTask(AbstractJMSCallback callback, String remoteFileURL, File localFile, boolean showError) {
+        this(callback, remoteFileURL, localFile);
+        m_showError = showError;
     }
 
     @Override
@@ -79,7 +89,6 @@ public class DownloadFileTask extends AbstractJMSTask {
     public void taskDone(Message jmsMessage) throws Exception {
         if (jmsMessage instanceof BytesMessage) {
             /* It is a Large Message Stream */
-            
 
             boolean success = false;
             BufferedOutputStream bos = null;
@@ -125,8 +134,61 @@ public class DownloadFileTask extends AbstractJMSTask {
             throw new Exception(" Invalide message type to download file ! ");
         }
 
-         m_currentState = JMSState.STATE_DONE;
+        m_currentState = JMSState.STATE_DONE;
     }
 
+    /**
+     * Method called after the service has been done
+     *
+     * @param success boolean indicating if the fetch has succeeded
+     */
+    @Override
+    protected void callback(final boolean success) {
+        if (m_callback == null) {
+
+            getTaskInfo().setFinished(success, m_taskError, true);
+
+            return;
+        }
+
+        m_callback.setTaskInfo(m_taskInfo);
+        m_callback.setTaskError(m_taskError);
+
+        if (m_callback.mustBeCalledInAWT()) {
+            // Callback must be executed in the Graphical thread (AWT)
+            SwingUtilities.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    if (m_showError) {
+                        showError(m_taskError);
+                    }
+                    m_callback.run(success);
+
+                    getTaskInfo().setFinished(success, m_taskError, true);
+                }
+            });
+        } else {
+            if (m_showError) {
+                showError(m_taskError);
+            }
+            // Method called in the current thread
+            // In this case, we assume the execution is fast.
+            m_callback.run(success);
+            getTaskInfo().setFinished(success, m_taskError, true);
+        }
+    }
+
+    /**
+     * don't show error when "Invalide message type to download file ! "
+     * "message":"Unknown"
+     *
+     * @param taskErr
+     */
+    private void showError(TaskError taskErr) {
+        if (taskErr != null) {
+            StudioExceptions.notify("JMS Task Error", new Exception(taskErr.getErrorTitle() + "\n" + taskErr.getErrorText()));
+        }
+    }
 
 }

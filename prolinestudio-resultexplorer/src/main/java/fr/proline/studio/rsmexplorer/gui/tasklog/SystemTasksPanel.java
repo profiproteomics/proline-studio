@@ -125,7 +125,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
         });
         toolbar.add(m_reconnectButton);
         m_logParserButton = new JButton(IconManager.getIcon(IconManager.IconType.DOCUMENT_LIST));
-        m_logParserButton.setToolTipText("Server Log parsor");
+        m_logParserButton.setToolTipText("View server tasks log history");
         m_logParserButton.setEnabled(true);
         m_logParserButton.addActionListener(createLogParserButtonAction());
         toolbar.add(m_logParserButton);

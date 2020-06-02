@@ -20,6 +20,7 @@ import fr.proline.logparser.gui.TaskExecutionPanel;
 import fr.proline.logparser.model.LogTask;
 import fr.proline.logparser.model.Utility;
 import fr.proline.studio.filter.ConvertValueInterface;
+import fr.proline.studio.filter.DateFilter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.LongFilter;
 import fr.proline.studio.filter.StringDiffFilter;
@@ -27,6 +28,7 @@ import fr.proline.studio.table.AbstractDecoratedGlobalTableModel;
 import fr.proline.studio.utils.StringUtils;
 import java.awt.Color;
 import java.awt.Component;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import javax.swing.JLabel;
 import javax.swing.JTable;
@@ -102,10 +104,10 @@ public class ServerLogTaskTableModel extends AbstractDecoratedGlobalTableModel<L
                 return String.class;
             }
             case COLTYPE_START_TIME: {
-                return Long.class;
+                return Date.class;
             }
             case COLTYPE_STOP_TIME: {
-                return Long.class;
+                return Date.class;
             }
             case COLTYPE_THREAD_NAME: {
                 return String.class;
@@ -234,11 +236,10 @@ public class ServerLogTaskTableModel extends AbstractDecoratedGlobalTableModel<L
         filtersMap.put(COLTYPE_STATUS, new StringDiffFilter(getColumnName(COLTYPE_STATUS), statusConvert, COLTYPE_STATUS));//String
         filtersMap.put(COLTYPE_PROJECT_ID,
                 new IntegerFilter(getColumnName(COLTYPE_PROJECT_ID), null, COLTYPE_PROJECT_ID));//Integer
-
         filtersMap.put(COLTYPE_START_TIME,
-                new LongFilter(getColumnName(COLTYPE_START_TIME), null, COLTYPE_START_TIME));//String
+                new DateFilter(getColumnName(COLTYPE_START_TIME), null, COLTYPE_START_TIME));//String
         filtersMap.put(COLTYPE_STOP_TIME,
-                new LongFilter(getColumnName(COLTYPE_STOP_TIME), null, COLTYPE_STOP_TIME));//String
+                new DateFilter(getColumnName(COLTYPE_STOP_TIME), null, COLTYPE_STOP_TIME));//String
 
         filtersMap.put(COLTYPE_DURATION,
                 new LongFilter(getColumnName(COLTYPE_DURATION), null, COLTYPE_DURATION));//Long
@@ -263,17 +264,8 @@ public class ServerLogTaskTableModel extends AbstractDecoratedGlobalTableModel<L
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            JLabel lb = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            int modelIndex = table.convertRowIndexToModel(row);
-            LogTask task = ServerLogTaskTableModel.this.getTask(modelIndex);
-            //we don't use value in order to avoid exception
-            String toShow;
-            if (_colType == COLTYPE_START_TIME) {
-                toShow = Utility.formatTime(task.getStartTime());
-            } else {
-                toShow = Utility.formatTime(task.getStopTime());
-            }
-            lb.setText(toShow);
+            String toShow = Utility.formatTime((Date) value);
+            JLabel lb = (JLabel) super.getTableCellRendererComponent(table, toShow, isSelected, hasFocus, row, column);
             return lb;
         }
     }

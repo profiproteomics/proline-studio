@@ -129,6 +129,7 @@ public class QuantPostProcessingPanel extends JPanel {
         Preferences preferences = NbPreferences.root();
         this.completeMode = preferences.getBoolean("Profi", false);
         m_parameterList = new ParameterList(QuantPostProcessingParams.SETTINGS_KEY);
+        m_parameterList.addBackwardCompatiblePrefix(QuantPostProcessingParams.PREVIOUS_SETTINGS_KEY);
         m_peptideModificationListChB = new ArrayList<>();
         m_peptidesModificationListParameter = new ArrayList<>();
         createParameters();

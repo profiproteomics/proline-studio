@@ -22,6 +22,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.prefs.Preferences;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -42,6 +43,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
     private ParametersPanel m_parametersPanel;
     private boolean m_enable = true;
 
+    protected List<String> m_backwardCompatiblePrefixes = new ArrayList<>(1);
     private final HashMap<JComponent, JLabel> m_associatedLabels = new HashMap<>();
 
     public ParameterList(String name) {
@@ -56,6 +58,14 @@ public class ParameterList extends ArrayList<AbstractParameter> {
     public String getPrefixName() {
        return m_name.replaceAll(" ", "_") + ".";
     }
+    
+    public void addBackwardCompatiblePrefix(String backwardCompatiblePrefix) {        
+        m_backwardCompatiblePrefixes.add(backwardCompatiblePrefix.replaceAll(" ", "_") + ".");
+    }
+    
+//    public List<String> getBackwardCompatibleKeys() {
+//        return m_backwardCompatiblePrefixes;
+//    }
 
     public ParametersPanel getPanel() {
 
@@ -63,8 +73,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             return m_parametersPanel;
         }
 
-        Preferences preferences = NbPreferences.root();
-        String prefixKey = getPrefixName();
+        Preferences preferences = NbPreferences.root();       
 
         m_parametersPanel = new ParametersPanel();
         m_parametersPanel.setLayout(new GridBagLayout());
@@ -93,7 +102,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
                 m_parametersPanel.add(l, c);
             }
 
-            String parameterValue = readParameter(preferences, parameter, prefixKey);
+            String parameterValue = readParameter(preferences, parameter);
 
 
             if (parameter.hasComponent()) {
@@ -172,13 +181,12 @@ public class ParameterList extends ArrayList<AbstractParameter> {
 
     public void completePanel(JPanel p, GridBagConstraints c) {
         Preferences preferences = NbPreferences.root();
-        String prefixKey = getPrefixName();
 
         int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
 
-            String parameterValue = readParameter(preferences,parameter, prefixKey);
+            String parameterValue = readParameter(preferences,parameter);
 
             c.gridy++;
 
@@ -201,13 +209,12 @@ public class ParameterList extends ArrayList<AbstractParameter> {
 
     
     public void updateValues(Preferences preferences) {
-        String prefixKey = getPrefixName();
 
         int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
 
-            String parameterValue = readParameter(preferences, parameter, prefixKey);
+            String parameterValue = readParameter(preferences, parameter);
             // -------------
             
             
@@ -236,7 +243,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         }
     }
 
-    private String readParameter(Preferences preferences, AbstractParameter parameter, String prefixKey) {
+    private String readParameter(Preferences preferences, AbstractParameter parameter) {
         
         String parameterKey = parameter.getKey();
         if (parameterKey == null) {
@@ -244,11 +251,21 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         }
         String suffixKey = parameterKey.replaceAll(" ", "_");
 
+        String prefixKey = getPrefixName();
         String key = prefixKey + suffixKey;
 
         String parameterValue = preferences.get(key, null);
 
         //JPM.WART ------------
+        if (parameterValue == null) {
+            // no value found, for backward compatibility, load the parameter using backwardCompatible prefixes from the backward compatible key 
+            for (String alternativePrefix : m_backwardCompatiblePrefixes) {
+                String newkey = alternativePrefix + suffixKey;                
+                parameterValue = preferences.get(newkey, null);
+                if (parameterValue != null) break;
+            }
+        }   
+        //Don't test combinaison of backwardCompatible prefixes + backward compatible key or name as key...
         if (parameterValue == null) {
             // no value found, for backward compatibility, load the parameter from the name as a key (there was a bug, name was used as the key)
             parameterKey = parameter.getName();
@@ -316,12 +333,10 @@ public class ParameterList extends ArrayList<AbstractParameter> {
 
     public void loadParameters(Preferences preferences) {
 
-        String prefixKey = getPrefixName();
-
         int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
-            String value = readParameter(preferences,parameter, prefixKey);
+            String value = readParameter(preferences,parameter);
             if (value == null) {
                  continue;
             }

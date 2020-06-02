@@ -23,7 +23,6 @@ import fr.proline.studio.dpm.AccessJMSManagerThread;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.TASK_LIST_INFO;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
-import fr.proline.studio.utils.StudioExceptions;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -34,7 +33,6 @@ import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
-import javax.swing.SwingUtilities;
 
 /**
  *
@@ -138,56 +136,15 @@ public class DownloadFileTask extends AbstractJMSTask {
     }
 
     /**
-     * Method called after the service has been done
-     *
-     * @param success boolean indicating if the fetch has succeeded
-     */
-    @Override
-    protected void callback(final boolean success) {
-        if (m_callback == null) {
-
-            getTaskInfo().setFinished(success, m_taskError, true);
-
-            return;
-        }
-
-        m_callback.setTaskInfo(m_taskInfo);
-        m_callback.setTaskError(m_taskError);
-
-        if (m_callback.mustBeCalledInAWT()) {
-            // Callback must be executed in the Graphical thread (AWT)
-            SwingUtilities.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    if (m_showError) {
-                        showError(m_taskError);
-                    }
-                    m_callback.run(success);
-
-                    getTaskInfo().setFinished(success, m_taskError, true);
-                }
-            });
-        } else {
-            if (m_showError) {
-                showError(m_taskError);
-            }
-            // Method called in the current thread
-            // In this case, we assume the execution is fast.
-            m_callback.run(success);
-            getTaskInfo().setFinished(success, m_taskError, true);
-        }
-    }
-
-    /**
      * don't show error when "Invalide message type to download file ! "
      * "message":"Unknown"
      *
      * @param taskErr
      */
-    private void showError(TaskError taskErr) {
-        if (taskErr != null) {
-            StudioExceptions.notify("JMS Task Error", new Exception(taskErr.getErrorTitle() + "\n" + taskErr.getErrorText()));
+    @Override
+    protected void showError(TaskError taskErr) {
+        if (m_showError) {
+            super.showError(taskErr);
         }
     }
 

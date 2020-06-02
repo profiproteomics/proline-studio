@@ -48,13 +48,13 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
         m_description = "All Peptides of a Protein Match";
         
         // Register in parameters
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(DProteinMatch.class);
         inParameter.addParameter(ResultSummary.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         outParameter.addParameter(DPeptideInstance.class);
         outParameter.addParameter(DPeptideMatch.class);
         outParameter.addParameter(ExtendedTableModelInterface.class);

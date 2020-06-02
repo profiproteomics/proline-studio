@@ -53,7 +53,7 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
         m_description = "PTMs information of Peptides of a [Group] Modification Site using graphical display.";
 
         
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(DProteinMatch.class);
         registerInParameter(inParameter);
         

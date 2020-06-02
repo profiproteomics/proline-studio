@@ -17,7 +17,7 @@
 package fr.proline.studio.rsmexplorer;
 
 import fr.proline.studio.pattern.DataParameter;
-import fr.proline.studio.pattern.GroupParameter;
+import fr.proline.studio.pattern.ParameterList;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.table.TableInfo;
 import java.awt.GridLayout;
@@ -82,20 +82,20 @@ public class MultiDataBoxViewerTopComponent extends DataBoxViewerTopComponent {
     }
 
     @Override
-    public GroupParameter getInParameters(){
-        GroupParameter inParameters = new GroupParameter();
+    public ParameterList getInParameters(){
+        ParameterList inParameters = new ParameterList();
          for (WindowBox wBox : m_windowBoxes) {
-             GroupParameter windowInParameters = wBox.getEntryBox().getInParameters();
+             ParameterList windowInParameters = wBox.getEntryBox().getInParameters();
              inParameters.addParameter(windowInParameters);
         }
         return inParameters;
     }
     
     @Override
-    public GroupParameter getOutParameters(){
-        GroupParameter outParameters = new GroupParameter();
+    public ParameterList getOutParameters(){
+        ParameterList outParameters = new ParameterList();
          for (WindowBox wBox : m_windowBoxes) {
-             GroupParameter windowOutParameters = wBox.getEntryBox().getOutParameters();
+             ParameterList windowOutParameters = wBox.getEntryBox().getOutParameters();
              outParameters.addParameter(windowOutParameters);
         }
         return outParameters;    

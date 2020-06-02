@@ -18,7 +18,7 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.GroupParameter;
+import fr.proline.studio.pattern.ParameterList;
 import fr.proline.studio.pattern.DataboxManager;
 import fr.proline.studio.pattern.ParameterDistance;
 import fr.proline.studio.progress.ProgressBarDialog;
@@ -52,7 +52,7 @@ public class DataBoxChooserDialog extends DefaultDialog {
     
     private AbstractDataBox m_previousDatabox = null;
     
-    public DataBoxChooserDialog(Window parent, ArrayList<GroupParameter> outParameters, boolean firstView) {
+    public DataBoxChooserDialog(Window parent, ArrayList<ParameterList> outParameters, boolean firstView) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
         setSize(780,420);

@@ -45,13 +45,13 @@ public class DataboxGeneric extends AbstractDataBox {
         
         // Register in parameters
         // One ResultSummary
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(ExtendedTableModelInterface.class);
         registerInParameter(inParameter);
         
         
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
 
@@ -75,7 +75,7 @@ public class DataboxGeneric extends AbstractDataBox {
             
              ArrayList<ExtraDataType> extraDataTypeList = m_entryModel.getExtraDataTypes();
              if (extraDataTypeList != null) {
-                 GroupParameter outParameter = new GroupParameter();
+                 ParameterList outParameter = new ParameterList();
                  for (ExtraDataType extraDataType : extraDataTypeList) {
                      Class c = extraDataType.getTypeClass();
                      outParameter.addParameter(c);

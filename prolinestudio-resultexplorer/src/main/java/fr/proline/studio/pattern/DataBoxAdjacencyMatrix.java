@@ -55,7 +55,7 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
         
         // Register in parameters
         // One ResultSummary
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(ResultSummary.class);
         inParameter.addParameter(DrawVisualization.class);
         inParameter.addParameter(Component.class);
@@ -63,7 +63,7 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
         
         
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         outParameter.addParameter(DPeptideMatch.class);
         outParameter.addParameter(DPeptideInstance.class);
         outParameter.addParameter(DProteinMatch.class);

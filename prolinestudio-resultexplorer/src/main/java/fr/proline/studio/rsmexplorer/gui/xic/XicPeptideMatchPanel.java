@@ -295,6 +295,11 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
             if (selectionWillBeRestored) {
                 return;
             }
+            
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
 
             m_dataBox.addDataChanged(DPeptideMatch.class);
             m_dataBox.addDataChanged(ExtendedTableModelInterface.class);

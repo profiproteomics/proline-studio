@@ -51,13 +51,13 @@ public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
         m_description = "All PSMs of a Protein Set";
         
         // Register in parameters
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(ResultSummary.class);
         inParameter.addParameter(DProteinSet.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         outParameter.addParameter(DPeptideMatch.class);
         outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);

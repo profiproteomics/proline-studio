@@ -37,7 +37,7 @@ public class DataBoxRsetPeptideSpectrumError extends AbstractDataBox {
         m_description = "Spectrum Error of a Peptide";
 
         // Register in parameters
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(DPeptideMatch.class);
         inParameter.addParameter(PeptideFragmentationData.class);
         registerInParameter(inParameter);

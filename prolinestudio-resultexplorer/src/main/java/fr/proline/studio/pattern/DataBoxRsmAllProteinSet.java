@@ -49,14 +49,14 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
 
         // Register in parameters
         // One ResultSummary
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(ResultSummary.class);
         registerInParameter(inParameter);
 
 
         // Register possible out parameters
         // One or Multiple ProteinSet
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         outParameter.addParameter(DProteinSet.class);
         outParameter.addParameter(ResultSummary.class);
         outParameter.addParameter(ExtendedTableModelInterface.class);

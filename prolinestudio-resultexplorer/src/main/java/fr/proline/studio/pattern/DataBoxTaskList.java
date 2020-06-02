@@ -40,7 +40,7 @@ public class DataBoxTaskList extends AbstractDataBox {
 
         // Register possible out parameters
         // One or Multiple PeptideMatch
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         outParameter.addParameter(TaskInfo.class);
         registerOutParameter(outParameter);
 

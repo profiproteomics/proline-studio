@@ -325,6 +325,12 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
             if (selectionWillBeRestored) {
                 return;
             }
+            
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
+            
             if (m_dataBox != null) {
                 m_dataBox.addDataChanged(Peak.class);
                 m_dataBox.propagateDataChanged();

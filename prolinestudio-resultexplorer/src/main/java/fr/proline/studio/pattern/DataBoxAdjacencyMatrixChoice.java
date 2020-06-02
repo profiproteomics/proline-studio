@@ -47,7 +47,7 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
         m_description = "All Adjacency Matrices";
         
         // Register in parameters
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         
         inParameter.addParameter(ResultSummary.class);
         inParameter.addParameter(DProteinSet.class);
@@ -57,7 +57,7 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
         
         
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         
         outParameter.addParameter(DrawVisualization.class);
         outParameter.addParameter(Component.class);

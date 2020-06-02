@@ -486,6 +486,11 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                 return;
             }
 
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
+            
             m_dataBox.addDataChanged(DPeptideMatch.class);
             m_dataBox.propagateDataChanged();
 

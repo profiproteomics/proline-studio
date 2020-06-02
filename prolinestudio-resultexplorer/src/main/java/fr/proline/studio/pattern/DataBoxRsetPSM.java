@@ -55,12 +55,12 @@ public class DataBoxRsetPSM extends AbstractDataBox {
         m_description = "All PSMs of a Search Result";
         
         // Register in parameters
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(ResultSet.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         outParameter.addParameter(DPeptideMatch.class);
         outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);

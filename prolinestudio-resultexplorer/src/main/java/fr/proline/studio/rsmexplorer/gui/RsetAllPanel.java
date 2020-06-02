@@ -366,6 +366,11 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
             super.valueChanged(e);
 
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
+            
             m_dataBox.addDataChanged(ResultSet.class);
             m_dataBox.propagateDataChanged();
 

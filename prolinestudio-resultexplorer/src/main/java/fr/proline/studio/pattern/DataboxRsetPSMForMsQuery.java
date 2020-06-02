@@ -60,13 +60,13 @@ public class DataboxRsetPSMForMsQuery extends AbstractDataBox{
         
         // Register in parameters
         // One MsQuery & rsm & rs, rsm could be null
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(MsQueryInfoRset.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
         // One or Multiple PeptideMatch
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         outParameter.addParameter(DPeptideMatch.class);
         outParameter.addParameter(ExtendedTableModelInterface.class);
         outParameter.addParameter(CrossSelectionInterface.class);

@@ -358,6 +358,11 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
             
             super.valueChanged(e);
             
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
+            
             m_dataBox.addDataChanged(DPeptideInstance.class);
             m_dataBox.addDataChanged(DPeptideMatch.class);
             m_dataBox.propagateDataChanged();

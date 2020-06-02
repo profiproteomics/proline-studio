@@ -44,7 +44,7 @@ public class AvailableParameters {
     }
     private void initAvailableParameters(AbstractDataBox box, Integer depth) {
     
-        GroupParameter outParameters = box.getOutParameters();
+        ParameterList outParameters = box.getOutParameters();
 
         ArrayList<DataParameter> parameterList = outParameters.getParameterList();
         for (int j = 0; j < parameterList.size(); j++) {
@@ -60,7 +60,7 @@ public class AvailableParameters {
     
     public double calculateParameterCompatibilityDistance(AbstractDataBox box, Class compulsoryInParameterClass) {
         
-        GroupParameter inParameters = box.getInParameters();
+        ParameterList inParameters = box.getInParameters();
         
         boolean foundCompulsoryInParameter = (compulsoryInParameterClass == null);
         double minAverageDistance = -1;

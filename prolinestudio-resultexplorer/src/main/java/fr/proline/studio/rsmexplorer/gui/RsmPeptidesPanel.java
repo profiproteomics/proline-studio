@@ -393,9 +393,16 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         public void valueChanged(ListSelectionEvent e) {
 
             super.valueChanged(e);
+            
             if (selectionWillBeRestored) {
                 return;
             }
+            
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
+            
             m_dataBox.addDataChanged(PeptideInstance.class);
             m_dataBox.addDataChanged(DPeptideMatch.class);
             m_dataBox.propagateDataChanged();

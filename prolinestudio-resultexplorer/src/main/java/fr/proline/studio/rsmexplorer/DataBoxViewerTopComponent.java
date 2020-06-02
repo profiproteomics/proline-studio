@@ -18,7 +18,7 @@ package fr.proline.studio.rsmexplorer;
 
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.OptionDialog;
-import fr.proline.studio.pattern.GroupParameter;
+import fr.proline.studio.pattern.ParameterList;
 import fr.proline.studio.pattern.ParameterSubtypeEnum;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.table.TableInfo;
@@ -151,11 +151,11 @@ public class DataBoxViewerTopComponent extends TopComponent {
     private boolean firstPaint = true;
 
     
-    public GroupParameter getInParameters(){
+    public ParameterList getInParameters(){
         return m_windowBox.getEntryBox().getInParameters();
     }
     
-    public GroupParameter getOutParameters(){
+    public ParameterList getOutParameters(){
         return m_windowBox.getEntryBox().getOutParameters();
     }
     

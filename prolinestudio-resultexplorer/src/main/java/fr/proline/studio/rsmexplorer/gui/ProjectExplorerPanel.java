@@ -39,7 +39,7 @@ import fr.proline.studio.dpm.task.jms.ClearProjectTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.pattern.DataParameter;
-import fr.proline.studio.pattern.GroupParameter;
+import fr.proline.studio.pattern.ParameterList;
 import fr.proline.studio.pattern.ParameterSubtypeEnum;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
@@ -428,7 +428,7 @@ public class ProjectExplorerPanel extends JPanel {
             if (topComponent instanceof DataBoxViewerTopComponent && !(topComponent.getName().startsWith(allImportedWindowsName))) {
                 long pId = ((DataBoxViewerTopComponent) topComponent).getProjectId();
                 if (pId == projectId) {
-                    GroupParameter inParam = ((DataBoxViewerTopComponent) topComponent).getInParameters();
+                    ParameterList inParam = ((DataBoxViewerTopComponent) topComponent).getInParameters();
                     for (DataParameter dataParam : inParam.getParameterList()) {
                         if (dataParam.equalsData(ResultSummary.class, ParameterSubtypeEnum.SINGLE_DATA)) {
                             ResultSummary rsm = (ResultSummary) ((DataBoxViewerTopComponent) topComponent).getData(ResultSummary.class);
@@ -440,7 +440,7 @@ public class ProjectExplorerPanel extends JPanel {
                         }
                     }
 
-                    GroupParameter outParam = ((DataBoxViewerTopComponent) topComponent).getOutParameters();
+                    ParameterList outParam = ((DataBoxViewerTopComponent) topComponent).getOutParameters();
                     for (DataParameter dataParam : outParam.getParameterList()) {
                         if (dataParam.equalsData(ResultSummary.class, ParameterSubtypeEnum.SINGLE_DATA)) {
                             ResultSummary rsm = (ResultSummary) ((DataBoxViewerTopComponent) topComponent).getData(ResultSummary.class);

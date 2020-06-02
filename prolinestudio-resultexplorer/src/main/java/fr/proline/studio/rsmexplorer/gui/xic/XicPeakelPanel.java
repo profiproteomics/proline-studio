@@ -335,6 +335,11 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
             if (selectionWillBeRestored) {
                 return;
             }
+            
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
  
             m_dataBox.addDataChanged(Peakel.class);
             m_dataBox.propagateDataChanged();

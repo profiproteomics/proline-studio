@@ -47,7 +47,7 @@ public class WindowSavedManager {
         boolean quanti = false;
         
         AbstractDataBox entryBox = boxList.get(0);
-        GroupParameter inParameter = entryBox.getInParameters();
+        ParameterList inParameter = entryBox.getInParameters();
 
         ArrayList<DataParameter> parametersList = inParameter.getParameterList();
         for (int i = 0; i < parametersList.size(); i++) {

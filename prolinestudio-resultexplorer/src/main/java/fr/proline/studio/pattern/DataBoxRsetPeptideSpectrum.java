@@ -46,12 +46,12 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
         m_description = "Spectrum of a Peptide";
 
         // Register in parameters
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(DPeptideMatch.class);
         registerInParameter(inParameter);
 
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         outParameter.addParameter(DMsQuery.class);
         outParameter.addParameter(DSpectrum.class);
         outParameter.addParameter(PeptideFragmentationData.class);

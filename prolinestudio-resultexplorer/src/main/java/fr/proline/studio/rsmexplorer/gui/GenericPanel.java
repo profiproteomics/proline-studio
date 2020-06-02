@@ -358,6 +358,11 @@ public class GenericPanel extends HourglassPanel implements DataBoxPanelInterfac
 
             super.valueChanged(e);
 
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
+
             CompoundTableModel compoundTableModel = ((CompoundTableModel) getModel());
             ArrayList<ExtraDataType> extraDataTypeList = compoundTableModel.getExtraDataTypes();
              if (extraDataTypeList != null) {

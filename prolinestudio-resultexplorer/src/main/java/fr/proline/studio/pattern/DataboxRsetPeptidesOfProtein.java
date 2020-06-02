@@ -57,13 +57,13 @@ public class DataboxRsetPeptidesOfProtein extends AbstractDataBox {
 
         // Register in parameters
         // One ProteinMatch AND one ResultSet
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(DProteinMatch.class);
         inParameter.addParameter(ResultSet.class);
         registerInParameter(inParameter);
 
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         outParameter.addParameter(DPeptideMatch.class);
         outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);

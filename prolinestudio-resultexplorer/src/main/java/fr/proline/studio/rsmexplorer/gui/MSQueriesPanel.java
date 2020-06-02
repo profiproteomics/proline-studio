@@ -435,6 +435,11 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
                 return;
             }
             
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
+            
             if (m_fromRSM) {
                 m_dataBox.addDataChanged(MsQueryInfoRsm.class);
             } else {

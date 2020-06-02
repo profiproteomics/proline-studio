@@ -53,7 +53,7 @@ public class DataBoxRsetMSDiag extends AbstractDataBox {
 
         m_messages_back.add(resultMessageHashMap); // first element is the settings (as hashmap type)
 
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(ResultSet.class);
         registerInParameter(inParameter);
 

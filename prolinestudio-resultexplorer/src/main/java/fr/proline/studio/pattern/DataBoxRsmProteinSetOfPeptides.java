@@ -50,13 +50,13 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
 
         // Register in parameters
 
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(PeptideInstance.class);
         registerInParameter(inParameter);
 
 
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         outParameter.addParameter(DProteinSet.class);
         outParameter.addParameter(ResultSummary.class);
         outParameter.addParameter(ExtendedTableModelInterface.class);

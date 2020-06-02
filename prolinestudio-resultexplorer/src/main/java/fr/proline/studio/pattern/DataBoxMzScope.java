@@ -50,12 +50,12 @@ public class DataBoxMzScope extends AbstractDataBox{
 
         // Register in parameters
         // One Map 
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(File.class);
         registerInParameter(inParameter);
 
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         //outParameter.addParameter(?.class, false);
         registerOutParameter(outParameter);
         

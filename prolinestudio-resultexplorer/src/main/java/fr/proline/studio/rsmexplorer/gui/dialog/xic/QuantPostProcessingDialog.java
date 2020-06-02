@@ -102,18 +102,19 @@ public class QuantPostProcessingDialog extends DefaultDialog {
                     File settingsFile = settingsDialog.getSelectedFile();
                     FilePreferences filePreferences = new FilePreferences(settingsFile, null, "");
 
-                    String version = filePreferences.get(QuantPostProcessingParams.PARAM_VERSION_KEY, "1.0");
-                     if (!version.equals(QuantPostProcessingParams.CURRENT_VERSION)) {
-                        String msg = "Can't load " + version + " post processing parameters to " + QuantPostProcessingParams.CURRENT_VERSION + " one. All parameters may not have been taken into account !";
+                    String version = filePreferences.get(QuantPostProcessingParams.PARAM_VERSION_KEY, null);
+                    boolean modifiedPepParamExist = (filePreferences.get(QuantPostProcessingParams.SETTINGS_KEY+"."+QuantPostProcessingParams.DISCARD_MODIFIED_PEPTIDES, null) != null); 
+                    if(version == null){
+                        if(modifiedPepParamExist)
+                            version = "2.0";
+                        else
+                            version = "1.0";
+                    }
+                    if (!version.equals(QuantPostProcessingParams.CURRENT_VERSION)) {
+                        String msg = "Try loading Post Processing parameters ("+ QuantPostProcessingParams.CURRENT_VERSION + ") from file with version "+version+". All parameters may not have been taken into account !";
                          JOptionPane.showMessageDialog(this, msg, "Load Post Processing parameters error", JOptionPane.ERROR_MESSAGE);
                     }
                      
-//                    Preferences preferences = NbPreferences.root();
-//                    String[] keys = filePreferences.keys();
-//                    for (String key : keys) {
-//                        String value = filePreferences.get(key, null);
-//                        preferences.put(key, value);
-//                    }
 
                     m_quantPostProcessingPanel.loadParameters(filePreferences);
                 } catch (Exception e) {

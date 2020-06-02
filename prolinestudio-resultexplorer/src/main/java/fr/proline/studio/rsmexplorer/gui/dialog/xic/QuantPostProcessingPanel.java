@@ -139,7 +139,8 @@ public class QuantPostProcessingPanel extends JPanel {
         }
         initPanel();
     }
-
+    
+    //VD TODO use QuantPostProcessingParams camelCase to snake_case to create in properties ! 
     private void createParameters() {
         m_peptideStatTestsAlpha = new JTextField();
         m_peptideStatTestsAlpha.setEnabled(!m_readOnly);
@@ -297,11 +298,14 @@ public class QuantPostProcessingPanel extends JPanel {
             Long ptmId = (Long) ptmToDiscardParameter.getAssociatedData();
             thisQuantPtmIds.add(m_parameterList.getPrefixName()+"discardPeptideModification_"+ptmId);
         }
-            
+         boolean discardModifiedPeptides = false;   
         for (String key : keys) {
             if(key.startsWith(m_parameterList.getPrefixName() +"discardPeptideModification_")){
                 prefQuantPtmIds.add(key);
             }
+            if(key.startsWith(m_parameterList.getPrefixName()+"discardModifiedPeptides"))
+                discardModifiedPeptides = filePreferences.getBoolean(key, false);
+            
             if (!completeMode) {                
                 if (Arrays.asList(hiddenParams).contains(key)) {
                     filePreferences.remove(key); // Don't load this parameter     
@@ -322,9 +326,9 @@ public class QuantPostProcessingPanel extends JPanel {
         } else {
             m_loadedPTMsParamsError = true;
         }
-        if(m_loadedPTMsParamsError){
-            JOptionPane.showMessageDialog(this, " Warning:  read parameter don't match current list", "Load Parameter ERROR",JOptionPane.ERROR_MESSAGE);
-            String label = m_discardModifiedPeptidesChB.getText()+" (WARNING: Read parameter don't match current list)";
+        if(m_loadedPTMsParamsError && discardModifiedPeptides){
+            JOptionPane.showMessageDialog(this, "Warning: PTMs to discard don't match current PTMs list", "Load Parameter ERROR",JOptionPane.ERROR_MESSAGE);
+            String label = m_discardModifiedPeptidesChB.getText()+" (WARNING-PTMs: Read parameters don't match current list)";
             m_discardModifiedPeptidesChB.setText(label);
         }
         getParameterList().loadParameters(filePreferences); //Load params 

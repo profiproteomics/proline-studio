@@ -10,6 +10,7 @@ package fr.proline.studio.corewrapper.data;
  *
  * @author VD225637
  */
+//VD TODO add camelCase to snake_case to use in properties ! 
 public class QuantPostProcessingParams {
     
     public final static String SETTINGS_KEY = "QuantPostProcessing";

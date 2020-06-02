@@ -301,16 +301,12 @@ public class ServerLogFileNameDialog extends DefaultDialog {
         };
         DownloadFileTask task = null;
         /**
-         * if !isDebugFile if isDebugFile && !m_isTodayDebug && index == 0 =>
-         * otherday first debug file in these 2 upon cases, if remote file don't
-         * existe, there will be an "Error handling JMS Message" Exception we
-         * need show the StudioExceptions.notify. In other case, we need not.
+         * if remote file don't existe, there will be an "Error handling JMS
+         * Message" Exception, in order to avoid to show
+         * StudioExceptions.notify: false.
          */
-        if (!isDebugFile || isDebugFile && !m_isTodayDebug && index == 0) {
-            task = new DownloadFileTask(callback, remoteFilePath, localFile, true);
-        } else {
-            task = new DownloadFileTask(callback, remoteFilePath, localFile, false);
-        }
+        task = new DownloadFileTask(callback, remoteFilePath, localFile, false);
+
         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
     }
 

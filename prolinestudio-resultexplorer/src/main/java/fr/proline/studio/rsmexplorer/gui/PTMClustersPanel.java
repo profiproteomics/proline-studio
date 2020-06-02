@@ -487,9 +487,12 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
             if (selectionWillBeRestored) {
                 return;
             }
-            //VDS: Order is important ! To be corrected using set of class for propagation
-            //m_dataBox.addDataChanged(PTMSite.class);
-            //m_dataBox.addDataChanged(DPeptideMatch.class);
+            
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
+            
             m_dataBox.addDataChanged(DProteinSet.class);
             m_dataBox.addDataChanged(DProteinMatch.class);
             m_dataBox.addDataChanged(PTMPeptideInstance.class, null);  //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously

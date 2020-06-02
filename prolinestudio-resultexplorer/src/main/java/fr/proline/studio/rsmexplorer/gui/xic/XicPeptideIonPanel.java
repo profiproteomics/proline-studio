@@ -369,6 +369,11 @@ public class XicPeptideIonPanel extends HourglassPanel implements DataBoxPanelIn
             if (selectionWillBeRestored) {
                 return;
             }
+            
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
 
             m_dataBox.addDataChanged(DMasterQuantPeptideIon.class);
             m_dataBox.propagateDataChanged();

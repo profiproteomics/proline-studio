@@ -453,6 +453,11 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             if (selectionWillBeRestored) {
                 return;
             }
+            
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
  
             m_dataBox.addDataChanged(Feature.class);
             m_dataBox.propagateDataChanged();

@@ -17,13 +17,13 @@
 package fr.proline.studio.pattern;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
 /**
- * Group of parameters
+ * List of parameters
+ * 
  * @author JM235353
  */
-public class GroupParameter  {
+public class ParameterList  {
     
     private final ArrayList<DataParameter> m_parameterList = new ArrayList<>(1);
     
@@ -47,7 +47,7 @@ public class GroupParameter  {
         return m_parameterList;
     }
     
-    public void addParameter(GroupParameter groupParameter) {
+    public void addParameter(ParameterList groupParameter) {
         for (DataParameter dataParameter : groupParameter.getParameterList()) {
             m_parameterList.add(dataParameter);
         }
@@ -66,7 +66,7 @@ public class GroupParameter  {
         return false;
     }
     
-    public boolean isCompatibleWithOutParameter(ArrayList<GroupParameter> outParameterList) {
+    public boolean isCompatibleWithOutParameter(ArrayList<ParameterList> outParameterList) {
         int nbInParameters  = m_parameterList.size();
         int nbOutParameters = outParameterList.size();
         
@@ -80,7 +80,7 @@ public class GroupParameter  {
             boolean compatibleOutParameterFound = false;
             for (int j=0;j<nbOutParameters;j++) {
                 
-                GroupParameter dataOutParameter = outParameterList.get(j);
+                ParameterList dataOutParameter = outParameterList.get(j);
                 if (dataOutParameter.isCompatibleWithInParameter(inParameter)) {
                     compatibleOutParameterFound = true;
                     break;

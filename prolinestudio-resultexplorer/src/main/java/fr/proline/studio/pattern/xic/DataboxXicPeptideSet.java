@@ -32,7 +32,7 @@ import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.GroupParameter;
+import fr.proline.studio.pattern.ParameterList;
 import fr.proline.studio.pattern.ParameterSubtypeEnum;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XicPeptidePanel;
@@ -84,7 +84,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         }
 
         // Register in parameters
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(DDataset.class);
         inParameter.addParameter(DProteinSet.class);
         inParameter.addParameter(DMasterQuantProteinSet.class);
@@ -93,7 +93,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         registerInParameter(inParameter);
 
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         outParameter.addParameter(DDataset.class);
         outParameter.addParameter(ResultSummary.class);
         

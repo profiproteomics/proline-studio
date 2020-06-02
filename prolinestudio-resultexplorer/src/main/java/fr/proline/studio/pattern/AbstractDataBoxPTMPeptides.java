@@ -66,7 +66,7 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
 
         // Register in parameters          
         // One ResultSummary
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(PTMPeptideInstance.class, m_displayAllPepMatches ? ParameterSubtypeEnum.LEAF_PTMPeptideInstance : ParameterSubtypeEnum.PARENT_PTMPeptideInstance);
         inParameter.addParameter(PTMPeptideInstance.class);
         
@@ -79,7 +79,7 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
         registerInParameter(inParameter);
 
         
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         outParameter.addParameter(PTMPeptideInstance.class);
         outParameter.addParameter(PTMPeptideInstance.class, ParameterSubtypeEnum.PARENT_PTMPeptideInstance);
         outParameter.addParameter(PTMPeptideInstance.class, ParameterSubtypeEnum.LEAF_PTMPeptideInstance);

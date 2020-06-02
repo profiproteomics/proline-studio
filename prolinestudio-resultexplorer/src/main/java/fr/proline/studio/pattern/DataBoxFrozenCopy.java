@@ -92,7 +92,7 @@ public class DataBoxFrozenCopy extends AbstractDataBox {
         }
         
         // register out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         Iterator<Class> itClass = m_frozenDataMap.keySet().iterator();
         while (itClass.hasNext()) {
             Class c = itClass.next();

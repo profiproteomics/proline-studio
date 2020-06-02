@@ -34,7 +34,7 @@ public class DataBoxTaskDescription extends AbstractDataBox {
         m_description = "Task Description";
         
         // Register in parameters
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(TaskInfo.class);
         registerInParameter(inParameter);
     }

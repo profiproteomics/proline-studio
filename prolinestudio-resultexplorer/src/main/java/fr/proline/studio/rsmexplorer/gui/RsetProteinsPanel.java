@@ -463,6 +463,11 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
             if (selectionWillBeRestored) {
                 return;
             }
+            
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
 
             m_dataBox.addDataChanged(DProteinMatch.class);
             m_dataBox.propagateDataChanged();

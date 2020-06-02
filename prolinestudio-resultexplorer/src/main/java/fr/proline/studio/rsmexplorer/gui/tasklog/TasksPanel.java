@@ -311,6 +311,11 @@ public class TasksPanel extends AbstractTasksPanel {
 
             super.valueChanged(e);
 
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
+            
             if (!m_isUpdating) {
                 getDataBox().addDataChanged(TaskInfo.class);
                 getDataBox().propagateDataChanged();

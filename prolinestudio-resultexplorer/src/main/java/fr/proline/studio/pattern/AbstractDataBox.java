@@ -64,8 +64,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     protected DataBoxPanelInterface m_panel;
 
     // In and out Parameters Registered
-    private GroupParameter m_inParameters = null;
-    private GroupParameter m_outParameters = null;
+    private ParameterList m_inParameters = null;
+    private ParameterList m_outParameters = null;
 
     private final HashMap<Long, TaskInfo> m_taskMap = new HashMap<>();
 
@@ -299,7 +299,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         m_style = style;
 
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         outParameter.addParameter(ProjectId.class);
         registerOutParameter(outParameter);
     }
@@ -419,7 +419,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         return m_taskMap.get(taskId);        
     }
 
-    protected final void registerInParameter(GroupParameter parameter) {
+    protected final void registerInParameter(ParameterList parameter) {
         if (m_inParameters == null) {
             m_inParameters = parameter;
         } else {
@@ -427,7 +427,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         }
     }
 
-    protected final void registerOutParameter(GroupParameter parameter) {
+    protected final void registerOutParameter(ParameterList parameter) {
         if (m_outParameters == null) {
             m_outParameters = parameter;
         } else {
@@ -435,11 +435,11 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         }
     }
 
-    public GroupParameter getOutParameters() {
+    public ParameterList getOutParameters() {
         return m_outParameters;
     }
 
-    public GroupParameter getInParameters() {
+    public ParameterList getInParameters() {
         return m_inParameters;
     }
 
@@ -448,7 +448,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
      * @param c
      * @return 
      */
-    public Object getExtraData(Class parameterType) { //JPM.DATABOX : add subtype ?
+    public Object getExtraData(Class parameterType) {
         if (isDataDependant(parameterType, ParameterSubtypeEnum.SINGLE_DATA)) {
             return null;
         }
@@ -488,7 +488,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         }
     }
 
-    public double calculateParameterCompatibilityDistance(ArrayList<GroupParameter> outParameters) {
+    public double calculateParameterCompatibilityDistance(ArrayList<ParameterList> outParameters) {
         if (m_inParameters.isCompatibleWithOutParameter(outParameters)) {
             return 0;
         }
@@ -545,6 +545,10 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     }
     public final Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
 
+        // I remove this log, it generates too much logs
+        // put it back if needed
+        //m_logger.debug("Ask to DataBox {} for parameter {}-{}", getClass().getName(), parameterType.getName(), parameterSubtype);
+        
         // check if the box has the right to ask this data
         checkDataAsked(parameterType, parameterSubtype);
         
@@ -658,6 +662,13 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         // during this operation, new boxes can be added to the queue.
         while (!queueList.isEmpty()) {
             AbstractDataBox currentBox = queueList.peekFirst();
+            
+            // log propagateDataChanged
+            if (m_logger.isDebugEnabled()) {
+                logPropagateDataChanged(currentBox);                
+                
+            }
+            
             currentBox.propagateDataChanged(currentBox.m_dataChangedMap);
             currentBox.m_dataChangedMap.clear();
             queueList.pop();
@@ -667,11 +678,17 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     private static LinkedList<AbstractDataBox> queueList = new LinkedList();
     
     
+    
     private HashMap<Class, HashSet<ParameterSubtypeEnum>> m_dataChangedMap = new HashMap<>();    
     public void addDataChanged(Class dataType) {
         addDataChanged(dataType, ParameterSubtypeEnum.SINGLE_DATA);
     }
     public void addDataChanged(Class dataType, ParameterSubtypeEnum parameterSubtype) {
+        
+        if (m_nextDataBoxArray == null) {
+            // no need to add data changed 
+            return;
+        }
         
         HashSet<ParameterSubtypeEnum> hashSet = m_dataChangedMap.get(dataType);
         if (hashSet == null) {
@@ -682,6 +699,12 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         hashSet.add(parameterSubtype);
     }
     public void propagateDataChanged() {
+        
+        if (m_nextDataBoxArray == null) {
+            // no need to add data changed 
+            return;
+        }
+        
         // propagation is queued up and can be treated later
         propagateDataChanged(this);
     }
@@ -690,7 +713,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         if (m_nextDataBoxArray != null) {
             for (AbstractDataBox nextDataBox : m_nextDataBoxArray) {
                 if (nextDataBox.isDataDependant(dataTypeMap)) {
-                    //m_logger.debug("nexDataBox:{} isDataDependant for datatype: {}",nextDataBox.getTypeName(), dataType.getName());
+
                     nextDataBox.dataChanged();
                 }
             }
@@ -700,6 +723,32 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         }
     }
 
+    public static void logPropagateDataChanged(AbstractDataBox box) {
+        m_sb.setLength(0);
+        m_sb.append(box.getType()).append("#").append(box.getClass().getName()).append("@").append(Integer.toHexString(box.hashCode())).append("#").append(box.getFullName()).append(" : ");
+        HashMap<Class, HashSet<ParameterSubtypeEnum>> dataChangedMap = box.m_dataChangedMap;
+        Iterator<Class> itClass = dataChangedMap.keySet().iterator();
+        while (itClass.hasNext()) {
+            Class c = itClass.next();
+            m_sb.append(c.getName()).append(" - ");
+            HashSet<ParameterSubtypeEnum> subParameters = dataChangedMap.get(c);
+            Iterator<ParameterSubtypeEnum> it = subParameters.iterator();
+            while (it.hasNext()) {
+                ParameterSubtypeEnum subtype = it.next();
+                m_sb.append(subtype);
+                if (it.hasNext()) {
+                    m_sb.append(", ");
+                }
+            }
+
+            if (itClass.hasNext()) {
+                m_sb.append("  | ");
+            }
+        }
+        m_logger.debug("propagateDataChanged() {}", m_sb.toString());
+    }
+    private static StringBuilder m_sb = new StringBuilder();
+    
     public void setProjectId(long projectId) {
         if (m_panel != null) {
             getDataBoxPanelInterface().addSingleValue(m_projectId);

@@ -71,22 +71,21 @@ public class DataboxMultiGraphics extends AbstractDataBox {
         }
 
         // Register in parameters
-        if (!m_displayDoubleYAxis) {
-            GroupParameter inParameter = new GroupParameter();
-            inParameter.addParameter(Integer.class, ParameterSubtypeEnum.PEPTIDES_SELECTION_LIST, false /* not compulsory */);
-            inParameter.addParameter(ExtendedTableModelInterface.class);
-            inParameter.addParameter(CrossSelectionInterface.class);
-            registerInParameter(inParameter);
-        } else {
-            GroupParameter inParameter = new GroupParameter();
-            inParameter.addParameter(Integer.class, ParameterSubtypeEnum.PEPTIDES_SELECTION_LIST, false /* not compulsory */);
-            inParameter.addParameter(ExtendedTableModelInterface.class);
-            inParameter.addParameter(CrossSelectionInterface.class);
+        ParameterList inParameter = new ParameterList();
+        
+        inParameter.addParameter(Integer.class, ParameterSubtypeEnum.PEPTIDES_SELECTION_LIST, false /* not compulsory */);
+        inParameter.addParameter(ExtendedTableModelInterface.class, ParameterSubtypeEnum.LIST_DATA);
+        inParameter.addParameter(CrossSelectionInterface.class, ParameterSubtypeEnum.LIST_DATA);
+
+        if (m_displayDoubleYAxis) {
+
             inParameter.addParameter(SecondAxisTableModelInterface.class);
             inParameter.addParameter(PTMPeptideInstance.class);//for DataBoxPTMPeptide[XXXX].propagate //JPM.DATABOX : big wart to be suppressed : removed true
             inParameter.addParameter(DMasterQuantPeptide.class);//for DataBoxXicPeptideSet.propagate
-            registerInParameter(inParameter);
+
         }
+        
+        registerInParameter(inParameter);
         m_setHideButton = false;
     }
 

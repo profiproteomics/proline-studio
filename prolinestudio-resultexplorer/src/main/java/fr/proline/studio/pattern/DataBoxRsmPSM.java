@@ -55,13 +55,13 @@ public class DataBoxRsmPSM extends AbstractDataBox {
         
         // Register in parameters
         // One ResultSummary
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(ResultSummary.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
         // One or Multiple PeptideMatch
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         outParameter.addParameter(DPeptideMatch.class);
         outParameter.addParameter(ResultSummary.class);
         outParameter.addParameter(ResultSet.class);

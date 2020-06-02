@@ -43,12 +43,12 @@ public class DataBoxRsetAll extends AbstractDataBox {
         m_typeName = "Search Results";
         
         // Register in parameters
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(Project.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         outParameter.addParameter(ResultSet.class);
         registerOutParameter(outParameter);
 

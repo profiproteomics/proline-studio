@@ -57,12 +57,12 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
         m_description = "All PSM of a Quanti. Peptide";
 
         // Register in parameters
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(DMasterQuantPeptide.class);
         registerInParameter(inParameter);
 
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
 
         outParameter.addParameter(DPeptideMatch.class);
         outParameter.addParameter(ExtendedTableModelInterface.class);

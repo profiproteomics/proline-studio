@@ -83,7 +83,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         m_description = "Clusters of Modification Sites of a Dataset";//May be Ident or Quant dataset...
         
         // Register in parameters
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         
         inParameter.addParameter(PTMDataset.class);
         inParameter.addParameter(DDataset.class);
@@ -91,7 +91,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         registerInParameter(inParameter);
         
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         outParameter.addParameter(ResultSummary.class);
 
         outParameter.addParameter(PTMPeptideInstance.class, ParameterSubtypeEnum.LEAF_PTMPeptideInstance);
@@ -129,7 +129,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     }
     
     private void registerXicOutParameter(){
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         
         outParameter.addParameter(DMasterQuantProteinSet.class);
         outParameter.addParameter(DProteinSet.class);

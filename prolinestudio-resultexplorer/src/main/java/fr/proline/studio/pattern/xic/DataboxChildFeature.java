@@ -30,7 +30,7 @@ import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.mzscope.MzScopeInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.GroupParameter;
+import fr.proline.studio.pattern.ParameterList;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XicFeaturePanel;
 import static fr.proline.studio.rsmexplorer.gui.xic.XicFeaturePanel.VIEW_ALL_GRAPH_PEAKS;
@@ -72,13 +72,13 @@ public class DataboxChildFeature extends AbstractDataBox {
 
         // Register in parameters
         // One Map 
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(DMasterQuantPeptideIon.class);
         inParameter.addParameter(QuantChannelInfo.class);
         registerInParameter(inParameter);
 
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         outParameter.addParameter(Feature.class);
         outParameter.addParameter(DFeature.class, ParameterSubtypeEnum.LIST_DATA);
 

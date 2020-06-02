@@ -85,7 +85,7 @@ public class DataboxManager {
         return m_databoxManager;
     }
 
-    public TreeMap<ParameterDistance, AbstractDataBox> findCompatibleStartingDataboxList(ArrayList<GroupParameter> outParameters) {
+    public TreeMap<ParameterDistance, AbstractDataBox> findCompatibleStartingDataboxList(ArrayList<ParameterList> outParameters) {
 
         TreeMap<ParameterDistance, AbstractDataBox> compatibilityList = new TreeMap<>();
         for (int i = 0; i < m_dataBoxStartingArray.length; i++) {

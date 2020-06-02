@@ -46,13 +46,13 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
         m_description = "All MSQueries of an Identification Summary";
         
         // Register in parameters
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(ResultSummary.class);
         registerInParameter(inParameter);
         
         
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         outParameter.addParameter(DMsQuery.class);
         outParameter.addParameter(ResultSummary.class);
         outParameter.addParameter(ResultSet.class);

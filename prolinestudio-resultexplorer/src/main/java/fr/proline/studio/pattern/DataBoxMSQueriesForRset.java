@@ -48,12 +48,12 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
         m_description = "All MSQueries of a Search Result";
         
         // Register in parameters
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(ResultSet.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         outParameter.addParameter(DMsQuery.class);
         outParameter.addParameter(ResultSet.class);
         outParameter.addParameter(MsQueryInfoRset.class);

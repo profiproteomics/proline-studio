@@ -22,7 +22,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.GroupParameter;
+import fr.proline.studio.pattern.ParameterList;
 import fr.proline.studio.pattern.ParameterSubtypeEnum;
 import fr.proline.studio.rsmexplorer.gui.xic.ExperimentalDesignPanel;
 
@@ -45,13 +45,13 @@ public class DataboxExperimentalDesign extends AbstractDataBox {
 
         // Register in parameters
         // One Dataset 
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(DDataset.class); 
         registerInParameter(inParameter);
 
 
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         outParameter.addParameter(DDataset.class);
         registerOutParameter(outParameter);
     }

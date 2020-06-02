@@ -35,7 +35,7 @@ public class DataBoxDataAnalyzerResults extends AbstractDataBox {
         m_description = "Data Analyzer Results";
 
         // Register in parameters
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(ProcessEngineInfo.class);
         registerInParameter(inParameter);
 

@@ -32,7 +32,7 @@ import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.GroupParameter;
+import fr.proline.studio.pattern.ParameterList;
 import fr.proline.studio.pattern.ParameterSubtypeEnum;
 import fr.proline.studio.rsmexplorer.gui.xic.MapAlignmentPanel;
 import fr.proline.studio.rsmexplorer.gui.xic.MapTimePanel;
@@ -72,12 +72,12 @@ public class DataboxMapAlignment extends AbstractDataBox {
 
         m_compareRT2Maps = new HashMap<Long, IonsRTTableModel>();
         // Register in parameters
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(DDataset.class);
         registerInParameter(inParameter);
 
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         
         outParameter.addParameter(ExtendedTableModelInterface.class);
         outParameter.addParameter(CrossSelectionInterface.class);

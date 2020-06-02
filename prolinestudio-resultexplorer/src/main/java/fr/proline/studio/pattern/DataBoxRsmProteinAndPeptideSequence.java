@@ -40,7 +40,7 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
         m_description = "Protein Sequence and its Peptides Sequences";
 
         // Register in parameters
-        GroupParameter inParameter = new GroupParameter();
+        ParameterList inParameter = new ParameterList();
         inParameter.addParameter(DProteinMatch.class);
         inParameter.addParameter(DPeptideInstance.class, ParameterSubtypeEnum.SINGLE_DATA, false /* parameter is not compulsory */);
         inParameter.addParameter(ResultSummary.class); // needs a ProteinMatch and a ResultSummary (PeptideInstance is optionnal)

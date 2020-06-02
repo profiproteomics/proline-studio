@@ -227,6 +227,12 @@ public class MapTimePanel extends HourglassPanel implements DataBoxPanelInterfac
             if (selectionWillBeRestored) {
                 return;
             }
+            
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
+            
             if (m_dataBox != null) {
                 m_dataBox.addDataChanged(MapAlignment.class);
                 m_dataBox.propagateDataChanged();

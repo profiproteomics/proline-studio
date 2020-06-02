@@ -17,42 +17,30 @@
 package fr.proline.studio.filter;
 
 import java.awt.GridBagConstraints;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 /**
- * Filter on Date values, used by ServerLog
+ * Filter on Duration values Specific for ServerLog
  *
- * @author kx257079
  */
-public class DateFilter extends Filter {
+public class DurationFilter extends LongFilter {
 
     private static final Integer VALUE_MIN = 0;
     private static final Integer VALUE_MAX = 1;
-    private Date m_min;
-    private Date m_max;
-    private SimpleDateFormat m_dateFormat;
-    private SimpleDateFormat m_alterDateFormat = new SimpleDateFormat("dd MMM yyyy");
+    private Long m_min;
+    private Long m_max;
 
-    public DateFilter(String variableName, ConvertValueInterface convertValueInterface, int modelColumn) {
+    public DurationFilter(String variableName, ConvertValueInterface convertValueInterface, int modelColumn) {
         super(variableName, convertValueInterface, modelColumn);
-        m_dateFormat = new SimpleDateFormat("HH:mm:ss.SSS - dd MMM yyyy");
-    }
-
-    public DateFilter(SimpleDateFormat dateFormat, String variableName, ConvertValueInterface convertValueInterface, int modelColumn) {
-        super(variableName, convertValueInterface, modelColumn);
-        m_dateFormat = dateFormat;
-
     }
 
     @Override
     public Filter cloneFilter4Search() {
-        DateFilter clone = new DateFilter(m_dateFormat, m_variableName, m_convertValueInterface, m_modelColumn);
-        clone.m_dateFormat = m_dateFormat;
+        DurationFilter clone = new DurationFilter(m_variableName, m_convertValueInterface, m_modelColumn);
         clone.m_min = m_min;
         clone.m_max = m_max;
         setValuesForClone(clone);
@@ -61,15 +49,16 @@ public class DateFilter extends Filter {
 
     @Override
     public boolean filter(Object v1, Object v2) {
-        Date value = (Date) v1;
+
+        long value = (Long) v1;
 
         if (m_min != null) {
-            if (value.getTime() < m_min.getTime()) {
+            if (value < m_min.longValue()) {
                 return false;
             }
         }
         if (m_max != null) {
-            if (value.getTime() > m_max.getTime()) {
+            if (value > m_max.longValue()) {
                 return false;
             }
         }
@@ -77,55 +66,107 @@ public class DateFilter extends Filter {
 
     }
 
+    public static String formatDurationInHour(long duration) {
+        int second = 1000, minute = 60000, hour = 3600000;
+
+        String time = String.format("%d:%02d:%02d.%03d",
+                duration / hour,
+                (duration % hour) / minute,
+                (duration % minute) / second,
+                (duration % second));
+        return time;
+    }
+
+    private Long getTextFieldValue(String content) {
+        int h = 3600000;
+        int m = 60000;
+        int s = 1000;
+        long duration = 0;
+        final String regex = "(\\d+):([0-5][0-9]):([0-5][0-9])\\.(\\d\\d\\d)";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(content);
+
+        if (matcher.find()) {
+            for (int i = 1; i <= matcher.groupCount(); i++) {
+                int v = Integer.parseInt(matcher.group(i));
+                switch (i) {
+                    case 1://hour
+                        duration += v * 3600000;
+                        break;
+                    case 2:
+                        duration += v * 60000;
+                        break;
+                    case 3:
+                        duration += v * 1000;
+                        break;
+                    case 4:
+                        duration += v;
+                        break;
+                }
+
+            }
+            return duration;
+        } else {
+            final String regexSimple = "(\\d+)([HhMmSs])?";
+            pattern = Pattern.compile(regexSimple);
+            matcher = pattern.matcher(content);
+            if (matcher.find()) {
+                int vs = Integer.parseInt(matcher.group(1));
+                String type = matcher.group(2);
+                if ((type) == null) {
+                    duration = vs;
+                } else if (type.equalsIgnoreCase("h")) {
+                    duration = vs * h;
+                } else if (type.equalsIgnoreCase("m")) {
+                    duration = vs * m;
+                } else if (type.equalsIgnoreCase("s")) {
+                    duration = vs * s;
+                }
+                return duration;
+            } else {
+                return null;
+            }
+        }
+
+    }
+
     @Override
     public FilterStatus checkValues() {
-        Date min;
+        Long min;
         String minValue = ((JTextField) getComponent(VALUE_MIN)).getText().trim();
         if ((minValue == null) || (minValue.length() == 0)) {
             min = null;
         } else {
             try {
-                min = parseTime(minValue);
-            } catch (ParseException ex) {
-                return new FilterStatus("Min Value is  not a Date", m_components.get(VALUE_MIN));
+                min = getTextFieldValue(minValue);
+                if (min == null) {
+                    return new FilterStatus("Min Value is  not a duration in (HHHH:mm:ss.SSS) format, or in (\\d+)h |(\\d+)m (\\d+)s ", m_components.get(VALUE_MIN));
+                }
+            } catch (Exception nfe) {
+                return new FilterStatus("Min Value is  not a duration in (HHHH:mm:ss.SSS) format, or in (\\d+)h |(\\d+)m (\\d+)s ", m_components.get(VALUE_MIN));
             }
         }
 
-        Date max;
+        Long max;
         String maxValue = ((JTextField) getComponent(VALUE_MAX)).getText().trim();
         if ((maxValue == null) || (maxValue.length() == 0)) {
             max = null;
         } else {
             try {
-                max = parseTime(maxValue);
-            } catch (ParseException ex) {
-                return new FilterStatus("Max Value is  not a Date", m_components.get(VALUE_MAX));
+                max = getTextFieldValue(maxValue);
+                if (max == null) {
+                    return new FilterStatus("Max Value is  not a duration in (HHHH:mm:ss.SSS) format, or in (\\d+)h |(\\d+)m (\\d+)s ", m_components.get(VALUE_MAX));
+                }
+            } catch (Exception nfe) {
+                return new FilterStatus("Max Value is  not a duration in (HHHH:mm:ss.SSS) format, or in (\\d+)h |(\\d+)m (\\d+)s ", m_components.get(VALUE_MAX));
             }
         }
 
-        if ((min != null) && (max != null) && (min.getTime() > max.getTime())) {
+        if ((min != null) && (max != null) && (min > max)) {
             return new FilterStatus("Min Value is greater than Max Value", m_components.get(VALUE_MIN));
         }
 
         return null;
-    }
-
-    /**
-     * reverse of formatTime
-     *
-     * @param time
-     * @return
-     */
-    private Date parseTime(String time) throws ParseException {
-        try {
-            return m_dateFormat.parse(time.trim());
-        } catch (ParseException ex) {
-            try {
-                return m_alterDateFormat.parse(time.trim());
-            } catch (ParseException ex1) {
-                throw ex1;
-            }
-        }
     }
 
     @Override
@@ -135,17 +176,17 @@ public class DateFilter extends Filter {
 
         if (isDefined()) {
 
-            Date lastMinValue = m_min;
-            Date lastMaxValue = m_max;
+            Long lastMinValue = m_min;
+            Long lastMaxValue = m_max;
 
             String minValue = ((JTextField) getComponent(VALUE_MIN)).getText().trim();
             if ((minValue == null) || (minValue.length() == 0)) {
                 m_min = null;
             } else {
                 try {
-                    m_min = parseTime(minValue);
-                } catch (ParseException ex) {
-                    m_min = null;
+                    m_min = getTextFieldValue(minValue);
+                } catch (Exception nfe) {
+
                 }
             }
 
@@ -154,9 +195,9 @@ public class DateFilter extends Filter {
                 m_max = null;
             } else {
                 try {
-                    m_max = parseTime(maxValue);
-                } catch (ParseException ex) {
-                    m_max = null;
+                    m_max = getTextFieldValue(maxValue);
+                } catch (Exception nfe) {
+                    // should never happen
                 }
             }
 
@@ -164,9 +205,9 @@ public class DateFilter extends Filter {
                 hasChanged = true;
             } else if (((lastMaxValue == null) && (m_max != null)) || ((lastMaxValue != null) && (m_max == null))) {
                 hasChanged = true;
-            } else if ((lastMinValue != null) && (!lastMinValue.equals(m_min))) {
+            } else if ((lastMinValue != null) && (lastMinValue.longValue() != m_min.longValue())) {
                 hasChanged = true;
-            } else if ((lastMaxValue != null) && (!lastMaxValue.equals(m_max))) {
+            } else if ((lastMaxValue != null) && (lastMaxValue.longValue() != m_max.longValue())) {
                 hasChanged = true;
             }
         }
@@ -183,9 +224,9 @@ public class DateFilter extends Filter {
         c.weightx = 1;
         JTextField minTextField = ((JTextField) getComponent(VALUE_MIN));
         if (minTextField == null) {
-            minTextField = new JTextField(18);
+            minTextField = new JTextField(10);
             if (m_min != null) {
-                minTextField.setText(m_dateFormat.format(m_min));
+                minTextField.setText(formatDurationInHour(m_min));
             }
             registerComponent(VALUE_MIN, minTextField);
         }
@@ -213,9 +254,9 @@ public class DateFilter extends Filter {
         c.weightx = 1;
         JTextField maxTextField = ((JTextField) getComponent(VALUE_MAX));
         if (maxTextField == null) {
-            maxTextField = new JTextField(18);
+            maxTextField = new JTextField(10);
             if (m_max != null) {
-                maxTextField.setText(m_dateFormat.format(m_max));
+                maxTextField.setText(formatDurationInHour(m_max));
             }
             registerComponent(VALUE_MAX, maxTextField);
         }

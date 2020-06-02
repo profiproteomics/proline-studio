@@ -13,6 +13,7 @@ package fr.proline.studio.corewrapper.data;
 public class QuantPostProcessingParams {
     
     public final static String SETTINGS_KEY = "QuantPostProcessing";
+    public final static String PREVIOUS_SETTINGS_KEY = "QuantProfile";
     public final static String CURRENT_VERSION ="2.0";
     public final static String PARAM_VERSION_KEY = SETTINGS_KEY + ".parametersVersion";
      

@@ -47,6 +47,9 @@ public class RunInfoData extends AbstractData {
 
     private String m_message = null;
 
+    /**
+     * HashMap<RawFileName of RawFile, RawFile>
+     */
     private HashMap<String, RawFile> m_potentialRawFileMap = null;
 
     public RunInfoData() {
@@ -63,6 +66,17 @@ public class RunInfoData extends AbstractData {
 
     public void setPotentialRawFiles(HashMap<String, RawFile> potentialRawFileMap) {
         m_potentialRawFileMap = potentialRawFileMap;
+    }
+
+    public void addPotentialRawFiles(RawFile linkedFile) {
+        if (m_potentialRawFileMap == null) {
+            m_potentialRawFileMap = new HashMap();
+        }
+        String fileName = linkedFile.getRawFileName();
+        if (m_potentialRawFileMap.get(fileName) == null) {
+            m_potentialRawFileMap.put(linkedFile.getRawFileName(), linkedFile);
+        }
+
     }
 
     public boolean hasPotentialRawFiles() {

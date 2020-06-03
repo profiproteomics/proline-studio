@@ -54,7 +54,13 @@ public class HelpUtils {
 
         return helpURL;
     }
-
+    
+    /**
+     * from a path, get only file name, and remove all given suffix 
+     * @param path
+     * @param suffixes
+     * @return 
+     */
     public static String getFileName(String path, String[] suffixes) {
 
         path = path.toLowerCase();

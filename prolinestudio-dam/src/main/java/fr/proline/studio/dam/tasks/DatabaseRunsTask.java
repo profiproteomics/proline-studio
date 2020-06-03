@@ -46,6 +46,9 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
     
     private Map<Long,Long> m_runIdsByRsmIds = null;
     private String m_searchString = null;
+    /**
+     * HashMap<FileName of RawFile, RawFile>
+     */
     private HashMap<String, RawFile> m_rawfileFounds = null;
     private Run[] m_runOut;
 

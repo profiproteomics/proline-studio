@@ -40,7 +40,9 @@ import javax.swing.JTable;
  * @author AK249877
  */
 public class XICDropZone extends JPanel implements DropZoneInterface {
-
+    /**
+     * Hashmap key File name, value File.
+     */
     private final HashMap<String, File> m_droppedFiles;
     private FlatDesignTableModel m_model;
     private final String[] suffix = {".raw", ".mzdb", ".wiff"};
@@ -71,6 +73,11 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
     }
 
     //Ne faudrait-il pas un updateRow que updateTable => update complet a chaque ligne ? 
+    /**
+     *  first, for all run, which missing association, we get m_model.getPotentialFilenamesForMissings()
+     *  for each run missing fileName, find between m_droppedFiles, if there are a File has the same name of PotentialFilenamesForMissings
+     *  if found, updateDropZoneInfo 
+     */  
     public void updateTable() {
         if (m_model == null) {
             return;
@@ -158,6 +165,10 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
         }
     }
 
+    /**
+     * sample is a File, if not exist before, put in m_droppedFiles, fileName without suffix->File
+     * @param sample: must be a File object
+     */
     @Override
     public void addSample(Object sample) {
         if (sample instanceof File) {
@@ -189,6 +200,10 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
         }
     }
 
+    /**
+     * call addSample for each File in paramter, puis updateTable()
+     * @param o , must be an ArrayList of File
+     */
     @Override
     public void addSamples(Object o) {
         if (o instanceof ArrayList) {

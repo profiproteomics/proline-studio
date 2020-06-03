@@ -271,8 +271,7 @@ public class MzdbRawFile implements IRawFile {
 
     private List<IFeature> detectFeatures(FeaturesExtractionRequest params) {
         List<IFeature> result = new ArrayList<>();
-        FeatureDetectorConfig detectorConfig = new FeatureDetectorConfig(1, params.getMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, 0.75f, false, 10, false, true, true));
-//        FeatureDetectorConfig detectorConfig = buildFeatureDetectorConfig(params);
+        FeatureDetectorConfig detectorConfig = buildFeatureDetectorConfig(params);
         MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, detectorConfig);
         try {
             double minMz = params.getMinMz();
@@ -305,23 +304,23 @@ public class MzdbRawFile implements IRawFile {
 
     }
 
-//    private FeatureDetectorConfig buildFeatureDetectorConfig(FeaturesExtractionRequest params) {
-//        return new FeatureDetectorConfig(
-//                      params.getMsLevel(),
-//                      params.isMsnExtraction() ? params.getFragmentMzTolPPM() : params.getMzTolPPM(),
-//                      5,
-//                      params.getIntensityPercentile(),
-//                      params.getMaxConsecutiveGaps(),
-//                      new SmartPeakelFinderConfig(
-//                              params.getMinPeaksCount(),
-//                              params.getMinmaxDistanceThreshold(),
-//                              params.getMaxIntensityRelativeThreshold(),
-//                              false,
-//                              10,
-//                              false,
-//                              params.isRemoveBaseline(),
-//                              params.isUseSmoothing()));
-//    }
+    private FeatureDetectorConfig buildFeatureDetectorConfig(FeaturesExtractionRequest params) {
+        return new FeatureDetectorConfig(
+                      params.getMsLevel(),
+                      params.isMsnExtraction() ? params.getFragmentMzTolPPM() : params.getMzTolPPM(),
+                      5,
+                      params.getIntensityPercentile(),
+                      params.getMaxConsecutiveGaps(),
+                      new SmartPeakelFinderConfig(
+                              params.getMinPeaksCount(),
+                              params.getMinmaxDistanceThreshold(),
+                              params.getMaxIntensityRelativeThreshold(),
+                              false,
+                              10,
+                              false,
+                              params.isRemoveBaseline(),
+                              params.isUseSmoothing()));
+    }
 
     private void logSliceBounds(Iterator<RunSlice> tmpRunSlices) {
       double min = Double.MAX_VALUE;
@@ -360,15 +359,7 @@ public class MzdbRawFile implements IRawFile {
             }
 
 
-            FeatureDetectorConfig detectorConfig = null;
-            if (params.isMsnExtraction()) {
-                detectorConfig = new FeatureDetectorConfig(2, params.getFragmentMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, 0.75f, false, 10, false, params.isRemoveBaseline(), true));
-            } else {
-                detectorConfig = new FeatureDetectorConfig(1, params.getMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, 0.75f, false, 10, false, params.isRemoveBaseline(), true));
-            }
-
-
-//            FeatureDetectorConfig detectorConfig = buildFeatureDetectorConfig(params);
+            FeatureDetectorConfig detectorConfig = buildFeatureDetectorConfig(params);
             MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, detectorConfig);
             
             Peakel[] peakels = detector.detectPeakels(runSlices, Option.empty());

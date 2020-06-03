@@ -752,10 +752,10 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
                         RawFile linkedFile = userObject.getSelectedRawFile();
                         if (linkedFile != null) {
                             userObject.addPotentialRawFiles(linkedFile);
-                            userObject.setStatus(RunInfoData.Status.MISSING);
-                            userObject.setSelectedRawFile(null);
-                            userObject.setMessage("");
                         }
+                        userObject.setStatus(RunInfoData.Status.MISSING);
+                        userObject.setSelectedRawFile(null);
+                        userObject.setMessage("<html><font color='#FF0000'>Missing Raw File</font></html>");
                     }
                 }
                 updatePotentialsListForMissings();

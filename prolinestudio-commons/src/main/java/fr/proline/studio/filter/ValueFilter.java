@@ -45,6 +45,15 @@ public class ValueFilter extends Filter {
         EQUAL
     }
     
+    /**
+     * 
+     * @param variableName
+     * @param values : items in ComboBox
+     * @param displayIcons: ImageIcons for each items in ComboBox
+     * @param type: GREATER_EQUAL>=| EQUAL ==
+     * @param convertValueInterface: convert getValue(row, colomn) result in Integer
+     * @param modelColumn 
+     */
     public ValueFilter(String variableName, Object[] values, ImageIcon[] displayIcons, ValueFilterType type, ConvertValueInterface convertValueInterface, int modelColumn) {
         super(variableName, convertValueInterface, modelColumn);
         

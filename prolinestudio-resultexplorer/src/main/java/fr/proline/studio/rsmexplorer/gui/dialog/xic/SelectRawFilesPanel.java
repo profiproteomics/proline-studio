@@ -102,7 +102,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
         if (m_singleton == null) {
             m_singleton = new SelectRawFilesPanel();
         }
-        m_singleton.setRootNode(rootNode);
+        m_singleton.setRootNode(rootNode);//init data
         return m_singleton;
     }
 
@@ -464,10 +464,10 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
         public XICDropZone getXICDropZone() {
             return m_dropZone;
         }
-
+        
         public void setData(AbstractNode rootNode) {
             m_dataList.clear();
-            parseTree(rootNode);
+            parseTree(rootNode);//init tableModel data
             fireTableDataChanged();
 
         }
@@ -508,7 +508,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
                         runNode.addXICRunNodeInitListener(m_singleton);
                         //HACK new method so that runNode is available later when we want to retrieve the potential matching raw files! calls super.add()
                         sampleAnalysisNode.addXicRunNode(runNode, true);
-                        runNode.init(sampleAnalysisNode.getDataset(), this);
+                        runNode.init(sampleAnalysisNode.getDataset(), this);//retrive data from database
                     } else {
                         sampleAnalysisNode.add(sampleAnalysisNode.getXicRunNode());
                     }

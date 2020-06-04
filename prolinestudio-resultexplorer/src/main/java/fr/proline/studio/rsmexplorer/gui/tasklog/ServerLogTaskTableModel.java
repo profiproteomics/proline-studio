@@ -270,8 +270,8 @@ public class ServerLogTaskTableModel extends AbstractDecoratedGlobalTableModel<L
         ValueFilter statusFilter = new ValueFilter(getColumnName(COLTYPE_STATUS), LogTask.STATUS.values(), null, ValueFilter.ValueFilterType.EQUAL, statusConverter, COLTYPE_STATUS);
         filtersMap.put(COLTYPE_STATUS, statusFilter);
         filtersMap.put(COLTYPE_PROJECT_ID, new IntegerFilter(getColumnName(COLTYPE_PROJECT_ID), null, COLTYPE_PROJECT_ID));//Integer
-        filtersMap.put(COLTYPE_START_TIME, new DateFilter(getColumnName(COLTYPE_START_TIME), null, COLTYPE_START_TIME));//String
-        filtersMap.put(COLTYPE_STOP_TIME, new DateFilter(getColumnName(COLTYPE_STOP_TIME), null, COLTYPE_STOP_TIME));//String
+        filtersMap.put(COLTYPE_START_TIME, new DateFilter(getColumnName(COLTYPE_START_TIME), null, COLTYPE_START_TIME));
+        filtersMap.put(COLTYPE_STOP_TIME, new DateFilter(getColumnName(COLTYPE_STOP_TIME), null, COLTYPE_STOP_TIME));
 
         filtersMap.put(COLTYPE_DURATION, new DurationFilter(getColumnName(COLTYPE_DURATION), null, COLTYPE_DURATION));//Long
         filtersMap.put(COLTYPE_NB_TASK_PARALELLE, new IntegerFilter(getColumnName(COLTYPE_NB_TASK_PARALELLE), null, COLTYPE_NB_TASK_PARALELLE));//Integer

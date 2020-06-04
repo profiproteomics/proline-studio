@@ -47,6 +47,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>prolinestudio-commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>prolinestudio-logger</artifactId>
             <version>${project.version}</version>
         </dependency>

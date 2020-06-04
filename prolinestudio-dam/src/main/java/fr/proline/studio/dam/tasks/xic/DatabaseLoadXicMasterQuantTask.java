@@ -798,7 +798,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         //--- Create corresponding DMasterQuantPeptide
                         List<DMasterQuantPeptide> listDMasterQuantPeptideFake = new ArrayList();
                         for (Long m_peptideInstanceId : currentMQChPepInstanceIds) {
-                            DMasterQuantPeptide f = new DMasterQuantPeptide(-1, 0, -1, "", quantResultSummaryId);
+                            DMasterQuantPeptide f = new DMasterQuantPeptide(-1, -1, -1, "", quantResultSummaryId);
                             f.setPeptideInstanceId(m_peptideInstanceId);
                             listDMasterQuantPeptideFake.add(f);
                         }
@@ -823,7 +823,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                             List<Long> listPepNonIdentIds = (List<Long>) quantPeptideNonIdentQuery.getResultList();
                             // in order to add these master quantPeptides to the peptideInstance to load, we add the -masterQuantPeptideId to load in the peptideInstanceId...
                             for (Long pepNonIdentId : listPepNonIdentIds) {
-                                DMasterQuantPeptide f = new DMasterQuantPeptide(pepNonIdentId, 0, -1, "", quantResultSummaryId);
+                                DMasterQuantPeptide f = new DMasterQuantPeptide(pepNonIdentId, -1, -1, "", quantResultSummaryId);
                                 f.setPeptideInstanceId(-pepNonIdentId);
                                 m_peptideInstanceIds.add(-pepNonIdentId);
                                 m_masterQuantPeptideList.add(f);
@@ -968,7 +968,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
 
                         List<DMasterQuantPeptide> listDMasterQuantPeptideFake = new ArrayList();
                         for (Long m_peptideInstanceId : m_peptideInstanceIds) {
-                            DMasterQuantPeptide f = new DMasterQuantPeptide(-1, 0, -1, "", resultSummaryId);
+                            DMasterQuantPeptide f = new DMasterQuantPeptide(-1, -1, -1, "", resultSummaryId);
                             f.setPeptideInstanceId(m_peptideInstanceId);
                             listDMasterQuantPeptideFake.add(f);
                         }
@@ -1301,7 +1301,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                             break;
                         }
                     }
-                    DMasterQuantPeptide o = new DMasterQuantPeptide(-1, 0, -1, null, masterQuantPeptide.getQuantResultSummaryId());
+                    DMasterQuantPeptide o = new DMasterQuantPeptide(-1, -1, -1, null, masterQuantPeptide.getQuantResultSummaryId());
                     o.setPeptideInstance(peptideInstance);
                     o.setPeptideInstanceId(masterQuantPeptide.getPeptideInstanceId());
 
@@ -1644,7 +1644,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             masterQuantProteinSet.setNbPeptides(nbPep);
             masterQuantProteinSet.setNbQuantifiedPeptides(nbPepQuant);
 
-            // load status and peptideNumber by QcId            
+            // load status and peptideNumber by QcId   
+            // VDS version 2.2.0  load quantPeptideNumberByQchIds is deprecated as it is now saved in quantProteinSet. Keep for previous SpectralCount. To be removed in version++
             Map<Long, String> quantStatusByQchIds = new HashMap();
             Map<Long, Integer> quantPeptideNumberByQchIds = new HashMap();
             for (DQuantitationChannel qch : listQC) {

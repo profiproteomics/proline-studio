@@ -655,7 +655,9 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
         }
 
         /**
-         * Drag & Down used by TreeFileChooserTableModelInterface.importData()
+         * In order to Drag & Down used by
+         * TreeFileChooserTableModelInterface.importData() used also by
+         * XICDropZone
          *
          * @param fileList
          * @param rowIndex
@@ -746,16 +748,18 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
                 for (NodeModelRow node : m_dataList) {
                     RunInfoData userObject = (RunInfoData) node.m_run.getData();
                     RunInfoData.Status status = userObject.getStatus();
-                    if (status != RunInfoData.Status.LINKED_IN_DATABASE) {
-                        userObject.setPotentialRawFiles(null);
+                    if (status != RunInfoData.Status.LINKED_IN_DATABASE) {//else not allowed
+                        RawFile linkedFile = userObject.getSelectedRawFile();
+                        if (linkedFile != null) {
+                            userObject.addPotentialRawFiles(linkedFile);
+                        }
                         userObject.setStatus(RunInfoData.Status.MISSING);
                         userObject.setSelectedRawFile(null);
-                        userObject.setRun(null);
-                        userObject.setMessage(null);
-                        fireTableDataChanged();
-                        updatePotentialsListForMissings();
+                        userObject.setMessage("<html><font color='#FF0000'>Missing Raw File</font></html>");
                     }
                 }
+                updatePotentialsListForMissings();
+                fireTableDataChanged();
             }
         }
 

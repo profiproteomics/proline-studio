@@ -133,7 +133,6 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                 
                 if (subTask == null) {
                     if (!allPeptides) {
-                        MasterQuantPeptideProperties properties = m_masterQuantPeptide.getMasterQuantPeptideProperties();
                         ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideIonList, m_isXICMode, finished);
                     } else {
                         AbstractDatabaseCallback mapCallback = new AbstractDatabaseCallback() {

@@ -17,6 +17,7 @@
 package fr.proline.studio.dpm.task.jms;
 
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.TASK_LIST_INFO;
@@ -41,11 +42,18 @@ public class DownloadFileTask extends AbstractJMSTask {
 
     private final String m_remoteFileURL;
     private final File m_localFile;
+    private boolean m_showError; //used by ServerLogFileNameDialog.java
 
     public DownloadFileTask(AbstractJMSCallback callback, String remoteFileURL, File localFile) {
         super(callback, new TaskInfo("Download file " + remoteFileURL, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_remoteFileURL = remoteFileURL;
         m_localFile = localFile;
+        m_showError = true;
+    }
+
+    public DownloadFileTask(AbstractJMSCallback callback, String remoteFileURL, File localFile, boolean showError) {
+        this(callback, remoteFileURL, localFile);
+        m_showError = showError;
     }
 
     @Override
@@ -79,7 +87,6 @@ public class DownloadFileTask extends AbstractJMSTask {
     public void taskDone(Message jmsMessage) throws Exception {
         if (jmsMessage instanceof BytesMessage) {
             /* It is a Large Message Stream */
-            
 
             boolean success = false;
             BufferedOutputStream bos = null;
@@ -125,8 +132,20 @@ public class DownloadFileTask extends AbstractJMSTask {
             throw new Exception(" Invalide message type to download file ! ");
         }
 
-         m_currentState = JMSState.STATE_DONE;
+        m_currentState = JMSState.STATE_DONE;
     }
 
+    /**
+     * don't show error when "Invalide message type to download file ! "
+     * "message":"Unknown"
+     *
+     * @param taskErr
+     */
+    @Override
+    protected void showError(TaskError taskErr) {
+        if (m_showError) {
+            super.showError(taskErr);
+        }
+    }
 
 }

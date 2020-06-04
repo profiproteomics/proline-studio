@@ -279,7 +279,7 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
         }
     }
 
-    private void showError(TaskError taskErr) {
+    protected void showError(TaskError taskErr) {
         if (taskErr != null) {
             StudioExceptions.notify("JMS Task Error", new Exception(taskErr.getErrorTitle() + "\n" + taskErr.getErrorText()));
         }

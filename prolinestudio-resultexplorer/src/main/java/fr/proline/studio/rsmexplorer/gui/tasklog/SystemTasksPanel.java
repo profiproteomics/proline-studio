@@ -76,11 +76,13 @@ public class SystemTasksPanel extends AbstractTasksPanel {
     protected static final Logger m_loggerProline = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
     private JButton m_reconnectButton;
+    private JButton m_logParserButton;
+    private ServerLogFileNameDialog m_logParserDialog;
 
     public SystemTasksPanel() {
         super();
         setLayout(new GridBagLayout());
-
+        m_logParserDialog = new ServerLogFileNameDialog();
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
@@ -122,7 +124,26 @@ public class SystemTasksPanel extends AbstractTasksPanel {
             }
         });
         toolbar.add(m_reconnectButton);
+        m_logParserButton = new JButton(IconManager.getIcon(IconManager.IconType.DOCUMENT_LIST));
+        m_logParserButton.setToolTipText("View server tasks log history");
+        m_logParserButton.setEnabled(true);
+        m_logParserButton.addActionListener(createLogParserButtonAction());
+        toolbar.add(m_logParserButton);
         return toolbar;
+    }
+
+    private ActionListener createLogParserButtonAction() {
+        ActionListener action = new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                m_logParserDialog.setLocationRelativeTo(m_logParserButton);
+                m_logParserDialog.setVisible(true);
+
+            }
+
+        };
+        return action;
     }
 
     private JPanel createToolbarPanel() {
@@ -401,8 +422,9 @@ public class SystemTasksPanel extends AbstractTasksPanel {
             if (indexByMsgId.containsKey(msgId)) {
                 int index = indexByMsgId.get(msgId);
                 JMSNotificationMessage prevMsg = m_notificationMsgs.get(index);
-                if( (!msg.getJsonRPCMsgId().equals(prevMsg.getJsonRPCMsgId())) && msgId.equals(msg.getJsonRPCMsgId()))
+                if ((!msg.getJsonRPCMsgId().equals(prevMsg.getJsonRPCMsgId())) && msgId.equals(msg.getJsonRPCMsgId())) {
                     msg = new JMSNotificationMessage(msg.getServiceName(), msg.getServiceVersion(), msg.getServiceSource(), msg.getServiceDescription(), msg.getServiceInfo(), msg.getEventDate().getTime(), msgId, prevMsg.getJsonRPCMsgId(), msg.getEventType());
+                }
                 m_notificationMsgs.set(index, msg);
             } else {
                 m_notificationMsgs.add(msg);
@@ -438,10 +460,10 @@ public class SystemTasksPanel extends AbstractTasksPanel {
                     Integer bIntId = Integer.valueOf(b.getJsonRPCMsgId());
                     Integer aIntId = Integer.valueOf(a.getJsonRPCMsgId());
                     return bIntId - aIntId;
-                } catch(NumberFormatException nfe) {
+                } catch (NumberFormatException nfe) {
                     return a.getJsonRPCMsgId().compareTo(b.getJsonRPCMsgId());
                 }
-            } 
+            }
         }
 
         @Override
@@ -471,10 +493,10 @@ public class SystemTasksPanel extends AbstractTasksPanel {
                     return msg;
                 case COLTYPE_MESSAGE_JSON_RPC_ID:
                     try {
-                        return Integer.valueOf(msg.getJsonRPCMsgId());                        
-                    } catch(NumberFormatException nfe){
-                        return -1;
-                    }
+                    return Integer.valueOf(msg.getJsonRPCMsgId());
+                } catch (NumberFormatException nfe) {
+                    return -1;
+                }
                 case COLTYPE_MESSAGE_SERVICE_NAME:
                     if (StringUtils.isNotEmpty(msg.getServiceDescription())) {
                         return msg.getServiceDescription();

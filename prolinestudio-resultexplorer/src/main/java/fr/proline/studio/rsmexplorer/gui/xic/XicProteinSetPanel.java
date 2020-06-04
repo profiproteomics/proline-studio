@@ -172,7 +172,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             public void actionPerformed(ActionEvent e) {
                 DataboxXicProteinSet databox = (DataboxXicProteinSet) m_dataBox;
                 long projectId = m_dataBox.getProjectId();
-                DDataset dataset = (DDataset) databox.getData(false, DDataset.class);
+                DDataset dataset = (DDataset) databox.getData(DDataset.class);
 
                 boolean okCalled = ComputeQuantPostProcessingAction.quantificationProfile(resultCallback, getX() + 20, getY() + 20, projectId, dataset);
                 if (okCalled) {
@@ -253,7 +253,8 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.propagateDataChanged();
                 m_infoToggleButton.updateInfo();
             }
 
@@ -558,13 +559,15 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             popupMenu.addAction(new RestrainAction() {
                 @Override
                 public void filteringDone() {
-                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                    m_dataBox.addDataChanged(CompareDataInterface.class);
+                    m_dataBox.propagateDataChanged();
                 }
             });
             popupMenu.addAction(new ClearRestrainAction() {
                 @Override
                 public void filteringDone() {
-                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                    m_dataBox.addDataChanged(CompareDataInterface.class);
+                    m_dataBox.propagateDataChanged();
                 }
             });
 
@@ -606,9 +609,15 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             if (selectionWillBeRestored) {
                 return;
             }
+            
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
 
-            m_dataBox.propagateDataChanged(DProteinSet.class);
-            m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+            m_dataBox.addDataChanged(DProteinSet.class);
+            m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+            m_dataBox.propagateDataChanged();
 
         }
 

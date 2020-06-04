@@ -59,20 +59,20 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
         // only one node selected for this action
         DataSetNode dataSetNode = (DataSetNode) selectedNodes[0];
         
-        ArrayList<GroupParameter> outParameters = new ArrayList<>();
+        ArrayList<ParameterList> outParameters = new ArrayList<>();
         if ((!forRsm()) && (dataSetNode.hasResultSet())) {
-            GroupParameter outParameter = new GroupParameter();
-            outParameter.addParameter(ResultSet.class, false);
+            ParameterList outParameter = new ParameterList();
+            outParameter.addParameter(ResultSet.class);
             outParameters.add(outParameter);
         }
         if ((forRsm()) && (dataSetNode.hasResultSummary())) {
-            GroupParameter outParameter = new GroupParameter();
-            outParameter.addParameter(ResultSummary.class, false);
+            ParameterList outParameter = new ParameterList();
+            outParameter.addParameter(ResultSummary.class);
             outParameters.add(outParameter);
         }
         if (m_windowType == WindowSavedManager.SAVE_WINDOW_FOR_QUANTI && dataSetNode.isQuantitation()){
-            GroupParameter outParameter = new GroupParameter();
-            outParameter.addParameter(DDataset.class, false);
+            ParameterList outParameter = new ParameterList();
+            outParameter.addParameter(DDataset.class);
             outParameters.add(outParameter);
         }
 

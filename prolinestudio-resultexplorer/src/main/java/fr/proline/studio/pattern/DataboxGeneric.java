@@ -43,16 +43,16 @@ public class DataboxGeneric extends AbstractDataBox {
         m_description = typeName;
         m_removeStripAndSort = removeStripAndSort;
         
-        // Register Possible in parameters
+        // Register in parameters
         // One ResultSummary
-        GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(ExtendedTableModelInterface.class, false);
+        ParameterList inParameter = new ParameterList();
+        inParameter.addParameter(ExtendedTableModelInterface.class);
         registerInParameter(inParameter);
         
         
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(ExtendedTableModelInterface.class, false);
+        ParameterList outParameter = new ParameterList();
+        outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
 
         
@@ -75,13 +75,12 @@ public class DataboxGeneric extends AbstractDataBox {
             
              ArrayList<ExtraDataType> extraDataTypeList = m_entryModel.getExtraDataTypes();
              if (extraDataTypeList != null) {
-                 for(ExtraDataType extraDataType : extraDataTypeList) {
+                 ParameterList outParameter = new ParameterList();
+                 for (ExtraDataType extraDataType : extraDataTypeList) {
                      Class c = extraDataType.getTypeClass();
-
-                     GroupParameter outParameter = new GroupParameter();
-                     outParameter.addParameter(c, false);
-                     registerOutParameter(outParameter);
+                     outParameter.addParameter(c);
                  }
+                 registerOutParameter(outParameter);
              }
             
         }
@@ -92,32 +91,35 @@ public class DataboxGeneric extends AbstractDataBox {
     public void dataChanged() {
         GlobalTableModelInterface dataInterface = m_entryModel;
         if (dataInterface == null) {
-            dataInterface = (GlobalTableModelInterface) m_previousDataBox.getData(false, GlobalTableModelInterface.class);
+            dataInterface = (GlobalTableModelInterface) getData(GlobalTableModelInterface.class);
         }
 
         ((GenericPanel) getDataBoxPanelInterface()).setData(dataInterface);
 
     }
     
-        @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    @Override
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType != null) {
-            if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
+            
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+                if (parameterType.equals(ExtendedTableModelInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
+                }
+                if (parameterType.equals(CrossSelectionInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
+                }
+                ArrayList<ExtraDataType> extraDataTypeList = m_entryModel.getExtraDataTypes();
+                if (extraDataTypeList != null) {
+                    for (ExtraDataType extraDataType : extraDataTypeList) {
+                        if (extraDataType.getTypeClass().equals(parameterType)) {
+                            return ((GenericPanel) getDataBoxPanelInterface()).getValue(parameterType, extraDataType.isList());
+                        }
+                    }
+                }
             }
-            if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface)getDataBoxPanelInterface()).getCrossSelectionInterface();
-            }
-            ArrayList<ExtraDataType> extraDataTypeList = m_entryModel.getExtraDataTypes();
-             if (extraDataTypeList != null) {
-                 for (ExtraDataType extraDataType : extraDataTypeList) {
-                     if (extraDataType.getTypeClass().equals(parameterType)) {
-                         return ((GenericPanel) getDataBoxPanelInterface()).getValue(parameterType, extraDataType.isList());
-                     }
-                 }
-             }
         }
-        return super.getData(getArray, parameterType);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
     
 }

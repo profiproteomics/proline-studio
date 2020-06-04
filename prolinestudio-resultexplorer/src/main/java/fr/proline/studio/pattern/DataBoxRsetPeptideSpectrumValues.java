@@ -42,8 +42,9 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
         m_description = "Spectrum Values of a Peptide";
 
         // Register in parameters
-        GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(DPeptideMatch.class, false);
+        ParameterList inParameter = new ParameterList();
+        inParameter.addParameter(DPeptideMatch.class);
+        inParameter.addParameter(PeptideFragmentationData.class, false /*not compulsory*/);
         registerInParameter(inParameter);
 
     }
@@ -58,8 +59,8 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-         DPeptideMatch peptideMatchData = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
-         PeptideFragmentationData fragmentationData = (PeptideFragmentationData) m_previousDataBox.getData(false, PeptideFragmentationData.class);
+         DPeptideMatch peptideMatchData = (DPeptideMatch) getData(DPeptideMatch.class);
+         PeptideFragmentationData fragmentationData = (PeptideFragmentationData) getData(PeptideFragmentationData.class);
          DPeptideMatch peptideMatch = (fragmentationData != null) ? fragmentationData.getPeptideMatch() : peptideMatchData;
         if ((m_previousPeptideMatch == peptideMatch) && (fragmentationData == null)) {
             return;
@@ -130,31 +131,36 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
     private Long m_previousTaskId = null;
 
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType != null) {
-            if (parameterType.equals(DMsQuery.class)) {
-                DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
-                if (peptideMatch != null) {
-                    DMsQuery msQuery = peptideMatch.getMsQuery();
-                    if (msQuery != null) {
-                        return msQuery;
-                    }
-                }
-            }
-            if (parameterType.equals(DSpectrum.class)) {
-                DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
-                if (peptideMatch != null) {
-                    DMsQuery msQuery = peptideMatch.getMsQuery();
-                    if (msQuery != null) {
-                        DSpectrum spectrum = msQuery.getDSpectrum();
-                        if (spectrum != null) {
-                            return spectrum;
+            
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+
+                if (parameterType.equals(DMsQuery.class)) {
+                    DPeptideMatch peptideMatch = (DPeptideMatch) getData(DPeptideMatch.class);
+                    if (peptideMatch != null) {
+                        DMsQuery msQuery = peptideMatch.getMsQuery();
+                        if (msQuery != null) {
+                            return msQuery;
                         }
                     }
                 }
+                if (parameterType.equals(DSpectrum.class)) {
+                    DPeptideMatch peptideMatch = (DPeptideMatch) getData(DPeptideMatch.class);
+                    if (peptideMatch != null) {
+                        DMsQuery msQuery = peptideMatch.getMsQuery();
+                        if (msQuery != null) {
+                            DSpectrum spectrum = msQuery.getDSpectrum();
+                            if (spectrum != null) {
+                                return spectrum;
+                            }
+                        }
+                    }
+                }
+
             }
         }
-        return super.getData(getArray, parameterType);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
 
 }

@@ -45,13 +45,15 @@ public class DisplayTablePopupMenu extends TablePopupMenu {
         addAction(new RestrainAction() {
             @Override
             public void filteringDone() {
-                m_databoxProvider.getDataBox().propagateDataChanged(ExtendedTableModelInterface.class);
+                m_databoxProvider.getDataBox().addDataChanged(ExtendedTableModelInterface.class);
+                m_databoxProvider.getDataBox().propagateDataChanged();
             }
         });
         addAction(new ClearRestrainAction() {
             @Override
             public void filteringDone() {
-                m_databoxProvider.getDataBox().propagateDataChanged(ExtendedTableModelInterface.class);
+                m_databoxProvider.getDataBox().addDataChanged(ExtendedTableModelInterface.class);
+                m_databoxProvider.getDataBox().propagateDataChanged();
             }
         });
     }

@@ -32,7 +32,8 @@ import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.GroupParameter;
+import fr.proline.studio.pattern.ParameterList;
+import fr.proline.studio.pattern.ParameterSubtypeEnum;
 import fr.proline.studio.rsmexplorer.gui.xic.MapAlignmentPanel;
 import fr.proline.studio.rsmexplorer.gui.xic.MapTimePanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
@@ -70,20 +71,19 @@ public class DataboxMapAlignment extends AbstractDataBox {
         m_description = "Graphical display of XIC Map Alignment.";
 
         m_compareRT2Maps = new HashMap<Long, IonsRTTableModel>();
-        // Register Possible in parameters
-        // One Dataset 
-        GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(DDataset.class, false);
+        // Register in parameters
+        ParameterList inParameter = new ParameterList();
+        inParameter.addParameter(DDataset.class);
         registerInParameter(inParameter);
 
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(ExtendedTableModelInterface.class, true);
+        ParameterList outParameter = new ParameterList();
+        
+        outParameter.addParameter(ExtendedTableModelInterface.class);
+        outParameter.addParameter(CrossSelectionInterface.class);
+        
         registerOutParameter(outParameter);
-
-        outParameter = new GroupParameter();
-        outParameter.addParameter(CrossSelectionInterface.class, true);
-        registerOutParameter(outParameter);
+        
         m_RT_Tolerance = 0.0;
 
         m_isCloudLoaded = false;
@@ -106,17 +106,20 @@ public class DataboxMapAlignment extends AbstractDataBox {
      * @return
      */
     @Override
-    public Object getData(boolean getArray, Class parameterType, boolean isList) {
-        //logger.debug("get Data");
-        if (parameterType != null && isList) {
-            if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                return getCompareDataInterfaceList();
-            }
-            if (parameterType.equals(CrossSelectionInterface.class)) {
-                return getCrossSelectionInterfaceList();
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+
+        if (parameterType != null) {
+            
+            if (parameterSubtype == ParameterSubtypeEnum.LIST_DATA) {
+                if (parameterType.equals(ExtendedTableModelInterface.class)) {
+                    return getCompareDataInterfaceList();
+                }
+                if (parameterType.equals(CrossSelectionInterface.class)) {
+                    return getCrossSelectionInterfaceList();
+                }
             }
         }
-        return super.getData(getArray, parameterType, isList);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
 
     private List<ExtendedTableModelInterface> getCompareDataInterfaceList() {
@@ -180,8 +183,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
         final int loadingId = setLoading();
 
         if (m_dataset == null) {
-            m_dataset = (DDataset) m_previousDataBox.getData(false, DDataset.class);
-
+            m_dataset = (DDataset) getData(DDataset.class);
         }
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -205,7 +207,8 @@ public class DataboxMapAlignment extends AbstractDataBox {
                     ((MapAlignmentPanel) getDataBoxPanelInterface()).setData(m_quantChannelInfo, getCompareDataInterfaceList(), getCrossSelectionInterfaceList());
 
                     if (finished) {
-                        propagateDataChanged(ExtendedTableModelInterface.class);
+                        addDataChanged(ExtendedTableModelInterface.class);
+                        propagateDataChanged();
                     }
                 }
             }
@@ -242,8 +245,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
             final int loadingId = setLoading();
 
             if (m_dataset == null) {
-                m_dataset = (DDataset) m_previousDataBox.getData(false, DDataset.class);
-
+                m_dataset = (DDataset) getData(DDataset.class);
             }
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 

@@ -323,7 +323,8 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
                         m_currentImageButton = curImageButton;
 
                         setCurrentComponent(component);
-                        m_dataBox.propagateDataChanged(Component.class);
+                        m_dataBox.addDataChanged(Component.class);
+                        m_dataBox.propagateDataChanged();
 
                         repaint();
 
@@ -340,7 +341,8 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
             add(m_scrollPane, BorderLayout.CENTER);
 
             if (!doNotTakeFirstSelection) {
-                m_dataBox.propagateDataChanged(Component.class);
+                m_dataBox.addDataChanged(Component.class);
+                m_dataBox.propagateDataChanged();
             }
         }
 
@@ -420,7 +422,8 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
             m_currentImageButton.setSelection(false);
             m_currentImageButton = null;
             setCurrentComponent(null);
-            m_dataBox.propagateDataChanged(Component.class);
+            m_dataBox.addDataChanged(Component.class);
+            m_dataBox.propagateDataChanged();
         }
 
     }

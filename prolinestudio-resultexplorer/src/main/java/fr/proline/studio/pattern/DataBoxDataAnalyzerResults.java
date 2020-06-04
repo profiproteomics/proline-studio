@@ -34,10 +34,9 @@ public class DataBoxDataAnalyzerResults extends AbstractDataBox {
         m_typeName = "Data Analyzer Results";
         m_description = "Data Analyzer Results";
 
-        // Register Possible in parameters
-        // One ResultSummary
-        GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(ProcessEngineInfo.class, false);
+        // Register in parameters
+        ParameterList inParameter = new ParameterList();
+        inParameter.addParameter(ProcessEngineInfo.class);
         registerInParameter(inParameter);
 
         
@@ -53,7 +52,7 @@ public class DataBoxDataAnalyzerResults extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        final ProcessEngineInfo processEngineInfo = (ProcessEngineInfo) m_previousDataBox.getData(false, ProcessEngineInfo.class);
+        final ProcessEngineInfo processEngineInfo = (ProcessEngineInfo) getData(ProcessEngineInfo.class);
         if (processEngineInfo != null) {
             ((DataAnalyzerResultsPanel) getDataBoxPanelInterface()).displayGraphNode(processEngineInfo);
         }

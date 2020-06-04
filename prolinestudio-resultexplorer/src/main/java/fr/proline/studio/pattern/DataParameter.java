@@ -18,52 +18,62 @@ package fr.proline.studio.pattern;
 
 /**
  * Definition of a parameter exhanged between databoxes
+ * 
+ * a DataParameter is defined by its type and subType.
+ * subType can be null
+ * 
+ * Two DataParameters are compatible when type are subtypes are equals 
+ * 
  * @author JM235353
  */
 public class DataParameter {
 
-    private Class m_c;
-    private boolean m_isList;
+    private Class m_type;
+    private ParameterSubtypeEnum m_subtype;
     private boolean m_isCompulsory;
 
     
-    public DataParameter(Class c, boolean isList) {
-        this(c, isList, true);
+    public DataParameter(Class c, ParameterSubtypeEnum subtype) {
+        this(c, subtype, true);
     }
-    public DataParameter(Class c, boolean isList, boolean isCompulsory) {
-        m_c = c;
-        m_isList = isList;
+    public DataParameter(Class c, ParameterSubtypeEnum subtype, boolean isCompulsory) {
+        m_type = c;
+        m_subtype = subtype;
         m_isCompulsory = isCompulsory;
     }
 
     public Class getParameterClass() {
-        return m_c;
+        return m_type;
     }
     
-    public boolean getParameterIsList() {
-        return m_isList;
+    public ParameterSubtypeEnum getSubtype() {
+        return m_subtype;
     }
     
     @Override
     public boolean equals(Object p) {
         if (p instanceof DataParameter) {
-            return m_c.equals(((DataParameter)p).m_c);
+            return m_type.equals(((DataParameter)p).m_type);
         }
         return false;
     }
-    
-    public boolean equalsData(Class dataC) {
-        return m_c.equals(dataC);
+   
+    public boolean equalsData(Class dataC, ParameterSubtypeEnum subtype) {
+        return m_type.equals(dataC) && ((subtype==null) || (m_subtype==null) || (m_subtype.equals(subtype))); // subtype null corresponds to subtype not specified
     }
 
     public boolean isCompatibleWithOutParameter(DataParameter outParameter) {
-        if (!m_c.equals(outParameter.m_c)) {
+        if (!m_type.equals(outParameter.m_type)) {
             return false;
         }
-        if (m_isList && !outParameter.m_isList) {
+        if (m_subtype == null && outParameter.m_subtype == null) {
+            return true;
+        }
+        if ((m_subtype == null) || (outParameter.m_subtype == null)) {
             return false;
         }
-        return true;
+
+        return m_subtype.equals(outParameter.m_subtype);
 
     }
     
@@ -73,7 +83,7 @@ public class DataParameter {
     
     @Override
     public int hashCode() {
-        return m_c.hashCode();
+        return m_type.hashCode();
     }
     
 }

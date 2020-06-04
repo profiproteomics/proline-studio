@@ -147,7 +147,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
+                ResultSummary rsm = (ResultSummary) m_dataBox.getData(ResultSummary.class);
                 ResultSummary decoyRsm = rsm.getDecoyResultSummary();
                 if (decoyRsm == null) {
                     return;
@@ -176,7 +176,8 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.propagateDataChanged();
                 m_infoToggleButton.updateInfo();
             }
             
@@ -327,7 +328,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
     public void setData(long taskId, PeptideInstance[] peptideInstances, boolean finished) {
 
-        ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
+        ResultSummary rsm = (ResultSummary) m_dataBox.getData(ResultSummary.class);
         if (rsm != null) {
             m_decoyButton.setEnabled(rsm.getDecoyResultSummary() != null);
         }
@@ -392,11 +393,19 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         public void valueChanged(ListSelectionEvent e) {
 
             super.valueChanged(e);
+            
             if (selectionWillBeRestored) {
                 return;
             }
-            m_dataBox.propagateDataChanged(PeptideInstance.class);
-            m_dataBox.propagateDataChanged(DPeptideMatch.class);
+            
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
+            
+            m_dataBox.addDataChanged(PeptideInstance.class);
+            m_dataBox.addDataChanged(DPeptideMatch.class);
+            m_dataBox.propagateDataChanged();
 
         }
 

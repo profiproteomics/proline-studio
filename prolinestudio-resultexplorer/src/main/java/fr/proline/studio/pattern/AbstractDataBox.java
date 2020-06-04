@@ -41,11 +41,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.jdesktop.swingx.JXTable;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -62,8 +64,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     protected DataBoxPanelInterface m_panel;
 
     // In and out Parameters Registered
-    private final HashSet<GroupParameter> m_inParameters = new HashSet<>();
-    private final ArrayList<GroupParameter> m_outParameters = new ArrayList<>();
+    private ParameterList m_inParameters = null;
+    private ParameterList m_outParameters = null;
 
     private final HashMap<Long, TaskInfo> m_taskMap = new HashMap<>();
 
@@ -90,6 +92,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     protected DataboxStyle m_style;
     protected DataboxType m_type;
 
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.databox");
+    
     public enum DataboxStyle {
         STYLE_XIC,
         STYLE_SC,
@@ -295,8 +299,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         m_style = style;
 
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(ProjectId.class, false);
+        ParameterList outParameter = new ParameterList();
+        outParameter.addParameter(ProjectId.class);
         registerOutParameter(outParameter);
     }
 
@@ -415,19 +419,27 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         return m_taskMap.get(taskId);        
     }
 
-    protected final void registerInParameter(GroupParameter parameter) {
-        m_inParameters.add(parameter);
+    protected final void registerInParameter(ParameterList parameter) {
+        if (m_inParameters == null) {
+            m_inParameters = parameter;
+        } else {
+            m_inParameters.addParameter(parameter);
+        }
     }
 
-    protected final void registerOutParameter(GroupParameter parameter) {
-        m_outParameters.add(parameter);
+    protected final void registerOutParameter(ParameterList parameter) {
+        if (m_outParameters == null) {
+            m_outParameters = parameter;
+        } else {
+            m_outParameters.addParameter(parameter);
+        }
     }
 
-    public ArrayList<GroupParameter> getOutParameters() {
+    public ParameterList getOutParameters() {
         return m_outParameters;
     }
 
-    public HashSet<GroupParameter> getInParameters() {
+    public ParameterList getInParameters() {
         return m_inParameters;
     }
 
@@ -437,7 +449,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
      * @return 
      */
     public Object getExtraData(Class parameterType) {
-        if (isDataDependant(parameterType)) {
+        if (isDataDependant(parameterType, ParameterSubtypeEnum.SINGLE_DATA)) {
             return null;
         }
         if (m_previousDataBox != null) {
@@ -446,31 +458,27 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         return null;
     }
 
-    
-    public boolean isDataDependant(Class dataType) {
-        Iterator<GroupParameter> it = m_inParameters.iterator();
-        while (it.hasNext()) {
-            GroupParameter parameter = it.next();
-            if (parameter.isDataDependant(dataType)) {
-                return true;
+    public boolean isDataDependant(Class dataType, ParameterSubtypeEnum subtype) {
+        return (m_inParameters.isDataDependant(dataType, subtype));
+    }
+    public boolean isDataDependant(HashMap<Class, HashSet<ParameterSubtypeEnum>> dataTypeMap) {
+        for (Class dataType : dataTypeMap.keySet()) {
+            HashSet<ParameterSubtypeEnum> subtypeSet = dataTypeMap.get(dataType);
+            for (ParameterSubtypeEnum subtype : subtypeSet) {
+                if (m_inParameters.isDataDependant(dataType, subtype)) {
+                    return true;
+                }
             }
         }
         return false;
     }
 
-    public boolean isDataProvider(Class dataType) {
-        Iterator<GroupParameter> it = m_outParameters.iterator();
-        while (it.hasNext()) {
-            GroupParameter parameter = it.next();
-            if (parameter.isDataDependant(dataType)) {
-                return true;
-            }
-        }
-        return false;
+    public boolean isDataProvider(Class dataType, ParameterSubtypeEnum subtype) {
+        return (m_outParameters.isDataDependant(dataType, subtype));
     }
 
     public void loadedDataModified(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, int reason) {
-        if (isDataProvider(dataType)) {
+        if (isDataProvider(dataType, null)) {
             dataMustBeRecalculated(rsetId, rsmId, dataType, modificationsList, reason);
         }
         if (m_nextDataBoxArray != null) {
@@ -480,14 +488,9 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         }
     }
 
-    public double calculateParameterCompatibilityDistance(ArrayList<GroupParameter> outParameters) {
-        Iterator<GroupParameter> it = m_inParameters.iterator();
-        while (it.hasNext()) {
-            GroupParameter parameter = it.next();
-
-            if (parameter.isCompatibleWithOutParameter(outParameters)) {
-                return 0;
-            }
+    public double calculateParameterCompatibilityDistance(ArrayList<ParameterList> outParameters) {
+        if (m_inParameters.isCompatibleWithOutParameter(outParameters)) {
+            return 0;
         }
         return -1;
     }
@@ -537,55 +540,215 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
 
     }
 
-    // VDS FIXME : getArray : ?? Not used 
-    public Object getData(boolean getArray, Class parameterType) {
+    public final Object getData(Class parameterType) {
+        return getData(parameterType, ParameterSubtypeEnum.SINGLE_DATA);
+    }
+    public final Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+
+        // I remove this log, it generates too much logs
+        // put it back if needed
+        //m_logger.debug("Ask to DataBox {} for parameter {}-{}", getClass().getName(), parameterType.getName(), parameterSubtype);
+        
+        // check if the box has the right to ask this data
+        checkDataAsked(parameterType, parameterSubtype);
+        
+        
+        return getDataImpl(parameterType, parameterSubtype);
+    }
+    
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
 
         if ((parameterType != null) && (parameterType.equals(ProjectId.class))) {
             if ((m_projectId == null) || (m_projectId.getId() == -1L)) {
                 if (m_previousDataBox != null) {
-                    return m_previousDataBox.getData(getArray, parameterType);
+                    return m_previousDataBox.getDataImpl(parameterType, parameterSubtype);
                 }
             }
             return m_projectId;
         }
 
         if (m_previousDataBox != null) {
-            return m_previousDataBox.getData(getArray, parameterType);
+            Object result = m_previousDataBox.getDataImpl(parameterType, parameterSubtype);
+           
+            // Check that the databox returns a correct data
+            checkDataReturned(parameterType, parameterSubtype, result);
+            
+            return result;
         }
         return null;
     }
+    
+    private void checkDataAsked(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+        // Check that the databox has the right to ask this data
+        // it has the right to ask this data if :
+        // - it has declared this data as an in parameter
+        // - or it has declared this data as an out parameter itself
+        // - or if the next parameter has it as in parameter (happens when calling directly getData on previous parameter)
+        if (!parameterType.equals(ProjectId.class)
+                && !m_inParameters.isDataDependant(parameterType, parameterSubtype)
+                && !m_outParameters.isDataDependant(parameterType, parameterSubtype)) {
+            // the box ask for a data not registered in in parameters
 
-    // VDS: FIXME
-    // isList => return a List of object from data => transformToList ?? 
-    public Object getData(boolean getArray, Class parameterType, boolean isList) {
-
-        if ((parameterType != null) && (parameterType.equals(ProjectId.class))) {
-            return m_projectId;
+            boolean nextOk = false;
+            if (m_nextDataBoxArray != null) {
+                for (AbstractDataBox nextDataBox : m_nextDataBoxArray) {
+                    if (nextDataBox.m_inParameters.isDataDependant(parameterType, parameterSubtype)) {
+                        nextOk = true;
+                        break;
+                    }
+                }
+            }
+            if (!nextOk) {
+                m_logger.warn("DataBox {} ask for unregistered in parameter {}", getClass().getName(), parameterType.getName());
+            }
         }
+    }
+    
+    private void checkDataReturned(Class parameterType, ParameterSubtypeEnum parameterSubtype, Object data) {
+        if (data != null) {
 
-        if (m_previousDataBox != null) {
-            return m_previousDataBox.getData(getArray, parameterType, isList);
+            boolean errorFound = false;
+            if (parameterSubtype.equals(ParameterSubtypeEnum.SINGLE_DATA)) {
+                // classes must correspond perfectly or inherits
+                if (!parameterType.equals(data.getClass()) && !parameterType.isAssignableFrom(data.getClass())) {
+                    errorFound = true;
+                }
+            } else {
+                // classes must correspond/inherit or enclosing class like for ArrayList<DPeptideMatch> must correspond/inhherits
+                Class alternativeClass = null;
+                if (data instanceof List) {
+                    List l = (List) data;
+                    if (!l.isEmpty()) {
+                        Object elem = l.get(0);
+                        if (elem != null) {
+                            alternativeClass = l.get(0).getClass();
+                        }
+                    }
+                }
+                if (alternativeClass != null) {
+                    if (!parameterType.equals(data.getClass()) && !parameterType.isAssignableFrom(data.getClass()) && !parameterType.equals(alternativeClass) && !parameterType.isAssignableFrom(alternativeClass)) {
+                        errorFound = true;
+                    }
+                }
+            }
+
+            if (errorFound) {
+                m_logger.warn("DataBox {} returns a wrong type : {} instead of {}. Error can come form ArrayList<A> instead of A.", m_previousDataBox.getClass().getName(), data.getClass().getName(), parameterType.getName());
+            }
         }
-        return null;
     }
 
     public void setEntryData(Object data) {
         throw new UnsupportedOperationException();
     }
 
-    public void propagateDataChanged(Class dataType) {
-        if (m_nextDataBoxArray != null) {
-            for (AbstractDataBox nextDataBox : m_nextDataBoxArray) {
-                if (nextDataBox.isDataDependant(dataType)) { 
-                    //m_logger.debug("nexDataBox:{} isDataDependant for datatype: {}",nextDataBox.getTypeName(), dataType.getName());
-                    nextDataBox.dataChanged();
-                }
-                nextDataBox.propagateDataChanged(dataType);
+
+    private static void propagateDataChanged(AbstractDataBox a) {
+        
+        if (queueList.contains(a)) {
+            // nothing to do, propagation for this box will be propagated
+            return;
+        }
+        
+        // add the box to the gueue
+        queueList.add(a);
+        
+        if (queueList.size() > 1) {
+            // a box is being treated, we will treat this one later
+            return;
+        }
+
+        // treats all box one by one (first in, first out)
+        // during this operation, new boxes can be added to the queue.
+        while (!queueList.isEmpty()) {
+            AbstractDataBox currentBox = queueList.peekFirst();
+            
+            // log propagateDataChanged
+            if (m_logger.isDebugEnabled()) {
+                logPropagateDataChanged(currentBox);                
+                
             }
+            
+            currentBox.propagateDataChanged(currentBox.m_dataChangedMap);
+            currentBox.m_dataChangedMap.clear();
+            queueList.pop();
         }
 
     }
+    private static LinkedList<AbstractDataBox> queueList = new LinkedList();
+    
+    
+    
+    private HashMap<Class, HashSet<ParameterSubtypeEnum>> m_dataChangedMap = new HashMap<>();    
+    public void addDataChanged(Class dataType) {
+        addDataChanged(dataType, ParameterSubtypeEnum.SINGLE_DATA);
+    }
+    public void addDataChanged(Class dataType, ParameterSubtypeEnum parameterSubtype) {
+        
+        if (m_nextDataBoxArray == null) {
+            // no need to add data changed 
+            return;
+        }
+        
+        HashSet<ParameterSubtypeEnum> hashSet = m_dataChangedMap.get(dataType);
+        if (hashSet == null) {
+            hashSet = new HashSet<>();
+            m_dataChangedMap.put(dataType, hashSet);
+        }
+        
+        hashSet.add(parameterSubtype);
+    }
+    public void propagateDataChanged() {
+        
+        if (m_nextDataBoxArray == null) {
+            // no need to add data changed 
+            return;
+        }
+        
+        // propagation is queued up and can be treated later
+        propagateDataChanged(this);
+    }
+    private void propagateDataChanged(HashMap<Class, HashSet<ParameterSubtypeEnum>> dataTypeMap) {
 
+        if (m_nextDataBoxArray != null) {
+            for (AbstractDataBox nextDataBox : m_nextDataBoxArray) {
+                if (nextDataBox.isDataDependant(dataTypeMap)) {
+
+                    nextDataBox.dataChanged();
+                }
+            }
+            for (AbstractDataBox nextDataBox : m_nextDataBoxArray) {
+                nextDataBox.propagateDataChanged(dataTypeMap);
+            }
+        }
+    }
+
+    public static void logPropagateDataChanged(AbstractDataBox box) {
+        m_sb.setLength(0);
+        m_sb.append(box.getType()).append("#").append(box.getClass().getName()).append("@").append(Integer.toHexString(box.hashCode())).append("#").append(box.getFullName()).append(" : ");
+        HashMap<Class, HashSet<ParameterSubtypeEnum>> dataChangedMap = box.m_dataChangedMap;
+        Iterator<Class> itClass = dataChangedMap.keySet().iterator();
+        while (itClass.hasNext()) {
+            Class c = itClass.next();
+            m_sb.append(c.getName()).append(" - ");
+            HashSet<ParameterSubtypeEnum> subParameters = dataChangedMap.get(c);
+            Iterator<ParameterSubtypeEnum> it = subParameters.iterator();
+            while (it.hasNext()) {
+                ParameterSubtypeEnum subtype = it.next();
+                m_sb.append(subtype);
+                if (it.hasNext()) {
+                    m_sb.append(", ");
+                }
+            }
+
+            if (itClass.hasNext()) {
+                m_sb.append("  | ");
+            }
+        }
+        m_logger.debug("propagateDataChanged() {}", m_sb.toString());
+    }
+    private static StringBuilder m_sb = new StringBuilder();
+    
     public void setProjectId(long projectId) {
         if (m_panel != null) {
             getDataBoxPanelInterface().addSingleValue(m_projectId);
@@ -594,7 +757,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     }
 
     public long getProjectId() {
-        ProjectId projectId = (ProjectId) getData(false, ProjectId.class);
+        ProjectId projectId = (ProjectId) getData(ProjectId.class);
         if (projectId == null) {
             return -1;
         }

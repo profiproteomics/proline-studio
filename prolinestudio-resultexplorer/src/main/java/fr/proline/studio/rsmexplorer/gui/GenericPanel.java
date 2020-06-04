@@ -188,7 +188,8 @@ public class GenericPanel extends HourglassPanel implements DataBoxPanelInterfac
 
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.propagateDataChanged();
                 m_infoToggleButton.updateInfo();
             }
             
@@ -305,13 +306,15 @@ public class GenericPanel extends HourglassPanel implements DataBoxPanelInterfac
             popupMenu.addAction(new RestrainAction() {
                 @Override
                 public void filteringDone() {
-                    m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                    m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                    m_dataBox.propagateDataChanged();
                 }
             });
             popupMenu.addAction(new ClearRestrainAction() {
                 @Override
                 public void filteringDone() {
-                    m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                    m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                    m_dataBox.propagateDataChanged();
                 }
             });
 
@@ -355,12 +358,18 @@ public class GenericPanel extends HourglassPanel implements DataBoxPanelInterfac
 
             super.valueChanged(e);
 
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
+
             CompoundTableModel compoundTableModel = ((CompoundTableModel) getModel());
             ArrayList<ExtraDataType> extraDataTypeList = compoundTableModel.getExtraDataTypes();
              if (extraDataTypeList != null) {
                  for (ExtraDataType extraDataType : extraDataTypeList) {
                      if (extraDataType.isList()) {
-                         m_dataBox.propagateDataChanged(extraDataType.getTypeClass());
+                         m_dataBox.addDataChanged(extraDataType.getTypeClass());
+                         m_dataBox.propagateDataChanged();
                      }
                  }
              }

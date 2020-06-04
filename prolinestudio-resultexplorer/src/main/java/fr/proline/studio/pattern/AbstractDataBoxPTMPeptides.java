@@ -64,27 +64,34 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
 
     protected void registerParameters() {
 
-        // Register Possible in parameters          
+        // Register in parameters          
         // One ResultSummary
-        GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(PTMPeptideInstance.class, true, true);
-        inParameter.addParameter(PTMDataset.class, false, true);
+        ParameterList inParameter = new ParameterList();
+        inParameter.addParameter(PTMPeptideInstance.class, m_displayAllPepMatches ? ParameterSubtypeEnum.LEAF_PTMPeptideInstance : ParameterSubtypeEnum.PARENT_PTMPeptideInstance);
+        inParameter.addParameter(PTMPeptideInstance.class);
+        
+        inParameter.addParameter(PTMDataset.class);
         if (m_isXICResult) {
-            inParameter.addParameter(QuantChannelInfo.class, false);
-            inParameter.addParameter(DMasterQuantProteinSet.class, false, true);
+            inParameter.addParameter(QuantChannelInfo.class);
+            inParameter.addParameter(DMasterQuantProteinSet.class);
         }
+        inParameter.addParameter(PTMCluster.class, ParameterSubtypeEnum.LIST_DATA);
         registerInParameter(inParameter);
 
-        GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(PTMPeptideInstance.class, true);
-        outParameter.addParameter(DPeptideMatch.class, false);
-        outParameter.addParameter(DPeptideInstance.class, true);
-        outParameter.addParameter(ResultSummary.class, false);
-        outParameter.addParameter(PTMDataset.class, false);
+        
+        ParameterList outParameter = new ParameterList();
+        outParameter.addParameter(PTMPeptideInstance.class);
+        outParameter.addParameter(PTMPeptideInstance.class, ParameterSubtypeEnum.PARENT_PTMPeptideInstance);
+        outParameter.addParameter(PTMPeptideInstance.class, ParameterSubtypeEnum.LEAF_PTMPeptideInstance);
+        outParameter.addParameter(DPeptideMatch.class);
+        outParameter.addParameter(DPeptideInstance.class);
+        outParameter.addParameter(DPeptideInstance.class, ParameterSubtypeEnum.LIST_DATA);
+        outParameter.addParameter(ResultSummary.class);
+        outParameter.addParameter(PTMDataset.class);
         if (m_isXICResult) {
-            outParameter.addParameter(ExtendedTableModelInterface.class, false);
+            outParameter.addParameter(ExtendedTableModelInterface.class);
         }
-        outParameter.addParameter(MsQueryInfoRsm.class, false);
+        outParameter.addParameter(MsQueryInfoRsm.class);
         registerOutParameter(outParameter);
     }
 
@@ -97,91 +104,98 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
     }
 
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         DataBoxPanelInterface panel = getDataBoxPanelInterface();
 
         if (parameterType != null && (!(panel instanceof SplittedPanelContainer.ReactiveTabbedComponent)
                 || (panel instanceof SplittedPanelContainer.ReactiveTabbedComponent && ((SplittedPanelContainer.ReactiveTabbedComponent) panel).isShowed()))) {
-            if (parameterType.equals(Integer.class)) {
-                return getSelectedIndex();
-            }
-            if (parameterType.equals(ResultSummary.class)) {
-                if (m_rsm != null) {
-                    return m_rsm;
-                }
-            }
+            
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
 
-            if (parameterType.equals(PTMDataset.class)) {
-                return m_ptmDataset;
-            }
-
-            if (parameterType.equals(PTMPeptideInstance.class)) {
-                PTMPeptideInstance selectedParentPepInstance = getSelectedPTMPeptide();
-                if (selectedParentPepInstance != null) {
-                    return selectedParentPepInstance;
+                if (parameterType.equals(Integer.class)) {
+                    return getSelectedIndex();
                 }
-            }
-            if (parameterType.equals(DPeptideInstance.class)) {
-                PTMPeptideInstance selectedParentPepInstance = getSelectedPTMPeptide();
-                if (selectedParentPepInstance != null) {
-                    return selectedParentPepInstance.getPeptideInstance();
+                if (parameterType.equals(ResultSummary.class)) {
+                    if (m_rsm != null) {
+                        return m_rsm;
+                    }
                 }
-            }
 
-            if (parameterType.equals(DPeptideMatch.class)) {
-                PTMPeptideInstance selectedParentPepInstance = getSelectedPTMPeptide();
-                if (selectedParentPepInstance != null) {
+                if (parameterType.equals(PTMDataset.class)) {
+                    return m_ptmDataset;
+                }
+
+                if (parameterType.equals(DPeptideInstance.class)) {
+                    PTMPeptideInstance selectedParentPepInstance = getSelectedPTMPeptide();
+                    if (selectedParentPepInstance != null) {
+                        return selectedParentPepInstance.getPeptideInstance();
+                    }
+                }
+
+                if (parameterType.equals(DPeptideMatch.class)) {
+                    PTMPeptideInstance selectedParentPepInstance = getSelectedPTMPeptide();
+                    if (selectedParentPepInstance != null) {
                     return selectedParentPepInstance.getRepresentativePepMatch(m_ptmClusters);
+                    }
                 }
-            }
 
-            if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
-            }
+                if (parameterType.equals(ExtendedTableModelInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
+                }
 
-            if (parameterType.equals(MsQueryInfoRsm.class)) {
-                PTMPeptideInstance selectedParentPepInstance = getSelectedPTMPeptide();
-                if (selectedParentPepInstance != null) {
-                    DPeptideMatch match = getSelectedPeptideMatch();
-                    if (match != null) {
-                        return new MsQueryInfoRsm(match.getMsQuery(), selectedParentPepInstance.getPeptideInstance().getResultSummary());
-                        //return new MsQueryInfoRsm(match.getMsQuery(), m_ptmDataset.getDataset().getResultSummary());
+                if (parameterType.equals(MsQueryInfoRsm.class)) {
+                    PTMPeptideInstance selectedParentPepInstance = getSelectedPTMPeptide();
+                    if (selectedParentPepInstance != null) {
+                        DPeptideMatch match = getSelectedPeptideMatch();
+                        if (match != null) {
+                            return new MsQueryInfoRsm(match.getMsQuery(), selectedParentPepInstance.getPeptideInstance().getResultSummary());
+                            //return new MsQueryInfoRsm(match.getMsQuery(), m_ptmDataset.getDataset().getResultSummary());
+                        }
+                    }
+                }
+                
+                if (parameterType.equals(PTMPeptideInstance.class)) {
+
+                    PTMPeptideInstance selectedParentPepInstance = getSelectedPTMPeptide();
+                    if (selectedParentPepInstance != null) {
+                        return selectedParentPepInstance;
                     }
                 }
             }
+            
+            if (parameterSubtype == ParameterSubtypeEnum.LIST_DATA) {
+                if (parameterType.equals(DPeptideInstance.class)) {
+                    if (m_ptmPepInstances == null) {
+                        return new ArrayList<DPeptideInstance>();
+                    }
+                    return m_ptmPepInstances.stream().map(ptpPepInst -> ptpPepInst.getPeptideInstance()).collect(Collectors.toList());
+
+                }
+            }
+   
+            if (parameterType.equals(PTMPeptideInstance.class)) {
+
+
+                //FIXME TODO  !!! VDS BIG WART !!! TO BE REMOVED WITH Propagate refactoring
+                // Use "getArray" to specify parent (==> display best PepMatch) (if false) or leaf (==> display all peptife matches) PTMPeptideInstance... if true
+                // if !getArray Return same data only if PARENT
+                if ((parameterSubtype.equals(ParameterSubtypeEnum.PARENT_PTMPeptideInstance) && !m_displayAllPepMatches) || (parameterSubtype.equals(ParameterSubtypeEnum.LEAF_PTMPeptideInstance) && m_displayAllPepMatches)) {
+                    if (m_ptmPepInstances == null) {
+                        return new ArrayList<PTMPeptideInstance>();
+                    }
+                    List<PTMPeptideInstance> ptmPepInstances = new ArrayList(m_ptmPepInstances);
+                    return ptmPepInstances;
+                }
+
+                
+            }
+
         }
 
-        return super.getData(getArray, parameterType);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
 
-    @Override
-    public Object getData(boolean getArray, Class parameterType, boolean isList) {
-       // m_logger.debug("getData called for " + (m_displayAllPepMatches ? " leaf " : " parent") + " with var array/list :  " + getArray + " - " + isList);
-        DataBoxPanelInterface panel = getDataBoxPanelInterface();
 
-        if (parameterType != null && isList && (!(panel instanceof SplittedPanelContainer.ReactiveTabbedComponent)
-                || ((panel instanceof SplittedPanelContainer.ReactiveTabbedComponent) && ((SplittedPanelContainer.ReactiveTabbedComponent) panel).isShowed()))) {
-
-            //FIXME TODO  !!! VDS BIG WART !!! TO BE REMOVED WITH Propagate refactoring
-            // Use "getArray" to specify parent (==> display best PepMatch) (if false) or leaf (==> display all peptife matches) PTMPeptideInstance... if true
-            // if !getArray Return same data only if PARENT
-            if (parameterType.equals(PTMPeptideInstance.class) && !getArray && !m_displayAllPepMatches
-                    || (parameterType.equals(PTMPeptideInstance.class) && getArray && m_displayAllPepMatches)) {
-                if (m_ptmPepInstances == null) {
-                    return new ArrayList<DPeptideInstance>();
-                }
-                List<PTMPeptideInstance> ptmPepInstances = new ArrayList(m_ptmPepInstances);
-                return ptmPepInstances;
-            }
-            if (parameterType.equals(DPeptideInstance.class)) {
-                if (m_ptmPepInstances == null) {
-                    return new ArrayList<DPeptideInstance>();
-                }
-                return m_ptmPepInstances.stream().map(ptpPepInst -> ptpPepInst.getPeptideInstance()).collect(Collectors.toList());
-            }
-        }
-        return super.getData(getArray, parameterType, isList);
-    }
 
     @Override
     public void dataChanged() {
@@ -193,23 +207,24 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
         //Get information from previous box:
         // -- PTM Dataset & RSM the ptm peptides belong to
         // -- List of PTM Peptides to display
-        PTMDataset newPtmDataset = (PTMDataset) m_previousDataBox.getData(false, PTMDataset.class);
+        PTMDataset newPtmDataset = (PTMDataset) m_previousDataBox.getData(PTMDataset.class);
 
         //FIXME TODO  !!! VDS BIG WART !!! TO BE REMOVED WITH Propagate refactoring
         // Use "getArray" to specify parent (false) or leaf (true) PTMPeptideInstance... corresponding to view only best vs view all peptide matches
-        List<PTMPeptideInstance> newPtmPepInstances = (List<PTMPeptideInstance>) m_previousDataBox.getData(m_displayAllPepMatches, PTMPeptideInstance.class, true);
+        ParameterSubtypeEnum parameterSubtype = m_displayAllPepMatches ? ParameterSubtypeEnum.LEAF_PTMPeptideInstance : ParameterSubtypeEnum.PARENT_PTMPeptideInstance;
+        List<PTMPeptideInstance> newPtmPepInstances = (List<PTMPeptideInstance>) m_previousDataBox.getData(PTMPeptideInstance.class, parameterSubtype);
 
         boolean valueUnchanged = Objects.equals(newPtmDataset, m_ptmDataset) && Objects.equals(newPtmPepInstances, m_ptmPepInstances);
         if (valueUnchanged) {
             //selection may have changed 
-            PTMPeptideInstance selectedPep = (PTMPeptideInstance) m_previousDataBox.getData(false, PTMPeptideInstance.class);
+            PTMPeptideInstance selectedPep = (PTMPeptideInstance) m_previousDataBox.getData(PTMPeptideInstance.class);
             setSelectedPTMPeptide(selectedPep);
             return;
         }
 
         m_ptmDataset = newPtmDataset;
         m_ptmPepInstances = newPtmPepInstances;
-        m_ptmClusters = (List<PTMCluster>) m_previousDataBox.getData(false, PTMCluster.class, true);
+        m_ptmClusters = (List<PTMCluster>) m_previousDataBox.getData(PTMCluster.class, ParameterSubtypeEnum.LIST_DATA);
         m_rsm = m_ptmDataset.getDataset().getResultSummary();
         updateData();
     }
@@ -255,8 +270,9 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
                         loadXicAndPropagate();
                     } else {
                         ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, m_ptmPepInstances, m_ptmClusters, null, finished);
-                        propagateDataChanged(PTMPeptideInstance.class);
-                        propagateDataChanged(ExtendedTableModelInterface.class);
+                        addDataChanged(PTMPeptideInstance.class, null); //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
+                        addDataChanged(ExtendedTableModelInterface.class);
+                        propagateDataChanged();
                     }
                 }
             }

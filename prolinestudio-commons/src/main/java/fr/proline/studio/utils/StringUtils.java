@@ -166,6 +166,23 @@ public class StringUtils {
         }
     }
 
+    public static String camelCasetoSnakeCase(String camelCaseStr){
+        return camelCaseStr.replaceAll("([a-z])([A-Z])", "$1_$2").toLowerCase();
+    }
+
+    public static String snakeCasetoCamelCase(String snakeCaseStr){
+        StringBuilder sb = new StringBuilder(snakeCaseStr);
+        for (int i = 0; i < sb.length(); i++) {
+            if (sb.charAt(i) == '_') {
+                sb.deleteCharAt(i);
+                sb.replace(i, i+1, String.valueOf(Character.toUpperCase(sb.charAt(i))));
+            }
+        }
+
+        return sb.toString();
+    }
+    
+    
     public static String getTimeInMinutes(float seconds, int nbDigit) {
         double min = seconds / 60;
 

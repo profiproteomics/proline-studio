@@ -283,9 +283,11 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
         
          m_logger.debug("fetchPTMSitesData: pepInstanceIds " +pepInstanceIds.size());
         //---- Load Peptide Match + Spectrum / MSQuery information for all peptideInstance of PTMSite
-        Query peptidesQuery = entityManagerMSI.createQuery("SELECT pm, pi\n"
-                + "              FROM fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstance pi \n"
-                + "              WHERE pipm.id.peptideInstanceId IN ( :peptideInstanceList ) AND pipm.id.peptideInstanceId=pi.id AND pipm.id.peptideMatchId=pm.id ");
+        Query peptidesQuery = entityManagerMSI.createQuery("SELECT pm, pi, sp.firstTime, sp.precursorIntensity, sp.title, "
+                + " msq.id, msq.initialId "
+                + " FROM fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstance pi, "
+                + "      fr.proline.core.orm.msi.MsQuery msq , fr.proline.core.orm.msi.Spectrum sp "
+                + " WHERE pipm.id.peptideInstanceId IN ( :peptideInstanceList ) AND pipm.id.peptideInstanceId=pi.id AND pipm.id.peptideMatchId=pm.id  AND pm.msQuery.id = msq.id AND msq.spectrum.id = sp.id ");
         peptidesQuery.setParameter("peptideInstanceList",new ArrayList<>(pepInstanceIds));
         List l = peptidesQuery.getResultList();
         Iterator<Object[]> itPeptidesQuery = l.iterator();
@@ -296,11 +298,16 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
             
             PeptideMatch pm = (PeptideMatch) resCur[0];
             PeptideInstance pi = (PeptideInstance) resCur[1];
+            Float firstTime = (Float) resCur[2];
+            Float precursorIntensity = (Float) resCur[3];
+            String spectrumTitle = (String) resCur[4];
+            Long msQueryId = (Long) resCur[5];
+            Integer msQueryInitialId = (Integer) resCur[6];
             
             DSpectrum spectrum = new DSpectrum();
-            spectrum.setFirstTime(pm.getMsQuery().getSpectrum().getFirstTime());
-            spectrum.setPrecursorIntensity(pm.getMsQuery().getSpectrum().getPrecursorIntensity());
-            spectrum.setTitle(pm.getMsQuery().getSpectrum().getTitle());
+            spectrum.setFirstTime(firstTime);
+            spectrum.setPrecursorIntensity(precursorIntensity);
+            spectrum.setTitle(spectrumTitle);
             
             DPeptideMatch dpm = new DPeptideMatch(pm.getId(), pm.getRank(), pm.getCharge(), pm.getDeltaMoz(), pm.getExperimentalMoz(), pm.getMissedCleavage(), pm.getScore(), pm.getResultSet().getId(), pm.getCDPrettyRank(), pm.getSDPrettyRank());
             dpm.setRetentionTime(spectrum.getFirstTime());
@@ -315,7 +322,7 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
             p.getTransientData().setPeptideReadablePtmStringLoaded();
             allPeptidesMap.put(p.getId(), p);
             
-            DMsQuery msq = new DMsQuery(pm.getId(), pm.getMsQuery().getId(), pm.getMsQuery().getInitialId(), spectrum.getPrecursorIntensity());
+            DMsQuery msq = new DMsQuery(pm.getId(), msQueryId, msQueryInitialId, spectrum.getPrecursorIntensity());
             msq.setDSpectrum(spectrum);
             
             dpm.setPeptide(p);
@@ -421,9 +428,11 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
         
         
         //---- Load Peptide Match + Spectrum / MSQuery information for all peptideInstance of PTMSite
-        Query peptidesQuery = entityManagerMSI.createQuery("SELECT pm, pi\n"
-                + "              FROM fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstance pi \n"
-                + "              WHERE pipm.id.peptideInstanceId IN ( :peptideInstanceList ) AND pipm.id.peptideInstanceId=pi.id AND pipm.id.peptideMatchId=pm.id ");
+        Query peptidesQuery = entityManagerMSI.createQuery("SELECT pm, pi, sp.firstTime, sp.precursorIntensity, sp.title "
+                + " msq.id, msq.initialId "
+                + " FROM fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstance pi, "
+                + "      fr.proline.core.orm.msi.MsQuery msq , fr.proline.core.orm.msi.Spectrum sp "
+                + " WHERE pipm.id.peptideInstanceId IN ( :peptideInstanceList ) AND pipm.id.peptideInstanceId=pi.id AND pipm.id.peptideMatchId=pm.id AND pm.msQuery.id = msq.id AND msq.spectrum.id = sp.id ");
         peptidesQuery.setParameter("peptideInstanceList",peptideInstanceIds);
         List l = peptidesQuery.getResultList();
         Iterator<Object[]> itPeptidesQuery = l.iterator();
@@ -433,11 +442,16 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
             
             PeptideMatch pm = (PeptideMatch) resCur[0];
             PeptideInstance pi = (PeptideInstance) resCur[1];
+            Float firstTime = (Float) resCur[2];
+            Float precursorIntensity = (Float) resCur[3];
+            String spectrumTitle = (String) resCur[4];
+            Long msQueryId = (Long) resCur[5];
+            Integer msQueryInitialId = (Integer) resCur[6];
             
             DSpectrum spectrum = new DSpectrum();
-            spectrum.setFirstTime(pm.getMsQuery().getSpectrum().getFirstTime());
-            spectrum.setPrecursorIntensity(pm.getMsQuery().getSpectrum().getPrecursorIntensity());
-            spectrum.setTitle(pm.getMsQuery().getSpectrum().getTitle());
+            spectrum.setFirstTime(firstTime);
+            spectrum.setPrecursorIntensity(precursorIntensity);
+            spectrum.setTitle(spectrumTitle);
             
             DPeptideMatch dpm = new DPeptideMatch(pm.getId(), pm.getRank(), pm.getCharge(), pm.getDeltaMoz(), pm.getExperimentalMoz(), pm.getMissedCleavage(), pm.getScore(), pm.getResultSet().getId(), pm.getCDPrettyRank(), pm.getSDPrettyRank());
             dpm.setRetentionTime(spectrum.getFirstTime());
@@ -452,7 +466,7 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
             p.getTransientData().setPeptideReadablePtmStringLoaded();
             allPeptidesMap.put(p.getId(), p);
             
-            DMsQuery msq = new DMsQuery(pm.getId(), pm.getMsQuery().getId(), pm.getMsQuery().getInitialId(), spectrum.getPrecursorIntensity());
+            DMsQuery msq = new DMsQuery(pm.getId(), msQueryId, msQueryInitialId, spectrum.getPrecursorIntensity());
             msq.setDSpectrum(spectrum);
             
             dpm.setPeptide(p);

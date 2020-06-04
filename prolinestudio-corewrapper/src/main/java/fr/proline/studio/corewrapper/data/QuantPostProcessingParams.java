@@ -15,7 +15,7 @@ public class QuantPostProcessingParams {
     
     public final static String SETTINGS_KEY = "QuantPostProcessing";
     public final static String PREVIOUS_SETTINGS_KEY = "QuantProfile";
-    public final static String CURRENT_VERSION ="3.0";
+    public final static String CURRENT_VERSION ="2.0";
     public final static String PARAM_VERSION_KEY = SETTINGS_KEY + ".parametersVersion";
      
     //V1 Only params
@@ -74,10 +74,6 @@ public class QuantPostProcessingParams {
     public final static String ION_ABUNDANCE_SUMMARIZING_METHOD = "pep_ion_abundance_summarizing_method";
 
     public final static String CONFIG_VERSION = "config_version";
-    
-    public static String getSnakeCase(String value){
-        
-    }
     
     public static final String[] getAbundanceSummarizingMethodValues(){
         return ABUNDANCE_SUMMARIZING_METHOD_VALUES;

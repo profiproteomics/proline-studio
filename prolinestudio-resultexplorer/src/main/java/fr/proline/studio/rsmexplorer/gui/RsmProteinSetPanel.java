@@ -101,7 +101,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         
         // update toolbar
         boolean mergedData = false;
-        ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
+        ResultSummary rsm = (ResultSummary) m_dataBox.getData(ResultSummary.class);
         if (rsm != null) {
 
             if (m_firstPanel) {
@@ -289,7 +289,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 @Override
                 public void actionPerformed(ActionEvent e) {
 
-                    ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
+                    ResultSummary rsm = (ResultSummary) m_dataBox.getData(ResultSummary.class);
                     ResultSummary decoyRsm = rsm.getDecoyResultSummary();
                     if (decoyRsm == null) {
                         return;
@@ -325,7 +325,8 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.propagateDataChanged();
                 m_infoToggleButton.updateInfo();
             }
             
@@ -424,8 +425,14 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             if (selectionWillBeRestored) {
                 return;
             }
+            
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
  
-            m_dataBox.propagateDataChanged(DProteinSet.class);
+            m_dataBox.addDataChanged(DProteinSet.class);
+            m_dataBox.propagateDataChanged();
 
         }
         

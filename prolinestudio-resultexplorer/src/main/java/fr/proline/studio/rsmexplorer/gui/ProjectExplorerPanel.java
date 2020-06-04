@@ -39,7 +39,8 @@ import fr.proline.studio.dpm.task.jms.ClearProjectTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.pattern.DataParameter;
-import fr.proline.studio.pattern.GroupParameter;
+import fr.proline.studio.pattern.ParameterList;
+import fr.proline.studio.pattern.ParameterSubtypeEnum;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
 import fr.proline.studio.rsmexplorer.actions.ConnectAction;
@@ -427,34 +428,30 @@ public class ProjectExplorerPanel extends JPanel {
             if (topComponent instanceof DataBoxViewerTopComponent && !(topComponent.getName().startsWith(allImportedWindowsName))) {
                 long pId = ((DataBoxViewerTopComponent) topComponent).getProjectId();
                 if (pId == projectId) {
-                    HashSet<GroupParameter> inParam = ((DataBoxViewerTopComponent) topComponent).getInParameters();
-                    inParam.stream().forEach((inp) -> {
-                        ArrayList<DataParameter> listP = inp.getParameterList();
-                        for (DataParameter dataParam : listP) {
-                            if (dataParam.equalsData(ResultSummary.class)) {
-                                ResultSummary rsm = (ResultSummary) ((DataBoxViewerTopComponent) topComponent).getData(false, ResultSummary.class);
-                                openedData.add(new ClearProjectData(projectId, rsm));
-                                openedData.add(new ClearProjectData(projectId, rsm.getResultSet()));
-                            } else if (dataParam.equalsData(ResultSet.class)) {
-                                ResultSet rs = (ResultSet) ((DataBoxViewerTopComponent) topComponent).getData(false, ResultSet.class);
-                                openedData.add(new ClearProjectData(projectId, rs));
-                            }
+                    ParameterList inParam = ((DataBoxViewerTopComponent) topComponent).getInParameters();
+                    for (DataParameter dataParam : inParam.getParameterList()) {
+                        if (dataParam.equalsData(ResultSummary.class, ParameterSubtypeEnum.SINGLE_DATA)) {
+                            ResultSummary rsm = (ResultSummary) ((DataBoxViewerTopComponent) topComponent).getData(ResultSummary.class);
+                            openedData.add(new ClearProjectData(projectId, rsm));
+                            openedData.add(new ClearProjectData(projectId, rsm.getResultSet()));
+                        } else if (dataParam.equalsData(ResultSet.class, ParameterSubtypeEnum.SINGLE_DATA)) {
+                            ResultSet rs = (ResultSet) ((DataBoxViewerTopComponent) topComponent).getData(ResultSet.class);
+                            openedData.add(new ClearProjectData(projectId, rs));
                         }
-                    });
-                    ArrayList<GroupParameter> outParam = ((DataBoxViewerTopComponent) topComponent).getOutParameters();
-                    outParam.stream().forEach((outp) -> {
-                        ArrayList<DataParameter> listP = outp.getParameterList();
-                        for (DataParameter dataParam : listP) {
-                            if (dataParam.equalsData(ResultSummary.class)) {
-                                ResultSummary rsm = (ResultSummary) ((DataBoxViewerTopComponent) topComponent).getData(false, ResultSummary.class);
-                                openedData.add(new ClearProjectData(projectId, rsm));
-                                openedData.add(new ClearProjectData(projectId, rsm.getResultSet()));
-                            } else if (dataParam.equalsData(ResultSet.class)) {
-                                ResultSet rs = (ResultSet) ((DataBoxViewerTopComponent) topComponent).getData(false, ResultSet.class);
-                                openedData.add(new ClearProjectData(projectId, rs));
-                            }
+                    }
+
+                    ParameterList outParam = ((DataBoxViewerTopComponent) topComponent).getOutParameters();
+                    for (DataParameter dataParam : outParam.getParameterList()) {
+                        if (dataParam.equalsData(ResultSummary.class, ParameterSubtypeEnum.SINGLE_DATA)) {
+                            ResultSummary rsm = (ResultSummary) ((DataBoxViewerTopComponent) topComponent).getData(ResultSummary.class);
+                            openedData.add(new ClearProjectData(projectId, rsm));
+                            openedData.add(new ClearProjectData(projectId, rsm.getResultSet()));
+                        } else if (dataParam.equalsData(ResultSet.class, ParameterSubtypeEnum.SINGLE_DATA)) {
+                            ResultSet rs = (ResultSet) ((DataBoxViewerTopComponent) topComponent).getData(ResultSet.class);
+                            openedData.add(new ClearProjectData(projectId, rs));
                         }
-                    });
+                    }
+                    
                 }
             }
         }

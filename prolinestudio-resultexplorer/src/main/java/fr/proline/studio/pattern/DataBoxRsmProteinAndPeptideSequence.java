@@ -21,7 +21,6 @@ import fr.proline.core.orm.msi.dto.DInfoPTM;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
-import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.rsmexplorer.gui.RsmProteinAndPeptideSequencePanel;
 
@@ -41,10 +40,10 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
         m_description = "Protein Sequence and its Peptides Sequences";
 
         // Register in parameters
-        GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(DProteinMatch.class, false);
-        inParameter.addParameter(DPeptideInstance.class, false, false /* parameter is not compulsory */);
-        inParameter.addParameter(ResultSummary.class, false); // needs a ProteinMatch and a ResultSummary (PeptideInstance is optionnal)
+        ParameterList inParameter = new ParameterList();
+        inParameter.addParameter(DProteinMatch.class);
+        inParameter.addParameter(DPeptideInstance.class, ParameterSubtypeEnum.SINGLE_DATA, false /* parameter is not compulsory */);
+        inParameter.addParameter(ResultSummary.class); // needs a ProteinMatch and a ResultSummary (PeptideInstance is optionnal)
         registerInParameter(inParameter);
 
         // Register possible out parameters
@@ -61,9 +60,9 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        DProteinMatch proteinMatch = (DProteinMatch) m_previousDataBox.getData(false, DProteinMatch.class);
-        DPeptideInstance selectedPeptide = (DPeptideInstance) m_previousDataBox.getData(false, DPeptideInstance.class);
-        ResultSummary resultSummary = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
+        DProteinMatch proteinMatch = (DProteinMatch) getData(DProteinMatch.class);
+        DPeptideInstance selectedPeptide = (DPeptideInstance) getData(DPeptideInstance.class);
+        ResultSummary resultSummary = (ResultSummary) getData(ResultSummary.class);
 
         if ((proteinMatch == null) || (resultSummary == null)) {
             ((RsmProteinAndPeptideSequencePanel) getDataBoxPanelInterface()).setData(null, null, null, null);

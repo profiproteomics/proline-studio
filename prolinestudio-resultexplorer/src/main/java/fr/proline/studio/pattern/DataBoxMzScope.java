@@ -48,14 +48,14 @@ public class DataBoxMzScope extends AbstractDataBox{
         m_typeName = "MzScope";
         m_description = "MzScope";
 
-        // Register Possible in parameters
+        // Register in parameters
         // One Map 
-        GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(File.class, false);
+        ParameterList inParameter = new ParameterList();
+        inParameter.addParameter(File.class);
         registerInParameter(inParameter);
 
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
+        ParameterList outParameter = new ParameterList();
         //outParameter.addParameter(?.class, false);
         registerOutParameter(outParameter);
         
@@ -105,13 +105,13 @@ public class DataBoxMzScope extends AbstractDataBox{
     }
     
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType != null) {
 //            if (parameterType.equals(?.class)) {
 //                return ?;
 //            }
         }
-        return super.getData(getArray, parameterType);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
     
     @Override
@@ -143,7 +143,8 @@ public class DataBoxMzScope extends AbstractDataBox{
                 
                 if (finished) {
                     unregisterTask(taskId);
-                    propagateDataChanged(ExtendedTableModelInterface.class); 
+                    addDataChanged(ExtendedTableModelInterface.class); 
+                    propagateDataChanged();
                 }
             }
         };

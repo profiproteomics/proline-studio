@@ -158,7 +158,8 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
 
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.propagateDataChanged();
                 m_infoToggleButton.updateInfo();
             }
             
@@ -434,11 +435,17 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
                 return;
             }
             
-            if (m_fromRSM){
-                m_dataBox.propagateDataChanged(MsQueryInfoRsm.class);
-            }else{
-                m_dataBox.propagateDataChanged(MsQueryInfoRset.class);
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
             }
+            
+            if (m_fromRSM) {
+                m_dataBox.addDataChanged(MsQueryInfoRsm.class);
+            } else {
+                m_dataBox.addDataChanged(MsQueryInfoRset.class);
+            }
+            m_dataBox.propagateDataChanged();
 
         }
 

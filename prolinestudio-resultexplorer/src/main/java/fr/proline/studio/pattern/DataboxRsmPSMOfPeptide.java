@@ -49,20 +49,15 @@ public class DataboxRsmPSMOfPeptide extends AbstractDataBox {
         m_typeName = "PSMs";
         m_description = "All PSMs of a Peptide";
         
-        // Register Possible in parameters
-        // One ResultSummary
-        GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(PeptideInstance.class, false);  //JPM.TODO ????
+        // Register in parameters
+        ParameterList inParameter = new ParameterList();
+        inParameter.addParameter(PeptideInstance.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
-        // One or Multiple PeptideMatch
-        GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DPeptideMatch.class, true);
-        registerOutParameter(outParameter);
-
-        outParameter = new GroupParameter();
-        outParameter.addParameter(ExtendedTableModelInterface.class, true);
+        ParameterList outParameter = new ParameterList();
+        outParameter.addParameter(DPeptideMatch.class);
+        outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
        
     }
@@ -79,7 +74,7 @@ public class DataboxRsmPSMOfPeptide extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
-        final PeptideInstance peptideInstance = (PeptideInstance) m_previousDataBox.getData(false, PeptideInstance.class);
+        final PeptideInstance peptideInstance = (PeptideInstance) getData(PeptideInstance.class);
 
         if (peptideInstance == null) {
              ((PeptideMatchPanel)getDataBoxPanelInterface()).setData(-1, null, null, true);
@@ -109,7 +104,8 @@ public class DataboxRsmPSMOfPeptide extends AbstractDataBox {
                 if (finished) {
                     unregisterTask(taskId);
                     //propagateDataChanged(ValuesForStatsAbstract.class);
-                    propagateDataChanged(ExtendedTableModelInterface.class);
+                    addDataChanged(ExtendedTableModelInterface.class);
+                    propagateDataChanged();
                 }
             }
         };
@@ -123,19 +119,22 @@ public class DataboxRsmPSMOfPeptide extends AbstractDataBox {
     }
     
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null ) {
-            if (parameterType.equals(DPeptideMatch.class)) {
-                return ((PeptideMatchPanel)getDataBoxPanelInterface()).getSelectedPeptideMatch();
-            }
-            if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
-            }
-            if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface)getDataBoxPanelInterface()).getCrossSelectionInterface();
+            
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+                if (parameterType.equals(DPeptideMatch.class)) {
+                    return ((PeptideMatchPanel) getDataBoxPanelInterface()).getSelectedPeptideMatch();
+                }
+                if (parameterType.equals(ExtendedTableModelInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
+                }
+                if (parameterType.equals(CrossSelectionInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
+                }
             }
         }
-        return super.getData(getArray, parameterType);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
  
 
@@ -147,7 +146,7 @@ public class DataboxRsmPSMOfPeptide extends AbstractDataBox {
 
     @Override
     public String getImportantOutParameterValue() {
-        DPeptideMatch p = (DPeptideMatch) getData(false, DPeptideMatch.class);
+        DPeptideMatch p = (DPeptideMatch) getData(DPeptideMatch.class);
         if (p != null) {
             Peptide peptide = p.getPeptide();
             if (peptide != null) {

@@ -109,12 +109,12 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
         }
         m_ptmPeptideAreaCtrl.setData(ptmPepInstances);
         m_ptmPeptideInstances = ptmPepInstances;
-        m_dataBox.getData(true, DPeptideInstance.class);
+        //m_dataBox.getData(DPeptideInstance.class);  //JPM.DATABOX strange : get data without doing something of it
 
         if (m_selectedProteinMatch == null) {
             return;
         } else {
-            DPeptideInstance[] peptideInstances = m_selectedProteinMatch.getPeptideSet(this.m_dataBox.getRsmId()).getPeptideInstances();
+            DPeptideInstance[] peptideInstances = m_selectedProteinMatch.getPeptideSet(m_dataBox.getRsmId()).getPeptideInstances();
 
             if (m_selectedProteinMatch.getDBioSequence() != null) {
                 m_proteinOverviewCtrl.setData(m_selectedProteinMatch.getAccession(), m_selectedProteinMatch.getDBioSequence().getSequence(), ptmPepInstances.get(0), ptmPepInstances, peptideInstances);
@@ -131,7 +131,8 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
      * when selected peptide change, change next databox and table selected row
      */
     protected void valueChanged() {
-        m_dataBox.propagateDataChanged(PTMPeptideInstance.class);
+        m_dataBox.addDataChanged(PTMPeptideInstance.class, null); //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
+        m_dataBox.propagateDataChanged();
         this.repaint();
     }
 
@@ -172,7 +173,7 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
-        this.m_ptmPeptideAreaCtrl.setDataBox(dataBox);
+        m_ptmPeptideAreaCtrl.setDataBox(dataBox);
     }
 
     @Override

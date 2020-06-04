@@ -152,7 +152,8 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
 
             @Override
             protected void filteringDone() {
-                 m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                 m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                 m_dataBox.propagateDataChanged();
             }
         };
 
@@ -181,7 +182,7 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
                 // prepare window box
                 WindowBox wbox = WindowBoxFactory.getGraphicsWindowBox("Peak Graphic", m_dataBox, true);
 
-                wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(false, ExtendedTableModelInterface.class));
+                wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(ExtendedTableModelInterface.class));
 
                 // open a window to display the window box
                 DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
@@ -324,8 +325,15 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
             if (selectionWillBeRestored) {
                 return;
             }
+            
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
+            
             if (m_dataBox != null) {
-                m_dataBox.propagateDataChanged(Peak.class);
+                m_dataBox.addDataChanged(Peak.class);
+                m_dataBox.propagateDataChanged();
             }
 
         }

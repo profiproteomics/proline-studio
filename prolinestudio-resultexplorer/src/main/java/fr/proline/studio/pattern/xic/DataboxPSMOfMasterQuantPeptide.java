@@ -56,20 +56,17 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
         m_typeName = "PSM / Quanti. Peptide";
         m_description = "All PSM of a Quanti. Peptide";
 
-        // Register Possible in parameters
-        // One ResultSummary
-        GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(DMasterQuantPeptide.class, false);
+        // Register in parameters
+        ParameterList inParameter = new ParameterList();
+        inParameter.addParameter(DMasterQuantPeptide.class);
         registerInParameter(inParameter);
 
         // Register possible out parameters
-        // One or Multiple PeptideMatch
-        GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DPeptideMatch.class, true);
-        registerOutParameter(outParameter);
+        ParameterList outParameter = new ParameterList();
 
-        outParameter = new GroupParameter();
-        outParameter.addParameter(ExtendedTableModelInterface.class, true);
+        outParameter.addParameter(DPeptideMatch.class);
+        outParameter.addParameter(ExtendedTableModelInterface.class);
+
         registerOutParameter(outParameter);
 
     }
@@ -85,9 +82,9 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
-        m_masterQuantPeptide = (DMasterQuantPeptide) m_previousDataBox.getData(false, DMasterQuantPeptide.class);
-        m_dataset = (DDataset) m_previousDataBox.getData(false, DDataset.class);
-        m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(false, QuantChannelInfo.class);
+        m_masterQuantPeptide = (DMasterQuantPeptide) getData(DMasterQuantPeptide.class);
+        m_dataset = (DDataset) getData(DDataset.class);
+        m_quantChannelInfo = (QuantChannelInfo) getData(QuantChannelInfo.class);
 
         if (m_masterQuantPeptide == null) {
             ((XicPeptideMatchPanel) getDataBoxPanelInterface()).setData((long)-1, null, m_quantChannelInfo, null, null, true);
@@ -124,7 +121,8 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
 
                 if (finished) {
                     unregisterTask(taskId);
-                    propagateDataChanged(ExtendedTableModelInterface.class);
+                    addDataChanged(ExtendedTableModelInterface.class);
+                    propagateDataChanged();
                 }
             }
         };
@@ -139,19 +137,22 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
     }
 
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+        
         if (parameterType != null) {
-            if (parameterType.equals(DPeptideMatch.class)) {
-                return ((XicPeptideMatchPanel) getDataBoxPanelInterface()).getSelectedPSM();
-            }
-            if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
-            }
-            if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+                if (parameterType.equals(DPeptideMatch.class)) {
+                    return ((XicPeptideMatchPanel) getDataBoxPanelInterface()).getSelectedPSM();
+                }
+                if (parameterType.equals(ExtendedTableModelInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
+                }
+                if (parameterType.equals(CrossSelectionInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
+                }
             }
         }
-        return super.getData(getArray, parameterType);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
 
 }

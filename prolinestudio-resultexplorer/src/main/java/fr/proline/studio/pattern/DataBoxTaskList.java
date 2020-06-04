@@ -40,8 +40,8 @@ public class DataBoxTaskList extends AbstractDataBox {
 
         // Register possible out parameters
         // One or Multiple PeptideMatch
-        GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(TaskInfo.class, false);
+        ParameterList outParameter = new ParameterList();
+        outParameter.addParameter(TaskInfo.class);
         registerOutParameter(outParameter);
 
     }
@@ -60,15 +60,18 @@ public class DataBoxTaskList extends AbstractDataBox {
         // never called
     }
     
-        @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    @Override
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null ) {
-            if (parameterType.equals(TaskInfo.class)) {
-                return ((TasksPanel)getDataBoxPanelInterface()).getSelectedTaskInfo();
+            
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+                if (parameterType.equals(TaskInfo.class)) {
+                    return ((TasksPanel) getDataBoxPanelInterface()).getSelectedTaskInfo();
+                }
             }
 
         }
-        return super.getData(getArray, parameterType);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
     
     @Override

@@ -145,7 +145,8 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
 
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.propagateDataChanged();
             }
         };
 
@@ -294,9 +295,15 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
             if (selectionWillBeRestored) {
                 return;
             }
+            
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
 
-            m_dataBox.propagateDataChanged(DPeptideMatch.class);
-            m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+            m_dataBox.addDataChanged(DPeptideMatch.class);
+            m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+            m_dataBox.propagateDataChanged();
 
         }
 

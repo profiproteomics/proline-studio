@@ -23,9 +23,7 @@ import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.prefs.Preferences;
 import javax.swing.JPanel;
-import org.openide.util.NbPreferences;
 import org.openide.windows.WindowManager;
 
 

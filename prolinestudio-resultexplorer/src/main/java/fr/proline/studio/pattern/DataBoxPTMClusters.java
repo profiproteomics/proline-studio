@@ -82,43 +82,30 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         m_typeName = "Dataset PTMs Clusters"; //May be Quant PTM Protein Sites... 
         m_description = "Clusters of Modification Sites of a Dataset";//May be Ident or Quant dataset...
         
-        // Register Possible in parameters
-        // One PTMDatasert ResultSummary
-        GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(PTMDataset.class, false);
-        registerInParameter(inParameter);
+        // Register in parameters
+        ParameterList inParameter = new ParameterList();
         
-        inParameter = new GroupParameter();
-        inParameter.addParameter(DDataset.class, false);
+        inParameter.addParameter(PTMDataset.class);
+        inParameter.addParameter(DDataset.class);
+        
         registerInParameter(inParameter);
         
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(ResultSummary.class, false);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
-        outParameter.addParameter(PTMPeptideInstance.class, true);
-        outParameter.addParameter(PTMCluster.class, true);
-        outParameter.addParameter(PTMDataset.class, false);
-        registerOutParameter(outParameter);
+        ParameterList outParameter = new ParameterList();
+        outParameter.addParameter(ResultSummary.class);
 
-        outParameter = new GroupParameter();
-        outParameter.addParameter(DProteinMatch.class, true); 
-        outParameter.addParameter(ResultSummary.class, false);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
-        outParameter.addParameter(DPeptideMatch.class, true);
-        outParameter.addParameter(ResultSummary.class, false);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
-        outParameter.addParameter(ExtendedTableModelInterface.class, true);
-        registerOutParameter(outParameter);
+        outParameter.addParameter(PTMPeptideInstance.class, ParameterSubtypeEnum.LEAF_PTMPeptideInstance);
+        outParameter.addParameter(PTMPeptideInstance.class, ParameterSubtypeEnum.PARENT_PTMPeptideInstance);
+        outParameter.addParameter(PTMDataset.class);
 
-        outParameter = new GroupParameter();
-        outParameter.addParameter(CrossSelectionInterface.class, true);
+        outParameter.addParameter(DProteinMatch.class); 
+        outParameter.addParameter(DPeptideMatch.class);
+        
+        outParameter.addParameter(PTMCluster.class, ParameterSubtypeEnum.LIST_DATA);
+
+        outParameter.addParameter(ExtendedTableModelInterface.class);
+        outParameter.addParameter(CrossSelectionInterface.class);
+        
         registerOutParameter(outParameter);
                         
     }
@@ -136,18 +123,18 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     public void setXicResult(boolean isXICResult) {
         m_isXicResult = isXICResult;
         m_style = (m_isXicResult) ? DataboxStyle.STYLE_XIC : DataboxStyle.STYLE_SC;
-        if(m_isXicResult)
+        if (m_isXicResult) {
             registerXicOutParameter();
+        }
     }
     
     private void registerXicOutParameter(){
-        GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DMasterQuantProteinSet.class, false);
-        outParameter.addParameter(DProteinSet.class, false);
-        registerOutParameter(outParameter);        
-                
-        outParameter = new GroupParameter();
-        outParameter.addParameter(QuantChannelInfo.class, false);
+        ParameterList outParameter = new ParameterList();
+        
+        outParameter.addParameter(DMasterQuantProteinSet.class);
+        outParameter.addParameter(DProteinSet.class);
+        outParameter.addParameter(QuantChannelInfo.class);
+        
         registerOutParameter(outParameter);
     }
     
@@ -212,7 +199,8 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                     setLoaded(loadingId);
                     unregisterTask(taskId);
                     m_logger.debug(" Task "+taskId+" DONE. Should propagate changes ");
-                    propagateDataChanged(ExtendedTableModelInterface.class);
+                    addDataChanged(ExtendedTableModelInterface.class);
+                    propagateDataChanged();
                 }
             }
         };
@@ -232,7 +220,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         String message = (ti != null && ti.hasTaskError()) ? ti.getTaskError().getErrorText() : "Error loading PTM Cluster";
         JOptionPane.showMessageDialog(((JPanel) getDataBoxPanelInterface()), message,"PTM Cluster loading error", JOptionPane.ERROR_MESSAGE);
         ((PTMClustersPanel) getDataBoxPanelInterface()).setData(taskId, null, isFinished);
-        
+
     }
     
     private boolean m_loadPepMatchOnGoing = false;
@@ -260,10 +248,11 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                     if(isXicResult()){
                         loadXicData(loadingId);
                     } else {
-                        setLoaded(loadingId);
+                        setLoaded(loadingId);                        
                         ((PTMClustersPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
-                        propagateDataChanged(PTMPeptideInstance.class);
-                        propagateDataChanged(ExtendedTableModelInterface.class);
+                        addDataChanged(PTMPeptideInstance.class, null);  //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
+                        addDataChanged(ExtendedTableModelInterface.class);
+                        propagateDataChanged();
                     }
                     unregisterTask(taskId);
                 }
@@ -326,7 +315,8 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                     m_ptmDataset.setQuantProteinSets(m_masterQuantProteinSetList, typicalProteinMatchIdByProteinMatchId);
                     unregisterTask(taskId);
                     startLoadingMasterQuantPeptides(m_ptmDataset.getPTMClusters());
-                    propagateDataChanged(ExtendedTableModelInterface.class);
+                    addDataChanged(ExtendedTableModelInterface.class);
+                    propagateDataChanged();
                 }
             }
         };
@@ -437,97 +427,91 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     
     
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null ) {
-            if (parameterType.equals(ResultSummary.class)) {
-                return m_rsm;
+            
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+
+                if (parameterType.equals(ResultSummary.class)) {
+                    return m_rsm;
+                }
+
+                if (parameterType.equals(DProteinMatch.class)) {
+                    PTMCluster cluster = ((PTMClustersPanel)getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
+                    if (cluster != null) {
+                        return cluster.getProteinMatch();
+                    }
+                }
+                if (parameterType.equals(DPeptideMatch.class)) {
+                    PTMCluster cluster = ((PTMClustersPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
+                    if (cluster != null) {
+                        return cluster.getRepresentativePepMatch();
+                    }
+                }
+
+                if (parameterType.equals(PTMDataset.class)) {
+                    return m_ptmDataset;
+                }
+                if (parameterType.equals(DDataset.class)) {
+                    return m_ptmDataset.getDataset();
+                }
+                //XIC Specific ---- 
+                if (parameterType.equals(DMasterQuantProteinSet.class) && isXicResult()) {
+                    PTMCluster cluster = ((PTMClustersPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
+                    if (cluster != null) {
+                        return cluster.getMasterQuantProteinSet();
+                    }
+                }
+                if (parameterType.equals(DProteinSet.class) && isXicResult()) {
+                    PTMCluster cluster = ((PTMClustersPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
+                    if (cluster != null && cluster.getMasterQuantProteinSet() != null) {
+                        return cluster.getMasterQuantProteinSet().getProteinSet();
+                    }
+                }
+                if (parameterType.equals(QuantChannelInfo.class) && isXicResult()) {
+                    return m_quantChannelInfo;
+                }
+
+                if (parameterType.equals(ExtendedTableModelInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
+                }
+                if (parameterType.equals(CrossSelectionInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
+                }
+                if (parameterType.equals(XicMode.class) && m_ptmDataset.getDataset().isQuantitation()) {
+                    return new XicMode(true);
+                }
+            }
+
+            if (parameterSubtype == ParameterSubtypeEnum.LIST_DATA) {
+                if (parameterType.equals(PTMCluster.class)) {
+                    List<PTMCluster> clusters = ((PTMClustersPanel) getDataBoxPanelInterface()).getSelectedPTMClusters();
+                    return clusters;
+                }
             }
             
-            if (parameterType.equals(DProteinMatch.class)) {
-                PTMCluster cluster = ((PTMClustersPanel)getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
-                if (cluster != null) {
-                    return cluster.getProteinMatch();
+
+            if (parameterType.equals(PTMPeptideInstance.class) && (parameterSubtype.equals(ParameterSubtypeEnum.PARENT_PTMPeptideInstance) || parameterSubtype.equals(ParameterSubtypeEnum.LEAF_PTMPeptideInstance)) ) {
+                if (m_loadPepMatchOnGoing) {
+                    return null;
                 }
-            }
-            if (parameterType.equals(DPeptideMatch.class)) {
-                PTMCluster cluster = ((PTMClustersPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
-                if (cluster != null) {
-                    return cluster.getRepresentativePepMatch();
-                }
-            }
-
-            if (parameterType.equals(PTMDataset.class)){
-                return m_ptmDataset;
-            }
-            if (parameterType.equals(DDataset.class)) {
-                return m_ptmDataset.getDataset();
-            }
-             //XIC Specific ---- 
-            if(parameterType.equals(DMasterQuantProteinSet.class) && isXicResult()) {
-                PTMCluster cluster = ((PTMClustersPanel)getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
-                if (cluster != null) {
-                    return cluster.getMasterQuantProteinSet();
-                }
-            }
-            if (parameterType.equals(DProteinSet.class) && isXicResult()) {
-               PTMCluster cluster = ((PTMClustersPanel)getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
-                if (cluster != null && cluster.getMasterQuantProteinSet() != null) {
-                    return cluster.getMasterQuantProteinSet().getProteinSet();
-                }     
-            }          
-            if (parameterType.equals(QuantChannelInfo.class) && isXicResult()) {
-                return m_quantChannelInfo;
-            }
-
-            if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
-            }
-            if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
-            }
-            if (parameterType.equals(XicMode.class) && m_ptmDataset.getDataset().isQuantitation()) {
-                return new XicMode(true);
-            }
-        }
-        return super.getData(getArray, parameterType);
-    }
- 
-    @Override
-    public Object getData(final boolean getArray, Class parameterType, boolean isList) {
-        if (parameterType != null && isList) {
-
-            if(m_loadPepMatchOnGoing)
-                return null;
-
-            if (parameterType.equals(PTMCluster.class)) {
-                List<PTMCluster> clusters = ((PTMClustersPanel) getDataBoxPanelInterface()).getSelectedPTMClusters();
-                return clusters;
-            }
-
-
-            if(parameterType.equals(PTMPeptideInstance.class) ) {
+                boolean parentPTMPeptideInstance = parameterSubtype.equals(ParameterSubtypeEnum.PARENT_PTMPeptideInstance);
+                
                 List<PTMCluster> clusters = ((PTMClustersPanel) getDataBoxPanelInterface()).getSelectedPTMClusters();
                 List<PTMPeptideInstance> ptmPeptideInstances =  new ArrayList<>();
-                if(!clusters.isEmpty()){
+                if (!clusters.isEmpty()) {
                     Collections.sort(clusters);                    
-                    //get First Selected Cluster, and consider only PTMCluster on same protein match (user can select clusters from different proteins)
+                    //get First Selected Cluster, and consider only PTMCluster on same protein match
                     Long protMatchId = ((PTMClustersPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster().getProteinMatch().getId();
-                    clusters.stream().filter(cluster -> protMatchId.equals(cluster.getProteinMatch().getId())).forEach(cluster -> {
-                        //FIXME TODO  !!! VDS BIG WART !!! TO BE REMOVED WITH Propagate refactoring
-                        // Use "getArray" to specify parent or leaf PTMPeptideInstance...
-                        ptmPeptideInstances.addAll(getArray ? cluster.getLeafPTMPeptideInstances() : cluster.getParentPTMPeptideInstances());
-                    });
+                    clusters.stream().filter(cluster -> protMatchId.equals(cluster.getProteinMatch().getId())).forEach(cluster -> {ptmPeptideInstances.addAll(parentPTMPeptideInstance ? cluster.getParentPTMPeptideInstances() : cluster.getLeafPTMPeptideInstances()); });                    
                 }
                 return ptmPeptideInstances;
-//                PTMCluster cluster = ((PTMClustersPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
-//                List<PTMPeptideInstance> ptmPeptideInstances =  new ArrayList<>();
-//                if(cluster != null)
-//                    ptmPeptideInstances = cluster.getParentPTMPeptideInstances();
-//                return ptmPeptideInstances;
             }
 
+          
         }
-        return super.getData(getArray, parameterType, isList);
+        
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
             
     @Override
@@ -586,7 +570,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     
     @Override
     public String getImportantOutParameterValue() {
-        DProteinMatch p = (DProteinMatch) getData(false, DProteinMatch.class);
+        DProteinMatch p = (DProteinMatch) getData(DProteinMatch.class);
         if (p != null) {
             return p.getAccession();
         }

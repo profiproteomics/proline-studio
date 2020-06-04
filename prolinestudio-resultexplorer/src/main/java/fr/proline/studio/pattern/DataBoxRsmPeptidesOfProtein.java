@@ -24,7 +24,6 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -48,25 +47,17 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
         m_typeName = "Peptides";
         m_description = "All Peptides of a Protein Match";
         
-        // Register Possible in parameters
-        // One ProteinMatch AND one ResultSummary
-        GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(DProteinMatch.class, false);
-        inParameter.addParameter(ResultSummary.class, false);
+        // Register in parameters
+        ParameterList inParameter = new ParameterList();
+        inParameter.addParameter(DProteinMatch.class);
+        inParameter.addParameter(ResultSummary.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
-        // One or Multiple  PeptideInstance
-        GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DPeptideInstance.class, true);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
-        outParameter.addParameter(DPeptideMatch.class, true);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
-        outParameter.addParameter(ExtendedTableModelInterface.class, true);
+        ParameterList outParameter = new ParameterList();
+        outParameter.addParameter(DPeptideInstance.class);
+        outParameter.addParameter(DPeptideMatch.class);
+        outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
        
     }
@@ -84,9 +75,9 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        final DProteinMatch proteinMatch = (DProteinMatch) m_previousDataBox.getData(false, DProteinMatch.class);
-        final DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
-        final ResultSummary rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
+        final DProteinMatch proteinMatch = (DProteinMatch) getData(DProteinMatch.class);
+        final DPeptideMatch peptideMatch = (DPeptideMatch) getData(DPeptideMatch.class);
+        final ResultSummary rsm = (ResultSummary) getData(ResultSummary.class);
 
         // register the link to the Transient Data
         linkCache(rsm);
@@ -119,7 +110,8 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
                 
                 if (finished) {
                     unregisterTask(taskId);
-                    propagateDataChanged(ExtendedTableModelInterface.class);
+                    addDataChanged(ExtendedTableModelInterface.class);
+                    propagateDataChanged();
                 }
             }
         };
@@ -141,25 +133,28 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
     private Long m_previousTaskId = null;
     
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null) {
-            if (parameterType.equals(DPeptideInstance.class)) {
-                return ((RsmPeptidesOfProteinPanel) getDataBoxPanelInterface()).getSelectedPeptide();
-            }
-            if (parameterType.equals(DPeptideMatch.class)) {
-                DPeptideInstance pi = ((RsmPeptidesOfProteinPanel) getDataBoxPanelInterface()).getSelectedPeptide();
-                if (pi != null) {
-                    return pi.getBestPeptideMatch();
+            
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+                if (parameterType.equals(DPeptideInstance.class)) {
+                    return ((RsmPeptidesOfProteinPanel) getDataBoxPanelInterface()).getSelectedPeptide();
+                }
+                if (parameterType.equals(DPeptideMatch.class)) {
+                    DPeptideInstance pi = ((RsmPeptidesOfProteinPanel) getDataBoxPanelInterface()).getSelectedPeptide();
+                    if (pi != null) {
+                        return pi.getBestPeptideMatch();
+                    }
+                }
+                if (parameterType.equals(ExtendedTableModelInterface.class)) {//get all peptide instances
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
+                }
+                if (parameterType.equals(CrossSelectionInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
                 }
             }
-            if (parameterType.equals(ExtendedTableModelInterface.class)) {//get all peptide instances
-                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
-            }
-            if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface)getDataBoxPanelInterface()).getCrossSelectionInterface();
-            }
         }
-        return super.getData(getArray, parameterType);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
     
     @Override
@@ -170,7 +165,7 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
 
     @Override
     public String getImportantOutParameterValue() {
-        DPeptideMatch p = (DPeptideMatch) getData(false, DPeptideMatch.class);
+        DPeptideMatch p = (DPeptideMatch) getData(DPeptideMatch.class);
         if (p != null) {
             Peptide peptide = p.getPeptide();
             if (peptide != null) {

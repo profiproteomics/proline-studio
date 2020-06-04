@@ -33,10 +33,9 @@ public class DataBoxTaskDescription extends AbstractDataBox {
         m_typeName = "Task";
         m_description = "Task Description";
         
-        // Register Possible in parameters
-        // One TaskInfo
-        GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(TaskInfo.class, false);
+        // Register in parameters
+        ParameterList inParameter = new ParameterList();
+        inParameter.addParameter(TaskInfo.class);
         registerInParameter(inParameter);
     }
 
@@ -50,7 +49,7 @@ public class DataBoxTaskDescription extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        TaskInfo taskInfo = (TaskInfo) m_previousDataBox.getData(false, TaskInfo.class);
+        TaskInfo taskInfo = (TaskInfo) getData(TaskInfo.class);
         ((TaskDescriptionPanel)getDataBoxPanelInterface()).setTaskInfo(taskInfo);
     }
     

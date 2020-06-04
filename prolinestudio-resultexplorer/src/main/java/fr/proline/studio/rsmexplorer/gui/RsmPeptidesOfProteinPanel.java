@@ -142,7 +142,8 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
 
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.propagateDataChanged();
                 m_infoToggleButton.updateInfo();
             }
 
@@ -357,8 +358,14 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
             
             super.valueChanged(e);
             
-            m_dataBox.propagateDataChanged(DPeptideInstance.class);
-            m_dataBox.propagateDataChanged(DPeptideMatch.class);
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
+            
+            m_dataBox.addDataChanged(DPeptideInstance.class);
+            m_dataBox.addDataChanged(DPeptideMatch.class);
+            m_dataBox.propagateDataChanged();
         }
         
  

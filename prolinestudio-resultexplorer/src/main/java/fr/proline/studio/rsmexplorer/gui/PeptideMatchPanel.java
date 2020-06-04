@@ -127,12 +127,12 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         // update toolbar
         if (m_startingPanel) {
             if (m_forRSM) {
-                ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
+                ResultSummary rsm = (ResultSummary) m_dataBox.getData(ResultSummary.class);
                 if (rsm != null) {
                     m_decoyButton.setEnabled(rsm.getDecoyResultSummary() != null);
                 }
             } else {
-                ResultSet rset = (ResultSet) m_dataBox.getData(false, ResultSet.class);
+                ResultSet rset = (ResultSet) m_dataBox.getData(ResultSet.class);
                 if (rset != null) {
                     m_decoyButton.setEnabled(rset.getDecoyResultSet() != null);
                 }
@@ -258,7 +258,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
                     WindowBox wbox;
                     if (m_forRSM) {
-                        ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
+                        ResultSummary rsm = (ResultSummary) m_dataBox.getData(ResultSummary.class);
                         ResultSummary decoyRsm = rsm.getDecoyResultSummary();
                         if (decoyRsm == null) {
                             return;
@@ -271,7 +271,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
 
                     } else {
-                        ResultSet rset = (ResultSet) m_dataBox.getData(false, ResultSet.class);
+                        ResultSet rset = (ResultSet) m_dataBox.getData(ResultSet.class);
                         ResultSet decoyRset = rset.getDecoyResultSet();
                         if (decoyRset == null) {
                             return;
@@ -300,7 +300,8 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.propagateDataChanged();
                 m_infoToggleButton.updateInfo();
             }
             
@@ -485,9 +486,13 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                 return;
             }
 
-
-
-            m_dataBox.propagateDataChanged(DPeptideMatch.class);
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
+            
+            m_dataBox.addDataChanged(DPeptideMatch.class);
+            m_dataBox.propagateDataChanged();
 
         }
 

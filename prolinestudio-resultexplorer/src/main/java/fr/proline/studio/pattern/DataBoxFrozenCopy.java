@@ -28,10 +28,11 @@ import java.util.Iterator;
  */
 public class DataBoxFrozenCopy extends AbstractDataBox {
     
-    private HashMap<Class, HashMap<Boolean, Object>> m_frozenDataMap = new HashMap<>();
+    // class as parameterType, ParameterSubtypeEnum, parameter
+    private HashMap<Class, HashMap<ParameterSubtypeEnum, Object>> m_frozenDataMap = new HashMap<>();
     
     public DataBoxFrozenCopy(AbstractDataBox srcDataBox) {
-        super(DataboxType.DataBoxMSQueriesForRSM, srcDataBox.getStyle());
+        super(srcDataBox.getType(), srcDataBox.getStyle());
         
         AvailableParameters avalaibleParameters = new AvailableParameters(srcDataBox);
         
@@ -40,76 +41,76 @@ public class DataBoxFrozenCopy extends AbstractDataBox {
         while (it.hasNext()) {
             DataParameter parameter = it.next();
             Class c = parameter.getParameterClass();
-            HashMap<Boolean, Object> map = m_frozenDataMap.get(c);
+            ParameterSubtypeEnum subtype = parameter.getSubtype();
+            HashMap<ParameterSubtypeEnum, Object> map = m_frozenDataMap.get(c);
             if (map == null) {
                 map = new HashMap<>();
-                map.put(true, srcDataBox.getData(true, c));
-                map.put(false, srcDataBox.getData(false, c));
+                map.put(subtype, srcDataBox.getData(c, subtype));
                 m_frozenDataMap.put(c, map);
             }
 
         }
         
         Class specificClass =  ResultSet.class;
-        ResultSet rset = (ResultSet) srcDataBox.getData(false, specificClass);
+        ResultSet rset = (ResultSet) srcDataBox.getData(specificClass, null);
         if (rset == null) {
-            DDataset dataset = (DDataset) srcDataBox.getData(false, DDataset.class);
+            DDataset dataset = (DDataset) srcDataBox.getData(DDataset.class, null);
             if (dataset!= null) {
                 rset = dataset.getResultSet();
             }
         }
         if (rset == null) {
-            ResultSummary rsm = (ResultSummary) srcDataBox.getData(false, specificClass);
+            ResultSummary rsm = (ResultSummary) srcDataBox.getData(specificClass, null);
             if (rsm != null) {
                 rset = rsm.getResultSet();
             }
         }
         if (rset != null) {
-            HashMap<Boolean, Object> map = m_frozenDataMap.get(specificClass);
+            HashMap<ParameterSubtypeEnum, Object> map = m_frozenDataMap.get(specificClass);
             if (map == null) {
                 map = new HashMap<>();
-                map.put(false, rset);
+                map.put(null, rset);
                 m_frozenDataMap.put(specificClass, map);
             }
         }
         
         specificClass =  ResultSummary.class;
-        ResultSummary rsm = (ResultSummary) srcDataBox.getData(false, specificClass);
+        ResultSummary rsm = (ResultSummary) srcDataBox.getData(specificClass);
         if (rsm == null) {
-            DDataset dataset = (DDataset) srcDataBox.getData(false, DDataset.class);
+            DDataset dataset = (DDataset) srcDataBox.getData(DDataset.class);
             if (dataset!= null) {
                 rsm = dataset.getResultSummary();
             }
         }
         if (rsm != null) {
-            HashMap<Boolean, Object> map = m_frozenDataMap.get(specificClass);
+            HashMap<ParameterSubtypeEnum, Object> map = m_frozenDataMap.get(specificClass);
             if (map == null) {
                 map = new HashMap<>();
-                map.put(false, rsm);
+                map.put(null, rsm);
                 m_frozenDataMap.put(specificClass, map);
             }
         }
         
         // register out parameters
+        ParameterList outParameter = new ParameterList();
         Iterator<Class> itClass = m_frozenDataMap.keySet().iterator();
         while (itClass.hasNext()) {
             Class c = itClass.next();
-            GroupParameter outParameter = new GroupParameter();
-            outParameter.addParameter(c, false);
-            registerOutParameter(outParameter);
+            outParameter.addParameter(c);
         }
+        registerOutParameter(outParameter);
 
         
         
     }
 
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
-        HashMap<Boolean, Object> map = m_frozenDataMap.get(parameterType);
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
+        HashMap<ParameterSubtypeEnum, Object> map = m_frozenDataMap.get(parameterType);
         if (map == null) {
             return null;
         }
-        return map.get(getArray);
+        return map.get(parameterSubtype);
     }
     
     @Override

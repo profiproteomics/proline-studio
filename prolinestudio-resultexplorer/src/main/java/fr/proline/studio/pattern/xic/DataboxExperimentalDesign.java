@@ -22,7 +22,8 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.GroupParameter;
+import fr.proline.studio.pattern.ParameterList;
+import fr.proline.studio.pattern.ParameterSubtypeEnum;
 import fr.proline.studio.rsmexplorer.gui.xic.ExperimentalDesignPanel;
 
 
@@ -42,16 +43,16 @@ public class DataboxExperimentalDesign extends AbstractDataBox {
         m_typeName = "Experimental Design";
         m_description = "Experimental Design of the quantitation";
 
-        // Register Possible in parameters
+        // Register in parameters
         // One Dataset 
-        GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(DDataset.class, false); 
+        ParameterList inParameter = new ParameterList();
+        inParameter.addParameter(DDataset.class); 
         registerInParameter(inParameter);
 
 
         // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DDataset.class, false);
+        ParameterList outParameter = new ParameterList();
+        outParameter.addParameter(DDataset.class);
         registerOutParameter(outParameter);
     }
     
@@ -88,7 +89,8 @@ public class DataboxExperimentalDesign extends AbstractDataBox {
                 
                 if (finished) {
                     unregisterTask(taskId); 
-                    propagateDataChanged(DDataset.class); 
+                    addDataChanged(DDataset.class); 
+                    propagateDataChanged();
                 }
             }
         };
@@ -109,13 +111,17 @@ public class DataboxExperimentalDesign extends AbstractDataBox {
     }
    
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType != null) {
-            if (parameterType.equals(DDataset.class)) {
-                return m_dataset;
+            
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+
+                if (parameterType.equals(DDataset.class)) {
+                    return m_dataset;
+                }
             }
         }
-        return super.getData(getArray, parameterType);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
    
     @Override

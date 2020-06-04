@@ -164,7 +164,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
                 public void actionPerformed(ActionEvent e) {
 
 
-                    ResultSet rset = (ResultSet) m_dataBox.getData(false, ResultSet.class);
+                    ResultSet rset = (ResultSet) m_dataBox.getData(ResultSet.class);
                     ResultSet decoyRset = rset.getDecoyResultSet();
                     if (decoyRset == null) {
                         return;
@@ -193,7 +193,8 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
 
             @Override
             protected void filteringDone() {
-                m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                m_dataBox.propagateDataChanged();
                 m_infoToggleButton.updateInfo();
             }
             
@@ -287,7 +288,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
             }
         }
 
-        ResultSet rset = (ResultSet) m_dataBox.getData(false, ResultSet.class);
+        ResultSet rset = (ResultSet) m_dataBox.getData(ResultSet.class);
         if ((m_decoyButton != null) && (rset != null)) {
             m_decoyButton.setEnabled(rset.getDecoyResultSet() != null);
         }
@@ -462,8 +463,14 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
             if (selectionWillBeRestored) {
                 return;
             }
+            
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
 
-            m_dataBox.propagateDataChanged(DProteinMatch.class);
+            m_dataBox.addDataChanged(DProteinMatch.class);
+            m_dataBox.propagateDataChanged();
 
         }
 

@@ -36,9 +36,9 @@ public class DataBoxRsetPeptideFragmentation extends AbstractDataBox {
         m_description = "Fragmentation table of a Peptide";
 
         // Register in parameters
-        GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(DPeptideMatch.class, false);
-        inParameter.addParameter(PeptideFragmentationData.class, false);
+        ParameterList inParameter = new ParameterList();
+        inParameter.addParameter(DPeptideMatch.class);
+        inParameter.addParameter(PeptideFragmentationData.class);
         registerInParameter(inParameter);
 
     }
@@ -53,7 +53,7 @@ public class DataBoxRsetPeptideFragmentation extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        final PeptideFragmentationData fragmentationData = (PeptideFragmentationData) m_previousDataBox.getData(false, PeptideFragmentationData.class);
+        final PeptideFragmentationData fragmentationData = (PeptideFragmentationData) getData(PeptideFragmentationData.class);
         final DPeptideMatch peptideMatch = (fragmentationData != null) ? fragmentationData.getPeptideMatch() : null;
 
         if ((m_previousPeptideMatch == peptideMatch) && (fragmentationData == null)) {

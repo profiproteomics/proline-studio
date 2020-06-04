@@ -50,24 +50,18 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
         m_typeName = "Peptides";
         m_description = "All Peptides of an Identification Summary";
         
-        // Register Possible in parameters
+        // Register in parameters
         // One ResultSummary
-        GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(ResultSummary.class, false);
+        ParameterList inParameter = new ParameterList();
+        inParameter.addParameter(ResultSummary.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
         // One or Multiple PeptideMatch
-        GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DPeptideMatch.class, true);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
-        outParameter.addParameter(PeptideInstance.class, true);
-        registerOutParameter(outParameter);
-       
-        outParameter = new GroupParameter();
-        outParameter.addParameter(ExtendedTableModelInterface.class, false);
+        ParameterList outParameter = new ParameterList();
+        outParameter.addParameter(DPeptideMatch.class);
+        outParameter.addParameter(PeptideInstance.class);
+        outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
 
         
@@ -85,7 +79,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
     @Override
     public void dataChanged() {
         
-        final ResultSummary _rsm = (m_rsm!=null) ? m_rsm : (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
+        final ResultSummary _rsm = (m_rsm!=null) ? m_rsm : (ResultSummary) getData( ResultSummary.class);
 
         // register the link to the Transient Data
         linkCache(_rsm);
@@ -114,7 +108,8 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
                
                 if (finished) {
                     unregisterTask(taskId);
-                    propagateDataChanged(ExtendedTableModelInterface.class);
+                    addDataChanged(ExtendedTableModelInterface.class);
+                    propagateDataChanged();
                 }
             }
         };
@@ -136,33 +131,35 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
     private Long m_previousTaskId = null;
     
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType!= null ) {
-            if (parameterType.equals(PeptideInstance.class)) {
-                return ((RsmPeptidesPanel)getDataBoxPanelInterface()).getSelectedPeptideInstance();
-            }
-            if (parameterType.equals(DPeptideMatch.class)) {
-                PeptideInstance pi = ((RsmPeptidesPanel)getDataBoxPanelInterface()).getSelectedPeptideInstance();
-                if (pi == null) {
-                    return null;
-                }
-                return pi.getTransientData().getBestPeptideMatch();
-            }
-            if (parameterType.equals(ResultSummary.class)) {
-                if (m_rsm != null) {
-                    return m_rsm;
-                }
-            }
-            if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
-            }
-            if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
-            }
             
-            
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+                if (parameterType.equals(PeptideInstance.class)) {
+                    return ((RsmPeptidesPanel) getDataBoxPanelInterface()).getSelectedPeptideInstance();
+                }
+                if (parameterType.equals(DPeptideMatch.class)) {
+                    PeptideInstance pi = ((RsmPeptidesPanel) getDataBoxPanelInterface()).getSelectedPeptideInstance();
+                    if (pi == null) {
+                        return null;
+                    }
+                    return pi.getTransientData().getBestPeptideMatch();
+                }
+                if (parameterType.equals(ResultSummary.class)) {
+                    if (m_rsm != null) {
+                        return m_rsm;
+                    }
+                }
+                if (parameterType.equals(ExtendedTableModelInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
+                }
+                if (parameterType.equals(CrossSelectionInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
+                }
+
+            }
         }
-        return super.getData(getArray, parameterType);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
  
     @Override
@@ -184,7 +181,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
 
     @Override
     public String getImportantOutParameterValue() {
-        DPeptideMatch p = (DPeptideMatch) getData(false, DPeptideMatch.class);
+        DPeptideMatch p = (DPeptideMatch) getData(DPeptideMatch.class);
         if (p != null) {
             Peptide peptide = p.getPeptide();
             if (peptide != null) {

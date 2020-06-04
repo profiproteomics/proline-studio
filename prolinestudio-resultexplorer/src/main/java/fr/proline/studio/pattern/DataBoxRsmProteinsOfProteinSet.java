@@ -46,20 +46,16 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
         m_typeName = "Proteins";
         m_description = "All Proteins of a Protein Set";
         
-        // Register Possible in parameters
-        // One ProteinSet
-        GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(DProteinSet.class, false);
+        // Register in parameters
+        ParameterList inParameter = new ParameterList();
+        inParameter.addParameter(DProteinSet.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
         // One ProteinMatch
-        GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DProteinMatch.class, true);
-        registerOutParameter(outParameter);
-
-        outParameter = new GroupParameter();
-        outParameter.addParameter(ExtendedTableModelInterface.class, true);
+        ParameterList outParameter = new ParameterList();
+        outParameter.addParameter(DProteinMatch.class);
+        outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
        
     }
@@ -74,7 +70,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
     
     @Override
     public void dataChanged() {
-        final DProteinSet proteinSet = (DProteinSet) m_previousDataBox.getData(false, DProteinSet.class);
+        final DProteinSet proteinSet = (DProteinSet) getData(DProteinSet.class);
 
         if (proteinSet == null) {
             ((RsmProteinsOfProteinSetPanel)getDataBoxPanelInterface()).setData(null, null);
@@ -109,7 +105,8 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
                 
                 setLoaded(loadingId);
                 unregisterTask(taskId);
-                propagateDataChanged(ExtendedTableModelInterface.class);
+                addDataChanged(ExtendedTableModelInterface.class);
+                propagateDataChanged();
             }
         };
 
@@ -128,19 +125,22 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
     
     
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType != null) {
-            if (parameterType.equals(DProteinMatch.class)) {
-                return ((RsmProteinsOfProteinSetPanel) getDataBoxPanelInterface()).getSelectedProteinMatch();
-            }
-            if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
-            }
-            if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface)getDataBoxPanelInterface()).getCrossSelectionInterface();
+            
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+                if (parameterType.equals(DProteinMatch.class)) {
+                    return ((RsmProteinsOfProteinSetPanel) getDataBoxPanelInterface()).getSelectedProteinMatch();
+                }
+                if (parameterType.equals(ExtendedTableModelInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
+                }
+                if (parameterType.equals(CrossSelectionInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
+                }
             }
         }
-        return super.getData(getArray, parameterType);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
     
     @Override
@@ -151,7 +151,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
 
     @Override
     public String getImportantOutParameterValue() {
-        DProteinMatch pm = (DProteinMatch) getData(false, DProteinMatch.class);
+        DProteinMatch pm = (DProteinMatch) getData(DProteinMatch.class);
 
         if (pm != null) {
             return pm.getAccession();

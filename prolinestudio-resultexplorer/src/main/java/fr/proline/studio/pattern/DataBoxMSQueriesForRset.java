@@ -18,7 +18,6 @@ package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.dto.DMsQuery;
-import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadMSQueriesTask;
@@ -48,29 +47,17 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
         m_typeName = "MSQueries";
         m_description = "All MSQueries of a Search Result";
         
-        // Register Possible in parameters
-        // One ResultSet
-        GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(ResultSet.class, false);
+        // Register in parameters
+        ParameterList inParameter = new ParameterList();
+        inParameter.addParameter(ResultSet.class);
         registerInParameter(inParameter);
         
         // Register possible out parameters
-        // One or Multiple PeptideMatchId for one msQuery
-        GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DMsQuery.class, false);
-        registerOutParameter(outParameter);
-        
-        
-        outParameter = new GroupParameter();
-        outParameter.addParameter(ResultSet.class, false);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
-        outParameter.addParameter(MsQueryInfoRset.class, false);
-        registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
-        outParameter.addParameter(ExtendedTableModelInterface.class, false);
+        ParameterList outParameter = new ParameterList();
+        outParameter.addParameter(DMsQuery.class);
+        outParameter.addParameter(ResultSet.class);
+        outParameter.addParameter(MsQueryInfoRset.class);
+        outParameter.addParameter(ExtendedTableModelInterface.class);
         registerOutParameter(outParameter);
        
     }
@@ -86,7 +73,7 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
 
     @Override
     public void dataChanged() {
-        final ResultSet _rset =   ((m_rset!=null) ? m_rset : m_previousDataBox == null ? null : (ResultSet) m_previousDataBox.getData(false, ResultSet.class));
+        final ResultSet _rset =   ((m_rset!=null) ? m_rset : (ResultSet) getData(ResultSet.class));
 
         // register the link to the Transient Data
         linkCache(_rset);
@@ -112,7 +99,8 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
                
                 if (finished) {
                     unregisterTask(taskId);
-                    propagateDataChanged(ExtendedTableModelInterface.class);
+                    addDataChanged(ExtendedTableModelInterface.class);
+                    propagateDataChanged();
                 }
             }
         };
@@ -136,26 +124,30 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
     }
     
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
+    public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         if (parameterType != null) {
-            if (parameterType.equals(DMsQuery.class)) {
-                return ((MSQueriesPanel)getDataBoxPanelInterface()).getSelectedMsQuery();
-            }
-            if (parameterType.equals(ResultSet.class)) {
-                return m_rset;
-            }
-            if (parameterType.equals(MsQueryInfoRset.class)) {
-                DMsQuery msq = ((MSQueriesPanel)getDataBoxPanelInterface()).getSelectedMsQuery();
-                return new MsQueryInfoRset(msq, m_rset);
-            }
-            if(parameterType.equals(ExtendedTableModelInterface.class)){
-                return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
-            }
-            if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface)getDataBoxPanelInterface()).getCrossSelectionInterface();
+            
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+
+                if (parameterType.equals(DMsQuery.class)) {
+                    return ((MSQueriesPanel) getDataBoxPanelInterface()).getSelectedMsQuery();
+                }
+                if (parameterType.equals(ResultSet.class)) {
+                    return m_rset;
+                }
+                if (parameterType.equals(MsQueryInfoRset.class)) {
+                    DMsQuery msq = ((MSQueriesPanel) getDataBoxPanelInterface()).getSelectedMsQuery();
+                    return new MsQueryInfoRset(msq, m_rset);
+                }
+                if (parameterType.equals(ExtendedTableModelInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
+                }
+                if (parameterType.equals(CrossSelectionInterface.class)) {
+                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
+                }
             }
         }
-        return super.getData(getArray, parameterType);
+        return super.getDataImpl(parameterType, parameterSubtype);
     }
     
     @Override
@@ -166,7 +158,7 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
 
     @Override
     public String getImportantOutParameterValue() {
-        DMsQuery q = (DMsQuery) getData(false, DMsQuery.class);
+        DMsQuery q = (DMsQuery) getData(DMsQuery.class);
         if (q != null) {
             int id = q.getInitialId();
             return String.valueOf(id);

@@ -111,6 +111,12 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
         featureTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
+                
+                if (e.getValueIsAdjusting()) {
+                    // value is adjusting, so valueChanged will be called again
+                    return;
+                }
+                
                 updateFeatureViewer();
             }
         });

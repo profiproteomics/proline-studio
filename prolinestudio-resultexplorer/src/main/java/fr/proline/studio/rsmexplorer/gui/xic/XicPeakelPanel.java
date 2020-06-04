@@ -151,7 +151,8 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
 
             @Override
             protected void filteringDone() {
-                 m_dataBox.propagateDataChanged(ExtendedTableModelInterface.class);
+                 m_dataBox.addDataChanged(ExtendedTableModelInterface.class);
+                 m_dataBox.propagateDataChanged();
             }
         };
 
@@ -180,7 +181,7 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
                 // prepare window box
                 WindowBox wbox = WindowBoxFactory.getGraphicsWindowBox("Peakel Graphic", m_dataBox, true);
 
-                wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(false, ExtendedTableModelInterface.class));
+                wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(ExtendedTableModelInterface.class));
 
                 // open a window to display the window box
                 DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
@@ -334,9 +335,14 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
             if (selectionWillBeRestored) {
                 return;
             }
+            
+            if (e.getValueIsAdjusting()) {
+                // value is adjusting, so valueChanged will be called again
+                return;
+            }
  
-            m_dataBox.propagateDataChanged(Peakel.class);
-
+            m_dataBox.addDataChanged(Peakel.class);
+            m_dataBox.propagateDataChanged();
         }
         
         public boolean selectPeakel(Long peakelId, String searchText) {

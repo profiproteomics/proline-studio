@@ -17,6 +17,7 @@
 package fr.proline.studio.rsmexplorer.gui.tasklog;
 
 import fr.proline.logparser.gui.ColorPalette;
+import fr.proline.logparser.model.Utility;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
@@ -60,7 +61,7 @@ public class ServerLogFileNameDialog extends DefaultDialog {
 
     protected static final Logger m_logger = LoggerFactory.getLogger(ServerLogFileNameDialog.class);
     private static String LOG_REMOTE_PATH = "./logs/";
-    private static String LOG_LOCAL_PATH = "cortexlogs";
+    private static File LOG_LOCAL_PATH = new File(Utility.WORKING_DATA_DIRECTORY + "/cortexlogs");
     private static String LOG_DEBUG_FILE_NAME = "proline_cortex_debug";
     private static String LOG_TODAY_DEBUG_FILE_NAME = "proline_cortex_debug.txt";
     private static String LOG_FILE_NAME = "proline_cortex_log";
@@ -83,9 +84,9 @@ public class ServerLogFileNameDialog extends DefaultDialog {
         m_fileList = new ArrayList();
         ServerConnectionManager serverConnectionManager = ServerConnectionManager.getServerConnectionManager();
         String host = serverConnectionManager.getServerURL();
-        m_localPath = new File(LOG_LOCAL_PATH);
-        if (!m_localPath.isDirectory()) {
-            m_localPath.mkdir();
+        Utility.init();//create directory entry point
+        if (!LOG_LOCAL_PATH.isDirectory()) {
+            LOG_LOCAL_PATH.mkdir();
         }
         m_localPath = new File(LOG_LOCAL_PATH + "/" + host);
         if (!m_localPath.isDirectory()) {
@@ -251,10 +252,13 @@ public class ServerLogFileNameDialog extends DefaultDialog {
      */
     private void retriveFile(String fileName, boolean isDebugFile, int index) {
         String remoteFilePath = LOG_REMOTE_PATH + fileName;
+        
+        String localFilePath = m_localPath + "/" + fileName;
         if (isDebugFile) {
             remoteFilePath = LOG_REMOTE_PATH + fileName + "." + index + LOG_FILE_SUFFIX;
+            localFilePath= m_localPath + "/" + fileName+ "." + index + LOG_FILE_SUFFIX;
         }
-        File localFile = new File(m_localPath + "/" + fileName);
+       File localFile = new File(localFilePath);
         AbstractJMSCallback callback;
         callback = new AbstractJMSCallback() {
             @Override

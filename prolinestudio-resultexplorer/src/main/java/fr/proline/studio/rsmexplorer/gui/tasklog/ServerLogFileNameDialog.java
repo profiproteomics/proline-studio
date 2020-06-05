@@ -34,8 +34,18 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.time.DateTimeException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -71,6 +81,7 @@ public class ServerLogFileNameDialog extends DefaultDialog {
     private JTextField m_fileNameTxtField;
     private JCheckBox m_debugFileCheckBox;
     private int m_dateAdjust;
+    boolean m_isTodayDebug = false;
     /**
      * localFile
      */
@@ -229,16 +240,54 @@ public class ServerLogFileNameDialog extends DefaultDialog {
             if (fileName.equals(LOG_TODAY_DEBUG_FILE_NAME)) {//today
                 m_isTodayDebug = true;
             }
-            retriveFile(debugFileP, isDebugFile, 0);
+            //retriveFile(debugFileP, isDebugFile, 0);
+            loadLocalFile(debugFileP, isDebugFile, 0, false);
         } else {
             //only one file
-
-            retriveFile(fileName, isDebugFile, -1);
+            //retriveFile(fileName, isDebugFile, -1);
+            loadLocalFile(fileName, isDebugFile, -1, false);
         }
 
         return true;
     }
-    boolean m_isTodayDebug = false;
+
+    private void loadLocalFile(String fileName, boolean isDebugFile, int index, boolean isLaterRetreived) {
+        String localFilePath = m_localPath + "/" + fileName;
+        if (isDebugFile) {
+            localFilePath = m_localPath + "/" + fileName + "." + index + LOG_FILE_SUFFIX;
+        }
+        m_logger.debug("local File path ={}", localFilePath);
+        File localFile = new File(localFilePath);
+        if (localFile.isFile()) {//alreaday downloaded
+            try {
+                BasicFileAttributes attr = Files.readAttributes(localFile.toPath(), BasicFileAttributes.class);
+                Long createTime = attr.creationTime().toMillis();
+                LocalDate fileCreateDate = Instant.ofEpochMilli(createTime).atZone(ZoneId.systemDefault()).toLocalDate();
+                LocalDate logNextDate = getDateInFileName(fileName).plusDays(1);//for one day plus
+                if (fileCreateDate.isAfter(logNextDate)) {//if local file is created at least 1 day later than logDate
+                    m_logger.debug("local File later retrived ok ={}", localFile.getName());
+                    m_fileList.add(localFile);//retrive local file
+                    if (isDebugFile) {
+                        index += 1;
+                        loadLocalFile(fileName, isDebugFile, index, true);
+                    }
+                } else {
+                    retriveFile(fileName, isDebugFile, index);//file retrveied the same day, so we need redo to have the recent logs
+                }
+            } catch (IOException ie) {
+                retriveFile(fileName, isDebugFile, index);//readAttributes exception lead to retrive a good file
+            } catch (DateTimeException dte) {
+                retriveFile(fileName, isDebugFile, index);
+            } finally {
+                return;
+            }
+        }
+        if (!isLaterRetreived) {//if isLaterRetreived, we need not to test the last debug file
+            retriveFile(fileName, isDebugFile, index); //file not found
+        } else {
+            createLogParserDialog(m_fileList);
+        }
+    }
 
     /**
      * We give the remote File path & local path to register files here, when
@@ -251,14 +300,15 @@ public class ServerLogFileNameDialog extends DefaultDialog {
      * @param index
      */
     private void retriveFile(String fileName, boolean isDebugFile, int index) {
+        m_logger.debug("retrive file: {}, isDebugFile={}, index ={}", fileName, isDebugFile, index);
         String remoteFilePath = LOG_REMOTE_PATH + fileName;
-        
+
         String localFilePath = m_localPath + "/" + fileName;
         if (isDebugFile) {
             remoteFilePath = LOG_REMOTE_PATH + fileName + "." + index + LOG_FILE_SUFFIX;
-            localFilePath= m_localPath + "/" + fileName+ "." + index + LOG_FILE_SUFFIX;
+            localFilePath = m_localPath + "/" + fileName + "." + index + LOG_FILE_SUFFIX;
         }
-       File localFile = new File(localFilePath);
+        File localFile = new File(localFilePath);
         AbstractJMSCallback callback;
         callback = new AbstractJMSCallback() {
             @Override
@@ -335,14 +385,12 @@ public class ServerLogFileNameDialog extends DefaultDialog {
      */
     private String getPrefix(String debugFileName) {
         if (debugFileName.contains(LOG_DEBUG_FILE_NAME)) {
-            if (m_debugFileCheckBox.isSelected()) {
-                if (debugFileName.contains(LOG_TODAY_DEBUG_FILE_NAME)) {//today
-                    return LOG_DEBUG_FILE_NAME + "_." + getDateInFileName(0);
-                } else {
-                    String regex = ".\\d+" + LOG_FILE_SUFFIX;
-                    String fileNamePrefix = debugFileName.replaceFirst(regex, "");
-                    return fileNamePrefix;
-                }
+            if (debugFileName.contains(LOG_TODAY_DEBUG_FILE_NAME)) {//today
+                return LOG_DEBUG_FILE_NAME + "_." + getDateInFileName(0);
+            } else {
+                String regex = ".\\d+" + LOG_FILE_SUFFIX;
+                String fileNamePrefix = debugFileName.replaceFirst(regex, "");
+                return fileNamePrefix;
             }
         }
         return null;
@@ -354,6 +402,17 @@ public class ServerLogFileNameDialog extends DefaultDialog {
             cal.add(Calendar.DATE, ajuste * -1);
         }
         return String.format("%tY-%tm-%td", cal, cal, cal);
+    }
+
+    private LocalDate getDateInFileName(String fileName) {
+        final String regex = "(2\\d\\d\\d)-([0]\\d)-([0-3]\\d)";
+        final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+        final Matcher matcher = pattern.matcher(fileName);
+        if (matcher.find()) {
+            LocalDate date = LocalDate.parse(matcher.group(0), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            return date;
+        }
+        return null;//impossible
     }
 
 }

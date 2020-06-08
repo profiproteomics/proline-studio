@@ -516,7 +516,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
 
     }
 
-    public boolean dataModified(ArrayList modificationsList, int reason) {
+    public boolean dataModified(ArrayList modificationsList) {
         HashMap<Long, DMasterQuantProteinSet> modifiedMap = new HashMap<>(modificationsList.size());
         for (int i = 0; i < modificationsList.size(); i++) {
             DMasterQuantProteinSet masterQuantProteinSet = (DMasterQuantProteinSet) modificationsList.get(i);

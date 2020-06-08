@@ -33,6 +33,7 @@ import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.parser.ParserDelegator;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+
 /**
  * utils for String
  *
@@ -166,6 +167,28 @@ public class StringUtils {
         }
     }
 
+    public static String camelCasetoSnakeCase(String camelCaseStr){
+        return camelCaseStr.replaceAll("([a-z])([A-Z])", "$1_$2").toLowerCase(); 
+    }
+
+    public static String snakeCasetoCamelCase(String snakeCaseStr, boolean startUpperCase){
+        StringBuilder sb = new StringBuilder(snakeCaseStr);
+        for (int i = 0; i < sb.length(); i++) {
+            if(startUpperCase && i==0)
+                sb.replace(i,i+1,String.valueOf(Character.toUpperCase(sb.charAt(i))));
+            if (sb.charAt(i) == '_') {
+                sb.deleteCharAt(i);
+                sb.replace(i, i+1, String.valueOf(Character.toUpperCase(sb.charAt(i))));
+            }
+        }
+
+        return sb.toString();
+    }
+    
+    public static String getLabelFromCamelCase(String camelCaseStr){
+        return org.apache.commons.lang3.StringUtils.capitalize(org.apache.commons.lang3.StringUtils.join(org.apache.commons.lang3.StringUtils.splitByCharacterTypeCamelCase(camelCaseStr),org.apache.commons.lang3.StringUtils.SPACE)); 
+    }
+    
     public static String getTimeInMinutes(float seconds, int nbDigit) {
         double min = seconds / 60;
 

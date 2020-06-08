@@ -98,7 +98,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>prolinestudio-Commons</artifactId>
+            <artifactId>prolinestudio-commons</artifactId>
             <version>${project.version}</version>
             <type>nbm</type>
         </dependency>

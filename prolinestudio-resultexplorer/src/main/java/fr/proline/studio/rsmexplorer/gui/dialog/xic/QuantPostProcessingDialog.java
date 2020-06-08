@@ -103,7 +103,7 @@ public class QuantPostProcessingDialog extends DefaultDialog {
                     FilePreferences filePreferences = new FilePreferences(settingsFile, null, "");
 
                     String version = filePreferences.get(QuantPostProcessingParams.PARAM_VERSION_KEY, null);
-                    boolean modifiedPepParamExist = (filePreferences.get(QuantPostProcessingParams.SETTINGS_KEY+"."+QuantPostProcessingParams.DISCARD_MODIFIED_PEPTIDES, null) != null); 
+                    boolean modifiedPepParamExist = (filePreferences.get(QuantPostProcessingParams.SETTINGS_KEY+"."+QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.DISCARD_MODIFIED_PEPTIDES), null) != null); 
                     if(version == null){
                         if(modifiedPepParamExist)
                             version = "2.0";
@@ -112,11 +112,10 @@ public class QuantPostProcessingDialog extends DefaultDialog {
                     }
                     if (!version.equals(QuantPostProcessingParams.CURRENT_VERSION)) {
                         String msg = "Try loading Post Processing parameters ("+ QuantPostProcessingParams.CURRENT_VERSION + ") from file with version "+version+". All parameters may not have been taken into account !";
-                         JOptionPane.showMessageDialog(this, msg, "Load Post Processing parameters error", JOptionPane.ERROR_MESSAGE);
-                    }
-                     
+                        JOptionPane.showMessageDialog(this, msg, "Load Post Processing parameters error", JOptionPane.ERROR_MESSAGE);
+                    }                     
 
-                    m_quantPostProcessingPanel.loadParameters(filePreferences);
+                    m_quantPostProcessingPanel.loadParameters(filePreferences, version);
                 } catch (Exception e) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);
                     setStatus(true, "Parsing of your Settings File failed");

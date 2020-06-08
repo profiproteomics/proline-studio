@@ -152,6 +152,22 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                             }
 
                             // propagate modifications to the previous views
+                            try {
+                                for (DMasterQuantProteinSet masterQuantProteinSet : masterQuantProteinSetModified) {
+                                    Map<String, Object> pmqSerializedMap = masterQuantProteinSet.getSerializedPropertiesAsMap();
+                                    if (pmqSerializedMap != null) {
+                                        pmqSerializedMap.put(DMasterQuantProteinSet.MASTER_QUANT_PROTEINSET_WITH_PEPTIDE_MODIFIED, Boolean.FALSE);
+                                        
+
+                                    }
+                                }
+
+                            } catch (Exception e) {
+
+                            }
+                                
+                                
+                                
                             DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), DMasterQuantProteinSet.class, masterQuantProteinSetModified, DataBoxViewerManager.REASON_PROTEINS_REFINED);
                         }
                     };
@@ -389,7 +405,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
     public void dataModified(ArrayList modificationsList, int reason) {
 
-        boolean modification = m_quantProteinSetTable.dataModified(modificationsList, reason);
+        boolean modification = m_quantProteinSetTable.dataModified(modificationsList);
 
         if (modification) {
             if (reason == DataBoxViewerManager.REASON_PEPTIDE_SUPPRESSED) {
@@ -731,7 +747,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             }
         }
 
-        public boolean dataModified(ArrayList modificationsList, int reason) {
+        public boolean dataModified(ArrayList modificationsList) {
 
             boolean modified = false;
 
@@ -745,7 +761,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 // Update Model (but protein set table must not react to the model update)
                 selectionWillBeRestored(true);
                 try {
-                    modified = ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).dataModified(modificationsList, reason);
+                    modified = ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).dataModified(modificationsList);
                 } finally {
                     selectionWillBeRestored(false);
                 }

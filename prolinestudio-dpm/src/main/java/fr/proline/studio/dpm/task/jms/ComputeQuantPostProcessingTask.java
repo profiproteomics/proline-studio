@@ -39,6 +39,7 @@ import javax.jms.TextMessage;
 public class ComputeQuantPostProcessingTask extends AbstractJMSTask {
 
     private static final String m_serviceName = "proline/dps/msq/PostProcessQuantitation";
+    private static final String m_version = "2.0";
 
     private Long m_pId;
     private Long m_masterQuantChannelId;
@@ -61,7 +62,7 @@ public class ComputeQuantPostProcessingTask extends AbstractJMSTask {
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, m_serviceName);
-        //message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, m_version);
+        message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, m_version);
         addSourceToMessage(message);
         addDescriptionToMessage(message);
 

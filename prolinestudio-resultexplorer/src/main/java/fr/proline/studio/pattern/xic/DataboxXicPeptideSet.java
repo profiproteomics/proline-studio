@@ -199,7 +199,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
             public void run(boolean success, final long taskId, SubTask subTask, boolean finished) {
                 if (subTask == null) {
                     if (!allPeptides && m_quantChannelInfo != null) {
-                        ((XicPeptidePanel) getDataBoxPanelInterface()).setData(taskId, m_proteinSet != null, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideList, m_isXICMode, finished);
+                        ((XicPeptidePanel) getDataBoxPanelInterface()).setData(taskId, m_masterQuantProteinSet, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideList, m_isXICMode, finished);
 
                     } else {
                         AbstractDatabaseCallback mapCallback = new AbstractDatabaseCallback() {
@@ -214,7 +214,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                                 m_quantChannelInfo = new QuantChannelInfo(m_dataset);
                                 getDataBoxPanelInterface().addSingleValue(m_quantChannelInfo);
 
-                                ((XicPeptidePanel) getDataBoxPanelInterface()).setData(taskId, m_proteinSet != null, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideList, m_isXICMode, finished);
+                                ((XicPeptidePanel) getDataBoxPanelInterface()).setData(taskId, m_masterQuantProteinSet, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideList, m_isXICMode, finished);
 
                                 if (finished) {
                                     unregisterTask(task2Id);

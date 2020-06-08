@@ -460,8 +460,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             }
  
             m_dataBox.addDataChanged(Feature.class);
-            m_dataBox.propagateDataChanged();
-            ((DataboxChildFeature) m_dataBox).propagateModelChangeWithoutModifyingZoom();
+            ((DataboxChildFeature) m_dataBox).propagateDataChanged();
 
 
         }

@@ -84,6 +84,10 @@ public class DataboxChildFeature extends AbstractDataBox {
 
         outParameter.addParameter(ExtendedTableModelInterface.class);
         outParameter.addParameter(CrossSelectionInterface.class);
+        
+        outParameter.addParameter(ExtendedTableModelInterface.class, ParameterSubtypeEnum.LIST_DATA);
+        outParameter.addParameter(CrossSelectionInterface.class, ParameterSubtypeEnum.LIST_DATA);
+
 
         registerOutParameter(outParameter);
 
@@ -153,7 +157,9 @@ public class DataboxChildFeature extends AbstractDataBox {
 
                 if (finished) {
                     unregisterTask(taskId);
-                    addDataChanged(ExtendedTableModelInterface.class);
+                    
+                    addDataChanged(ExtendedTableModelInterface.class, ParameterSubtypeEnum.SINGLE_DATA);
+                    addDataChanged(ExtendedTableModelInterface.class, ParameterSubtypeEnum.LIST_DATA);
                     propagateDataChanged();
                 }
 
@@ -410,7 +416,8 @@ public class DataboxChildFeature extends AbstractDataBox {
     
     public void propagateModelChangeWithoutModifyingZoom() {
         m_keepZoom = Boolean.TRUE;
-        addDataChanged(ExtendedTableModelInterface.class);
+        addDataChanged(ExtendedTableModelInterface.class, ParameterSubtypeEnum.SINGLE_DATA);
+        addDataChanged(ExtendedTableModelInterface.class, ParameterSubtypeEnum.LIST_DATA);
         propagateDataChanged();
         m_keepZoom = Boolean.FALSE;
     }

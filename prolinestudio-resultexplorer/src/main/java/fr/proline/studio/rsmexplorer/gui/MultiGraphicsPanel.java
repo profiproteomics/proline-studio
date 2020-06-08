@@ -424,9 +424,11 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
                 XAxis xAxis = m_plotPanel.getXAxis();
                 double minXValue = xAxis.getMinValue();
                 double maxXValue = xAxis.getMaxValue();
+                keepZoom &= (maxXValue>minXValue);
                 YAxis yAxis = m_plotPanel.getYAxis();
                 double minYValue = yAxis.getMinValue();
                 double maxYValue = yAxis.getMaxValue();
+                keepZoom &= (maxYValue>minYValue);
                 
                 m_plotPanel.clearPlots();
                 if (m_isDoubleYAxis) {

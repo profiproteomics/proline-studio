@@ -96,7 +96,12 @@
             <version>${project.version}</version>
             <type>nbm</type>
         </dependency>
-        
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>prolinestudio-Commons</artifactId>
+            <version>${project.version}</version>
+            <type>nbm</type>
+        </dependency>
     </dependencies>
 
     <build>

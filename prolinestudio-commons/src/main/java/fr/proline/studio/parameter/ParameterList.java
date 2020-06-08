@@ -62,11 +62,11 @@ public class ParameterList extends ArrayList<AbstractParameter> {
     public void addBackwardCompatiblePrefix(String backwardCompatiblePrefix) {        
         m_backwardCompatiblePrefixes.add(backwardCompatiblePrefix.replaceAll(" ", "_") + ".");
     }
-    
-//    public List<String> getBackwardCompatibleKeys() {
-//        return m_backwardCompatiblePrefixes;
-//    }
 
+    public List<String> getBackwardCompatiblePrefixes(){
+        return new ArrayList(m_backwardCompatiblePrefixes);
+    }
+    
     public ParametersPanel getPanel() {
 
         if (m_parametersPanel != null) {
@@ -258,28 +258,37 @@ public class ParameterList extends ArrayList<AbstractParameter> {
 
         //JPM.WART ------------
         if (parameterValue == null) {
-            // no value found, for backward compatibility, load the parameter using backwardCompatible prefixes from the backward compatible key 
+            // no value found, for backward compatibility, load the parameter using backwardCompatible prefixes 
             for (String alternativePrefix : m_backwardCompatiblePrefixes) {
-                String newkey = alternativePrefix + suffixKey;                
-                parameterValue = preferences.get(newkey, null);
+                key = alternativePrefix + suffixKey;                
+                parameterValue = preferences.get(key, null);
                 if (parameterValue != null) break;
             }
-        }   
-        //Don't test combinaison of backwardCompatible prefixes + backward compatible key or name as key...
+        }           
         if (parameterValue == null) {
-            // no value found, for backward compatibility, load the parameter from the name as a key (there was a bug, name was used as the key)
-            parameterKey = parameter.getName();
-            suffixKey = parameterKey.replaceAll(" ", "_");
-            key = prefixKey + suffixKey;
+            // no value found, for backward compatibility, load the parameter from the name as a key (there was a bug, name was used as the key)            
+            String newSuffixKey = parameter.getName().replaceAll(" ", "_");
+            key = prefixKey + newSuffixKey;
             parameterValue = preferences.get(key, null);
         }
         if (parameterValue == null) {
             // no value found, for backward compatibility, load the parameter from the backward compatible key 
             for (String alternativeKey : parameter.getBackwardCompatibleKeys()) {
-                suffixKey = alternativeKey.replaceAll(" ", "_");
-                key = prefixKey + suffixKey;
+                String newSuffixKey = alternativeKey.replaceAll(" ", "_");
+                key = prefixKey + newSuffixKey;
                 parameterValue = preferences.get(key, null);
                 if (parameterValue != null) break;
+            }
+        }
+        if (parameterValue == null) {
+            // no value found, for backward compatibility, load the parameter using backwardCompatible prefixes and backward compatible key 
+            for (String alternativePrefix : m_backwardCompatiblePrefixes) {
+               for (String alternativeKey : parameter.getBackwardCompatibleKeys()) {
+                    String newSuffixKey = alternativeKey.replaceAll(" ", "_");
+                    key = alternativePrefix + newSuffixKey;  
+                    parameterValue = preferences.get(key, null);
+                    if (parameterValue != null) break;                    
+                }
             }
         }
         // -------------

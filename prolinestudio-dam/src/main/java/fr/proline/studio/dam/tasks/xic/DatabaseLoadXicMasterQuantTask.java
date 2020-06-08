@@ -1401,8 +1401,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 
         if(postProcessingParam == null)
             isBestIonSummarizingMethod = true; //If no ComputePostProcessing, information may exist anyway 
-        else if(!postProcessingParam.isEmpty() && postProcessingParam.containsKey(QuantPostProcessingParams.ION_ABUNDANCE_SUMMARIZING_METHOD)){
-            String method = postProcessingParam.get(QuantPostProcessingParams.ION_ABUNDANCE_SUMMARIZING_METHOD).toString();
+        else if(!postProcessingParam.isEmpty() && postProcessingParam.containsKey(QuantPostProcessingParams.PEP_ION_ABUNDANCE_SUMMARIZING_METHOD)){
+            String method = postProcessingParam.get(QuantPostProcessingParams.PEP_ION_ABUNDANCE_SUMMARIZING_METHOD).toString();
             isBestIonSummarizingMethod = QuantPostProcessingParams.ION_ABUNDANCE_SUMMARIZING_BEST_ION_METHOD_KEY.equals(method);
         }
         return isBestIonSummarizingMethod;

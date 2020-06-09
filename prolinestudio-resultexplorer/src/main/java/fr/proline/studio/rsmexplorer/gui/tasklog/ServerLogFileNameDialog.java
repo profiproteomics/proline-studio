@@ -64,6 +64,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Dialog to chose a server log file
  *
  * @author KX257079
  */
@@ -76,7 +77,6 @@ public class ServerLogFileNameDialog extends DefaultDialog {
     private static String LOG_TODAY_DEBUG_FILE_NAME = "proline_cortex_debug.txt";
     private static String LOG_FILE_NAME = "proline_cortex_log";
     private static String LOG_FILE_SUFFIX = ".txt";
-    private JPanel m_internalPanel;
     private JComboBox m_dateChooser;
     private JTextField m_fileNameTxtField;
     private JCheckBox m_debugFileCheckBox;
@@ -91,7 +91,7 @@ public class ServerLogFileNameDialog extends DefaultDialog {
     public ServerLogFileNameDialog() {
         super(WindowManager.getDefault().getMainWindow(), Dialog.ModalityType.APPLICATION_MODAL);
         m_dateAdjust = 0;
-        m_internalPanel = initInternalPanel();
+        JPanel m_internalPanel = initInternalPanel();
         m_fileList = new ArrayList();
         ServerConnectionManager serverConnectionManager = ServerConnectionManager.getServerConnectionManager();
         String host = serverConnectionManager.getServerURL();
@@ -113,6 +113,12 @@ public class ServerLogFileNameDialog extends DefaultDialog {
         super.setResizable(true);
     }
 
+    /**
+     * to view log tasks
+     *
+     * @param fileList
+     * @return
+     */
     private JDialog createLogParserDialog(ArrayList<File> fileList) {
 
         JDialog logViewDialog = new JDialog(WindowManager.getDefault().getMainWindow(), "Parse Tasks On The Server", Dialog.ModalityType.APPLICATION_MODAL);
@@ -256,7 +262,7 @@ public class ServerLogFileNameDialog extends DefaultDialog {
         if (isDebugFile) {
             localFilePath = m_localPath + "/" + fileName + "." + index + LOG_FILE_SUFFIX;
         }
-        m_logger.debug("local File path ={}", localFilePath);
+        m_logger.debug("load local File path ={}", localFilePath);
         File localFile = new File(localFilePath);
         if (localFile.isFile()) {//alreaday downloaded
             try {
@@ -277,6 +283,9 @@ public class ServerLogFileNameDialog extends DefaultDialog {
             } catch (IOException ie) {
                 retriveFile(fileName, isDebugFile, index);//readAttributes exception lead to retrive a good file
             } catch (DateTimeException dte) {
+                retriveFile(fileName, isDebugFile, index);
+            } catch (Exception anyE) {
+                m_logger.debug("Exception when loadLocalFile(){}  ", anyE.getMessage());
                 retriveFile(fileName, isDebugFile, index);
             } finally {
                 return;
@@ -405,7 +414,7 @@ public class ServerLogFileNameDialog extends DefaultDialog {
     }
 
     private LocalDate getDateInFileName(String fileName) {
-        final String regex = "(2\\d\\d\\d)-([0]\\d)-([0-3]\\d)";
+        final String regex = "(2\\d\\d\\d)-([0-1]\\d)-([0-3]\\d)";
         final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
         final Matcher matcher = pattern.matcher(fileName);
         if (matcher.find()) {

@@ -253,6 +253,7 @@ public class ServerLogTaskTableModel extends AbstractDecoratedGlobalTableModel<L
     @Override
     public void addFilters(LinkedHashMap filtersMap) {
         filtersMap.put(COLTYPE_ORDER_ID, new IntegerFilter(getColumnName(COLTYPE_ORDER_ID), null, COLTYPE_ORDER_ID));//Integer
+        filtersMap.put(COLTYPE_MESSAGE_ID, new StringDiffFilter(getColumnName(COLTYPE_MESSAGE_ID), null, COLTYPE_MESSAGE_ID));//String
         filtersMap.put(COLTYPE_THREAD_NAME, new StringDiffFilter(getColumnName(COLTYPE_THREAD_NAME), null, COLTYPE_THREAD_NAME));//String
         filtersMap.put(COLTYPE_CALL_SERVICE, new StringDiffFilter(getColumnName(COLTYPE_CALL_SERVICE), null, COLTYPE_CALL_SERVICE));//String
         filtersMap.put(COLTYPE_META_INFO, new StringDiffFilter(getColumnName(COLTYPE_META_INFO), null, COLTYPE_META_INFO));//String

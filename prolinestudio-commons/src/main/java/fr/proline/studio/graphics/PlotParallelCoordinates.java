@@ -43,43 +43,40 @@ import fr.proline.studio.graphics.core.PlotToolbarListenerInterface;
  * @author JM235353
  */
 public class PlotParallelCoordinates extends PlotMultiDataAbstract {
-    
-    
-    private static final Color COLOR_VALUES_NOT_SELECTED = new Color(230,230,230);
-    private static final Color[] GRADIENT_COLORS_VALUES_SELECTED = { new Color(132,90,133) /* purple*/, new Color(255,200,255) /* pink */ };
-    
+
+    private static final Color COLOR_VALUES_NOT_SELECTED = new Color(230, 230, 230);
+    private static final Color[] GRADIENT_COLORS_VALUES_SELECTED = {new Color(132, 90, 133) /* purple*/, new Color(255, 200, 255) /* pink */};
+
     private static final int PAD_AXIS_X = 30;
-    
+
     private ArrayList<ParallelCoordinatesAxis> m_axisList = new ArrayList<>();
-    
-    
+
     private ArrayList<ParameterList> m_parameterListArray = null;
     private final ColorOrGradientParameter m_colorSelectedParameter;
     private final ColorParameter m_colorParameter;
     private final IntegerParameter m_thicknessParameter;
-    
+
     private Color[] m_gradientColors;
     private float[] m_gradientFractions;
     private int m_mainSelectedAxisIndex = 0;
-    
+
     private boolean[] m_selectionArray = null;
     private long[] m_ids;
-    
+
     private boolean[] m_SpecificSelection = null;
-    
+
     public PlotParallelCoordinates(BasePlotPanel plotPanel, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int[] cols) {
         super(plotPanel, PlotType.PARALLEL_COORDINATES_PLOT, compareDataInterface, crossSelectionInterface);
 
         update(cols, null);
 
-        
         // Color parameter
         ParameterList colorParameteList = new ParameterList("Colors");
-       
+
         ColorOrGradient colorOrGradient = new ColorOrGradient();
         colorOrGradient.setColor(CyclicColorPalette.getColor(21, 128));
         float[] fractions = {0.0f, 1.0f};
-        
+
         LinearGradientPaint gradient = ColorOrGradientChooserPanel.getGradientForPanel(GRADIENT_COLORS_VALUES_SELECTED, fractions);
         colorOrGradient.setGradient(gradient);
         colorOrGradient.setGradientSelected();
@@ -89,19 +86,18 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
 
         m_colorParameter = new ColorParameter("UNSELECTED_COLOR_KEY", "Color for unselected values", COLOR_VALUES_NOT_SELECTED);
         colorParameteList.add(m_colorParameter);
-        
+
         m_thicknessParameter = new IntegerParameter("THICKNESS_BORDER_VENNDIAGRAM", "Border Thickness", JSpinner.class, 1, 1, 5);
         colorParameteList.add(m_thicknessParameter);
-        
-        m_parameterListArray = new  ArrayList<>(1);
+
+        m_parameterListArray = new ArrayList<>(1);
         m_parameterListArray.add(colorParameteList);
-        
-         // disable selection buttons
+
+        // disable selection buttons
         m_plotPanel.enableButton(PlotToolbarListenerInterface.BUTTONS.GRID, false);
         m_plotPanel.enableButton(PlotToolbarListenerInterface.BUTTONS.VIEW_ALL_MAP, false);
         //m_plotPanel.enableButton(BasePlotPanel.PlotToolbarListener.BUTTONS.IMPORT_SELECTION, false);
     }
-
 
     @Override
     public boolean needsXAxis() {
@@ -112,12 +108,12 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
     public boolean needsYAxis() {
         return false;
     }
-    
+
     @Override
     public boolean canLogXAxis() {
         return false;
     }
-    
+
     @Override
     public boolean canLogYAxis() {
         return true;
@@ -165,34 +161,32 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
 
     @Override
     public void paint(Graphics2D g, XAxis xAxis, YAxis yAxis) {
-        
+
         if (m_axisList.isEmpty()) {
             return;
         }
-        
+
         int width = m_plotPanel.getWidth();
         int height = m_plotPanel.getHeight();
-        
+
         if ((width != m_previousWidth) || (height != m_previousHeight)) {
             // size of the panel has been changed, we are obliged to update the axis whose range
             // correspond to the size of the panel
             m_plotPanel.updateAxis();
             xAxis.setSize(0, height, width, 0);
             yAxis.setSize(0, 0, 0, height);
-            
+
             m_previousWidth = width;
             m_previousHeight = height;
         }
 
-        
-        
         int nbAxis = m_axisList.size();
-        
+
         int deltaAxis = getAxisDelta(width, nbAxis);
 
         int i = 0;
         for (ParallelCoordinatesAxis axis : m_axisList) {
-            axis.setPosition(PAD_AXIS_X+i*deltaAxis, height);
+            axis.setPosition(PAD_AXIS_X + i * deltaAxis, height);
             i++;
         }
 
@@ -207,28 +201,25 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
             setGradientValues(); // set gradient values if needed
         }
 
-        
         // paint non selected lines
         drawLines(g, plotColor, useGradient, false);
-        
+
         Stroke previousStroke = g.getStroke();
         Integer thickness = (Integer) m_thicknessParameter.getObjectValue();
         if (thickness == null) {
             thickness = 1;
         }
-        g.setStroke( new BasicStroke(thickness));
-        
+        g.setStroke(new BasicStroke(thickness));
+
         // paint selected lines
         drawLines(g, plotColor, useGradient, true);
-        
-        g.setStroke(previousStroke);
-        
 
-        
+        g.setStroke(previousStroke);
+
     }
     private int m_previousWidth = 0;
     private int m_previousHeight = 0;
-    
+
     @Override
     public void paintOver(Graphics2D g) {
         int width = m_plotPanel.getWidth();
@@ -236,16 +227,20 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
             axis.paint(g, width);
         }
     }
-    
+
     private int getAxisDelta(int width, int nbAxis) {
-        return (width-ParallelCoordinatesAxis.AXIS_WIDTH-PAD_AXIS_X*2)/(nbAxis-1);
+        if (nbAxis > 1) {
+            return (width - ParallelCoordinatesAxis.AXIS_WIDTH - PAD_AXIS_X * 2) / (nbAxis - 1);
+        } else {
+            return 0;
+        }
     }
-    
+
     private void drawLines(Graphics2D g, Color plotColor, boolean useGradient, boolean paintSelection) {
-        
+
         ParallelCoordinatesAxis selectedAxis = m_axisList.get(m_mainSelectedAxisIndex);
         ParallelCoordinatesAxis firstAxis = m_axisList.get(0);
-        
+
         int nbRows = m_compareDataInterface.getRowCount();
         for (int index = 0; index < nbRows; index++) {
 
@@ -258,13 +253,13 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
             } else if (m_selectionArray[rowIndex] ^ paintSelection) {
                 continue;
             }
-            
+
             int y1 = firstAxis.getPositionByRowIndex(rowIndex);
             int x1 = firstAxis.getX();
             boolean error1 = firstAxis.isOnError(rowIndex);
             Color normalColor = (paintSelection) ? selectColor(plotColor, useGradient, rowIndex, false) : m_colorParameter.getColor();
             Color errorColor = (paintSelection) ? selectColor(plotColor, useGradient, rowIndex, true) : ERROR_COLOR_NOT_SELECTED;
-            
+
             for (int j = 1; j < m_axisList.size(); j++) {
                 ParallelCoordinatesAxis secondAxis = m_axisList.get(j);
                 int y2 = secondAxis.getPositionByRowIndex(rowIndex);
@@ -282,29 +277,25 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
                 error1 = error2;
             }
 
-            
-            
         }
     }
-    
+
     private void prepareSelectionHashSet() {
         if (m_axisList.isEmpty()) {
             return;
         }
-        
+
         m_SpecificSelection = null;
-        
+
         int nbRows = m_compareDataInterface.getRowCount();
-        
-        
+
         ParallelCoordinatesAxis selectedAxis = m_axisList.get(m_mainSelectedAxisIndex);
-        
+
         for (int index = 0; index < nbRows; index++) {
             boolean selected = true;
             int rowIndex = selectedAxis.getRowIndexFromIndex(index);
             for (ParallelCoordinatesAxis axis : m_axisList) {
 
-                
                 if (!axis.isRowIndexSelected(rowIndex)) {
                     selected = false;
                     break;
@@ -313,24 +304,22 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
             m_selectionArray[rowIndex] = selected;
         }
 
-        
     }
-    
+
     private void setGradientValues() {
-            
+
         ColorOrGradient colorOrGradient = m_colorSelectedParameter.getColor();
         boolean useGradient = !colorOrGradient.isColorSelected();
         if (!useGradient) {
             return;
         }
-        
+
         m_gradientColors = colorOrGradient.getGradient().getColors();
         m_gradientFractions = colorOrGradient.getGradient().getFractions();
 
-
     }
-    
-      private Color selectColor(Color plotColor, boolean useGradient, int rowIndex, boolean error) {
+
+    private Color selectColor(Color plotColor, boolean useGradient, int rowIndex, boolean error) {
         Color c;
         if (useGradient) {
             ParallelCoordinatesAxis selectedAxis = m_axisList.get(m_mainSelectedAxisIndex);
@@ -343,15 +332,15 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         }
         return c;
     }
-    
+
     private Color getColorInGradient(int heightInAxis, int height, boolean error) {
-        double f = ((double)heightInAxis)/((double)height);
+        double f = ((double) heightInAxis) / ((double) height);
         for (int i = 0; i < m_gradientFractions.length - 1; i++) {
             float f1 = m_gradientFractions[i];
             float f2 = m_gradientFractions[i + 1];
             if ((f >= f1) && (f <= f2)) {
                 Color c1 = m_gradientColors[i];
-                Color c2 = (i==0 &&  error) ? ERROR_COLOR : m_gradientColors[i + 1];
+                Color c2 = (i == 0 && error) ? ERROR_COLOR : m_gradientColors[i + 1];
                 double fInInterval = (f - f1) / (f2 - f1);
                 int r = (int) Math.round(((double) (c2.getRed() - c1.getRed())) * fInInterval + (double) c1.getRed());
                 int g = (int) Math.round(((double) (c2.getGreen() - c1.getGreen())) * fInInterval + (double) c1.getGreen());
@@ -366,8 +355,8 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         }
         return error ? ERROR_COLOR : m_gradientColors[m_gradientFractions.length - 1];
     }
-    private static final Color ERROR_COLOR = new Color(192,0,0,128);
-    private static final Color ERROR_COLOR_NOT_SELECTED = new Color(128,0,0,128);
+    private static final Color ERROR_COLOR = new Color(192, 0, 0, 128);
+    private static final Color ERROR_COLOR_NOT_SELECTED = new Color(128, 0, 0, 128);
 
     @Override
     public String getToolTipText(double x, double y) {
@@ -382,35 +371,32 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         m_SpecificSelection = null;
         m_ids = new long[nbRows];
         Arrays.fill(m_selectionArray, Boolean.TRUE);
-        
+
         m_axisList.clear();
-        
+
         for (int i = 0; i < nbRows; i++) {
             m_ids[i] = m_compareDataInterface.row2UniqueId(i);
         }
-        
-        
+
         m_mainSelectedAxisIndex = 0;
         int nbCols = m_cols.length;
-        for (int i=0;i<nbCols;i++) {
+        for (int i = 0; i < nbCols; i++) {
             int colId = m_cols[i];
-            
+
             ParallelCoordinatesAxis axis = new ParallelCoordinatesAxis(i, m_compareDataInterface, colId, this);
             if (i == 0) {
                 axis.displaySelected(true);
             }
             m_axisList.add(axis);
-            
+
         }
-        
-        
+
         //JPM.TODO : remove it ?
         prepareSelectionHashSet();
-        
+
         m_plotPanel.forceUpdateDoubleBuffer();
         m_plotPanel.repaint();
-        
-        
+
     }
 
     @Override
@@ -431,7 +417,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
 
     @Override
     public ArrayList<Long> getSelectedIds() {
-        
+
         ParallelCoordinatesAxis selectedAxis = m_axisList.get(m_mainSelectedAxisIndex);
         int nbRows = m_compareDataInterface.getRowCount();
 
@@ -439,7 +425,6 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         for (int index = 0; index < nbRows; index++) {
             int rowIndex = selectedAxis.getRowIndexFromIndex(index);
 
-            
             if (m_SpecificSelection != null) {
                 if (m_SpecificSelection[rowIndex]) {
                     selection.add(m_ids[rowIndex]);
@@ -465,7 +450,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
 
     @Override
     public ArrayList<ParameterList> getParameters() {
-                
+
         return m_parameterListArray;
     }
 
@@ -484,12 +469,10 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         return null;
     }
 
-    
     @Override
     public String getEnumValueY(int index, boolean fromData, Axis axis) {
-       return null;
+        return null;
     }
-    
 
     @Override
     public MoveableInterface getOverMovable(int x, int y) {
@@ -505,22 +488,21 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
         }
         return null;
     }
-    
-    
+
     @Override
     public JPopupMenu getPopupMenu(double x, double y) {
-        
+
         MoveableInterface over = getOverMovable((int) Math.round(x), (int) Math.round(y));
-        if ( (over == null) || (!(over instanceof ParallelCoordinatesAxis)) || (! ((ParallelCoordinatesAxis) over).isSelected())) {
+        if ((over == null) || (!(over instanceof ParallelCoordinatesAxis)) || (!((ParallelCoordinatesAxis) over).isSelected())) {
             return null;
         }
- 
+
         int countLog = 0;
         int nbNumberAxisSelected = 0;
         boolean stringAxisSelected = false;
         boolean canLog = true;
         for (ParallelCoordinatesAxis axis : m_axisList) {
-            if (axis.isSelected() ) {
+            if (axis.isSelected()) {
                 if (axis.isNumeric()) {
                     nbNumberAxisSelected++;
                     if (axis.isLog()) {
@@ -534,7 +516,7 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
                 }
             }
         }
-        
+
         JMenuItem logAction = new JMenuItem("Log10");
         logAction.addActionListener(new ActionListener() {
             @Override
@@ -544,25 +526,24 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
                         axis.log();
                     }
                 }
-                
+
                 // only main axis is selected after a log
                 ParallelCoordinatesAxis mainAxis = m_axisList.get(m_mainSelectedAxisIndex);
                 m_mainSelectedAxisIndex = -1;
                 selectAxis(mainAxis, false);
-                
+
                 m_plotPanel.repaintUpdateDoubleBuffer();
-                
-                
+
             }
         });
-        logAction.setEnabled((nbNumberAxisSelected>=1) && (!stringAxisSelected) && canLog);
-        
+        logAction.setEnabled((nbNumberAxisSelected >= 1) && (!stringAxisSelected) && canLog);
+
         JMenuItem normalizeAction = new JMenuItem("Normalize");
         normalizeAction.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 double rangeMin = Double.POSITIVE_INFINITY;
-                double rangeMax= -Double.POSITIVE_INFINITY;
+                double rangeMax = -Double.POSITIVE_INFINITY;
                 boolean hasNaN = false;
                 for (ParallelCoordinatesAxis axis : m_axisList) {
                     if (!axis.isSelected()) {
@@ -570,11 +551,11 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
                     }
                     hasNaN |= axis.hasNaN();
                     double min = axis.getRealMinValue();
-                    if (min<rangeMin) {
+                    if (min < rangeMin) {
                         rangeMin = min;
                     }
                     double max = axis.getRealMaxValue();
-                    if (max>rangeMax) {
+                    if (max > rangeMax) {
                         rangeMax = max;
                     }
                 }
@@ -584,16 +565,16 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
                     }
                     axis.setRange(rangeMin, rangeMax, hasNaN);
                 }
-                
+
                 // only main axis is selected after a normalize
                 ParallelCoordinatesAxis mainAxis = m_axisList.get(m_mainSelectedAxisIndex);
                 m_mainSelectedAxisIndex = -1;
                 selectAxis(mainAxis, false);
-                
+
                 m_plotPanel.repaintUpdateDoubleBuffer();
             }
         });
-        normalizeAction.setEnabled((nbNumberAxisSelected>1) && (!stringAxisSelected) && ((countLog==nbNumberAxisSelected) || (countLog==0)) );
+        normalizeAction.setEnabled((nbNumberAxisSelected > 1) && (!stringAxisSelected) && ((countLog == nbNumberAxisSelected) || (countLog == 0)));
 
         JPopupMenu menu = new JPopupMenu();
         menu.add(logAction);
@@ -601,57 +582,55 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
 
         return menu;
     }
-        
+
     @Override
     public void doubleClicked(int x, int y) {
         for (ParallelCoordinatesAxis axis : m_axisList) {
-             MoveableInterface movable = axis.getOverMovable(x, y);
+            MoveableInterface movable = axis.getOverMovable(x, y);
             if (movable != null) {
                 // we are over the axis
                 axis.doubleClicked();
             }
         }
     }
-    
+
     public void selectAxis(ParallelCoordinatesAxis axis, boolean isCtrlOrShiftDown) {
         int id = axis.getId();
         if (m_mainSelectedAxisIndex != id) {
             m_mainSelectedAxisIndex = id;
-            
+
             m_SpecificSelection = null;
-            
+
             if (!isCtrlOrShiftDown) {
 
                 for (ParallelCoordinatesAxis axisCur : m_axisList) {
                     axisCur.displaySelected(false);
                 }
-                
+
             }
             axis.displaySelected(true);
-            
+
             m_plotPanel.repaint();
         }
     }
 
-    
     public void axisMoved(ParallelCoordinatesAxis axis, int deltaX) {
 
         ParallelCoordinatesAxis mainAxis = m_axisList.get(m_mainSelectedAxisIndex);
 
-        
         int nbAxis = m_axisList.size();
         int width = m_plotPanel.getWidth();
         int deltaAxis = getAxisDelta(width, nbAxis);
-        
-        if (Math.abs(deltaX)<deltaAxis) {
+
+        if (Math.abs(deltaX) < deltaAxis) {
             m_plotPanel.repaintUpdateDoubleBuffer();
             return;
         }
-        
-        int axisPosition = axis.getX()+deltaX;
-        
+
+        int axisPosition = axis.getX() + deltaX;
+
         ArrayList<ParallelCoordinatesAxis> m_axisListNew = new ArrayList<>();
-        
+
         boolean axisAdded = false;
         ParallelCoordinatesAxis previousAxis = null;
         for (ParallelCoordinatesAxis nextAxis : m_axisList) {
@@ -665,18 +644,18 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
                     axisAdded = true;
                 }
 
-            } else if ((previousAxis.getX()<axisPosition) && (axisPosition<nextAxis.getX())) {
+            } else if ((previousAxis.getX() < axisPosition) && (axisPosition < nextAxis.getX())) {
                 m_axisListNew.add(axis);
                 axisAdded = true;
             }
             m_axisListNew.add(nextAxis);
-            
+
             previousAxis = nextAxis;
         }
         if (!axisAdded) {
             m_axisListNew.add(axis);
         }
-        
+
         m_axisList = m_axisListNew;
 
         // set the index of the main axis which can have been changed
@@ -689,19 +668,17 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
             m_mainSelectedAxisIndex++;
         }
 
-
-        
         m_plotPanel.repaintUpdateDoubleBuffer();
 
     }
-    
+
     public void axisChanged() {
         prepareSelectionHashSet();
         m_plotPanel.repaintUpdateDoubleBuffer();
     }
-    
+
     public void axisIsMoving() {
         m_plotPanel.repaintUpdateDoubleBuffer();
     }
-    
+
 }

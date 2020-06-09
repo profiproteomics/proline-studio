@@ -900,6 +900,9 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
     @Override
     public Object getDataValueAt(int rowIndex, int columnIndex) {
         Object data = getValueAt(rowIndex, columnIndex);
+        if (columnIndex == COLTYPE_PEPTIDE_ION_STATUS){
+            return ((PepIonStatus)data).name();
+        }
         if (data instanceof LazyData) {
             data = ((LazyData) data).getData();
         }

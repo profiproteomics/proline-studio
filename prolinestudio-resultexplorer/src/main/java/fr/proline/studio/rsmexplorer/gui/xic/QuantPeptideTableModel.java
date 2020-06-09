@@ -1469,7 +1469,10 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
         if (columnIndex == COLTYPE_PEPTIDE_ID) {
             return peptide.getId();
+        }else if (columnIndex ==COLTYPE_SELECTION_LEVEL){
+            return peptide.getSelectionLevel();
         }
+            
         return data;
     }
 

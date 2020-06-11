@@ -79,8 +79,8 @@ public class DataboxMapAlignment extends AbstractDataBox {
         // Register possible out parameters
         ParameterList outParameter = new ParameterList();
         
-        outParameter.addParameter(ExtendedTableModelInterface.class);
-        outParameter.addParameter(CrossSelectionInterface.class);
+        outParameter.addParameter(ExtendedTableModelInterface.class, ParameterSubtypeEnum.LIST_DATA);
+        outParameter.addParameter(CrossSelectionInterface.class, ParameterSubtypeEnum.LIST_DATA);
         
         registerOutParameter(outParameter);
         
@@ -207,7 +207,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
                     ((MapAlignmentPanel) getDataBoxPanelInterface()).setData(m_quantChannelInfo, getCompareDataInterfaceList(), getCrossSelectionInterfaceList());
 
                     if (finished) {
-                        addDataChanged(ExtendedTableModelInterface.class);
+                        addDataChanged(ExtendedTableModelInterface.class, ParameterSubtypeEnum.LIST_DATA);
                         propagateDataChanged();
                     }
                 }

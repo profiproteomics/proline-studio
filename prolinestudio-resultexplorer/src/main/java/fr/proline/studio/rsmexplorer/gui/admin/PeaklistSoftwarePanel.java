@@ -177,7 +177,7 @@ public class PeaklistSoftwarePanel extends JPanel {
 
                             @Override
                             public boolean mustBeCalledInAWT() {
-                                return false;
+                                return true;
                             }
 
                             @Override

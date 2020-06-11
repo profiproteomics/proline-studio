@@ -71,6 +71,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
     private Feature m_masterFeature;
     private List<Feature> m_masterFeatureList;
     private DMasterQuantPeptideIon m_masterQuantPeptideIon;
+    private DQuantitationChannel[] m_quantChannels;
     private List<DFeature> m_childFeatureList;
     private List<Feature> m_childFeatureListForMaster;
     private Feature m_childFeature;
@@ -140,10 +141,11 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
         action = LOAD_FEATURE_FOR_MASTER;
     }
 
-    public void initLoadChildFeatureForPeptideIonWithPeakel(long projectId, DMasterQuantPeptideIon masterQuantPeptideIon, List<DFeature> childFeatureList, List<List<Peakel>> peakelListPerFeature, DDataset dataset) {
+    public void initLoadChildFeatureForPeptideIonWithPeakel(long projectId, DMasterQuantPeptideIon masterQuantPeptideIon, DQuantitationChannel[] quantChannels, List<DFeature> childFeatureList, List<List<Peakel>> peakelListPerFeature, DDataset dataset) {
         init(SUB_TASK_COUNT_CHILD_FEATURE, new TaskInfo("Load Child Features + peakels for PeptideIon " + (masterQuantPeptideIon == null ? "" : (masterQuantPeptideIon.getId())), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
         m_masterQuantPeptideIon = masterQuantPeptideIon;
+        m_quantChannels = quantChannels;
         m_childFeatureList = childFeatureList;
         m_peakelListPerFeature = peakelListPerFeature;
         m_dataset = dataset;
@@ -942,7 +944,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                 }
                 
                 // sort childFeatureList by quantChannel
-                m_childFeatureList.sort(new FeatureQuantIdComparator());
+                m_childFeatureList.sort(new FeatureQuantIdComparator(m_quantChannels));
 
                     
                 
@@ -1063,8 +1065,22 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
     
     private class FeatureQuantIdComparator implements Comparator<DFeature> {
 
+        HashMap<Long, Integer> m_quantitationChannelOrderMap = new HashMap<>();
+        
+        public FeatureQuantIdComparator(DQuantitationChannel[] quantChannels) {
+            int index = 0;
+            for (DQuantitationChannel quantChannel : quantChannels) {
+                m_quantitationChannelOrderMap.put(quantChannel.getId(), index);
+                index++;
+           }
+        }
+        
+        @Override
         public int compare(DFeature a, DFeature b) {
-            return (int) (a.getQuantChannelId()-b.getQuantChannelId());
+            int indexA = m_quantitationChannelOrderMap.get(a.getQuantChannelId());
+            int indexB = m_quantitationChannelOrderMap.get(b.getQuantChannelId());
+            
+            return (int) (indexA-indexB);
         }
     }
 }

@@ -79,26 +79,26 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
     private static final Logger m_logger = LoggerFactory.getLogger(BasePlotPanel.class);
 
-    protected static final Color PANEL_BACKGROUND_COLOR = UIManager.getColor("Panel.background");
+    private static final Color PANEL_BACKGROUND_COLOR = UIManager.getColor("Panel.background");
 
-    protected XAxis m_xAxis = null;
-    protected YAxis m_yAxis = null;
-    protected YAxis m_yAxisRight = null;
+    private XAxis m_xAxis = null;
+    private YAxis m_yAxis = null;
+    private YAxis m_yAxisRight = null;
 
-    protected double[] m_xAxisBounds = {Double.NaN, Double.NaN};
-    protected double[] m_yAxisBounds = {Double.NaN, Double.NaN};
-    protected double[] m_yAxisRightBounds = {Double.NaN, Double.NaN};
+    private double[] m_xAxisBounds = {Double.NaN, Double.NaN};
+    private double[] m_yAxisBounds = {Double.NaN, Double.NaN};
+    private double[] m_yAxisRightBounds = {Double.NaN, Double.NaN};
 
-    protected final ZoomGesture m_zoomGesture = new ZoomGesture();
-    protected final SelectionGestureLasso m_selectionGesture = new SelectionGestureLasso();
+    private final ZoomGesture m_zoomGesture = new ZoomGesture();
+    private final SelectionGestureLasso m_selectionGesture = new SelectionGestureLasso();
     /**
      * manage zoom/unzoom gesture
      */
-    protected final PanAxisGesture m_panAxisGesture = new PanAxisGesture();
+    private final PanAxisGesture m_panAxisGesture = new PanAxisGesture();
     /**
      * manage movable object
      */
-    protected final MoveGesture m_moveGesture = new MoveGesture();
+    private final MoveGesture m_moveGesture = new MoveGesture();
 
     public final static int GAP_FIGURES_Y = 30;
     public final static int GAP_FIGURES_X = 24;
@@ -106,18 +106,18 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     public final static int GAP_AXIS_TITLE = 20;
     public final static int GAP_AXIS_LINE = 5;
     
-    protected BufferedImage m_doubleBuffer = null;
-    protected boolean m_useDoubleBuffering = false;
-    protected boolean m_updateDoubleBuffer = false; 
+    private BufferedImage m_doubleBuffer = null;
+    private boolean m_useDoubleBuffering = false;
+    private boolean m_updateDoubleBuffer = false; 
     
     private BasePlotPanelViewAll m_viewAllPanel = new BasePlotPanelViewAll(this);
 
-    protected boolean m_plotHorizontalGrid = true;
-    protected boolean m_plotVerticalGrid = true;
+    private boolean m_plotHorizontalGrid = true;
+    private boolean m_plotVerticalGrid = true;
     private boolean m_dataLocked = false;
-    protected boolean m_drawCursor = false;
+    private boolean m_drawCursor = false;
 
-    protected List<PlotPanelListener> m_listeners = new ArrayList<>();
+    private List<PlotPanelListener> m_listeners = new ArrayList<>();
 
     private PlotToolbarListenerInterface m_plotToolbarListener = null;
 
@@ -125,24 +125,24 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     private Rectangle m_plotAreaViewAllMap = new Rectangle();
 
     // cursor, show coord.
-    protected String m_coordX = "";
-    protected String m_coordY = "";
-    protected int m_posx;
-    protected int m_posy;
+    private String m_coordX = "";
+    private String m_coordY = "";
+    private int m_posx;
+    private int m_posy;
     /* font coord */
     private final static Font coordFont = new Font("dialog", Font.BOLD, 9);
     private final static Color coordColor = Color.GRAY;
 
-    protected final static NumberFormat nfE = NumberFormat.getNumberInstance();
-    protected final static DecimalFormat formatE = (DecimalFormat) nfE;
-    protected final static NumberFormat nf = NumberFormat.getNumberInstance();
-    protected final static DecimalFormat format = (DecimalFormat) nf;
+    private final static NumberFormat nfE = NumberFormat.getNumberInstance();
+    private final static DecimalFormat formatE = (DecimalFormat) nfE;
+    private final static NumberFormat nf = NumberFormat.getNumberInstance();
+    private final static DecimalFormat format = (DecimalFormat) nf;
 
     // title
-    protected String m_plotTitle = null;
+    private String m_plotTitle = null;
     /* title coord */
-    protected final static Font TITLE_FONT = new Font("dialog", Font.BOLD, 11);
-    protected final static Color TITLE_COLOR = Color.DARK_GRAY;
+    private final static Font TITLE_FONT = new Font("dialog", Font.BOLD, 11);
+    private final static Color TITLE_COLOR = Color.DARK_GRAY;
 
 //    public final FPSUtility fps = new FPSUtility(20);
     //events
@@ -152,9 +152,9 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
      * & after, this ajustment is need only one time before the first paint,
      * each time if the select Axis change item, we should ajust it.
      */
-    protected boolean m_isEnumAxisUpdated = false;
+    private boolean m_isEnumAxisUpdated = false;
 
-    protected MOUSE_MODE m_mouseMode = MOUSE_MODE.NORMAL_MODE;
+    private MOUSE_MODE m_mouseMode = MOUSE_MODE.NORMAL_MODE;
 
     public BasePlotPanel() {
         formatE.applyPattern("0.#####E0");
@@ -198,7 +198,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     /**
      * used to add 0.5 space before first & after last enum label
      */
-    protected void updateEnumAxis() {
+    private void updateEnumAxis() {
 
         XAxis xAxis = this.getXAxis();
         if (!xAxis.hasPlots()) {
@@ -256,8 +256,8 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         boolean displayYAxisAtRight = ((m_yAxisRight != null) && (m_yAxisRight.hasPlots()) && (m_yAxisRight.displayAxis()));
         
         // To let space for Axis Title when it is displayed
-        int gapForAxisXTtile = m_xAxis.displayTitle() ? GAP_AXIS_TITLE : 0;
-        int gapForAxisYTitle = m_yAxis.displayTitle() ? GAP_AXIS_TITLE : 0;
+        int gapForAxisXTtile = getXAxis().displayTitle() ? GAP_AXIS_TITLE : 0;
+        int gapForAxisYTitle = getYAxis().displayTitle() ? GAP_AXIS_TITLE : 0;
 
         int xAxisX = GAP_FIGURES_Y + gapForAxisYTitle + GAP_AXIS_LINE;
         int yAxisWidth = GAP_FIGURES_Y + gapForAxisYTitle + GAP_AXIS_LINE;
@@ -452,7 +452,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
      *
      * @param g
      */
-    protected void paintCoord(Graphics2D g) {
+    private void paintCoord(Graphics2D g) {
         int lx = StringUtils.lenghtOfString(m_coordX, getFontMetrics(coordFont));
         int ly = StringUtils.lenghtOfString(m_coordY, getFontMetrics(coordFont));
         int maxl = Math.max(lx, ly);
@@ -929,14 +929,14 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                 m_xAxis.setSelected(true);
                 m_yAxis.setSelected(false);
                 m_yAxisRight.setSelected(false);
-                JPopupMenu popup = createAxisPopup(m_xAxis, x, y);
+                JPopupMenu popup = createAxisPopup(m_xAxis, null, x, y);
                 popup.show((JComponent) e.getSource(), x, y);
                 mustRepaint = true;
             } else if (m_xAxis != null && m_yAxis != null && m_yAxis.inside(x, y)) {
                 m_xAxis.setSelected(false);
                 m_yAxis.setSelected(true);
                 m_yAxisRight.setSelected(false);
-                JPopupMenu popup = createAxisPopup(m_yAxis, x, y);
+                JPopupMenu popup = createAxisPopup(m_yAxis, getYAxisRight().hasPlots() ? getYAxisRight() : null, x, y);
                 popup.show((JComponent) e.getSource(), x, y);
                 mustRepaint = true;
             } //trigger on m_secondYAxis is not allowed
@@ -1091,46 +1091,179 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     }
 
     public void zoomIn() {
-        zoom(true, true, true, getYAxisRight().hasPlots());
+        zoom(true, true, true, getYAxisRight().hasPlots(), null, null);
     }
 
     public void zoomOut() {
-        zoom(false, true, true, getYAxisRight().hasPlots());
+        zoom(false, true, true, getYAxisRight().hasPlots(), null, null);
     }
 
-    private void zoom(boolean zoomIn, boolean zoomX, boolean zoomY, boolean zoomYRight) {
+    /**
+     * 
+     * @param zoomIn Direction of the zoom
+     * @param zoomX zoom along X
+     * @param zoomY zoom along Y
+     * @param zoomYRight zoom along second Y Axis at right
+     * @param fixedCoordinateX zoom around a fixed X coordinate
+     * @param fixedCoordinateY zoom around a fixed Y coordinate
+     */
+    private void zoom(boolean zoomIn, boolean zoomX, boolean zoomY, boolean zoomYRight, Integer fixedCoordinateX, Integer fixedCoordinateY) {
         if (!getXAxis().hasPlots()) {
             return;
         }
 
         int zoomDirection = (zoomIn) ? -1 : 1;
-        double factor = 0.20;
+        
+        
+        
+        double fixedX = 0;
+        double fixedY = 0;
+        double fixedYRight = 0;
+        if (fixedCoordinateX != null) {
+            if (zoomX) {
+                fixedX = m_xAxis.pixelToValue(fixedCoordinateX);
+            }
+        }
+        if (fixedCoordinateY != null) {
+            if (zoomY) {
+                fixedY = m_yAxis.pixelToValue(fixedCoordinateY);
+            }
+            if (zoomYRight) {
+                fixedYRight = m_yAxisRight.pixelToValue(fixedCoordinateY);
+            }
+        }
+
         
         double oldMinX = m_xAxis.getMinValue();
         double oldMaxX = m_xAxis.getMaxValue();
         if (zoomX) {
-            double xValue = (oldMinX + oldMaxX) / 2;
-            double newXmin = oldMinX + (oldMinX - xValue) * factor * zoomDirection;
-            double newXmax = oldMaxX - (xValue - oldMaxX) * factor * zoomDirection;
-            m_xAxis.setRange(newXmin, newXmax);
+            double newXmin;
+            double newXmax;
+            boolean doZoom = true;
+            if (m_xAxis.isLog()) {
+                double factorMin;
+                double factorMax;
+                if (zoomDirection == 1) {
+                    factorMax = 5;
+                    factorMin = 1d/5;
+                } else {
+                    factorMin = 5;
+                    factorMax = 1d/5;
+                }
+                newXmin = oldMinX * factorMin;
+                newXmax = oldMaxX * factorMax;
+                doZoom = (newXmax/newXmin)>=2; // avoid to zoom too much, in log it can lead to infinite loop
+                
+                
+            } else {
+                double factor = 0.20 * zoomDirection;
+                
+                double xValue = (oldMinX + oldMaxX) / 2;
+                newXmin = oldMinX + (oldMinX - xValue) * factor;
+                newXmax = oldMaxX - (xValue - oldMaxX) * factor;
+            }
+           
+            if (doZoom) {
+                m_xAxis.setRange(newXmin, newXmax);
+                if (fixedCoordinateX != null) {
+                    if (m_xAxis.isLog()) {
+                        int coordinateNowX = m_xAxis.valueToPixel(fixedX);
+                        double mult = m_xAxis.deltaPixelToLogMultValue(fixedCoordinateX - coordinateNowX);
+                        m_xAxis.setRange(m_xAxis.getMinValue() / mult, m_xAxis.getMaxValue() / mult);
+                    } else {
+                        double valueTranslated = m_xAxis.pixelToValue(fixedCoordinateX);
+                        m_xAxis.setRange(newXmin + (fixedX - valueTranslated), newXmax + (fixedX - valueTranslated));
+                    }
+                }
+            }
         }
         
         double oldMinY = m_yAxis.getMinValue();
         double oldMaxY = m_yAxis.getMaxValue();
         if (zoomY) {
-            double yValue = (oldMinY + oldMaxY) / 2;  
-            double newYmin = oldMinY + (oldMinY - yValue) * factor * zoomDirection;
-            double newYmax = oldMaxY - (yValue - oldMaxY) * factor * zoomDirection;
-            m_yAxis.setRange(newYmin, newYmax);
+            double newYmin;
+            double newYmax;
+            boolean doZoom = true;
+            if (m_yAxis.isLog()) {
+                double factorMin;
+                double factorMax;
+                if (zoomDirection == 1) {
+                    factorMax = 5;
+                    factorMin = 1d/5;
+                } else {
+                    factorMin = 5;
+                    factorMax = 1d/5;
+                }
+                newYmin = oldMinY * factorMin;
+                newYmax = oldMaxY * factorMax;
+                doZoom = (newYmax/newYmin)>=2; // avoid to zoom too much, in log it can lead to infinite loop
+                
+            } else {
+                double factor = 0.20 * zoomDirection;
+                
+                double yValue = (oldMinY + oldMaxY) / 2;
+                newYmin = oldMinY + (oldMinY - yValue) * factor;
+                newYmax = oldMaxY - (yValue - oldMaxY) * factor;
+            }
+            if (doZoom) {
+                m_yAxis.setRange(newYmin, newYmax);
+                if (fixedCoordinateY != null) {
+                    if (m_yAxis.isLog()) {
+                        int coordinateNowY = m_yAxis.valueToPixel(fixedY);
+                        double mult = m_yAxis.deltaPixelToLogMultValue(coordinateNowY - fixedCoordinateY);
+                        m_yAxis.setRange(m_yAxis.getMinValue() / mult, m_yAxis.getMaxValue() / mult);
+                    } else {
+                        double valueTranslated = m_yAxis.pixelToValue(fixedCoordinateY);
+                        m_yAxis.setRange(newYmin + (fixedY - valueTranslated), newYmax + (fixedY - valueTranslated));
+                    }
+                }
+            }
+            
         }
-        
+
+        double oldMinYRight = m_yAxisRight.getMinValue();
+        double oldMaxYRight = m_yAxisRight.getMaxValue();
         if (zoomYRight) {
-            double oldMinYRight = m_yAxisRight.getMinValue();
-            double oldMaxYRight = m_yAxisRight.getMaxValue();
-            double yValue = (oldMinYRight + oldMaxYRight) / 2;  
-            double newYmin = oldMinYRight + (oldMinYRight - yValue) * factor * zoomDirection;
-            double newYmax = oldMaxYRight - (yValue - oldMaxYRight) * factor * zoomDirection;
-            m_yAxisRight.setRange(newYmin, newYmax);
+            double newYmin;
+            double newYmax;
+            boolean doZoom = true;
+            if (m_yAxisRight.isLog()) {
+                double factorMin;
+                double factorMax;
+                if (zoomDirection == 1) {
+                    factorMax = 5;
+                    factorMin = 1d/5;
+                } else {
+                    factorMin = 5;
+                    factorMax = 1d/5;
+                }
+                newYmin = oldMinYRight * factorMin;
+                newYmax = oldMaxYRight * factorMax;
+                doZoom = (newYmax/newYmin)>=2; // avoid to zoom too much, in log it can lead to infinite loop
+                
+                
+            } else {
+                double factor = 0.20 * zoomDirection;
+                
+                double yValue = (oldMinYRight + oldMaxY) / 2;
+                newYmin = oldMinYRight + (oldMinYRight - yValue) * factor;
+                newYmax = oldMaxYRight - (yValue - oldMaxYRight) * factor;
+            }
+            
+            if (doZoom) {
+                m_yAxisRight.setRange(newYmin, newYmax);
+
+                if (fixedCoordinateY != null) {
+                    if (m_yAxis.isLog()) {
+                        int coordinateNowY = m_yAxisRight.valueToPixel(fixedYRight);
+                        double mult = m_yAxisRight.deltaPixelToLogMultValue(coordinateNowY - fixedCoordinateY);
+                         m_yAxisRight.setRange(m_yAxisRight.getMinValue() / mult, m_yAxisRight.getMaxValue() / mult);
+                    } else {
+                        double valueTranslated = m_yAxisRight.pixelToValue(fixedCoordinateY);
+                        m_yAxisRight.setRange(newYmin + (fixedYRight - valueTranslated), newYmax + (fixedYRight - valueTranslated));
+                    }
+                }
+            }
         }
 
         
@@ -1151,14 +1284,14 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         m_listeners.add(listener);
     }
 
-    protected void fireMouseClicked(MouseEvent e, double xValue, double yValue) {
+    private void fireMouseClicked(MouseEvent e, double xValue, double yValue) {
         // Notify 
         for (PlotPanelListener l : m_listeners) {
             l.plotPanelMouseClicked(e, xValue, yValue);
         }
     }
 
-    protected void fireUpdateAxisRange(double oldMinX, double oldMaxX, double newMinX, double newMaxX, double oldMinY, double oldMaxY, double newMinY, double newMaxY) {
+    private void fireUpdateAxisRange(double oldMinX, double oldMaxX, double newMinX, double newMaxX, double oldMinY, double oldMaxY, double newMinY, double newMaxY) {
         // Notify 
         double[] oldX = new double[2];
         oldX[0] = oldMinX;
@@ -1366,14 +1499,14 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         }
 
     }
-    protected final StringBuilder m_sbTooltip = new StringBuilder();
+    private final StringBuilder m_sbTooltip = new StringBuilder();
 
-    protected JPopupMenu createAxisPopup(final Axis axis, int x, int y) {
+    private JPopupMenu createAxisPopup(final Axis axis, final YAxis secondAxis, int x, int y) {
 
         boolean isXAxis = axis.equals(m_xAxis);
 
         JPopupMenu popup = new JPopupMenu();
-        popup.add(new LogAction(axis, isXAxis));
+        popup.add(new LogAction(axis, isXAxis, secondAxis));
         popup.add(new TitleAction(axis, (isXAxis) ? null : m_yAxisRight));
         popup.add(new GridAction(axis.equals(m_xAxis)));
         popup.add(new RangeAction(axis, axis.equals(m_xAxis)));
@@ -1453,6 +1586,8 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             return;
         }
         
+        Integer fixedCoordinateX = null;
+        Integer fixedCoordinateY = null;
         boolean zoomX = false;
         boolean zoomY = false;
         boolean zoomYRight  = false;
@@ -1460,16 +1595,27 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             zoomX = true;
             zoomY = true;
             zoomYRight = getYAxisRight().hasPlots();
+            
+            int modifier = e.getModifiers();
+            boolean isCtrlOrShiftDown = ((modifier & (InputEvent.SHIFT_MASK | InputEvent.CTRL_MASK)) != 0);
+            if (isCtrlOrShiftDown) {
+                // zoom around the mouse
+                fixedCoordinateX = e.getX();
+                fixedCoordinateY = e.getY();
+            }
         } else if ((m_xAxis != null) && m_xAxis.inside(e.getX(), e.getY())) {
             //mouse wheel move on Axis X
             zoomX = true;
+            fixedCoordinateX = e.getX();
         } else if ((m_yAxis != null) && m_yAxis.inside(e.getX(), e.getY())) {//mouse wheel move on Axis Y
             zoomY = true;
+            fixedCoordinateY = e.getY();
         } else if ((m_yAxisRight != null) && m_yAxisRight.inside(e.getX(), e.getY())) {//mouse wheel move on second Axis Y
             zoomYRight = true;
+            fixedCoordinateY = e.getY();
         }
         
-        zoom(e.getWheelRotation() == 1, zoomX, zoomY, zoomYRight);
+        zoom(e.getWheelRotation() < 0, zoomX, zoomY, zoomYRight, fixedCoordinateX, fixedCoordinateY);
         
     }
 
@@ -1521,16 +1667,21 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
         private final Axis m_axis;
         private final boolean m_isXAxis;
+        private final Axis m_secondAxis;
 
-        public LogAction(Axis axis, boolean isXAxis) {
+        public LogAction(Axis axis, boolean isXAxis, Axis secondAxis) {
             super(axis.isLog() ? "Linear Axis" : "Log10 Axis");
             m_axis = axis;
             m_isXAxis = isXAxis;
+            m_secondAxis = secondAxis;
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
             m_axis.setLog(!m_axis.isLog());
+            if (m_secondAxis != null) {
+                m_secondAxis.setLog(m_axis.isLog());
+            }
             m_updateDoubleBuffer = true;
             repaint();
         }
@@ -1659,16 +1810,16 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         private int index = 0;
         private long startTime;
 
-        protected FPSUtility(int size) {
+        private FPSUtility(int size) {
             frames = new double[size];
             Arrays.fill(frames, -1.0);
         }
 
-        protected void startFrame() {
+        private void startFrame() {
             startTime = System.currentTimeMillis();
         }
 
-        protected void stopFrame() {
+        private void stopFrame() {
             frames[index++] = System.currentTimeMillis() - startTime;
             index = index % frames.length;
         }
@@ -1690,7 +1841,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         return this.insidePlotArea(x, y, m_xAxis, m_yAxis);
     }
 
-    protected boolean insidePlotArea(int x, int y, XAxis xAxis, YAxis yAxis) {
+    private boolean insidePlotArea(int x, int y, XAxis xAxis, YAxis yAxis) {
         int x1 = xAxis.valueToPixel(xAxis.getMinValue());
         int x2 = xAxis.valueToPixel(xAxis.getMaxValue());
         int y1 = yAxis.valueToPixel(yAxis.getMaxValue());

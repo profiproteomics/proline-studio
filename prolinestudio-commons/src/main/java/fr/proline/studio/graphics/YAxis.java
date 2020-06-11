@@ -288,7 +288,7 @@ public class YAxis extends Axis {
                     m_lastHeight = height;
                 }
             }
-            //draw ticket & it's label
+            // draw ticks & it's label
             int tickX = ((m_isLeftAxis) ? m_lineXStart : m_lineXStart + 4);
             int tickStringX = ((m_isLeftAxis) ? m_lineXStart - stringWidth - 6 : m_lineXStart + 6);
 
@@ -358,13 +358,16 @@ public class YAxis extends Axis {
             if (height > m_lastHeight) {
                 m_lastHeight = height;
             }
-            
+
+            // draw ticks & it's label
+            int tickX = ((m_isLeftAxis) ? m_lineXStart : m_lineXStart + 4);
+            int tickStringX = ((m_isLeftAxis) ? m_lineXStart - stringWidth - 6 : m_lineXStart + 6);
             int delta = pY-valueToPixel(Math.pow(10.0,y)); // used to check that tick is inside the visible area
             if ((pY < previousEndY - m_lastHeight - 2) && (delta == 0)) { // check to avoid to overlap labels
-                g.drawString(s, m_lineXStart - stringWidth - 6, pY + halfAscent);
+                g.drawString(s, tickStringX, pY + halfAscent);
+                g.drawLine(tickX, pY, tickX - 4, pY);
                 previousEndY = pY;
             }
-            g.drawLine(m_lineXStart, pY, m_lineXStart - 4, pY);
 
             y += m_tickSpacing;
             pY = valueToPixel(Math.pow(10, y));
@@ -376,7 +379,7 @@ public class YAxis extends Axis {
             } else {
                 g.setColor(CyclicColorPalette.GRAY_TEXT_LIGHT);
             }
-            int tickX = ((m_isLeftAxis) ? m_lineXStart : m_lineXStart + 3);
+            tickX = ((m_isLeftAxis) ? m_lineXStart : m_lineXStart + 3);
             // display min ticks between two major ticks
             for (int i = 2; i <= 9; i++) {
                 double yMinTick = Math.pow(10, y) * (((double) i) * 0.1d);

@@ -252,6 +252,9 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
     
     @Override
     public String getFullName() {
+        if (m_dataset == null) {
+            return super.getFullName();
+        }
         return m_dataset.getName() + " " + getTypeName();
     }
     

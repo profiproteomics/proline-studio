@@ -107,6 +107,9 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         outParameter.addParameter(CrossSelectionInterface.class);
 
         outParameter.addParameter(SecondAxisTableModelInterface.class);
+        
+        outParameter.addParameter(ExtendedTableModelInterface.class, ParameterSubtypeEnum.LIST_DATA);
+        
 
         registerOutParameter(outParameter);
 
@@ -319,10 +322,15 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
             
             if (parameterSubtype == ParameterSubtypeEnum.PEPTIDES_SELECTION_LIST) {
                 if (parameterType.equals(Integer.class)) {
-                    ArrayList<Long> selection = ((XicPeptidePanel) this.m_panel).getCrossSelectionInterface().getSelection();
+                    CrossSelectionInterface crossSelectionInterface = ((XicPeptidePanel) this.m_panel).getCrossSelectionInterface();
                     ArrayList<Integer> result = new ArrayList();
-                    for (Long l : selection) {
-                        result.add(l.intValue());
+                    if (crossSelectionInterface != null) {
+                        ArrayList<Long> selection = crossSelectionInterface.getSelection();
+                        if (selection != null) {
+                            for (Long l : selection) {
+                                result.add(l.intValue());
+                            }
+                        }
                     }
                     return result;
                 }
@@ -340,6 +348,9 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
 
     @Override
     public String getFullName() {
+        if (m_dataset == null) {
+            return super.getFullName();
+        }
         return m_dataset.getName() + " " + getTypeName();
     }
 

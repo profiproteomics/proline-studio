@@ -46,7 +46,7 @@ public class DataboxGraphics extends AbstractDataBox  {
         // Register in parameters
         // One ResultSummary
         ParameterList inParameter = new ParameterList();
-        inParameter.addParameter(ExtendedTableModelInterface.class);
+        inParameter.addParameter(ExtendedTableModelInterface.class, false);
         registerInParameter(inParameter);
         
     }

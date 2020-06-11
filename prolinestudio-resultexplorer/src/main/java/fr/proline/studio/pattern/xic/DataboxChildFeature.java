@@ -128,30 +128,37 @@ public class DataboxChildFeature extends AbstractDataBox {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                m_peakList = new ArrayList();
-                if (m_childFeatureList != null) {
-                    for (int i = 0; i < m_childFeatureList.size(); i++) {
-                        boolean hasPeak = false;
-                        List<List<Peak>> list = new ArrayList();
-                        if (m_peakelList.size() >= i + 1) {
-                            for (Peakel peakel : m_peakelList.get(i)) {
-                                List<Peak> listPeak = peakel.getPeakList();
-                                if (listPeak.size() > 0) {
-                                    hasPeak = true;
+                if (success) {
+                    m_peakList = new ArrayList();
+                    if (m_childFeatureList != null) {
+                        for (int i = 0; i < m_childFeatureList.size(); i++) {
+                            boolean hasPeak = false;
+                            List<List<Peak>> list = new ArrayList();
+                            if (m_peakelList.size() >= i + 1) {
+                                for (Peakel peakel : m_peakelList.get(i)) {
+                                    List<Peak> listPeak = peakel.getPeakList();
+                                    if (listPeak.size() > 0) {
+                                        hasPeak = true;
+                                    }
+                                    list.add(listPeak);
                                 }
-                                list.add(listPeak);
                             }
+                            m_peakList.add(list);
+                            m_featureHasPeak.add(hasPeak);
                         }
-                        m_peakList.add(list);
-                        m_featureHasPeak.add(hasPeak);
+
                     }
+                    
+                    ((XicFeaturePanel) getDataBoxPanelInterface()).setData(taskId, m_childFeatureList, m_quantChannelInfo, m_featureHasPeak, finished);
+                    
+                } else {
+                    m_childFeatureList = new ArrayList();
+                    m_featureHasPeak = new ArrayList();
+                    m_peakelList = new ArrayList();
+                    m_peakList = new ArrayList();
+                    ((XicFeaturePanel) getDataBoxPanelInterface()).setData(taskId, m_childFeatureList, m_quantChannelInfo, m_featureHasPeak, finished);
                 }
 
-                if (subTask == null) {
-                    ((XicFeaturePanel) getDataBoxPanelInterface()).setData(taskId, m_childFeatureList, m_quantChannelInfo, m_featureHasPeak, finished);
-                } else {
-                    ((XicFeaturePanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
-                }
 
                 setLoaded(loadingId);
 
@@ -181,7 +188,7 @@ public class DataboxChildFeature extends AbstractDataBox {
 
 
 //        task.initLoadChildFeatureForPeptideIonWithPeakel(getProjectId(), m_masterQuantPeptideIon, m_childFeatureList, m_peakelList, allMapAlignments, alnRefMapId, m_quantChannelInfo.getDataset().getMaps());
-        task.initLoadChildFeatureForPeptideIonWithPeakel(getProjectId(), m_masterQuantPeptideIon, m_childFeatureList, m_peakelList, m_quantChannelInfo.getDataset());
+        task.initLoadChildFeatureForPeptideIonWithPeakel(getProjectId(), m_masterQuantPeptideIon, m_quantChannelInfo.getQuantChannels(), m_childFeatureList, m_peakelList, m_quantChannelInfo.getDataset());
         registerTask(task);
 
     }
@@ -373,6 +380,9 @@ public class DataboxChildFeature extends AbstractDataBox {
 
     @Override
     public String getFullName() {
+        if (m_masterQuantPeptideIon == null) {
+            return super.getFullName();
+        }
         return m_masterQuantPeptideIon.getCharge() + " " + getTypeName();
     }
 

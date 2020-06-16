@@ -660,20 +660,25 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
 
         // treats all box one by one (first in, first out)
         // during this operation, new boxes can be added to the queue.
-        while (!queueList.isEmpty()) {
-            AbstractDataBox currentBox = queueList.peekFirst();
-            
-            // log propagateDataChanged
-            if (m_logger.isDebugEnabled()) {
-                logPropagateDataChanged(currentBox);                
-                
-            }
-            
-            currentBox.propagateDataChanged(currentBox.m_dataChangedMap);
-            currentBox.m_dataChangedMap.clear();
-            queueList.pop();
-        }
+        try {
+            while (!queueList.isEmpty()) {
+                AbstractDataBox currentBox = queueList.peekFirst();
 
+                // log propagateDataChanged
+                if (m_logger.isDebugEnabled()) {
+                    logPropagateDataChanged(currentBox);
+
+                }
+
+                currentBox.propagateDataChanged(currentBox.m_dataChangedMap);
+                currentBox.m_dataChangedMap.clear();
+                queueList.pop();
+            }
+        } catch (Exception e) {
+            // if an exception occurs, clean up the queuelist to be restart from clean bases
+            queueList.clear();
+            throw e;
+        }
     }
     private static LinkedList<AbstractDataBox> queueList = new LinkedList();
     

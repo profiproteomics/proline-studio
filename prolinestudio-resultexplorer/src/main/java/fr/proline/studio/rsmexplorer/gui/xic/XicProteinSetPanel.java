@@ -378,7 +378,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             if (m_hideFirstTime) {
                 // allow to change column visibility
                 //m_columnVisibilityButton.setEnabled(true);
-                m_quantProteinSetTable.setSortable(true);
+                
                 // hide the rawAbundance  and selectionLevel columns
                 List<Integer> listIdsToHide = ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
                 for (Integer id : listIdsToHide) {
@@ -387,16 +387,22 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 m_hideFirstTime = false;
             }
 
-            // check if refine panel must be shown
-            try {
-                boolean containsModifier = ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).containsModifiedQuantProteinSet();
-                if (containsModifier) {
-                    // we must show refine panel
-                    m_refineProteinsPanel.setLocation(getX() + 20, getY() + 20);
-                    m_refineProteinsPanel.setVisible(true);
+            
+            if (finished) {
+                
+                m_quantProteinSetTable.setSortable(true);
+                
+                // check if refine panel must be shown
+                try {
+                    boolean containsModifier = ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).containsModifiedQuantProteinSet();
+                    if (containsModifier) {
+                        // we must show refine panel
+                        m_refineProteinsPanel.setLocation(getX() + 20, getY() + 20);
+                        m_refineProteinsPanel.setVisible(true);
+                    }
+                } catch (Exception e) {
+                    // should never happen
                 }
-            } catch (Exception e) {
-                // should never happen
             }
         }
 
@@ -418,16 +424,23 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
     public void dataUpdated(SubTask subTask, boolean finished) {
         m_quantProteinSetTable.dataUpdated(subTask, finished);
+        
+
         if (m_hideFirstTime) {
             // allow to change column visibility
             //m_columnVisibilityButton.setEnabled(true);
-            m_quantProteinSetTable.setSortable(true);
+            //m_quantProteinSetTable.setSortable(true);
             // hide the rawAbundance  and selectionLevel columns
             List<Integer> listIdsToHide = ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
             for (Integer id : listIdsToHide) {
                 m_quantProteinSetTable.getColumnExt(m_quantProteinSetTable.convertColumnIndexToView(id)).setVisible(false);
             }
             m_hideFirstTime = false;
+
+        }
+        
+        if (finished) {
+            m_quantProteinSetTable.setSortable(true);
         }
     }
 

@@ -487,7 +487,13 @@ public class XicPeptideIonPanel extends HourglassPanel implements DataBoxPanelIn
             }
 
             // convert according to the sorting
-            selectedRow = convertRowIndexToModel(selectedRow);
+            try {
+                selectedRow = convertRowIndexToModel(selectedRow);
+            } catch (Exception e) {
+                // for unknow reason, an exception can occures due to the fact that the sorter is not ready
+                m_loggerProline.debug("Exception catched as a wart : " + e.getMessage());
+                return null;
+            }
             selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
 
             // Retrieve PeptideIon selected

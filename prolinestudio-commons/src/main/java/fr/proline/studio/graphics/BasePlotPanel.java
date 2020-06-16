@@ -1591,13 +1591,15 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         boolean zoomX = false;
         boolean zoomY = false;
         boolean zoomYRight  = false;
+        
+        int modifier = e.getModifiers();
+        boolean isCtrlOrShiftDown = ((modifier & (InputEvent.SHIFT_MASK | InputEvent.CTRL_MASK)) != 0);
+            
         if (insidePlotArea(e.getX(), e.getY())) {
             zoomX = true;
             zoomY = true;
             zoomYRight = getYAxisRight().hasPlots();
-            
-            int modifier = e.getModifiers();
-            boolean isCtrlOrShiftDown = ((modifier & (InputEvent.SHIFT_MASK | InputEvent.CTRL_MASK)) != 0);
+
             if (isCtrlOrShiftDown) {
                 // zoom around the mouse
                 fixedCoordinateX = e.getX();
@@ -1606,13 +1608,22 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         } else if ((m_xAxis != null) && m_xAxis.inside(e.getX(), e.getY())) {
             //mouse wheel move on Axis X
             zoomX = true;
-            fixedCoordinateX = e.getX();
+            if (isCtrlOrShiftDown) {
+                // zoom around the mouse
+                fixedCoordinateX = e.getX();
+            }
         } else if ((m_yAxis != null) && m_yAxis.inside(e.getX(), e.getY())) {//mouse wheel move on Axis Y
             zoomY = true;
-            fixedCoordinateY = e.getY();
+            if (isCtrlOrShiftDown) {
+                // zoom around the mouse
+                fixedCoordinateY = e.getY();
+            }
         } else if ((m_yAxisRight != null) && m_yAxisRight.inside(e.getX(), e.getY())) {//mouse wheel move on second Axis Y
             zoomYRight = true;
-            fixedCoordinateY = e.getY();
+            if (isCtrlOrShiftDown) {
+                // zoom around the mouse
+                fixedCoordinateY = e.getY();
+            }
         }
         
         zoom(e.getWheelRotation() < 0, zoomX, zoomY, zoomYRight, fixedCoordinateX, fixedCoordinateY);

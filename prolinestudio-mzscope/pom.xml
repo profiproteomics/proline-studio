@@ -74,6 +74,7 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>18.0</version>
+            <!-- ALERT Upgrade com.google.guava:guava to version 24.1.1 or later. For example:  -->
             <type>jar</type>
         </dependency>
         

@@ -346,7 +346,7 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
         if ((peptides != null) && (peptides.size() > 0)) {
             m_quantPeptideTable.getSelectionModel().setSelectionInterval(0, 0);
             m_markerContainerPanel.setMaxLineNumber(peptides.size());
-
+            m_markerContainerPanel.removeAllMarkers();
         }
 
         m_infoToggleButton.updateInfo();

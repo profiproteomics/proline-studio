@@ -420,30 +420,24 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
 
         ArrayList<Long> selectionList = new ArrayList<>();
 
-        try {
+        ListSelectionModel selModel = getSelectionModel();
+        AbstractTableModel model = (AbstractTableModel) getModel();
 
-            ListSelectionModel selModel = getSelectionModel();
-            AbstractTableModel model = (AbstractTableModel) getModel();
-
-            if (model instanceof ExtendedTableModelInterface) {
-                ExtendedTableModelInterface compareDataInterface = (ExtendedTableModelInterface) model;
-                for (int i = 0; i < model.getRowCount(); i++) {
-                    int row = convertRowIndexToView(i);
-                    if (selModel.isSelectedIndex(row)) {
-                        selectionList.add(compareDataInterface.row2UniqueId(i));
-                    }
-                }
-            } else {
-                for (int i = 0; i < model.getRowCount(); i++) {
-                    int row = convertRowIndexToView(i);
-                    if (selModel.isSelectedIndex(row)) {
-                        selectionList.add((long) i);
-                    }
+        if (model instanceof ExtendedTableModelInterface) {
+            ExtendedTableModelInterface compareDataInterface = (ExtendedTableModelInterface) model;
+            for (int i = 0; i < model.getRowCount(); i++) {
+                int row = convertRowIndexToView(i);
+                if (selModel.isSelectedIndex(row)) {
+                    selectionList.add(compareDataInterface.row2UniqueId(i));
                 }
             }
-        } catch (Exception e) {
-            // for unknow reason, an exception can occures due to the fact that the sorter is not ready
-            m_loggerProline.debug("Exception catched as a wart : "+e.getMessage());
+        } else {
+            for (int i = 0; i < model.getRowCount(); i++) {
+                int row = convertRowIndexToView(i);
+                if (selModel.isSelectedIndex(row)) {
+                    selectionList.add((long) i);
+                }
+            }
         }
 
         return selectionList;

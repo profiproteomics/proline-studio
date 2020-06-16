@@ -204,7 +204,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
     public boolean fetchData() {
         if (action == LOAD_MAP_FOR_XIC) {
             if (needToFetch()) {
-                DatabaseLoadXicMasterQuantTask.fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
+                m_taskError = DatabaseLoadXicMasterQuantTask.fetchDataQuantChannels(m_projectId, m_dataset);
                 return fetchDataMainTaskMapForXic();
             }
         } else if (action == LOAD_PEAKELS_FOR_MAP) {
@@ -242,7 +242,9 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
             }
         } else if (action == LOAD_ALIGNMENT_FOR_XIC) {
             if (needToFetch()) {
-                DatabaseLoadXicMasterQuantTask.fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
+                if (m_dataset.getMasterQuantitationChannels() == null || m_dataset.getMasterQuantitationChannels().isEmpty()) {
+                    m_taskError = DatabaseLoadXicMasterQuantTask.fetchDataQuantChannels(m_projectId, m_dataset);
+                }
                 return fetchDataMainTaskAlignmentForXic();
             }
         }
@@ -943,11 +945,38 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                     }
                 }
                 
-                // sort childFeatureList by quantChannel
-                m_childFeatureList.sort(new FeatureQuantIdComparator(m_quantChannels));
+                // prepare map to sort by quantChannel
+                HashMap<Long, Integer> m_quantitationChannelOrderMap = new HashMap<>();
 
-                    
-                
+                int index = 0;
+                for (DQuantitationChannel quantChannel : m_quantChannels) {
+                    m_quantitationChannelOrderMap.put(quantChannel.getId(), index);
+                    index++;
+                }
+   
+                /* Bubble Sort, to sort features according to quant channel and m_peakelListPerFeature in the same time */
+                int size = m_childFeatureList.size();
+                for (int n = 0; n < size; n++) {
+                    for (int m = 0; m < (size-1) - n; m++) {
+                        
+                        DFeature featureA = m_childFeatureList.get(m);
+                        DFeature featureB = m_childFeatureList.get(m+1);
+                        int indexA = m_quantitationChannelOrderMap.get(featureA.getQuantChannelId());
+                        int indexB = m_quantitationChannelOrderMap.get(featureB.getQuantChannelId());
+                        
+                        if (indexA-indexB>0) {
+                            // swap features a and b
+                            m_childFeatureList.set(m, featureB);
+                            m_childFeatureList.set(m+1, featureA);
+                            
+                            // swap in the same time elements in m_peakelListPerFeature
+                            List<Peakel> peakelListA = m_peakelListPerFeature.get(m);
+                            List<Peakel> peakelListB = m_peakelListPerFeature.get(m+1);
+                            m_peakelListPerFeature.set(m, peakelListB);
+                            m_peakelListPerFeature.set(m+1, peakelListA);
+                        }
+                    }
+                }
             }
             entityManagerLCMS.getTransaction().commit();
 //            m_logger.info("fetchDataMainTaskChildFeatureForPeptideIonWithPeakels took "+(System.currentTimeMillis() - start)+" ms");
@@ -972,11 +1001,21 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
      * @return
      */
     private boolean fetchDataMainTaskAlignmentForXic() {
-        EntityManager entityManagerLCMS = DStoreCustomPoolConnectorFactory.getInstance().getLcMsDbConnector(m_projectId).createEntityManager();
+        m_taskError = fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
+        
+        // set priority as low for the possible sub tasks
+        m_defaultPriority = Priority.LOW;
+        m_currentPriority = Priority.LOW;
+        
+        return (m_taskError == null);
+    }
+    public static TaskError fetchDataMainTaskAlignmentForXic(Long projectId, DDataset dataset) {
+        
+        EntityManager entityManagerLCMS = DStoreCustomPoolConnectorFactory.getInstance().getLcMsDbConnector(projectId).createEntityManager();
         try {
             entityManagerLCMS.getTransaction().begin();
-            if (m_dataset != null && m_dataset.getMasterQuantitationChannels() != null) {
-                List<DMasterQuantitationChannel> listMasterQuantitationChannels = m_dataset.getMasterQuantitationChannels();
+            if (dataset != null && dataset.getMasterQuantitationChannels() != null) {
+                List<DMasterQuantitationChannel> listMasterQuantitationChannels = dataset.getMasterQuantitationChannels();
                 for (DMasterQuantitationChannel masterQuantitationChannel : listMasterQuantitationChannels) {
                     List<DQuantitationChannel> listQuantChannels = masterQuantitationChannel.getQuantitationChannels();
                     if (listQuantChannels != null && !listQuantChannels.isEmpty()) {
@@ -1005,7 +1044,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                         Iterator<Object[]> it2 = rl.iterator();
                         while (it2.hasNext()) { // should be one
                             Object[] res = it2.next();
-                            m_dataset.setAlnReferenceMapId((Long) res[0]);
+                            dataset.setAlnReferenceMapId((Long) res[0]);
                             mapSetId = (Long) res[1];
                         }
 
@@ -1019,7 +1058,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                         for (MapAlignment ma : rs2) {
                             allMapAlignmentList.add(ma);
                         }
-                        m_dataset.setMapAlignments(allMapAlignmentList);
+                        dataset.setMapAlignments(allMapAlignmentList);
                         // all processed map -- order by quant channel
                         String orderBy = " case pm.id ";
                         int index = 1;
@@ -1041,46 +1080,25 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                                 Hibernate.initialize(pm.getRawMaps());
                                 allMaps.add(pm);
                             }
-                            m_dataset.setMaps(allMaps);
+                            dataset.setMaps(allMaps);
                         }
                     }
                 }
             }
             entityManagerLCMS.getTransaction().commit();
         } catch (Exception e) {
-            m_logger.error(getClass().getSimpleName() + " failed", e);
-            m_taskError = new TaskError(e);
+            m_logger.error("fetchDataMainTaskAlignmentForXic failed", e);
+            TaskError taskError = new TaskError(e);
             entityManagerLCMS.getTransaction().rollback();
-            return false;
+            return taskError;
         } finally {
             entityManagerLCMS.close();
         }
 
-        // set priority as low for the possible sub tasks
-        m_defaultPriority = Priority.LOW;
-        m_currentPriority = Priority.LOW;
-        return true;
-    }
-    
-    
-    private class FeatureQuantIdComparator implements Comparator<DFeature> {
 
-        HashMap<Long, Integer> m_quantitationChannelOrderMap = new HashMap<>();
-        
-        public FeatureQuantIdComparator(DQuantitationChannel[] quantChannels) {
-            int index = 0;
-            for (DQuantitationChannel quantChannel : quantChannels) {
-                m_quantitationChannelOrderMap.put(quantChannel.getId(), index);
-                index++;
-           }
-        }
-        
-        @Override
-        public int compare(DFeature a, DFeature b) {
-            int indexA = m_quantitationChannelOrderMap.get(a.getQuantChannelId());
-            int indexB = m_quantitationChannelOrderMap.get(b.getQuantChannelId());
-            
-            return (int) (indexA-indexB);
-        }
+        return null;
     }
+    
+    
+
 }

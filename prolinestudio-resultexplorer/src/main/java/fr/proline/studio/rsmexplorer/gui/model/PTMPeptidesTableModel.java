@@ -208,7 +208,6 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
         setDefaultColumnToHide();
         m_rendererMap.clear();
         fireTableStructureChanged();
-        fireTableDataChanged();
     }
     
     private void setDefaultColumnToHide(){

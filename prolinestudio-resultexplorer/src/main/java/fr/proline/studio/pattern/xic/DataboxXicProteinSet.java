@@ -139,33 +139,16 @@ public class DataboxXicProteinSet extends AbstractDataBox {
             public void run(boolean success, final long taskId, SubTask subTask, boolean finished) {
                 if (subTask == null) {
 
-                    AbstractDatabaseCallback mapCallback = new AbstractDatabaseCallback() {
+                    m_quantChannelInfo = new QuantChannelInfo(m_dataset);
+                    getDataBoxPanelInterface().addSingleValue(m_quantChannelInfo);
 
-                        @Override
-                        public boolean mustBeCalledInAWT() {
-                            return true;
-                        }
+                    // proteins set 
+                    //DMasterQuantProteinSet[] masterQuantProteinSetArray = new DMasterQuantProteinSet[m_masterQuantProteinSetList.size()];
+                    //m_masterQuantProteinSetList.toArray(masterQuantProteinSetArray);
+                    ((XicProteinSetPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantProteinSetList, m_isXICMode, finished);
 
-                        @Override
-                        public void run(boolean success, long task2Id, SubTask subTask, boolean finished) {
-                            m_quantChannelInfo = new QuantChannelInfo(m_dataset);
-                            getDataBoxPanelInterface().addSingleValue(m_quantChannelInfo);
-
-                            // proteins set 
-                            //DMasterQuantProteinSet[] masterQuantProteinSetArray = new DMasterQuantProteinSet[m_masterQuantProteinSetList.size()];
-                            //m_masterQuantProteinSetList.toArray(masterQuantProteinSetArray);
-                            ((XicProteinSetPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantProteinSetList, m_isXICMode, finished);
-                            if (finished) {
-                                unregisterTask(task2Id);
-                                addDataChanged(ExtendedTableModelInterface.class, null);  //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
-                                propagateDataChanged();
-                            }
-                        }
-                    };
-                    // ask asynchronous loading of data
-                    DatabaseLoadLcMSTask taskMap = new DatabaseLoadLcMSTask(mapCallback);
-                    taskMap.initLoadAlignmentForXic(getProjectId(), m_dataset);
-                    registerTask(taskMap);
+                    addDataChanged(ExtendedTableModelInterface.class, null);  //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
+                    propagateDataChanged();
 
                 } else {
                     ((XicProteinSetPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);

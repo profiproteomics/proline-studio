@@ -135,27 +135,8 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                     if (!allPeptides) {
                         ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideIonList, m_isXICMode, finished);
                     } else {
-                        AbstractDatabaseCallback mapCallback = new AbstractDatabaseCallback() {
-                            
-                            @Override
-                            public boolean mustBeCalledInAWT() {
-                                return true;
-                            }
-                            
-                            @Override
-                            public void run(boolean success, long task2Id, SubTask subTask, boolean finished) {
-                                m_quantChannelInfo = new QuantChannelInfo(m_dataset);
-                                ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideIonList, m_isXICMode, finished);
-                                
-                                if (finished) {
-                                    unregisterTask(task2Id);
-                                }
-                            }
-                        };
-                        // ask asynchronous loading of data
-                        DatabaseLoadLcMSTask taskMap = new DatabaseLoadLcMSTask(mapCallback);
-                        taskMap.initLoadAlignmentForXic(getProjectId(), m_dataset);
-                        registerTask(taskMap);
+                        m_quantChannelInfo = new QuantChannelInfo(m_dataset);
+                        ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideIonList, m_isXICMode, finished);
                     }
                     
                 } else {

@@ -278,13 +278,17 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
     public boolean fetchData() {
         if (action == LOAD_QUANT_CHANNELS_FOR_XIC) {
             if (needToFetch()) {
-                return fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
+                m_taskError = fetchDataQuantChannels(m_projectId, m_dataset);
+                return (m_taskError == null);
             }
         } else if (action == LOAD_PROTEIN_SET_FOR_XIC) {
             if (needToFetch()) {
                 // first data are fetched
                 if (m_dataset.getMasterQuantitationChannels() == null || m_dataset.getMasterQuantitationChannels().isEmpty()) {
-                    fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
+                    m_taskError = fetchDataQuantChannels(m_projectId, m_dataset);
+                }
+                if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
+                    m_taskError = DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
                 }
                 return fetchDataProteinMainTask();
             } else {
@@ -296,7 +300,10 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             if (needToFetch()) {
                 // first data are fetched
                 if (m_dataset.getMasterQuantitationChannels() == null || m_dataset.getMasterQuantitationChannels().isEmpty()) {
-                    fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
+                    m_taskError = fetchDataQuantChannels(m_projectId, m_dataset);
+                }
+                if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
+                    DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
                 }
                 return fetchDataPeptideMainTask(m_xic, null);
             } else {
@@ -308,6 +315,9 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             if (needToFetch()) {
                 // first data are fetched
                 //fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
+                if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
+                    m_taskError = DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
+                }
                 return fetchDataPeptideForProteinSetMainTask(m_xic);
             }
 
@@ -315,6 +325,9 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             if (needToFetch()) {
                 // first data are fetched
                 //fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
+                if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
+                    m_taskError = DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
+                }
                 return fetchDataPeptideMainTask(m_xic, m_peptideInstanceIdArray);
             } else {
                 // fetch data of SubTasks
@@ -324,7 +337,10 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             if (needToFetch()) {
                 // first data are fetched
                 if (m_dataset.getMasterQuantitationChannels() == null || m_dataset.getMasterQuantitationChannels().isEmpty()) {
-                    fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
+                    m_taskError = fetchDataQuantChannels(m_projectId, m_dataset);
+                }
+                if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
+                    m_taskError = DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
                 }
                 return fetchDataPeptideIonMainTask();
             } else {
@@ -336,6 +352,9 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             if (needToFetch()) {
                 // first data are fetched
                 //fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
+                if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
+                    m_taskError = DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
+                }
                 return fetchDataPeptideIonForPeptideMainTask();
             }
 
@@ -422,7 +441,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
      * @param taskError
      * @return
      */
-    public static boolean fetchDataQuantChannels(Long projectId, DDataset dataset, TaskError taskError) {
+    public static TaskError fetchDataQuantChannels(Long projectId, DDataset dataset) {
         long start = System.currentTimeMillis();
         EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
         EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(projectId).createEntityManager();
@@ -552,7 +571,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             //logger.error(getClass().getSimpleName() + " failed", e);
             String trace2String = Arrays.stream(e.getStackTrace()).map(es -> es.toString()).collect(Collectors.joining("\n"));
             m_logger.error("fetchDataQuantChannels failed: {}, \n StackTrace:\n{}", e, trace2String);
-            taskError = new TaskError(e);
+            TaskError taskError = new TaskError(e);
             try {
                 entityManagerMSI.getTransaction().rollback();
                 entityManagerUDS.getTransaction().rollback();
@@ -560,13 +579,13 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             } catch (Exception rollbackException) {
                 m_logger.error(DatabaseLoadXicMasterQuantTask.class.getSimpleName() + " failed : potential network problem", rollbackException);
             }
-            return false;
+            return taskError;
         } finally {
             entityManagerLCMS.close();
             entityManagerMSI.close();
             entityManagerUDS.close();
         }
-        return true;
+        return null;
     }
 
     static private List<DQuantitationChannel> createDQuantChannelsForMQC(Long projectId, MasterQuantitationChannel masterQuantitationChannel, EntityManager entityManagerMSI, EntityManager entityManagerUDS, EntityManager entityManagerLCMS) {

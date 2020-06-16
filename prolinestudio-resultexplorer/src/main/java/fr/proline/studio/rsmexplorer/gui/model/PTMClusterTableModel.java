@@ -446,10 +446,12 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
             structChanged = true;
         }
         
-    fireTableDataChanged();
-    if(structChanged)
+    
+    if (structChanged) {
         fireTableStructureChanged();
-
+    } else {
+        fireTableDataChanged();
+    }
   }
 
   public PTMCluster getProteinPTMCluster(int i) {

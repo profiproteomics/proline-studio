@@ -912,7 +912,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             m_dataset.setQuantitationMethod(quantMethodDB);
             m_dataset.setDescription(datasetDB.getDescription());
 
-            DatabaseLoadXicMasterQuantTask.fetchDataQuantChannels(m_project.getId(), m_dataset, m_taskError);
+            m_taskError = DatabaseLoadXicMasterQuantTask.fetchDataQuantChannels(m_project.getId(), m_dataset);
 
             // load ObjectTree linked to the dataset
             setDDatasetQuantProperties(m_dataset, datasetDB.getObjectTreeIdByName(), entityManagerUDS);

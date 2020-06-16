@@ -205,29 +205,12 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                         ((XicPeptidePanel) getDataBoxPanelInterface()).setData(taskId, m_masterQuantProteinSet, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideList, m_isXICMode, finished);
 
                     } else {
-                        AbstractDatabaseCallback mapCallback = new AbstractDatabaseCallback() {
 
-                            @Override
-                            public boolean mustBeCalledInAWT() {
-                                return true;
-                            }
+                        m_quantChannelInfo = new QuantChannelInfo(m_dataset);
+                        getDataBoxPanelInterface().addSingleValue(m_quantChannelInfo);
 
-                            @Override
-                            public void run(boolean success, long task2Id, SubTask subTask, boolean finished) {
-                                m_quantChannelInfo = new QuantChannelInfo(m_dataset);
-                                getDataBoxPanelInterface().addSingleValue(m_quantChannelInfo);
+                        ((XicPeptidePanel) getDataBoxPanelInterface()).setData(taskId, m_masterQuantProteinSet, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideList, m_isXICMode, finished);
 
-                                ((XicPeptidePanel) getDataBoxPanelInterface()).setData(taskId, m_masterQuantProteinSet, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideList, m_isXICMode, finished);
-
-                                if (finished) {
-                                    unregisterTask(task2Id);
-                                }
-                            }
-                        };
-                        // ask asynchronous loading of data
-                        DatabaseLoadLcMSTask maptask = new DatabaseLoadLcMSTask(mapCallback);
-                        maptask.initLoadAlignmentForXic(getProjectId(), m_dataset);
-                        registerTask(maptask);
                     }
                 } else {
                     ((XicPeptidePanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
@@ -325,7 +308,12 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                     CrossSelectionInterface crossSelectionInterface = ((XicPeptidePanel) this.m_panel).getCrossSelectionInterface();
                     ArrayList<Integer> result = new ArrayList();
                     if (crossSelectionInterface != null) {
-                        ArrayList<Long> selection = crossSelectionInterface.getSelection();
+                        ArrayList<Long> selection = null;
+                        try {
+                            selection = crossSelectionInterface.getSelection();
+                        } catch (Exception e) {
+                            m_logger.error("wart : selection not ready ", e);
+                        }
                         if (selection != null) {
                             for (Long l : selection) {
                                 result.add(l.intValue());

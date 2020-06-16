@@ -1103,6 +1103,9 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     private final StringBuilder m_sb = new StringBuilder();
 
     public void setData(Long taskId, long projectId, DQuantitationChannel[] quantChannels, List<DMasterQuantPeptide> peptides, DMasterQuantProteinSet masterQuantProtSetContext, boolean isXICMode) {
+        
+        m_taskId = taskId;
+        
         boolean structureChanged = true;
         m_isXICMode = isXICMode;
         if (isXICMode) {
@@ -1134,12 +1137,9 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
         if (structureChanged) {
             fireTableStructureChanged();
+        } else {
+            fireTableDataChanged();
         }
-
-        m_taskId = taskId;
-
-        fireTableDataChanged();
-
     }
 
     public void dataUpdated() {

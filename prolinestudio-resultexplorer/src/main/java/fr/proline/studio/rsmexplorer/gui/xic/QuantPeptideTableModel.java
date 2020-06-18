@@ -227,7 +227,6 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
     }
 
-
     @Override
     public String getExportRowCell(int row, int col) {
 
@@ -746,22 +745,22 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
     }
 
-    private XicStatusRenderer.SelectLevel getSelectionLevelFor(DMasterQuantPeptide peptide){
+    public XicStatusRenderer.SelectLevel getSelectionLevelFor(DMasterQuantPeptide peptide) {
         XicStatusRenderer.SelectLevel level = XicStatusRenderer.SelectLevel.UNKNOWN;
         if (m_mqProtSetContext != null && !m_selectionLevelInContext.isEmpty()) {
             Integer value = m_selectionLevelInContext.get(peptide.getId());
             if (value != null) {
                 level = XicStatusRenderer.SelectLevel.valueOf(m_selectionLevelInContext.get(peptide.getId()));
-                logger.debug(" use masterQuantProtein specific selection for peptide "+peptide.getId()+": "+level.toString());
+                logger.debug(" use masterQuantProtein specific selection for peptide " + peptide.getId() + ": " + level.toString());
             }
-            
+
         }
         if (level == null || level.equals(XicStatusRenderer.SelectLevel.UNKNOWN)) {
             level = XicStatusRenderer.SelectLevel.valueOf(peptide.getSelectionLevel());
         }
         return level;
     }
-        
+
     @Override
     public Object getValueAt(final int row, int col) {
 
@@ -776,7 +775,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             }
             case COLTYPE_MQPEPTIDE_SELECTION_LEVEL: {
                 if (m_isXICMode) {
-                    XicStatusRenderer.SelectLevel level =getSelectionLevelFor(peptide);
+                    XicStatusRenderer.SelectLevel level = getSelectionLevelFor(peptide);
                     return level;
                 } else {
                     return "";
@@ -1103,9 +1102,9 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     private final StringBuilder m_sb = new StringBuilder();
 
     public void setData(Long taskId, long projectId, DQuantitationChannel[] quantChannels, List<DMasterQuantPeptide> peptides, DMasterQuantProteinSet masterQuantProtSetContext, boolean isXICMode) {
-        
+
         m_taskId = taskId;
-        
+
         boolean structureChanged = true;
         m_isXICMode = isXICMode;
         if (isXICMode) {
@@ -1121,16 +1120,17 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         }
         m_quantPeptides = peptides;
         m_quantChannels = quantChannels;
-        m_mqProtSetContext = masterQuantProtSetContext;                
+        m_mqProtSetContext = masterQuantProtSetContext;
         m_selectionLevelInContext = new HashMap();
-        if(m_mqProtSetContext != null){
+        if (m_mqProtSetContext != null) {
             MasterQuantProteinSetProperties prop = m_mqProtSetContext.getMasterQuantProtSetProperties();
-            if(prop != null){
+            if (prop != null) {
                 Map<Long, Integer> selectLevelByMqPeps = prop.getMqPeptideSelLevelById();
-                if(selectLevelByMqPeps != null){
-                    for(DMasterQuantPeptide mqPep : m_quantPeptides)
-                        m_selectionLevelInContext.put(mqPep.getId(),selectLevelByMqPeps.getOrDefault(mqPep.getId(), XicStatusRenderer.SelectLevel.UNKNOWN.getIntValue()) );   
-                }  
+                if (selectLevelByMqPeps != null) {
+                    for (DMasterQuantPeptide mqPep : m_quantPeptides) {
+                        m_selectionLevelInContext.put(mqPep.getId(), selectLevelByMqPeps.getOrDefault(mqPep.getId(), XicStatusRenderer.SelectLevel.UNKNOWN.getIntValue()));
+                    }
+                }
             }
         }
         m_quantChannelNumber = quantChannels.length;
@@ -1473,10 +1473,10 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
         if (columnIndex == COLTYPE_PEPTIDE_ID) {
             return peptide.getId();
-        }else if (columnIndex ==COLTYPE_SELECTION_LEVEL){
+        } else if (columnIndex == COLTYPE_SELECTION_LEVEL) {
             return peptide.getSelectionLevel();
         }
-            
+
         return data;
     }
 
@@ -1686,7 +1686,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
     @Override
     public Object getColValue(Class c, int col) {
-        if (c.equals(XicGroup.class )) {
+        if (c.equals(XicGroup.class)) {
             if (col <= LAST_STATIC_COLUMN) {
                 return null;
             } else {

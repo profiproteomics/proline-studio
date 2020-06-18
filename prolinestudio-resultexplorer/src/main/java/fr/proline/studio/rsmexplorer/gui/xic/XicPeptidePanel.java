@@ -82,16 +82,19 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.renderer.XicStatusRenderer;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -563,7 +566,7 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
                 return;
             }
 
-           if (e.getValueIsAdjusting()) {
+            if (e.getValueIsAdjusting()) {
                 // value is adjusting, so valueChanged will be called again
                 return;
             }
@@ -785,9 +788,12 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
         String cmd_validated = "Validated";
         String cmd_invalidated = "Invalidated";
         String cmd_reset = "Reset manual status to auto";
-        XRadioButtonPanel _validButtonPane;
-        XRadioButtonPanel _invalidButtonPane;
-        ButtonGroup _buttonGroup;
+        XRadioButtonPanel _localValidButtonPane;
+        XRadioButtonPanel _localInvalidButtonPane;
+        XRadioButtonPanel _globalValidButtonPane;
+        XRadioButtonPanel _globalInvalidButtonPane;
+        ButtonGroup _globalButtonGroup;
+
         JButton _resetButton;
         DMasterQuantPeptide _selectedPeptide; //for single select
         ArrayList<Integer> _selectedRows;
@@ -797,16 +803,22 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
             _internalPanel = new ModifyStatusPanel();
             String dialog_title = "Modify Status Dialog";
             super.setTitle(dialog_title);
-            String help_text = "<html>Modify validated/Invalidated status.<br> You can also clic the reset button to<br> change for each status manual -> auto </html>";
-            super.setHelpHeaderText(help_text);
+            String help_text = "Peptide status is the combination between the  global status"
+                    + " (defined for the whole dataset) and the local one (defined for"
+                    + " a Protein Set using razor peptides selection for example).<br>"
+                    + " Only the global status could be changed, this will impact the "
+                    + "local status and Post Processing service SHOULD be run again. ";
+            super.setHelpHeader(help_text, 370, 100);
             super.setInternalComponent(_internalPanel);
+            super.setResizable(true);
+
             setButtonVisible(BUTTON_HELP, false);//use only cancel, ok button
         }
 
         @Override
         protected boolean okCalled() {
             actionStarted();
-            String command = _buttonGroup.getSelection().getActionCommand();
+            String command = _globalButtonGroup.getSelection().getActionCommand();
             if (command.equals(cmd_validated)) {
                 m_quantPeptideTableModel.validateModifications(XicPeptidePanel.this, _selectedRows, XicStatusRenderer.SelectLevel.SELECTED_MANUAL);
             } else if (command.equals(cmd_invalidated)) {
@@ -829,7 +841,7 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
 
         @Override
         protected boolean cancelCalled() {
-            _buttonGroup.clearSelection();
+            _globalButtonGroup.clearSelection();
             setVisible(false);
             return true;
         }
@@ -837,7 +849,7 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
         public void actionFinished(boolean success, String errorMessage) {
             _selectedPeptide = null;
             _selectedRows.clear();
-            _buttonGroup.clearSelection();
+            _globalButtonGroup.clearSelection();
             _internalPanel.setLoaded(1);
             setVisible(false);
             if (!success) {
@@ -864,25 +876,35 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
 
                 _selectedPeptide = (DMasterQuantPeptide) m_quantPeptideTableModel.getRowValue(DMasterQuantPeptide.class, modelRow);
                 if (_selectedPeptide != null) {//single select
-                    int selectLevel = _selectedPeptide.getSelectionLevel();
-                    switch (selectLevel) {
-                        case 0:
-                        case 1:
-                            _invalidButtonPane.getRadioButton().setSelected(true);
-                            _invalidButtonPane.addIcon(selectLevel);
-                            _validButtonPane.removeOptionIcon();
-                            break;
-                        case 2:
-                        case 3:
-                            _validButtonPane.getRadioButton().setSelected(true);
-                            _validButtonPane.addIcon(selectLevel);
-                            _invalidButtonPane.removeOptionIcon();
-                            break;
-                        default:
-                            _validButtonPane.removeOptionIcon();
-                            _invalidButtonPane.removeOptionIcon();
-                    }
+                    int globalSelectLevel = _selectedPeptide.getSelectionLevel();
+                    updateRadioButton(XicStatusRenderer.SelectLevel.valueOf(globalSelectLevel), _globalValidButtonPane, _globalInvalidButtonPane);
+                    XicStatusRenderer.SelectLevel localSelectLevel = m_quantPeptideTableModel.getSelectionLevelFor(_selectedPeptide);
+                    updateRadioButton(localSelectLevel, _localValidButtonPane, _localInvalidButtonPane);
                 }
+            }
+        }
+
+        private void updateRadioButton(XicStatusRenderer.SelectLevel selectLevel, XRadioButtonPanel validPane, XRadioButtonPanel invalidPane) {
+            switch (selectLevel) {
+                case DESELECTED_MANUAL:
+                case DESELECTED_AUTO:
+                    validPane.getRadioButton().setSelected(false);
+                    validPane.removeOptionIcon();
+                    invalidPane.getRadioButton().setSelected(true);
+                    invalidPane.addIcon(selectLevel.getIntValue());
+                    break;
+                case SELECTED_AUTO:
+                case SELECTED_MANUAL:
+                    validPane.getRadioButton().setSelected(true);
+                    validPane.addIcon(selectLevel.getIntValue());
+                    invalidPane.getRadioButton().setSelected(false);
+                    invalidPane.removeOptionIcon();
+                    break;
+                default:
+                    validPane.getRadioButton().setSelected(false);
+                    validPane.removeOptionIcon();
+                    invalidPane.getRadioButton().setSelected(false);
+                    invalidPane.removeOptionIcon();
             }
         }
 
@@ -901,9 +923,9 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
                     modelIndex = m_quantPeptideTable.convertRowIndexToModel(row);
                     _selectedRows.add(modelIndex);
                 }
-                _validButtonPane.removeOptionIcon();
-                _invalidButtonPane.removeOptionIcon();
-                _buttonGroup.clearSelection();
+                _globalValidButtonPane.removeOptionIcon();
+                _globalInvalidButtonPane.removeOptionIcon();
+                _globalButtonGroup.clearSelection();
             }
         }
 
@@ -911,40 +933,92 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
 
             ModifyStatusPanel() {
                 //model
+                //create local items
                 _selectedRows = new ArrayList();
+                JLabel localText = new JLabel("<html>Local status (for current <br>protein set specifically)</html>");
+                _localValidButtonPane = new XRadioButtonPanel(cmd_validated, IconManager.getIcon(IconManager.IconType.VALIDATED));;
+                _localInvalidButtonPane = new XRadioButtonPanel(cmd_invalidated, IconManager.getIcon(IconManager.IconType.INVALIDATED));
+                _localValidButtonPane.getRadioButton().setEnabled(false);
+                _localInvalidButtonPane.getRadioButton().setEnabled(false);
+                //create global 2 radio buttons
+                JLabel globalText = new JLabel("<html>Global status (for the whole<br> dataset)</html>");
+                _globalValidButtonPane = new XRadioButtonPanel(cmd_validated, IconManager.getIcon(IconManager.IconType.VALIDATED));
+                _globalInvalidButtonPane = new XRadioButtonPanel(cmd_invalidated, IconManager.getIcon(IconManager.IconType.INVALIDATED));
+                _globalValidButtonPane.getRadioButton().setActionCommand(cmd_validated);
+                _globalInvalidButtonPane.getRadioButton().setActionCommand(cmd_invalidated);
 
-                //create 2 radio buttons
-                _validButtonPane = new XRadioButtonPanel(cmd_validated, IconManager.getIcon(IconManager.IconType.VALIDATED));
-                _invalidButtonPane = new XRadioButtonPanel(cmd_invalidated, IconManager.getIcon(IconManager.IconType.INVALIDATED));
-                _validButtonPane.getRadioButton().setActionCommand(cmd_validated);
-                _invalidButtonPane.getRadioButton().setActionCommand(cmd_invalidated);
-
-                _buttonGroup = new ButtonGroup();
-                _buttonGroup.add(_validButtonPane.getRadioButton());
-                _buttonGroup.add(_invalidButtonPane.getRadioButton());
+                _globalButtonGroup = new ButtonGroup();
+                _globalButtonGroup.add(_globalValidButtonPane.getRadioButton());
+                _globalButtonGroup.add(_globalInvalidButtonPane.getRadioButton());
                 //create reset button
                 _resetButton = new JButton(cmd_reset);
                 _resetButton.addActionListener(createResetAction());
+                //layout local status
+                JPanel localPane = new JPanel(new GridBagLayout());
+                GridBagConstraints c1 = new GridBagConstraints();
 
-                //layout
-                setBorder(BorderFactory.createLineBorder(Color.darkGray, 1, true));
-                setOpaque(true);
-                setLayout(new GridBagLayout());
+                c1.anchor = GridBagConstraints.NORTHWEST;
+                c1.insets = new java.awt.Insets(2, 2, 2, 2);
+                c1.gridx = 0;
+                c1.gridy = 0;
+                c1.gridheight = 2;
+                c1.fill = GridBagConstraints.BOTH;
+
+                localPane.add(localText, c1);
+                localPane.setBackground(Color.WHITE);
+                c1.fill = GridBagConstraints.HORIZONTAL;
+                c1.gridx++;
+                localPane.add(Box.createRigidArea(new Dimension(50, 0)), c1);
+                c1.gridx++;
+                c1.gridheight = 1;
+                c1.fill = GridBagConstraints.NONE;
+                localPane.add(_localValidButtonPane, c1);
+                c1.gridy++;
+                localPane.add(_localInvalidButtonPane, c1);
+                c1.fill = GridBagConstraints.HORIZONTAL;
+                c1.gridx++;
+                localPane.add(Box.createRigidArea(new Dimension(30, 0)), c1);
+                localPane.setEnabled(false);
+                localPane.setBorder(BorderFactory.createLineBorder(Color.orange));
+                //layout global status  button
+                JPanel globalPane = new JPanel(new GridBagLayout());
+
                 GridBagConstraints c = new GridBagConstraints();
                 c.anchor = GridBagConstraints.NORTHWEST;
-                c.insets = new java.awt.Insets(0, 1, 1, 0);
+                c.insets = new java.awt.Insets(2, 2, 2, 2);
+                c.fill = GridBagConstraints.BOTH;
                 c.gridx = 0;
                 c.gridy = 0;
-                this.add(_validButtonPane, c);
-                c.gridy++;
-                this.add(_invalidButtonPane, c);
-                c.gridy++;
-                this.add(new JPanel(), c);//invisible
-                c.gridy++;
-                this.add(_resetButton, c);
+                c.gridheight = 2;
+                globalText.setBackground(Color.WHITE);
+                globalPane.add(globalText, c);
+                c.gridx++;
+                c.gridheight = 1;
 
+                globalPane.add(Box.createRigidArea(new Dimension(30, 0)), c);
+                c.gridx++;
+                c.gridheight = 1;
+                c.fill = GridBagConstraints.NONE;
+                globalPane.add(_globalValidButtonPane, c);
+                c.gridy++;
+                globalPane.add(_globalInvalidButtonPane, c);
+                c.gridy++;
+                globalPane.add(Box.createRigidArea(new Dimension(0, 10)), c);//invisible
+                c.gridx = 1;
+                c.gridwidth = 2;
+                c.gridy++;
+                globalPane.add(_resetButton, c);
+
+                globalPane.setBorder(BorderFactory.createLineBorder(Color.orange));
+                Container simpleBorders;
+                // whole layout
+                this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+                this.setBorder(new EmptyBorder(10, 10, 10, 10));
+                this.add(localPane);
+                this.add(Box.createRigidArea(new Dimension(0, 10)));
+                this.add(globalPane);
                 Dimension d = getPreferredSize();
-                setBounds(0, 0, (int) d.getWidth(), (int) d.getHeight());
+                this.setBounds(0, 0, (int) d.getWidth(), (int) d.getHeight());
             }
         }
 

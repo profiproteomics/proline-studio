@@ -24,6 +24,8 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -195,8 +197,9 @@ public class DefaultDialog extends javax.swing.JDialog {
     }
 
     /**
-     * set Help text with specific icon, but without title. If belong to new panel, often followed with
-     * replaceInternalComponent or setInternalComponent
+     * set Help text with specific icon, but without title. If belong to new
+     * panel, often followed with replaceInternalComponent or
+     * setInternalComponent
      *
      * @param icon
      * @param htmlSupportedTxt
@@ -229,6 +232,41 @@ public class DefaultDialog extends javax.swing.JDialog {
         m_helpPanel.removeAll();
         m_helpPanel.add(new HelpHeaderPanel(icon, title, htmlSupportedTxt), BorderLayout.CENTER);;
         repaint();
+    }
+
+    public void setHelpHeader(String htmlSupportedTxt, int width, int height) {
+        m_helpPanel.removeAll();
+        JTextPane wizardPane = new JTextPane();
+        m_helpPanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+        wizardPane.setEditable(false);
+        wizardPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        wizardPane.setContentType("text/html");
+        String fontFamily = this.getFont().getFamily();
+        int fontSize = this.getFont().getSize();
+        String content = "<html> \n"
+                + "   <head>\n"
+                + "      <style type=\"text/css\">  \n"
+                + "         #help{\n"
+                + "         color: Gray; \n"
+                + "         font-family: " + fontFamily + ";"
+                + "         font-size: " + fontSize + ";"
+                + "         padding-top: 1px;\n"
+                + "         padding-bottom: 1px;\n"
+                + "         } \n"
+                + "      </style> \n"
+                + "   </head> \n"
+                + "   <body>\n"
+                + "<div id=\"help\">" + htmlSupportedTxt + "</div>"
+                + "   </body> \n"
+                + "</html>";
+        wizardPane.setText(content);
+        wizardPane.setPreferredSize(new Dimension(width, height));
+        m_helpPanel.add(wizardPane);
+        repaint();
+    }
+
+    public void setHelpHeaderSize(int width, int height) {
+        m_helpPanel.setPreferredSize(new Dimension(width, height));
     }
 
     protected void setInternalComponent(Component component) {

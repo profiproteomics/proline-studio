@@ -128,81 +128,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         final JPanel proteinSetPanel = createProteinSetPanel();
 
-        ResultCallback resultCallback = new ResultCallback() {
-            @Override
-            public void run(boolean success) {
-                m_refineProteinsPanel.actionFinished(success, success ? null : "Refine failed. Look to Tasks Log for more information.");
-
-                if (success) {
-
-                    final ArrayList<DMasterQuantProteinSet> masterQuantProteinSetModified = m_quantProteinSetTable.getModifiedQuantProteinSet();
-
-                    AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-                        @Override
-                        public boolean mustBeCalledInAWT() {
-                            return true;
-                        }
-
-                        @Override
-                        public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
-                            if (!success) {
-                                return; // should not happen
-                            }
-
-                            // propagate modifications to the previous views
-                            try {
-                                for (DMasterQuantProteinSet masterQuantProteinSet : masterQuantProteinSetModified) {
-                                    Map<String, Object> pmqSerializedMap = masterQuantProteinSet.getSerializedPropertiesAsMap();
-                                    if (pmqSerializedMap != null) {
-                                        pmqSerializedMap.put(DMasterQuantProteinSet.MASTER_QUANT_PROTEINSET_WITH_PEPTIDE_MODIFIED, Boolean.FALSE);
-                                        
-
-                                    }
-                                }
-
-                            } catch (Exception e) {
-
-                            }
-                                
-                                
-                                
-                            DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), DMasterQuantProteinSet.class, masterQuantProteinSetModified, DataBoxViewerManager.REASON_PROTEINS_REFINED);
-                        }
-                    };
-
-                    // ask asynchronous loading of data
-                    DatabaseModifyPeptideTask task = new DatabaseModifyPeptideTask(callback);
-
-                    task.initRemovePeptideModifiedOnProtein(m_dataBox.getProjectId(), masterQuantProteinSetModified);
-                    AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-                }
-
-            }
-
-        };
-
-        ActionListener refineAction = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                DataboxXicProteinSet databox = (DataboxXicProteinSet) m_dataBox;
-                long projectId = m_dataBox.getProjectId();
-                DDataset dataset = (DDataset) databox.getData(DDataset.class);
-
-                boolean okCalled = ComputeQuantPostProcessingAction.quantificationProfile(resultCallback, getX() + 20, getY() + 20, projectId, dataset);
-                if (okCalled) {
-                    m_refineProteinsPanel.actionStarted();
-                }
-            }
-
-        };
-
-        String[] actionText = {"Refine"};
-        ActionListener[] actionListeners = {refineAction};
-        Icon[] icons = {IconManager.getIcon(IconManager.IconType.REFINE)};
-
-        m_refineProteinsPanel = new DefaultFloatingPanel("Proteins need to be refined : ", actionText, actionListeners, icons);
+        m_refineProteinsPanel = createRefineProteinsPanel();
 
         final JLayeredPane layeredPane = new JLayeredPane();
 
@@ -237,6 +163,100 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER + 2));
         layeredPane.add(m_refineProteinsPanel, JLayeredPane.PALETTE_LAYER);
 
+    }
+
+    /**
+     * Compute post processing dialog + action
+     *
+     * @return
+     */
+    private DefaultFloatingPanel createRefineProteinsPanel() {
+        ResultCallback resultCallback = new ResultCallback() {
+            @Override
+            public void run(boolean success) {
+                m_refineProteinsPanel.actionFinished(success, success ? null : "Refine failed. Look to Tasks Log for more information.");
+
+                if (success) {
+
+                    final ArrayList<DMasterQuantProteinSet> masterQuantProteinSetModified = m_quantProteinSetTable.getModifiedQuantProteinSet();
+
+                    AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                        @Override
+                        public boolean mustBeCalledInAWT() {
+                            return true;
+                        }
+
+                        @Override
+                        public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+
+                            if (!success) {
+                                return; // should not happen
+                            }
+
+                            // propagate modifications to the previous views
+                            try {
+                                for (DMasterQuantProteinSet masterQuantProteinSet : masterQuantProteinSetModified) {
+                                    Map<String, Object> pmqSerializedMap = masterQuantProteinSet.getSerializedPropertiesAsMap();
+                                    if (pmqSerializedMap != null) {
+                                        pmqSerializedMap.put(DMasterQuantProteinSet.MASTER_QUANT_PROTEINSET_WITH_PEPTIDE_MODIFIED, Boolean.FALSE);
+
+                                    }
+                                }
+
+                            } catch (Exception e) {
+
+                            }
+
+                            DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), DMasterQuantProteinSet.class, masterQuantProteinSetModified, DataBoxViewerManager.REASON_PROTEINS_REFINED);
+                        }
+                    };
+
+                    // ask asynchronous loading of data
+                    DatabaseModifyPeptideTask task = new DatabaseModifyPeptideTask(callback);
+
+                    task.initRemovePeptideModifiedOnProtein(m_dataBox.getProjectId(), masterQuantProteinSetModified);
+                    AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+                }
+
+            }
+
+        };
+        ActionListener refineAction = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DataboxXicProteinSet databox = (DataboxXicProteinSet) m_dataBox;
+                long projectId = m_dataBox.getProjectId();
+                DDataset dataset = (DDataset) databox.getData(DDataset.class);
+
+                boolean okCalled = ComputeQuantPostProcessingAction.quantificationProfile(resultCallback, getX() + 20, getY() + 20, projectId, dataset);
+                if (okCalled) {
+                    m_refineProteinsPanel.actionStarted();
+                }
+            }
+
+        };
+
+        String[] actionText = {"Refine"};
+        ActionListener[] actionListeners = {refineAction};
+        Icon[] icons = {IconManager.getIcon(IconManager.IconType.REFINE)};
+
+        DefaultFloatingPanel refineProteinsPanel = new DefaultFloatingPanel("Proteins need to be refined : ", actionText, actionListeners, icons) {
+            @Override
+            public void actionFinished(boolean success, String errorMessage) {
+                super.actionFinished(success, errorMessage);
+                //get SelectedRow
+                int selectedRow = m_quantProteinSetTable.getSelectedRow();
+                int selectedModelRow = m_quantProteinSetTable.convertRowIndexToModel(selectedRow);
+
+                ((CompoundTableModel) m_quantProteinSetTable.getModel()).fireTableDataChanged();
+                //set SelectedRow after fire
+                selectedRow = m_quantProteinSetTable.convertRowIndexToView(selectedModelRow);
+                m_quantProteinSetTable.setSelection(selectedRow);
+            }
+
+        };
+        return refineProteinsPanel;
     }
 
     private JPanel createProteinSetPanel() {
@@ -378,7 +398,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             if (m_hideFirstTime) {
                 // allow to change column visibility
                 //m_columnVisibilityButton.setEnabled(true);
-                
+
                 // hide the rawAbundance  and selectionLevel columns
                 List<Integer> listIdsToHide = ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
                 for (Integer id : listIdsToHide) {
@@ -387,11 +407,10 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 m_hideFirstTime = false;
             }
 
-            
             if (finished) {
-                
+
                 m_quantProteinSetTable.setSortable(true);
-                
+
                 // check if refine panel must be shown
                 try {
                     boolean containsModifier = ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).containsModifiedQuantProteinSet();
@@ -424,8 +443,6 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
     public void dataUpdated(SubTask subTask, boolean finished) {
         m_quantProteinSetTable.dataUpdated(subTask, finished);
-        
-
         if (m_hideFirstTime) {
             // allow to change column visibility
             //m_columnVisibilityButton.setEnabled(true);
@@ -441,7 +458,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         
         if (finished) {
             m_quantProteinSetTable.setSortable(true);
-        }
+    }
     }
 
     public DProteinSet getSelectedProteinSet() {
@@ -638,7 +655,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             if (selectionWillBeRestored) {
                 return;
             }
-            
+
             if (e.getValueIsAdjusting()) {
                 // value is adjusting, so valueChanged will be called again
                 return;

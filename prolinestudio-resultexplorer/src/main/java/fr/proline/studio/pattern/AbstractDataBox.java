@@ -29,6 +29,7 @@ import fr.proline.studio.pattern.xic.DataboxChildFeature;
 import fr.proline.studio.pattern.xic.DataboxExperimentalDesign;
 import fr.proline.studio.pattern.xic.DataboxMapAlignment;
 import fr.proline.studio.pattern.xic.DataboxPSMOfMasterQuantPeptide;
+import fr.proline.studio.pattern.xic.DataboxXicParentsPeptideIon;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
 import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
@@ -158,7 +159,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxPTMPeptides(54),        
         DataBoxPTMClusters(55),
         DataBoxPTMPeptidesMatches(56),
-        DataBoxPTMPeptidesGraphic(57)
+        DataBoxPTMPeptidesGraphic(57),
+        DataboxXicParentsPeptideIon(58)
         ;
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -270,7 +272,9 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                 case DataBoxXicPTMPeptidesMatches:
                     return new DataBoxPTMPeptides(true, true);                         
                 case DataBoxPTMPeptidesGraphic:
-                    return new DataBoxPTMPeptidesGraphic();     
+                    return new DataBoxPTMPeptidesGraphic();  
+                case DataboxXicParentsPeptideIon:
+                    return new DataboxXicParentsPeptideIon();
                     
             }
             return null; // should not happen

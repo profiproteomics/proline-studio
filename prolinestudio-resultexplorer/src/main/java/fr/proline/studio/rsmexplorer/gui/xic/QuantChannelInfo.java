@@ -47,6 +47,12 @@ public class QuantChannelInfo {
         listQuantChannel.toArray(m_quantChannels);
         m_quantChannelsById = listQuantChannel.stream().collect(Collectors.toMap(qc -> qc.getId(), qc -> qc));
     }
+    
+    public QuantChannelInfo(List<DQuantitationChannel> listQuantChannel) {
+        m_quantChannels = new DQuantitationChannel[listQuantChannel.size()];
+        listQuantChannel.toArray(m_quantChannels);
+        m_quantChannelsById = listQuantChannel.stream().collect(Collectors.toMap(qc -> qc.getId(), qc -> qc));
+    }
 
 
     public DQuantitationChannel getQuantChannels(Long id) {

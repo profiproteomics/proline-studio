@@ -17,12 +17,10 @@
 package fr.proline.studio.pattern.xic;
 
 import fr.proline.core.orm.msi.Peptide;
-import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.core.orm.uds.QuantitationChannel;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -71,7 +69,7 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
         
         inParameter.addParameter(DDataset.class, ParameterSubtypeEnum.SINGLE_DATA, false /* not compulsory */);
         inParameter.addParameter(QuantChannelInfo.class, ParameterSubtypeEnum.SINGLE_DATA, false /* not compulsory */);
-        inParameter.addParameter(DMasterQuantPeptideIon.class);
+        inParameter.addParameter(DMasterQuantPeptideIon.class); // parent DMasterQuantPeptideIon.class of the aggregation
         //inParameter.addParameter(XicMode.class);
         
         registerInParameter(inParameter);
@@ -79,11 +77,14 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
         // Register possible out parameters
         ParameterList outParameter = new ParameterList();
 
+        outParameter.addParameter(DMasterQuantPeptideIon.class);  // selected child DMasterQuantPeptideIon.class of the aggregation
+        outParameter.addParameter(QuantChannelInfo.class);
+        outParameter.addParameter(DPeptideMatch.class);
+        
         /*outParameter.addParameter(ResultSummary.class);
         outParameter.addParameter(DDataset.class);
         outParameter.addParameter(DMasterQuantPeptideIon.class);
-        outParameter.addParameter(QuantChannelInfo.class);
-        outParameter.addParameter(DPeptideMatch.class);
+        
         
         outParameter.addParameter(ExtendedTableModelInterface.class);*/ //JPM.PARENT.TODO
         
@@ -124,8 +125,13 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
             
         }
         
-        final HashMap<Long, HashSet<Long>> aggregatedToChildrenQuantChannelsId = new HashMap<>();
+        ArrayList<Long> childrenDatasetIds = new ArrayList<>();
+        for (Integer id: (ArrayList<Integer>) map.get("quantitation_ids")) {
+            childrenDatasetIds.add(id.longValue());
+        }
         
+        final HashMap<Long, HashSet<Long>> aggregatedToChildrenQuantChannelsId = new HashMap<>();
+
         ArrayList mappingList = (ArrayList) map.get("quant_channels_mapping");
         for (int i=0;i<mappingList.size();i++) {
             Map m = (Map) mappingList.get(i);
@@ -138,13 +144,14 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
             
             Map<String, Integer> quantChannelsMatching = (Map<String, Integer>) m.get("quant_channels_matching");
             for (String key : quantChannelsMatching.keySet()) {
+
                 Integer childQuantChannelId = quantChannelsMatching.get(key);
                 childrenQuantitationId.add(childQuantChannelId.longValue());
             }
             
         }
         
-        List<DMasterQuantPeptideIon> masterQuantPeptideIonList = new ArrayList<>();
+        ArrayList<DMasterQuantPeptideIon> masterQuantPeptideIonList = new ArrayList<>();
 
         final int loadingId = setLoading();
         
@@ -180,24 +187,12 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
 
         // ask asynchronous loading of data
         DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
-        task.initLoadParentPeptideIons(getProjectId(), m_dataset, m_masterQuantPeptide, m_aggregatedMasterQuantPeptideIon, masterQuantPeptideIonList, m_quantitationChannelsMap);
-        
-        Long taskId = task.getId();
+        task.initLoadParentPeptideIons(getProjectId(), m_dataset, m_masterQuantPeptide, m_aggregatedMasterQuantPeptideIon, masterQuantPeptideIonList, m_quantitationChannelsMap, childrenDatasetIds);
+
         registerTask(task);
         
     }
-    
-    /*public boolean isXICMode() {
-        return m_isXICMode;
-    }*/
-    
-    /*public void setXICMode(boolean isXICMode) {
-        m_isXICMode = isXICMode;
-        m_style = (m_isXICMode) ? AbstractDataBox.DataboxStyle.STYLE_XIC : AbstractDataBox.DataboxStyle.STYLE_SC;
-        if (getDataBoxPanelInterface() != null) {
-            getDataBoxPanelInterface().addSingleValue(new XicMode((isXICMode)));
-        }
-    }*/
+
     
     @Override
     public void setEntryData(Object data) {
@@ -209,24 +204,16 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
     @Override
     public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         
-        /*
+     
         if (parameterType != null) {
             
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
 
-                if (parameterType.equals(ResultSummary.class)) {
-                    return m_dataset.getResultSummary();
-                }
                 if (parameterType.equals(DMasterQuantPeptideIon.class)) {
-                    return ((XicPeptideIonPanel) getDataBoxPanelInterface()).getSelectedMasterQuantPeptideIon();
-                }
-                if (parameterType.equals(QuantChannelInfo.class)) {
-                    if (m_quantChannelInfo != null) {
-                        return m_quantChannelInfo;
-                    }
+                    return ((XicParentPeptideIonPanel) getDataBoxPanelInterface()).getSelectedMasterQuantPeptideIon();
                 }
                 if (parameterType.equals(DPeptideMatch.class)) {
-                    DMasterQuantPeptideIon qpi = ((XicPeptideIonPanel) getDataBoxPanelInterface()).getSelectedMasterQuantPeptideIon();
+                    DMasterQuantPeptideIon qpi = ((XicParentPeptideIonPanel) getDataBoxPanelInterface()).getSelectedMasterQuantPeptideIon();
                     if (qpi == null) {
                         return null;
                     }
@@ -236,7 +223,7 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
                     }
                     return pi.getBestPeptideMatch();
                 }
-                if (parameterType.equals(DDataset.class)) {
+                /*if (parameterType.equals(DDataset.class)) {
                     return m_dataset;
                 }
                 if (parameterType.equals(ExtendedTableModelInterface.class)) {
@@ -244,12 +231,12 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
                 }
                 if (parameterType.equals(CrossSelectionInterface.class)) {
                     return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
-                }
+                }*/
                 if (parameterType.equals(QuantChannelInfo.class)) {
-                    return m_quantChannelInfo;
+                    return ((XicParentPeptideIonPanel) getDataBoxPanelInterface()).getSelectedQuantChannelInfo();
                 }
             }
-        }*/
+        }
         return super.getDataImpl(parameterType, parameterSubtype);
     }
     

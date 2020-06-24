@@ -42,82 +42,151 @@ public class QuantAggregatePeptideIonTableModel extends DecoratedTableModel impl
     private static final String[] m_columnNamesForFilter = m_columnNames;
     private static final String[] m_toolTipColumns = {"Master Quant. Peption Ion Id of aggregated Quanti.", "Quantification"};
 
-    
-    private DMasterQuantPeptideIon m_aggregatedMasterQuantPeptideIon = null;
     private List<DMasterQuantPeptideIon> m_masterQuantPeptideIonList = null;
-    private QuantChannelInfo m_quantChannelInfo = null;
-    private HashMap<Long, HashSet<Long>> m_aggregatedToChildrenQuantChannelsId;
-    private HashMap<Long, DQuantitationChannel> m_quantitationChannelsMap = null;
+    private QuantChannelInfo m_quantChannelInfoParent = null;
+    private List<QuantChannelInfo> m_quantChannelInfoChildren = null;
+    private int m_nbRows = 0;
+    private int m_nbCols = 0;
+    private ArrayList<String> m_columnNamesDynamic = new ArrayList<>();
+    private ArrayList<String> m_sourceQuantiNames = new ArrayList<>();
+    private Integer[][] m_abundances = null;
+    
+
     
     public QuantAggregatePeptideIonTableModel() {
-
+        for (String columnName: m_columnNames) {
+            m_columnNamesDynamic.add(columnName);
+        }
+        m_nbCols = m_columnNamesDynamic.size();
     }
     
     public void setData(DMasterQuantPeptideIon aggregatedMasterQuantPeptideIon, List<DMasterQuantPeptideIon> masterQuantPeptideIonList, QuantChannelInfo quantChannelInfo, HashMap<Long, HashSet<Long>> aggregatedToChildrenQuantChannelsId, HashMap<Long, DQuantitationChannel> quantitationChannelsMap) {
-       m_aggregatedMasterQuantPeptideIon = aggregatedMasterQuantPeptideIon;
-       m_masterQuantPeptideIonList = masterQuantPeptideIonList;
-       m_quantChannelInfo = quantChannelInfo;
-       m_aggregatedToChildrenQuantChannelsId = aggregatedToChildrenQuantChannelsId;
-       m_quantitationChannelsMap = quantitationChannelsMap;
-       
-       fireTableStructureChanged(); //JPM.TODO
-       
-        /*boolean structureChanged = true;
 
-        if (m_quantChannels != null && m_quantChannels.length == quantChannels.length) {
-            for (int i = 0; i < m_quantChannels.length; i++) {
-                structureChanged = !(m_quantChannels[i].equals(quantChannels[i]));
+
+        m_masterQuantPeptideIonList = masterQuantPeptideIonList;
+        m_quantChannelInfoParent = quantChannelInfo;
+        
+        // column names
+        ArrayList<String> columnNamesDynamic = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        for (String columnName : m_columnNames) {
+            columnNamesDynamic.add(columnName);
+        }
+        for (int col = 0; col < quantChannelInfo.getQuantChannels().length; col++) {
+            String rsmHtmlColor = CyclicColorPalette.getHTMLColor(col);
+            sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
+            sb.append(quantChannelInfo.getQuantChannels()[col].getName());
+            sb.append("</html>");
+            columnNamesDynamic.add(sb.toString());
+            sb.setLength(0);
+        }
+
+       
+       
+       // row and col count
+       m_nbRows = masterQuantPeptideIonList.size();
+       m_nbCols = columnNamesDynamic.size();
+       
+       
+       // source quanti names and QuantChannelInfo
+       m_quantChannelInfoChildren = new ArrayList<>();
+       for (int row = 0; row < m_nbRows; row++) {
+           String quantiName = "";
+            DMasterQuantPeptideIon masterQuantPeptideIon = masterQuantPeptideIonList.get(row);
+            ArrayList<DQuantitationChannel> quantChannelsChild = new ArrayList<>();
+            searchQuantiName:
+            for (DQuantitationChannel qc : quantChannelInfo.getQuantChannels()) {
+                HashSet<Long> childrenQC = aggregatedToChildrenQuantChannelsId.get(qc.getId());
+                Map<Long, DQuantPeptideIon> quantPeptideIonMap = masterQuantPeptideIon.getQuantPeptideIonByQchIds();
+                for (Long qcId : childrenQC) {
+                    if (quantPeptideIonMap.get(qcId) != null) {
+                        quantiName = quantitationChannelsMap.get(qcId).getMasterQuantitationChannel().getDataset().getName();
+                        quantChannelsChild.add(quantitationChannelsMap.get(qcId));
+                        break searchQuantiName;
+                    }
+                }
+                m_quantChannelInfoChildren.add(new QuantChannelInfo(quantChannelsChild));
+            }
+            
+            m_sourceQuantiNames.add(quantiName);
+        }
+  
+        // abundances
+        m_abundances = new Integer[m_nbRows][m_nbCols-LAST_STATIC_COLUMN-1];
+        for (int row = 0;row <m_nbRows;row++) {
+            DMasterQuantPeptideIon masterQuantPeptideIon = masterQuantPeptideIonList.get(row);
+            for (int col =0;col<m_nbCols-LAST_STATIC_COLUMN-1;col++) {
+                
+                Integer abundance = null;
+                
+                DQuantitationChannel aggregateQC = quantChannelInfo.getQuantChannels()[col];
+                HashSet<Long> childrenQC = aggregatedToChildrenQuantChannelsId.get(aggregateQC.getId());
+
+                DQuantPeptideIon peptideIon = null;
+                Map<Long, DQuantPeptideIon> quantPeptideIonMap = masterQuantPeptideIon.getQuantPeptideIonByQchIds();
+                for (Long qcId : childrenQC) {
+                    peptideIon = quantPeptideIonMap.get(qcId);
+                    if (peptideIon != null) {
+                        break;
+                    }
+                }
+
+                if (peptideIon != null) {
+                    abundance = new Integer(Math.round(peptideIon.getAbundance()));
+                } else {
+                    abundance = new Integer(0);
+                }
+                  
+                m_abundances[row][col] = abundance;
             }
         }
-        m_quantPeptideIons = peptideIons;
-        m_quantChannels = quantChannels;
-        m_quantChannelNumber = quantChannels.length;
-
+        
+        boolean structureChanged = false;
+        if (columnNamesDynamic.size() != m_columnNamesDynamic.size()) {
+            structureChanged = true;
+        } else {
+            for (int i=0;i<m_columnNamesDynamic.size();i++) {
+                if (! columnNamesDynamic.get(i).equals(m_columnNamesDynamic.get(i))) {
+                    structureChanged = true;
+                    break;
+                }
+            }
+        }
+        
         if (structureChanged) {
+            m_columnNamesDynamic = columnNamesDynamic;
             fireTableStructureChanged();
+        } else {
+            fireTableDataChanged();
         }
 
-        m_taskId = taskId;
 
-        fireTableDataChanged();*/
+    }
+    
+    public DMasterQuantPeptideIon getPeptideIon(int row) {
+        return m_masterQuantPeptideIonList.get(row);
+    }
+    
+    public QuantChannelInfo getQuantChannelInfo(int row) {
+        DMasterQuantPeptideIon masterQuantPeptideIon = m_masterQuantPeptideIonList.get(row);
 
+        
+        return new QuantChannelInfo(masterQuantPeptideIon.getResultSummary().getTransientData(null).getDDataset());
     }
     
     @Override
     public int getRowCount() {
-        if (m_masterQuantPeptideIonList == null) {
-            return 0;
-        }
-        return m_masterQuantPeptideIonList.size();
+        return m_nbRows;
     }
 
     @Override
     public int getColumnCount() {
-        if (m_masterQuantPeptideIonList == null) {
-            return m_columnNames.length;
-        }
-        return m_columnNames.length+m_aggregatedMasterQuantPeptideIon.getQuantPeptideIonByQchIds().size();
+        return m_nbCols;
     }
 
     @Override
     public String getColumnName(int col) {
-        if (col<=LAST_STATIC_COLUMN) {
-            return m_columnNames[col];
-        }
-        
-        if (m_masterQuantPeptideIonList == null) {
-            return "";
-        }
-        
-        col -= LAST_STATIC_COLUMN+1;
-        
-        StringBuilder sb = new StringBuilder();
-        String rsmHtmlColor = CyclicColorPalette.getHTMLColor(col);
-        sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
-        sb.append(m_quantChannelInfo.getQuantChannels()[col].getName());
-        sb.append("</html>");
-        
-        return sb.toString();
+        return m_columnNamesDynamic.get(col);
     }
     
     @Override
@@ -128,7 +197,7 @@ public class QuantAggregatePeptideIonTableModel extends DecoratedTableModel impl
             case COLTYPE_QUANTI_DATASET_NAME:
                 return String.class;
             default:
-                return Float.class;
+                return Integer.class;
         }
         
     }
@@ -143,37 +212,11 @@ public class QuantAggregatePeptideIonTableModel extends DecoratedTableModel impl
                 return masterQuantPeptideIon.getId();
             }
             case COLTYPE_QUANTI_DATASET_NAME: {
-                DQuantitationChannel aggregateQC = m_quantChannelInfo.getQuantChannels()[0];
-                HashSet<Long> childrenQC = m_aggregatedToChildrenQuantChannelsId.get(aggregateQC.getId());
-                Map<Long, DQuantPeptideIon> quantPeptideIonMap = masterQuantPeptideIon.getQuantPeptideIonByQchIds();
-                for (Long qcId : childrenQC) {
-                    if (quantPeptideIonMap.get(qcId) != null) {
-                        return m_quantitationChannelsMap.get(qcId).getMasterQuantitationChannel().getName();
-                    }
-                }
-                
-                
-                return ""; // should never happen
+                return m_sourceQuantiNames.get(row);
             }
             default: {
                 col -= LAST_STATIC_COLUMN+1;
-                DQuantitationChannel aggregateQC = m_quantChannelInfo.getQuantChannels()[col];
-                HashSet<Long> childrenQC = m_aggregatedToChildrenQuantChannelsId.get(aggregateQC.getId());
-
-                DQuantPeptideIon peptideIon = null;
-                Map<Long, DQuantPeptideIon> quantPeptideIonMap = masterQuantPeptideIon.getQuantPeptideIonByQchIds();
-                for (Long qcId : childrenQC) {
-                    peptideIon = quantPeptideIonMap.get(qcId);
-                    if (peptideIon != null) {
-                        break;
-                    }
-                }
-
-                if (peptideIon != null) {
-                    return peptideIon.getAbundance();
-                }
-
-                return new Float(0);
+                return m_abundances[row][col];
             }
         }
         
@@ -354,7 +397,7 @@ public class QuantAggregatePeptideIonTableModel extends DecoratedTableModel impl
         
         col -= LAST_STATIC_COLUMN+1;
 
-        return m_quantChannelInfo.getQuantChannels()[col].getName();
+        return m_quantChannelInfoParent.getQuantChannels()[col].getName();
     }
     
 }

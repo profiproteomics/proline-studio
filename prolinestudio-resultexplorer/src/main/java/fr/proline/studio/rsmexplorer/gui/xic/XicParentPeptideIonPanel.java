@@ -297,10 +297,14 @@ public class XicParentPeptideIonPanel extends HourglassPanel implements DataBoxP
         return m_dataBox.getSaveAction(splittedPanel);
     }
 
-    /*
+    
     public DMasterQuantPeptideIon getSelectedMasterQuantPeptideIon() {
         return m_quantChildrenPeptideIonTable.getSelectedMasterQuantPeptideIon();
-    }*/
+    }
+    
+    public QuantChannelInfo getSelectedQuantChannelInfo() {
+        return m_quantChildrenPeptideIonTable.getSelectedQuantChannelInfo();
+    }
 
     @Override
     public CrossSelectionInterface getCrossSelectionInterface() {
@@ -360,21 +364,46 @@ public class XicParentPeptideIonPanel extends HourglassPanel implements DataBoxP
             return m_dataBox.isLoaded();
         }
 
-        /*
+        public QuantChannelInfo getSelectedQuantChannelInfo() {
+            
+            int selectedRow = getSelectedRowInModel();
+            if (selectedRow == -1) {
+                return null;
+            }
+            
+            // Retrieve PeptideIon selected
+            CompoundTableModel compoundTableModel = (CompoundTableModel) m_quantChildrenPeptideIonTable.getModel();
+            QuantAggregatePeptideIonTableModel tableModel = (QuantAggregatePeptideIonTableModel) compoundTableModel.getBaseModel();
+            return tableModel.getQuantChannelInfo(selectedRow);
+        }
+        
         public DMasterQuantPeptideIon getSelectedMasterQuantPeptideIon() {
 
+            int selectedRow = getSelectedRowInModel();
+            if (selectedRow == -1) {
+                return null;
+            }
+            
+            // Retrieve PeptideIon selected
+            CompoundTableModel compoundTableModel = (CompoundTableModel) m_quantChildrenPeptideIonTable.getModel();
+            QuantAggregatePeptideIonTableModel tableModel = (QuantAggregatePeptideIonTableModel) compoundTableModel.getBaseModel();
+            return tableModel.getPeptideIon(selectedRow);
+        }
+        
+        private int getSelectedRowInModel() {
+            
             // Retrieve Selected Row
             int selectedRow = getSelectedRow();
 
             // nothing selected
             if (selectedRow == -1) {
-                return null;
+                return -1;
 
             }
 
             CompoundTableModel compoundTableModel = (CompoundTableModel) m_quantChildrenPeptideIonTable.getModel();
             if (compoundTableModel.getRowCount() == 0) {
-                return null; // this is a wart, for an unknown reason, it happens that the first row
+                return -1; // this is a wart, for an unknown reason, it happens that the first row
                 // is selected although it does not exist.
             }
 
@@ -384,14 +413,12 @@ public class XicParentPeptideIonPanel extends HourglassPanel implements DataBoxP
             } catch (Exception e) {
                 // for unknow reason, an exception can occures due to the fact that the sorter is not ready
                 m_loggerProline.debug("Exception catched as a wart : " + e.getMessage());
-                return null;
+                return -1;
             }
-            selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
+            
+            return compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
 
-            // Retrieve PeptideIon selected
-            QuantPeptideIonTableModel tableModel = (QuantPeptideIonTableModel) compoundTableModel.getBaseModel();
-            return tableModel.getPeptideIon(selectedRow);
-        }*/
+        }
 
         @Override
         public String getExportColumnName(int col) {

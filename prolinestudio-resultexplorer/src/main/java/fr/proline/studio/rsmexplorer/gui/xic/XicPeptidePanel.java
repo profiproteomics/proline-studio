@@ -90,7 +90,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
-import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingUtilities;
@@ -283,7 +282,7 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
                     m_modifyStatusDialog.setSelectedRows(selectedRows);
                     m_modifyStatusDialog.setVisible(true);
                     Point p = m_modifyStatusButton.getLocationOnScreen();
-                    m_modifyStatusDialog.setLocation(p.x + 5, p.y + 5);
+                    m_modifyStatusDialog.setLocationRelativeTo(m_modifyStatusButton);
                 }
             }
         };
@@ -932,6 +931,7 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
         class ModifyStatusPanel extends HourglassPanel {
 
             ModifyStatusPanel() {
+                super();
                 //model
                 //create local items
                 _selectedRows = new ArrayList();
@@ -1024,6 +1024,9 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
 
     }
 
+    /**
+     * Utility which show one JRadioButton with 2 icon after text
+     */
     class XRadioButtonPanel extends JPanel {
 
         private JRadioButton _radioButton;

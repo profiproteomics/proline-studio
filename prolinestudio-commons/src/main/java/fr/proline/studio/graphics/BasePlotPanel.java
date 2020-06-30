@@ -325,14 +325,16 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             int yAxisY = GAP_END_AXIS + titleY;
 
             int yAxisHeight = height - figuresXHeight - gapForAxisXTtile - GAP_END_AXIS - titleY;
-            if ((m_yAxis != null) && (m_yAxis.displayAxis())) {
+            if (m_yAxis != null) {
 
                 m_yAxis.setSize(yAxisX, yAxisY, yAxisWidth, yAxisHeight);
                 
-                //prepare plotArea begin point & height
-                m_plotArea.y = m_yAxis.getY() + 1;
-                m_plotArea.height = m_yAxis.getHeight();
-                m_yAxis.paint(g2d);
+                if (m_yAxis.displayAxis()) {
+                    //prepare plotArea begin point & height
+                    m_plotArea.y = m_yAxis.getY() + 1;
+                    m_plotArea.height = m_yAxis.getHeight();
+                    m_yAxis.paint(g2d);
+                }
             }
             //3.2 draw second axis Y & paint a rectangle to indicate the plot color on 2nd Axis Y
             if (displayYAxisAtRight) {

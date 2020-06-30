@@ -683,7 +683,7 @@ public class PlotStick extends PlotXYAbstract {
 
     @Override
     public boolean needsYAxis() {
-        return false;
+        return true;
     }
     
     @Override

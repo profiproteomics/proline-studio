@@ -117,6 +117,15 @@ public class DataboxChildFeature extends AbstractDataBox {
             return;
         }
 
+        
+        if (m_quantChannelInfo == null) {
+            
+            ((XicFeaturePanel) getDataBoxPanelInterface()).setData(-1l, null, null, null, true);
+            
+            return;
+        }
+
+
         final int loadingId = setLoading();
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 

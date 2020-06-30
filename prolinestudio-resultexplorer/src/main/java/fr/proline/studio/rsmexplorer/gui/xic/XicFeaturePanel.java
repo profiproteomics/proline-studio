@@ -342,15 +342,20 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
     
     public void setData(Long taskId,  List<DFeature> features, QuantChannelInfo quantChannelInfo, List<Boolean> featureHasPeak, boolean finished) {
         ((FeatureTableModel) ((CompoundTableModel) m_featureTable.getModel()).getBaseModel()).setData(taskId,  features, quantChannelInfo, featureHasPeak);
-        //m_featureTable.setColumnControlVisible(((FeatureTableModel) ((CompoundTableModel) m_featureTable.getModel()).getBaseModel()).getColumnCount() < XicProteinSetPanel.NB_MAX_COLUMN_CONTROL);     
-        m_titleLabel.setText(TABLE_TITLE +" ("+features.size()+")");
-        // select the first row
-        if ((features.size() > 0)) {
-            m_featureTable.getSelectionModel().setSelectionInterval(0, 0);
-            m_markerContainerPanel.setMaxLineNumber(features.size());
-        }
-        if (finished) {
-            m_featureTable.setSortable(true);
+
+        if (features == null) {
+            m_titleLabel.setText(TABLE_TITLE);
+            m_markerContainerPanel.setMaxLineNumber(0);
+        } else {
+            m_titleLabel.setText(TABLE_TITLE + " (" + features.size() + ")");
+            // select the first row
+            if ((features.size() > 0)) {
+                m_featureTable.getSelectionModel().setSelectionInterval(0, 0);
+                m_markerContainerPanel.setMaxLineNumber(features.size());
+            }
+            if (finished) {
+                m_featureTable.setSortable(true);
+            }
         }
     }
     

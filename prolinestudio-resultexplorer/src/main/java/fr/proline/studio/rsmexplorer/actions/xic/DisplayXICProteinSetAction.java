@@ -54,7 +54,7 @@ public class DisplayXICProteinSetAction extends AbstractRSMAction {
         final DDataset dataset = ((DataSetData) dataSetNode.getData()).getDataset();
 
 
-        WindowBox wbox = WindowBoxFactory.getXicQuantProteinSetWindowBox(dataset.getName(), dataset.getName()+" Protein Sets", dataSetNode.isQuantXIC());
+        WindowBox wbox = WindowBoxFactory.getXicQuantProteinSetWindowBox(dataset.getName(), dataset.getName()+" Protein Sets", dataSetNode.isQuantXIC(), dataset.isAggregation());
             wbox.setEntryData(dataset.getProject().getId(), dataset);
 
 

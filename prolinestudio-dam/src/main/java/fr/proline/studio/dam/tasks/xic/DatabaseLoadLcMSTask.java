@@ -238,6 +238,9 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
             }
         } else if (action == LOAD_FEATURE_FOR_PEPTIDE_ION_WITH_PEAKELS) {
             if (needToFetch()) {
+                if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
+                    m_taskError = DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
+                }
                 return fetchDataMainTaskChildFeatureForPeptideIonWithPeakels();
             }
         } else if (action == LOAD_ALIGNMENT_FOR_XIC) {

@@ -35,6 +35,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.pattern.xic.DataboxXicParentsPeptideIon;
 
 /**
  *
@@ -494,10 +495,11 @@ public class WindowBoxFactory {
      * @param xicMode
      * @return
      */
-    public static WindowBox getXicQuantProteinSetWindowBox(String dataName, String fullName, boolean xicMode) {
+    public static WindowBox getXicQuantProteinSetWindowBox(String dataName, String fullName, boolean xicMode, boolean aggregatedQuantiPeptideIon) {
 
         // create boxes
-        int nbBoxes = xicMode ? 6 : 3;
+        int nbBoxes = xicMode ? ((aggregatedQuantiPeptideIon) ? 7 : 6) : 3;
+
         AbstractDataBox[] boxes = new AbstractDataBox[nbBoxes];
         boxes[0] = new DataboxXicProteinSet();
         boxes[0].setDataName(dataName);
@@ -511,10 +513,21 @@ public class WindowBoxFactory {
             boxes[3] = new DataboxXicPeptideIon();
             ((DataboxXicPeptideIon) boxes[3]).setXICMode(xicMode);
             boxes[3].setLayout(SplittedPanelContainer.PanelLayout.VERTICAL);
-            boxes[4] = new DataboxChildFeature();
-            boxes[4].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
-            boxes[5] = new DataboxMultiGraphics(false, false);
-            boxes[5].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+
+            if (aggregatedQuantiPeptideIon) {
+                boxes[4] = new DataboxXicParentsPeptideIon();
+                boxes[4].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+                boxes[5] = new DataboxChildFeature();
+                boxes[5].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+                boxes[6] = new DataboxMultiGraphics(false, false);
+                boxes[6].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+            } else {
+
+                boxes[4] = new DataboxChildFeature();
+                boxes[4].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+                boxes[5] = new DataboxMultiGraphics(false, false);
+                boxes[5].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+            }
         }
 
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;

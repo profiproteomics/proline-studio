@@ -116,6 +116,7 @@ public class DataboxChildFeature extends AbstractDataBox {
         if (m_masterQuantPeptideIon == null && oldIon == null) {
             return;
         }
+
         
         if (m_quantChannelInfo == null) {
             
@@ -123,6 +124,7 @@ public class DataboxChildFeature extends AbstractDataBox {
             
             return;
         }
+
 
         final int loadingId = setLoading();
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {

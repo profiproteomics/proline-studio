@@ -275,7 +275,6 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataBoxPTMPeptidesGraphic();  
                 case DataboxXicParentsPeptideIon:
                     return new DataboxXicParentsPeptideIon();
-                    
             }
             return null; // should not happen
         }

@@ -499,6 +499,7 @@ public class WindowBoxFactory {
 
         // create boxes
         int nbBoxes = xicMode ? ((aggregatedQuantiPeptideIon) ? 7 : 6) : 3;
+
         AbstractDataBox[] boxes = new AbstractDataBox[nbBoxes];
         boxes[0] = new DataboxXicProteinSet();
         boxes[0].setDataName(dataName);
@@ -512,7 +513,7 @@ public class WindowBoxFactory {
             boxes[3] = new DataboxXicPeptideIon();
             ((DataboxXicPeptideIon) boxes[3]).setXICMode(xicMode);
             boxes[3].setLayout(SplittedPanelContainer.PanelLayout.VERTICAL);
-            
+
             if (aggregatedQuantiPeptideIon) {
                 boxes[4] = new DataboxXicParentsPeptideIon();
                 boxes[4].setLayout(SplittedPanelContainer.PanelLayout.TABBED);

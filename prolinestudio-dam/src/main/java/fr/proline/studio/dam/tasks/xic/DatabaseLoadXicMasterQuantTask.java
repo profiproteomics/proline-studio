@@ -74,6 +74,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -629,6 +630,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             entityManagerUDS.close();
         }
         return null;
+
     }
 
     public static TaskError fetchDataset(Long projectId, ArrayList<Long> childrenDatasetId, ArrayList<DDataset> m_childrenDatasetList) {

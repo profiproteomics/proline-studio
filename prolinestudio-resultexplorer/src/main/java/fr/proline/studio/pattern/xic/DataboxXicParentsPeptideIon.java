@@ -27,8 +27,6 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
-import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
-import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.ParameterList;
 import fr.proline.studio.pattern.ParameterSubtypeEnum;
@@ -81,13 +79,6 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
         outParameter.addParameter(QuantChannelInfo.class);
         outParameter.addParameter(DPeptideMatch.class);
         
-        /*outParameter.addParameter(ResultSummary.class);
-        outParameter.addParameter(DDataset.class);
-        outParameter.addParameter(DMasterQuantPeptideIon.class);
-        
-        
-        outParameter.addParameter(ExtendedTableModelInterface.class);*/ //JPM.PARENT.TODO
-        
         registerOutParameter(outParameter);
         
     }
@@ -98,8 +89,7 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);
-        
-        //getDataBoxPanelInterface().addSingleValue(new XicMode((m_isXICMode)));
+
     }
     
     @Override
@@ -111,6 +101,11 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
         m_aggregatedMasterQuantPeptideIon = (DMasterQuantPeptideIon) m_previousDataBox.getData(DMasterQuantPeptideIon.class);
 
         if (m_aggregatedMasterQuantPeptideIon == null || m_aggregatedMasterQuantPeptideIon.equals(oldParentMasterQuantPeptideIon)) {
+            
+            if (m_aggregatedMasterQuantPeptideIon == null) {
+                ((XicParentPeptideIonPanel) getDataBoxPanelInterface()).setData(null, null, null, null, null);
+            }
+            
             return;
         }
         

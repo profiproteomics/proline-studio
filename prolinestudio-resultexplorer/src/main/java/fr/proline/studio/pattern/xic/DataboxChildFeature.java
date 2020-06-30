@@ -116,6 +116,13 @@ public class DataboxChildFeature extends AbstractDataBox {
         if (m_masterQuantPeptideIon == null && oldIon == null) {
             return;
         }
+        
+        if (m_quantChannelInfo == null) {
+            
+            ((XicFeaturePanel) getDataBoxPanelInterface()).setData(-1l, null, null, null, true);
+            
+            return;
+        }
 
         final int loadingId = setLoading();
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {

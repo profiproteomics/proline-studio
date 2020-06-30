@@ -299,9 +299,9 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
     }
 
     public void setData(Long taskId, List<DFeature> features, QuantChannelInfo quantChannelInfo, List<Boolean> featureHasPeak) {
-        this.m_features = features;
-        this.m_quantChannelInfo = quantChannelInfo;
-        this.m_featureHasPeak = featureHasPeak ;
+        m_features = features;
+        m_quantChannelInfo = quantChannelInfo;
+        m_featureHasPeak = featureHasPeak ;
 
         m_taskId = taskId;
 

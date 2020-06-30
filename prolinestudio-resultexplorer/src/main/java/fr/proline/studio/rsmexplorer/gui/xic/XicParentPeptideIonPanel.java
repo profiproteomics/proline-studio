@@ -238,14 +238,22 @@ public class XicParentPeptideIonPanel extends HourglassPanel implements DataBoxP
 
     public void setData(DMasterQuantPeptideIon aggregatedMasterQuantPeptideIon, List<DMasterQuantPeptideIon> masterQuantPeptideIonList, QuantChannelInfo quantChannelInfo, HashMap<Long, HashSet<Long>> aggregatedToChildrenQuantChannelsId, HashMap<Long, DQuantitationChannel> quantitationChannelsMap) {
 
-        //JPM.TODO : not changed
-        
         ((QuantAggregatePeptideIonTableModel) ((CompoundTableModel) m_quantChildrenPeptideIonTable.getModel()).getBaseModel()).setData(aggregatedMasterQuantPeptideIon, masterQuantPeptideIonList, quantChannelInfo, aggregatedToChildrenQuantChannelsId, quantitationChannelsMap);
+
+        // select the first row
+        if ((masterQuantPeptideIonList != null) && (masterQuantPeptideIonList.size() > 0)) {
+            m_quantChildrenPeptideIonTable.getSelectionModel().setSelectionInterval(0, 0);
+            m_markerContainerPanel.setMaxLineNumber(masterQuantPeptideIonList.size());
+        }
+
+        m_infoToggleButton.updateInfo();
+
+        m_quantChildrenPeptideIonTable.setSortable(true);
 
         setColumnsVisibility();
     }
-    
-        public void setColumnsVisibility() {
+
+    public void setColumnsVisibility() {
 
         List<Integer> listIdsToHide = ((QuantAggregatePeptideIonTableModel) ((CompoundTableModel) m_quantChildrenPeptideIonTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
         List<TableColumn> columns = m_quantChildrenPeptideIonTable.getColumns(true);

@@ -72,72 +72,79 @@ public class QuantAggregatePeptideIonTableModel extends DecoratedTableModel impl
         for (String columnName : m_columnNames) {
             columnNamesDynamic.add(columnName);
         }
-        for (int col = 0; col < quantChannelInfo.getQuantChannels().length; col++) {
-            String rsmHtmlColor = CyclicColorPalette.getHTMLColor(col);
-            sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
-            sb.append(quantChannelInfo.getQuantChannels()[col].getName());
-            sb.append("</html>");
-            columnNamesDynamic.add(sb.toString());
-            sb.setLength(0);
-        }
+        if (aggregatedMasterQuantPeptideIon == null) {
+            // row and col count
+            m_nbRows = 0;
+            m_nbCols = columnNamesDynamic.size();
+            m_abundances = null;
+            m_sourceQuantiNames.clear();
+            m_quantChannelInfoChildren = null;
+        } else {
 
-       
-       
-       // row and col count
-       m_nbRows = masterQuantPeptideIonList.size();
-       m_nbCols = columnNamesDynamic.size();
-       
-       
-       // source quanti names and QuantChannelInfo
-       m_quantChannelInfoChildren = new ArrayList<>();
-       for (int row = 0; row < m_nbRows; row++) {
-           String quantiName = "";
-            DMasterQuantPeptideIon masterQuantPeptideIon = masterQuantPeptideIonList.get(row);
-            ArrayList<DQuantitationChannel> quantChannelsChild = new ArrayList<>();
-            searchQuantiName:
-            for (DQuantitationChannel qc : quantChannelInfo.getQuantChannels()) {
-                HashSet<Long> childrenQC = aggregatedToChildrenQuantChannelsId.get(qc.getId());
-                Map<Long, DQuantPeptideIon> quantPeptideIonMap = masterQuantPeptideIon.getQuantPeptideIonByQchIds();
-                for (Long qcId : childrenQC) {
-                    if (quantPeptideIonMap.get(qcId) != null) {
-                        quantiName = quantitationChannelsMap.get(qcId).getMasterQuantitationChannel().getDataset().getName();
-                        quantChannelsChild.add(quantitationChannelsMap.get(qcId));
-                        break searchQuantiName;
-                    }
-                }
-                m_quantChannelInfoChildren.add(new QuantChannelInfo(quantChannelsChild));
+            for (int col = 0; col < quantChannelInfo.getQuantChannels().length; col++) {
+                String rsmHtmlColor = CyclicColorPalette.getHTMLColor(col);
+                sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
+                sb.append(quantChannelInfo.getQuantChannels()[col].getName());
+                sb.append("</html>");
+                columnNamesDynamic.add(sb.toString());
+                sb.setLength(0);
             }
-            
-            m_sourceQuantiNames.add(quantiName);
-        }
-  
-        // abundances
-        m_abundances = new Integer[m_nbRows][m_nbCols-LAST_STATIC_COLUMN-1];
-        for (int row = 0;row <m_nbRows;row++) {
-            DMasterQuantPeptideIon masterQuantPeptideIon = masterQuantPeptideIonList.get(row);
-            for (int col =0;col<m_nbCols-LAST_STATIC_COLUMN-1;col++) {
-                
-                Integer abundance = null;
-                
-                DQuantitationChannel aggregateQC = quantChannelInfo.getQuantChannels()[col];
-                HashSet<Long> childrenQC = aggregatedToChildrenQuantChannelsId.get(aggregateQC.getId());
 
-                DQuantPeptideIon peptideIon = null;
-                Map<Long, DQuantPeptideIon> quantPeptideIonMap = masterQuantPeptideIon.getQuantPeptideIonByQchIds();
-                for (Long qcId : childrenQC) {
-                    peptideIon = quantPeptideIonMap.get(qcId);
-                    if (peptideIon != null) {
-                        break;
+            // row and col count
+            m_nbRows = masterQuantPeptideIonList.size();
+            m_nbCols = columnNamesDynamic.size();
+
+            // source quanti names and QuantChannelInfo
+            m_quantChannelInfoChildren = new ArrayList<>();
+            for (int row = 0; row < m_nbRows; row++) {
+                String quantiName = "";
+                DMasterQuantPeptideIon masterQuantPeptideIon = masterQuantPeptideIonList.get(row);
+                ArrayList<DQuantitationChannel> quantChannelsChild = new ArrayList<>();
+                searchQuantiName:
+                for (DQuantitationChannel qc : quantChannelInfo.getQuantChannels()) {
+                    HashSet<Long> childrenQC = aggregatedToChildrenQuantChannelsId.get(qc.getId());
+                    Map<Long, DQuantPeptideIon> quantPeptideIonMap = masterQuantPeptideIon.getQuantPeptideIonByQchIds();
+                    for (Long qcId : childrenQC) {
+                        if (quantPeptideIonMap.get(qcId) != null) {
+                            quantiName = quantitationChannelsMap.get(qcId).getMasterQuantitationChannel().getDataset().getName();
+                            quantChannelsChild.add(quantitationChannelsMap.get(qcId));
+                            break searchQuantiName;
+                        }
                     }
+                    m_quantChannelInfoChildren.add(new QuantChannelInfo(quantChannelsChild));
                 }
 
-                if (peptideIon != null) {
-                    abundance = new Integer(Math.round(peptideIon.getAbundance()));
-                } else {
-                    abundance = new Integer(0);
+                m_sourceQuantiNames.add(quantiName);
+            }
+
+            // abundances
+            m_abundances = new Integer[m_nbRows][m_nbCols - LAST_STATIC_COLUMN - 1];
+            for (int row = 0; row < m_nbRows; row++) {
+                DMasterQuantPeptideIon masterQuantPeptideIon = masterQuantPeptideIonList.get(row);
+                for (int col = 0; col < m_nbCols - LAST_STATIC_COLUMN - 1; col++) {
+
+                    Integer abundance = null;
+
+                    DQuantitationChannel aggregateQC = quantChannelInfo.getQuantChannels()[col];
+                    HashSet<Long> childrenQC = aggregatedToChildrenQuantChannelsId.get(aggregateQC.getId());
+
+                    DQuantPeptideIon peptideIon = null;
+                    Map<Long, DQuantPeptideIon> quantPeptideIonMap = masterQuantPeptideIon.getQuantPeptideIonByQchIds();
+                    for (Long qcId : childrenQC) {
+                        peptideIon = quantPeptideIonMap.get(qcId);
+                        if (peptideIon != null) {
+                            break;
+                        }
+                    }
+
+                    if (peptideIon != null) {
+                        abundance = new Integer(Math.round(peptideIon.getAbundance()));
+                    } else {
+                        abundance = new Integer(0);
+                    }
+
+                    m_abundances[row][col] = abundance;
                 }
-                  
-                m_abundances[row][col] = abundance;
             }
         }
         

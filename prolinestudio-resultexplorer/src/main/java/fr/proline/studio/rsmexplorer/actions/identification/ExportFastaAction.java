@@ -219,7 +219,7 @@ public class ExportFastaAction extends AbstractRSMAction {
                 m_logger.debug("->rsm is ok");
                 String properties = rsm.getSerializedProperties();
 
-                if (properties.contains(SEQUENCE_RETRIVED) || m_selectedNode.isBioRetrived()) {
+                if (properties != null && properties.contains(SEQUENCE_RETRIVED) || m_selectedNode.isBioRetrived()) {
                     m_logger.debug("-->rsm : sequenceRetrived");
                     //write bio sequence
                     extraitProteinSet(rsm);
@@ -247,7 +247,7 @@ public class ExportFastaAction extends AbstractRSMAction {
                     if (success) {
                         String properties = dataSet.getResultSummary().getSerializedProperties();
 
-                        if (properties.contains(SEQUENCE_RETRIVED)) {
+                        if (properties != null && properties.contains(SEQUENCE_RETRIVED)) {
                             extraitProteinSet(dataSet.getResultSummary());
                         } else {
                             retriveBioSequence(dataSet);

@@ -148,7 +148,7 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
     
         if (!pm.isDBiosequenceSet() && projectId != null) {
             m_logger.info("BioSequence is absent from the protein match, trying to load it ...");
-            DatabaseBioSequenceTask.fetchData(Collections.singletonList(pm), projectId);
+            DatabaseBioSequenceTask.fetchData(Collections.singletonList(pm), projectId);//task not launched @todo
         }
 
         if (pm.isDBiosequenceSet()) {

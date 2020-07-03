@@ -96,7 +96,13 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
     // true if the user has to choose a file, false if it's a directory, in case of tsv or multi export
     private static boolean m_fileExportMode;
 
+    /**
+     * Export Excel FileChooser
+     */
     private final JFileChooser m_fchooser;
+    /**
+     * Config File FileChooser
+     */
     private final JFileChooser m_exportFchooser;
 
     private ProgressTask m_task = null;

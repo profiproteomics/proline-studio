@@ -74,7 +74,7 @@ public class RunInfoData extends AbstractData {
         }
         String fileName = linkedFile.getRawFileName();
         if (m_potentialRawFileMap.get(fileName) == null) {
-            m_potentialRawFileMap.put(linkedFile.getRawFileName(), linkedFile);
+            m_potentialRawFileMap.put(fileName, linkedFile);
         }
 
     }

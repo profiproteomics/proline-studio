@@ -165,6 +165,16 @@ public class DataSetNode extends AbstractNode {
         return false;
     }
 
+    boolean m_isBioSequenceRetrived = false;
+
+    public boolean isBioRetrived() {
+        return m_isBioSequenceRetrived;
+    }
+
+    public void setBioRetrived(boolean b) {
+        m_isBioSequenceRetrived = b;
+    }
+
     public DDataset getDataset() {
         return ((DataSetData) getData()).getDataset();
     }

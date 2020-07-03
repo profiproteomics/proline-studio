@@ -127,7 +127,7 @@ public class XICRunNode extends AbstractNode {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     if (success) {
-                        if (!rawfileFounds.isEmpty()) {
+                        if (!rawfileFounds.isEmpty()) {//LINKED_IN_DATABASE
 
                             RawFile rawFile = rawfileFounds.entrySet().iterator().next().getValue();
 

@@ -275,8 +275,8 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
                 String s = "";
                 for (DPeptidePTM pep : ptms) {
                     DInfoPTM ptmTypeInfo = DInfoPTM.getInfoPTMMap().get(pep.getIdPtmSpecificity());
-                    int position = positionOnProtein; //(int) pep.getSeqPosition();//position convert to int
-                    s += ptmTypeInfo.toReadablePtmString(position);//@todo position on pep ou position on prot?
+                    int position = positionOnProtein; 
+                    s += ptmTypeInfo.toReadablePtmString(position);
                 }
                 return s;
             }

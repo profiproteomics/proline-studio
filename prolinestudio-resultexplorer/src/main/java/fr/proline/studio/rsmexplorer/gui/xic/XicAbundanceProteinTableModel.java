@@ -122,7 +122,6 @@ public class XicAbundanceProteinTableModel extends XICComparePeptideTableModel i
         return getSingleValue(c);
     }
 
-    //@todo à verifier
     @Override
     public Object getRowValue(Class c, int row) {
         if (c.equals(DQuantitationChannel.class)) {

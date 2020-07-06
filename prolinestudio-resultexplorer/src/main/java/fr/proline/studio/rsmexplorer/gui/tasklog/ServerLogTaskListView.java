@@ -96,7 +96,7 @@ public class ServerLogTaskListView extends JScrollPane implements TaskListInterf
     }
 
     /**
-     * @todo verify if useful
+     * optional 
      */
     private void initColumnsize() {
         String[] example = {"198", "853bda4a-10d9-11e8-9a85-d9411af38406", "[pool-2-thread-25]", "proline/dps/msi/ImportValidateGenerateSM", " result_files :  mascot_data/20200113/F136424.dat ",

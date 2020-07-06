@@ -55,6 +55,7 @@ import java.util.prefs.Preferences;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -357,10 +358,6 @@ public class ExportFastaAction extends AbstractRSMAction {
 
         private void writeBioSequence(DProteinSet[] proteinSetArray) {
             m_logger.debug("->writeBioSequence");
-            if (m_localFile.exists()) {
-                //@todo prompt rewrite
-            }
-
             try {
                 m_writer = new BufferedWriter(new FileWriter(m_localFile));
                 int lineLength = 60;
@@ -427,15 +424,16 @@ public class ExportFastaAction extends AbstractRSMAction {
             setResizable(true);
             setTitle("Export Fasta");
             setButtonVisible(BUTTON_HELP, true);
-            //@todo 
+            //@todo Help link
             setDocumentationSuffix("id.37m2jsg");
 
             Preferences preferences = NbPreferences.root();
-            _localFile = new File(preferences.get("DefaultFastaExportPath", System.getProperty("user.home"))
-                    + File.separator + _dataSetN.toString() + "." + EXT_FASTA);
+            String lastPath = preferences.get("DefaultFastaExportPath", System.getProperty("user.home"));
 
+            String fileName = _dataSetN.toString() + "." + EXT_FASTA;
+            _localFile = new File(lastPath + File.separator + fileName);
             _fchooser = new JFileChooser(_localFile);//longtime
-            //m_loadWaitingDialog.setVisible(false);
+            _fchooser.setSelectedFile(_localFile);
             FileNameExtensionFilter FILTER_FASTA = new FileNameExtensionFilter("Fasta File (." + EXT_FASTA + ")", EXT_FASTA);
 
             _fchooser.addChoosableFileFilter(FILTER_FASTA);
@@ -499,6 +497,16 @@ public class ExportFastaAction extends AbstractRSMAction {
             _localFile = new File(_fileTextField.getText().trim());
             Preferences preferences = NbPreferences.root();
             preferences.put("DefaultFastaExportPath", _localFile.getAbsoluteFile().getParentFile().getAbsolutePath());
+            if (_localFile.exists()) {
+                String message = "The file already exists. Do you want to overwrite it ?";
+                String title = "Overwrite ?";
+                String[] options = {"Yes", "No"};
+                int reply = JOptionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, "Yes");
+                if (reply != JOptionPane.YES_OPTION) {
+                    setStatus(true, "File already exists.");
+                    return false;
+                }
+            }
             m_task.execute();
             return true;
         }

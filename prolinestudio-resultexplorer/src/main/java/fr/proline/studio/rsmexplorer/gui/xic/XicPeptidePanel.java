@@ -1035,19 +1035,16 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
 
         public XRadioButtonPanel(String text, ImageIcon icon) {
             setLayout(new GridBagLayout());
-            add(getRadioButton());
-            _label = new JLabel(text);
+            _radioButton = new JRadioButton(text);
+            _label = new JLabel(icon);
             _label.setHorizontalTextPosition(JLabel.LEFT);
             _label.setVerticalTextPosition(JLabel.BOTTOM);
-            _label.setLabelFor(getRadioButton());
-            _label.setIcon(icon);
+            _label.setToolTipText(text);
+            add(_radioButton);
             add(_label);
         }
 
         public JRadioButton getRadioButton() {
-            if (_radioButton == null) {
-                _radioButton = new JRadioButton();
-            }
             return _radioButton;
         }
 
@@ -1066,12 +1063,16 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
                 remove(_optionIconLabel);
             }
             ImageIcon icon = null;
+            String tooltips;
             if (isManual) {
                 icon = new ImageIcon(IconManager.getIcon(IconManager.IconType.NAVIGATE).getImage().getScaledInstance(16, 16, Image.SCALE_DEFAULT));
+                tooltips = "Manual";
             } else {
                 icon = new ImageIcon(IconManager.getIcon(IconManager.IconType.GEAR).getImage().getScaledInstance(16, 16, Image.SCALE_DEFAULT));
+                tooltips = "Automatic";
             }
             _optionIconLabel = new JLabel(icon);
+            _optionIconLabel.setToolTipText(tooltips);
             add(_optionIconLabel);
         }
 

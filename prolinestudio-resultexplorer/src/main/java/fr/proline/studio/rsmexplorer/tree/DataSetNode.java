@@ -51,7 +51,12 @@ public class DataSetNode extends AbstractNode {
 
     private boolean m_isReference = false;
     private boolean m_isRefined = false;
-
+    
+    /**
+     * combine with RSM.getSerializedProperties(), to determinate if this rsm isBioSequenceRetrived. 
+     */
+    boolean m_isBioSequenceRetrived = false;
+    
     public DataSetNode(NodeTypes type, AbstractData data) {
         super(type, data);
     }
@@ -165,12 +170,21 @@ public class DataSetNode extends AbstractNode {
         return false;
     }
 
-    boolean m_isBioSequenceRetrived = false;
-
+    /**
+     * if you have setBioRetrived(true) after an action retriveBioSequence, you can test this field, if not, it return always false;
+     * So you should combine with the value "is_coverage_updated" in  ResultSummary.getSerializedProperties()
+     * 
+     * @return 
+     */
     public boolean isBioRetrived() {
         return m_isBioSequenceRetrived;
     }
-
+    
+    /**
+     * for a ResultSummary, after the action retriveBioSequence, as ResultSummary is already in memory, the value "is_coverage_updated" in  ResultSummary.getSerializedProperties() is false, so we use
+     * this field m_isBioSequenceRetrived to help marker that this rsm is equals to "is_coverage_updated:true".
+     * @param b 
+     */
     public void setBioRetrived(boolean b) {
         m_isBioSequenceRetrived = b;
     }

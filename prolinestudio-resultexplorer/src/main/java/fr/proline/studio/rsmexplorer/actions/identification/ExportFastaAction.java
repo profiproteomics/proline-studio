@@ -31,8 +31,6 @@ import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.RetrieveBioSeqTask;
 import fr.proline.studio.gui.DefaultDialog;
-import static fr.proline.studio.gui.DefaultDialog.BUTTON_HELP;
-import static fr.proline.studio.gui.DefaultDialog.BUTTON_OK;
 import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
@@ -66,6 +64,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.DefaultTreeModel;
+import org.apache.commons.lang3.StringUtils;
 import org.openide.util.NbBundle;
 import org.openide.util.NbPreferences;
 import org.openide.windows.WindowManager;
@@ -99,21 +98,15 @@ public class ExportFastaAction extends AbstractRSMAction {
     @Override
     public void actionPerformed(final AbstractNode[] selectedNodes, final int x, final int y) {
         String waitingTxt = "Please wait while loading template to configure export";
-//        m_loadWaitingDialog = new LoadWaitingDialog(WindowManager.getDefault().getMainWindow(), waitingTxt);
-//        m_loadWaitingDialog.setLocation(x, y);
-//        m_loadWaitingDialog.setVisible(true);
 
         final DataSetNode dataSetNode = (DataSetNode) selectedNodes[0];
-        //FastaExportDialog fastaExportDialog = new FastaExportDialog(WindowManager.getDefault().getMainWindow(), dataSetNode);
         FastaExportMulitipleDialog exportMultipleDialog = new FastaExportMulitipleDialog(WindowManager.getDefault().getMainWindow(), selectedNodes);
 
         ExportFastaProgressTask exportFastaProgressTask = new ExportFastaProgressTask(selectedNodes, exportMultipleDialog);
         exportMultipleDialog.setTask(exportFastaProgressTask);
         exportMultipleDialog.setLocation(x, y);
-        //fastaExportDialog.setVisible(true);
         exportMultipleDialog.setLocation(x, y);
         exportMultipleDialog.setVisible(true);
-//        m_loadWaitingDialog.setVisible(false);
     }
 
     /**
@@ -165,6 +158,10 @@ public class ExportFastaAction extends AbstractRSMAction {
 
         setEnabled(true);
 
+    }
+
+    public static enum ExportMode {
+        SINGLE, MULTIPLE, CONCATENATED
     }
 
     /**
@@ -394,7 +391,6 @@ public class ExportFastaAction extends AbstractRSMAction {
                 }
             };
 
-            //DatabaseProteinMatchesTask task = new DatabaseProteinMatchesTask(callback, m_projectId, _rset); //this can retreive protein bio sequence 
             // ask asynchronous loading of data
             DatabaseProteinSetsTask task = new DatabaseProteinSetsTask(callback);
             task.initLoadProteinSets(m_projectId, rsm);
@@ -501,7 +497,9 @@ public class ExportFastaAction extends AbstractRSMAction {
     class FastaExportMulitipleDialog extends DefaultDialog {
 
         JFileChooser _fchooser;
-        String EXT_FASTA = "fasta";
+        final static String EXT_FASTA = "fasta";
+        final static int DATASET_NAME_LENGTH = 20; //length to be shown in label
+        final static int MAX_FILENAME_LENGTH = 80;//not include directory length, default windows max path = 260, 
         FileNameExtensionFilter FILTER_FASTA = new FileNameExtensionFilter("Fasta File (." + EXT_FASTA + ")", EXT_FASTA);
         private ExportFastaProgressTask _progressTask = null;
         AbstractNode[] _nodes;
@@ -520,21 +518,39 @@ public class ExportFastaAction extends AbstractRSMAction {
             _nodes = selectedNodes;
             setResizable(true);
             setTitle("Export Fasta Multiple");
-            setButtonVisible(BUTTON_HELP, true);
-            //@todo Help link
-            setDocumentationSuffix("id.37m2jsg");
 
             Preferences preferences = NbPreferences.root();
             String lastPath = preferences.get("DefaultFastaExportPath", System.getProperty("user.home"));
 
             _dataSetFileNameMap = new HashMap();
-            String fileName = ((DataSetNode) _nodes[0]).toString() + "." + EXT_FASTA;
-            _localFile = new File(lastPath + File.separator + fileName);
+            String fn = ((DataSetNode) _nodes[0]).toString() + "." + EXT_FASTA;
+            int nbNode = selectedNodes.length;
+            if (nbNode > 1) {
+                fn = "";
+                for (int i = 0; i < nbNode; i++) {
+                    DataSetNode node = (DataSetNode) selectedNodes[i];
+                    fn += node.getDataset().getName();
+                    if (i < nbNode - 1) {
+                        fn += "-";
+                    }
+                }
+                if (fn.length() > MAX_FILENAME_LENGTH) {
+                    fn = "";
+                    int blocLength = MAX_FILENAME_LENGTH / nbNode;
+                    for (int j = 0; j < nbNode; j++) {
+                        DataSetNode node = (DataSetNode) selectedNodes[j];
+                        String n = node.getDataset().getName();
+                        fn += StringUtils.right(n, blocLength);
+                        if (j < nbNode - 1) {
+                            fn += "-";
+                        }
+                    }
+                }
+                fn += "." + EXT_FASTA;
+            }
+            _localFile = new File(lastPath + File.separator + fn);
             _fchooser = new JFileChooser(_localFile);//longtime
-            //_fchooser.setSelectedFile(_localFile);
-
             _fchooser.addChoosableFileFilter(FILTER_FASTA);
-
             _fchooser.setMultiSelectionEnabled(false);
             _multipleButton = new JCheckBox("Mutiple Export: One fasta file for one DataSet");
             setInternalComponent(initComponent(_localFile));
@@ -578,9 +594,7 @@ public class ExportFastaAction extends AbstractRSMAction {
                         if (textFile.length() > 0) {
                             File currentFile = new File(textFile);
                             _fchooser.setSelectedFile(currentFile);
-
                         }
-
                         int result = _fchooser.showOpenDialog(chooseFileBt);
                         if (result == JFileChooser.APPROVE_OPTION) {
                             _pathTextField.setText(_fchooser.getSelectedFile().getAbsolutePath());
@@ -609,8 +623,6 @@ public class ExportFastaAction extends AbstractRSMAction {
                         String directory = _pathTextField.getText().trim();
                         String fileName = _localFile.getName();
                         File f = new File(directory + File.separator + fileName);
-                        //_fchooser.setCurrentDirectory(f);
-                        // _fchooser.setSelectedFile(f);
                         _fchooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
                         _fchooser.addChoosableFileFilter(FILTER_FASTA);
                         _pathTextField.setText(f.getAbsolutePath());
@@ -626,8 +638,6 @@ public class ExportFastaAction extends AbstractRSMAction {
                         }
                         _localDirectory = new File(directory);
                         _pathTextField.setText(directory);
-                        //_fchooser.setCurrentDirectory(_localDirectory);
-                        //_fchooser.setSelectedFile(_localDirectory);
                         _fchooser.removeChoosableFileFilter(FILTER_FASTA);
                         _fchooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
@@ -641,15 +651,16 @@ public class ExportFastaAction extends AbstractRSMAction {
                         int i = 0;
                         for (AbstractNode node : _nodes) {
                             DataSetNode dNode = (DataSetNode) node;
-                            JLabel lb2File = new JLabel("Export to file:");
+                            String dataSetName = dNode.toString();
+                            JLabel lb2File = new JLabel(dataSetName + ", Export to file:");
                             co.gridx = 0;
                             optionPane.add(lb2File, co);
                             JTextField fNameField;
                             if (isFirstExpand) {
                                 fNameField = _dataSetFileNameMap.get(dNode);
                             } else {
-                                String dataSetName = dNode.toString();
                                 fNameField = new JTextField(40);
+                                StringUtils.right(dataSetName, DATASET_NAME_LENGTH);
                                 fNameField.setText(dataSetName + "." + EXT_FASTA);
                                 _dataSetFileNameMap.put(dNode, fNameField);
                             }
@@ -683,7 +694,6 @@ public class ExportFastaAction extends AbstractRSMAction {
 
         @Override
         protected boolean okCalled() {
-
             _localFile = new File(_pathTextField.getText().trim());
             Preferences preferences = NbPreferences.root();
             String dir = _localFile.isDirectory() ? _localFile.getAbsolutePath() : _localFile.getAbsoluteFile().getParentFile().getAbsolutePath();
@@ -696,15 +706,8 @@ public class ExportFastaAction extends AbstractRSMAction {
                     highlight(_pathTextField);
                     return false;
                 }
-                if (_localFile.exists()) {
-                    String message = "The file already exists. Do you want to overwrite it ?";
-                    String title = "Overwrite ?";
-                    String[] options = {"Yes", "No"};
-                    int reply = JOptionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, "Yes");
-                    if (reply != JOptionPane.YES_OPTION) {
-                        setStatus(true, "File already exists.");
-                        return false;
-                    }
+                if (overwriteExistFile(_localFile) == false) {
+                    return false;
                 }
                 _dataSetExportFileMap.put((DataSetNode) this._nodes[0], _localFile);
             } else {
@@ -724,10 +727,28 @@ public class ExportFastaAction extends AbstractRSMAction {
                         highlight(field);
                         return false;
                     }
-                    _dataSetExportFileMap.put(node, new File(_localDirectory + File.separator + fName));
+                    File aFile = new File(_localDirectory + File.separator + fName);
+                    if (overwriteExistFile(aFile) == false) {
+                        return false;
+                    }
+                    _dataSetExportFileMap.put(node, aFile);
                 }
             }
             _progressTask.execute();
+            return true;
+        }
+
+        private boolean overwriteExistFile(File file) {
+            if (file.exists()) {
+                String message = "The file " + file.getName() + " already exists. Do you want to overwrite it ?";
+                String title = "Overwrite ?";
+                String[] options = {"Yes", "No"};
+                int reply = JOptionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, "Yes");
+                if (reply != JOptionPane.YES_OPTION) {
+                    setStatus(true, "File " + file.getName() + " already exists.");
+                    return false;
+                }
+            }
             return true;
         }
 
@@ -753,7 +774,4 @@ public class ExportFastaAction extends AbstractRSMAction {
         }
     }
 
-    public static enum ExportMode {
-        SINGLE, MULTIPLE, CONCATENATED
-    }
 }

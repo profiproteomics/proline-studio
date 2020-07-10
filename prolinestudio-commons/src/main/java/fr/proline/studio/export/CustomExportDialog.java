@@ -174,9 +174,6 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         //m_lastDefaultExportConfig =  preferences.get("DefaultExportConfig", null);
         //m_lastExportConfig =  preferences.get("ExportConfig", null);
         m_tabTitleIdHashMap = new HashMap<>(); // this is used to store tab id/tab title matching
-        /**
-         * @kx here: createCustomExportPanel
-         */
         setInternalComponent(createCustomExportPanel(defaultExportPath));
 
         setButtonName(BUTTON_OK, "Export");
@@ -433,7 +430,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
     }
 
     /**
-     * also listen to File button, export file and type
+     * Main panel, listen to addFileButton(FileChooser), export file JTextField and ComboBox file type
      *
      * @param defaultExportPath
      * @return
@@ -528,7 +525,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         c.weightx = 1;
         insidePanel.add(m_exporTypeCombobox, c);
         c.weightx = 0;
-        //@kx create optionPanel, #########important panel
+        //create optionPanel, will be a CollapsablePanel 
         m_optionPanel = createOptionPanel();
         c.gridx = 0;
         c.gridwidth = 3;
@@ -546,7 +543,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
     }
 
     /**
-     * optionPanel, add 4 commboBox, without listen, Date format,Protein
+     * Custom options Panel, add 4 commboBox, without listener, Date format,Protein
      * sets,Number separator,Export profile,
      *
      * call createTabbedOptionPanel

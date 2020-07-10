@@ -156,7 +156,7 @@ public abstract class PlotBaseAbstract implements Axis.EnumXInterface, Axis.Enum
             m_plotPanel.setAxisXSpecificities(isIntegerX, isEnumX, false);
         }
 
-        if (!needsYAxis()) {//@kx ?????
+        if (!needsYAxis()) {
             m_plotPanel.getYAxis().setSpecificities(false, false, true);
         } else if ((needsYAxis()) && (m_cols[COL_Y_ID] != -1)) {
             Class yClass = m_compareDataInterface.getDataColumnClass(m_cols[COL_Y_ID]);

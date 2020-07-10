@@ -61,7 +61,7 @@ import java.util.Map;
 import javax.swing.table.TableCellRenderer;
 
 /**
- * @kx Table Model for XIC-displayAbundances-Proteins sets
+ * Table Model for XIC-displayAbundances-Proteins sets
  * @author JM235353
  */
 public class QuantProteinSetTableModel extends LazyTableModel implements ExportTableSelectionInterface, GlobalTableModelInterface {

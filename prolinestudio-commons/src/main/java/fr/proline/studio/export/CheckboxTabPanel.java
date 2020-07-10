@@ -27,7 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 /**
- * @kx, tabbedPanel in CustomOptions Panel, one title with it's checkBox 
+ * TabbedPanel used in CustomOptions Panel, one title with it's checkBox 
  * @author JM235353
  */
 public class CheckboxTabPanel extends JPanel {

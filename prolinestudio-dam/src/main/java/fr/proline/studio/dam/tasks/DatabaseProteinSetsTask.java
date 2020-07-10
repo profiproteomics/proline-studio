@@ -369,7 +369,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             DProteinMatch pmCur = itTypical.next();
             typicalProteinMap.put(pmCur.getId(), pmCur);
         }
-        //@kx add here mass=bioSequence in DProteinMatch
+        // add here mass=bioSequence in DProteinMatch
         DatabaseBioSequenceTask.fetchData(typicalProteinMap.values().stream().collect(Collectors.toList()), m_projectId);
         for (int i = subTask.getStartIndex(); i <= subTask.getStopIndex(); i++) {
             DProteinSet proteinSetCur = proteinSetArray[i];

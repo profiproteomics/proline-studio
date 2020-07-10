@@ -125,7 +125,7 @@ public class QCMappingTransferHandler extends AbstractTreeTransferHandler {
             }
             ArrayList<String> doubleChannel = m_treeTableModel.findRedundantChannel(dropLocationDs);
             if (doubleChannel != null && !doubleChannel.isEmpty()) {
-                String message = String.format("Channels: %s are repeated in this Quantitation column", doubleChannel.stream().collect(Collectors.joining(",")));
+                String message = String.format("Some repeated channel(s) in this Quantitation column: \n  %s ", doubleChannel.stream().collect(Collectors.joining(",")));
                 JOptionPane.showMessageDialog(m_tree, message);
             }
             return false;

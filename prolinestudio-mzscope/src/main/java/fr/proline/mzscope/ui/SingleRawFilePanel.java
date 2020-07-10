@@ -78,6 +78,7 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
       });
 
       chromatogramToolbar.add(editFeatureBtn);
+      spectrumContainerPanel.updateToolbar();
       return chromatogramToolbar;
    }
 
@@ -90,10 +91,11 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
         int minIdx = SpectrumUtils.getNearestPeakIndex(chrom.getTime(), min);
         int maxIdx = Math.min(SpectrumUtils.getNearestPeakIndex(chrom.getTime(), max)+1, chrom.getTime().length);
         Signal signal = new Signal(Arrays.copyOfRange(chrom.getTime(), minIdx, maxIdx), Arrays.copyOfRange(chrom.getIntensities(), minIdx, maxIdx));
+        signal.setSignalType(Signal.PROFILE);
         signals.add(signal);
       }
       JDialog dialog = new JDialog((JFrame)this.getTopLevelAncestor(), "Feature editor", true);
-      dialog.setContentPane(SignalEditorBuilder.buildEditor(signals));
+      dialog.setContentPane(SignalViewerBuilder.buildEditor(signals));
       dialog.pack();
       dialog.setVisible(true);
       logger.info("Edit feature within range "+min+", "+max);

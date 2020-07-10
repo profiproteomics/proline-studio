@@ -121,7 +121,7 @@ public class ServerLogFileNameDialog extends DefaultDialog {
      */
     private JDialog createLogParserDialog(ArrayList<File> fileList) {
 
-        JDialog logViewDialog = new JDialog(WindowManager.getDefault().getMainWindow(), "Parse Tasks On The Server", Dialog.ModalityType.APPLICATION_MODAL);
+        JDialog logViewDialog = new JDialog(WindowManager.getDefault().getMainWindow(), "Parse Tasks In Server Log File", Dialog.ModalityType.APPLICATION_MODAL);
         logViewDialog.getContentPane().setLayout(new BorderLayout());
         //task flow
         JInternalFrame taskFlowFrame;
@@ -327,19 +327,20 @@ public class ServerLogFileNameDialog extends DefaultDialog {
 
             @Override
             public void run(boolean success) {
+                String notExistMsg = "The file does not exist, perhaps there are no log for the selected day.";
                 if (!isDebugFile) {
                     if (success) {
-                        m_logger.debug("Retrive file \"" + localFile.getName() + "\" from server succes.");
+                        m_logger.debug("Retrieving file \"" + localFile.getName() + "\" from server succes.");
                         m_fileList.add(localFile);
                         createLogParserDialog(m_fileList);
                     } else {
 
-                        JOptionPane.showMessageDialog(rootPane, "Retrive File \"" + localFile.getName() + "\" failed.\n"
-                                + " The file name/path error or it does not exist a so file(by example a off day)");
+                        JOptionPane.showMessageDialog(rootPane, "Retrieving  File \"" + localFile.getName() + "\"has failed.\n"
+                                + notExistMsg);
                     }
                 } else {
                     if (success) {
-                        m_logger.debug("Retrive file \"" + localFile.getName() + "\" from server succes.");
+                        m_logger.debug("Retrieving file \"" + localFile.getName() + "\" from server succes.");
 
                         m_fileList.add(localFile);
                         int next = index + 1;
@@ -347,7 +348,7 @@ public class ServerLogFileNameDialog extends DefaultDialog {
                     } else {
                         if (index == 0 && !m_isTodayDebug) {//first file do not exist => this day, we have not debug log file
                             JOptionPane.showMessageDialog(rootPane, "Retrive File \"" + localFile.getName() + "\" failed.\n"
-                                    + " The file name/path error or it does not exist a so file(by example a off day)");
+                                    + notExistMsg);
                         } else {
                             if (m_isTodayDebug) {
                                 retriveFile(LOG_TODAY_DEBUG_FILE_NAME, !isDebugFile, index);//the last log file to retrive, 

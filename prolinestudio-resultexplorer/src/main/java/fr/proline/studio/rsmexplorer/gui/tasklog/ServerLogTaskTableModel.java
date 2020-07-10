@@ -29,6 +29,7 @@ import fr.proline.studio.table.AbstractDecoratedGlobalTableModel;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import javax.swing.JLabel;
 import javax.swing.JTable;
@@ -64,7 +65,7 @@ public class ServerLogTaskTableModel extends AbstractDecoratedGlobalTableModel<L
         "Start Time",
         "Stop Time",
         "Duration",
-        "Nb Task Paralelle"};
+        "Parallel tasks Nb"};
     private static final String[] m_columnTooltips = m_columnNames;
 
     public ServerLogTaskTableModel() {
@@ -181,9 +182,13 @@ public class ServerLogTaskTableModel extends AbstractDecoratedGlobalTableModel<L
                 return null;
         }
     }
+    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();//for reuse
 
     @Override
     public TableCellRenderer getRenderer(int row, int col) {
+        if (m_rendererMap.containsKey(col)) {
+            return m_rendererMap.get(col);
+        }
         TableCellRenderer renderer = null;
         switch (col) {
             case COLTYPE_NB_TASK_PARALELLE:
@@ -233,7 +238,7 @@ public class ServerLogTaskTableModel extends AbstractDecoratedGlobalTableModel<L
             default:
                 renderer = new DefaultTableCellRenderer();
         }
-
+        m_rendererMap.put(col, renderer);
         return renderer;
     }
 

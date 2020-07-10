@@ -57,7 +57,7 @@ public class QCMappingTreeTable extends JXTreeTable {
         this.addMouseListener(new PopupAdapter());
     }
 
-        @Override
+    @Override
     public String getToolTipText(MouseEvent event) {
         int column = columnAtPoint(event.getPoint());
         if (column > 0 && column < getColumnCount()) {
@@ -97,17 +97,39 @@ public class QCMappingTreeTable extends JXTreeTable {
         this.setRowSelectionInterval(min, max);//selection must be continue
     }
 
-    protected void moveUpDown(int weight, boolean isInsertMode) {
+    private boolean isSelectionOk() {
         if (getSelectedRows().length == 0) {
-            return;
+            return false;
+        }
+        //don't treat ignored channel
+        int[] selectRows = getSelectedRows();
+        int[] selectCols = getSelectedColumns();
+
+        for (int i = 0; i < selectRows.length; i++) {
+            for (int j = 0; j < selectCols.length; j++) {
+                int row = convertRowIndexToModel(selectRows[i]);
+                int col = convertColumnIndexToModel(selectCols[j]);
+                if (m_model.hasEmptyChannel(row, col)) {
+                    return false;
+                }
+            }
         }
         //don't treat first column
         int[] columnList = getSelectedColumns();
         for (int nb = 0; nb < columnList.length; nb++) {
             if (columnList[nb] == 0) {
-                return;
+                return false;
             }
         }
+        return true;
+    }
+
+    protected void moveUpDown(int weight, boolean isInsertMode) {
+        if (!isSelectionOk()) {
+            return;
+        }
+
+        int[] columnList = getSelectedColumns();
 
         if (isInsertMode) {
             setContinueSelected();
@@ -185,13 +207,22 @@ public class QCMappingTreeTable extends JXTreeTable {
         int Coloumn = columnAtPoint(p);
         int row = rowAtPoint(p);
         int[] selectedRows = this.getSelectedRows();
+        int[] selectedModelRows = new int[selectedRows.length];
+        for (int i = 0; i < selectedRows.length; i++) {
+            selectedModelRows[i] = convertRowIndexToModel(selectedRows[i]);
+        }
         int[] selectedCols = this.getSelectedColumns();
+        int[] selectedModelCols = new int[selectedCols.length];
+        for (int i = 0; i < selectedCols.length; i++) {
+            selectedModelCols[i] = convertColumnIndexToModel(selectedCols[i]);
+        }
         if (selectedRows.length != 0) {
             List<Integer> selectedRowList = Arrays.stream(selectedRows).boxed().collect(Collectors.toList());
             if (selectedRowList.contains(row)) {
                 List<Integer> selectedColList = Arrays.stream(selectedCols).boxed().collect(Collectors.toList());
                 if (selectedColList.contains(Coloumn)) {
-                    if (m_model.isChannelSelected(selectedRows, selectedCols)) {
+                    if (m_model.isChannelSelected(selectedModelRows, selectedModelCols)) {
+
                         triggerPopup(e);
                     }
                 }

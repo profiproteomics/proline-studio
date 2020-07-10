@@ -452,6 +452,22 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
         return false;
     }
 
+    public boolean hasEmptyChannel(int row, int col) {
+        AbstractNode srcNode = this.m_indexedNodes.get(row);
+        if (col == 0) {
+            return true;
+        }
+        DDataset Quanti = this.m_datasets.get(col - 1);
+        if (XICBiologicalSampleAnalysisNode.class.isInstance(srcNode)) {
+            DQuantitationChannelMapping srcMapping = this.m_parentQCMappings.get((XICBiologicalSampleAnalysisNode) srcNode);
+            QuantitationChannel srcChannel = srcMapping.getQuantChannel(Quanti);
+            if (srcChannel == null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     DQuantitationChannelMapping m_holdChannel = new DQuantitationChannelMapping(0);
 
     /**

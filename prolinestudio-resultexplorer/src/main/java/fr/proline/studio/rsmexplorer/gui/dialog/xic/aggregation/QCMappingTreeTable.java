@@ -57,7 +57,7 @@ public class QCMappingTreeTable extends JXTreeTable {
         this.addMouseListener(new PopupAdapter());
     }
 
-    @Override
+        @Override
     public String getToolTipText(MouseEvent event) {
         int column = columnAtPoint(event.getPoint());
         if (column > 0 && column < getColumnCount()) {
@@ -101,6 +101,14 @@ public class QCMappingTreeTable extends JXTreeTable {
         if (getSelectedRows().length == 0) {
             return;
         }
+        //don't treat first column
+        int[] columnList = getSelectedColumns();
+        for (int nb = 0; nb < columnList.length; nb++) {
+            if (columnList[nb] == 0) {
+                return;
+            }
+        }
+
         if (isInsertMode) {
             setContinueSelected();
         }
@@ -118,7 +126,6 @@ public class QCMappingTreeTable extends JXTreeTable {
             return;
         }
         //move up/down for each cell
-        int[] columnList = getSelectedColumns();
         m_model.setSelected(getSelectedRows(), getSelectedColumns());
         if (isInsertMode) {
             m_model.preInsertMove(rowList.get(0), rowList.get(rowList.size() - 1), columnList, weight);
@@ -128,11 +135,8 @@ public class QCMappingTreeTable extends JXTreeTable {
             //for (int row : rowList) {
             row = rowList.get(i);
             for (int column : columnList) {
-                if (column == 0) {
-                    continue;
-                }
                 targetRow = m_model.moveUpDown(row, column, weight);
-                m_logger.debug("targetRow: {}",targetRow );
+                m_logger.debug("targetRow: {}", targetRow);
                 if (targetRow != -1) {
                     newSelectedRows.add(targetRow);
                 }
@@ -147,8 +151,8 @@ public class QCMappingTreeTable extends JXTreeTable {
             Collections.sort(newSelectedRows);
             for (int i = 0; i < newSelectedRows.size(); i++) {
                 row = newSelectedRows.get(i);
-                if (i == 0) {
-                    setRowSelectionInterval(row, row);
+                if (i <= 0) {
+                    setRowSelectionInterval(0, 0);
                 } else {
                     addRowSelectionInterval(row, row);
                 }
@@ -238,6 +242,7 @@ public class QCMappingTreeTable extends JXTreeTable {
     }
 
     class PopupAdapter extends MouseAdapter {
+
         @Override
         public void mouseReleased(MouseEvent e) {
             if (SwingUtilities.isRightMouseButton(e)) {

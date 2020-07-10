@@ -222,8 +222,11 @@ public class IconManager {
         INVALIDATED,
         VALIDATED,
         VALIDATED_AND_USED,
-        VALIDATED_AND_NOTUSED
+        VALIDATED_AND_NOTUSED,
+        CENTROID_SPECTRA,
+        EXPORT_CENTROID
     }
+    
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private final static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
     private final static HashMap<IconType, ImageIcon> m_grayedIconMap = new HashMap<>();
@@ -731,6 +734,10 @@ public class IconManager {
                 return "fr/proline/studio/images/validated_and_used.png";
             case VALIDATED_AND_NOTUSED:
                 return "fr/proline/studio/images/validated_and_notused.png";
+            case CENTROID_SPECTRA:
+                return "fr/proline/studio/images/centroid.png";
+            case EXPORT_CENTROID:
+                return "fr/proline/studio/images/export-centroid.png";
         }
 
         return null; // can not happen

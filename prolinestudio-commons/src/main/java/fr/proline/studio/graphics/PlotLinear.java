@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -40,12 +40,8 @@ import fr.proline.studio.extendedtablemodel.LogAdapterModel;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_X_ID;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_Y_ID;
 import fr.proline.studio.graphics.core.PlotToolbarListenerInterface;
-import fr.proline.studio.parameter.DoubleParameter;
-import fr.proline.studio.parameter.ObjectParameter;
 import java.awt.Stroke;
 import java.awt.geom.Point2D;
-import javax.swing.JTextField;
-import org.openide.util.NbPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

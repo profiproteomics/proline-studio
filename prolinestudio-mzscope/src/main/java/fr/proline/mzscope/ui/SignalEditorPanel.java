@@ -24,25 +24,30 @@ import fr.profi.mzdb.algo.signal.filtering.SavitzkyGolaySmoother;
 import fr.profi.mzdb.algo.signal.filtering.SavitzkyGolaySmoothingConfig;
 import fr.profi.mzdb.util.math.DerivativeAnalysis;
 import fr.proline.mzscope.model.Signal;
+import fr.proline.mzscope.ui.dialog.SmoothingParamDialog;
+import fr.proline.mzscope.ui.model.ScanTableModel;
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.graphics.PlotPanel;
+import fr.proline.studio.graphics.PlotStick;
+import fr.proline.studio.graphics.PlotXYAbstract;
 import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.graphics.marker.PointMarker;
 import fr.proline.studio.graphics.marker.coordinates.DataCoordinates;
+import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
+import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Tuple2;
@@ -51,49 +56,30 @@ import scala.Tuple2;
  *
  * @author CB205360
  */
-public class SignalEditorPanel extends JPanel {
+public class SignalEditorPanel extends SignalPanel {
    
    final private static Logger logger = LoggerFactory.getLogger(SignalEditorPanel.class);
 
-   private final PlotPanel m_plotPanel;
-   private final PlotLinear m_linear;
-   private final Signal m_signal;
    private Map<Signal, PlotLinear> m_smoothedSignals;
-   private final JButton minmaxBtn;
-   private final JButton baseLineBtn;
+   private JButton minmaxBtn;
+   private JButton maxBtn;
+   private JButton baseLineBtn;
     
    public SignalEditorPanel(Signal signal) {
-      m_signal = signal;
-      m_plotPanel = new PlotPanel(false);
-      m_smoothedSignals = new HashMap<>();
-      
-      BasePlotPanel basePlot = m_plotPanel.getBasePlotPanel();
-      basePlot.setPlotTitle("2d signal");
-      basePlot.setDrawCursor(true);
-      SignalWrapper wrappedSignal = new SignalWrapper(m_signal, "original signal", CyclicColorPalette.getColor(1));
-      m_linear = new PlotLinear(basePlot, wrappedSignal, null, 0, 1);
-      m_linear.setPlotInformation(wrappedSignal.getPlotInformation());
-      m_linear.setStrokeFixed(true);
-      m_linear.setAntiAliasing(true);
-      basePlot.setPlot(m_linear);
-      setLayout(new BorderLayout());
-      JToolBar toolbar = new JToolBar();
+       super(signal);
+       m_smoothedSignals = new HashMap<>();
+   }
+   
+    @Override
+    protected JToolBar createToolBar(){
+    JToolBar toolbar = new JToolBar();
       
       JButton smoothBtn = new JButton("Smooth");
       smoothBtn.addActionListener(new ActionListener() {
 
          @Override
          public void actionPerformed(ActionEvent e) {
-            
-            List<Tuple2> input = toScalaArrayTuple();
- 
-            PartialSavitzkyGolaySmoother psgSmoother = new PartialSavitzkyGolaySmoother(new SavitzkyGolaySmoothingConfig(5, 4, 1));
-            smooth(input, psgSmoother, "Partial SG");
-            //int nbPoints = (input.size() <= 20) ? 5 : (input.size() < 50) ? 7 : 11;
-            int nbPoints = Math.min(input.size()/4, 9);
-            logger.info("display smoothed signal, SG nb smoothing points = "+nbPoints);
-            SavitzkyGolaySmoother sgSmoother = new SavitzkyGolaySmoother(new SavitzkyGolaySmoothingConfig(nbPoints, 2, 1));
-            smooth(input, sgSmoother, "SG");
+             runSmoothing();
          }
       });
       toolbar.add(smoothBtn);
@@ -111,13 +97,25 @@ public class SignalEditorPanel extends JPanel {
       
       toolbar.add(minmaxBtn);
       
+      maxBtn = new JButton("Max");
+      maxBtn.setEnabled(false);
+      maxBtn.addActionListener(new ActionListener() {
+
+         @Override
+         public void actionPerformed(ActionEvent e) {
+            logger.info("detect max");
+            detectMax();
+         }
+      });
+      
+      toolbar.add(maxBtn);
+      
       baseLineBtn = new JButton("Baseline");
       baseLineBtn.addActionListener(new ActionListener() {
 
          @Override
          public void actionPerformed(ActionEvent e) {
-            
-            List<Tuple2> input = toScalaArrayTuple();
+            List<Tuple2> input = m_signal.toScalaArrayTuple(false);
             Tuple2[] rtIntPairs = input.toArray(new Tuple2[input.size()]);
             BaselineRemover baselineRemover = new BaselineRemover(1, 3);
             double threshold = baselineRemover.calcNoiseThreshold(rtIntPairs);
@@ -130,15 +128,53 @@ public class SignalEditorPanel extends JPanel {
       });
       
       toolbar.add(baseLineBtn);
-      
-      add(m_plotPanel, BorderLayout.CENTER);
-      add(toolbar, BorderLayout.NORTH);
-      setPreferredSize(new Dimension(300,500));
-   }
+     return toolbar;
+    }
+    
+   private void runSmoothing() {
+        SmoothingParamDialog dialog = new SmoothingParamDialog(WindowManager.getDefault().getMainWindow());
+        dialog.pack();
+        dialog.setVisible(true);
+
+        if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+            // peakel detection did not include peaks with intensity = 0, this seems also mandatory since PartialSG smoother
+             // get strange behavior with 0 intensities
+
+            List<Tuple2> input = m_signal.toScalaArrayTuple(false);
+
+            int nbrPoints  = dialog.getNbrPoint();
+            if(nbrPoints==0)
+                nbrPoints = Math.min(input.size()/4, 9);
+
+            String smoothMethod = dialog.getMethod();
+            switch(smoothMethod){
+                case SmoothingParamDialog.SG_SMOOTHER:
+                    logger.info("display smoothed signal, SG nb smoothing points = "+nbrPoints);
+                    SavitzkyGolaySmoother sgSmoother = new SavitzkyGolaySmoother(new SavitzkyGolaySmoothingConfig(nbrPoints, 2, 1));
+                    smooth(input, sgSmoother, "SG");
+                    break;
+                case SmoothingParamDialog.PARTIAL_SG_SMOOTHER:
+                    logger.info("display smoothed signal, Partial SG nb smoothing points = "+nbrPoints);
+                    PartialSavitzkyGolaySmoother psgSmoother = new PartialSavitzkyGolaySmoother(new SavitzkyGolaySmoothingConfig(nbrPoints, 4, 1));
+                    smooth(input, psgSmoother, "Partial SG");
+                    break;
+                case SmoothingParamDialog.BOTH_SMOOTHER:
+                    logger.info("display smoothed signal, SG nb smoothing points = "+nbrPoints);
+                    sgSmoother = new SavitzkyGolaySmoother(new SavitzkyGolaySmoothingConfig(nbrPoints, 2, 1));
+                    smooth(input, sgSmoother, "SG");
+                    logger.info("display smoothed signal, Partial SG nb smoothing points = "+nbrPoints);
+                    psgSmoother = new PartialSavitzkyGolaySmoother(new SavitzkyGolaySmoothingConfig(nbrPoints, 4, 1));
+                    smooth(input, psgSmoother, "Partial SG");
+                    break;
+            }
+        }
+
+}
    
    private void addSmoothedSignal(Signal s, String title) {
       
       minmaxBtn.setEnabled(true);
+      maxBtn.setEnabled(true);
       BasePlotPanel basePlot = m_plotPanel.getBasePlotPanel();
       SignalWrapper wrappedSignal = new SignalWrapper(s, "smoothed signal : "+title, CyclicColorPalette.getColor((m_smoothedSignals.size()+1)*2));
       PlotLinear linear = new PlotLinear(basePlot, wrappedSignal, null, 0, 1);
@@ -148,6 +184,19 @@ public class SignalEditorPanel extends JPanel {
       basePlot.addPlot(linear, true);
       basePlot.repaintUpdateDoubleBuffer();
       m_smoothedSignals.put(s, linear);
+   }
+
+   private void detectMax() {
+      for (Map.Entry<Signal, PlotLinear> e : m_smoothedSignals.entrySet()) {
+         Signal s = e.getKey();
+         DerivativeAnalysis.ILocalDerivativeChange[] mm = DerivativeAnalysis.findMiniMaxi(s.getYSeries());
+         PlotLinear plot = e.getValue();
+         for (int k = 0; k < mm.length; k++) {
+            if(mm[k].isMaximum())
+                plot.addMarker(new PointMarker(m_plotPanel.getBasePlotPanel(), new DataCoordinates(s.getXSeries()[mm[k].index()], s.getYSeries()[mm[k].index()]), plot.getPlotInformation().getPlotColor()));
+         }
+      }
+      m_plotPanel.getBasePlotPanel().repaintUpdateDoubleBuffer();
    }
    
    private void detectSignificantMinMax() {
@@ -162,10 +211,10 @@ public class SignalEditorPanel extends JPanel {
       m_plotPanel.getBasePlotPanel().repaintUpdateDoubleBuffer();
    }
    
-   private void smooth(List<Tuple2> rtIntPairs, ISignalSmoother smoother, String title) {
-      logger.info("signal length before smoothing = "+rtIntPairs.size());
+   private void smooth(List<Tuple2> xyPairs, ISignalSmoother smoother, String title) {
+      logger.info("signal length before smoothing = "+xyPairs.size());
       
-      Tuple2[] result = smoother.smoothTimeIntensityPairs(rtIntPairs.toArray(new Tuple2[rtIntPairs.size()]));
+      Tuple2[] result = smoother.smoothTimeIntensityPairs(xyPairs.toArray(new Tuple2[xyPairs.size()]));
       logger.info("signal length after smoothing = "+result.length);
       double[] x = new double[result.length];
       double[] y = new double[result.length];
@@ -177,15 +226,6 @@ public class SignalEditorPanel extends JPanel {
       addSmoothedSignal(s, title);
    }
 
-   private List<Tuple2> toScalaArrayTuple() {
-      List<Tuple2> rtIntPairs = new ArrayList<Tuple2>();
-      for (int k = 0; k < m_signal.getXSeries().length; k++) {
-         // peakel detection did not include peaks with intensity = 0, this seems also mandatory since PartialSG smoother
-         // get strange behavior with 0 intensities
-         if (m_signal.getYSeries()[k] > 0.0)
-            rtIntPairs.add(new Tuple2(m_signal.getXSeries()[k], m_signal.getYSeries()[k]));
-      }
-      return rtIntPairs;
-   }
+   
 }
 

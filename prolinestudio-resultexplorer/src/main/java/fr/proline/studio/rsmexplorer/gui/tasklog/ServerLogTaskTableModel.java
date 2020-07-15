@@ -102,7 +102,7 @@ public class ServerLogTaskTableModel extends AbstractDecoratedGlobalTableModel<L
                 return Integer.class;
             }
             case COLTYPE_STATUS: {
-                return String.class;
+                return LogTask.STATUS.class;
             }
             case COLTYPE_START_TIME: {
                 return Date.class;

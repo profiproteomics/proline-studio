@@ -78,6 +78,13 @@ public class SystemInfoDialog extends DefaultDialog {
         return m_singletonDialog;
     }
 
+    public void updateInfo(String s) {
+        m_txtArea.setText(s);
+        m_txtArea.setCaretPosition(0);
+        revalidate();
+        repack();
+    }
+
     public void updateInfo() {
 
         final String[] sysInfoResult = new String[1];
@@ -90,31 +97,31 @@ public class SystemInfoDialog extends DefaultDialog {
 
             @Override
             public void run(boolean success) {
-                
+
                 String sysInfoText = sysInfoResult[0];
 
                 StringBuilder sb = new StringBuilder();
                 String serverURL = null;
                 String queueName = null;
-                StringTokenizer st = new StringTokenizer(sysInfoText,"\n");
+                StringTokenizer st = new StringTokenizer(sysInfoText, "\n");
                 while (st.hasMoreTokens()) {
                     String line = st.nextToken();
                     if (serverURL == null) {
-                        if ( line.indexOf("\"em1\"") != -1) {
+                        if (line.indexOf("\"em1\"") != -1) {
                             int index = line.lastIndexOf(',');
                             if (index != -1) {
-                                serverURL = line.substring(index+1, line.length());
+                                serverURL = line.substring(index + 1, line.length());
                                 sb.append("Server: ").append(serverURL).append("\n");
                             }
                         }
                     }
                     if (queueName == null) {
-                        if ( line.indexOf("\"JMSDestination\"") != -1) {
+                        if (line.indexOf("\"JMSDestination\"") != -1) {
                             String queueLabel = "HornetQQueue[";
                             int index1 = line.lastIndexOf(queueLabel);
                             int index2 = line.lastIndexOf(']');
-                            if ((index1 != -1) && (index2!=-1)) {
-                                queueName = line.substring(index1+queueLabel.length(), index2);
+                            if ((index1 != -1) && (index2 != -1)) {
+                                queueName = line.substring(index1 + queueLabel.length(), index2);
                                 sb.append("JMS Proline Queue: ").append(queueName).append("\n\n\n");
                             }
                         }
@@ -123,10 +130,9 @@ public class SystemInfoDialog extends DefaultDialog {
                         break;
                     }
                 }
-                
 
                 sb.append(sysInfoText);
-                        
+
                 m_txtArea.setText(sb.toString());
                 m_txtArea.setCaretPosition(0);
                 revalidate();
@@ -146,5 +152,4 @@ public class SystemInfoDialog extends DefaultDialog {
         super.setVisible(v);
     }
 
- 
 }

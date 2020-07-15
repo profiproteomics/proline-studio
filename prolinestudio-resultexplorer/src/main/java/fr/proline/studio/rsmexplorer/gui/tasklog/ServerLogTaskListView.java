@@ -96,7 +96,7 @@ public class ServerLogTaskListView extends JScrollPane implements TaskListInterf
     }
 
     /**
-     * optional 
+     * optional
      */
     private void initColumnsize() {
         String[] example = {"198", "853bda4a-10d9-11e8-9a85-d9411af38406", "[pool-2-thread-25]", "proline/dps/msi/ImportValidateGenerateSM", " result_files :  mascot_data/20200113/F136424.dat ",
@@ -113,7 +113,12 @@ public class ServerLogTaskListView extends JScrollPane implements TaskListInterf
         }
     }
 
-    class ServerLogTaskTable extends DecoratedMarkerTable implements ExportModelInterface, InfoInterface {
+    public String getInfo() {
+        int count = m_tableModel.getRowCount();
+        return (count<=1)? count+" task.": count+" tasks.";
+    }
+
+    class ServerLogTaskTable extends DecoratedMarkerTable implements ExportModelInterface {
 
         public ServerLogTaskTable() {
             super();
@@ -141,15 +146,9 @@ public class ServerLogTaskListView extends JScrollPane implements TaskListInterf
                 LogTask task = m_taskList.get(selectedIndex);
                 String taskOrder = (task == null) ? "" : "" + task.getTaskOrder();
                 m_ctrl.valueChanged(task);
-            }else{
+            } else {
                 m_ctrl.valueChanged(null);
             }
-        }
-
-        @Override
-        public String getInfo() {
-            int count = getModel().getRowCount();
-            return count + ((count > 1) ? " Tasks" : " Task");
         }
 
         @Override

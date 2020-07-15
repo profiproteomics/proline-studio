@@ -141,6 +141,8 @@ public class ServerLogTaskListView extends JScrollPane implements TaskListInterf
                 LogTask task = m_taskList.get(selectedIndex);
                 String taskOrder = (task == null) ? "" : "" + task.getTaskOrder();
                 m_ctrl.valueChanged(task);
+            }else{
+                m_ctrl.valueChanged(null);
             }
         }
 

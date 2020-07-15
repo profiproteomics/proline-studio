@@ -25,6 +25,7 @@ import fr.proline.logparser.model.Utility;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.info.InfoToggleButton;
+import fr.proline.studio.rsmexplorer.gui.dialog.SystemInfoDialog;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -43,6 +44,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextPane;
 import javax.swing.JToolBar;
 import org.openide.util.NbPreferences;
+import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,8 +132,19 @@ public class ServerLogControlPanel extends LogControlPanel {
         ExportButton exportButton = new ExportButton(taskListPane.getCompoundTableModel(), "Tasks", taskListPane.getTable());
         toolbar.add(exportButton);
         //
-        m_infoToggleButton = new InfoToggleButton(null, taskListPane.getTable());
-        toolbar.add(m_infoToggleButton);
+        JButton infoButton = new JButton(IconManager.getIcon(IconManager.IconType.INFORMATION));
+        infoButton.setToolTipText("Get Log File information");
+
+        infoButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                SystemInfoDialog m_infoDialog = SystemInfoDialog.getDialog(WindowManager.getDefault().getMainWindow());
+                m_infoDialog.updateInfo(getInfo());
+                m_infoDialog.setTitle("Log File Information ");
+                m_infoDialog.setVisible(true);
+            }
+        });
+        toolbar.add(infoButton);
 
         return toolbar;
     }
@@ -215,4 +228,14 @@ public class ServerLogControlPanel extends LogControlPanel {
     public void setProgress(int percent) {
         m_progressBar.setValue(percent);
     }
+
+    public String getInfo() {
+        String result = "";
+        for (File f : m_fileList) {
+            result += f.getName() + "\n";
+        }
+        result += ((ServerLogTaskListView) m_taskQueueView).getInfo();
+        return result;
+    }
+
 }

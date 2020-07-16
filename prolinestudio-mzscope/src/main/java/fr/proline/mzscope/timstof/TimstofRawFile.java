@@ -12,6 +12,7 @@ import fr.proline.mzscope.model.FeaturesExtractionRequest;
 import fr.proline.mzscope.model.IChromatogram;
 import fr.proline.mzscope.model.IExportParameters;
 import fr.proline.mzscope.model.IFeature;
+import fr.proline.mzscope.model.IPeakel;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.mzscope.model.QCMetrics;
@@ -102,7 +103,7 @@ public class TimstofRawFile implements IRawFile{
             int index =0;
             for(TimsFrame frame : m_ttFrames ){
                 times[index] = frame.getTime()/60; //Set time in minutes
-                intensities[index] = frame.getSummedIntensity().doubleValue();
+                intensities[index] = (double) frame.getSummedIntensity();
                 index++;
             }
             m_ticChromato = new Chromatogram(getName(), getName(),times,intensities);            
@@ -130,7 +131,7 @@ public class TimstofRawFile implements IRawFile{
             int index =0;
             for(TimsFrame frame : m_ttFrames ){
                 times[index] = frame.getTime()/60; //Set time in minutes
-                intensities[index] = frame.getMaxIntensity().doubleValue();
+                intensities[index] = (double) frame.getMaxIntensity();
                 index++;
             }
             m_bpcChromato = new Chromatogram(getName(), getName(),times,intensities);            
@@ -147,7 +148,7 @@ public class TimstofRawFile implements IRawFile{
     public Spectrum getSpectrum(int spectrumIndex) {
         Integer frameId = m_spectra2FrameIndex.get(spectrumIndex);       
         
-        Optional<TimsFrame> opFrame = m_ttFrames.stream().filter(frame -> frame.getId().equals(frameId)).findFirst();
+        Optional<TimsFrame> opFrame = m_ttFrames.stream().filter(frame -> frameId.equals(frame.getId())).findFirst();
         if(!opFrame.isPresent())
             return null;
         
@@ -158,16 +159,16 @@ public class TimstofRawFile implements IRawFile{
         }
         
         Spectrum spectrum = null;
-        if(tf.isPasef() && tf.getPrecursorId() != null){
+        if(tf.isPasef() && tf.getPrecursorIds() != null){
             
            //Read spcetrum corresponding to index...             
            Integer indexInFrameSpectra = spectrumIndex - m_frame2FirstSpectraIndex.get(tf.getId()); //Index relative to frame 
-           List<Integer> precursorIds = tf.getPrecursorId();
+           List<Integer> precursorIds = tf.getPrecursorIds();
            if(indexInFrameSpectra >= precursorIds.size())
                return null;
            Collections.sort(precursorIds);           
            fr.profi.brucker.timstof.model.Spectrum tfSp = tf.getPrecursorSpectrum(precursorIds.get(indexInFrameSpectra));
-           spectrum = new Spectrum(spectrumIndex,  tf.getTime().floatValue(), tfSp.getMasses(), tfSp.getIntensities(), 2);
+           spectrum = new Spectrum(spectrumIndex, (float) tf.getTime(), tfSp.getMasses(), tfSp.getIntensities(), 2);
            spectrum.setTitle(tfSp.getTitle());
         } else if (!tf.isPasef()){
             fr.profi.brucker.timstof.model.Spectrum tfSp = tf.getSingleSpectrum();
@@ -188,7 +189,7 @@ public class TimstofRawFile implements IRawFile{
 //             someInt[i]=maxInt.get(i);
 //             someMasses[i]=massPerInt.get(someInt[i]);
 //            }
-            spectrum  = new Spectrum(spectrumIndex,  tf.getTime().floatValue(), tfSp.getMasses(), tfSp.getIntensities(), 1);
+            spectrum  = new Spectrum(spectrumIndex, (float) tf.getTime(), tfSp.getMasses(), tfSp.getIntensities(), 1);
 //            spectrum  = new Spectrum(spectrumIndex,  tf.getTime().floatValue(), someMasses, someInt, 1);
             spectrum.setTitle(tfSp.getTitle());
         }
@@ -221,7 +222,7 @@ public class TimstofRawFile implements IRawFile{
     @Override
     public double getSpectrumElutionTime(int spectrumIndex) {
         Integer frameId = m_spectra2FrameIndex.get(spectrumIndex);
-        Optional<TimsFrame> opFr =  m_ttFrames.stream().filter(fr -> fr.getId().equals(frameId)).findFirst();
+        Optional<TimsFrame> opFr =  m_ttFrames.stream().filter(fr -> frameId.equals(fr.getId())).findFirst();
         if(opFr.isPresent())
             return opFr.get().getTime();
         return 0; //First spectrum if not found ? or -1 ?
@@ -242,7 +243,7 @@ public class TimstofRawFile implements IRawFile{
         boolean foundSpectrumFrame = false;
         while(!foundSpectrumFrame){ 
             final Integer finalFrId = nextFrameId;
-            Optional<TimsFrame> opFr = m_ttFrames.stream().filter(fr -> fr.getId().equals(finalFrId)).findFirst();
+            Optional<TimsFrame> opFr = m_ttFrames.stream().filter(fr -> finalFrId.equals(fr.getId())).findFirst();
             if(opFr.isPresent()){
                 if(opFr.get().getMsmsType().equals(msmsType)){
                     foundSpectrumFrame = true;
@@ -274,7 +275,7 @@ public class TimstofRawFile implements IRawFile{
         boolean foundSpectrumFrame = false;
         while(!foundSpectrumFrame){
              final Integer finalFrId = prevFrameId;
-            Optional<TimsFrame> opFr =  m_ttFrames.stream().filter(fr -> fr.getId().equals(finalFrId)).findFirst();
+            Optional<TimsFrame> opFr =  m_ttFrames.stream().filter(fr -> finalFrId.equals(fr.getId())).findFirst();
             if(opFr.isPresent()){
                 if(opFr.get().getMsmsType().equals(msmsType)){
                     foundSpectrumFrame = true;
@@ -325,5 +326,10 @@ public class TimstofRawFile implements IRawFile{
     @Override
     public String toString(){
         return getName();
+    }
+
+    @Override
+    public List<IPeakel> extractPeakels(FeaturesExtractionRequest params) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

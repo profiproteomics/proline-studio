@@ -259,7 +259,7 @@ public class MzdbRawFile implements IRawFile {
     @Override
     public List<IPeakel> extractPeakels(FeaturesExtractionRequest params) {
         List<IPeakel> result = new ArrayList<>();
-        logger.info("Extract peakels with params : " + params.toString());
+        LOG.info("Extract peakels with params : " + params.toString());
 
         try {
             Iterator<RunSlice> runSlices;
@@ -288,7 +288,7 @@ public class MzdbRawFile implements IRawFile {
             double min = (params.getMsLevel() == 1) ? params.getMinMz() : params.getFragmentMinMz();
             double max = (params.getMsLevel() == 1) ? params.getMaxMz() : params.getFragmentMaxMz();
 
-            logger.info("{} peakels found",peakels.length);
+            LOG.info("{} peakels found",peakels.length);
 
             for (Peakel peakel : peakels) {
                 //creates a fake Feature associated to this peakel in order to always display Features
@@ -350,7 +350,7 @@ public class MzdbRawFile implements IRawFile {
             features.forEach(f -> result.add(new MzdbFeatureWrapper(f, this, 1)));
             
         } catch (SQLiteException | StreamCorruptedException ex) {
-            logger.error("Error while getting LcMs RunSlice Iterator: " + ex);
+            LOG.error("Error while getting LcMs RunSlice Iterator: " + ex);
         }
         return result;
     }
@@ -381,7 +381,7 @@ public class MzdbRawFile implements IRawFile {
          min = Math.min(min, rs.getHeader().getBeginMz());
          max = Math.max(max, rs.getHeader().getEndMz());
       }
-      logger.info("Real bounds : " + min + " - " + max);
+      LOG.info("Real bounds : " + min + " - " + max);
    }
 
     private List<IFeature> extractFeaturesFromMs2(float tolPPM) {

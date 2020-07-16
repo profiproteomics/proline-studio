@@ -128,55 +128,63 @@ public class QCMappingTreeTable extends JXTreeTable {
         if (!isSelectionOk()) {
             return;
         }
-
+        ArrayList<Integer> selectedModelCols = new ArrayList();
         int[] columnList = getSelectedColumns();
-
+        for (int col : columnList) {
+            selectedModelCols.add(convertColumnIndexToModel(col));
+        }
         if (isInsertMode) {
             setContinueSelected();
         }
         int[] rows = getSelectedRows();
-        //get selected row, range it in order ascending(for up) ou descending(for down)
-        List<Integer> newSelectedRows = new ArrayList();
-        List<Integer> rowList = Arrays.stream(rows).boxed().collect(Collectors.toList());
-        if (weight == UP) {
-            Collections.sort(rowList);//lower element move first
-
-        } else {
-            Collections.sort(rowList, Collections.reverseOrder());//higher element move first
+        ArrayList<Integer> newSelectedModelRows = new ArrayList();
+        ArrayList<Integer> selectedModelRows = new ArrayList();
+        for (int row : rows) {
+            selectedModelRows.add(convertRowIndexToModel(row));
         }
-        if (m_model.isEndChannel(rowList, weight)) {
+
+        //get selected row, range it in order ascending(for up) ou descending(for down)
+        if (weight == UP) {
+            Collections.sort(selectedModelRows);//lower element move first
+        } else {
+            Collections.sort(selectedModelRows, Collections.reverseOrder());//higher element move first
+        }
+        if (m_model.isEndChannel(selectedModelRows, weight)) {
             return;
         }
         //move up/down for each cell
-        m_model.setSelected(getSelectedRows(), getSelectedColumns());
+        m_model.setSelected(selectedModelRows, selectedModelCols);
         if (isInsertMode) {
-            m_model.preInsertMove(rowList.get(0), rowList.get(rowList.size() - 1), columnList, weight);
+            m_model.preInsertMove(selectedModelRows.get(0), selectedModelRows.get(selectedModelRows.size() - 1), selectedModelCols, weight);
         }
         int row, targetRow;
-        for (int i = 0; i < rowList.size(); i++) {
+        for (int i = 0; i < selectedModelRows.size(); i++) {
             //for (int row : rowList) {
-            row = rowList.get(i);
-            for (int column : columnList) {
+            row = selectedModelRows.get(i);
+            for (int column : selectedModelCols) {
                 targetRow = m_model.moveUpDown(row, column, weight);
                 m_logger.debug("targetRow: {}", targetRow);
                 if (targetRow != -1) {
-                    newSelectedRows.add(targetRow);
+                    newSelectedModelRows.add(targetRow);
                 }
             }
         }
         if (isInsertMode) {
-            m_model.postInsertMove(rowList.get(rowList.size() - 1), columnList);
+            m_model.postInsertMove(selectedModelRows.get(selectedModelRows.size() - 1), selectedModelCols);
         }
-        m_logger.debug("newSelectedRow index: {}", newSelectedRows);
+        m_logger.debug("newSelectedRow index: {}", newSelectedModelRows);
         //set the new selected rows columns
-        if (newSelectedRows.size() > 0) {
-            Collections.sort(newSelectedRows);
-            for (int i = 0; i < newSelectedRows.size(); i++) {
-                row = newSelectedRows.get(i);
-                if (i <= 0) {
-                    setRowSelectionInterval(0, 0);
-                } else {
-                    addRowSelectionInterval(row, row);
+        if (newSelectedModelRows.size() > 0) {
+            Collections.sort(newSelectedModelRows);
+            for (int i = 0; i < newSelectedModelRows.size(); i++) {
+                row = newSelectedModelRows.get(i);
+                if (row < this.getRowCount()) {
+                    int index = convertRowIndexToView(row);
+                    if (i <= 0) {
+                        setRowSelectionInterval(index, index);
+                    } else {
+                        addRowSelectionInterval(index, index);
+                    }
                 }
             }
             this.repaint();

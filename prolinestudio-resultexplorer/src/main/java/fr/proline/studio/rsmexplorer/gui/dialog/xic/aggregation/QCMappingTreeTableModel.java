@@ -379,7 +379,7 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
      * @param rowList
      * @param columnList
      */
-    public void setSelected(int[] rowList, int[] columnList) {
+    public void setSelected(ArrayList<Integer> rowList, ArrayList<Integer> columnList) {
         m_selectedChannelIds = new ArrayList();
         for (int row : rowList) {
             for (int col : columnList) {
@@ -478,7 +478,7 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
      * @param columnList
      * @param weight
      */
-    public void preInsertMove(Integer srcRow, Integer targetRow, int[] columnList, int weight) {
+    public void preInsertMove(Integer srcRow, Integer targetRow, ArrayList<Integer> columnList, int weight) {
         m_holdChannel = new DQuantitationChannelMapping(targetRow);
         int nextIndex = m_indexChannelNodes.indexOf(srcRow) + weight;
         int nextChannelIndex = m_indexChannelNodes.get(nextIndex);
@@ -493,7 +493,7 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
         }
     }
 
-    public void postInsertMove(Integer targetRow, int[] columnList) {
+    public void postInsertMove(Integer targetRow, ArrayList<Integer> columnList) {
         int targetIndex = m_indexChannelNodes.indexOf(targetRow);
         if (targetIndex == -1) {
             return;

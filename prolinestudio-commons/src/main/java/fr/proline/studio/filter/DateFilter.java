@@ -19,6 +19,7 @@ package fr.proline.studio.filter;
 import java.awt.GridBagConstraints;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -37,6 +38,7 @@ public class DateFilter extends Filter {
     private Date m_max;
     private SimpleDateFormat m_dateFormat;
     private SimpleDateFormat m_alterDateFormat = new SimpleDateFormat("dd MMM yyyy");
+    static String DATE_FORMAT = "HH:mm:ss.SSS - dd MMM yyyy";
 
     public DateFilter(String variableName, ConvertValueInterface convertValueInterface, int modelColumn) {
         super(variableName, convertValueInterface, modelColumn);
@@ -178,15 +180,21 @@ public class DateFilter extends Filter {
 
     @Override
     public void createComponents(JPanel p, GridBagConstraints c) {
+        String today = "00:00:00.000 - "+m_alterDateFormat.format(new Date());
         c.gridx++;
         c.gridwidth = 1;
         c.weightx = 1;
         JTextField minTextField = ((JTextField) getComponent(VALUE_MIN));
         if (minTextField == null) {
             minTextField = new JTextField(18);
+            minTextField.setToolTipText(DATE_FORMAT);
             if (m_min != null) {
                 minTextField.setText(m_dateFormat.format(m_min));
+            } else {
+
+                minTextField.setText(today);
             }
+
             registerComponent(VALUE_MIN, minTextField);
         }
         p.add(minTextField, c);
@@ -214,8 +222,11 @@ public class DateFilter extends Filter {
         JTextField maxTextField = ((JTextField) getComponent(VALUE_MAX));
         if (maxTextField == null) {
             maxTextField = new JTextField(18);
+            maxTextField.setToolTipText(DATE_FORMAT);
             if (m_max != null) {
                 maxTextField.setText(m_dateFormat.format(m_max));
+            } else {
+                maxTextField.setText(today);
             }
             registerComponent(VALUE_MAX, maxTextField);
         }

@@ -29,6 +29,8 @@ import javax.swing.JTextField;
  */
 public class DurationFilter extends LongFilter {
 
+    static String DURATION_FORMAT = "DDD:hh:ss:ms";
+
     private static final Integer VALUE_MIN = 0;
     private static final Integer VALUE_MAX = 1;
     private Long m_min;
@@ -165,6 +167,9 @@ public class DurationFilter extends LongFilter {
         if ((min != null) && (max != null) && (min > max)) {
             return new FilterStatus("Min Value is greater than Max Value", m_components.get(VALUE_MIN));
         }
+        if (min != null && max != null && min.equals(max)) {
+            return new FilterStatus("Max Value is same as Min Value", m_components.get(VALUE_MAX));
+        }
 
         return null;
     }
@@ -225,8 +230,11 @@ public class DurationFilter extends LongFilter {
         JTextField minTextField = ((JTextField) getComponent(VALUE_MIN));
         if (minTextField == null) {
             minTextField = new JTextField(10);
+            minTextField.setToolTipText(DURATION_FORMAT);
             if (m_min != null) {
                 minTextField.setText(formatDurationInHour(m_min));
+            } else {
+                minTextField.setText("  0:00:00.000");
             }
             registerComponent(VALUE_MIN, minTextField);
         }
@@ -255,8 +263,11 @@ public class DurationFilter extends LongFilter {
         JTextField maxTextField = ((JTextField) getComponent(VALUE_MAX));
         if (maxTextField == null) {
             maxTextField = new JTextField(10);
+            maxTextField.setToolTipText(DURATION_FORMAT);
             if (m_max != null) {
                 maxTextField.setText(formatDurationInHour(m_max));
+            } else {
+                maxTextField.setText("  0:00:00.000");
             }
             registerComponent(VALUE_MAX, maxTextField);
         }

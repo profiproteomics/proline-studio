@@ -383,7 +383,8 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
       int minIdx = SpectrumUtils.getNearestPeakIndex(currentScan.getMasses(), min);
       int maxIdx = Math.min(SpectrumUtils.getNearestPeakIndex(currentScan.getMasses(), max)+1, currentScan.getMasses().length);
       Signal currentSignal = new Signal(Arrays.copyOfRange(currentScan.getMasses(), minIdx, maxIdx), Arrays.copyOfRange(currentScan.getIntensities(), minIdx, maxIdx));      
-      currentSignal.setSignalType(Signal.CENTROID);
+      if(currentScan.getDataType().equals(Spectrum.ScanType.CENTROID))
+          currentSignal.setSignalType(Signal.CENTROID);
       return currentSignal;
     }
     

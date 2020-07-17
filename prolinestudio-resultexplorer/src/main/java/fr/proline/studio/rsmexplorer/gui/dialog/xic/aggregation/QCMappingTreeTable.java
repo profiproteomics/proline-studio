@@ -215,21 +215,21 @@ public class QCMappingTreeTable extends JXTreeTable {
         int Coloumn = columnAtPoint(p);
         int row = rowAtPoint(p);
         int[] selectedRows = this.getSelectedRows();
-        int[] selectedModelRows = new int[selectedRows.length];
+        ArrayList<Integer> selectedModelRows = new ArrayList<Integer>();
         for (int i = 0; i < selectedRows.length; i++) {
-            selectedModelRows[i] = convertRowIndexToModel(selectedRows[i]);
+            selectedModelRows.add(convertRowIndexToModel(selectedRows[i]));
         }
         int[] selectedCols = this.getSelectedColumns();
-        int[] selectedModelCols = new int[selectedCols.length];
+        ArrayList<Integer> selectedModelCols = new ArrayList();
         for (int i = 0; i < selectedCols.length; i++) {
-            selectedModelCols[i] = convertColumnIndexToModel(selectedCols[i]);
+           selectedModelCols.add(convertColumnIndexToModel(selectedCols[i]));
         }
         if (selectedRows.length != 0) {
             List<Integer> selectedRowList = Arrays.stream(selectedRows).boxed().collect(Collectors.toList());
             if (selectedRowList.contains(row)) {
                 List<Integer> selectedColList = Arrays.stream(selectedCols).boxed().collect(Collectors.toList());
                 if (selectedColList.contains(Coloumn)) {
-                    if (m_model.isChannelSelected(selectedModelRows, selectedModelCols)) {
+                    if (m_model.isChannel(selectedModelRows, selectedModelCols)) {
 
                         triggerPopup(e);
                     }

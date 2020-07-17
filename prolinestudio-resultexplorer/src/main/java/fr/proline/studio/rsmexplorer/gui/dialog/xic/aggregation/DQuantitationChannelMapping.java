@@ -30,7 +30,7 @@ import java.util.Map;
 public class DQuantitationChannelMapping {
 
     /**
-     * for one =Quantitation Channel in Aggregation Tree
+     * for one =Quantitation Channel Id in Aggregation Tree
      */
     private Integer parentQCNumber;
     /**

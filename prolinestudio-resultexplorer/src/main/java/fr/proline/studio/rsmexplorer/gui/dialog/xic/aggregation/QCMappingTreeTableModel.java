@@ -50,44 +50,32 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
 
     //protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.QCMappingTreeTableModel");
     /**
-     * Aggregation Quanti result tree data =column head
+     * Column List: Aggregation Quanti result tree data
      */
     List<DDataset> m_datasets;
+
     /**
-     * Data model for the TreeTable, created once time in constructor, it will
-     * be modified by DnD action or move up/down action.<br>
-     * key = ParentQCNode value = DQuantitationChannelMapping.<br>
-     * ParentQCNode represented by XICBiologicalSampleAnalysisNode,<br>
-     * The value is an object of DQuantitationChannelMapping, it's structure is
-     * key(AggregationChannelid as row id/object) -> value( map(key =DDataset as
-     * column id/object, value=QuantiChannel as cell value))
+     * map(row, map(column,value))<br>
+     * DQuantitationChannelMapping = map(column, value)<br>
+     * row = XICBiologicalSampleAnalysisNode,<br> 
+     * column = DDataset, <br>
+     * value = QuantitationChannel.<br>
      */
     Map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping> m_parentQCMappings;
     //m_startingQCMappings for alt+up/down
     /**
-     * a ordered List according to tree row index, useful for getNodeAt(), fixed
-     * once created in Constructor
+     * a ordered List according to tree row index, used by DND
      */
     List<AbstractNode> m_indexedNodes;
     /**
-     * A list, memorize only channel node, without root node & group node, for
-     * ordred channel(cell)
+     * A list, memorize only channel node index, used by DND
      */
     List<Integer> m_indexChannelNodes;
-    /**
-     * memorize which channel is selected, used for move Up/Down
-     */
-    List<Long> m_selectedChannelIds;
-
-    /**
-     * hode the original(DDataset, Channel), used for insertMove
-     */
-    DQuantitationChannelMapping m_holdChannel = new DQuantitationChannelMapping(0);
 
     public QCMappingTreeTableModel(AbstractNode rootNode, List<DDataset> datasets) {
-        super(rootNode);
-        m_datasets = datasets;
-        m_parentQCMappings = inferDefaultMapping(rootNode);
+        super(rootNode);//define the first Tree column 
+        m_datasets = datasets;//other columns
+        m_parentQCMappings = inferDefaultMapping(rootNode);// map(row, (column, value))
         m_indexedNodes = new ArrayList<>();
         m_indexChannelNodes = new ArrayList<>();
 
@@ -294,6 +282,38 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
         return null;
     }
 
+    public Object getChannelAt(Object o, int columnIndex) {
+        AbstractNode node = (AbstractNode) o;
+        if (columnIndex == 0) {
+            return node.toString();
+        } else if (XICBiologicalSampleAnalysisNode.class.isAssignableFrom(node.getClass())) {
+            DDataset ds = m_datasets.get(columnIndex - 1);
+            DQuantitationChannelMapping mapping = m_parentQCMappings.get(node);
+            if (mapping != null) {
+                QuantitationChannel childQc = mapping.getMappedQuantChannels().get(ds);
+                return childQc;
+            }
+        }
+        return null;
+    }
+
+    public DQuantitationChannelMapping getRowMapping(Object o) {
+        if (o instanceof XICBiologicalSampleAnalysisNode) {
+            return m_parentQCMappings.get(o);
+        } else {
+            return null;
+        }
+    }
+
+    public DQuantitationChannelMapping putRowMapping(XICBiologicalSampleAnalysisNode o, DQuantitationChannelMapping value) {
+        if (o instanceof XICBiologicalSampleAnalysisNode) {
+            m_parentQCMappings.put(o, value);//@todo delete
+            return m_parentQCMappings.put(o, value);
+        } else {
+            return null;
+        }
+    }
+
     @Override
     public Object getChild(Object parent, int index) {
         TreeNode node = (TreeNode) parent;
@@ -363,144 +383,6 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
         }
     }
 
-    /**
-     *
-     * @param row
-     * @param column
-     * @param weight, 1= down, -1 = up
-     * @return the index of target node, or -1 if failed
-     */
-    public int moveUpDown(int row, int column, int weight) {
-        AbstractNode srcNode = this.m_indexedNodes.get(row);
-        if (srcNode instanceof XICBiologicalSampleAnalysisNode) {
-            //if (XICBiologicalSampleAnalysisNode.class.isInstance(srcNode)) {
-            DDataset Quanti = getDatasetAt(column);
-            int targetIndex = m_indexChannelNodes.indexOf(row) + weight;
-            int targetIndexChannelNode = m_indexChannelNodes.get(targetIndex);
-            //m_logger.debug("targetIndex: {},{}", targetIndex, targetIndexChannelNode);
-            DQuantitationChannelMapping srcMapping = this.m_parentQCMappings.get((XICBiologicalSampleAnalysisNode) srcNode);
-            QuantitationChannel srcChannel = srcMapping.getQuantChannel(Quanti);
-
-            AbstractNode targetNode = this.m_indexedNodes.get(targetIndexChannelNode);
-            DQuantitationChannelMapping targetMapping = this.m_parentQCMappings.get((XICBiologicalSampleAnalysisNode) targetNode);
-
-            if (srcChannel != null) {
-                //m_logger.debug("selectedChannelId {}", m_selectedChannelIds.toString());
-                srcMapping.remove(Quanti);
-                targetMapping.put(Quanti, srcChannel);
-            } else {
-                targetMapping.put(Quanti, null);
-
-            }
-            return targetIndexChannelNode;//row index of the table
-        }
-        return -1;
-    }
-
-    public ArrayList<Integer> moveUpDown(ArrayList<Integer> rows, ArrayList<Integer> cols, boolean isInsertMode, int weight) {
-        ArrayList<Integer> newSelectedModelRows = new ArrayList();
-        this.setSelected(rows, cols);
-        if (isInsertMode) {
-            this.preInsertMove(rows.get(0), rows.get(rows.size() - 1), cols, weight);
-        }
-        int row, targetRow;
-        for (int i = 0; i < rows.size(); i++) {
-            //for (int row : rowList) {
-            row = rows.get(i);
-            for (int column : cols) {
-                targetRow = this.moveUpDown(row, column, weight);
-                //m_logger.debug("targetRow: {}", targetRow);
-                if (targetRow != -1) {
-                    newSelectedModelRows.add(targetRow);
-                }
-            }
-        }
-        if (isInsertMode) {
-            this.postInsertMove(rows.get(rows.size() - 1), cols);
-        }
-
-        return newSelectedModelRows;
-    }
-
-    /**
-     * build the m_selectedChannelIds, a list of cell(Channel id)
-     *
-     * @param rowList
-     * @param columnList
-     */
-    public void setSelected(ArrayList<Integer> rowList, ArrayList<Integer> columnList) {
-        m_selectedChannelIds = new ArrayList();
-        for (int row : rowList) {
-            for (int col : columnList) {
-                if (col == 0) {
-                    continue;
-                }
-                AbstractNode srcNode = this.m_indexedNodes.get(row);
-                if (XICBiologicalSampleAnalysisNode.class.isInstance(srcNode)) {
-                    DDataset colDataSet = this.getDatasetAt(col);//col object
-                    DQuantitationChannelMapping rowMapping = this.m_parentQCMappings.get((XICBiologicalSampleAnalysisNode) srcNode);//row object
-                    QuantitationChannel cellChannel = rowMapping.getQuantChannel(colDataSet);//obtain the cell value
-                    if (cellChannel != null) {
-                        m_selectedChannelIds.add(cellChannel.getId());
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * determinate if the move up or move down reach the top/bottm
-     *
-     * @param selectedRowList
-     * @param weight
-     * @return
-     */
-    public boolean isEndChannel(List<Integer> selectedRowList, int weight) {
-        for (int row : selectedRowList) {
-            AbstractNode srcNode = this.m_indexedNodes.get(row);
-            if (!XICBiologicalSampleAnalysisNode.class.isInstance(srcNode)) {
-                continue;
-            } else {
-                int nextIndex = m_indexChannelNodes.indexOf(row) + weight;
-                if (nextIndex < 0 || nextIndex >= m_indexChannelNodes.size()) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-
-        }
-        return false;
-    }
-
-    /**
-     * test if at list 1 Channel is selected, used by TreeTable to determine if
-     * trigger Popup Menu
-     *
-     * @param rowList
-     * @param columnList
-     * @return
-     */
-    public boolean isChannel(ArrayList<Integer> rowList, ArrayList<Integer> columnList) {
-        for (int row : rowList) {
-            AbstractNode rowNode = this.m_indexedNodes.get(row);
-            for (int column : columnList) {
-                if (column == 0) {
-                    continue;
-                }
-                DDataset colQuanti = this.getDatasetAt(column);
-                if (XICBiologicalSampleAnalysisNode.class.isInstance(rowNode)) {
-                    DQuantitationChannelMapping rowMapping = this.m_parentQCMappings.get((XICBiologicalSampleAnalysisNode) rowNode);
-                    QuantitationChannel cellChannel = rowMapping.getQuantChannel(colQuanti);
-                    if (cellChannel != null) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     public boolean hasEmptyChannel(int row, int col) {
         AbstractNode srcNode = this.m_indexedNodes.get(row);
         if (col == 0) {
@@ -515,57 +397,6 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
             }
         }
         return false;
-    }
-
-    /**
-     * set the m_holdChannel, one DQuantitationChannelMapping which hold the
-     * value of next value(only the first one will be covered)
-     *
-     * @param srcRow, first selected row to insert move
-     * @param targetRow, last selected row to insert move
-     * @param columnList:
-     * @param weight
-     */
-    public void preInsertMove(Integer srcRow, Integer targetRow, ArrayList<Integer> columnList, int weight) {
-        // 1 row, several columns The selcted row is sorted according to weight, if
-        //weight ==1, sorted ascending, if weight ==-1, sorted descending
-
-        m_holdChannel = new DQuantitationChannelMapping(targetRow);//last row 
-        int nextIndex = m_indexChannelNodes.indexOf(srcRow) + weight;//first row index after moved
-        int nextChannelIndex = m_indexChannelNodes.get(nextIndex);
-        for (int column : columnList) {
-            if (column == 0) {
-                continue;
-            }
-            DQuantitationChannelMapping srcMapping = this.m_parentQCMappings.get((XICBiologicalSampleAnalysisNode) getNodeAt(nextChannelIndex));
-            DDataset quanti = this.getDatasetAt(column);
-            QuantitationChannel srcChannel = srcMapping.getQuantChannel(quanti);
-            m_holdChannel.put(quanti, srcChannel);
-        }
-    }
-
-    /**
-     * put the m_holdChannel at the last place of moved cell(empty now)
-     *
-     * @param targetRow
-     * @param columnList
-     */
-    public void postInsertMove(Integer targetRow, ArrayList<Integer> columnList) {
-        int targetIndex = m_indexChannelNodes.indexOf(targetRow);
-        if (targetIndex == -1) {
-            return;
-        }
-        int targetChannelIndex = m_indexChannelNodes.get(targetIndex);
-        XICBiologicalSampleAnalysisNode targetNode = (XICBiologicalSampleAnalysisNode) this.getNodeAt(targetChannelIndex);
-        for (int column : columnList) {
-            if (column == 0) {
-                continue;
-            }
-            DQuantitationChannelMapping mapping = m_parentQCMappings.get(targetNode);
-            DDataset quanti = this.m_datasets.get(column - 1);
-            mapping.remove(quanti);
-            mapping.put(quanti, m_holdChannel.getQuantChannel(quanti));
-        }
     }
 
     public String verifyRedundantChannel() {

@@ -66,9 +66,8 @@ public class DQuantitationChannelMapping {
         }
     }
 
-    void remove(DDataset quanti) {
+    public void remove(DDataset quanti) {
         mappedQuantChannels.remove(quanti);
-
     }
 
     public DQuantitationChannelMapping clone() {
@@ -85,7 +84,7 @@ public class DQuantitationChannelMapping {
         String result = this.parentQCNumber + " ";
         for (DDataset quanti : this.mappedQuantChannels.keySet()) {
             QuantitationChannel channel = this.mappedQuantChannels.get(quanti);
-            result += "{" + quanti.getName() + ",(id=" + channel.getId()+",name="+channel.getName() + ")}";
+            result += "{" + quanti.getName() + ",(id=" + channel.getId() + ",name=" + channel.getName() + ")}";
         }
         return result;
     }

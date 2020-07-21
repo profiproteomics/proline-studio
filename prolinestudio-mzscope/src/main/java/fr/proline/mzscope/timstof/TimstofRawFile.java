@@ -6,7 +6,8 @@
 package fr.proline.mzscope.timstof;
 
 import fr.profi.brucker.timstof.io.TimstofReader;
-import fr.profi.brucker.timstof.model.TimsFrame;
+import fr.profi.brucker.timstof.model.AbstractTimsFrame;
+import fr.profi.brucker.timstof.model.TimsPASEFFrame;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.FeaturesExtractionRequest;
 import fr.proline.mzscope.model.IChromatogram;
@@ -35,7 +36,7 @@ public class TimstofRawFile implements IRawFile{
     private  File m_ttDirFile;
     private TimstofReader m_reader;
     private Long m_fileHandler;
-    private List<TimsFrame> m_ttFrames;
+    private List<AbstractTimsFrame> m_ttFrames;
     private Map<Integer, Integer> m_spectra2FrameIndex;
     private Map<Integer, Integer> m_frame2FirstSpectraIndex;
     private IChromatogram m_ticChromato;
@@ -68,8 +69,8 @@ public class TimstofRawFile implements IRawFile{
         Integer spectrumIndex = 0;
         m_spectra2FrameIndex = new HashMap<>();
         m_frame2FirstSpectraIndex = new HashMap<>();
-        for(TimsFrame tf : m_ttFrames){
-            Integer nbrSpectrum = (!tf.isPasef()) ? 1 : tf.getPasefMsMSData().size();
+        for(AbstractTimsFrame tf : m_ttFrames){
+            Integer nbrSpectrum =  tf.getSpectrumCount();
             
             
             m_frame2FirstSpectraIndex.put(tf.getId(),spectrumIndex);
@@ -101,7 +102,7 @@ public class TimstofRawFile implements IRawFile{
             double[] intensities = new double[m_ttFrames.size()];
             double[] times = new double[m_ttFrames.size()];
             int index =0;
-            for(TimsFrame frame : m_ttFrames ){
+            for(AbstractTimsFrame frame : m_ttFrames ){
                 times[index] = frame.getTime()/60; //Set time in minutes
                 intensities[index] = (double) frame.getSummedIntensity();
                 index++;
@@ -129,7 +130,7 @@ public class TimstofRawFile implements IRawFile{
             double[] intensities = new double[m_ttFrames.size()];
             double[] times = new double[m_ttFrames.size()];
             int index =0;
-            for(TimsFrame frame : m_ttFrames ){
+            for(AbstractTimsFrame frame : m_ttFrames ){
                 times[index] = frame.getTime()/60; //Set time in minutes
                 intensities[index] = (double) frame.getMaxIntensity();
                 index++;
@@ -148,49 +149,31 @@ public class TimstofRawFile implements IRawFile{
     public Spectrum getSpectrum(int spectrumIndex) {
         Integer frameId = m_spectra2FrameIndex.get(spectrumIndex);       
         
-        Optional<TimsFrame> opFrame = m_ttFrames.stream().filter(frame -> frameId.equals(frame.getId())).findFirst();
+        Optional<AbstractTimsFrame> opFrame = m_ttFrames.stream().filter(frame -> frameId.equals(frame.getId())).findFirst();
         if(!opFrame.isPresent())
             return null;
         
-        TimsFrame tf = opFrame.get();
+        AbstractTimsFrame tf = opFrame.get();
         if(!tf.spectrumRead()){
-            List<TimsFrame> tfs = Collections.singletonList(tf);
+            List<AbstractTimsFrame> tfs = Collections.singletonList(tf);
             m_reader.fillFramesWithSpectrumData(m_fileHandler, tfs);            
         }
         
         Spectrum spectrum = null;
-        if(tf.isPasef() && tf.getPrecursorIds() != null){
-            
-           //Read spcetrum corresponding to index...             
-           Integer indexInFrameSpectra = spectrumIndex - m_frame2FirstSpectraIndex.get(tf.getId()); //Index relative to frame 
-           List<Integer> precursorIds = tf.getPrecursorIds();
+        if(TimsPASEFFrame.class.isInstance(tf) && ((TimsPASEFFrame) tf).getPrecursorIds() != null){
+            TimsPASEFFrame pasefFrame = (TimsPASEFFrame) tf;
+           //Read spectrum corresponding to index...             
+           Integer indexInFrameSpectra = spectrumIndex - m_frame2FirstSpectraIndex.get(pasefFrame.getId()); //Index relative to frame 
+           List<Integer> precursorIds = pasefFrame.getPrecursorIds();
            if(indexInFrameSpectra >= precursorIds.size())
                return null;
            Collections.sort(precursorIds);           
-           fr.profi.brucker.timstof.model.Spectrum tfSp = tf.getPrecursorSpectrum(precursorIds.get(indexInFrameSpectra));
-           spectrum = new Spectrum(spectrumIndex, (float) tf.getTime(), tfSp.getMasses(), tfSp.getIntensities(), 2);
+           fr.profi.brucker.timstof.model.Spectrum tfSp = pasefFrame.getPrecursorSpectrum(precursorIds.get(indexInFrameSpectra));
+           spectrum = new Spectrum(spectrumIndex, (float) pasefFrame.getTime(), tfSp.getMasses(), tfSp.getIntensities(), 2);
            spectrum.setTitle(tfSp.getTitle());
-        } else if (!tf.isPasef()){
+        } else if (!TimsPASEFFrame.class.isInstance(tf) ){
             fr.profi.brucker.timstof.model.Spectrum tfSp = tf.getSingleSpectrum();
-            //Suppose MS1
-//            HashMap<Float, Double> massPerInt = new HashMap<>();
-//            double[] allMasses = tfSp.getMasses();
-//            float[] allInt = tfSp.getIntensities();
-//            List<Float> maxInt = new ArrayList<>();
-//            for(int i = 0; i<allMasses.length; i++){    
-//                massPerInt.put(allInt[i], allMasses[i]);
-//                maxInt.add(allInt[i]);
-//            }
-//            Collections.sort(maxInt);
-//            Collections.reverse(maxInt);
-//            double[] someMasses = new double[50000];
-//            float[] someInt =new  float[50000];
-//            for(int i =0 ; i<50000; i++){
-//             someInt[i]=maxInt.get(i);
-//             someMasses[i]=massPerInt.get(someInt[i]);
-//            }
             spectrum  = new Spectrum(spectrumIndex, (float) tf.getTime(), tfSp.getMasses(), tfSp.getIntensities(), 1);
-//            spectrum  = new Spectrum(spectrumIndex,  tf.getTime().floatValue(), someMasses, someInt, 1);
             spectrum.setTitle(tfSp.getTitle());
         }
             
@@ -205,7 +188,7 @@ public class TimstofRawFile implements IRawFile{
     @Override
     public int getSpectrumId(double retentionTime) {
         //LOG.info("Search Spectrum for RT "+retentionTime);
-        for (TimsFrame fr : m_ttFrames) {
+        for (AbstractTimsFrame fr : m_ttFrames) {
             if (Math.abs(fr.getTime() - retentionTime) < 0.05) {
                // LOG.info(" FOUND "+fr.getId());
                 return m_frame2FirstSpectraIndex.get(fr.getId());
@@ -222,7 +205,7 @@ public class TimstofRawFile implements IRawFile{
     @Override
     public double getSpectrumElutionTime(int spectrumIndex) {
         Integer frameId = m_spectra2FrameIndex.get(spectrumIndex);
-        Optional<TimsFrame> opFr =  m_ttFrames.stream().filter(fr -> frameId.equals(fr.getId())).findFirst();
+        Optional<AbstractTimsFrame> opFr =  m_ttFrames.stream().filter(fr -> frameId.equals(fr.getId())).findFirst();
         if(opFr.isPresent())
             return opFr.get().getTime();
         return 0; //First spectrum if not found ? or -1 ?
@@ -231,7 +214,7 @@ public class TimstofRawFile implements IRawFile{
     @Override
     public int getNextSpectrumId(int spectrumIndex, int msLevel) {
         //Pour le moment suppose que PASEF !
-        final TimsFrame.MsMsType msmsType = (msLevel == 2) ? TimsFrame.MsMsType.PASEF : TimsFrame.MsMsType.MS;
+        final AbstractTimsFrame.MsMsType msmsType = (msLevel == 2) ? AbstractTimsFrame.MsMsType.PASEF : AbstractTimsFrame.MsMsType.MS;
             
         //Suppose index and times are ordered the same way ! ... To verify ?               
         Integer nextSpectrumId= spectrumIndex+1;
@@ -241,9 +224,9 @@ public class TimstofRawFile implements IRawFile{
             return nextSpectrumId;
         
         boolean foundSpectrumFrame = false;
-        while(!foundSpectrumFrame){ 
+        while(!foundSpectrumFrame){
             final Integer finalFrId = nextFrameId;
-            Optional<TimsFrame> opFr = m_ttFrames.stream().filter(fr -> finalFrId.equals(fr.getId())).findFirst();
+            Optional<AbstractTimsFrame> opFr = m_ttFrames.stream().filter(fr -> finalFrId.equals(fr.getId())).findFirst();
             if(opFr.isPresent()){
                 if(opFr.get().getMsmsType().equals(msmsType)){
                     foundSpectrumFrame = true;
@@ -263,7 +246,7 @@ public class TimstofRawFile implements IRawFile{
     @Override
     public int getPreviousSpectrumId(int spectrumIndex, int msLevel) {
         //Pour le moment suppose que PASEF !
-        final TimsFrame.MsMsType msmsType = (msLevel == 2) ? TimsFrame.MsMsType.PASEF : TimsFrame.MsMsType.MS;
+        final AbstractTimsFrame.MsMsType msmsType = (msLevel == 2) ? AbstractTimsFrame.MsMsType.PASEF : AbstractTimsFrame.MsMsType.MS;
             
         //Suppose index and times are ordered the same way ! ... To verify ?                
         Integer prevSpectrumId= spectrumIndex-1;
@@ -275,7 +258,7 @@ public class TimstofRawFile implements IRawFile{
         boolean foundSpectrumFrame = false;
         while(!foundSpectrumFrame){
              final Integer finalFrId = prevFrameId;
-            Optional<TimsFrame> opFr =  m_ttFrames.stream().filter(fr -> finalFrId.equals(fr.getId())).findFirst();
+            Optional<AbstractTimsFrame> opFr =  m_ttFrames.stream().filter(fr -> finalFrId.equals(fr.getId())).findFirst();
             if(opFr.isPresent()){
                 if(opFr.get().getMsmsType().equals(msmsType)){
                     foundSpectrumFrame = true;

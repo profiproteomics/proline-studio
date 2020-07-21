@@ -329,24 +329,46 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
             long step3 = System.currentTimeMillis();      
             logger.debug("DerivativeAnalysis Done, number min/max points = "+mm.length+". TIME: "+(step3-step2));
             
+            //Create new Spectrum
+            int realLenght = 0;
+            double[] newSpMasses = new double[mm.length];
+            float[] newSpIntensities = new float[mm.length];
             double[] centroidSignalX = new double[mm.length];
             double[] centroidSignalY = new double[mm.length];
-            int realLenght = 0;
-            Color markerColor = rawFilePanel.getPlotColor(rawFilePanel.getCurrentRawfile().getName());
             for (int k = 0; k < mm.length; k++) {
-               if(mm[k].isMaximum()){                   
-                   double massIdx = newSignal.getXSeries()[mm[k].index()];
-                   centroidSignalX[realLenght] = massIdx;
-                   centroidSignalY[realLenght] = signal.getYSeries()[mm[k].index()];
-                   scanPlot.addMarker(new PointMarker(spectrumPlotPanel, new DataCoordinates(massIdx, newSignal.getYSeries()[mm[k].index()]), markerColor));
-                   realLenght++;
+               if(mm[k].isMaximum()){
+                  double massIdx = newSignal.getXSeries()[mm[k].index()];
+                  double intensityIdx = signal.getYSeries()[mm[k].index()];
+                  centroidSignalY[realLenght] = 
+                  centroidSignalX[realLenght] = massIdx;
+                  centroidSignalY[realLenght] = intensityIdx;                   
+                  newSpMasses[realLenght] = massIdx;
+                  newSpIntensities[realLenght] = (float) intensityIdx;                  
+                  realLenght++;
                }
             }
+            Spectrum newSpectrum = new Spectrum(-1, currentScan.getRetentionTime() , Arrays.copyOfRange(newSpMasses, 0, realLenght), Arrays.copyOfRange(newSpIntensities, 0, realLenght), currentScan.getMsLevel(), Spectrum.ScanType.PROFILE);
+            
+//            double[] centroidSignalX = new double[mm.length];
+//            double[] centroidSignalY = new double[mm.length];
+//            int realLenght = 0;
+//            Color markerColor = rawFilePanel.getPlotColor(rawFilePanel.getCurrentRawfile().getName());
+//            for (int k = 0; k < mm.length; k++) {
+//               if(mm[k].isMaximum()){                   
+//                   double massIdx = newSignal.getXSeries()[mm[k].index()];
+//                   centroidSignalX[realLenght] = massIdx;
+//                   centroidSignalY[realLenght] = signal.getYSeries()[mm[k].index()];
+//                   scanPlot.addMarker(new PointMarker(spectrumPlotPanel, new DataCoordinates(massIdx, newSignal.getYSeries()[mm[k].index()]), markerColor));
+//                   realLenght++;
+//               }
+//            }
           
             currentScanCentroided = new Signal(Arrays.copyOfRange(centroidSignalX, 0, realLenght),Arrays.copyOfRange(centroidSignalY,0,realLenght));
             currentScanCentroided.setSignalType(Signal.CENTROID);
             long step4 = System.currentTimeMillis();      
             logger.debug("Create CentroidSignal values + display markers.Nbr real points = "+realLenght+". TIME: "+(step4-step3)+ "TOTAL == "+(step4-start));
+            referenceSpectrum = newSpectrum;
+            _displayReferenceSpectrum(newSpectrum);
             m_viewCentroidSignal.setEnabled(true);
         }
     }

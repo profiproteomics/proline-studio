@@ -182,8 +182,7 @@ public class AggregationQuantChannelsPanel extends JPanel {
 
     public boolean verifyRedundantChannel() {
         String r = this.m_treeTableModel.verifyRedundantChannel();
-        if (! r.isEmpty())
-        {
+        if (!r.isEmpty()) {
             JOptionPane.showMessageDialog(this, r);
             return false;
         }

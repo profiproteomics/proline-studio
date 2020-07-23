@@ -16,6 +16,10 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog.xic.aggregation;
 
+import fr.proline.core.orm.uds.QuantitationChannel;
+import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.rsmexplorer.tree.AbstractNode;
+import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -41,7 +45,7 @@ public class QCMappingTreeTable extends JXTreeTable {
 
     private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.AggregationQuant");
     private static final int UP = -1;
-    private static final int DOWN = 1;
+    public static final int DOWN = 1;
     public static final String ERRASE = "Remove";
     public static final String MOVE_UP = "Move Up";
     public static final String MOVE_DOWN = "Move Down";
@@ -54,6 +58,7 @@ public class QCMappingTreeTable extends JXTreeTable {
         m_model = treeModel;
         setCellSelectionEnabled(true);
         setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        super.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         this.addMouseListener(new PopupAdapter());
     }
 
@@ -69,50 +74,38 @@ public class QCMappingTreeTable extends JXTreeTable {
         return super.getToolTipText(event);
     }
 
-    public Object getNodeForRow(int row) {
+    public AbstractNode getNodeForRow(int row) {
         TreePath path = getPathForRow(row);
-        return path != null ? path.getLastPathComponent() : null;
+        return path != null ? (AbstractNode) path.getLastPathComponent() : null;
     }
 
     public void removeAssociateChannel() {
         int[] rowList = getSelectedRows();
         int[] columnList = getSelectedColumns();
+        AbstractNode node;
+        DQuantitationChannelMapping mapping;
         for (int row : rowList) {
             for (int column : columnList) {
-                m_model.remove(row, column);
+                node = getNodeForRow(convertRowIndexToModel(row));
+                mapping = m_model.getRowMapping(node);
+                if (mapping != null) {
+                    mapping.remove(m_model.getDatasetAt(convertColumnIndexToModel(column)));
+                }
             }
         }
+        this.clearSelection();
         this.repaint();
     }
 
-    private void setContinueSelected() {
-        int[] rows = getSelectedRows();
-        int min, max;
-        min = rows[0];
-        max = rows[0];
-        for (int row : rows) {
-            min = Math.min(min, row);
-            max = Math.max(max, row);
-        }
-        this.setRowSelectionInterval(min, max);//selection must be continue
-    }
-
-    private boolean isSelectionOk() {
-        if (getSelectedRows().length == 0) {
+    /**
+     *
+     * @param selectRows model row
+     * @param selectCols model col
+     * @return
+     */
+    private boolean isSelectionOk(ArrayList<Integer> selectRows, ArrayList<Integer> selectCols) {
+        if (selectRows.isEmpty()) {
             return false;
-        }
-        //don't treat ignored channel
-        int[] selectRows = getSelectedRows();
-        int[] selectCols = getSelectedColumns();
-
-        for (int i = 0; i < selectRows.length; i++) {
-            for (int j = 0; j < selectCols.length; j++) {
-                int row = convertRowIndexToModel(selectRows[i]);
-                int col = convertColumnIndexToModel(selectCols[j]);
-                if (m_model.hasEmptyChannel(row, col)) {
-                    return false;
-                }
-            }
         }
         //don't treat first column
         int[] columnList = getSelectedColumns();
@@ -121,66 +114,190 @@ public class QCMappingTreeTable extends JXTreeTable {
                 return false;
             }
         }
-        return true;
-    }
-
-    protected void moveUpDown(int weight, boolean isInsertMode) {
-        if (!isSelectionOk()) {
-            return;
-        }
-
-        int[] columnList = getSelectedColumns();
-
-        if (isInsertMode) {
-            setContinueSelected();
-        }
-        int[] rows = getSelectedRows();
-        //get selected row, range it in order ascending(for up) ou descending(for down)
-        List<Integer> newSelectedRows = new ArrayList();
-        List<Integer> rowList = Arrays.stream(rows).boxed().collect(Collectors.toList());
-        if (weight == UP) {
-            Collections.sort(rowList);//lower element move first
-
-        } else {
-            Collections.sort(rowList, Collections.reverseOrder());//higher element move first
-        }
-        if (m_model.isEndChannel(rowList, weight)) {
-            return;
-        }
-        //move up/down for each cell
-        m_model.setSelected(getSelectedRows(), getSelectedColumns());
-        if (isInsertMode) {
-            m_model.preInsertMove(rowList.get(0), rowList.get(rowList.size() - 1), columnList, weight);
-        }
-        int row, targetRow;
-        for (int i = 0; i < rowList.size(); i++) {
-            //for (int row : rowList) {
-            row = rowList.get(i);
-            for (int column : columnList) {
-                targetRow = m_model.moveUpDown(row, column, weight);
-                m_logger.debug("targetRow: {}", targetRow);
-                if (targetRow != -1) {
-                    newSelectedRows.add(targetRow);
+        //don't treat ignored channel
+        for (int row : selectRows) {
+            for (int col : selectCols) {
+                Object node = getNodeForRow(row);
+                if (m_model.isEmptyChannel(node, col)) {
+                    return false;
                 }
             }
         }
-        if (isInsertMode) {
-            m_model.postInsertMove(rowList.get(rowList.size() - 1), columnList);
+        return true;
+    }
+
+    protected synchronized void moveUpDown(int weight, boolean isInsertMode) {
+        int[] rows = getSelectedRows();
+        ArrayList<Integer> selectedModelRows = new ArrayList();
+        for (int row : rows) {
+            selectedModelRows.add(convertRowIndexToModel(row));
         }
-        m_logger.debug("newSelectedRow index: {}", newSelectedRows);
+        ArrayList<Integer> selectedModelCols = new ArrayList();
+        int[] columnList = getSelectedColumns();
+        for (int col : columnList) {
+            selectedModelCols.add(convertColumnIndexToModel(col));
+        }
+        if (!isSelectionOk(selectedModelRows, selectedModelCols)) {
+            return;
+        }
+        ArrayList<Integer> newSelectedModelRows = new ArrayList();//memorize to set the new selectedInterval
+        //get selected row, range it in order ascending(for up) ou descending(for down)
+        if (weight == UP) {
+            Collections.sort(selectedModelRows);//lower element move first
+        } else {
+            Collections.sort(selectedModelRows, Collections.reverseOrder());//higher element move first
+        }
+        //can't move if reach edge
+        if (isEndChannel(selectedModelRows, weight)) {
+            return;
+        }
+        int firstRow = selectedModelRows.get(0);
+        int lastRow = selectedModelRows.get(selectedModelRows.size() - 1);
+        if (isInsertMode) {//set m_holdChannelMapping
+            //the row next to first row will be recoverd by firstRow, and the last row will be empty.
+            //We create a row which has the last row index, and the first DQuantitationChannelMapping
+            int nextRow = getNextChannelRowIndex(firstRow, weight);
+            DQuantitationChannelMapping coverdMapping = m_model.getRowMapping(getNodeForRow(nextRow));
+            m_holdChannelMapping = new DQuantitationChannelMapping(-1);//any QcParentNumber
+            for (int column : selectedModelCols) {
+                if (column == 0) {
+                    continue;
+                }
+                DDataset quanti = m_model.getDatasetAt(column);
+                QuantitationChannel coverdChannel = coverdMapping.getQuantChannel(quanti);
+                m_holdChannelMapping.put(quanti, coverdChannel);
+            }
+        }
+
+        int targetRow;
+        for (int row : selectedModelRows) {
+            for (int column : selectedModelCols) {
+                targetRow = this.setNextRow(row, column, weight);
+                if (targetRow != -1) {
+                    newSelectedModelRows.add(convertRowIndexToView(targetRow));
+                }
+            }
+        }
+
+        if (isInsertMode) {//put m_holdChannelMapping at the last place of moved row(empty now)
+            Object targetNode = getNodeForRow(lastRow);
+            if (targetNode instanceof XICBiologicalSampleAnalysisNode) {
+                for (int column : columnList) {
+                    if (column == 0) {
+                        continue;
+                    }
+                    DQuantitationChannelMapping mapping = m_model.getRowMapping(targetNode);
+                    DDataset quanti = m_model.getDatasetAt(column);
+                    mapping.put(quanti, m_holdChannelMapping.getQuantChannel(quanti));
+                }
+            }
+        }
         //set the new selected rows columns
-        if (newSelectedRows.size() > 0) {
-            Collections.sort(newSelectedRows);
-            for (int i = 0; i < newSelectedRows.size(); i++) {
-                row = newSelectedRows.get(i);
-                if (i <= 0) {
-                    setRowSelectionInterval(0, 0);
-                } else {
-                    addRowSelectionInterval(row, row);
+        if (newSelectedModelRows.size() > 0) {
+            Collections.sort(newSelectedModelRows);
+            for (int i = 0; i < newSelectedModelRows.size(); i++) {
+                int nRow = newSelectedModelRows.get(i);
+                if (nRow < this.getRowCount()) {
+                    int index = convertRowIndexToView(nRow);
+                    if (i <= 0) {
+                        setRowSelectionInterval(index, index);
+                    } else {
+                        addRowSelectionInterval(index, index);
+                    }
                 }
             }
             this.repaint();
         }
+    }
+
+    /**
+     * determinate if the move up or move down reach the top/bottm
+     *
+     * @param selectedRowList model row index
+     * @param weight 1=down -1=up
+     * @return
+     */
+    private boolean isEndChannel(List<Integer> selectedRowList, int weight) {
+        for (int row : selectedRowList) {
+            AbstractNode srcNode = (AbstractNode) this.getNodeForRow(row);
+            if (!XICBiologicalSampleAnalysisNode.class.isInstance(srcNode)) {
+                continue;
+            } else {
+                int nextIndex = row + weight;
+
+                if (nextIndex < 0 || nextIndex >= this.getRowCount()) {
+                    return true;
+                } else {
+                    if (this.getNextChannelRowIndex(row, weight) == -1) {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+
+        }
+        return false;
+    }
+
+    /**
+     * hode the original(DDataset, Channel), used for insertMove
+     */
+    DQuantitationChannelMapping m_holdChannelMapping;
+
+    /**
+     * Continue to browse the table,util to find the next
+     * DQuantitationChannelMapping or at the end of the table.
+     *
+     * @param row
+     * @param weight
+     * @return the next row index, or -1 if it is the end row (up/down end ).
+     */
+    public int getNextChannelRowIndex(int row, int weight) {
+        int recoveredRow = row + weight;
+        DQuantitationChannelMapping targetMapping;
+        while (recoveredRow >= 0 && recoveredRow < this.getRowCount()) {
+            targetMapping = m_model.getRowMapping(getNodeForRow(recoveredRow));
+            if (targetMapping == null) {
+                recoveredRow += weight;
+            } else {
+                return recoveredRow;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     *
+     * @param row model row index
+     * @param column model column index
+     * @param weight UP/DOWN
+     * @return new model row index
+     */
+    private int setNextRow(int row, int column, int weight) {
+
+        Object srcNode = getNodeForRow(row);
+        if (srcNode instanceof XICBiologicalSampleAnalysisNode) {
+            DDataset col = m_model.getDatasetAt(column);//col
+            //if (XICBiologicalSampleAnalysisNode.class.isInstance(srcNode)) {
+            DQuantitationChannelMapping srcRowMapping = m_model.getRowMapping(srcNode);
+
+            QuantitationChannel srcChannel = srcRowMapping.getQuantChannel(col);//value
+            int targetIndexChannelNode = this.getNextChannelRowIndex(row, weight);
+            if (targetIndexChannelNode != -1) {
+                DQuantitationChannelMapping targetRowMapping = m_model.getRowMapping(getNodeForRow(targetIndexChannelNode));
+
+                if (srcChannel != null) {
+                    //m_logger.debug("selectedChannelId {}", m_selectedChannelIds.toString());
+                    srcRowMapping.remove(col);
+                    targetRowMapping.put(col, srcChannel);
+                } else {
+                    targetRowMapping.put(col, null);
+
+                }
+            }
+            return targetIndexChannelNode;//row index of the table
+        }
+        return -1;
     }
 
     public void moveUp() {
@@ -207,27 +324,44 @@ public class QCMappingTreeTable extends JXTreeTable {
         int Coloumn = columnAtPoint(p);
         int row = rowAtPoint(p);
         int[] selectedRows = this.getSelectedRows();
-        int[] selectedModelRows = new int[selectedRows.length];
-        for (int i = 0; i < selectedRows.length; i++) {
-            selectedModelRows[i] = convertRowIndexToModel(selectedRows[i]);
-        }
         int[] selectedCols = this.getSelectedColumns();
-        int[] selectedModelCols = new int[selectedCols.length];
-        for (int i = 0; i < selectedCols.length; i++) {
-            selectedModelCols[i] = convertColumnIndexToModel(selectedCols[i]);
-        }
         if (selectedRows.length != 0) {
             List<Integer> selectedRowList = Arrays.stream(selectedRows).boxed().collect(Collectors.toList());
             if (selectedRowList.contains(row)) {
                 List<Integer> selectedColList = Arrays.stream(selectedCols).boxed().collect(Collectors.toList());
                 if (selectedColList.contains(Coloumn)) {
-                    if (m_model.isChannelSelected(selectedModelRows, selectedModelCols)) {
-
+                    if (this.isChannel(selectedRowList, selectedColList)) {
                         triggerPopup(e);
                     }
                 }
             }
         }
+    }
+
+    /**
+     * test if all selected cell are Channel, used to determine if trigger Popup
+     * Menu
+     *
+     * @param rowList, view row index
+     * @param columnList, view row index
+     * @return
+     */
+    private boolean isChannel(List<Integer> rowList, List<Integer> columnList) {
+        Object value;
+        for (int row : rowList) {
+            Object o = getNodeForRow(convertRowIndexToModel(row));
+            for (int column : columnList) {
+                int col = convertColumnIndexToModel(column);
+                if (col == 0) {
+                    return false;
+                }
+                value = m_model.getChannelAt(o, col);
+                if (value == null) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     //remove, up, down action

@@ -21,16 +21,13 @@ import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.xic.AbstractTreeTransferHandler;
-import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICSelectionTransferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.TransferHandler;
-import javax.swing.tree.TreePath;
 import org.openide.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,13 +39,13 @@ import org.slf4j.LoggerFactory;
 public class QCMappingTransferHandler extends AbstractTreeTransferHandler {
 
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-    private QCMappingTreeTable m_tree;
+    private QCMappingTreeTable m_treeTable;
     private QCMappingTreeTableModel m_treeTableModel;
 
     public QCMappingTransferHandler(QCMappingTreeTable tree) {
         super(false);
-        m_tree = tree;
-        m_treeTableModel = (QCMappingTreeTableModel) m_tree.getTreeTableModel();
+        m_treeTable = tree;
+        m_treeTableModel = (QCMappingTreeTableModel) m_treeTable.getTreeTableModel();
     }
 
     @Override
@@ -93,40 +90,46 @@ public class QCMappingTransferHandler extends AbstractTreeTransferHandler {
     @Override
     public boolean importData(TransferHandler.TransferSupport support) {
         try {
-            JTable.DropLocation dropLocation = ((JTable.DropLocation) support.getDropLocation());
-            TreePath dropPath = m_tree.getPathForRow(dropLocation.getRow());
-            AbstractNode dropNode = (dropPath != null) ? (AbstractNode) dropPath.getLastPathComponent() : null;
-            DDataset dropLocationDs = m_treeTableModel.getDatasetAt(dropLocation.getColumn());
-
+            //get transfer data
             XICSelectionTransferable transfer = (XICSelectionTransferable) support.getTransferable().getTransferData(XICSelectionTransferable.RSMNodeList_FLAVOR);
             XICSelectionTransferable.TransferData transferData = XICSelectionTransferable.getData(transfer.getTransferKey());
             ArrayList<AbstractNode> transferDsNodesList = (ArrayList<AbstractNode>) transferData.getDesignList();
-
             if (transferDsNodesList == null) {
                 return false;
             }
-            AbstractNode dropChannelTreeNode = dropNode;
+            //get drop node
+            JTable.DropLocation dropLocation = ((JTable.DropLocation) support.getDropLocation());
+            int currentRow = dropLocation.getRow();
+            AbstractNode dropChannelTreeNode = m_treeTable.getNodeForRow(currentRow);
+            DDataset dropLocationDs = m_treeTableModel.getDatasetAt(dropLocation.getColumn());
+            //drop behavior
             for (AbstractNode dsNode : transferDsNodesList) {
                 switch (dsNode.getType()) {
                     case BIOLOGICAL_GROUP:
-                        m_logger.info("moving group");
+                        m_logger.info("moving group");//no implement now
                     case BIOLOGICAL_SAMPLE_ANALYSIS: {
                         DQuantitationChannelMapping dropLocationMapping = m_treeTableModel.getMapping().get(dropChannelTreeNode);
                         if (dropLocationMapping != null) {
                             DataSetData userObject = (DataSetData) dsNode.getData();
                             dropLocationMapping.put(dropLocationDs, userObject.getChannelNumber());
                         }
-                        dropChannelTreeNode = this.m_treeTableModel.getNextChannelNode((XICBiologicalSampleAnalysisNode) dropChannelTreeNode);
+                        int nextRowIndex = this.m_treeTable.getNextChannelRowIndex(currentRow, QCMappingTreeTable.DOWN);//DOWN ONLY
+                        if (nextRowIndex != -1) {
+                            dropChannelTreeNode = this.m_treeTable.getNodeForRow(nextRowIndex);
+                            currentRow = nextRowIndex;
+                        } else {
+                            dropChannelTreeNode = null;
+                        }
                         if (dropChannelTreeNode == null) {
                             continue;
                         }
                     }
                 }
             }
-            ArrayList<String> doubleChannel = m_treeTableModel.findRedundantChannel(dropLocationDs);
+            String doubleChannel = m_treeTableModel.redundantChannel(dropLocationDs);
             if (doubleChannel != null && !doubleChannel.isEmpty()) {
-                String message = String.format("Some repeated channel(s) in this Quantitation column: \n  %s ", doubleChannel.stream().collect(Collectors.joining(",")));
-                JOptionPane.showMessageDialog(m_tree, message);
+
+                JOptionPane.showMessageDialog(m_treeTable, doubleChannel);
             }
             return false;
         } catch (UnsupportedFlavorException ex) {

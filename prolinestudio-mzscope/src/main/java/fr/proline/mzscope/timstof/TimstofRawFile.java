@@ -5,6 +5,7 @@
  */
 package fr.proline.mzscope.timstof;
 
+import fr.profi.brucker.timstof.converter.SpectrumGeneratingMethod;
 import fr.profi.brucker.timstof.io.TimstofReader;
 import fr.profi.brucker.timstof.model.AbstractTimsFrame;
 import fr.profi.brucker.timstof.model.TimsPASEFFrame;
@@ -172,7 +173,8 @@ public class TimstofRawFile implements IRawFile{
            spectrum = new Spectrum(spectrumIndex, (float) pasefFrame.getTime(), tfSp.getMasses(), tfSp.getIntensities(), 2);
            spectrum.setTitle(tfSp.getTitle());
         } else if (!TimsPASEFFrame.class.isInstance(tf) ){
-            fr.profi.brucker.timstof.model.Spectrum tfSp = tf.getSingleSpectrum();
+            //TODO VDS TO TEST if correct to fix  SpectrumGeneratingMethod.SMOOTH  or ask user...
+            fr.profi.brucker.timstof.model.Spectrum tfSp = tf.getSingleSpectrum(SpectrumGeneratingMethod.SMOOTH);
             spectrum  = new Spectrum(spectrumIndex, (float) tf.getTime(), tfSp.getMasses(), tfSp.getIntensities(), 1);
             spectrum.setTitle(tfSp.getTitle());
         }

@@ -30,7 +30,7 @@ import java.util.Map;
 public class DQuantitationChannelMapping {
 
     /**
-     * for one =Quantitation Channel in Aggregation Tree
+     * for one =Quantitation Channel Id in Aggregation Tree
      */
     private Integer parentQCNumber;
     /**
@@ -68,7 +68,6 @@ public class DQuantitationChannelMapping {
 
     void remove(DDataset quanti) {
         mappedQuantChannels.remove(quanti);
-
     }
 
     public DQuantitationChannelMapping clone() {
@@ -85,7 +84,7 @@ public class DQuantitationChannelMapping {
         String result = this.parentQCNumber + " ";
         for (DDataset quanti : this.mappedQuantChannels.keySet()) {
             QuantitationChannel channel = this.mappedQuantChannels.get(quanti);
-            result += "{" + quanti.getName() + ",(id=" + channel.getId()+",name="+channel.getName() + ")}";
+            result += "{" + quanti.getName() + ",(id=" + channel.getId() + ",name=" + channel.getName() + ")}";
         }
         return result;
     }

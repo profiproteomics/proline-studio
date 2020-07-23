@@ -28,19 +28,14 @@ import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleNode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.swing.tree.TreeNode;
 import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -346,40 +341,42 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
     public String verifyRedundantChannel() {
         String r = "";
         for (DDataset ds : this.m_datasets) {
-            ArrayList<String> redunday = findRedundantChannel(ds);
-            if (!redunday.isEmpty()) {
-                r += "in column: " + ds.getName() + ",Sample Analysis channel: " + redunday.stream().collect(Collectors.joining(",")) + "\n";
+            String info = redundantChannel(ds);
+            if (!info.isEmpty()) {
+                r += info + "\n";
             }
-        }
-        if (!r.isEmpty()) {
-            r += "are repeated.";
         }
         return r;
     }
 
-    protected ArrayList<String> findRedundantChannel(DDataset quanti) {
+    protected String redundantChannel(DDataset quanti) {
+        HashMap<String, List<XICBiologicalSampleAnalysisNode>> repeatedChannel = new HashMap(); //HashMap Channel Name- QC Parent Channel
+        ArrayList<String> result = new ArrayList();
         Map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping> map = this.getMapping();
-        Stream<String> channelsName = map.values().stream()
-                .map(nMap -> nMap.getQuantChannel(quanti))
-                .filter(chv -> Objects.nonNull(chv))
-                .map(ch -> ch.getName());
-
-        Iterator channelIt = channelsName.iterator();
-        ArrayList<String> channelEnum = new ArrayList();
-        ArrayList<String> channelDouble = new ArrayList();
-        String chName;
-        while (channelIt.hasNext()) {
-            chName = (String) channelIt.next();
-            if (!channelEnum.contains(chName)) {
-                channelEnum.add(chName);
-            } else {
-                if (!channelDouble.contains(chName)) {
-                    channelDouble.add(chName);
+        for (XICBiologicalSampleAnalysisNode node : map.keySet()) {
+            QuantitationChannel channel = map.get(node).getQuantChannel(quanti);
+            if (channel != null) {
+                List<XICBiologicalSampleAnalysisNode> nodes = repeatedChannel.get(channel.getName());
+                if (nodes == null) {
+                    nodes = new ArrayList();
                 }
+                nodes.add(node);
+                repeatedChannel.put(channel.getName(), nodes);
             }
         }
-        return channelDouble;
 
+        for (String channel : repeatedChannel.keySet()) {
+            List<XICBiologicalSampleAnalysisNode> nodes = repeatedChannel.get(channel);
+            if (nodes.size() > 1) {
+                String s = channel + " repeated in ";
+                s += nodes.stream().map(n -> n.toString()).collect(Collectors.joining(",", "{", "}"));
+                result.add(s);
+            }
+        }
+        if (result.isEmpty()) {
+            return "";
+        }
+        return "In Column: " + quanti.getName() + "\n" + result.stream().collect(Collectors.joining("\n"));
     }
 
     @Override

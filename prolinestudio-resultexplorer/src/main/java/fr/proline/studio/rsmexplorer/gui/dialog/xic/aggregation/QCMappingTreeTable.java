@@ -96,15 +96,23 @@ public class QCMappingTreeTable extends JXTreeTable {
         this.clearSelection();
         this.repaint();
     }
+
     /**
-     * 
+     *
      * @param selectRows model row
      * @param selectCols model col
-     * @return 
+     * @return
      */
     private boolean isSelectionOk(ArrayList<Integer> selectRows, ArrayList<Integer> selectCols) {
         if (selectRows.isEmpty()) {
             return false;
+        }
+        //don't treat first column
+        int[] columnList = getSelectedColumns();
+        for (int nb = 0; nb < columnList.length; nb++) {
+            if (columnList[nb] == 0) {
+                return false;
+            }
         }
         //don't treat ignored channel
         for (int row : selectRows) {
@@ -113,13 +121,6 @@ public class QCMappingTreeTable extends JXTreeTable {
                 if (m_model.isEmptyChannel(node, col)) {
                     return false;
                 }
-            }
-        }
-        //don't treat first column
-        int[] columnList = getSelectedColumns();
-        for (int nb = 0; nb < columnList.length; nb++) {
-            if (columnList[nb] == 0) {
-                return false;
             }
         }
         return true;

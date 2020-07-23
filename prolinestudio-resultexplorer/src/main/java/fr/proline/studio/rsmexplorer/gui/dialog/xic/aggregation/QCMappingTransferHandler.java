@@ -21,16 +21,13 @@ import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.xic.AbstractTreeTransferHandler;
-import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICSelectionTransferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.TransferHandler;
-import javax.swing.tree.TreePath;
 import org.openide.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,8 +117,8 @@ public class QCMappingTransferHandler extends AbstractTreeTransferHandler {
                         if (nextRowIndex != -1) {
                             dropChannelTreeNode = this.m_treeTable.getNodeForRow(nextRowIndex);
                             currentRow = nextRowIndex;
-                        }else{
-                            dropChannelTreeNode =  null;
+                        } else {
+                            dropChannelTreeNode = null;
                         }
                         if (dropChannelTreeNode == null) {
                             continue;
@@ -129,10 +126,10 @@ public class QCMappingTransferHandler extends AbstractTreeTransferHandler {
                     }
                 }
             }
-            ArrayList<String> doubleChannel = m_treeTableModel.findRedundantChannel(dropLocationDs);
+            String doubleChannel = m_treeTableModel.redundantChannel(dropLocationDs);
             if (doubleChannel != null && !doubleChannel.isEmpty()) {
-                String message = String.format("Some repeated channel(s) in this Quantitation column: \n  %s ", doubleChannel.stream().collect(Collectors.joining(",")));
-                JOptionPane.showMessageDialog(m_treeTable, message);
+               
+                JOptionPane.showMessageDialog(m_treeTable, doubleChannel);
             }
             return false;
         } catch (UnsupportedFlavorException ex) {

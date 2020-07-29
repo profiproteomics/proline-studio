@@ -80,19 +80,18 @@ import org.jdesktop.swingx.table.TableColumnExt;
 import org.openide.windows.WindowManager;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.rsmexplorer.gui.renderer.RendererMouseCallback;
 import fr.proline.studio.rsmexplorer.gui.renderer.XicStatusRenderer;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.Dimension;
-import java.awt.event.MouseAdapter;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,7 +100,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author JM235353
  */
-public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
+public class XicPeptidePanel extends HourglassPanel implements RendererMouseCallback, DataBoxPanelInterface, GlobalTabelModelProviderInterface {
 
     private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private AbstractDataBox m_dataBox;
@@ -280,9 +279,9 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
                 int[] selectedRows = m_quantPeptideTable.getSelectedRows();
                 if (selectedRows.length > 0) {
                     m_modifyStatusDialog.setSelectedRows(selectedRows);
-                    m_modifyStatusDialog.setVisible(true);
-                    Point p = m_modifyStatusButton.getLocationOnScreen();
                     m_modifyStatusDialog.setLocationRelativeTo(m_modifyStatusButton);
+                    m_modifyStatusDialog.setVisible(true);
+                    
                 }
             }
         };
@@ -303,8 +302,13 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
         m_peptideScrollPane = new JScrollPane();
 
         m_quantPeptideTable = new QuantPeptideTable();
-        m_quantPeptideTableModel = new QuantPeptideTableModel((LazyTable) m_quantPeptideTable, xicMode);
+        m_quantPeptideTableModel = new QuantPeptideTableModel((LazyTable) m_quantPeptideTable, this, xicMode);
         m_quantPeptideTable.setModel(new CompoundTableModel(m_quantPeptideTableModel, true));
+        
+        XicStatusRenderer renderer = (XicStatusRenderer) m_quantPeptideTableModel.getRenderer(0, QuantPeptideTableModel.COLTYPE_MQPEPTIDE_SELECTION_LEVEL);
+        m_quantPeptideTable.addMouseListener(renderer);
+        m_quantPeptideTable.addMouseMotionListener(renderer);
+        
         CustomColumnControlButton customColumnControl = new CustomColumnControlButton(m_quantPeptideTable);
         m_quantPeptideTable.setColumnControl(customColumnControl);
         // hide the id column
@@ -455,13 +459,30 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
         return m_quantPeptideTable;
     }
 
+    @Override
+    public void mouseAction(MouseEvent e) {
+        int col = m_quantPeptideTable.columnAtPoint(e.getPoint());
+        int row = m_quantPeptideTable.rowAtPoint(e.getPoint());
+        if (row != -1) {
+            int colModelIndex = m_quantPeptideTable.convertColumnIndexToModel(col);
+            int rowModelIndex = m_quantPeptideTable.convertRowIndexToModel(row);
+            if (m_quantPeptideTable.convertColumnIndexToModel(col) == QuantPeptideTableModel.COLTYPE_MQPEPTIDE_SELECTION_LEVEL) {
+                m_quantPeptideTable.getSelectionModel().setSelectionInterval(row, row);
+                if (m_modifyStatusDialog != null && m_quantPeptideTableModel.isRowEditable(rowModelIndex)) {
+                    m_modifyStatusDialog.selectedRow(rowModelIndex);
+                    m_modifyStatusDialog.setLocation(e.getLocationOnScreen().x, e.getLocationOnScreen().y);
+                    m_modifyStatusDialog.setVisible(true);
+                }
+            }
+        }
+    }
+    
     private class QuantPeptideTable extends LazyTable implements ExportModelInterface, InfoInterface {
 
         private ObjectParameter m_overviewParameter = null;
 
         public QuantPeptideTable() {
             super(m_peptideScrollPane.getVerticalScrollBar());
-            setStutusColonneListner();
         }
 
         @Override
@@ -731,48 +752,6 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
             return count + ((count > 1) ? " Peptides" : " Peptide");
         }
 
-        private void setStutusColonneListner() {
-            addMouseListener(createChangeStatusMouseAdapter());
-        }
-
-        private MouseAdapter createChangeStatusMouseAdapter() {
-            MouseAdapter changeStatusMouseAdapter = new MouseAdapter() {
-
-                /**
-                 * if mousePressed right on the colonne
-                 * QuantPeptideTableModel.COLTYPE_MQPEPTIDE_SELECTION_LEVEL,
-                 * popup
-                 *
-                 * @param e
-                 */
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (SwingUtilities.isLeftMouseButton(e)) {
-                        int col = m_quantPeptideTable.columnAtPoint(e.getPoint());
-                        int row = m_quantPeptideTable.rowAtPoint(e.getPoint());
-                        if (row != -1) {
-                            int colModelIndex = m_quantPeptideTable.convertColumnIndexToModel(col);
-                            int rowModelIndex = m_quantPeptideTable.convertRowIndexToModel(row);
-                            if (m_quantPeptideTable.convertColumnIndexToModel(col) == QuantPeptideTableModel.COLTYPE_MQPEPTIDE_SELECTION_LEVEL) {
-                                if (e.isShiftDown() || e.isControlDown()) {//multi select
-                                    m_modifyStatusDialog.selectedRow(-1);
-                                    m_modifyStatusDialog.setVisible(false);
-                                } else {
-                                    m_quantPeptideTable.getSelectionModel().setSelectionInterval(row, row);
-                                    if (m_modifyStatusDialog != null && m_quantPeptideTableModel.isRowEditable(rowModelIndex)) {
-                                        m_modifyStatusDialog.selectedRow(rowModelIndex);
-                                        m_modifyStatusDialog.setLocation(e.getLocationOnScreen());
-                                        m_modifyStatusDialog.setVisible(true);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-
-            return changeStatusMouseAdapter;
-        }
     }
 
     public void modifyStatusActionFinished(boolean success, String errorMessage) {
@@ -841,7 +820,6 @@ public class XicPeptidePanel extends HourglassPanel implements DataBoxPanelInter
         @Override
         protected boolean cancelCalled() {
             _globalButtonGroup.clearSelection();
-            setVisible(false);
             return true;
         }
 

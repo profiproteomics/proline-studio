@@ -45,6 +45,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.TimeRenderer;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.RendererMouseCallback;
 import fr.proline.studio.rsmexplorer.gui.renderer.XicStatusRenderer;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.table.LazyData;
@@ -961,7 +962,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
 
         switch (col) {
             case COLTYPE_PEPTIDE_ION_STATUS: {
-                renderer = new XicStatusRenderer();
+                renderer = new XicStatusRenderer(null, QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_STATUS);
                 break;
             }
 

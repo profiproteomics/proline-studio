@@ -55,6 +55,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.TimeRenderer;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.rsmexplorer.gui.renderer.RendererMouseCallback;
 import fr.proline.studio.rsmexplorer.gui.renderer.XicStatusRenderer;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.table.LazyData;
@@ -132,8 +133,11 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     private final ScoreRenderer m_scoreRenderer = new ScoreRenderer();
     protected static final Logger logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.XIC");
 
-    public QuantPeptideTableModel(LazyTable table, boolean xicMode) {
+    private RendererMouseCallback m_callback;
+    
+    public QuantPeptideTableModel(LazyTable table, RendererMouseCallback callback, boolean xicMode) {
         super(table);
+        m_callback = callback;
         m_isXICMode = xicMode;
         if (xicMode) {
             m_overviewType = COLTYPE_ABUNDANCE;
@@ -1524,22 +1528,27 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     @Override
     public TableCellRenderer getRenderer(int row, int col) {
 
-        //Boolean peptideSelected = (m_isXICMode) ? (Boolean) getValueAt(row, COLTYPE_MQPEPTIDE_SELECTION_LEVEL) : true;
-        Boolean peptideSelected = true;
-        if (m_isXICMode) {
-            XicStatusRenderer.SelectLevel status = (XicStatusRenderer.SelectLevel) getValueAt(row, COLTYPE_MQPEPTIDE_SELECTION_LEVEL);
-            peptideSelected = status.getIntValue() >= 2;
-        }
 
-        boolean grayed = !peptideSelected;
+        boolean grayed = false;
+        
+        if (getRowCount() > 0) {
 
-        if (grayed) {
-            if (m_rendererMapGrayed.containsKey(col)) {
-                return m_rendererMapGrayed.get(col);
+            Boolean peptideSelected = true;
+            if (m_isXICMode) {
+                XicStatusRenderer.SelectLevel status = (XicStatusRenderer.SelectLevel) getValueAt(row, COLTYPE_MQPEPTIDE_SELECTION_LEVEL);
+                peptideSelected = status.getIntValue() >= 2;
             }
-        } else {
-            if (m_rendererMap.containsKey(col)) {
-                return m_rendererMap.get(col);
+
+            grayed = !peptideSelected;
+
+            if (grayed) {
+                if (m_rendererMapGrayed.containsKey(col)) {
+                    return m_rendererMapGrayed.get(col);
+                }
+            } else {
+                if (m_rendererMap.containsKey(col)) {
+                    return m_rendererMap.get(col);
+                }
             }
         }
 
@@ -1552,7 +1561,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             }
             case COLTYPE_MQPEPTIDE_SELECTION_LEVEL: {
                 if (m_isXICMode) {
-                    renderer = new XicStatusRenderer();
+                    renderer = new XicStatusRenderer(m_callback, QuantPeptideTableModel.COLTYPE_MQPEPTIDE_SELECTION_LEVEL);
                 }
                 break;
             }

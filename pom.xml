@@ -6,11 +6,11 @@
     <parent>
         <artifactId>profi-pom</artifactId>
         <groupId>fr.proline</groupId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0_jdk11-SNAPSHOT</version>
     </parent>
 
     <artifactId>prolinestudio-parent</artifactId>
-    <version>2.2.0-SNAPSHOT</version> <!-- ProlineStudio version -->
+    <version>2.2.0_jdk11-SNAPSHOT</version> <!-- ProlineStudio version -->
     <packaging>pom</packaging>
 
     <name>ProlineStudio-parent</name>
@@ -29,7 +29,7 @@
     </modules>
 
     <properties>
-        <netbeans.version>RELEASE801</netbeans.version>
+        <netbeans.version>RELEASE120-1</netbeans.version>
         <brandingToken>prolinestudio</brandingToken>
     </properties>
 
@@ -50,9 +50,9 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>nbm-maven-plugin</artifactId>
-                    <version>3.7</version>
+                <groupId>org.apache.netbeans.utilities</groupId>
+                <artifactId>nbm-maven-plugin</artifactId>
+                <version>4.5</version>
                     <extensions>true</extensions>
                     <configuration>
                         <brandingToken>${brandingToken}</brandingToken>
@@ -76,35 +76,14 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <!-- Version inherited from ProFI-Pom -->
                     <configuration>
-                        <compilerVersion>1.8</compilerVersion>
-                        <source>1.8</source> <!-- Java version : 1.8 -->
-                        <target>1.8</target>
+                        <compilerVersion>11</compilerVersion>
+                        <source>11</source>
+                        <target>11</target>
                         <useIncrementalCompilation>false</useIncrementalCompilation> <!-- to avoid "endPosTable already set" error -->
                     </configuration>
                 </plugin>
-        
-                <!--  Maven Release for branches and tags -->
-
-                <plugin>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>2.5.2</version>
-                    <configuration>
-                        <providerImplementations>
-                            <svn>javasvn</svn>
-                        </providerImplementations>
-                    </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>com.google.code.maven-scm-provider-svnjava</groupId>
-                            <artifactId>maven-scm-provider-svnjava</artifactId>
-                            <version>2.1.1</version>
-                            <scope>compile</scope>
-                        </dependency>
-                    </dependencies>
-                </plugin>
             </plugins>
         </pluginManagement>
-
     </build>
 
 </project>

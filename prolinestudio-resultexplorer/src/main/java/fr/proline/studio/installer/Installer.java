@@ -29,6 +29,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import org.openide.windows.WindowManager;
+import java.lang.Module;
+
 
 /**
  * 1- Used to connect to web-core and UDS database as soon as possible

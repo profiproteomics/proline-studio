@@ -31,6 +31,7 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import javax.swing.JOptionPane;
+import javax.swing.tree.TreeNode;
 import org.openide.util.NbBundle;
 
 /**
@@ -100,9 +101,10 @@ public class SetRsetNameAction extends AbstractRSMAction {
                 getTree().expandNodeIfNeeded(datasetNode);
 
                 if (datasetNode.getChildCount() > 0) {
-                    Enumeration<AbstractNode> e = datasetNode.depthFirstEnumeration();
+                    Enumeration<TreeNode> e = datasetNode.depthFirstEnumeration();
                     while (e.hasMoreElements()) {
-                        AbstractNode currentElement = e.nextElement();
+                        // TODO avoid this cast due to AbstractNode API modification (jdk13)
+                        AbstractNode currentElement = (AbstractNode)e.nextElement();
                         if (currentElement.getType() == AbstractNode.NodeTypes.DATA_SET && currentElement.isLeaf() && currentElement.getChildCount() == 0) {
                             toRename.add((DataSetNode) currentElement);
                         } else {

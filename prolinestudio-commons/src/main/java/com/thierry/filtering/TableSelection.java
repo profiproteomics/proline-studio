@@ -42,8 +42,6 @@ import com.thierry.filtering.report.TextReportBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sun.awt.datatransfer.DataTransferer;
-
 public class TableSelection implements Transferable, ClipboardOwner {
 
     public static void installCopyAction(final JTable table) {
@@ -79,11 +77,7 @@ public class TableSelection implements Transferable, ClipboardOwner {
             new ArrayList<DataFlavor>();
 
     static {
-        String encoding = null;
-        DataTransferer transferer = DataTransferer.getInstance();
-        if (transferer != null) {
-            encoding = transferer.getDefaultUnicodeEncoding();
-        }
+        String encoding = "unicode";
         htmlFlavors.add(new DataFlavor("text/html;charset="
                 + encoding + ";class=java.lang.String", "HTML Text"));
         htmlFlavors.add(new DataFlavor("text/html;charset="

@@ -1,6 +1,5 @@
-/prolinestudio-dpm/target/
-/prolinestudio-mzscope/target/
-/prolinestudio-R/target/
-/prolinestudio-resultexplorer/target/
-/application/target/
-/builder/target/
+**/target/
+/.idea/
+*.iml
+.flattened-pom.xml
+nb-configuration.xml

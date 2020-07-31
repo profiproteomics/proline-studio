@@ -72,6 +72,7 @@ import javax.swing.tree.DefaultTreeModel;
 import java.nio.file.Paths;
 import java.util.List;
 import javax.swing.table.TableColumn;
+import javax.swing.tree.TreeNode;
 import org.jdesktop.swingx.table.TableColumnExt;
 
 /**
@@ -267,9 +268,10 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
     }
 
     public void pruneDesignTree() {
-        Enumeration<AbstractNode> e = this.m_rootNode.depthFirstEnumeration();
+        Enumeration<TreeNode> e = this.m_rootNode.depthFirstEnumeration();
         while (e.hasMoreElements()) {
-            AbstractNode currentElement = e.nextElement();
+            // TODO avoid this cast due to AbstractNode API modification (jdk13)
+            AbstractNode currentElement = (AbstractNode)e.nextElement();
             if (currentElement.getType() == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
                 XICBiologicalSampleAnalysisNode sampleAnalysisNode = (XICBiologicalSampleAnalysisNode) currentElement;
                 sampleAnalysisNode.removeAllChildren();

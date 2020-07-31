@@ -14,7 +14,17 @@
 
     <name>ProlineStudio-CoreWrapper</name>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <core.version>2.2.0_jdk11-SNAPSHOT</core.version>
+        <server.version>2.2.0_jdk11-SNAPSHOT</server.version>
+        <util.version>1.0.0_jdk11-SNAPSHOT</util.version>
+    </properties>
+
     <dependencies>
+
+
+        <!-- Proline-Core dependencies -->
 
         <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>

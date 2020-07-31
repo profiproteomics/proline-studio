@@ -27,6 +27,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreeNode;
 
 /**
  *
@@ -96,9 +97,9 @@ public class AbstractParameterListTree extends JPanel {
 
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) tree.getModel().getRoot();
 
-        Enumeration<DefaultMutableTreeNode> e = root.depthFirstEnumeration();
+        Enumeration<TreeNode> e = root.depthFirstEnumeration();
         while (e.hasMoreElements()) {
-            DefaultMutableTreeNode node = e.nextElement();
+            TreeNode node = e.nextElement();
             if (node.toString().equalsIgnoreCase(key)) {
                 if (node.getParent() != null) {
                     tree.setSelectionRow(node.getParent().getIndex(node) + 1);

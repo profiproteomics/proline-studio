@@ -117,12 +117,12 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
     private Map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping> inferDefaultMapping(AbstractNode node) {
 
         Map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping> mappings = new HashMap<>();
-        Stream<Object> groupStream = Collections.list(node.children()).stream()
-                .filter(n -> (((AbstractNode) n).getType() == AbstractNode.NodeTypes.BIOLOGICAL_GROUP));
+        Stream<TreeNode> groupStream = Collections.list(node.children()).stream()
+                .filter(n -> (((AbstractNode)n).getType() == AbstractNode.NodeTypes.BIOLOGICAL_GROUP));
         AtomicInteger index = new AtomicInteger(1);
         List<XICBiologicalGroupNode> groupNodes = groupStream.map(o -> ((XICBiologicalGroupNode) o)).collect(Collectors.toList());
         for (XICBiologicalGroupNode groupNode : groupNodes) {
-            Stream<Object> sampleStream = Collections.list(groupNode.children()).stream()
+            Stream<TreeNode> sampleStream = Collections.list(groupNode.children()).stream()
                     .filter(n -> (((AbstractNode) n).getType() == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE));
             List<XICBiologicalSampleNode> sampleNodeList = sampleStream.map(s -> ((XICBiologicalSampleNode) s)).collect(Collectors.toList());
             for (XICBiologicalSampleNode sampleNode : sampleNodeList) {
@@ -204,7 +204,7 @@ public class QCMappingTreeTableModel extends AbstractTreeTableModel {
      * @return
      */
     private Stream<XICBiologicalSampleAnalysisNode> parseSample(XICBiologicalSampleNode sampleNode) {
-        Stream<Object> stream = Collections.list(sampleNode.children()).stream();
+        Stream<TreeNode> stream = Collections.list(sampleNode.children()).stream();
         return stream.map(node -> ((XICBiologicalSampleAnalysisNode) node));
     }
 

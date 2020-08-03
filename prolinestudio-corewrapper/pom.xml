@@ -41,31 +41,6 @@
             <version>${core.version}</version>
         </dependency>
 
-        <dependency> 
-            <groupId>fr.proline</groupId> 
-            <artifactId>pm-sequence-repository</artifactId> 
-            <version>${server.version}</version> 
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.logging.log4j</groupId>
-                    <artifactId>log4j-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.logging.log4j</groupId>
-                    <artifactId>log4j-slf4j-impl</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.logging.log4j</groupId>
-                    <artifactId>log4j-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javax.xml.bind</groupId>
-                    <artifactId>jaxb-api</artifactId>
-                </exclusion>
-
-            </exclusions>
-        </dependency>
-
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>prolinestudio-logger</artifactId>
@@ -104,9 +79,6 @@
                 <extensions>true</extensions>
                 <configuration>
                     <publicPackages>
-                        <!--<publicPackage>javax.transaction</publicPackage>
-                        <publicPackage>javax.transaction.xa</publicPackage>-->
-                        <!--<publicPackage>javax.xml.transform.*</publicPackage>-->
                         <publicPackage>fr.profi.jdbc</publicPackage>
                         <publicPackage>fr.profi.jdbc.easy</publicPackage>
                         <publicPackage>fr.profi.util</publicPackage>
@@ -158,8 +130,6 @@
                         <publicPackage>fr.proline.core.utils.serialization</publicPackage>
                         <publicPackage>fr.proline.module</publicPackage>
                         <publicPackage>fr.proline.module.parser.mascot</publicPackage>
-                        <publicPackage>fr.proline.module.seq</publicPackage>
-                        <publicPackage>fr.proline.module.seq.dto</publicPackage>
                         <publicPackage>fr.proline.repository</publicPackage>
                         <publicPackage>fr.proline.repository.util</publicPackage>
                         <publicPackage>fr.proline.security</publicPackage>

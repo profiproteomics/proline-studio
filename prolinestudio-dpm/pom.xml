@@ -69,16 +69,13 @@
             <artifactId>jackson-annotations</artifactId>
             <version>2.6.0</version>
         </dependency>
-        <dependency>
+
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-        </dependency>
         -->
-         
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>prolinestudio-corewrapper</artifactId>
@@ -135,7 +132,7 @@
             <artifactId>hibernate-jpa-2.1-api</artifactId>
             <version>1.0.0.Final</version>
         </dependency>
-       
+
     </dependencies>
 
     <build>

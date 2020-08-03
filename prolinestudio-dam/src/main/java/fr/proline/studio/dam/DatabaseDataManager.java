@@ -16,24 +16,14 @@
  */
 package fr.proline.studio.dam;
 
-import fr.proline.core.orm.uds.Aggregation;
-import fr.proline.core.orm.uds.FragmentationRule;
-import fr.proline.core.orm.uds.FragmentationRuleSet;
-import fr.proline.core.orm.uds.InstrumentConfiguration;
-import fr.proline.core.orm.uds.PeaklistSoftware;
-import fr.proline.core.orm.uds.Project;
-import fr.proline.core.orm.uds.SpectrumTitleParsingRule;
-import fr.proline.core.orm.uds.UserAccount;
-import fr.proline.module.seq.DatabaseAccess;
-import fr.proline.repository.IDatabaseConnector;
-import fr.proline.studio.Exceptions;
+import fr.proline.core.orm.uds.*;
+import fr.proline.core.orm.uds.repository.ExternalDbRepository;
+import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
+import fr.proline.repository.ProlineDatabaseType;
+import org.openide.util.Exceptions;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
+import javax.persistence.EntityManager;
+import java.util.*;
 /**
  * Static reference of the several UDS values : project, instruments ....
  * @author jm235353
@@ -41,7 +31,8 @@ import java.util.Map;
 public class DatabaseDataManager  {
     
     private static DatabaseDataManager m_singleton = null;
-    
+
+    private Boolean m_checkDatabaseExists = null;
     private InstrumentConfiguration[] m_instruments;
     private FragmentationRuleSet[] m_fragmentationRuleSets;
     private FragmentationRule[] m_fragmentationRules;
@@ -230,6 +221,7 @@ public class DatabaseDataManager  {
     public void setUdsJdbcDriver(String jdbcDriver) {
         m_jdbcDriver = jdbcDriver;
     }
+
     public String getUdsJdbcDriver() {
         return m_jdbcDriver;
     }
@@ -243,30 +235,15 @@ public class DatabaseDataManager  {
     }
     
     public boolean isSeqDatabaseExists() {
-        
-        if (m_checkDatabaseExists == null) {
-        
-            try {
-                IDatabaseConnector seqDatabaseConnector;
-                if(m_serverConnectionProperties != null && !m_serverConnectionProperties.isEmpty())
-                    seqDatabaseConnector = DatabaseAccess.getSEQDatabaseConnector(false,m_serverConnectionProperties);
-                else
-                    seqDatabaseConnector =DatabaseAccess.getSEQDatabaseConnector(false);
-                
-                if (seqDatabaseConnector == null) {
-                    m_checkDatabaseExists = Boolean.FALSE;
-                } else {
-                    m_checkDatabaseExists = Boolean.TRUE;
-                }
-            } catch (Throwable e) {
-                m_checkDatabaseExists = Boolean.FALSE;
-            }
-        }
+
+        EntityManager udsEM = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
+        ExternalDb seqDb = ExternalDbRepository.findExternalByType(udsEM, ProlineDatabaseType.SEQ);
+        m_checkDatabaseExists = (seqDb != null);
 
         return m_checkDatabaseExists;
     }
-    private Boolean m_checkDatabaseExists = null;
-    
+
+
     public static boolean isAdmin(UserAccount userAccount) {
         boolean isAdmin = false;
         try {

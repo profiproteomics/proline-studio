@@ -17,40 +17,21 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <repositories>
-        <!--
-        Repository hosting NetBeans modules, especially APIs.
-        Versions are based on IDE releases, e.g.: RELEASE691
-        To create your own repository, use: nbm:populate-repository
-        -->
-        
-        <!--<repository>
-            <id>bedatadriven</id>
-            <name>bedatadriven public repo</name>
-            <url>http://nexus.bedatadriven.com/content/groups/public/</url>
-        </repository> -->
-        
-        <!-- <repository>
-            <id>netbeans</id>
-            <name>NetBeans</name>
-            <url>http://bits.netbeans.org/maven2/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository> -->
-
-
-
-    </repositories>
-
     <dependencies>
 
-        
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>prolinestudio-corewrapper</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.netbeans.api</groupId>-->
+<!--            <artifactId>org-netbeans-modules-settings</artifactId>-->
+<!--            <version>${netbeans.version}</version>-->
+<!--            <type>jar</type>-->
+<!--        </dependency> -->
+
+
+<!--        <dependency>-->
+<!--            <groupId>${project.groupId}</groupId>-->
+<!--            <artifactId>prolinestudio-corewrapper</artifactId>-->
+<!--            <version>${project.version}</version>-->
+<!--        </dependency>-->
         
         <!-- R Dependencies -->
         <dependency>
@@ -77,16 +58,16 @@
         </dependency>
 
 
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>prolinestudio-dpm</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>prolinestudio-dam</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>${project.groupId}</groupId>-->
+<!--            <artifactId>prolinestudio-dpm</artifactId>-->
+<!--            <version>${project.version}</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>${project.groupId}</groupId>-->
+<!--            <artifactId>prolinestudio-dam</artifactId>-->
+<!--            <version>${project.version}</version>-->
+<!--        </dependency>-->
 
         
         <dependency> 
@@ -115,23 +96,6 @@
         </dependency>
         
 
-
-
-        
-        <!-- <dependency>
-            <groupId>org.renjin</groupId>
-            <artifactId>renjin-script-engine</artifactId>
-            <version>0.7.0-RC7</version>
-        </dependency> -->
-        
-        <!-- <dependency>
-              <groupId>org.renjin</groupId>  
-               <artifactId>renjin-script-engine</artifactId>  
-               <version>0.7.0-RC7</version> 
-              <scope>system</scope>
-        <systemPath>D://renjin/renjin-script-engine-0.7.0-RC7-jar-with-dependencies.jar</systemPath>
-        </dependency> -->
-       
     </dependencies>
 
 

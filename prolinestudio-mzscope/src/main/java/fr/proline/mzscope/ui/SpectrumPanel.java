@@ -515,14 +515,16 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
 
       double xMin = 0.0, xMax = 0.0, yMin = 0.0, yMax = 0.0;
 
-      if (currentScan != null) {
+      if ((currentScan != null) && (currentScan.getMasses().length > 0)){
          xMin = spectrumPlotPanel.getXAxis().getMinValue();
          xMax = spectrumPlotPanel.getXAxis().getMaxValue();
          yMin = spectrumPlotPanel.getYAxis().getMinValue();
          yMax = spectrumPlotPanel.getYAxis().getMaxValue();
       }
 
-      if (scan != null) {          
+      if (scan != null && scan.getMasses().length > 0) {    
+        
+         logger.info("display scan id = {}, masses length = {} ", scan.getIndex(), scan.getMasses().length);
          currentScanCentroided = null;
          m_viewCentroidSignal.setEnabled(false);
          Color plotColor = rawFilePanel.getPlotColor(rawFilePanel.getCurrentRawfile().getName());
@@ -533,7 +535,7 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
          spectrumPlotPanel.lockMinXValue();
          spectrumPlotPanel.lockMinYValue();
 
-         if ((currentScan != null) && (currentScan.getMsLevel() == scan.getMsLevel())) {
+         if ((currentScan != null) && (currentScan.getMasses().length > 0) && (currentScan.getMsLevel() == scan.getMsLevel())) {
             if (!autoZoom) { 
                 spectrumPlotPanel.getXAxis().setRange(xMin, xMax);
                 spectrumPlotPanel.getYAxis().setRange(yMin, yMax);
@@ -553,6 +555,14 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
          currentScan = scan;
          spinnerModel.setValue(currentScan.getIndex());
          headerSpectrumPanel.setScan(currentScan);
+      } else if (scan != null) {
+        logger.info("display scan id = {},contains no data ", scan.getIndex());
+         currentScan = scan;
+         spinnerModel.setValue(currentScan.getIndex());
+         headerSpectrumPanel.setScan(currentScan);
+         spectrumPlotPanel.clearPlotsWithRepaint();
+      } else {
+        spectrumPlotPanel.clearPlotsWithRepaint();
       }
    }
 
@@ -595,7 +605,7 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
             plot = new PlotLinear(spectrumPlotPanel, scanModel, null, ScanTableModel.COLTYPE_SCAN_MASS, ScanTableModel.COLTYPE_SCAN_INTENSITIES);
             plot.addMeasurement(new IntegralMeasurement(plot));
             plot.addMeasurement(new WidthMeasurement(plot));
-          ((PlotLinear) plot).setStrokeFixed(true);
+            ((PlotLinear) plot).setStrokeFixed(true);
             ((PlotLinear) plot).setPlotInformation(scanModel.getPlotInformation());
         }
         plot.setIsPaintMarker(true);

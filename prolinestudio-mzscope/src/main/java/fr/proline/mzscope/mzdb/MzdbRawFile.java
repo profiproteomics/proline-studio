@@ -306,7 +306,7 @@ public class MzdbRawFile implements IRawFile {
             LOG.error("Error while getting LcMs RunSlice Iterator: " + ex);
         } catch (Exception e) {
             LOG.error("unexpected error ",e);
-        } 
+        }
         return result;
     }
 
@@ -638,7 +638,7 @@ public class MzdbRawFile implements IRawFile {
                 case MGF :{
                     try {
                         MgfExportParameters mgfExportParam = (MgfExportParameters)exportParams;
-                        LOG.debug("MGF writer start for " + this.getName() + ": mgfFilePath=" + outputFileName 
+                        LOG.debug("MGF writer start for " + this.getName() + ": mgfFilePath=" + outputFileName
                                 + ", precursorMzComputation=" + mgfExportParam.getPrecComp().getParamName() +
                                 ", mzTol=" + mgfExportParam.getMzTolPPM() 
                                 + ", intensityCutoff=" + mgfExportParam.getIntensityCutoff() 
@@ -710,6 +710,7 @@ public class MzdbRawFile implements IRawFile {
             }
         } catch (SQLiteException ex) {
             LOG.error("Check DIA: SQLiteException while reading acquisition mode", ex);
+            return false;
         }
         return false;
     }
@@ -739,9 +740,9 @@ public class MzdbRawFile implements IRawFile {
         }
         return null;
     }
- 
+
     @Override
     public void closeIRawFile() {
         reader.close();
-    }   
+    }
 }

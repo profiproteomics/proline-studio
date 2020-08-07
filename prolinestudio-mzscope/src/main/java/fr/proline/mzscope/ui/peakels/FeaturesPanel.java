@@ -170,7 +170,8 @@ public class FeaturesPanel extends AbstractPeakelsPanel {
       }
       prefs.put(LAST_DIR, csvFile.getParentFile().getAbsolutePath());
       ImportedDataTableModel importedTableModel = new ImportedDataTableModel();
-      ImportedDataTableModel.loadFile(importedTableModel, csvFile.getAbsolutePath(), ';', true, false);
+      Exception csvException  = ImportedDataTableModel.loadFile(importedTableModel, csvFile.getAbsolutePath(), ';', true, false);
+      if (csvException == null) {
       int mzColumnIdx = findColumn(importedTableModel, new String[]{"moz", "m/z", "mz"});
       int rtColumnIdx = findColumn(importedTableModel, new String[]{"rt", "retention_time", "retention time", "elution_time", "elution time", "time"});
       int zColumnIdx = findColumn(importedTableModel, new String[]{"charge", "z"});
@@ -187,7 +188,20 @@ public class FeaturesPanel extends AbstractPeakelsPanel {
 
         matchFeatures(mzValues, rtValues, zValues);
       } else {
-        JOptionPane.showMessageDialog(this, "No column named \"mz\",\"moz\" or \"m/z\" detected in the imported file.\n Verify the column headers (the column separator must be \";\")", "Error", JOptionPane.ERROR_MESSAGE);
+        StringBuffer columnNamesBuffer = new StringBuffer("[");
+        for (int i = 0; i < importedTableModel.getColumnCount(); i++) {
+          columnNamesBuffer.append(importedTableModel.getColumnName(i)).append(";");
+        }
+        columnNamesBuffer.deleteCharAt(columnNamesBuffer.length()-1);
+        columnNamesBuffer.append("]");
+        
+        String message = "No column named \"mz\",\"moz\" or \"m/z\" detected in the imported file.\n Verify the column headers (the column separator must be \";\") \n" +
+            columnNamesBuffer.toString();
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+      }
+      } else {
+        
+        JOptionPane.showMessageDialog(this, "Error while redading CSV file : "+csvException.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);        
       }
     }
   }
@@ -210,7 +224,7 @@ public class FeaturesPanel extends AbstractPeakelsPanel {
       if (features != null) {
         IFeature feature = features.stream().filter(f -> {
                   double tolDa = f.getMz() * moztol / 1e6;
-                  return (rt >= f.getFirstElutionTime() && rt <= f.getLastElutionTime() && (Math.abs(f.getMz() - mz) < tolDa) && ((f.getCharge() == 0) || (z == f.getCharge())));
+                  return (rt >= f.getFirstElutionTime() && rt <= f.getLastElutionTime() && (Math.abs(f.getMz() - mz) < tolDa) && ((f.getCharge() == 0) || (z == 0) || (z == f.getCharge())));
                 }
         ).findFirst().orElse(null);
 

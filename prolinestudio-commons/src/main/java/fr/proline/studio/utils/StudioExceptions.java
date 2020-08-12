@@ -20,9 +20,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Level;
 import javax.swing.ImageIcon;
-import org.openide.awt.NotificationDisplayer;
-import org.openide.util.Exceptions;
-import org.openide.util.ImageUtilities;
+
+import fr.proline.studio.Exceptions;
+import fr.proline.studio.ImageUtilities;
+import fr.proline.studio.WindowManager;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -34,10 +35,10 @@ public class StudioExceptions {
     private static ImageIcon exceptionIcon = ImageUtilities.loadImageIcon("org/netbeans/core/resources/exception.gif", false);
         
     public static void notify(String message, Throwable throwable) {
-        NotificationDisplayer.getDefault().notify("Proline Studio Error", exceptionIcon, message, new ActionListener() {
+        WindowManager.getDefault().notify("Proline Studio Error", exceptionIcon, message, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Exceptions.printStackTrace(Exceptions.attachSeverity(throwable, Level.SEVERE));
+                Exceptions.printStackTrace( throwable /*Exceptions.attachSeverity(throwable, Level.SEVERE)*/); //JPM.DOCK
             }
         });
     }

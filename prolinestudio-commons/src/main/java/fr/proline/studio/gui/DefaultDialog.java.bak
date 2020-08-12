@@ -369,7 +369,7 @@ public class DefaultDialog extends javax.swing.JDialog {
         c.gridx++;
         buttonPanel.add(m_buttons[BUTTON_HELP], c);
 
-        m_buttons[BUTTON_SAVE].setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.saveButton.text"));
+        m_buttons[BUTTON_SAVE].setText("Save");
         setButtonVisible(BUTTON_SAVE, false);
         m_buttons[BUTTON_SAVE].addActionListener(new java.awt.event.ActionListener() {
             @Override
@@ -387,7 +387,7 @@ public class DefaultDialog extends javax.swing.JDialog {
             }
         });
 
-        m_buttons[BUTTON_OK].setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
+        m_buttons[BUTTON_OK].setText("OK");
         m_buttons[BUTTON_OK].addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {

@@ -31,8 +31,8 @@
                     <groupId>org.netbeans.modules</groupId>
                 </exclusion>
             </exclusions>   -->
-        </dependency> 
-       
+        </dependency>
+
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-util</artifactId>

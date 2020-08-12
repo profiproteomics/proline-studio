@@ -15,6 +15,6 @@ import org.openide.modules.ModuleInstall;
  */
 public class VersionInstaller extends ModuleInstall{
     
-    public final String moduleVersion = "2.1.0";
-    public final String moduleBuildDate = "2021-01-12T14:03:19Z_VD225637";
+    public final String moduleVersion = "2.2.0-SNAPSHOT";
+    public final String moduleBuildDate = "2020-08-12T14:28:29Z_Jean-Philippe";
 }

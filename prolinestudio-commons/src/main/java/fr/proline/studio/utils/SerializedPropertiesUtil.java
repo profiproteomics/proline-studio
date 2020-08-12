@@ -16,6 +16,10 @@
  */
 package fr.proline.studio.utils;
 
+import fr.proline.studio.Property;
+import fr.proline.studio.PropertySupport;
+import fr.proline.studio.Sheet;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,9 +27,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.openide.nodes.Node.Property;
-import org.openide.nodes.PropertySupport;
-import org.openide.nodes.Sheet;
 
 /**
  * Extract Properties form a Map of maps, lists and objects

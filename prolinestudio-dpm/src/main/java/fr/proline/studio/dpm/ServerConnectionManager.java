@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.dpm;
 
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.taskinfo.TaskError;
@@ -29,7 +30,6 @@ import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.util.HashMap;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
-import org.openide.util.NbPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

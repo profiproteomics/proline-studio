@@ -16,6 +16,8 @@
  */
 package fr.proline.studio.rsmexplorer.tree.identification;
 
+import fr.proline.studio.Property;
+import fr.proline.studio.Sheet;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -28,9 +30,6 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.nodes.PropertySupport;
-import org.openide.nodes.Sheet;
-import org.openide.nodes.Node.Property;
 
 
 /**
@@ -113,30 +112,22 @@ public class IdProjectIdentificationNode extends AbstractNode {
         Project p = getProject();
         
         Sheet sheet = Sheet.createDefault();
-        
-        try {
+
 
             Sheet.Set propGroup = Sheet.createPropertiesSet();
             
          
-            Property prop = new PropertySupport.Reflection<>(p, Long.class, "getId", null);
-            prop.setName("id");
+            Property prop = new Property("id", "id", Long.class, p.getId());
             propGroup.put(prop);
-            
-            prop = new PropertySupport.Reflection<>(p, String.class, "getName", null);
-            prop.setName("name");
+
+            prop = new Property("name", "name", String.class, p.getName());
             propGroup.put(prop);
-            
-            prop = new PropertySupport.Reflection<>(p, String.class, "getDescription", null);
-            prop.setName("description");
+
+            prop = new Property("description", "description", String.class, p.getDescription());
             propGroup.put(prop);
             
             sheet.put(propGroup);
 
-        } catch (NoSuchMethodException e) {
-            m_logger.error(getClass().getSimpleName() + " properties error ", e);
-        }
-        
         return sheet;
     }
     

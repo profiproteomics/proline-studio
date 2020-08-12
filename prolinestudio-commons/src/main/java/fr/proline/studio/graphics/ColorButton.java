@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.graphics;
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.graphics.colorpicker.ColorDataInterface;
 import fr.proline.studio.graphics.colorpicker.ColorPickerDialog;
 import fr.proline.studio.gui.DefaultDialog;
@@ -26,7 +27,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.JButton;
-import org.openide.windows.WindowManager;
 
 /**
  *

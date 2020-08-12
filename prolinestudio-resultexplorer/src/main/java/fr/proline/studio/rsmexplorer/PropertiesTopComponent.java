@@ -16,13 +16,13 @@
  */
 package fr.proline.studio.rsmexplorer;
 
+import fr.proline.studio.PropertySheet;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.rsmexplorer.tree.PropertiesWrapperNode;
 import fr.proline.studio.utils.PropertiesProviderInterface;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import org.openide.explorer.propertysheet.PropertySheet;
 import org.openide.windows.TopComponent;
 
 /**
@@ -64,12 +64,12 @@ public class PropertiesTopComponent extends TopComponent {
         
         int nbProp = propertiesProviders.length;
         
-        PropertiesWrapperNode[] wrappedNodes = new PropertiesWrapperNode[nbProp];
+        /*PropertiesWrapperNode[] wrappedNodes = new PropertiesWrapperNode[nbProp];
         for (int i=0;i<nbProp;i++) {
             wrappedNodes[i] = new PropertiesWrapperNode(propertiesProviders[i]);
-        }
+        }*/
         
-        m_propertySheet.setNodes(wrappedNodes);
+        m_propertySheet.setNodes(propertiesProviders);
         
         m_hourglassPanel.setLoaded(1);
     }

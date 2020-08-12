@@ -16,6 +16,8 @@
  */
 package fr.proline.studio.graphics;
 
+import fr.proline.studio.NbPreferences;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.graphics.cursor.AbstractCursor;
 import fr.proline.studio.graphics.cursor.CursorInfo;
 import fr.proline.studio.graphics.cursor.CursorInfoList;
@@ -49,7 +51,6 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
-import org.openide.windows.WindowManager;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.ExtraDataForTableModelInterface;
 import fr.proline.studio.extendedtablemodel.LogAdapterModel;
@@ -59,7 +60,6 @@ import fr.proline.studio.parameter.AbstractLinkedParameters;
 import fr.proline.studio.parameter.DoubleParameter;
 import fr.proline.studio.parameter.ObjectParameter;
 import javax.swing.JComboBox;
-import org.openide.util.NbPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

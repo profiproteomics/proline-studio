@@ -16,11 +16,11 @@
  */
 package fr.proline.studio.gui;
 
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.utils.IconManager;
 import java.awt.*;
 import java.util.prefs.Preferences;
 import javax.swing.*;
-import org.openide.util.NbPreferences;
 
 
 

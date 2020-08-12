@@ -56,8 +56,8 @@ public final class MzdbFilesTopComponent extends TopComponent {
 
     public MzdbFilesTopComponent() {
         initComponents();
-        setName(Bundle.CTL_MzdbFilesTopComponent());
-        setToolTipText(Bundle.HINT_MzdbFilesTopComponent());
+        setName("Ms Files");
+        setToolTipText("Ms Files");
 
     }
 

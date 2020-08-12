@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.export;
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.utils.IconManager;
@@ -27,7 +28,6 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import org.jdesktop.swingx.JXTable;
-import org.openide.windows.WindowManager;
 
 /**
  * Button to export data of a table or image of a JPanel

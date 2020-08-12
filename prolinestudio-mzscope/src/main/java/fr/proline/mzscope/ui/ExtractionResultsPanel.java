@@ -23,6 +23,7 @@ import fr.proline.mzscope.processing.PeakelAnnotator;
 import fr.proline.mzscope.ui.model.ExtractionResultsTableModel;
 import fr.proline.mzscope.ui.model.MzScopePreferences;
 import fr.proline.mzscope.utils.Display;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
@@ -50,7 +51,6 @@ import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.AbstractTableModel;
 
-import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

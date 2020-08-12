@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.table;
 
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import com.thierry.filtering.TableSelection;
 import fr.proline.studio.graphics.CrossSelectionInterface;
@@ -54,7 +55,6 @@ import org.jdesktop.swingx.JXTableHeader;
 import org.jdesktop.swingx.decorator.Highlighter;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.jdesktop.swingx.table.TableColumnExt;
-import org.openide.util.NbPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;

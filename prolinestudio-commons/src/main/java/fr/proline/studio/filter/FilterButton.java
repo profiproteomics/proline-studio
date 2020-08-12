@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.filter;
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.utils.IconManager;
 import java.awt.event.ActionEvent;
@@ -24,7 +25,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.Icon;
 import javax.swing.JButton;
-import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

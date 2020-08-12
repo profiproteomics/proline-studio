@@ -29,7 +29,7 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
-import org.openide.util.NbPreferences;
+//JPM.DOCK import org.openide.util.NbPreferences;
 
 /**
  *
@@ -42,7 +42,7 @@ public class TreeUtils {
         SERVER, LOCAL, XIC, WORKING_SET
     }
 
-    public static Preferences m_preferences = NbPreferences.root();
+    //JPM.DOCK public static Preferences m_preferences = NbPreferences.root();
 
     public static void saveExpansionState(JTree tree, TreeType type, String rootSuffix) {
 
@@ -56,6 +56,8 @@ public class TreeUtils {
             builder.append(";");
         }
 
+        //JPM.DOCK
+        /*
         if (type == TreeType.SERVER) {
             m_preferences.put("TreeStateUtil.Server_tree", builder.toString());
         } else if (type == TreeType.LOCAL) {
@@ -64,15 +66,17 @@ public class TreeUtils {
             m_preferences.put("TreeStateUtil.XIC_tree", builder.toString());
         } else if (type == TreeType.WORKING_SET) {
             m_preferences.put("TreeStateUtil.Working_Set_tree", builder.toString());
-        }
+        }*/
 
     }
 
     public static HashSet<String> loadExpansionState(TreeType type, String rootSuffix) {
         HashSet<String> retrievedSet = new HashSet<String>();
 
-        String s;
+        String s = null;
 
+        //JPM.DOCK
+        /*
         if (type == TreeType.SERVER) {
             s = m_preferences.get("TreeStateUtil.Server_tree", null);
         } else if (type == TreeType.LOCAL) {
@@ -83,7 +87,7 @@ public class TreeUtils {
             s = m_preferences.get("TreeStateUtil.Working_Set_tree", null);
         } else {
             s = null;
-        }
+        }*/
 
         if (s == null) {
             return retrievedSet;

@@ -17,6 +17,7 @@
 package fr.proline.studio.rsmexplorer.tree.xic;
 
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.Sheet;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -24,7 +25,6 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
 import javax.swing.tree.MutableTreeNode;
-import org.openide.nodes.Sheet;
 
 /**
  * Biological Sample Analysis Node used in XIC Design Tree

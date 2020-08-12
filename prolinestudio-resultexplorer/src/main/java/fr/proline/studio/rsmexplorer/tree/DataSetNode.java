@@ -27,6 +27,7 @@ import static fr.proline.core.orm.uds.dto.DDatasetType.AggregationInformation.SE
 import static fr.proline.core.orm.uds.dto.DDatasetType.AggregationInformation.SEARCH_RESULT_UNION;
 import static fr.proline.core.orm.uds.dto.DDatasetType.AggregationInformation.UNKNOWN;
 import fr.proline.core.orm.uds.dto.DDatasetType.QuantitationMethodInfo;
+import fr.proline.studio.Sheet;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
@@ -40,7 +41,6 @@ import fr.proline.studio.utils.IconManager;
 import java.util.Enumeration;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.nodes.Sheet;
 
 /**
  * Node for Dataset

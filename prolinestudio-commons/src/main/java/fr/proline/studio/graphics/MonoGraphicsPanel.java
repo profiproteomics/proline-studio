@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.graphics;
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.graphics.core.GraphicsToolbarPanel;
 import fr.proline.studio.extendedtablemodel.LockedDataModel;
 import fr.proline.studio.export.ExportButton;

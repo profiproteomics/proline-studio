@@ -100,7 +100,7 @@ public abstract class Axis {
     protected int m_minimumAxisWidth = 0;
 
     private boolean m_maxZoomDone = false;
-    
+
     private boolean m_rangeModifiedByUser = false;
 
     protected static final double LOG_MIN_VALUE = 10e-13;
@@ -369,7 +369,7 @@ public abstract class Axis {
     public void setRangeModifiedByUser(boolean rangeModifiedByUser) {
         m_rangeModifiedByUser = rangeModifiedByUser;
     }
-    
+
     public void setRange(double min, double max, boolean rangeModifiedByUser) {
         setRange(min, max);
         setRangeModifiedByUser(rangeModifiedByUser);

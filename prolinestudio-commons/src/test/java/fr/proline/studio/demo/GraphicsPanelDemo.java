@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.demo;
 
+import fr.proline.studio.Exceptions;
 import fr.proline.studio.graphics.MonoGraphicsPanel;
 import fr.proline.studio.sampledata.Sample;
 import java.awt.BorderLayout;
@@ -24,7 +25,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
-import org.openide.util.Exceptions;
 
 /**
  *

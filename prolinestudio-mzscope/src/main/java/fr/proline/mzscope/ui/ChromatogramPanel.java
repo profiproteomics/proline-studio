@@ -21,6 +21,7 @@ import fr.proline.mzscope.model.IPeakel;
 import fr.proline.mzscope.ui.event.AxisRangeChromatogramListener;
 import fr.proline.mzscope.ui.model.ChromatogramTableModel;
 import fr.proline.mzscope.utils.Display;
+import fr.proline.studio.Exceptions;
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotBaseAbstract;
 import fr.proline.studio.graphics.PlotLinear;
@@ -38,7 +39,6 @@ import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JPanel;
-import org.openide.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

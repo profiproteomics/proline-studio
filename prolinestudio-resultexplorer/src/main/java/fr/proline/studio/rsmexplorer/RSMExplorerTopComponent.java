@@ -59,8 +59,8 @@ public final class RSMExplorerTopComponent extends TopComponent  {
     
     public RSMExplorerTopComponent() {
         initComponents();
-        setName(Bundle.CTL_RSMExplorerTopComponent());
-        setToolTipText(Bundle.HINT_RSMExplorerTopComponent());
+        setName("Projects");
+        setToolTipText("Projects");
 
     }
     

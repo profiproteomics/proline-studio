@@ -50,8 +50,8 @@ public class TaskLogTopComponent extends MultiDataBoxViewerTopComponent {
     public TaskLogTopComponent() {
         super(WindowBoxFactory.getSystemMonitoringWindowBox(),"Logs");
         
-        setName(Bundle.CTL_TaskLogTopComponent());
-        setToolTipText(Bundle.HINT_TaskLogTopComponent());
+        setName("Logs");
+        setToolTipText("Logs");
     }
     
     

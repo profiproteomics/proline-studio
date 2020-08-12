@@ -16,6 +16,8 @@
  */
 package fr.proline.studio.utils;
 
+import fr.proline.studio.ImageUtilities;
+
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -23,7 +25,6 @@ import java.io.File;
 import java.util.HashMap;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
-import org.openide.util.ImageUtilities;
 
 /**
  * Manage all icons needed by the application. Each icon is loaded only one time
@@ -224,7 +225,9 @@ public class IconManager {
         VALIDATED_AND_USED,
         VALIDATED_AND_NOTUSED,
         CENTROID_SPECTRA,
-        EXPORT_CENTROID
+        EXPORT_CENTROID,
+        SPLASH,
+        FRAME_ICON
     }
     
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -738,6 +741,10 @@ public class IconManager {
                 return "fr/proline/studio/images/centroid.png";
             case EXPORT_CENTROID:
                 return "fr/proline/studio/images/export-centroid.png";
+            case SPLASH:
+                return "fr/proline/studio/images/splash.gif";
+            case FRAME_ICON:
+                return "fr/proline/studio/images/frame48.gif";
         }
 
         return null; // can not happen

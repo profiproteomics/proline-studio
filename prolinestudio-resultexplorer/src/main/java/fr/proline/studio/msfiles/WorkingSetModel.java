@@ -28,7 +28,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.openide.util.NbPreferences;
+//JPM.DOCK import org.openide.util.NbPreferences;
 
 /**
  *
@@ -54,7 +54,7 @@ public class WorkingSetModel implements TreeModel {
         m_root = new DefaultMutableTreeNode(root);
         m_listeners = new HashSet<TreeModelListener>();
         
-        m_displayFilename = NbPreferences.root().get(ApplicationSettingsDialog.MS_FILES_SETTINGS+"."+ApplicationSettingsDialog.WORKING_SET_ENTRY_NAMING_KEY, ApplicationSettingsDialog.FILENAME).equalsIgnoreCase(ApplicationSettingsDialog.FILENAME);
+        m_displayFilename =true; //JPM.DOCK NbPreferences.root().get(ApplicationSettingsDialog.MS_FILES_SETTINGS+"."+ApplicationSettingsDialog.WORKING_SET_ENTRY_NAMING_KEY, ApplicationSettingsDialog.FILENAME).equalsIgnoreCase(ApplicationSettingsDialog.FILENAME);
         
         m_index = new HashMap<String, ArrayList<WorkingSet>>();
         

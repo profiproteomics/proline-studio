@@ -19,6 +19,7 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.core.orm.msi.MsiSearch;
 import fr.proline.core.orm.msi.Peaklist;
 import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.studio.Sheet;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -76,7 +77,6 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
-import org.openide.nodes.Sheet;
 import org.openide.util.NbBundle;
 
 /**

@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.dpm.task.util;
 
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.StringParameter;
@@ -37,7 +38,6 @@ import org.hornetq.api.jms.JMSFactoryType;
 import org.hornetq.core.remoting.impl.netty.NettyConnectorFactory;
 import org.hornetq.core.remoting.impl.netty.TransportConstants;
 import org.hornetq.jms.client.HornetQConnectionFactory;
-import org.openide.util.NbPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

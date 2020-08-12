@@ -16,6 +16,8 @@
  */
 package fr.proline.studio.export;
 
+import fr.proline.studio.NbPreferences;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.parameter.BooleanParameter;
@@ -42,11 +44,9 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jdesktop.swingx.JXTable;
-import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
 import org.jfree.graphics2d.svg.*;
-import org.openide.windows.WindowManager;
 
 /**
  * Dialog used to export an image or a table

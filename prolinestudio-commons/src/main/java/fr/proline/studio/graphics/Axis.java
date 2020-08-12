@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.graphics;
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.graphics.cursor.AbstractCursor;
 import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.utils.IconManager;
@@ -41,7 +42,6 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

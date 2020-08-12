@@ -42,6 +42,7 @@ public class Installer extends VersionInstaller {
     @Override
     public void restored() {
 
+        /*
         // for Mac : we need to use Metal UI, otherwise the browse file on server does not work
         forceMetalUIForMac();
         
@@ -60,10 +61,11 @@ public class Installer extends VersionInstaller {
         
         // initialize the connection to the server as soon as possible
         ServerConnectionManager.getServerConnectionManager();
-        
+        */
     }
     
     private void forceMetalUIForMac() {
+        /*
         String OS = System.getProperty("os.name").toLowerCase();
         if (OS.contains("mac")) {
             SwingUtilities.invokeLater(new Runnable() {
@@ -87,12 +89,12 @@ public class Installer extends VersionInstaller {
                 }
 
             });
-        }
+        }*/
     }
     
     @Override
     public boolean closing() {
-        
+        /*
         // check if there is tasks being done which ask not to close the application
         if (TaskInfoManager.getTaskInfoManager().askBeforeExitingApp()) {
             InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "You should not exit. Important tasks are being done.\nAre you sure you want to exit ?");
@@ -113,7 +115,7 @@ public class Installer extends VersionInstaller {
         
         //Close connection to JMS Server if needed
         JMSConnectionManager.getJMSConnectionManager().closeConnection();
-        
+        */
         return true;
     }
 }

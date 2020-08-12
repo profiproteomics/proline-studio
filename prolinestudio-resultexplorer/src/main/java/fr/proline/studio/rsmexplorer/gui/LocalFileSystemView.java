@@ -64,7 +64,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
-import org.openide.util.NbPreferences;
+//JPM.DOCK import org.openide.util.NbPreferences;
 import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,7 +84,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
     private final LocalFileSystemTransferHandler m_transferHandler;
     private boolean m_showUpdateButton;
     private JComboBox m_rootsComboBox;
-    private Preferences m_preferences;
+    //JPM.DOCK private Preferences m_preferences;
 
     private MsFilesExplorer.FileSelectionInterface m_fileSelectionInterface = null;
     
@@ -99,7 +99,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
     public LocalFileSystemView(LocalFileSystemTransferHandler transferHandler) {
         m_transferHandler = transferHandler;
-        m_preferences = NbPreferences.root();
+        //JPM.DOCK m_preferences = NbPreferences.root();
         m_paths = new HashSet<String>();
         initComponents();
     }
@@ -181,7 +181,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
 
                 reloadTree();
                 resetTreeState();
-                m_preferences.put(LOCAL_FILE_SYSTEM_LIST_KEY + "." + DRIVE_PARAM_KEY, m_rootsComboBox.getSelectedItem().toString());
+                //JPM.DOCK m_preferences.put(LOCAL_FILE_SYSTEM_LIST_KEY + "." + DRIVE_PARAM_KEY, m_rootsComboBox.getSelectedItem().toString());
 
             }
 
@@ -291,7 +291,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
     }
     
     private void initRoot() {
-        String previousDrive = m_preferences.get(LOCAL_FILE_SYSTEM_LIST_KEY + "." + DRIVE_PARAM_KEY, null);
+        String previousDrive = null; //JPM.DOCK m_preferences.get(LOCAL_FILE_SYSTEM_LIST_KEY + "." + DRIVE_PARAM_KEY, null);
         if (previousDrive != null) {
             ComboBoxModel model = m_rootsComboBox.getModel();
             int size = model.getSize();

@@ -16,13 +16,13 @@
  */
 package fr.proline.studio.info;
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.utils.IconManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JToggleButton;
-import org.openide.windows.WindowManager;
 
 /**
  * Button to access to an info floating panelo

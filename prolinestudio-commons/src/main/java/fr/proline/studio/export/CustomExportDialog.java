@@ -16,6 +16,8 @@
  */
 package fr.proline.studio.export;
 
+import fr.proline.studio.NbPreferences;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.utils.IconManager;
 
@@ -40,7 +42,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -51,7 +52,6 @@ import fr.proline.studio.gui.CollapsablePanel;
 import fr.proline.studio.gui.CollapseListener;
 import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.settings.FilePreferences;
-import org.openide.windows.WindowManager;
 
 /**
  *

@@ -23,6 +23,9 @@ import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.UserAccount;
+import fr.proline.studio.Property;
+import fr.proline.studio.PropertySupport;
+import fr.proline.studio.Sheet;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.AbstractData;
@@ -63,9 +66,6 @@ import java.util.List;
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
-import org.openide.nodes.Node;
-import org.openide.nodes.PropertySupport;
-import org.openide.nodes.Sheet;
 import org.openide.util.NbPreferences;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
@@ -749,27 +749,24 @@ public class ProjectExplorerPanel extends JPanel {
 
             Sheet sheet = Sheet.createDefault();
 
-            try {
+            //try {
 
                 Sheet.Set propGroup = Sheet.createPropertiesSet();
 
-                Node.Property prop = new PropertySupport.Reflection<>(p, Long.class, "getId", null);
-                prop.setName("id");
+                Property prop = new Property("id", "id", Long.class, p.getId());
                 propGroup.put(prop);
 
-                prop = new PropertySupport.Reflection<>(p, String.class, "getName", null);
-                prop.setName("name");
+                prop = new Property("name", "name", String.class, p.getName());
                 propGroup.put(prop);
 
-                prop = new PropertySupport.Reflection<>(p, String.class, "getDescription", null);
-                prop.setName("description");
+                prop = new Property("description", "description", String.class, p.getDescription());
                 propGroup.put(prop);
 
                 sheet.put(propGroup);
 
-            } catch (NoSuchMethodException e) {
+            /*} catch (NoSuchMethodException e) {
                 LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(getClass().getSimpleName() + " properties error ", e);
-            }
+            }*/
 
             return sheet;
         }

@@ -44,12 +44,7 @@
     </repositories>
 
     <dependencies>
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-netbeans-modules-settings</artifactId>
-            <version>${netbeans.version}</version>
-            <type>jar</type>
-        </dependency> 
+
         
         <dependency>
             <groupId>${project.groupId}</groupId>

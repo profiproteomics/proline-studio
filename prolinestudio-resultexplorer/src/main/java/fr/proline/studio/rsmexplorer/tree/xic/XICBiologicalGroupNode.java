@@ -16,11 +16,11 @@
  */
 package fr.proline.studio.rsmexplorer.tree.xic;
 
+import fr.proline.studio.Sheet;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
-import org.openide.nodes.Sheet;
 
 /**
  * Biologic Group node used in XIC Design Tree

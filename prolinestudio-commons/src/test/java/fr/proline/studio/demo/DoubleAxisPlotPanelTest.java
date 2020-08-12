@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.demo;
 
+import fr.proline.studio.Exceptions;
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotLinear;
@@ -27,7 +28,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
-import org.openide.util.Exceptions;
 
 /**
  *

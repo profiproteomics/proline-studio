@@ -26,8 +26,8 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdProjectIdentificationNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 
 /**
  * Action to Rename a dataset
@@ -39,7 +39,7 @@ public class RenameAction extends AbstractRSMAction {
      * Builds the RenameAction depending of the treeType
      */
     public RenameAction(AbstractTree tree) {
-        super(NbBundle.getMessage(RenameAction.class, "CTL_RenameAction"), tree);
+        super("Rename...", tree);
     }
 
     @Override

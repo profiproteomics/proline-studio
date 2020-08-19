@@ -38,7 +38,7 @@ import java.io.File;
 import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

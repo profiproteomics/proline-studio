@@ -30,8 +30,8 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 
 /**
  * Remove Identification Summary and potentially Search Result from a dataset
@@ -41,12 +41,12 @@ public class ClearDatasetAction extends AbstractRSMAction {
     
     
     public ClearDatasetAction(AbstractTree tree) {
-        super(NbBundle.getMessage(ClearDatasetAction.class, "CTL_ClearAction"), tree);
+        super("Clear", tree);
     }
 
      @Override
     public void actionPerformed(final AbstractNode[] selectedNodes, int x, int y) {
-        String msg = NbBundle.getMessage(ClearDatasetAction.class,"ClearDatasetAction.help.text");
+        String msg = "The Clear action will delete generated data : Merged DataSet or Identification Summary.\n (can not be undone) Are you sure ?";
         String title = "Clear Dataset";
         int n = JOptionPane.showConfirmDialog(WindowManager.getDefault().getMainWindow(),
                 msg, title, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);

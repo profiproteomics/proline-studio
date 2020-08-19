@@ -16,11 +16,12 @@
  */
 package fr.proline.studio.rsmexplorer.actions.table;
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxFrozenCopy;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
@@ -70,9 +71,8 @@ public class DisplayViewInNewWindowAction extends AbstractAction {
         final WindowBox wbox = WindowBoxFactory.getDetailWindowBox(dataName, dataName+": "+m_destinationBox.getDescription(), m_destinationBox);
 
         // open a window to display the window box
-        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-        win.open();
-        win.requestActive();
+        DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+        WindowManager.getDefault().getMainWindow().displayWindow(win);
         
         Class[] classes = m_sourceBox.getImportantInParameterClass();
         for (int i=0;i<classes.length;i++) {

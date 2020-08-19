@@ -22,7 +22,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
-import org.openide.util.NbBundle;
+
 
 /**
  * Add Action (menu for sub-actions identification and aggregation)
@@ -42,7 +42,7 @@ public class ExportAction extends AbstractRSMAction {
     private JMenu m_menu;
 
     public ExportAction(AbstractTree tree) {
-        super(NbBundle.getMessage(ExportAction.class, "CTL_ExportAction"), tree);
+        super("Export", tree);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class ExportAction extends AbstractRSMAction {
             m_menu.add(exportMzIdentMLItem);
         }
 
-        JMenu exportMenu = new JMenu(NbBundle.getMessage(ExportAction.class, "CTL_ExportSpectraListAction"));
+        JMenu exportMenu = new JMenu("Spectra List");
         m_exportPeakViewSpectraAction = new ExportSpectraListJMSAction(getTree(), ExportSpectraListJMSAction.FormatCompatibility.PeakView);
         m_exportSpectronautSpectraAction = new ExportSpectraListJMSAction(getTree(), ExportSpectraListJMSAction.FormatCompatibility.Spectronaut);
 

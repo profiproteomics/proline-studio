@@ -22,7 +22,7 @@ import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import org.openide.util.NbBundle;
+
 
 /**
  *
@@ -41,7 +41,7 @@ public class CreateAction extends AbstractRSMAction {
     private JMenuItem m_createChannelItem;
 
     public CreateAction(QuantExperimentalDesignTree tree) {
-        super(NbBundle.getMessage(CreateAction.class, "CTL_CreateAction"), tree);
+        super("Create", tree);
         m_tree = tree;
     }
 
@@ -52,11 +52,11 @@ public class CreateAction extends AbstractRSMAction {
 
             m_menu = new JMenu((String) getValue(NAME));
             m_createSampleAction = new CreateXICBiologicalNodeAction(
-                    NbBundle.getMessage(CreateAction.class, "CTL_CreateSampleAction"), AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE, m_tree);
+                    "Sample", AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE, m_tree);
             m_createGroupAction = new CreateXICBiologicalNodeAction(
-                    NbBundle.getMessage(CreateAction.class, "CTL_CreateGroupAction"), AbstractNode.NodeTypes.BIOLOGICAL_GROUP, m_tree);
+                    "Group", AbstractNode.NodeTypes.BIOLOGICAL_GROUP, m_tree);
             m_createChannelAction = new CreateXICBiologicalNodeAction(
-                    NbBundle.getMessage(CreateAction.class, "CTL_CreateChannelAction"), AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS, m_tree);
+                    "Channel", AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS, m_tree);
             m_createSampleItem = new JMenuItem(m_createSampleAction);
             m_createGroupItem = new JMenuItem(m_createGroupAction);
             m_createChannelItem = new JMenuItem(m_createChannelAction);

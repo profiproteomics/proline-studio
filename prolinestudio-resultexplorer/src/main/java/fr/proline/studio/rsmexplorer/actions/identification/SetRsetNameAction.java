@@ -31,7 +31,7 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import javax.swing.JOptionPane;
-import org.openide.util.NbBundle;
+
 
 /**
  * Action to Rename a dataset
@@ -51,8 +51,8 @@ public class SetRsetNameAction extends AbstractRSMAction {
      * Builds the RenameAction depending of the treeType
      *
      */
-    public SetRsetNameAction(AbstractTree tree, String naming, String ctlProperty) {
-        super(NbBundle.getMessage(SetRsetNameAction.class, ctlProperty), tree);
+    public SetRsetNameAction(AbstractTree tree, String naming, String name) {
+        super(name, tree);
         this.m_naming = naming;
     }
 

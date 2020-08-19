@@ -44,8 +44,8 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 
 /**
  * Action to validate or re-validate a Search Result
@@ -57,7 +57,7 @@ public class ValidateJMSAction extends AbstractRSMAction {
 
        
     public ValidateJMSAction(AbstractTree tree) {
-        super(NbBundle.getMessage(ValidateJMSAction.class, "CTL_ValidateAction"), tree);
+        super("Validate Search Result...", tree);
     }
 
     @Override

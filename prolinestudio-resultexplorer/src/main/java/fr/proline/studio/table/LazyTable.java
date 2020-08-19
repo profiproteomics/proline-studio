@@ -33,7 +33,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.table.renderer.GrayedRenderer;
 
 /**

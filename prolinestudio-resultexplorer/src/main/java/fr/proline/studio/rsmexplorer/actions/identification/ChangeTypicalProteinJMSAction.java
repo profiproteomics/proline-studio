@@ -23,8 +23,8 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.DatabaseDataManager;
@@ -44,7 +44,7 @@ public class ChangeTypicalProteinJMSAction extends AbstractRSMAction {
 
     
     public ChangeTypicalProteinJMSAction(AbstractTree tree) {
-        super(NbBundle.getMessage(ChangeTypicalProteinJMSAction.class, "CTL_ChangeTypicalProtein"), tree);
+        super("Change Typical Protein...", tree);
     }
 
     @Override

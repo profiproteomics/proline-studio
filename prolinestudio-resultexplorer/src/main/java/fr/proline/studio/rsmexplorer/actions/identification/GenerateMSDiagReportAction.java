@@ -29,14 +29,14 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.MSDiagDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 
 /**
  * Action to launch the msdiag generation of the report. action
@@ -47,7 +47,7 @@ import org.openide.windows.WindowManager;
 public class GenerateMSDiagReportAction extends AbstractRSMAction {
 
     public GenerateMSDiagReportAction(AbstractTree tree) {
-        super(NbBundle.getMessage(GenerateMSDiagReportAction.class, "CTL_GenerateMSDiagReportAction"), tree);
+        super("Quality Control...", tree);
     }
 
     @Override
@@ -90,16 +90,14 @@ public class GenerateMSDiagReportAction extends AbstractRSMAction {
             wbox.setEntryData(dataSet.getProject().getId(), rset);
 
             // open a window to display the window box
-            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-            win.open();
-            win.requestActive();
+            DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+            WindowManager.getDefault().getMainWindow().displayWindow(win);
         } else {
 
             final WindowBox wbox = WindowBoxFactory.getMSDiagWindowBox(dataSet.getName() + " Quality Control", (HashMap<String, String>) resultMessages.get(0));
             // open a window to display the window box
-            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-            win.open();
-            win.requestActive();
+            DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+            WindowManager.getDefault().getMainWindow().displayWindow(win);
 
             // we have to load the result set
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {

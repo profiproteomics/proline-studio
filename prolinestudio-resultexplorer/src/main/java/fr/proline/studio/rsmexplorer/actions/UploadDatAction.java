@@ -22,27 +22,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import org.openide.awt.ActionRegistration;
-import org.openide.awt.ActionReferences;
-import org.openide.awt.ActionID;
-import org.openide.util.ContextAwareAction;
-import org.openide.util.Lookup;
-import org.openide.util.NbBundle;
-import org.openide.util.NbBundle.Messages;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 
-@ActionID(category = "File", id = "fr.proline.studio.rsmexplorer.actions.UploadDatAction")
-@ActionRegistration(displayName = "#CTL_UploadDatAction")
-@ActionReferences({
-    //@ActionReference(path = "Menu/File", position = 600)
-})
-@Messages("CTL_UploadDatAction=Upload .dat File(s)")
-public final class UploadDatAction extends AbstractAction implements ActionListener, ContextAwareAction {
+
+
+public final class UploadDatAction extends AbstractAction implements ActionListener {
 
     private static UploadDatAction m_action = null;
 
     public UploadDatAction() {
-        putValue(Action.NAME, NbBundle.getMessage(UploadDatAction.class, "CTL_UploadDatAction"));
+        putValue(Action.NAME, "Upload .dat File(s)");
         m_action = this;
         setEnabled(true);
     }
@@ -62,8 +51,4 @@ public final class UploadDatAction extends AbstractAction implements ActionListe
 
     }
 
-    @Override
-    public Action createContextAwareInstance(Lookup lkp) {
-        return new UploadDatAction();
-    }
 }

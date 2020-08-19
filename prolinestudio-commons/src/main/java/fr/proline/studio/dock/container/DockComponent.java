@@ -1,7 +1,10 @@
 package fr.proline.studio.dock.container;
 
 
+import fr.proline.studio.dock.AbstractTopPanel;
+
 import javax.swing.*;
+import java.util.HashSet;
 
 
 public class DockComponent extends DockContainer {
@@ -17,12 +20,25 @@ public class DockComponent extends DockContainer {
     public static final int PROP_MINIMIZE = 0b10;
 
 
+    public DockComponent(AbstractTopPanel topPanel, int properties) {
+        this(topPanel.getTopPanelIdentifierKey(), topPanel.getTitle(), (topPanel.getIcon() != null) ? new ImageIcon(topPanel.getIcon()) : null, topPanel, properties);
+    }
+
     public DockComponent(String windowKey, String title, Icon icon, JComponent component, int properties) {
         m_windowKey = windowKey;
         m_title = title;
         m_icon = icon;
         m_component = component;
         m_properties = properties;
+    }
+
+
+    public void getTopPanels(HashSet<AbstractTopPanel> set) {
+
+        if (m_component instanceof AbstractTopPanel) {
+            set.add((AbstractTopPanel) m_component);
+        }
+
     }
 
     @Override

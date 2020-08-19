@@ -37,8 +37,8 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +51,7 @@ public class GenerateSpectrumMatchesJMSAction extends AbstractRSMAction {
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
     public GenerateSpectrumMatchesJMSAction(AbstractTree tree) {
-        super(NbBundle.getMessage(GenerateSpectrumMatchesJMSAction.class, "CTL_GenerateSpectrumMatchesAction"), tree);
+        super("Generate Spectrum Matches", tree);
     }
     
     @Override

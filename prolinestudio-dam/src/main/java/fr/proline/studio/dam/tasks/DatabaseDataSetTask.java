@@ -56,7 +56,6 @@ import fr.proline.studio.dam.data.DatasetToCopy;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import java.io.IOException;
 import javax.persistence.NoResultException;
-import org.netbeans.api.db.explorer.DatabaseException;
 import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 
 /**

@@ -20,24 +20,8 @@
 
     <dependencies>
 
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-netbeans-modules-db</artifactId>
-            <version>${netbeans.version}</version>
-            <type>jar</type>
-            <!--            <exclusions>
-                <exclusion>
-                    <artifactId>org-netbeans-modules-db-kit</artifactId>
-                    <groupId>org.netbeans.modules</groupId>
-                </exclusion>
-            </exclusions>   -->
-        </dependency>
 
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-util</artifactId>
-            <version>${netbeans.version}</version>
-        </dependency>
+
 
         <!-- ProlineStudio dependencies -->
         <dependency>

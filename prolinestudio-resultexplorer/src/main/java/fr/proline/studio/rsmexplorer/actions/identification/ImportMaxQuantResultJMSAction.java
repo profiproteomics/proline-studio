@@ -45,8 +45,8 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 
 /**
  *
@@ -55,7 +55,7 @@ import org.openide.windows.WindowManager;
 public class ImportMaxQuantResultJMSAction extends AbstractRSMAction {
 
     public ImportMaxQuantResultJMSAction(AbstractTree tree) {
-        super(NbBundle.getMessage(ImportMaxQuantResultJMSAction.class, "CTL_ImportMaxQuantResult"), tree);
+        super("Import MaxQuant Result...", tree);
     }
 
     @Override

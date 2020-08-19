@@ -1,5 +1,6 @@
 package fr.proline.studio.dock.container;
 
+import fr.proline.studio.dock.AbstractTopPanel;
 import fr.proline.studio.dock.dragdrop.OverArea;
 
 import javax.swing.*;
@@ -8,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class DocContainerMinimizeZone extends DockContainerMulti implements DockReplaceInterface {
 
@@ -27,6 +29,11 @@ public class DocContainerMinimizeZone extends DockContainerMulti implements Dock
 
         m_component = containerPanel;
 
+    }
+
+    public void getTopPanels(HashSet<AbstractTopPanel> set) {
+        m_dockContainerMulti.getTopPanels(set);
+        m_minimizePanel.getTopPanels(set);
     }
 
     @Override
@@ -147,6 +154,13 @@ public class DocContainerMinimizeZone extends DockContainerMulti implements Dock
             setBackground(Color.white);
 
             setVisible(false);
+        }
+
+        public void getTopPanels(HashSet<AbstractTopPanel> set) {
+
+            for (DockContainer c : m_componentMap.keySet()) {
+                c.getTopPanels(set);
+            }
         }
 
         public DockContainer search(String windowKey) {

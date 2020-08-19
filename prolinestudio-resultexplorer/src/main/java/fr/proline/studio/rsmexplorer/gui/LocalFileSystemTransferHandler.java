@@ -18,7 +18,6 @@ package fr.proline.studio.rsmexplorer.gui;
 
 
 import fr.proline.studio.msfiles.MzdbDownloadBatch;
-import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
@@ -29,6 +28,8 @@ import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
+
+import fr.proline.studio.rsmexplorer.MzdbFilesTopPanel;
 import org.openide.util.Exceptions;
 
 /**
@@ -102,9 +103,9 @@ public class LocalFileSystemTransferHandler extends TransferHandler {
                 /*
                 Now we can drop on a file (corresponds to usual behaviour on Window)
                 But when we drop on a file, in fact we drop on the parent directory of the file
-                
+
                 TreePath dropPath = ((JTree.DropLocation) support.getDropLocation()).getPath();
-                File dropFile = pathToFile(MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().getSelectedRoot(), dropPath);
+                File dropFile = pathToFile(MzdbFilesTopPanel.getExplorer().getLocalFileSystemView().getSelectedRoot(), dropPath);
                 if (!dropFile.isDirectory()) {
                     return false;
                 }*/
@@ -137,8 +138,8 @@ public class LocalFileSystemTransferHandler extends TransferHandler {
                     // drop on a file corresponds to a drop on the parent directory
                     dropPath = dropPath.getParentPath();
                 }
-                
-                MzdbDownloadBatch downloadBatch = new MzdbDownloadBatch(filesToTransfer, dropPath, MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().getSelectedRoot());
+
+                MzdbDownloadBatch downloadBatch = new MzdbDownloadBatch(filesToTransfer, dropPath, MzdbFilesTopPanel.getExplorer().getLocalFileSystemView().getSelectedRoot());
                 Thread downloadThread = new Thread(downloadBatch);
                 downloadThread.start();
 

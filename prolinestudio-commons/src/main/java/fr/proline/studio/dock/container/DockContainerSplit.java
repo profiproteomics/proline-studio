@@ -1,9 +1,11 @@
 package fr.proline.studio.dock.container;
 
+import fr.proline.studio.dock.AbstractTopPanel;
 import fr.proline.studio.dock.dragdrop.OverArea;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.HashSet;
 
 public class DockContainerSplit extends DockContainerMulti implements DockReplaceInterface {
 
@@ -14,6 +16,11 @@ public class DockContainerSplit extends DockContainerMulti implements DockReplac
 
     public DockContainerSplit() {
 
+    }
+
+    public void getTopPanels(HashSet<AbstractTopPanel> set) {
+        m_leftContainer.getTopPanels(set);
+        m_rightContainer.getTopPanels(set);
     }
 
     @Override

@@ -27,7 +27,7 @@ import javax.swing.JPanel;
 
 
 /**
- * A window box contains a set of Databox and can be display by a DataBoxViewerTopComponent
+ * A window box contains a set of Databox and can be display by a DataBoxViewerTopPanel
  * @author JM235353
  */
 public class WindowBox {

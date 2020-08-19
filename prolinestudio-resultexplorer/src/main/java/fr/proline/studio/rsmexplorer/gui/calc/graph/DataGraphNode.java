@@ -16,12 +16,13 @@
  */
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.id.ProjectId;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.table.TableInfo;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
@@ -150,9 +151,8 @@ public class DataGraphNode extends GraphNode {
         long id = (projectId!=null) ? projectId.getId() : -1L;
         
         windowBox.setEntryData(id, model);
-        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
-        win.open();
-        win.requestActive();
+        DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(windowBox);
+        WindowManager.getDefault().getMainWindow().displayWindow(win);
     }
 
     @Override

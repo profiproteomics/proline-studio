@@ -34,8 +34,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.*;
-import org.openide.DialogDisplayer;
-import org.openide.NotifyDescriptor;
+
 
 /**
  * Panel to display information about a specific task
@@ -373,6 +372,9 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
             _requestDialogContentPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, top, bottom);
             _requestDialogContentPane.setDividerLocation(60);
             requestPanel.add(_requestDialogContentPane, c);
+
+            //JPM.DOCK
+            /*
             NotifyDescriptor nd = new NotifyDescriptor(
                     requestPanel, // instance of your panel
                     "Request details", // title of the dialog
@@ -382,7 +384,7 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
                     null
             );
 
-            DialogDisplayer.getDefault().notify(nd);
+            DialogDisplayer.getDefault().notify(nd);*/
 
         }
 

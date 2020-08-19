@@ -23,7 +23,7 @@ import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import java.util.ArrayList;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import org.openide.util.NbBundle;
+
 
 /**
  * Action for the menu to display data for Identification Summary
@@ -48,7 +48,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
     private JMenu m_menu;
 
     public DisplayRsmAction(AbstractTree tree) {
-        super(NbBundle.getMessage(DisplayRsmAction.class, "CTL_DisplayRsmAction"), tree);
+        super("Display Identification Summary", tree);
     }
 
     @Override

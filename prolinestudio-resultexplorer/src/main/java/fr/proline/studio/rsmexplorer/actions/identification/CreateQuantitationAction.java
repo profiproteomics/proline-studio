@@ -41,8 +41,8 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import java.util.*;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,13 +63,13 @@ public class CreateQuantitationAction extends AbstractRSMAction {
         switch (type) {
             case LABEL_FREE: {
                 if (fromExistingXIC) {
-                  return NbBundle.getMessage(CreateQuantitationAction.class, "CTL_CreateXIC_Clone");
+                  return "Clone & Extract Abundances...";
                 } else {
-                  return NbBundle.getMessage(CreateQuantitationAction.class, "CTL_CreateXIC");
+                  return "Label Free...";
                 } 
             }
-            case RESIDUE_LABELING: return NbBundle.getMessage(CreateQuantitationAction.class, "CTL_CreateResidueLabeling");
-            case ISOBARIC_TAGGING: return NbBundle.getMessage(CreateQuantitationAction.class, "CTL_CreateIsobaricLabeling");
+            case RESIDUE_LABELING: return "Residue Labeling...";
+            case ISOBARIC_TAGGING: return "Isobaric Labeling...";
             
         }
        return "unknown";

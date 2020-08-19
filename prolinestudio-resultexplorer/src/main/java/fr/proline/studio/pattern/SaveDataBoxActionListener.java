@@ -24,7 +24,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.JPanel;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 
 
 /**

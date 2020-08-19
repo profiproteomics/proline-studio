@@ -27,15 +27,14 @@ import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.pattern.*;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.DataBoxChooserDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 
 import java.util.ArrayList;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 
 /**
  * Action to display the dialog to choose a view (databox) for a user window
@@ -46,7 +45,7 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
     private final char m_windowType;
     
     public DisplayUserWindowAction(char windowType, AbstractTree tree) {
-        super(NbBundle.getMessage(DisplayRsmProteinSetsAction.class, "CTL_DisplayUserWindowAction"), tree);
+        super("New User Window...", tree);
         m_windowType = windowType;
     }
     
@@ -102,15 +101,14 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
                         wbox.setEntryData(dataSet.getProject().getId(), rsm);
 
                         // open a window to display the window box
-                        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                        win.open();
-                        win.requestActive();
+                        DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+                        WindowManager.getDefault().getMainWindow().displayWindow(win);
+
                     } else {
 
                         // open a window to display the window box
-                        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                        win.open();
-                        win.requestActive();
+                        DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+                        WindowManager.getDefault().getMainWindow().displayWindow(win);
 
                         // we have to load the result set
                         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -148,14 +146,12 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
 
 
                         // open a window to display the window box
-                        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                        win.open();
-                        win.requestActive();
+                        DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+                        WindowManager.getDefault().getMainWindow().displayWindow(win);
                     } else {
 
-                        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                        win.open();
-                        win.requestActive();
+                        DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+                        WindowManager.getDefault().getMainWindow().displayWindow(win);
 
                         // we have to load the result set
                         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -191,14 +187,12 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
 
 
                         // open a window to display the window box
-                        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                        win.open();
-                        win.requestActive();
+                        DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+                        WindowManager.getDefault().getMainWindow().displayWindow(win);
                     } else {
 
-                        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                        win.open();
-                        win.requestActive();
+                        DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+                        WindowManager.getDefault().getMainWindow().displayWindow(win);
 
                         // we have to load the result set
                         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {

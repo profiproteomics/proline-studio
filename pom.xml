@@ -18,8 +18,8 @@
     <modules>
         <module>prolinestudio-corewrapper</module>
         <module>prolinestudio-logger</module>
-        <module>branding</module>
-        <module>application</module>
+        <!-- <module>branding</module>
+        <module>application</module> -->
         <module>prolinestudio-commons</module>
         <module>prolinestudio-dam</module>
         <module>prolinestudio-resultexplorer</module>

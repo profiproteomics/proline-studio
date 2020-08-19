@@ -19,6 +19,7 @@ package fr.proline.studio.rsmexplorer.actions.identification;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -26,11 +27,11 @@ import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
-import org.openide.util.NbBundle;
+
 
 /**
  * Action to display all msQueries for a given resultSet
@@ -39,7 +40,7 @@ import org.openide.util.NbBundle;
 public class DisplayMSQueryAction extends AbstractRSMAction {
 
     public DisplayMSQueryAction(AbstractTree tree) {
-       super(NbBundle.getMessage(DisplayMSQueryAction.class, "CTL_DisplayMSQueryAction"), tree);
+       super("MSQueries", tree);
     }
     
     @Override
@@ -74,9 +75,8 @@ public class DisplayMSQueryAction extends AbstractRSMAction {
             wbox.setEntryData(dataSet.getProject().getId(), rsm);
             
             // open a window to display the window box
-            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-            win.open();
-            win.requestActive();
+            DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+            WindowManager.getDefault().getMainWindow().displayWindow(win);
         } else {
 
             
@@ -98,9 +98,8 @@ public class DisplayMSQueryAction extends AbstractRSMAction {
                     
                     WindowBox wbox = WindowBoxFactory.getMSQueriesWindowBoxForRsm(dataSet.getName(), mergedData);
                     // open a window to display the window box
-                    DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                    win.open();
-                    win.requestActive();
+                    DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+                    WindowManager.getDefault().getMainWindow().displayWindow(win);
                     
                     // prepare window box
                     wbox.setEntryData(dataSet.getProject().getId(), rsm);

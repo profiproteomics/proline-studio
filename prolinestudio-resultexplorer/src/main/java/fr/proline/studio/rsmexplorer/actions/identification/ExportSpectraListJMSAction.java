@@ -31,8 +31,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.swing.JOptionPane;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +49,8 @@ public class ExportSpectraListJMSAction extends AbstractRSMAction {
     FormatCompatibility m_compatibility;
     
     public ExportSpectraListJMSAction(AbstractTree tree, FormatCompatibility compatibility) {
-        super(NbBundle.getMessage(ExportSpectraListJMSAction.class, "CTL_"+compatibility.toString()+"SpectraListAction"), tree);
+        super(compatibility.equals(FormatCompatibility.PeakView) ? "PeakView..." : "Spectronaut...", tree);
+
         m_compatibility = compatibility;
     }
 

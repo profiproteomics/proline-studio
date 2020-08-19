@@ -73,7 +73,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import org.jdesktop.swingx.table.TableColumnExt;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 
 /**
  *

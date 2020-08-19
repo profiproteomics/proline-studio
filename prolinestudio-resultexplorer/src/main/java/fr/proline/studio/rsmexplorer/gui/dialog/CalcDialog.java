@@ -18,6 +18,7 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 
 
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.id.ProjectId;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
@@ -30,7 +31,7 @@ import fr.proline.studio.python.interpreter.CalcInterpreterTask;
 import fr.proline.studio.python.interpreter.CalcInterpreterThread;
 import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.rserver.dialog.ImageViewerTopComponent;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.DataTree;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
@@ -265,15 +266,14 @@ public class CalcDialog extends JDialog {
                         long id = (projectId!=null) ? projectId.getId() : -1L;
                         
                         windowBox.setEntryData(id, model );
-                        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
-                        win.open();
-                        win.requestActive();
+                        DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(windowBox);
+                        WindowManager.getDefault().getMainWindow().displayWindow(win);
                     } else if (o instanceof PythonImage) {
                         BufferedImage image = ((PythonImage) o).getImage();
 
                         ImageViewerTopComponent win = new ImageViewerTopComponent(resultVariable.getName(), image);
-                        win.open();
-                        win.requestActive();
+                        WindowManager.getDefault().getMainWindow().displayWindow(win);
+
 
                     }
 

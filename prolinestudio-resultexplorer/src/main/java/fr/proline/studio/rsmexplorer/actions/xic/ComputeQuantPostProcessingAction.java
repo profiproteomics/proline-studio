@@ -47,8 +47,8 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 
 /**
  * key word: Refine = Compute Quan Post Processing
@@ -60,7 +60,7 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
     private int m_nbLoadedQuanti;
 
     public ComputeQuantPostProcessingAction(AbstractTree tree) {
-        super(NbBundle.getMessage(ComputeQuantPostProcessingAction.class, "CTL_ComputeQuantPostProcessingAction"), tree);
+        super("Compute Post Processing on Abundances...", tree);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package fr.proline.studio;
 
+import fr.proline.studio.dock.AbstractDockFrame;
+
 import javax.swing.*;
 import java.awt.event.ActionListener;
 
@@ -7,7 +9,7 @@ public class WindowManager {
 
     private static WindowManager m_singleton = null;
 
-    private JFrame m_frame;
+    private AbstractDockFrame m_frame;
 
     private WindowManager() {
 
@@ -20,11 +22,11 @@ public class WindowManager {
         return m_singleton;
     }
 
-    public JFrame getMainWindow() {
+    public AbstractDockFrame getMainWindow() {
         return m_frame;
     }
 
-    public void setMainWindow(JFrame frame) {
+    public void setMainWindow(AbstractDockFrame frame) {
         m_frame = frame;
     }
 

@@ -16,10 +16,12 @@
  */
 package fr.proline.studio.rsmexplorer.gui.calc;
 
+import fr.proline.studio.WindowManager;
+import fr.proline.studio.dock.AbstractTopPanel;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.table.TableInfo;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AdjustPFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.SCDiffAnalysisFunction;
@@ -72,7 +74,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.TableColumnExt;
-import org.openide.windows.TopComponent;
 
 /**
  * Tree Panel for the DataAnalyzer with data and functions
@@ -219,15 +220,17 @@ public abstract class DataTree extends JTree {
         HashMap<Integer, JXTable> tableMap = new HashMap<>();
         
         ArrayList<TableInfo> list = new ArrayList<>();
-        
-        Set<TopComponent> tcs = TopComponent.getRegistry().getOpened();
-        Iterator<TopComponent> itTop = tcs.iterator();
+
+
+
+        Set< AbstractTopPanel > tcs = WindowManager.getDefault().getMainWindow().getTopPanels();
+        Iterator<AbstractTopPanel> itTop = tcs.iterator();
         while (itTop.hasNext()) {
-            TopComponent topComponent = itTop.next();
-            if (topComponent instanceof DataBoxViewerTopComponent) {
+            AbstractTopPanel topComponent = itTop.next();
+            if (topComponent instanceof DataBoxViewerTopPanel) {
                 list.clear();
-                DataBoxViewerTopComponent databoxViewerTopComponent = (DataBoxViewerTopComponent) topComponent;
-                databoxViewerTopComponent.retrieveTableModels(list);
+                DataBoxViewerTopPanel DataBoxViewerTopPanel = (DataBoxViewerTopPanel) topComponent;
+                DataBoxViewerTopPanel.retrieveTableModels(list);
                 int nb = list.size();
                 if (nb > 0) {
                     WindowDataNode windowDataNode = new WindowDataNode(list.get(0));

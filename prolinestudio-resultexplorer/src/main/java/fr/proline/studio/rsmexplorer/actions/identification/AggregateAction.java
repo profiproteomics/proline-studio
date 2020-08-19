@@ -35,8 +35,8 @@ import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.AddAggregateDialog;
 import java.util.ArrayList;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 
 /**
  * Add Aggregate action
@@ -46,7 +46,7 @@ public class AggregateAction extends AbstractRSMAction {
 
     
     public AggregateAction(AbstractTree tree) {
-        super(NbBundle.getMessage(AggregateAction.class, "CTL_AggregateAction"), tree);
+        super("Add Dataset...", tree);
     }
 
     

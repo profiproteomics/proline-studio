@@ -96,6 +96,8 @@ public class DockContainerTab extends DockContainerMulti {
 
 
 
+
+
     public void add(DockContainer container, DockPosition position)  throws DockException {
 
         if (! (container instanceof DockComponent)) {

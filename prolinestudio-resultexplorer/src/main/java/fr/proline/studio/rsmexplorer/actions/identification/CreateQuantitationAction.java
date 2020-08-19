@@ -124,7 +124,7 @@ public class CreateQuantitationAction extends AbstractRSMAction {
                 DataSetNode node = (DataSetNode) n;
                 DataSetData dataset = (DataSetData) node.getData();
                 DDatasetType dsType = dataset.getDatasetType();
-                if (node.hasResultSummary() && (dsType.isAggregation())) {
+                if (node.hasResultSummary() && (dsType.isAggregation() || dsType.isIdentification())) {
                     m_referenceDataSetDefined = true;
                     refDataset = dataset.getDataset();
                 } else {

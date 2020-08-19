@@ -25,7 +25,7 @@ import java.awt.Window;
 import java.io.File;
 import java.util.HashMap;
 import javax.swing.JFileChooser;
-import org.openide.util.NbBundle;
+
 
 /**
  *
@@ -55,7 +55,7 @@ public class Export2MzIdentMLDialog extends DefaultDialog {
         setButtonVisible(BUTTON_SAVE, true);
 
         m_paramPanel = new Export2MzIdentMLParamPanel(this);
-        this.setHelpHeader(IconManager.getIcon(IconManager.IconType.INFORMATION),"MzIdentML parameters", NbBundle.getMessage(Export2MzIdentMLDialog.class,"Export2MzIdentMLDialog.help.text"));
+        this.setHelpHeader(IconManager.getIcon(IconManager.IconType.INFORMATION),"MzIdentML parameters", "Spectrum Matches should have been generated before exporting to MzidentML format.<br> It is also recommended to jave run 'Retrieve proteins sequences'.");
         setInternalComponent(m_paramPanel);
     }
 
@@ -80,7 +80,7 @@ public class Export2MzIdentMLDialog extends DefaultDialog {
             setButtonVisible(BUTTON_SAVE, false);
 
             m_filePanel = new Export2MzIdentMLFilePanel(this);
-            this.setHelpHeader(IconManager.getIcon(IconManager.IconType.INFORMATION), "MzIdentML output file", NbBundle.getMessage(Export2MzIdentMLDialog.class, "Export2MzIdentMLDialog.help.text"));
+            this.setHelpHeader(IconManager.getIcon(IconManager.IconType.INFORMATION), "MzIdentML output file", "Spectrum Matches should have been generated before exporting to MzidentML format.<br> It is also recommended to jave run 'Retrieve proteins sequences'.");
             replaceInternalComponent(m_filePanel);
             
             revalidate();

@@ -65,7 +65,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 //JPM.DOCK import org.openide.util.NbPreferences;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

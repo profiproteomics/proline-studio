@@ -65,9 +65,9 @@ import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.DefaultTreeModel;
 import org.apache.commons.lang3.StringUtils;
-import org.openide.util.NbBundle;
+
 import org.openide.util.NbPreferences;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,11 +81,11 @@ public class ExportFastaAction extends AbstractRSMAction {
     //private LoadWaitingDialog m_loadWaitingDialog;
 
     public ExportFastaAction(AbstractTree tree) {
-        super(NbBundle.getMessage(ExportDatasetJMSAction.class, "CTL_ExportFastaAction"), tree);
+        super("Sequence Fasta", tree);
     }
 
     public ExportFastaAction(AbstractTree tree, boolean exportTitle) {
-        super(NbBundle.getMessage(ExportFastaAction.class, "CTL_ExportAction") + " " + NbBundle.getMessage(ExportFastaAction.class, "CTL_ExportFastaAction"), tree);
+        super("Export Sequence Fasta", tree);
     }
 
     /**

@@ -1,17 +1,28 @@
 package fr.proline.studio.rsmexplorer;
 
+import fr.proline.studio.dock.AbstractTopPanel;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class RSMExplorerTopPanel extends JPanel {
+public class RSMExplorerTopPanel extends AbstractTopPanel {
 
-    public RSMExplorerTopPanel() {
+    private static RSMExplorerTopPanel m_singleton = null;
+
+    private RSMExplorerTopPanel() {
         initComponents();
         setName("Projects");
         setToolTipText("Projects");
 
+    }
+
+    public static RSMExplorerTopPanel getSingleton() {
+        if (m_singleton == null) {
+            m_singleton = new RSMExplorerTopPanel();
+        }
+
+        return m_singleton;
     }
 
 
@@ -29,5 +40,20 @@ public class RSMExplorerTopPanel extends JPanel {
         c.weightx = 1;
         c.weighty = 1;
         add(ProjectExplorerPanel.getProjectExplorerPanel(), c);
+    }
+
+    @Override
+    public String getTopPanelIdentifierKey() {
+        return "PROJECTS_TOP_PANEL";
+    }
+
+    @Override
+    public Image getIcon() {
+        return null;
+    }
+
+    @Override
+    public String getTitle() {
+        return getName();
     }
 }

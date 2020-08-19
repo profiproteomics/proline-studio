@@ -26,12 +26,13 @@ import fr.proline.core.orm.uds.SpectrumTitleParsingRule;
 import fr.proline.core.orm.uds.UserAccount;
 import fr.proline.module.seq.DatabaseAccess;
 import fr.proline.repository.IDatabaseConnector;
+import fr.proline.studio.Exceptions;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.openide.util.Exceptions;
 
 /**
  * Static reference of the several UDS values : project, instruments ....

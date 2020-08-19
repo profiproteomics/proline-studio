@@ -43,7 +43,7 @@ import uk.ac.ebi.pride.utilities.ols.web.service.model.Term;
 import uk.ac.ebi.pride.toolsuite.ols.dialog.OLSDialog;
 
 import org.apache.commons.lang3.StringUtils;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 import org.slf4j.LoggerFactory;
 
 

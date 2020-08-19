@@ -28,8 +28,8 @@ import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import java.util.ArrayList;
 import java.util.List;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +42,7 @@ public class ExportMzIdentMLAction extends AbstractRSMAction {
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
       
     public ExportMzIdentMLAction(AbstractTree tree) {
-        super(NbBundle.getMessage(ExportMzIdentMLAction.class, "CTL_ExportMzIdentMLAction") , tree);
+        super("MzIdentML...", tree);
     }
     
         @Override

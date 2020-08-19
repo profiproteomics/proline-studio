@@ -17,7 +17,7 @@
 package fr.proline.studio.msfiles;
 
 import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
-import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
+import fr.proline.studio.rsmexplorer.MzdbFilesTopPanel;
 import fr.proline.studio.rsmexplorer.gui.LocalFileSystemTransferHandler;
 import fr.proline.studio.rsmexplorer.gui.LocalFileSystemView;
 import fr.proline.studio.rsmexplorer.gui.TreeFileChooserPanel;
@@ -158,7 +158,7 @@ public class MsFilesExplorer extends JPanel {
                         fileList.add(f.getFile());
                     }
                     TreePath path = m_directoriesUp.get(0).getPath();
-                    MzdbDownloadBatch downloadBatch = new MzdbDownloadBatch(fileList, path, MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().getSelectedRoot());
+                    MzdbDownloadBatch downloadBatch = new MzdbDownloadBatch(fileList, path, MzdbFilesTopPanel.getExplorer().getLocalFileSystemView().getSelectedRoot());
                     Thread downloadThread = new Thread(downloadBatch);
                     downloadThread.start();
                 }

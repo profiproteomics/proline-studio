@@ -27,7 +27,7 @@ import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.actions.identification.DisplayPTMSitesAction;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -39,8 +39,8 @@ import java.awt.Window;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 
 /**
  *
@@ -49,7 +49,7 @@ import org.openide.windows.WindowManager;
 public class DisplayXICPTMSitesAction extends AbstractRSMAction {
 
     public DisplayXICPTMSitesAction(AbstractTree tree) {
-       super(NbBundle.getMessage(DisplayXICPTMSitesAction.class, "CTL_DisplayPtmSiteProtein"), tree);
+       super("Modification Sites", tree);
     }
 
     @Override
@@ -77,9 +77,8 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
             wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));
 
             // open a window to display the window box
-            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-            win.open();
-            win.requestActive();
+            DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+            WindowManager.getDefault().getMainWindow().displayWindow(win);
 
         } else {
 
@@ -95,9 +94,8 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     WindowBox wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName(), true);
                     // open a window to display the window box
-                    DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                    win.open();
-                    win.requestActive();
+                    DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+                    WindowManager.getDefault().getMainWindow().displayWindow(win);
 
                     // prepare window box
                     wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));
@@ -150,7 +148,7 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
 //            wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));
 //
 //            // open a window to display the window box
-//            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+//            DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
 //            win.open();
 //            win.requestActive();
 //
@@ -174,7 +172,7 @@ public class DisplayXICPTMSitesAction extends AbstractRSMAction {
 //                        wbox = WindowBoxFactory.getXicPTMSitesWindowBoxV1(dataSet.getName());
 //                    }
 //                    // open a window to display the window box
-//                    DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+//                    DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
 //                    win.open();
 //                    win.requestActive();
 //

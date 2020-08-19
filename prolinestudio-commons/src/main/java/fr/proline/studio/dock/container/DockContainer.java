@@ -1,7 +1,10 @@
 package fr.proline.studio.dock.container;
 
 
+import fr.proline.studio.dock.AbstractTopPanel;
+
 import javax.swing.*;
+import java.util.HashSet;
 
 public abstract class DockContainer {
 
@@ -59,6 +62,8 @@ public abstract class DockContainer {
         }
         return null;
     }
+
+    public abstract void getTopPanels(HashSet<AbstractTopPanel> set);
 
 
     public abstract void check();

@@ -74,7 +74,6 @@ import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import org.openide.util.Exceptions;
 
 /**
  *

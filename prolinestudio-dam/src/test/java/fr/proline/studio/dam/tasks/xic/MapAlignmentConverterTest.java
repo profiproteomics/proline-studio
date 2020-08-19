@@ -23,13 +23,14 @@ import fr.proline.core.orm.lcms.MapTime;
 import fr.proline.core.orm.lcms.ProcessedMap;
 import java.util.ArrayList;
 import java.util.List;
+
+import fr.proline.studio.Exceptions;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.openide.util.Exceptions;
 
 /**
  *

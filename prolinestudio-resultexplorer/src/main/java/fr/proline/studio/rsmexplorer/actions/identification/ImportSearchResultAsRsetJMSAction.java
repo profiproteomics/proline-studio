@@ -35,8 +35,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.event.ChangeListener;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 
 /**
  * Action to import one or multiple identification
@@ -51,7 +51,7 @@ public class ImportSearchResultAsRsetJMSAction extends AbstractRSMAction {
     private static HashMap<Long, ArrayList<ChangeListener>> m_listenerMap = new HashMap<>();
     
     public ImportSearchResultAsRsetJMSAction(AbstractTree tree) {
-        super(NbBundle.getMessage(ImportSearchResultAsRsetJMSAction.class, "CTL_AddSearchResult"), tree);
+        super("Import Search Result...", tree);
     }
     
     @Override

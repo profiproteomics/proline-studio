@@ -19,7 +19,8 @@ package fr.proline.studio.msfiles;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
+import fr.proline.studio.rsmexplorer.MzdbFilesTopPanel;
+
 import java.io.File;
 import java.util.ArrayList;
 
@@ -48,7 +49,7 @@ public class FileDeletionBatch implements Runnable {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                    MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
+                    MzdbFilesTopPanel.getExplorer().getLocalFileSystemView().updateTree();
 
                 }
             };

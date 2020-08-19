@@ -30,7 +30,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.lang3.StringUtils;
-import org.openide.util.NbBundle;
+
 import org.openide.util.NbPreferences;
 
 /**

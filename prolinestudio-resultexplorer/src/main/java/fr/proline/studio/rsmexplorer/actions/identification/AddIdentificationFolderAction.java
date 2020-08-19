@@ -34,7 +34,7 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdProjectIdentification
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import java.util.ArrayList;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 
 /**
  *

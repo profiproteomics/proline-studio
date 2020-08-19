@@ -28,8 +28,8 @@ import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 
 /**
  * Rename a Node in a Xic QuantExperimentalDesignTree
@@ -39,7 +39,7 @@ public class RenameAction extends AbstractRSMAction {
 
 
     public RenameAction(AbstractTree tree) {
-        super(NbBundle.getMessage(RenameAction.class, "CTL_RenameAction"), tree);
+        super("Rename...", tree);
     }
 
     @Override

@@ -44,7 +44,7 @@ import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.progress.ProgressInterface;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
@@ -71,7 +71,7 @@ import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
 import org.jdesktop.swingx.JXTable;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.pattern.ParameterSubtypeEnum;
 import fr.proline.studio.pattern.xic.DataboxChildFeature;
@@ -222,9 +222,8 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
                 wbox.setEntryData(m_dataBox.getProjectId(), null); //JPM.DATABOX : it works with null, there must be a wart somewhere so it works..
 
                 // open a window to display the window box
-                DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                win.open();
-                win.requestActive();
+                DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+                WindowManager.getDefault().getMainWindow().displayWindow(win);
             }
         });
         

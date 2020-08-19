@@ -16,8 +16,9 @@
  */
 package fr.proline.studio.pattern;
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.mzscope.MzScopeInterface;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 
 /**
  *
@@ -26,7 +27,7 @@ import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 public class MzScopeWindowBoxManager {
     
     private static WindowBox m_windowBox = null;
-    private static DataBoxViewerTopComponent m_win = null;
+    private static DataBoxViewerTopPanel m_win = null;
     
     public static void addMzdbScope(MzScopeInterface mzScopeInterface) {
         if (m_windowBox == null) {
@@ -34,18 +35,11 @@ public class MzScopeWindowBoxManager {
             m_windowBox.setEntryData(-1, mzScopeInterface);
             
             // open a window to display the window box
-            m_win = new DataBoxViewerTopComponent(m_windowBox);
-            m_win.open();
-            m_win.requestActive();
+            m_win = new DataBoxViewerTopPanel(m_windowBox);
+            WindowManager.getDefault().getMainWindow().displayWindow(m_win);
         } else {
             m_windowBox.setEntryData(-1, mzScopeInterface);
-            if (m_win.isOpened()) {
-                m_win.requestActive();
-            } else {
-                m_win = new DataBoxViewerTopComponent(m_windowBox);
-                m_win.open();
-                m_win.requestActive();
-            }
+            WindowManager.getDefault().getMainWindow().displayWindow(m_win);
         }
     }
     

@@ -35,7 +35,7 @@ import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationProjectNode;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import java.util.ArrayList;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 
 /**
  *

@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.*;
 import org.openide.util.NbPreferences;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 
 /**
  * Panel to set the different parameters for the XIC Quantitation

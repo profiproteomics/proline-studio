@@ -1,11 +1,13 @@
 package fr.proline.studio.dock.container;
 
+import fr.proline.studio.dock.AbstractTopPanel;
 import fr.proline.studio.dock.dragdrop.OverArea;
 import fr.proline.studio.dock.gui.DraggingOverlayPanel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class DockContainerRoot extends DockContainer implements DockMultiInterface, DockReplaceInterface {
 
@@ -37,6 +39,14 @@ public class DockContainerRoot extends DockContainer implements DockMultiInterfa
 
     public JPanel getMainPanel() {
         return m_mainPanel;
+    }
+
+    public void getTopPanels(HashSet<AbstractTopPanel> set) {
+
+        for (DockContainerMulti c : m_containerMap.keySet()) {
+            c.getTopPanels(set);
+        }
+
     }
 
     @Override

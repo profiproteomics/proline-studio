@@ -61,7 +61,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.*;
 import org.jdesktop.swingx.renderer.DefaultTableRenderer;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 
 /**
  * Panel used to display all logged tasks

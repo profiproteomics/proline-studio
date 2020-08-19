@@ -19,14 +19,11 @@ package fr.proline.studio.rsmexplorer.actions.identification;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdProjectIdentificationNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
-import java.util.Set;
-import org.openide.util.NbBundle;
-import org.openide.windows.TopComponent;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 
 /**
  * Action to display a window with all Search Results (rset)
@@ -35,7 +32,7 @@ import org.openide.windows.WindowManager;
 public class DisplayAllRsetAction extends AbstractRSMAction {
 
     public DisplayAllRsetAction(AbstractTree tree) {
-        super(NbBundle.getMessage(DisplayAllRsetAction.class, "CTL_DisplayAllRset"), tree);
+        super("Display List", tree);
     }
     
     @Override
@@ -50,20 +47,20 @@ public class DisplayAllRsetAction extends AbstractRSMAction {
         String windowName = p.getName()+" : All Imported";
         
 
-        TopComponent tc = findTopComponent(windowName);
-        if (tc != null) {
-            tc.requestActive();
+        boolean displayed = WindowManager.getDefault().getMainWindow().isDisplayed(windowName);
+        if (displayed) {
+            WindowManager.getDefault().getMainWindow().toFront(windowName);
         } else {
-        
             // prepare window box
             WindowBox wbox = WindowBoxFactory.getAllResultSetWindowBox(windowName);
             wbox.setEntryData(p.getId(), p);
 
             // open a window to display the window box
-            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-            win.open();
-            win.requestActive();
+            DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+
+            WindowManager.getDefault().getMainWindow().displayWindow(win);
         }
+
 
     }
     
@@ -72,15 +69,6 @@ public class DisplayAllRsetAction extends AbstractRSMAction {
        setEnabled(true); //JPM.TODO
     }
     
-    
-    private TopComponent findTopComponent(String name) {
-        Set<TopComponent> openTopComponents = WindowManager.getDefault().getRegistry().getOpened();
-        for (TopComponent tc : openTopComponents) {
-            if (tc.getName().startsWith(name)) {
-                return tc;
-            }
-        }
-        return null;
-    }
+
     
 }

@@ -23,7 +23,7 @@ import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import java.util.ArrayList;
-import org.openide.util.NbBundle;
+
 
 /**
  * Delete a Node in a Xic QuantExperimentalDesignTree
@@ -33,7 +33,7 @@ public class DeleteAction  extends AbstractRSMAction {
     
 
     public DeleteAction(AbstractTree tree) {
-        super(NbBundle.getMessage(DeleteAction.class, "CTL_DeleteAction"), tree);
+        super("Delete", tree);
     }
 
     @Override

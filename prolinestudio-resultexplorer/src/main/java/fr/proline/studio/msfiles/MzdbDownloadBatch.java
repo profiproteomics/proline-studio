@@ -19,11 +19,9 @@ package fr.proline.studio.msfiles;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.DownloadFileTask;
-import fr.proline.studio.dpm.task.jms.DownloadProcessedFileTask;
-import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
+import fr.proline.studio.rsmexplorer.MzdbFilesTopPanel;
+
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import javax.swing.tree.TreePath;
 
@@ -83,7 +81,7 @@ public class MzdbDownloadBatch implements Runnable {
 
                 if (success) {
                     if (m_pathToExpand != null) {
-                        MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
+                        MzdbFilesTopPanel.getExplorer().getLocalFileSystemView().updateTree();
                     }
                     m_downloadList.add(new MsListenerDownloadParameter(m_localFile, remoteFile, true));
                 } else {
@@ -142,7 +140,7 @@ public class MzdbDownloadBatch implements Runnable {
 
                     if (success) {
                         if (m_pathToExpand != null) {
-                            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
+                            MzdbFilesTopPanel.getExplorer().getLocalFileSystemView().updateTree();
                         }
                         m_downloadList.add(new MsListenerDownloadParameter(m_localFile, entry.getFile(), true));
                     } else {
@@ -189,7 +187,7 @@ public class MzdbDownloadBatch implements Runnable {
     @Override
     public void run() {
         if (m_pathToExpand != null) {
-            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandTreePath(m_pathToExpand);
+            MzdbFilesTopPanel.getExplorer().getLocalFileSystemView().expandTreePath(m_pathToExpand);
         }
         if (m_files != null) {
             for (int i = 0; i < m_files.size(); i++) {

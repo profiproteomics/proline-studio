@@ -16,7 +16,8 @@
  */
 package fr.proline.studio.msfiles;
 
-import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
+import fr.proline.studio.rsmexplorer.MzdbFilesTopPanel;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -86,12 +87,12 @@ public class ConvertionUploadBatch implements Runnable, MsListener {
                     }
                 }
             }
-            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandMultipleTreePath(m_parentDirectories, m_conversions.values().iterator().next().getUploadSettings().getMountingPointPath());
+            MzdbFilesTopPanel.getExplorer().getTreeFileChooserPanel().expandMultipleTreePath(m_parentDirectories, m_conversions.values().iterator().next().getUploadSettings().getMountingPointPath());
         } else {
-            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
+            MzdbFilesTopPanel.getExplorer().getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
         }
 
-        MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();
+        MzdbFilesTopPanel.getExplorer().getTreeFileChooserPanel().updateTree();
 
         Iterator it = m_conversions.entrySet().iterator();
         while (it.hasNext()) {
@@ -112,7 +113,7 @@ public class ConvertionUploadBatch implements Runnable, MsListener {
 
                 if (p.wasSuccessful()) {
                     if (p.getConversionSettings() != null && p.getConversionSettings().getUploadSettings() != null) {
-                        MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
+                        MzdbFilesTopPanel.getExplorer().getLocalFileSystemView().updateTree();
                         upload(p.getFile(), p.getConversionSettings().getUploadSettings());
                     }
                 }
@@ -136,7 +137,7 @@ public class ConvertionUploadBatch implements Runnable, MsListener {
             }
 
             if (success) {
-                MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();
+                MzdbFilesTopPanel.getExplorer().getTreeFileChooserPanel().updateTree();
             }
         }
     }

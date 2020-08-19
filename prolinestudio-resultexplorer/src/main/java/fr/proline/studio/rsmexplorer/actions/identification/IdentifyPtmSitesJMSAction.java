@@ -34,9 +34,8 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 
 import javax.swing.tree.DefaultTreeModel;
 
-import org.apache.lucene.search.FieldComparator;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +55,7 @@ public class IdentifyPtmSitesJMSAction extends AbstractRSMAction {
   protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
   public IdentifyPtmSitesJMSAction(AbstractTree tree) {
-    super(NbBundle.getMessage(IdentifyPtmSitesJMSAction.class, "CTL_IdentifyPtmSitesAction"), tree);
+    super("Identify Modification Sites", tree);
   }
 
   @Override

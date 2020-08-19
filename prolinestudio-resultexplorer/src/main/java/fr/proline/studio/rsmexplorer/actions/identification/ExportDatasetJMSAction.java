@@ -31,8 +31,8 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.SwingUtilities;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,11 +47,11 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
     private List<String> m_config;
 
     public ExportDatasetJMSAction(AbstractTree tree) {
-        super(NbBundle.getMessage(ExportDatasetJMSAction.class, "CTL_ExportDatasetAction"), tree);
+        super("Excel...", tree);
     }
 
     public ExportDatasetJMSAction(AbstractTree tree, boolean exportTitle) {
-        super(NbBundle.getMessage(ExportDatasetJMSAction.class, "CTL_ExportAction") + " " + NbBundle.getMessage(ExportDatasetJMSAction.class, "CTL_ExportDatasetAction"), tree);
+        super("Export Excel...", tree);
     }
 
     @Override

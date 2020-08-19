@@ -17,15 +17,16 @@
 package fr.proline.studio.rsmexplorer.actions.xic;
 
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
-import org.openide.util.NbBundle;
+
 
 /**
  * Action to display the XIC parameters + exp. design
@@ -34,7 +35,7 @@ import org.openide.util.NbBundle;
 public class DisplayXicParamAction extends AbstractRSMAction {
     
     public DisplayXicParamAction(AbstractTree tree) {
-       super(NbBundle.getMessage(DisplayXicParamAction.class,"CTL_DisplayXicParamAction"), tree);
+       super("Parameters", tree);
     }
     
     @Override
@@ -57,9 +58,8 @@ public class DisplayXicParamAction extends AbstractRSMAction {
         wbox.setEntryData(dataset.getProject().getId(), dataset);
 
         // open a window to display the window box
-        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-        win.open();
-        win.requestActive();
+        DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+        WindowManager.getDefault().getMainWindow().displayWindow(win);
     }
     
     @Override

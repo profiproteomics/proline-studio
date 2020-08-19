@@ -1,5 +1,6 @@
 package fr.proline.studio.dock.container;
 
+import fr.proline.studio.dock.AbstractTopPanel;
 import fr.proline.studio.dock.dragdrop.OverArea;
 import fr.proline.studio.dock.gui.TabbedPaneLabel;
 
@@ -27,6 +28,13 @@ public class DockContainerTab extends DockContainerMulti {
         }
     }
 
+    public void getTopPanels(HashSet<AbstractTopPanel> set) {
+        for (DockContainer c : m_dockContainerSet) {
+            c.getTopPanels(set);
+        }
+    }
+
+
     @Override
     public DockContainer search(String windowKey) {
 
@@ -39,6 +47,8 @@ public class DockContainerTab extends DockContainerMulti {
         }
         return null;
     }
+
+
 
 
     public void add(DockContainer container, DockPosition position)  throws DockException {

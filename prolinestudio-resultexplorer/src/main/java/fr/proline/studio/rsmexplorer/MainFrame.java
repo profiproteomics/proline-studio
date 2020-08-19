@@ -2,6 +2,8 @@ package fr.proline.studio.rsmexplorer;
 
 import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
+import fr.proline.studio.dock.AbstractDockFrame;
+import fr.proline.studio.dock.AbstractTopPanel;
 import fr.proline.studio.dock.container.*;
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
@@ -22,8 +24,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.HashSet;
 
-public class MainFrame extends JFrame implements WindowListener {
+public class MainFrame extends AbstractDockFrame implements WindowListener {
 
     private static MainFrame m_singleton = null;
 
@@ -57,12 +60,11 @@ public class MainFrame extends JFrame implements WindowListener {
             m_propertiesAreaTab = new DockContainerTab();
             m_propertiesAreaTab.setZoneArea("PROPERTIES_AREA");
 
-            JPanel p1 = new RSMExplorerTopPanel();
-            DockComponent comp1 = new DockComponent("PROPERTIES_WINDOW", p1.getName(), null, p1, DockComponent.PROP_MINIMIZE);
+            JPanel p1 = RSMExplorerTopPanel.getSingleton();
+            DockComponent comp1 = new DockComponent(RSMExplorerTopPanel.getSingleton(), DockComponent.PROP_MINIMIZE);
             m_propertiesAreaTab.add(comp1);
 
-            JPanel p2 = new MzdbFilesTopPanel();
-            DockComponent comp2 = new DockComponent("MZDB_WINDOW", p2.getName(), null, p2, DockComponent.PROP_MINIMIZE);
+            DockComponent comp2 = new DockComponent(MzdbFilesTopPanel.getSingleton(), DockComponent.PROP_MINIMIZE);
             m_propertiesAreaTab.add(comp2);
 
 
@@ -157,32 +159,98 @@ public class MainFrame extends JFrame implements WindowListener {
         menuBar.add(windowMenu);
 
         // WINDOW > Projects
-        menuItem = new JMenuItem(new DisplayWindow("Projects", "PROPERTIES_WINDOW"));
+        menuItem = new JMenuItem(new DisplayWindow("Projects", RSMExplorerTopPanel.getSingleton()));
         windowMenu.add(menuItem);
 
         // WINDOW > Ms Files
-        menuItem = new JMenuItem(new DisplayWindow("Ms Files", "MZDB_WINDOW"));
+        menuItem = new JMenuItem(new DisplayWindow("Ms Files", MzdbFilesTopPanel.getSingleton()));
         windowMenu.add(menuItem);
 
         // WINDOW > Projects
-        menuItem = new JMenuItem(new DisplayWindow("Logs", "LOG_WINDOW"));
+        menuItem = new JMenuItem(new DisplayWindow("Logs", TaskLogTopPanel.getSingleton()));
         windowMenu.add(menuItem);
+
+        // Window > Data Analyzer
+        menuItem = new JMenuItem(new DataAnalyzerAction());
+        windowMenu.add(menuItem);
+
+        // Window > Memory Usage
+        menuItem = new JMenuItem(new MemoryAction());
+        windowMenu.add(menuItem);
+
+
+
+        // ---------------------------------------------------------------
+
+        // HELP
+        JMenu helpMenu = new JMenu("Help");
+        menuBar.add(helpMenu);
+
+        // Help > Getting Started
+        menuItem = new JMenuItem(new HelpAction());
+        helpMenu.add(menuItem);
+
+        // Help > Proline Help
+        menuItem = new JMenuItem(new HelpProlineAction());
+        helpMenu.add(menuItem);
+
+        // Help > How to
+        menuItem = new JMenuItem(new HelpHowToAction());
+        helpMenu.add(menuItem);
+
+
+
+
 
         return menuBar;
 
     }
 
-    public void displayWindow(String windowKey) {
-        DockContainer searchedContainer = m_containerRoot.search(windowKey);
+    @Override
+    public void closeWindow(AbstractTopPanel topPanel) {
+        DockContainer container = m_containerRoot.search(topPanel.getTopPanelIdentifierKey());
+        if (container != null) {
+            ((DockContainerTab) ((DockComponent) container).getParent()).remove(container);
+        }
+    }
+
+    @Override
+    public void displayWindow(AbstractTopPanel topPanel) {
+        DockContainer searchedContainer = m_containerRoot.search(topPanel.getTopPanelIdentifierKey());
         if (searchedContainer != null) {
             searchedContainer.toFront();
         } else {
             // container not found, we must create it
 
-            DockComponent comp6 = new DockComponent(null, "Window 3", null, createComponent(Color.pink), DockComponent.PROP_CLOSE);
-            m_windowAreaTab.add(comp6);
+            DockComponent component = new DockComponent(topPanel, DockComponent.PROP_CLOSE);
+            m_windowAreaTab.add(component);
         }
     }
+
+    @Override
+    public boolean isDisplayed(String windowKey) {
+        DockContainer searchedContainer = m_containerRoot.search(windowKey);
+        return (searchedContainer != null);
+    }
+
+    @Override
+    public void toFront(String windowKey) {
+        DockContainer searchedContainer = m_containerRoot.search(windowKey);
+        if (searchedContainer != null) {
+            searchedContainer.toFront();
+        }
+    }
+
+    @Override
+    public HashSet<AbstractTopPanel> getTopPanels() {
+        HashSet<AbstractTopPanel> set = new HashSet<>();
+        m_containerRoot.getTopPanels(set);
+
+        return set;
+    }
+
+
+
 
     public void exit() {
 

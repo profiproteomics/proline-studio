@@ -54,7 +54,7 @@ import java.util.List;
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import org.openide.util.NbPreferences;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 import org.slf4j.LoggerFactory;
 
 /**

@@ -33,8 +33,8 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import java.util.HashMap;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 
 /**
  * Filters the ProteinSets of all selected ResultSummaries via JMS
@@ -44,7 +44,7 @@ import org.openide.windows.WindowManager;
 public class FilterRSMProteinSetsJMSAction extends AbstractRSMAction{
       
     public FilterRSMProteinSetsJMSAction(AbstractTree tree) {
-        super(NbBundle.getMessage(FilterRSMProteinSetsJMSAction.class, "CTL_FilterRSMProteinSetsAction"), tree);
+        super("Filter ProteinSets...", tree);
     }
 
     @Override

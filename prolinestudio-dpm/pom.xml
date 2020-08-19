@@ -100,18 +100,8 @@
             <artifactId>prolinestudio-dam</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-util</artifactId>
-            <version>${netbeans.version}</version>
-            <type>nbm</type>
-        </dependency>
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-awt</artifactId>
-            <version>${netbeans.version}</version>
-            <type>nbm</type>
-        </dependency>
+
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>prolinestudio-commons</artifactId>

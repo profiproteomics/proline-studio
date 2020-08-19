@@ -36,6 +36,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseClearProjectTask;
 import fr.proline.studio.dam.tasks.DatabaseProjectTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dock.AbstractTopPanel;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.ClearProjectTask;
@@ -44,8 +45,8 @@ import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.pattern.DataParameter;
 import fr.proline.studio.pattern.ParameterList;
 import fr.proline.studio.pattern.ParameterSubtypeEnum;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
-import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
+import fr.proline.studio.rsmexplorer.PropertiesTopPanel;
 import fr.proline.studio.rsmexplorer.actions.ConnectAction;
 import fr.proline.studio.rsmexplorer.gui.dialog.AddProjectDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.ClearProjectDialog;
@@ -59,16 +60,12 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import org.openide.util.NbPreferences;
-import org.openide.windows.TopComponent;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -378,12 +375,11 @@ public class ProjectExplorerPanel extends JPanel {
 
         String dialogName = "Properties : " + projectName;
 
-        final PropertiesTopComponent win = new PropertiesTopComponent(dialogName);
+        final PropertiesTopPanel win = new PropertiesTopPanel(dialogName);
         ProjectItem[] projectItemArray = new ProjectItem[1];
         projectItemArray[0] = projectItem;
         win.setProperties(projectItemArray);
-        win.open();
-        win.requestActive();
+        WindowManager.getDefault().getMainWindow().displayWindow(win);
 
     }
 
@@ -413,7 +409,7 @@ public class ProjectExplorerPanel extends JPanel {
     
     /**
      * returns the list of rs/rsm opened in the application for a given project
-     * @param projectId
+     * @param project
      * @return 
      */
     public static  List<ClearProjectData> getOpenedData(Project project) {
@@ -422,32 +418,33 @@ public class ProjectExplorerPanel extends JPanel {
         String allImportedWindowsName = project.getName()+" : All Imported";
         
         // remove data which are opened in windows
-        Iterator<TopComponent> itTop = TopComponent.getRegistry().getOpened().iterator();
+        Set<AbstractTopPanel> tcs = WindowManager.getDefault().getMainWindow().getTopPanels();
+        Iterator<AbstractTopPanel> itTop = tcs.iterator();
         while (itTop.hasNext()) {
-            TopComponent topComponent = itTop.next();
-            if (topComponent instanceof DataBoxViewerTopComponent && !(topComponent.getName().startsWith(allImportedWindowsName))) {
-                long pId = ((DataBoxViewerTopComponent) topComponent).getProjectId();
+            AbstractTopPanel topComponent = itTop.next();
+            if (topComponent instanceof DataBoxViewerTopPanel && !(topComponent.getName().startsWith(allImportedWindowsName))) {
+                long pId = ((DataBoxViewerTopPanel) topComponent).getProjectId();
                 if (pId == projectId) {
-                    ParameterList inParam = ((DataBoxViewerTopComponent) topComponent).getInParameters();
+                    ParameterList inParam = ((DataBoxViewerTopPanel) topComponent).getInParameters();
                     for (DataParameter dataParam : inParam.getParameterList()) {
                         if (dataParam.equalsData(ResultSummary.class, ParameterSubtypeEnum.SINGLE_DATA)) {
-                            ResultSummary rsm = (ResultSummary) ((DataBoxViewerTopComponent) topComponent).getData(ResultSummary.class);
+                            ResultSummary rsm = (ResultSummary) ((DataBoxViewerTopPanel) topComponent).getData(ResultSummary.class);
                             openedData.add(new ClearProjectData(projectId, rsm));
                             openedData.add(new ClearProjectData(projectId, rsm.getResultSet()));
                         } else if (dataParam.equalsData(ResultSet.class, ParameterSubtypeEnum.SINGLE_DATA)) {
-                            ResultSet rs = (ResultSet) ((DataBoxViewerTopComponent) topComponent).getData(ResultSet.class);
+                            ResultSet rs = (ResultSet) ((DataBoxViewerTopPanel) topComponent).getData(ResultSet.class);
                             openedData.add(new ClearProjectData(projectId, rs));
                         }
                     }
 
-                    ParameterList outParam = ((DataBoxViewerTopComponent) topComponent).getOutParameters();
+                    ParameterList outParam = ((DataBoxViewerTopPanel) topComponent).getOutParameters();
                     for (DataParameter dataParam : outParam.getParameterList()) {
                         if (dataParam.equalsData(ResultSummary.class, ParameterSubtypeEnum.SINGLE_DATA)) {
-                            ResultSummary rsm = (ResultSummary) ((DataBoxViewerTopComponent) topComponent).getData(ResultSummary.class);
+                            ResultSummary rsm = (ResultSummary) ((DataBoxViewerTopPanel) topComponent).getData(ResultSummary.class);
                             openedData.add(new ClearProjectData(projectId, rsm));
                             openedData.add(new ClearProjectData(projectId, rsm.getResultSet()));
                         } else if (dataParam.equalsData(ResultSet.class, ParameterSubtypeEnum.SINGLE_DATA)) {
-                            ResultSet rs = (ResultSet) ((DataBoxViewerTopComponent) topComponent).getData(ResultSet.class);
+                            ResultSet rs = (ResultSet) ((DataBoxViewerTopPanel) topComponent).getData(ResultSet.class);
                             openedData.add(new ClearProjectData(projectId, rs));
                         }
                     }

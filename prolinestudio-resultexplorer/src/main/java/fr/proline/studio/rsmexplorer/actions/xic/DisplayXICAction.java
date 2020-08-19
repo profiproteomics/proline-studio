@@ -26,7 +26,7 @@ import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import java.util.ArrayList;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import org.openide.util.NbBundle;
+
 
 /**
  *
@@ -46,7 +46,7 @@ public class DisplayXICAction extends AbstractRSMAction {
     private ArrayList<DisplaySavedWindowAction> m_displaySavedWindowActionList;
     
    public DisplayXICAction(AbstractTree tree) {
-       super(NbBundle.getMessage(DisplayXICAction.class,"CTL_DisplayXicAction"), tree);
+       super("Display Abundances", tree);
    }
    
    @Override

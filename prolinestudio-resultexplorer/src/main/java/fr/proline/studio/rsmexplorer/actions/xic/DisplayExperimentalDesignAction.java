@@ -21,7 +21,7 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import org.openide.util.NbBundle;
+
 
 /**
  * Action to display the experimental design: menu with exp. design parameters
@@ -37,7 +37,7 @@ public class DisplayExperimentalDesignAction extends AbstractRSMAction {
     private JMenu m_menu;
 
     public DisplayExperimentalDesignAction(AbstractTree tree) {
-        super(NbBundle.getMessage(DisplayExperimentalDesignAction.class, "CTL_DisplayExperimentalDesignAction"), tree);
+        super("Display Exp. Design", tree);
     }
 
     @Override

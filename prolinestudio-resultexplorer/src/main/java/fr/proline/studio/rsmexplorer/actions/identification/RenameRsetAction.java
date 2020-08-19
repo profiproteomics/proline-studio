@@ -21,7 +21,7 @@ import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import org.openide.util.NbBundle;
+
 
 /**
  * Action with a Menu for the Display of Rset (Search Result)
@@ -35,7 +35,7 @@ public class RenameRsetAction extends AbstractRSMAction {
     private JMenu m_menu;
 
     public RenameRsetAction(AbstractTree tree) {
-        super(NbBundle.getMessage(RenameRsetAction.class, "CTL_RenameRsetAction"), tree);
+        super("Rename", tree);
     }
 
     @Override
@@ -44,10 +44,10 @@ public class RenameRsetAction extends AbstractRSMAction {
 
         m_renameAction = new RenameAction(getTree());
 
-        m_searchNameAction = new SetRsetNameAction(getTree(), ImportManager.SEARCH_RESULT_NAME_SOURCE, "CTL_RenameRsetSearchResultAction");
-        m_peaklistAction = new SetRsetNameAction(getTree(), ImportManager.PEAKLIST_PATH_SOURCE, "CTL_RenameRsetPeaklistAction");
-        m_msiAction = new SetRsetNameAction(getTree(), ImportManager.MSI_SEARCH_FILE_NAME_SOURCE, "CTL_RenameRsetMsiAction");
-        m_mascotAction = new SetRsetNameAction(getTree(), ImportManager.MASCOT_DAEMON_RULE, "CTL_RenameRsetMascotAction");
+        m_searchNameAction = new SetRsetNameAction(getTree(), ImportManager.SEARCH_RESULT_NAME_SOURCE, "Set Search Result Name");
+        m_peaklistAction = new SetRsetNameAction(getTree(), ImportManager.PEAKLIST_PATH_SOURCE, "Set Peaklist Name");
+        m_msiAction = new SetRsetNameAction(getTree(), ImportManager.MSI_SEARCH_FILE_NAME_SOURCE, "Set MSI Search Filename Name");
+        m_mascotAction = new SetRsetNameAction(getTree(), ImportManager.MASCOT_DAEMON_RULE, "Set <datafilename> Using Mascot Daemon Rule");
 
         JMenuItem renameItem = new JMenuItem(m_renameAction);
         JMenuItem searchNameItem = new JMenuItem(m_searchNameAction);

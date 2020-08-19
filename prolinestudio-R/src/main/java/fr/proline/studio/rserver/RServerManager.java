@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.rserver;
 
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.python.math.StatsUtil;
 import fr.proline.studio.utils.StudioExceptions;
 import java.io.BufferedReader;
@@ -30,7 +31,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.prefs.Preferences;
 import javax.swing.SwingUtilities;
-import org.openide.util.NbPreferences;
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPMismatchException;
 import org.rosuda.REngine.REngineException;

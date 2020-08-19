@@ -42,8 +42,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +57,7 @@ public class AggregateQuantitationsAction extends AbstractRSMAction {
     private int m_nbLoadedQuanti;
 
     public AggregateQuantitationsAction(AbstractTree tree) {
-        super(NbBundle.getMessage(AggregateQuantitationsAction.class, "CTL_AggregateQuantitations"), tree);
+        super("Aggregate Quantitations", tree);
     }
 
     @Override

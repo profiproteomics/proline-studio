@@ -3,7 +3,7 @@ package fr.proline.studio.main;
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.rsmexplorer.MainFrame;
 import fr.proline.studio.rsmexplorer.SplashScreenWindow;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 
 import javax.swing.*;
 import java.awt.*;

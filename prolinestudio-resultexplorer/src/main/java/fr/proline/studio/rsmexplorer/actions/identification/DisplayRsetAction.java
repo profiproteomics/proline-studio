@@ -23,7 +23,7 @@ import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import java.util.ArrayList;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import org.openide.util.NbBundle;
+
 
 /**
  * Action with a Menu for the Display of Rset (Search Result)
@@ -42,7 +42,7 @@ public class DisplayRsetAction extends AbstractRSMAction {
    private JMenu m_menu;
 
    public DisplayRsetAction(AbstractTree tree) {
-       super(NbBundle.getMessage(DisplayRsetAction.class, "CTL_DisplayRsetAction"), tree);
+       super("Display Search Result", tree);
    }
 
     @Override

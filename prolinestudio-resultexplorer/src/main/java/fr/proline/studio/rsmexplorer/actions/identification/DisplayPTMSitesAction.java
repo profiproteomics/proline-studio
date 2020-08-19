@@ -26,11 +26,18 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
-import org.openide.util.NbBundle;
+import java.awt.Dialog;
+import java.awt.GridBagConstraints;
+import java.awt.Window;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import fr.proline.studio.WindowManager;
 
 /**
  *
@@ -39,7 +46,7 @@ import org.openide.util.NbBundle;
 public class DisplayPTMSitesAction  extends AbstractRSMAction {
 
     public DisplayPTMSitesAction(AbstractTree tree) {
-       super(NbBundle.getMessage(DisplayPTMSitesAction.class, "CTL_PtmSiteProtein"), tree);
+       super("Modification Sites", tree);
     }
 
 
@@ -68,9 +75,8 @@ public class DisplayPTMSitesAction  extends AbstractRSMAction {
             wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));
 
             // open a window to display the window box
-            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-            win.open();
-            win.requestActive();
+            DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+            WindowManager.getDefault().getMainWindow().displayWindow(win);
         } else {
 
 
@@ -88,9 +94,8 @@ public class DisplayPTMSitesAction  extends AbstractRSMAction {
                     WindowBox wbox = WindowBoxFactory.getPTMDataWindowBox(dataSet.getName(), true);
 
                     // open a window to display the window box
-                    DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                    win.open();
-                    win.requestActive();
+                    DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+                    WindowManager.getDefault().getMainWindow().displayWindow(win);
 
                     // prepare window box
                     wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));
@@ -142,7 +147,7 @@ public class DisplayPTMSitesAction  extends AbstractRSMAction {
 //            wbox.setEntryData(dataSet.getProject().getId(), new PTMDataset(dataSet));
 //
 //            // open a window to display the window box
-//            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+//            DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
 //            win.open();
 //            win.requestActive();
 //        } else {
@@ -168,7 +173,7 @@ public class DisplayPTMSitesAction  extends AbstractRSMAction {
 //                        wbox = WindowBoxFactory.getPTMSitesWindowBoxV1(dataSet.getName());
 //                    }
 //                    // open a window to display the window box
-//                    DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+//                    DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
 //                    win.open();
 //                    win.requestActive();
 //

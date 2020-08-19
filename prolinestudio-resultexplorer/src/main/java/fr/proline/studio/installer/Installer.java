@@ -25,12 +25,9 @@ import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rserver.RServerManager;
 import java.awt.Frame;
-import java.io.File;
-import java.io.IOException;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-import org.apache.commons.io.FileUtils;
 import org.openide.windows.WindowManager;
 
 /**
@@ -45,23 +42,6 @@ public class Installer extends VersionInstaller {
     @Override
     public void restored() {
 
-         //Clear cache in case installation folder has been renamed
-        String s = System.getProperty("netbeans.user");
-        StringBuilder sb = new StringBuilder(s);
-        if(s != null && !s.isEmpty()){
-            sb.append(File.separator).append("/var/cache");
-        }
-        File f = new File(sb.toString());
-
-        try {
-            boolean clean =false;
-            if(f.exists() && f.isDirectory()){
-                FileUtils.cleanDirectory(f);
-                clean = true;
-            }
-        } catch (IOException ex) {
-
-        }
         /*
         // for Mac : we need to use Metal UI, otherwise the browse file on server does not work
         forceMetalUIForMac();
@@ -90,7 +70,7 @@ public class Installer extends VersionInstaller {
         
         // initialize the connection to the server as soon as possible
         ServerConnectionManager.getServerConnectionManager();
-      */
+        */
     }
     
     private void forceMetalUIForMac() {

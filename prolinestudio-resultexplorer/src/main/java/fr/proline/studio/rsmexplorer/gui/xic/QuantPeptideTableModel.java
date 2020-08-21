@@ -1403,7 +1403,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             }
             case COLTYPE_MQPEPTIDE_SELECTION_LEVEL: {
                 if (m_isXICMode) {
-                    return Integer.class;
+                    return Integer.class; // return XicStatusRenderer.SelectLevel.class;
                 } else {
                     return String.class;
                 }
@@ -1477,8 +1477,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
         if (columnIndex == COLTYPE_PEPTIDE_ID) {
             return peptide.getId();
-        } else if (columnIndex == COLTYPE_SELECTION_LEVEL) {
-            return peptide.getSelectionLevel();
+        } else if (columnIndex == COLTYPE_MQPEPTIDE_SELECTION_LEVEL) {
+            return ((XicStatusRenderer.SelectLevel) data).getIntValue();
         }
 
         return data;

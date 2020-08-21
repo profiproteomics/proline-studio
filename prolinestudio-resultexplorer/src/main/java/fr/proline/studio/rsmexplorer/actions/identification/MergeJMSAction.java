@@ -126,17 +126,17 @@ class ConfigurableMergeAction extends AbstractRSMAction {
                     for (int i = 0; i < nbChildren; i++) {
                         DataSetNode childNode = (DataSetNode) node.getChildAt(i);
                         if (childNode.isChanging()) {
-                            error = "Merge is not possible while a child Search Result is being imported or validated";
+                            error = "Merge is not possible: child DataSet ("+childNode.getDataset().getName() +") is being processed";
                             break;
                         }
                         if (!childNode.hasResultSet()) {
-                            error = "Merge is not possible : " + childNode.getDataset().getName() + " has no Search Result";
+                            error = "Merge is not possible: " + childNode.getDataset().getName() + " has no Search Result";
                             break;
                         }
 
                         Long rsetId = childNode.getDataset().getResultSetId();
                         if (checkDifferentResultSetId.contains(rsetId)) {
-                            error = "Merge is not possible : several Search Results are identical";
+                            error = "Merge is not possible: several Search Results are identical";
                             break;
                         }
                         checkDifferentResultSetId.add(rsetId);
@@ -155,7 +155,7 @@ class ConfigurableMergeAction extends AbstractRSMAction {
                         askMergeService((DataSetNode) node, resultSummaryIdList, true);
                     } else if (resultSummaryIdList.size() > 0) {
                         // not all children have a result summary
-                        error = "Merge is not possible : some Search Results are not validated ";
+                        error = "Merge is not possible: some Search Results are not validated ";
                         JOptionPane.showMessageDialog(IdentificationTree.getCurrentTree(), error, "Warning", JOptionPane.ERROR_MESSAGE);
                     } else {
                         // merge on result set

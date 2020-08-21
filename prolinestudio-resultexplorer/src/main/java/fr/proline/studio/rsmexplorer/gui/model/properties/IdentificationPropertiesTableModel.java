@@ -234,7 +234,7 @@ public class IdentificationPropertiesTableModel extends AbstractPropertiesTableM
                     boolean first = true;
                     
                     if(searchSetting==null){
-                        return new GroupObject("AGGREGATION", this);
+                        return new GroupObject("[unknown]", this);
                     }
                     
                     Set<SearchSettingsSeqDatabaseMap> searchSettingsSeqDatabaseMapSet = searchSetting.getSearchSettingsSeqDatabaseMaps();

@@ -105,7 +105,7 @@ public class ServerLogFileNameDialog extends DefaultDialog {
         if (!m_localPath.isDirectory()) {
             m_localPath.mkdir();
         }
-        String dialog_title = "Server Log File Parser";
+        String dialog_title = "Server Parsed Tasks";
         super.setTitle(dialog_title);
         String help_text = "<html>Specify which server tasks log to view : <br> select the date and  log mode (debug or info)</html>";
         super.setHelpHeaderText(help_text);
@@ -123,7 +123,7 @@ public class ServerLogFileNameDialog extends DefaultDialog {
      */
     private JDialog createLogParserDialog(ArrayList<File> fileList) {
 
-        JDialog logViewDialog = new JDialog(WindowManager.getDefault().getMainWindow(), "Parse Tasks In Server Log File", Dialog.ModalityType.APPLICATION_MODAL);
+        JDialog logViewDialog = new JDialog(WindowManager.getDefault().getMainWindow(), "Server Parsed Tasks", Dialog.ModalityType.APPLICATION_MODAL);
         logViewDialog.getContentPane().setLayout(new BorderLayout());
         //task flow
         JInternalFrame taskFlowFrame;

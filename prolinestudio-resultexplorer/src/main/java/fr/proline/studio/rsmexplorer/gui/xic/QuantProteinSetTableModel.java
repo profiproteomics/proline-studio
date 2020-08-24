@@ -292,7 +292,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                         if (m_overviewType == -1) {
                             return 0; // should not happen
                         }
-                        int realCol = LAST_STATIC_COLUMN + 1 + m_overviewType + col * m_columnNamesQC.length;
+                        int realCol = LAST_STATIC_COLUMN + 1 + m_overviewType + col * getColumnPerQCCount();
                         LazyData lazyData = (LazyData) getValueAt(row, realCol);
                         if (lazyData != null && lazyData.getData() != null) {
                             if (Number.class.isAssignableFrom(lazyData.getData().getClass())) {

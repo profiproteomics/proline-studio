@@ -307,7 +307,7 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
 
             m_alnIgnoreErrorsParameter.setValue(alignmentConfig.getOrDefault("ignore_errors", false).toString());
             m_alignmentSmoothingMethodParameter.setValue((String) alignmentConfig.getOrDefault("smoothing_method_name", ALIGNMENT_SMOOTHING_METHOD_VALUES[0]));
-            if (alignmentConfig.containsKey("smoothing_params")) {
+            if (alignmentConfig.containsKey("smoothing_method_params")) {
                 Map<String, Object> smootingParams = (Map<String, Object>) alignmentConfig.get("smoothing_method_params");
                 try {
                     m_alignmentSmoothWinSizeTF.setText("" + Integer.parseInt(smootingParams.getOrDefault("window_size", DEFAULT_SMOOTH_WINSIZE_VALUE).toString()));

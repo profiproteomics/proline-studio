@@ -486,10 +486,11 @@ public abstract class AbstractPeptideSpectrumPanel extends HourglassPanel implem
 
   @Override
   public void plotChanged(PlotChangeEvent arg0) {
+    // unnecessary notification ?
 
-    m_chart.getPlot().removeChangeListener(this);
-    annotateSpectrum();
-    m_chart.getPlot().addChangeListener(this);
+//    m_chart.getPlot().removeChangeListener(this);
+//    annotateSpectrum();
+//    m_chart.getPlot().addChangeListener(this);
 
   }
 

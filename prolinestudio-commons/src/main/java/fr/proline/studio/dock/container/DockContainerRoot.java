@@ -1,7 +1,25 @@
+/*
+ * Copyright (C) 2019 VD225637
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
+ * ; either version 2.1
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * CeCILL License V2.1 for more details.
+ *
+ * You should have received a copy of the CeCILL License
+ * along with this program; If not, see <http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html>.
+ */
+
 package fr.proline.studio.dock.container;
 
 import fr.proline.studio.dock.AbstractTopPanel;
 import fr.proline.studio.dock.dragdrop.OverArea;
+import fr.proline.studio.dock.gui.InfoLabel;
 import fr.proline.studio.dock.gui.DraggingOverlayPanel;
 
 import javax.swing.*;
@@ -18,6 +36,7 @@ public class DockContainerRoot extends DockContainer implements DockMultiInterfa
     private JComponent m_oldGlassPanel = null;
 
     private JPanel m_mainPanel;
+    private InfoLabel m_infoLabel;
 
 
     public DockContainerRoot() {
@@ -35,10 +54,18 @@ public class DockContainerRoot extends DockContainer implements DockMultiInterfa
 
         m_mainPanel.add(m_component, BorderLayout.CENTER);
 
+        m_infoLabel = new InfoLabel();
+        m_mainPanel.add(m_infoLabel, BorderLayout.SOUTH);
+
+
     }
 
     public JPanel getMainPanel() {
         return m_mainPanel;
+    }
+
+    public InfoLabel getInfoLabel() {
+        return m_infoLabel;
     }
 
     public void getTopPanels(HashSet<AbstractTopPanel> set) {
@@ -72,12 +99,6 @@ public class DockContainerRoot extends DockContainer implements DockMultiInterfa
         ((JPanel) m_component).add(container.getComponent(), position.getBorderLayout());
         container.setParent(this);
     }
-
-    /*public void minimize(DockContainer container) {
-        m_dockMinimizePanel.add(container);
-    }*/
-
-
 
 
     public OverArea getOverArea(Point screenPoint) {

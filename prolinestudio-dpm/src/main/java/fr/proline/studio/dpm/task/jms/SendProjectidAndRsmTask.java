@@ -47,7 +47,7 @@ public class SendProjectidAndRsmTask extends AbstractJMSTask {
     	
         final JSONRPC2Request jsonRequest = new JSONRPC2Request(JMSConnectionManager.PROLINE_PROCESS_METHOD_NAME, Integer.valueOf(m_taskInfo.getId()));
         jsonRequest.setNamedParams(createParams());
-        final TextMessage message = AccessJMSManagerThread.getAccessJMSManagerThread().getSession().createTextMessage(jsonRequest.toJSONString());
+        final TextMessage message = m_session.createTextMessage(jsonRequest.toJSONString());
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/GetProteinSequence");
         addSourceToMessage(message);  

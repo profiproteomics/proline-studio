@@ -38,7 +38,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import org.openide.util.NbPreferences;
+import fr.proline.studio.NbPreferences;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -162,26 +162,26 @@ public class XicStatusRenderer extends DefaultTableCellRenderer implements Mouse
 
     }
 
-    
+
     public static class SelectLevel {
         public SelectLevelEnum m_status;
         public SelectLevelEnum m_globalStatus;
-        
+
         public SelectLevel(SelectLevelEnum status, SelectLevelEnum globalStatus) {
             m_status = status;
             m_globalStatus = globalStatus;
         }
-        
+
         public String getDescription() {
             return m_status.getDescription();
         }
-        
+
         public SelectLevelEnum getStatus() {
             return m_status;
         }
-        
+
     }
-    
+
     public static enum SelectLevelEnum {
         DESELECTED_MANUAL(0, "Invalidated manually"),
         DESELECTED_AUTO(1, "Invalidated automatically"),
@@ -204,11 +204,11 @@ public class XicStatusRenderer extends DefaultTableCellRenderer implements Mouse
                 map.put(status._intValue, status);
             }
         }
-        
+
         public boolean isSelected() {
             return this.equals(SELECTED_AUTO) || this.equals(SELECTED_MANUAL);
         }
-        
+
         public boolean isDeselected() {
             return this.equals(DESELECTED_AUTO) || this.equals(DESELECTED_MANUAL);
         }
@@ -261,7 +261,7 @@ public class XicStatusRenderer extends DefaultTableCellRenderer implements Mouse
                     } else {
                         setIcon(IconManager.getIcon(IconManager.IconType.INVALIDATED_LOCALLY));
                     }
-                    
+
                     break;
                 case SELECTED_AUTO: //2
                 case SELECTED_MANUAL: //3

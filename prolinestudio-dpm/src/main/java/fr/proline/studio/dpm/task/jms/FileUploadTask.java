@@ -89,7 +89,7 @@ public class FileUploadTask extends AbstractJMSTask {
 
         InputStream in = null;
         try {
-            final BytesMessage message = AccessJMSManagerThread.getAccessJMSManagerThread().getSession().createBytesMessage();
+            final BytesMessage message = m_session.createBytesMessage();
 
             File uploadFile = null;
 

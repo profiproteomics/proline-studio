@@ -48,7 +48,7 @@ import java.util.List;
 import java.util.prefs.Preferences;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import org.openide.util.NbPreferences;
+import fr.proline.studio.NbPreferences;
 import org.slf4j.LoggerFactory;
 
 /**

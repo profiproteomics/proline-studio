@@ -532,7 +532,7 @@ public class DefaultDialog extends javax.swing.JDialog {
             }
         });
 
-        //m_helpButton.setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.helpButton.text"));
+
         m_buttons[BUTTON_HELP].addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {

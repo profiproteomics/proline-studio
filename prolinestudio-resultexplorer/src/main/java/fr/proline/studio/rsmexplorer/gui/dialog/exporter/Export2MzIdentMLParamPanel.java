@@ -34,7 +34,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.openide.util.NbPreferences;
+import fr.proline.studio.NbPreferences;
 import org.slf4j.LoggerFactory;
 
 /**

@@ -22,7 +22,7 @@ import java.awt.*;
 import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
-import org.openide.util.NbPreferences;
+import fr.proline.studio.NbPreferences;
 
 /**
  *

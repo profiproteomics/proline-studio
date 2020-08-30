@@ -31,7 +31,7 @@ import javax.swing.JToolBar;
  * 
  * @author JM235353
  */
-public class ImageViewerTopComponent extends AbstractTopPanel { //JPM.DOCK
+public class ImageViewerTopComponent extends AbstractTopPanel {
 
     public ImageViewerTopComponent(String name, Image img) {
 
@@ -60,6 +60,17 @@ public class ImageViewerTopComponent extends AbstractTopPanel { //JPM.DOCK
     public String getTitle() {
         return getName();
     }
+
+    @Override
+    protected void componentOpened() {
+        // nothing to do
+    }
+
+    @Override
+    public void componentClosed() {
+        // nothing to do
+    }
+
 
     public class ImagePanel extends HourglassPanel {
 

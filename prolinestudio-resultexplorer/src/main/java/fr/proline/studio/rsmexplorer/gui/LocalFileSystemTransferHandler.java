@@ -30,7 +30,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
 import fr.proline.studio.rsmexplorer.MzdbFilesTopPanel;
-import org.openide.util.Exceptions;
+import fr.proline.studio.Exceptions;
 
 /**
  *

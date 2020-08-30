@@ -53,7 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.prefs.Preferences;
 import javax.swing.*;
-import org.openide.util.NbPreferences;
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.WindowManager;
 import org.slf4j.LoggerFactory;
 

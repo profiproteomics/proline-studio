@@ -27,6 +27,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dock.gui.InfoLabel;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.RetrieveBioSeqTask;
@@ -36,7 +37,6 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.utils.IconManager;
-import fr.proline.studio.utils.StudioExceptions;
 import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -66,7 +66,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.DefaultTreeModel;
 import org.apache.commons.lang3.StringUtils;
 
-import org.openide.util.NbPreferences;
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -403,7 +403,7 @@ public class ExportFastaAction extends AbstractRSMAction {
             try {
                 write(proteinSetArray, node);
             } catch (IOException ex) {
-                StudioExceptions.notify("IO Exception when write fasta file", ex);
+                WindowManager.getDefault().getMainWindow().alert(InfoLabel.INFO_LEVEL.ERROR, "IO Exception when write fasta file", ex);
             } finally {
                 node.setIsChanging(false);
                 DefaultTreeModel treeModel = (DefaultTreeModel) getTree().getModel();
@@ -463,7 +463,7 @@ public class ExportFastaAction extends AbstractRSMAction {
             try {
                 write(proteinSetArray, firstNode);
             } catch (IOException ex) {
-                StudioExceptions.notify("IO Exception when write fasta file", ex);
+                WindowManager.getDefault().getMainWindow().alert(InfoLabel.INFO_LEVEL.ERROR, "IO Exception when write fasta file", ex);
             } finally {
                 for (AbstractNode anode : m_selectedNodes) {
                     DataSetNode node = (DataSetNode) anode;

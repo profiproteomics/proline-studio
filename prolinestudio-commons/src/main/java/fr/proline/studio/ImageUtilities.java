@@ -18,7 +18,7 @@ public class ImageUtilities {
 
     public static Image loadImage(String path, boolean b) {
         try {
-            return ImageIO.read(ClassLoader.getSystemResource("image/button1.png"));
+            return ImageIO.read(ClassLoader.getSystemResource(path));
         } catch (IOException e) {
 
         }

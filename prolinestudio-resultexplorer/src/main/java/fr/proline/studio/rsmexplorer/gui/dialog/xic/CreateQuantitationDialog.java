@@ -17,6 +17,7 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.core.orm.msi.PtmSpecificity;
+import fr.proline.studio.dock.gui.InfoLabel;
 import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.QuantitationLabel;
@@ -51,7 +52,6 @@ import fr.proline.studio.settings.FilePreferences;
 import fr.proline.studio.settings.SettingsDialog;
 import fr.proline.studio.settings.SettingsUtils;
 import fr.proline.studio.utils.IconManager;
-import fr.proline.studio.utils.StudioExceptions;
 import java.awt.Dialog;
 import java.awt.HeadlessException;
 import java.awt.Point;
@@ -64,7 +64,7 @@ import javax.persistence.EntityManager;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
-import org.openide.util.NbPreferences;
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -164,7 +164,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
                 }
             } catch (Exception ex) {
                 LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Error while setting Quant Param ", ex);
-                StudioExceptions.notify("An error occured while cloning XIC parameters", ex);
+                WindowManager.getDefault().getMainWindow().alert(InfoLabel.INFO_LEVEL.ERROR, "An error occured while cloning XIC parameters", ex);
             }
         } else {
             // set refDataset node

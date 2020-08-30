@@ -49,7 +49,7 @@ public class CancelTask extends AbstractJMSTask {
         final JSONRPC2Request jsonRequest = new JSONRPC2Request("cancel", Integer.valueOf(m_taskInfo.getId()));
         jsonRequest.setNamedParams(createParams());
 
-        final TextMessage message = AccessJMSManagerThread.getAccessJMSManagerThread().getSession().createTextMessage(jsonRequest.toJSONString());
+        final TextMessage message = m_session.createTextMessage(jsonRequest.toJSONString());
 
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);

@@ -10,7 +10,7 @@
 
     <groupId>fr.proline</groupId>
     <artifactId>prolinestudio-dam</artifactId>
-    <packaging>nbm</packaging>
+    <packaging>jar</packaging>
 
     <name>ProlineStudio-DAM</name>
 
@@ -70,25 +70,20 @@
     </dependencies>
 
     <build>
+
         <plugins>
 
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>nbm-maven-plugin</artifactId>
-                <!-- Version inherited from ProlineStudio-parent -->
-                <extensions>true</extensions>
-                <configuration>
-                    <publicPackages>
-                        <publicPackage>fr.proline.repository</publicPackage>
-                        <publicPackage>fr.proline.studio.dam.*</publicPackage>
-                        <publicPackage>fr.proline.studio.id</publicPackage>
-                        <publicPackage>fr.proline.studio.repositorymgr</publicPackage>
-                        <publicPackage>fr.proline.studio.repositorymgr.action</publicPackage>
-                        <publicPackage>org.openide.awt</publicPackage>
-                    </publicPackages>
-                </configuration>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <!-- Version inherited from ProFI-Pom -->
+
+
+
             </plugin>
 
         </plugins>
+
     </build>
+
 </project>

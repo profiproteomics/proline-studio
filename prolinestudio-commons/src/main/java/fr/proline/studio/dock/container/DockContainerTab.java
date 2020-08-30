@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2019 VD225637
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
+ * ; either version 2.1
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * CeCILL License V2.1 for more details.
+ *
+ * You should have received a copy of the CeCILL License
+ * along with this program; If not, see <http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html>.
+ */
+
 package fr.proline.studio.dock.container;
 
 import fr.proline.studio.dock.AbstractTopPanel;
@@ -10,13 +27,12 @@ import java.util.HashSet;
 
 public class DockContainerTab extends DockContainerMulti {
 
-
     private HashSet<DockContainer> m_dockContainerSet = new HashSet();
 
-
-
     public DockContainerTab() {
-        m_component = new JTabbedPane();
+        final JTabbedPane tabbedPane = new JTabbedPane();
+        m_component = tabbedPane;
+
     }
 
     public void toFront(DockContainer child) {
@@ -121,11 +137,19 @@ public class DockContainerTab extends DockContainerMulti {
         tabbedPane.addTab(container.getTitle(), container.getComponent());
 
         int index = tabbedPane.indexOfComponent(container.getComponent());
-        tabbedPane.setTabComponentAt(index, new TabbedPaneLabel(this, container));
+
+        TabbedPaneLabel tpl =  new TabbedPaneLabel(this, container);
+        tabbedPane.setTabComponentAt(index, tpl);
         tabbedPane.setSelectedIndex(index);
 
         m_dockContainerSet.add(container);
         container.setParent(this);
+
+        if (container.getComponent() instanceof AbstractTopPanel) {
+            AbstractTopPanel topPanel = (AbstractTopPanel) container.getComponent();
+            topPanel.componentAdded();
+        }
+
     }
 
     @Override
@@ -140,6 +164,8 @@ public class DockContainerTab extends DockContainerMulti {
         container.setParent(null);
 
         removeIfEmpty();
+
+
     }
 
     public boolean isEmpty() {

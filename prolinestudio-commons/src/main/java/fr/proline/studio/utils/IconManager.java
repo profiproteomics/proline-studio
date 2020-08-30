@@ -72,6 +72,7 @@ public class IconManager {
         PLUS,
         CROSS_SMALL7,
         CROSS_SMALL16,
+        CROSS_SMALL12,
         CROSS_BLUE_SMALL16,
         DOCUMENT_LIST,
         WEB_LINK,
@@ -227,7 +228,8 @@ public class IconManager {
         CENTROID_SPECTRA,
         EXPORT_CENTROID,
         SPLASH,
-        FRAME_ICON
+        FRAME_ICON,
+        MINIFY
     }
     
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -437,6 +439,8 @@ public class IconManager {
                 return "fr/proline/studio/images/cross-small7x7.png";
             case CROSS_SMALL16:
                 return "fr/proline/studio/images/cross-small16x16.png";
+            case CROSS_SMALL12:
+                return "fr/proline/studio/images/cross-small12x16.png";
             case CROSS_BLUE_SMALL16:
                 return "fr/proline/studio/images/cross-smallblue16x16.png";
             case DOCUMENT_LIST:
@@ -745,6 +749,8 @@ public class IconManager {
                 return "fr/proline/studio/images/splash.gif";
             case FRAME_ICON:
                 return "fr/proline/studio/images/frame48.gif";
+            case MINIFY:
+                return "fr/proline/studio/images/minify.png";
         }
 
         return null; // can not happen

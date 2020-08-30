@@ -167,7 +167,7 @@ public class ExportDialog extends DefaultDialog {
 
         setInternalComponent(createExportPanel(defaultExportPath));
 
-            setButtonName(BUTTON_OK, (m_exportType == ExporterFactory.EXPORT_IMAGE) ? "Export Image" : "Export");
+        setButtonName(BUTTON_OK, (m_exportType == ExporterFactory.EXPORT_IMAGE) ? "Export Image" : "Export");
 
         m_fchooser = new JFileChooser(new File(defaultExportPath));
         m_fchooser.setMultiSelectionEnabled(false);

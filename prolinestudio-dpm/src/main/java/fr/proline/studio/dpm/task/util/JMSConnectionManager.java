@@ -278,6 +278,8 @@ public class JMSConnectionManager {
             try {    
                 m_browser = m_mainSession.createBrowser(m_serviceQueue);
             } catch (JMSException ex) {
+                ex.printStackTrace();
+
                 m_browser = null;
             }
         }

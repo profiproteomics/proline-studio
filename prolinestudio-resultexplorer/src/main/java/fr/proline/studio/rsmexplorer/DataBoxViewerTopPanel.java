@@ -1,6 +1,24 @@
+/*
+ * Copyright (C) 2019 VD225637
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
+ * ; either version 2.1
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * CeCILL License V2.1 for more details.
+ *
+ * You should have received a copy of the CeCILL License
+ * along with this program; If not, see <http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html>.
+ */
+
 package fr.proline.studio.rsmexplorer;
 
 import fr.proline.studio.dock.AbstractTopPanel;
+import fr.proline.studio.dock.container.DockComponent;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.pattern.ParameterList;
@@ -45,12 +63,9 @@ public class DataBoxViewerTopPanel extends AbstractTopPanel {
         m_windowBox.retrieveTableModels(list);
     }
 
-    /*
-    JPM.DOCK
-
     @Override
-    public Action[] getActions() {
-        Action[] actions = super.getActions();
+    public Action[] getActions(DockComponent component) {
+        Action[] actions = super.getActions(component);
 
         Action renameAction = new AbstractAction("Rename...") {
 
@@ -58,8 +73,6 @@ public class DataBoxViewerTopPanel extends AbstractTopPanel {
             public void actionPerformed(ActionEvent e) {
                 OptionDialog dialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Rename", null, "New Name", OptionDialog.OptionDialogType.TEXTFIELD);
                 dialog.setText(getName());
-                Object o = e.getSource();
-                //dialog.setLocation(x, y);
                 dialog.setVisible(true);
                 String newName = null;
                 if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
@@ -68,6 +81,7 @@ public class DataBoxViewerTopPanel extends AbstractTopPanel {
 
                 if ((newName != null) && (newName.length() > 0)) {
                     setName(newName);
+                    component.setTitle(newName);
                     m_windowBox.getEntryBox().setUserName(newName);
                 }
             }
@@ -93,15 +107,14 @@ public class DataBoxViewerTopPanel extends AbstractTopPanel {
     }
 
 
-
-
     @Override
     protected void componentOpened() {
         m_windowBox.windowOpened();
     }
 
     @Override
-    protected void componentClosed() {
+    public void componentClosed() {
+
         m_windowBox.windowClosed();
     }
 
@@ -110,7 +123,6 @@ public class DataBoxViewerTopPanel extends AbstractTopPanel {
         return m_windowBox.getIcon();
     }
 
-     */
 
     @Override
     public void paint(Graphics g) {
@@ -156,11 +168,6 @@ public class DataBoxViewerTopPanel extends AbstractTopPanel {
     @Override
     public String getTopPanelIdentifierKey() {
         return null;
-    }
-
-    @Override
-    public Image getIcon() {
-        return m_windowBox.getIcon();
     }
 
     @Override

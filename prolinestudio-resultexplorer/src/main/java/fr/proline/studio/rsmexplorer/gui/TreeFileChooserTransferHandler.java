@@ -34,7 +34,7 @@ import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
-import org.openide.util.Exceptions;
+import fr.proline.studio.Exceptions;
 
 /**
  * Class used for Drag and Drop of nodes

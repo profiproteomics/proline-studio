@@ -30,7 +30,7 @@ import java.util.HashMap;
 import javax.swing.*;
 import java.util.prefs.Preferences;
 
-import org.openide.util.NbPreferences;
+import fr.proline.studio.NbPreferences;
 import org.slf4j.LoggerFactory;
 
 /**

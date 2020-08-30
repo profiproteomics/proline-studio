@@ -317,6 +317,9 @@ public class SystemTasksPanel extends AbstractTasksPanel {
             }
 
         } catch (Exception jmsE) {
+
+            jmsE.printStackTrace();
+
             m_connectionErrCount++;
             if (m_connectionErrCount < 2) {
                 JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "Unable to browse pending messages (JMS Connection problem ?! : " + jmsE.getMessage() + ")", "Server Tasks Logs error", JOptionPane.ERROR_MESSAGE);

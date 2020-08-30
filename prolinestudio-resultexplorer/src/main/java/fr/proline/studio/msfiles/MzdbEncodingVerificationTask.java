@@ -27,7 +27,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.openide.util.Exceptions;
+import fr.proline.studio.Exceptions;
 
 /**
  *

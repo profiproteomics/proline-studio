@@ -34,8 +34,7 @@ import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import org.openide.util.NbPreferences;
-import org.slf4j.Logger;
+import fr.proline.studio.NbPreferences;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -178,7 +177,7 @@ public class QuantPostProcessingDialog extends DefaultDialog {
         } catch (Exception ex) {
             m_logger.error("error while settings quanti params " + ex);
         }
-        
+
         m_quantPostProcessingPanel.setDiscardPeptidesSharingPeakelsChB(isAggregation);
 
         setInternalComponent(m_quantPostProcessingPanel);

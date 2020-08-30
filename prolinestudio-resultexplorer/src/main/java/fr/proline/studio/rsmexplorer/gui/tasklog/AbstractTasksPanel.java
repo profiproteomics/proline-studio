@@ -58,7 +58,7 @@ public abstract class AbstractTasksPanel extends HourglassPanel implements DataB
 
     public AbstractTasksPanel(){
         this.m_isConnected = false;
-        initListener();
+        //initListener(); calling it in constructor is incorrect: it calls overriden methods
     }
     
    
@@ -69,7 +69,7 @@ public abstract class AbstractTasksPanel extends HourglassPanel implements DataB
     /**
      * Listener of JMS Connection state change : to connect/disconnect from topic
      */
-    private void initListener(){
+    public void initListener(){
         JMSConnectionManager.getJMSConnectionManager().addConnectionListener(this);
         int currentState =  JMSConnectionManager.getJMSConnectionManager().getConnectionState();
         connectionStateChanged(currentState);

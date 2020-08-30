@@ -64,7 +64,7 @@ import java.util.*;
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
-import org.openide.util.NbPreferences;
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.WindowManager;
 import org.slf4j.LoggerFactory;
 

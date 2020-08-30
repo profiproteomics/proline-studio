@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2019 VD225637
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
+ * ; either version 2.1
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * CeCILL License V2.1 for more details.
+ *
+ * You should have received a copy of the CeCILL License
+ * along with this program; If not, see <http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html>.
+ */
+
 package fr.proline.studio.dock.gui;
 
 import fr.proline.studio.dock.container.*;
@@ -10,9 +27,11 @@ import java.awt.*;
 public class DraggingOverlayPanel extends javax.swing.JPanel
 {
 
-    final DockContainerRoot m_dockContainerRoot;
+    private final DockContainerRoot m_dockContainerRoot;
 
-    final static AlphaComposite ALPHA_COMPOSITE = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f);
+    private static final AlphaComposite ALPHA_COMPOSITE = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f);
+
+    private static final Color OVER_COLOR = new Color(51, 153, 255);
 
     private OverArea m_overArea = null;
 
@@ -37,14 +56,14 @@ public class DraggingOverlayPanel extends javax.swing.JPanel
 
         if (m_overArea != null) {
 
-            g2D.setColor(Color.white);
+            g2D.setColor(OVER_COLOR);
 
 
-            Composite originalComposite = g2D.getComposite();
+            Composite previousComposite = g2D.getComposite();
 
             g2D.setComposite(ALPHA_COMPOSITE);
             g2D.fill(m_overArea.getZone(this));
-            g2D.setComposite(originalComposite);
+            g2D.setComposite(previousComposite);
 
         }
 

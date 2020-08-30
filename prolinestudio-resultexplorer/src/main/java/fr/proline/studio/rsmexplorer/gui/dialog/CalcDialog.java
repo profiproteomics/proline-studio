@@ -88,7 +88,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
 import org.jdesktop.swingx.JXTable;
-import org.openide.util.NbPreferences;
+import fr.proline.studio.NbPreferences;
 import org.python.core.PyObject;
 
 

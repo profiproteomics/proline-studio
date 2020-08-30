@@ -9,7 +9,7 @@
   
     <groupId>fr.proline</groupId>
     <artifactId>prolinestudio-mzscope</artifactId>
-    <packaging>nbm</packaging>
+    <packaging>jar</packaging>
     
     <name>ProlineStudio-mzScope</name>
     <description>Proline module to display mzdb files</description>
@@ -194,50 +194,23 @@
         </dependency>
         
     </dependencies>
-    
+
+
     <build>
+
         <plugins>
 
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>nbm-maven-plugin</artifactId>
-                <!-- Version inherited from ProlineStudio-parent -->
-                <extensions>true</extensions>
-                <configuration>
-                    <publicPackages>
-                        <!--  <publicPackage>org.joda.time.*</publicPackage>  -->
-                        <publicPackage>fr.proline.mzscope.*</publicPackage>
-                        <publicPackage>fr.proline.studio.mzscope</publicPackage>
-                        <publicPackage>org.xmlpull.v1.*</publicPackage>
-                        <publicPackage>com.google.common.*</publicPackage>
-                        <publicPackage>org.apache.xerces.parsers.*</publicPackage>
-                        <publicPackage>org.apache.xml.serialize.*</publicPackage> 
-                        <publicPackage>fr.profi.mzdb.*</publicPackage>          
-                        <publicPackage>com.almworks.sqlite4java.*</publicPackage>
-                        <!--  <publicPackage>org.joda.time.*</publicPackage>  -->
-                    </publicPackages>
-                </configuration>
-            </plugin>
-            
-            <!--  Maven Release for branches and tags -->
-            <plugin>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.5.2</version>
-                <configuration>
-                    <providerImplementations>
-                        <svn>javasvn</svn>
-                    </providerImplementations>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.google.code.maven-scm-provider-svnjava</groupId>
-                        <artifactId>maven-scm-provider-svnjava</artifactId>
-                        <version>2.1.1</version>
-                        <scope>compile</scope>
-                    </dependency>
-                </dependencies>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <!-- Version inherited from ProFI-Pom -->
+
+
+
             </plugin>
 
         </plugins>
+
     </build>
+
 </project>

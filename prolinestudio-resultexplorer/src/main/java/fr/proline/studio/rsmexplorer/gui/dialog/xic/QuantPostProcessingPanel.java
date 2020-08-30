@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javax.swing.*;
-import org.openide.util.NbPreferences;
+import fr.proline.studio.NbPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -124,7 +124,6 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
     }
 
     private String getTopComponentName() {
-        //JPM.DOCK
 
         Container c = getParent();
         while ((c != null) && !(c instanceof AbstractTopPanel)) {

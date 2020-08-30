@@ -34,6 +34,7 @@ public class DataBoxSystemTasks extends AbstractDataBox  {
     @Override
     public void createPanel() {
         SystemTasksPanel p = new SystemTasksPanel();
+        p.initListener();
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);               

@@ -10,7 +10,7 @@
 
     <groupId>fr.proline</groupId>
     <artifactId>prolinestudio-resultexplorer</artifactId>
-    <packaging>nbm</packaging>
+    <packaging>jar</packaging>
 
     <name>ProlineStudio-ResultExplorer</name>
 
@@ -113,18 +113,35 @@
             <groupId>xml-apis</groupId>
             <artifactId>xml-apis</artifactId>
             <version>1.4.01</version>
-        </dependency> 
-        
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>
             <artifactId>hibernate-jpa-2.1-api</artifactId>
             <version>1.0.0.Final</version>
         </dependency>
-        <dependency>
+        <!-- <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>4.2.13.Final</version>
-        </dependency> 
+        </dependency> -->
+
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.python</groupId>
             <artifactId>jython</artifactId>
@@ -242,53 +259,20 @@
     </dependencies>
 
     <build>
+
         <plugins>
-
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>nbm-maven-plugin</artifactId>
-                <!-- Version inherited from ProlineStudio-parent -->
-                <extensions>true</extensions>
-                <configuration>
-                    <publicPackages>
-                        <publicPackage>fr.proline.studio.rsmexplorer</publicPackage>
-                    </publicPackages>
-                </configuration>
-            </plugin>
 
             <plugin>
                 <groupId>com.google.code.maven-replacer-plugin</groupId>
                 <artifactId>replacer</artifactId>
                 <!-- Version inherited from ProFI-Pom -->
 
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>replace</goal>
-                        </goals>
-                    </execution>
-                </executions>
 
-                <!-- JPM.DOCK
-                <configuration>
-                    <file>${basedir}/src/main/resources/fr/proline/studio/installer/VersionInstaller.java.template</file>
-                    <outputFile>${basedir}/src/main/java/fr/proline/studio/installer/VersionInstaller.java</outputFile>
-                    <replacements>
-                        <replacement>
-                            <token>@build.date@</token>
-                            <value>${maven.build.timestamp}_${user.name}</value>
-                        </replacement>         
-                        <replacement>
-                            <token>@version@</token>
-                            <value>${project.version}</value>
-                        </replacement>                               
-                    </replacements>
-                </configuration>
-                -->
 
             </plugin>
+
         </plugins>
+
     </build>
+
 </project>

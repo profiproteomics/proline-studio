@@ -19,7 +19,7 @@ package fr.proline.studio.rsmexplorer.gui.calc.macros;
 
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
-import org.openide.util.NbPreferences;
+import fr.proline.studio.NbPreferences;
 
 /**
  * Management of all user macros for DataAnalyzer

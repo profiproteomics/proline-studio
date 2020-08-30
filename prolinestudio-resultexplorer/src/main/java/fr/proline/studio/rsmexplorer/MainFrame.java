@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2019 VD225637
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
+ * ; either version 2.1
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * CeCILL License V2.1 for more details.
+ *
+ * You should have received a copy of the CeCILL License
+ * along with this program; If not, see <http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html>.
+ */
+
 package fr.proline.studio.rsmexplorer;
 
 import fr.proline.studio.WindowManager;
@@ -5,6 +22,7 @@ import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dock.AbstractDockFrame;
 import fr.proline.studio.dock.AbstractTopPanel;
 import fr.proline.studio.dock.container.*;
+import fr.proline.studio.dock.gui.InfoLabel;
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.InfoDialog;
@@ -13,6 +31,7 @@ import fr.proline.studio.rserver.RServerManager;
 import fr.proline.studio.rsmexplorer.actions.*;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.ServerConnectionDialog;
+import fr.proline.studio.rsmexplorer.gui.tasklog.SystemTasksPanel;
 import fr.proline.studio.utils.IconManager;
 
 import javax.swing.*;
@@ -42,8 +61,9 @@ public class MainFrame extends AbstractDockFrame implements WindowListener {
     }
 
     private MainFrame() {
-        super("Proline Studio TEST DOCK");
-        setSize(800, 800);
+        super("Proline Studio "); //JPM.DOCK : version
+        setSize(1000, 800);
+
         setIconImage(IconManager.getImage(IconManager.IconType.FRAME_ICON));
 
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -60,13 +80,13 @@ public class MainFrame extends AbstractDockFrame implements WindowListener {
             m_propertiesAreaTab = new DockContainerTab();
             m_propertiesAreaTab.setZoneArea("PROPERTIES_AREA");
 
-            JPanel p1 = RSMExplorerTopPanel.getSingleton();
-            DockComponent comp1 = new DockComponent(RSMExplorerTopPanel.getSingleton(), DockComponent.PROP_MINIMIZE);
-            m_propertiesAreaTab.add(comp1);
+            DockComponent propertiesComponent = new DockComponent(RSMExplorerTopPanel.getSingleton(), DockComponent.PROP_MINIMIZE);
+            m_propertiesAreaTab.add(propertiesComponent);
 
-            DockComponent comp2 = new DockComponent(MzdbFilesTopPanel.getSingleton(), DockComponent.PROP_MINIMIZE);
-            m_propertiesAreaTab.add(comp2);
+            DockComponent mzdbComponent = new DockComponent(MzdbFilesTopPanel.getSingleton(), DockComponent.PROP_MINIMIZE);
+            m_propertiesAreaTab.add(mzdbComponent);
 
+            propertiesComponent.toFront();
 
             // left tab put in container which accepts minimized containers
             DocContainerMinimizeZone dockContainerMinimizeZone = new DocContainerMinimizeZone();
@@ -77,14 +97,9 @@ public class MainFrame extends AbstractDockFrame implements WindowListener {
             m_windowAreaTab = new DockContainerTab();
             m_windowAreaTab.setZoneArea("WINDOWS_AREA");
 
-            DockComponent comp4 = new DockComponent(null, "Window 1", null, createComponent(Color.blue), DockComponent.PROP_CLOSE);
-            m_windowAreaTab.add(comp4);
+            DockComponent logComponent = new DockComponent(TaskLogTopPanel.getSingleton(), DockComponent.PROP_CLOSE);
+            m_windowAreaTab.add(logComponent);  //JPM.DOCK
 
-            DockComponent comp5 = new DockComponent(null, "Window 2", null, createComponent(Color.pink), DockComponent.PROP_CLOSE);
-            m_windowAreaTab.add(comp5);
-
-            DockComponent comp6 = new DockComponent(null, "Window 3", null, createComponent(Color.pink), DockComponent.PROP_CLOSE);
-            m_windowAreaTab.add(comp6);
 
             // Split pane
             DockContainerSplit mainContainerSplit = new DockContainerSplit();
@@ -105,14 +120,33 @@ public class MainFrame extends AbstractDockFrame implements WindowListener {
 
 
         WindowManager.getDefault().setMainWindow(this);
+
+        //JPM.DOCK.TEST
+        //SystemTasksPanel p = new SystemTasksPanel();
+        //p.initListener();
+
     }
 
+    public void alert(InfoLabel.INFO_LEVEL level, String message, Throwable t) {
+        m_containerRoot.getInfoLabel().setInfo(level, message, t);
+    }
+    public void alert(InfoLabel.INFO_LEVEL level, Throwable t) {
+        m_containerRoot.getInfoLabel().setInfo(level, t);
+    }
+
+
+    public void addLog() {
+        DockComponent logComponent = new DockComponent(TaskLogTopPanel.getSingleton(), DockComponent.PROP_CLOSE);
+        m_windowAreaTab.add(logComponent);
+    }
+
+    /*
     private static JPanel createComponent(Color c) {
         JPanel background = new JPanel() ;
         background.setOpaque ( true ) ;
         background.setBackground (c) ;
         return background;
-    }
+    }*/
 
 
     private JMenuBar createMenu() {
@@ -168,11 +202,14 @@ public class MainFrame extends AbstractDockFrame implements WindowListener {
 
         // WINDOW > Projects
         menuItem = new JMenuItem(new DisplayWindow("Logs", TaskLogTopPanel.getSingleton()));
-        windowMenu.add(menuItem);
+        windowMenu.add(menuItem); //JPM.DOCK
 
         // Window > Data Analyzer
         menuItem = new JMenuItem(new DataAnalyzerAction());
         windowMenu.add(menuItem);
+
+        // -------------------
+        windowMenu.addSeparator();
 
         // Window > Memory Usage
         menuItem = new JMenuItem(new MemoryAction());
@@ -190,14 +227,21 @@ public class MainFrame extends AbstractDockFrame implements WindowListener {
         menuItem = new JMenuItem(new HelpAction());
         helpMenu.add(menuItem);
 
-        // Help > Proline Help
-        menuItem = new JMenuItem(new HelpProlineAction());
-        helpMenu.add(menuItem);
-
         // Help > How to
         menuItem = new JMenuItem(new HelpHowToAction());
         helpMenu.add(menuItem);
 
+        // Help > Proline Help
+        menuItem = new JMenuItem(new HelpProlineAction());
+        helpMenu.add(menuItem);
+
+
+        // -------------------
+        helpMenu.addSeparator();
+
+        // Help > Proline Help
+        menuItem = new JMenuItem(new AboutAction());
+        helpMenu.add(menuItem);
 
 
 

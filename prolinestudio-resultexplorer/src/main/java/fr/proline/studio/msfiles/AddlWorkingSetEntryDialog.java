@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.msfiles;
 
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dpm.serverfilesystem.ServerFile;
 import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
@@ -44,7 +45,6 @@ import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import org.openide.util.NbPreferences;
 
 /**
  *

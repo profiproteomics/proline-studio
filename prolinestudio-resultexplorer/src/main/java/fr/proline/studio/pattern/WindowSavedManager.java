@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.prefs.Preferences;
-import org.openide.util.NbPreferences;
+import fr.proline.studio.NbPreferences;
 
 /**
  *

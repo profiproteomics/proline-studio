@@ -17,6 +17,7 @@
 package fr.proline.studio.dpm;
 
 import fr.proline.studio.NbPreferences;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.taskinfo.TaskError;
@@ -32,6 +33,8 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
 
 /**
  * Management of the connection to the Jetty Server and to the databases
@@ -145,7 +148,6 @@ public class ServerConnectionManager {
             //throw new RuntimeException("Error creating connection to JMS Server "+e.getMessage());
         }
 
-
         userAuthenticateJMS(connectionCallback, serverURL, projectUser, userPassword, changingUser);
     }
 
@@ -200,11 +202,22 @@ public class ServerConnectionManager {
                         connectionCallback.run();
                     }
                 }
+
+                // open log
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        WindowManager.getDefault().getMainWindow().addLog(); //JPM.DOCK
+                    }
+                }); //JPM.DOCK.TEST
+
             }
         };
         m_loggerProline.debug(" ---- WILL RUN AuthenticateUserTask ");
         AuthenticateUserTask task = new AuthenticateUserTask(callback, projectUser, userPassword, databasePassword);
         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+
+
 
     }
 

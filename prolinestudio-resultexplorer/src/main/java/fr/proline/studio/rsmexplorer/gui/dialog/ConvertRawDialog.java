@@ -60,7 +60,7 @@ import javax.swing.JTextField;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import org.openide.util.NbPreferences;
+import fr.proline.studio.NbPreferences;
 
 /**
  *
@@ -70,7 +70,7 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
 
     private static ConvertRawDialog m_singletonNonConnectedDialog = null;
     private static ConvertRawDialog m_singletonConnectedDialog = null;
-    
+
     private boolean m_serverConnected;
     private JList m_fileList;
     private JScrollPane m_fileListScrollPane;
@@ -84,10 +84,10 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
     private String m_lastParentDirectory;
 
     public static ConvertRawDialog getDialog(Window parent) {
-        
+
         ArrayList<String> labels = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_MZDB_FILES);
         boolean connectedToServer = (labels != null);
-   
+
         if (connectedToServer) {
             if (m_singletonConnectedDialog == null) {
                 m_singletonConnectedDialog = new ConvertRawDialog(parent, true);
@@ -102,7 +102,7 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
                     model.clear();
                 }
             }
-            
+
             return m_singletonConnectedDialog;
         } else {
             if (m_singletonNonConnectedDialog == null) {
@@ -115,19 +115,19 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
                     model.clear();
                 }
             }
-            
+
             return m_singletonNonConnectedDialog;
         }
 
 
-        
+
     }
 
     private ConvertRawDialog(Window parent, boolean serverConnected) {
         super(parent, Dialog.ModalityType.MODELESS);
 
         m_serverConnected = serverConnected;
-        
+
         setTitle("Convert raw file(s)");
 
         setSize(new Dimension(360, 480));
@@ -191,25 +191,25 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
 
 
 
-        
+
         if (m_serverConnected) {
 
             JCheckBox uploadCheckbox = new JCheckBox("Upload .mzdb file successful conversion");
             m_uploadMzdb = new BooleanParameter("UPLOAD_CONVERTED", "Upload after conversion", uploadCheckbox, false);
             m_parameterList.add(m_uploadMzdb);
-            
+
             ArrayList<String> labels = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_MZDB_FILES);
-            
+
             Object[] associatedTable = labels.toArray(new String[labels.size()]);
             Object[] objectTable = labels.toArray(new String[labels.size()]);
             JComboBox namingComboBox = new JComboBox(associatedTable);
             m_uploadLabelParameter = new ObjectParameter("MZDB_MOUNT_LABEL", "Server's mounting point", namingComboBox, associatedTable, objectTable, 0, null);
             m_parameterList.add(m_uploadLabelParameter);
-            
+
             JCheckBox mzdbCheckbox = new JCheckBox("Delete .mzdb file after a successful upload");
             m_deleteMzdb = new BooleanParameter("DELETE_MZDB", "Delete mzdb file after a successful upload", mzdbCheckbox, false);
             m_parameterList.add(m_deleteMzdb);
-            
+
             JCheckBox parentDirectoryCheckbox = new JCheckBox("Create Parent Directory in Destination");
             m_createParentDirectoryParameter = new BooleanParameter("CREATE_PARENT_DIRECTORY", "Create Parent Directory in Destination", parentDirectoryCheckbox, false);
             m_parameterList.add(m_createParentDirectoryParameter);
@@ -239,7 +239,7 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
         if (m_serverConnected) {
             m_uploadMzdb.addLinkedParameters(linkedParameters);
         }
-        
+
         return parameterPanel;
     }
 

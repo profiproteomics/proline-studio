@@ -22,7 +22,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import java.io.File;
 import java.io.IOException;
-import org.openide.util.Exceptions;
+import fr.proline.studio.Exceptions;
 
 /**
  *

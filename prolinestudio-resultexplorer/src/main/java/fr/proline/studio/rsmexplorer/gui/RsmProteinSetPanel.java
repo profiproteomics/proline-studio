@@ -223,7 +223,6 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     }
 
     private String getTopComponentName() {
-        //JPM.DOCK
 
         Container c = getParent();
         while ((c != null) && !(c instanceof AbstractTopPanel)) {

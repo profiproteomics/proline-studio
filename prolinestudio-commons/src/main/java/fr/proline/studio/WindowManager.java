@@ -30,8 +30,4 @@ public class WindowManager {
         m_frame = frame;
     }
 
-    //JPM.DOCK
-    public void notify(String titleMessage, ImageIcon exceptionIcon, String message, ActionListener a) {
-
-    }
 }

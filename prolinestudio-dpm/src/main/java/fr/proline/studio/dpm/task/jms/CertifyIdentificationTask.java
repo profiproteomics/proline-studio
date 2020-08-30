@@ -66,7 +66,7 @@ public class CertifyIdentificationTask extends AbstractJMSTask {
         //Add Service parameters
         jsonRequest.setNamedParams(createParams());
 
-        final TextMessage message = AccessJMSManagerThread.getAccessJMSManagerThread().getSession().createTextMessage(jsonRequest.toJSONString());
+        final TextMessage message = m_session.createTextMessage(jsonRequest.toJSONString());
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/CertifyResultFiles");

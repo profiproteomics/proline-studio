@@ -99,6 +99,8 @@ public abstract class Axis {
     protected int m_minimumAxisHeight = 0;
     protected int m_minimumAxisWidth = 0;
 
+    private boolean m_maxZoomDone = false;
+
     protected static final double LOG_MIN_VALUE = 10e-13;
             
     public boolean displayAxis() {
@@ -261,6 +263,19 @@ public abstract class Axis {
         m_plots = new ArrayList();
         m_plotPanel = p;
         m_rangePanel = new AxisRangePanel(this);
+    }
+
+    public void checkMaxZoomOutDone() {
+        if (m_log) {
+            double min = Math.log10(m_minValue <= LOG_MIN_VALUE ? LOG_MIN_VALUE : m_minValue);
+            double max = Math.log10(m_maxValue <= LOG_MIN_VALUE ? LOG_MIN_VALUE*10 : m_maxValue);
+            m_maxZoomDone = ((max-min)/(Math.pow(10, m_tickSpacing)))*m_width > 10e09;
+        } else {
+            m_maxZoomDone = ((m_maxValue-m_minValue)/(m_tickSpacing))*m_width > 10e09;
+        }
+    }
+    public boolean isMaxZoomOutReached() {
+        return m_maxZoomDone;
     }
 
     public ArrayList<PlotBaseAbstract> getPlots() {

@@ -295,6 +295,11 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
         int figuresXHeight = GAP_FIGURES_X;
 
+        // checj max zoom reached
+        m_xAxis.checkMaxZoomOutDone();
+        m_yAxis.checkMaxZoomOutDone();
+
+
         //2 draw axis X
         boolean hasPlot = ((m_xAxis != null) && (m_xAxis.hasPlots()));
         if (hasPlot) {
@@ -1113,6 +1118,15 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         if (!getXAxis().hasPlots()) {
             return;
         }
+
+        if (!zoomIn && zoomX && m_xAxis.isMaxZoomOutReached()) {
+            return;
+        }
+
+        if (!zoomIn && zoomY && m_yAxis.isMaxZoomOutReached()) {
+            return;
+        }
+
 
         int zoomDirection = (zoomIn) ? -1 : 1;
         

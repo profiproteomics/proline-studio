@@ -678,7 +678,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                 for (int k = 1; k < nb; k++) {
                     double plotXMin = plotList.get(k).getXMin();
                     double plotXMax = plotList.get(k).getXMax();
-                    if (plotXMin != 0 && plotXMax != 0) {
+                    if (plotXMin != 0 || plotXMax != 0) {
                         if (minX == 0 && maxX == 0) {
                             minX = plotXMin;
                             maxX = plotXMax;
@@ -696,7 +696,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                 for (int k = 1; k < nb; k++) {
                     double plotYMin = plotList.get(k).getYMin();
                     double plotYMax = plotList.get(k).getYMax();
-                    if (plotYMin != 0 && plotYMax != 0) {
+                    if (plotYMin != 0 || plotYMax != 0) {
                         if (minY == 0 && maxY == 0) {
                             minY = plotYMin;
                             maxY = plotYMax;

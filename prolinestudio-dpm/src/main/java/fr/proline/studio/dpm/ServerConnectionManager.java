@@ -203,13 +203,7 @@ public class ServerConnectionManager {
                     }
                 }
 
-                // open log
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        WindowManager.getDefault().getMainWindow().addLog(); //JPM.DOCK
-                    }
-                }); //JPM.DOCK.TEST
+
 
             }
         };

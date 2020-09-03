@@ -15,6 +15,7 @@
     <name>ProlineStudio-Commons</name>
 
     <properties>
+        <version.path>${project.basedir}/src/main/java/fr/proline/studio/</version.path>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -100,9 +101,17 @@
             <plugin>
                 <groupId>com.google.code.maven-replacer-plugin</groupId>
                 <artifactId>replacer</artifactId>
-                <!-- Version inherited from ProFI-Pom -->
 
-
+                <!-- Version & config inherited from ProFI-Pom -->
+                <executions>
+                    <execution>
+                        <id>java-version-generation</id>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <skip>false</skip>
+                        </configuration>
+                    </execution>
+                </executions>
 
             </plugin>
 

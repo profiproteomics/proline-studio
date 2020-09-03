@@ -33,16 +33,15 @@ import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.ServerConnectionDialog;
 import fr.proline.studio.rsmexplorer.gui.tasklog.SystemTasksPanel;
 import fr.proline.studio.utils.IconManager;
+import fr.proline.studio.JavaVersion;
 
 import javax.swing.*;
 
 
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
+import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class MainFrame extends AbstractDockFrame implements WindowListener {
@@ -50,8 +49,8 @@ public class MainFrame extends AbstractDockFrame implements WindowListener {
     private static MainFrame m_singleton = null;
 
     private DockContainerRoot m_containerRoot = null;
-    private DockContainerTab m_windowAreaTab = null;
-    private DockContainerTab m_propertiesAreaTab = null;
+    private DocContainerMinimizeZone m_dockContainerMinimizeZone = null;
+    private DockContainerSplit m_mainContainerSplit = null;
 
     public static MainFrame getInstance() {
         if (m_singleton == null) {
@@ -61,7 +60,7 @@ public class MainFrame extends AbstractDockFrame implements WindowListener {
     }
 
     private MainFrame() {
-        super("Proline Studio "); //JPM.DOCK : version
+        super("Proline Studio "+JavaVersion.getProductVersion());
         setSize(1000, 800);
 
         setIconImage(IconManager.getImage(IconManager.IconType.FRAME_ICON));
@@ -77,37 +76,45 @@ public class MainFrame extends AbstractDockFrame implements WindowListener {
         try {
 
             // left tab
-            m_propertiesAreaTab = new DockContainerTab();
-            m_propertiesAreaTab.setZoneArea("PROPERTIES_AREA");
+            DockContainerTab propertiesAreaTab = new DockContainerTab();
+            propertiesAreaTab.setZoneArea("PROPERTIES_AREA");
 
             DockComponent propertiesComponent = new DockComponent(RSMExplorerTopPanel.getSingleton(), DockComponent.PROP_MINIMIZE);
-            m_propertiesAreaTab.add(propertiesComponent);
+            propertiesAreaTab.add(propertiesComponent);
 
             DockComponent mzdbComponent = new DockComponent(MzdbFilesTopPanel.getSingleton(), DockComponent.PROP_MINIMIZE);
-            m_propertiesAreaTab.add(mzdbComponent);
+            propertiesAreaTab.add(mzdbComponent);
 
             propertiesComponent.toFront();
 
             // left tab put in container which accepts minimized containers
-            DocContainerMinimizeZone dockContainerMinimizeZone = new DocContainerMinimizeZone();
-            dockContainerMinimizeZone.set(m_propertiesAreaTab);
+            m_dockContainerMinimizeZone = new DocContainerMinimizeZone();
+            m_dockContainerMinimizeZone.set(propertiesAreaTab);
 
 
             // right tab
-            m_windowAreaTab = new DockContainerTab();
-            m_windowAreaTab.setZoneArea("WINDOWS_AREA");
+            DockContainerTab windowAreaTab = new DockContainerTab();
+            windowAreaTab.setZoneArea("WINDOWS_AREA");
 
             DockComponent logComponent = new DockComponent(TaskLogTopPanel.getSingleton(), DockComponent.PROP_CLOSE);
-            m_windowAreaTab.add(logComponent);  //JPM.DOCK
+            windowAreaTab.add(logComponent);
 
 
             // Split pane
-            DockContainerSplit mainContainerSplit = new DockContainerSplit();
-            mainContainerSplit.add(true, dockContainerMinimizeZone, m_windowAreaTab);
-            mainContainerSplit.setCanRemoveChildren(false);
+            m_mainContainerSplit = new DockContainerSplit();
+            m_mainContainerSplit.add(true, m_dockContainerMinimizeZone, windowAreaTab);
+            m_mainContainerSplit.setCanRemoveChildren(false);
 
             // add right tab to root
-            m_containerRoot.add(mainContainerSplit, DockPosition.CENTER);
+            m_containerRoot.add(m_mainContainerSplit, DockPosition.CENTER);
+
+            // -- Divider Location
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    ((JSplitPane) m_mainContainerSplit.getComponent()).setDividerLocation(300);
+                }
+            });
 
         } catch (DockException e) {
             // should not happen
@@ -116,14 +123,14 @@ public class MainFrame extends AbstractDockFrame implements WindowListener {
 
         getContentPane().add(m_containerRoot.getMainPanel());
 
+
+        m_containerRoot.getMemoryPanel().setActionListener(new MemoryAction());
+
         addWindowListener(this);
 
 
         WindowManager.getDefault().setMainWindow(this);
 
-        //JPM.DOCK.TEST
-        //SystemTasksPanel p = new SystemTasksPanel();
-        //p.initListener();
 
     }
 
@@ -137,16 +144,9 @@ public class MainFrame extends AbstractDockFrame implements WindowListener {
 
     public void addLog() {
         DockComponent logComponent = new DockComponent(TaskLogTopPanel.getSingleton(), DockComponent.PROP_CLOSE);
-        m_windowAreaTab.add(logComponent);
+        DockContainerTab windowAreaTab = (DockContainerTab) m_mainContainerSplit.searchZoneArea("WINDOWS_AREA");
+        windowAreaTab.add(logComponent);
     }
-
-    /*
-    private static JPanel createComponent(Color c) {
-        JPanel background = new JPanel() ;
-        background.setOpaque ( true ) ;
-        background.setBackground (c) ;
-        return background;
-    }*/
 
 
     private JMenuBar createMenu() {
@@ -174,9 +174,6 @@ public class MainFrame extends AbstractDockFrame implements WindowListener {
         menuItem = new JMenuItem(new SettingsAction());
         fileMenu.add(menuItem);
 
-        // FILE > Open File JPM.DOCK
-
-        // FILE > Open Recent Files JPM.DOCK
 
         // -------------------
         fileMenu.addSeparator();
@@ -202,7 +199,7 @@ public class MainFrame extends AbstractDockFrame implements WindowListener {
 
         // WINDOW > Projects
         menuItem = new JMenuItem(new DisplayWindow("Logs", TaskLogTopPanel.getSingleton()));
-        windowMenu.add(menuItem); //JPM.DOCK
+        windowMenu.add(menuItem);
 
         // Window > Data Analyzer
         menuItem = new JMenuItem(new DataAnalyzerAction());
@@ -213,6 +210,17 @@ public class MainFrame extends AbstractDockFrame implements WindowListener {
 
         // Window > Memory Usage
         menuItem = new JMenuItem(new MemoryAction());
+        windowMenu.add(menuItem);
+
+        // -------------------
+        windowMenu.addSeparator();
+
+        // Window > Reset Windows
+        menuItem = new JMenuItem(new ResetWindowsAction());
+        windowMenu.add(menuItem);
+
+        // Window > Close All Proteomics Data
+        menuItem = new JMenuItem(new CloseAllDataWindows());
         windowMenu.add(menuItem);
 
 
@@ -262,13 +270,117 @@ public class MainFrame extends AbstractDockFrame implements WindowListener {
     public void displayWindow(AbstractTopPanel topPanel) {
         DockContainer searchedContainer = m_containerRoot.search(topPanel.getTopPanelIdentifierKey());
         if (searchedContainer != null) {
-            searchedContainer.toFront();
+            if (((DockComponent)searchedContainer).canMinimize()) {
+                ((DockComponent) searchedContainer).maximize();
+            } else {
+                searchedContainer.toFront();
+            }
+
         } else {
+
+            DockContainerTab windowAreaTab = (DockContainerTab) m_mainContainerSplit.searchZoneArea("WINDOWS_AREA");
+
+
             // container not found, we must create it
 
             DockComponent component = new DockComponent(topPanel, DockComponent.PROP_CLOSE);
-            m_windowAreaTab.add(component);
+            windowAreaTab.add(component);
         }
+    }
+
+    @Override
+    public void resetWindows() {
+
+        // WINDOWS AREA
+
+        DockContainer windowsArea = m_mainContainerSplit.getRightContainer();
+        // is logs opened ?
+        boolean logsFound = windowsArea.search(TaskLogTopPanel.getSingleton().getTopPanelIdentifierKey()) != null;
+
+        // remove all components
+        ArrayList<DockComponent> componentsList = new ArrayList<>();
+        windowsArea.findAllDockComponents(componentsList);
+        for (DockComponent c : componentsList) {
+            ((DockContainerTab) c.getParent()).remove(c);
+        }
+
+        // add logs if necessary
+        if (! logsFound) {
+            MainFrame f = (MainFrame) WindowManager.getDefault().getMainWindow();
+            f.displayWindow(TaskLogTopPanel.getSingleton());
+        }
+
+        // put back all removed components
+        DockContainerTab windowAreaTab = (DockContainerTab) m_mainContainerSplit.searchZoneArea("WINDOWS_AREA");
+        for (DockComponent c : componentsList) {
+            windowAreaTab.add(c);
+        }
+
+        componentsList.clear();
+
+        // PROPERTIES AREA
+
+        m_dockContainerMinimizeZone.findAllDockComponents(componentsList);
+
+        // maximize all components
+        for (DockComponent c : componentsList) {
+            c.maximize();
+        }
+
+        // remove all components
+        for (DockComponent c : componentsList) {
+            ((DockContainerTab) c.getParent()).remove(c);
+        }
+
+        // put back all components
+        DockContainerTab propertiesAreaTab = (DockContainerTab) m_mainContainerSplit.searchZoneArea("PROPERTIES_AREA");
+        for (DockComponent c : componentsList) {
+            propertiesAreaTab.add(c);
+        }
+
+
+        // put Projects to front
+        DockContainer propertiesArea = m_mainContainerSplit.getLeftContainer();
+        DockContainer projectsContainer = propertiesArea.search(RSMExplorerTopPanel.getSingleton().getTopPanelIdentifierKey());
+        projectsContainer.toFront();
+
+        // -- Divider Location
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                ((JSplitPane) m_mainContainerSplit.getComponent()).setDividerLocation(300);
+            }
+        });
+
+
+    }
+
+    @Override
+    public void closeDataWindows() {
+
+
+        DockContainer windowsArea = m_mainContainerSplit.getRightContainer();
+
+        // logs will not be closed
+        DockContainer logContainer = windowsArea.search(TaskLogTopPanel.getSingleton().getTopPanelIdentifierKey());
+
+
+
+        // remove all components
+        ArrayList<DockComponent> componentsList = new ArrayList<>();
+        windowsArea.findAllDockComponents(componentsList);
+        for (DockComponent c : componentsList) {
+            if ((logContainer != null) && (logContainer.equals(c))) {
+                continue;
+            }
+            ((DockContainerTab) c.getParent()).remove(c);
+
+            if (c.getComponent() instanceof AbstractTopPanel) {
+                ((AbstractTopPanel) c.getComponent()).componentClosed();
+            }
+
+        }
+
     }
 
     @Override

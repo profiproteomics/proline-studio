@@ -71,9 +71,10 @@ public class PropertiesTopPanel extends AbstractTopPanel {
 
 
 
+
     @Override
     public String getTopPanelIdentifierKey() {
-        return null;
+        return "PROPERTIES_TOP_PANEL";
     }
 
     @Override

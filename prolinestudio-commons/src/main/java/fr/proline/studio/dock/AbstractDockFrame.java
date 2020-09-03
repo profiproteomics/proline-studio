@@ -33,6 +33,10 @@ public abstract class AbstractDockFrame extends JFrame {
 
     public abstract void displayWindow(AbstractTopPanel topPanel);
 
+    public abstract void resetWindows();
+
+    public abstract void closeDataWindows();
+
     public abstract boolean isDisplayed(String windowKey);
 
     public abstract void toFront(String windowKey);

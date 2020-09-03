@@ -21,6 +21,7 @@ package fr.proline.studio.dock.container;
 import fr.proline.studio.dock.AbstractTopPanel;
 
 import javax.swing.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public abstract class DockContainer {
@@ -41,6 +42,10 @@ public abstract class DockContainer {
     }
 
     public abstract DockContainer search(String windowKey);
+    public abstract DockContainer searchZoneArea(String zoneArea);
+
+    public abstract void findAllDockComponents(ArrayList<DockComponent> components);
+
     public void toFront() {
         // nothing to do
     }

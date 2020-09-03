@@ -17,12 +17,12 @@
 
 package fr.proline.studio.gui;
 
+import fr.proline.studio.JavaVersion;
 import fr.proline.studio.utils.IconManager;
 
 import javax.swing.*;
 import java.awt.*;
 
-//JPM.DOCK : version of proline studio
 
 public class AboutDialog extends DefaultDialog {
 
@@ -59,7 +59,7 @@ public class AboutDialog extends DefaultDialog {
         c.weighty = 1;
         c.gridy++;
 
-        String copyrightText = "<html>Proline Studio is developped in the context of ProFI ( French Proteomics National Infrastructure).<br><br>3 laboratories contribute to this software:<br>- iRTSV (Grenoble): EDyP Team, BGE Laboratory (U1038 CEA/INSERM/UJF)<br>- IPBS (Toulouse):UMR 5089 (CNRS/UPS)<br>- LSMBO (Strasbourg) :UMR 7178 (CNRS/UdS)</html>";
+        String copyrightText = "<html>Proline Studio is developped in the context of ProFI ( French Proteomics National Infrastructure).<br><br>3 laboratories contribute to this software:<br>- iRTSV (Grenoble): EDyP Team, BGE Laboratory (U1038 CEA/INSERM/UJF)<br>- IPBS (Toulouse):UMR 5089 (CNRS/UPS)<br>- LSMBO (Strasbourg) :UMR 7178 (CNRS/UdS)<br><br>Version: "+ JavaVersion.getProductVersion()+" / "+JavaVersion.getProductDate()+"</html>";
         JLabel textCopyrightLabel = new JLabel(copyrightText);
         internalPanel.add(textCopyrightLabel, c);
 

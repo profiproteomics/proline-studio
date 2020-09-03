@@ -21,9 +21,11 @@ import fr.proline.studio.dock.AbstractTopPanel;
 import fr.proline.studio.dock.dragdrop.OverArea;
 import fr.proline.studio.dock.gui.InfoLabel;
 import fr.proline.studio.dock.gui.DraggingOverlayPanel;
+import fr.proline.studio.dock.gui.MemoryPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -37,6 +39,7 @@ public class DockContainerRoot extends DockContainer implements DockMultiInterfa
 
     private JPanel m_mainPanel;
     private InfoLabel m_infoLabel;
+    private MemoryPanel m_memoryPanel;
 
 
     public DockContainerRoot() {
@@ -54,8 +57,35 @@ public class DockContainerRoot extends DockContainer implements DockMultiInterfa
 
         m_mainPanel.add(m_component, BorderLayout.CENTER);
 
+        JPanel southPanel = new JPanel(new GridBagLayout());
+
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(2, 2, 2, 2);
+
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 0;
+        c.weighty = 0;
+
+        m_memoryPanel = new MemoryPanel();
+        southPanel.add(m_memoryPanel, c);
+
+        //c.gridx++;
+        //southPanel.add(Box.createHorizontalStrut(6), c);
+
+        c.gridx++;
+        c.weightx = 1;
         m_infoLabel = new InfoLabel();
-        m_mainPanel.add(m_infoLabel, BorderLayout.SOUTH);
+        southPanel.add(m_infoLabel, c);
+
+
+
+
+
+
+        m_mainPanel.add(southPanel, BorderLayout.SOUTH);
 
 
     }
@@ -66,6 +96,10 @@ public class DockContainerRoot extends DockContainer implements DockMultiInterfa
 
     public InfoLabel getInfoLabel() {
         return m_infoLabel;
+    }
+
+    public MemoryPanel getMemoryPanel() {
+        return m_memoryPanel;
     }
 
     public void getTopPanels(HashSet<AbstractTopPanel> set) {
@@ -88,6 +122,28 @@ public class DockContainerRoot extends DockContainer implements DockMultiInterfa
         }
         return null;
     }
+
+    @Override
+    public DockContainer searchZoneArea(String zoneArea) {
+
+        for (DockContainerMulti c : m_containerMap.keySet()) {
+            DockContainer containerSearched = c.searchZoneArea(zoneArea);
+            if (containerSearched != null) {
+                return containerSearched;
+
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void findAllDockComponents(ArrayList<DockComponent> components) {
+        for (DockContainerMulti c : m_containerMap.keySet()) {
+            c.findAllDockComponents(components);
+        }
+
+    }
+
 
     public void add(DockContainer container, DockPosition position) throws DockException {
 

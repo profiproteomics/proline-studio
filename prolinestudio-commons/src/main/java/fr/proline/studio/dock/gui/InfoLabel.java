@@ -22,6 +22,7 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.utils.IconManager;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -42,8 +43,13 @@ public class InfoLabel extends JLabel implements MouseListener {
 
     public InfoLabel() {
         setInfo(INFO_LEVEL.INFO, "", null);
+        setBackground(Color.white);
 
         addMouseListener(this);
+
+        // line border
+        Border border = BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Color.black, 1), BorderFactory.createEmptyBorder(2,2,2,2));
+        setBorder(border);
     }
 
 
@@ -155,12 +161,12 @@ public class InfoLabel extends JLabel implements MouseListener {
 
         @Override
         public void setVisible(boolean v) {
-            super.setVisible(v);
-
             if (m_firstDisplay) {
                 m_singleton.centerToWindow(WindowManager.getDefault().getMainWindow());
                 m_firstDisplay = false;
             }
+
+            super.setVisible(v);
         }
 
         private void setContent(String message, Throwable t) {

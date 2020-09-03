@@ -19,7 +19,11 @@ package fr.proline.studio.dock.container;
 
 public abstract class DockContainerMulti extends DockContainer implements DockMultiInterface {
 
+    protected boolean m_canRemoveChildren = true;
 
+    public void setCanRemoveChildren(boolean v) {
+        m_canRemoveChildren = v;
+    }
 
     public abstract void remove(DockContainer container);
 

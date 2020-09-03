@@ -355,12 +355,15 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
 
         @Override
         public void setVisible(boolean v) {
-            super.setVisible(v);
-
             if (m_firstDisplay) {
                 m_singleton.centerToWindow(WindowManager.getDefault().getMainWindow());
                 m_firstDisplay = false;
             }
+
+
+            super.setVisible(v);
+
+
         }
 
         private void setContent(String content, String requestURL) {

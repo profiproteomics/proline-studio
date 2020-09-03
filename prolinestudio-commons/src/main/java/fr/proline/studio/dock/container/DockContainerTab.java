@@ -23,6 +23,7 @@ import fr.proline.studio.dock.gui.TabbedPaneLabel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class DockContainerTab extends DockContainerMulti {
@@ -62,6 +63,32 @@ public class DockContainerTab extends DockContainerMulti {
             }
         }
         return null;
+    }
+
+    @Override
+    public DockContainer searchZoneArea(String zoneArea) {
+
+        if ((m_zoneArea!=null) && (m_zoneArea.equals(zoneArea))) {
+            return this;
+        }
+
+
+        for (DockContainer c : m_dockContainerSet) {
+            DockContainer containerSearched = c.searchZoneArea(zoneArea);
+            if (containerSearched != null) {
+                return containerSearched;
+
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void findAllDockComponents(ArrayList<DockComponent> components) {
+
+        for (DockContainer c : m_dockContainerSet) {
+            c.findAllDockComponents(components);
+        }
     }
 
 
@@ -184,7 +211,7 @@ public class DockContainerTab extends DockContainerMulti {
     }
 
     public void removeIfEmpty() {
-        if (! m_dockContainerSet.isEmpty()) {
+        if (! m_dockContainerSet.isEmpty() || !m_canRemoveChildren) {
             return;
         }
         ((DockContainerMulti) getParent()).remove(this);

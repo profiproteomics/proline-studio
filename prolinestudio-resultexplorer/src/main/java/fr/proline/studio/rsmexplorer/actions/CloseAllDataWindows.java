@@ -15,38 +15,35 @@
  * along with this program; If not, see <http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html>.
  */
 
-package fr.proline.studio.rsmexplorer;
+package fr.proline.studio.rsmexplorer.actions;
 
+import fr.proline.studio.WindowManager;
+import fr.proline.studio.dock.AbstractDockFrame;
 
-import fr.proline.studio.pattern.WindowBoxFactory;
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+public class CloseAllDataWindows  extends AbstractAction implements ActionListener {
 
-public class TaskLogTopPanel extends MultiDataBoxViewerTopPanel {
-
-    private static TaskLogTopPanel m_singleton = null;
-
-    public TaskLogTopPanel() {
-        super(WindowBoxFactory.getSystemMonitoringWindowBox(),"Logs");
-
-        setName("Logs");
-        setToolTipText("Logs");
-    }
-
-
-    public static TaskLogTopPanel getSingleton() {
-        if (m_singleton == null) {
-            m_singleton = new TaskLogTopPanel();
-        }
-
-        return m_singleton;
+    public CloseAllDataWindows() {
+        putValue(Action.NAME, "Close All Proteomics Data");
+        setEnabled(true);
     }
 
     @Override
-    public String getTopPanelIdentifierKey() {
-        return "LOG_TOP_PANEL";
+    public void actionPerformed(ActionEvent e) {
+
+        AbstractDockFrame f = WindowManager.getDefault().getMainWindow();
+        f.closeDataWindows();
+
     }
 
 
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 
 
 }

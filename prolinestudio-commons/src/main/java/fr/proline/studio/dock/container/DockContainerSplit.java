@@ -22,6 +22,7 @@ import fr.proline.studio.dock.dragdrop.OverArea;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class DockContainerSplit extends DockContainerMulti implements DockReplaceInterface {
@@ -29,10 +30,18 @@ public class DockContainerSplit extends DockContainerMulti implements DockReplac
     private DockContainerMulti m_leftContainer;
     private DockContainerMulti m_rightContainer;
 
-    private boolean m_canRemoveChildren = true;
+
 
     public DockContainerSplit() {
 
+    }
+
+    public DockContainerMulti getLeftContainer() {
+        return m_leftContainer;
+    }
+
+    public DockContainerMulti getRightContainer() {
+        return m_rightContainer;
     }
 
     public void getTopPanels(HashSet<AbstractTopPanel> set) {
@@ -58,10 +67,37 @@ public class DockContainerSplit extends DockContainerMulti implements DockReplac
         return null;
     }
 
+    @Override
+    public DockContainer searchZoneArea(String zoneArea) {
 
-    public void setCanRemoveChildren(boolean v) {
-        m_canRemoveChildren = v;
+        if ((m_zoneArea!=null) && (m_zoneArea.equals(zoneArea))) {
+            return this;
+        }
+
+        DockContainer containerSearched = m_leftContainer.searchZoneArea(zoneArea);
+        if (containerSearched != null) {
+            return containerSearched;
+
+        }
+
+        containerSearched = m_rightContainer.searchZoneArea(zoneArea);
+        if (containerSearched != null) {
+            return containerSearched;
+
+        }
+
+        return null;
     }
+
+    @Override
+    public  void findAllDockComponents(ArrayList<DockComponent> components) {
+        m_leftContainer.findAllDockComponents(components);
+        m_rightContainer.findAllDockComponents(components);
+    }
+
+
+
+
 
 
     public void add(boolean horizontal, DockContainerMulti leftContainer, DockContainerMulti rightContainer) {
@@ -70,7 +106,6 @@ public class DockContainerSplit extends DockContainerMulti implements DockReplac
         m_rightContainer = rightContainer;
 
         JSplitPane splitPane = new JSplitPane(horizontal ? JSplitPane.HORIZONTAL_SPLIT : JSplitPane.VERTICAL_SPLIT, leftContainer.getComponent(), rightContainer.getComponent());
-        splitPane.setDividerSize(5);
         m_component = splitPane;
 
 
@@ -84,6 +119,20 @@ public class DockContainerSplit extends DockContainerMulti implements DockReplac
                 ((JSplitPane) m_component).setDividerLocation(0.5d);
             }
         });
+    }
+
+
+    public void addLeft(DockContainerMulti leftContainer) {
+
+        ((JSplitPane) m_component).setRightComponent(leftContainer.getComponent());
+        leftContainer.setParent(this);
+    }
+
+
+    public void addRight(DockContainerMulti rightContainer) {
+
+        ((JSplitPane) m_component).setRightComponent(rightContainer.getComponent());
+        rightContainer.setParent(this);
     }
 
 

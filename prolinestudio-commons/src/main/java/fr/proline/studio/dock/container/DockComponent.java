@@ -21,6 +21,7 @@ package fr.proline.studio.dock.container;
 import fr.proline.studio.dock.AbstractTopPanel;
 
 import javax.swing.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 
@@ -31,6 +32,8 @@ public class DockComponent extends DockContainer {
     final private Icon m_icon;
 
     private DockComponentListener m_componentListener = null;
+    private DockMaximizeInterface m_maximizeInterface = null;
+
 
     private int m_properties = 0;
 
@@ -78,8 +81,33 @@ public class DockComponent extends DockContainer {
     }
 
     @Override
+    public DockContainer searchZoneArea(String zoneArea) {
+
+        if ((m_zoneArea!=null) && (m_zoneArea.equals(zoneArea))) {
+            return this;
+        }
+
+        return null;
+    }
+
+    @Override
+    public  void findAllDockComponents(ArrayList<DockComponent> components) {
+        components.add(this);
+    }
+
+    @Override
     public void toFront() {
         getParent().toFront(this);
+    }
+
+    public void maximize() {
+        if (m_maximizeInterface != null) {
+            m_maximizeInterface.maximize();
+        }
+    }
+
+    public void setMaximizeInterface(DockMaximizeInterface maximizeInterface) {
+        m_maximizeInterface = maximizeInterface;
     }
 
 

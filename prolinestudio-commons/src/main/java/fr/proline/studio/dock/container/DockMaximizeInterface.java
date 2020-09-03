@@ -15,38 +15,9 @@
  * along with this program; If not, see <http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html>.
  */
 
-package fr.proline.studio.rsmexplorer;
+package fr.proline.studio.dock.container;
 
+public interface DockMaximizeInterface {
 
-import fr.proline.studio.pattern.WindowBoxFactory;
-
-
-public class TaskLogTopPanel extends MultiDataBoxViewerTopPanel {
-
-    private static TaskLogTopPanel m_singleton = null;
-
-    public TaskLogTopPanel() {
-        super(WindowBoxFactory.getSystemMonitoringWindowBox(),"Logs");
-
-        setName("Logs");
-        setToolTipText("Logs");
-    }
-
-
-    public static TaskLogTopPanel getSingleton() {
-        if (m_singleton == null) {
-            m_singleton = new TaskLogTopPanel();
-        }
-
-        return m_singleton;
-    }
-
-    @Override
-    public String getTopPanelIdentifierKey() {
-        return "LOG_TOP_PANEL";
-    }
-
-
-
-
+    void maximize();
 }

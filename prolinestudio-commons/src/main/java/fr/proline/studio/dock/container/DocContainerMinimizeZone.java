@@ -25,6 +25,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -62,6 +63,24 @@ public class DocContainerMinimizeZone extends DockContainerMulti implements Dock
         }
 
         return m_minimizePanel.search(windowKey);
+    }
+
+    @Override
+    public DockContainer searchZoneArea(String zoneArea) {
+        DockContainer containerSearched = m_dockContainerMulti.searchZoneArea(zoneArea);
+        if (containerSearched != null) {
+            return containerSearched;
+        }
+
+        return m_minimizePanel.searchZoneArea(zoneArea);
+    }
+
+    @Override
+    public void findAllDockComponents(ArrayList<DockComponent> components) {
+
+        m_dockContainerMulti.findAllDockComponents(components);
+        m_minimizePanel.findAllDockComponents(components);
+
     }
 
     public void set(DockContainerMulti containerMulti) {
@@ -107,7 +126,7 @@ public class DocContainerMinimizeZone extends DockContainerMulti implements Dock
     }
 
     public void toFront(DockContainer child) {
-        m_minimizePanel.remove(child);
+        m_minimizePanel.maximize(child);
     }
 
     @Override
@@ -191,6 +210,22 @@ public class DocContainerMinimizeZone extends DockContainerMulti implements Dock
 
         }
 
+        public DockContainer searchZoneArea(String zoneArea) {
+            for (DockContainer c : m_componentMap.keySet()) {
+                DockContainer containerSearched = c.search(zoneArea);
+                if (containerSearched != null) {
+                    return containerSearched;
+                }
+            }
+            return null;
+        }
+
+        public void findAllDockComponents(ArrayList<DockComponent> components) {
+            for (DockContainer c : m_componentMap.keySet()) {
+                c.findAllDockComponents(components);
+            }
+        }
+
         public void add(DockContainer component) {
 
             MinimizedLabel l = new MinimizedLabel(this, component);
@@ -206,7 +241,7 @@ public class DocContainerMinimizeZone extends DockContainerMulti implements Dock
             repaint();
         }
 
-        public void remove(DockContainer component) {
+        public void maximize(DockContainer component) {
 
             JComponent l = m_componentMap.remove(component);
 
@@ -222,7 +257,7 @@ public class DocContainerMinimizeZone extends DockContainerMulti implements Dock
     }
 
 
-    public class MinimizedLabel extends JPanel implements MouseListener {
+    public class MinimizedLabel extends JPanel implements MouseListener, DockMaximizeInterface {
 
         private static final int PAD = 2;
 
@@ -237,6 +272,8 @@ public class DocContainerMinimizeZone extends DockContainerMulti implements Dock
 
             m_parentPanel = parentPanel;
             m_component = component;
+
+            ((DockComponent) component).setMaximizeInterface(this);
 
             addMouseListener(this);
         }
@@ -260,6 +297,12 @@ public class DocContainerMinimizeZone extends DockContainerMulti implements Dock
             }
 
             return m_preferredSize;
+        }
+
+        @Override
+        public void maximize() {
+            ((DockComponent) m_component).setMaximizeInterface(null);
+            m_parentPanel.maximize(m_component);
         }
 
         @Override
@@ -309,7 +352,7 @@ public class DocContainerMinimizeZone extends DockContainerMulti implements Dock
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            m_parentPanel.remove(m_component);
+            maximize();
         }
 
         @Override

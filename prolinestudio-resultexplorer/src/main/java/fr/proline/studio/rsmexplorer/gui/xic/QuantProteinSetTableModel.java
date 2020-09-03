@@ -861,6 +861,18 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
 
             case COLTYPE_OVERVIEW:
                 return "";
+                
+            case COLTYPE_DESCRIPTION: {
+                if (proteinSet.getProteinSet() != null) {
+                    DProteinMatch proteinMatch = proteinSet.getProteinSet().getTypicalProteinMatch();
+                    if (proteinMatch == null) {
+                        return("");
+                    } else {
+                        return proteinMatch.getDescription();
+                    }
+                } 
+                return "";
+            }                            
 
             case COLTYPE_NB_PEPTIDE: {
                 if (proteinSet.getProteinSet() != null) {

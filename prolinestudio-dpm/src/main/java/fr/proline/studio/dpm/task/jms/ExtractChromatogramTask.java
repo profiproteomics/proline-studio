@@ -41,8 +41,8 @@ import javax.jms.TextMessage;
 /**
  * Get full XIC Chromatogram for a m/z with tolerance ppm Task JMS
  */
-public class GetXICChromatogramTask extends AbstractJMSTask {
-    private static final String m_serviceName = "proline/dps/msq/GetXICChromatogram";
+public class ExtractChromatogramTask extends AbstractJMSTask {
+    private static final String m_serviceName = "proline/dps/msq/ExtractChromatogram";
     private final String m_version = "1.0";
 
 
@@ -53,8 +53,8 @@ public class GetXICChromatogramTask extends AbstractJMSTask {
     private final double m_ppm;
 
 
-    public GetXICChromatogramTask(AbstractJMSCallback callback, ArrayList<DFeature> features, ArrayList<String> rawFileIdentifierList, ArrayList<Double> mzList, double ppm) {
-        super(callback, new TaskInfo("Retrieve XIC Chromatograms", false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
+    public ExtractChromatogramTask(AbstractJMSCallback callback, ArrayList<DFeature> features, ArrayList<String> rawFileIdentifierList, ArrayList<Double> mzList, double ppm) {
+        super(callback, new TaskInfo("Extract Chromatograms", false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         
         m_features = features;
         m_rawFileIdentifierList = rawFileIdentifierList;

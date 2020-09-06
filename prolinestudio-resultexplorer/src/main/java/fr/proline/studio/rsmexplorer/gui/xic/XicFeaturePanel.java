@@ -25,7 +25,7 @@ import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
-import fr.proline.studio.dpm.task.jms.GetXICChromatogramTask;
+import fr.proline.studio.dpm.task.jms.ExtractChromatogramTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.export.ExportFontData;
@@ -849,7 +849,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             };
 
             // use canonicalPath when it is possible to be sure to have an unique path
-            GetXICChromatogramTask task = new GetXICChromatogramTask(callback, featuresSearched, rawFileIdentifierList, mozList, ppm);
+            ExtractChromatogramTask task = new ExtractChromatogramTask(callback, featuresSearched, rawFileIdentifierList, mozList, ppm);
             AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
         }

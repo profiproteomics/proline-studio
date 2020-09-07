@@ -355,7 +355,7 @@ public class IconManager {
             bGr.dispose();
 
             try {
-                File f = File.createTempFile("tmpicon", ".png", new File("."));
+                File f = File.createTempFile("tmpicon", ".png");
                 f.deleteOnExit();
                 ImageIO.write(bimage, "png", f);
 

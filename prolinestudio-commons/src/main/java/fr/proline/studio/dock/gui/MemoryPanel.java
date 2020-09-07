@@ -47,6 +47,7 @@ public class MemoryPanel extends JPanel implements MouseListener {
     private boolean m_firstPaint = true;
 
     public MemoryPanel() {
+        setMinimumSize(m_dimension);
         setPreferredSize(m_dimension);
 
         addMouseListener(this);

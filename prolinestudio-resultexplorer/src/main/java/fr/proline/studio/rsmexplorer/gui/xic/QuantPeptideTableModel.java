@@ -755,7 +755,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             Integer value = m_selectionLevelInContext.get(peptide.getId());
             if (value != null) {
                 level = XicStatusRenderer.SelectLevel.valueOf(m_selectionLevelInContext.get(peptide.getId()));
-                logger.debug(" use masterQuantProtein specific selection for peptide " + peptide.getId() + ": " + level.toString());
+//                logger.debug(" use masterQuantProtein specific selection for peptide " + peptide.getId() + ": " + level.toString());
             }
 
         }

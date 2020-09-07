@@ -1659,7 +1659,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         masterQuantProteinSetsQuery.setParameter("listId", proteinSetIds);
         //masterQuantProteinSetsQuery.setParameter("rsmId", resultSummaryId); // NO NEED, and even if this constaint is added, the query become slow
         List<DMasterQuantProteinSet> listResult = masterQuantProteinSetsQuery.getResultList();
-        m_logger.debug(" found  DMasterQuantProteinSet " + listResult.size());
+//        m_logger.debug(" found  DMasterQuantProteinSet " + listResult.size());
 
         TypedQuery<DProteinSet> proteinSetQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinSet(ps.id, ps.representativeProteinMatchId, ps.resultSummary.id, ps.serializedProperties) FROM ProteinSet ps WHERE ps.id=:psId ", DProteinSet.class);
         String queryProteinMatch = "SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(pm.id, pm.accession,  pm.score, pm.peptideCount, pm.resultSet.id, pm.description, pm.serializedProperties) "
@@ -1788,7 +1788,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             MasterQuantProteinSetProperties mqPSprop = masterQuantProteinSet.getMasterQuantProtSetProperties();
             if(mqPSprop!= null){
                 int nbPepQuantSpecific2ProtSet = mqPSprop.getSelectedMasterQuantPeptideIds().size();
-                m_logger.debug(" **** global nbPepQuant "+nbPepQuant+" specific to mqProtSet "+nbPepQuantSpecific2ProtSet);
+//                m_logger.debug(" **** global nbPepQuant "+nbPepQuant+" specific to mqProtSet "+nbPepQuantSpecific2ProtSet);
                 nbPepQuant = nbPepQuantSpecific2ProtSet;
             }
 

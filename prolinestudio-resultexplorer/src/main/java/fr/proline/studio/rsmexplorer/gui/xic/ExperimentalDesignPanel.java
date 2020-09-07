@@ -118,7 +118,7 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
         m_scrollPaneExpDesign = new JScrollPane();
         m_expDesignPanel = new JPanel();
         m_expDesignPanel.setLayout(new BorderLayout());
-        m_expDesignTree = new QuantExperimentalDesignTree(QuantitationTree.getCurrentTree().copyCurrentNodeForSelection(), false);
+        m_expDesignTree = new QuantExperimentalDesignTree(QuantitationTree.getCurrentTree().copyCurrentNodeForSelection(), false, false);
         m_expDesignPanel.add(m_expDesignTree, BorderLayout.CENTER);
         m_scrollPaneExpDesign.setViewportView(m_expDesignPanel);
 

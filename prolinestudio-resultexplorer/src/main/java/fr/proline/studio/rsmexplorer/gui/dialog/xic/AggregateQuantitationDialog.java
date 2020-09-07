@@ -168,7 +168,7 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
                 m_designPanel.setBorder(BorderFactory.createTitledBorder(" Experimental Design "));
                 JScrollPane treePanel = new JScrollPane();
                 m_designPanel.setLayout(new BorderLayout());
-                m_experimentalDesignTree = new QuantExperimentalDesignTree(m_experimentalDesignNode, true);
+                m_experimentalDesignTree = new QuantExperimentalDesignTree(m_experimentalDesignNode, true, true);
                 //m_designPanel.add(new WizardPanel(step1Title, step1Help), BorderLayout.NORTH);
                 treePanel.setViewportView(m_experimentalDesignTree);
                 m_designPanel.add(treePanel, BorderLayout.CENTER);

@@ -16,21 +16,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui.spectrum;
 
-import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.annotations.XYLineAnnotation;
-import org.jfree.chart.annotations.XYTextAnnotation;
-import org.jfree.chart.plot.Marker;
-import org.jfree.chart.plot.ValueMarker;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.ui.RectangleAnchor;
-import org.jfree.ui.TextAnchor;
-import org.slf4j.LoggerFactory;
-
-import java.awt.*;
-import java.text.NumberFormat;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  *

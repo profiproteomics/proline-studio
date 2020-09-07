@@ -68,7 +68,7 @@ public class QuantExperimentalDesignTree extends AbstractTree {
     private JPopupMenu m_mainPopup;
     private ArrayList<AbstractRSMAction> m_mainActions;
 
-    public QuantExperimentalDesignTree(AbstractNode top, boolean editable) {
+    public QuantExperimentalDesignTree(AbstractNode top, boolean editable, boolean canImport) {
 
         setEditable(editable);
 
@@ -77,7 +77,10 @@ public class QuantExperimentalDesignTree extends AbstractTree {
         XICTransferHandler handler = new XICTransferHandler(false, this);
         super.setTransferHandler(handler);
 
-        setDropMode(DropMode.ON_OR_INSERT);
+        if (canImport) {
+            setDropMode(DropMode.ON_OR_INSERT);
+        }
+
         setDragEnabled(true);
 
         initTree(top);

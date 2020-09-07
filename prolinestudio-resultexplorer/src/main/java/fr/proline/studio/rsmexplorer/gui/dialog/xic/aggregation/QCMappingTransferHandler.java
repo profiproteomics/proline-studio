@@ -61,6 +61,16 @@ public class QCMappingTransferHandler extends AbstractTreeTransferHandler {
                 return false;
             }
 
+
+            int currentRow = dropLocation.getRow();
+            AbstractNode dropChannelTreeNode = m_treeTable.getNodeForRow(currentRow);
+            DQuantitationChannelMapping dropLocationMapping = m_treeTableModel.getMapping().get(dropChannelTreeNode);
+            if (dropLocationMapping == null) {
+                // can not drop at this position
+                return false;
+            }
+
+
             AbstractNode.NodeTypes designNodeType = null;
             try {
                 XICSelectionTransferable transfer = (XICSelectionTransferable) support.getTransferable().getTransferData(XICSelectionTransferable.RSMNodeList_FLAVOR);

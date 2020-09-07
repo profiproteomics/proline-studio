@@ -53,7 +53,7 @@ public class QuantExperimentalDesignPanel extends JPanel {
     public QuantExperimentalDesignPanel(AbstractNode rootNode, IdentificationTree selectionTree, QuantitationMethod.Type quantitationType) {
         m_rootNode = rootNode;
         m_selectionTree = selectionTree;
-        m_experimentalDesignTree = new QuantExperimentalDesignTree(m_rootNode, true);
+        m_experimentalDesignTree = new QuantExperimentalDesignTree(m_rootNode, true, true);
         m_quantitationType = quantitationType;
 
         JPanel mainPanel = createMainPanel();

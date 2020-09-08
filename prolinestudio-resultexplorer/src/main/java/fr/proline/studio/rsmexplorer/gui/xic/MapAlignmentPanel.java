@@ -105,6 +105,7 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
      * for alignment iterative mode, sometimes, we should show 2 graphic
      */
     private BasePlotPanel m_alignmentGraphicPanel_2;
+    private PlotPanel m_plotPanel2;
     private boolean m_isInitialized = false;
     private IonsRTScatterPlot m_ionsScatterPlot;
 
@@ -121,16 +122,18 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         pane = new JPanel();
         JPanel mapAlignmentPanel = initMapAlignmentPanel();
         //m_alignmentGraphicPanel = new MultiGraphicsPanel(false, false);
-        m_alignmentGraphicPanel = new BasePlotPanel();
+        PlotPanel plotPanel1 = new PlotPanel(false);
+        m_alignmentGraphicPanel = plotPanel1.getBasePlotPanel();
         //m_alignmentGraphicPanel_2 = new MultiGraphicsPanel(false, false);
-        m_alignmentGraphicPanel_2 = new BasePlotPanel();
+        m_plotPanel2 = new PlotPanel(false);
+        m_alignmentGraphicPanel_2 = m_plotPanel2.getBasePlotPanel();
         // the second graphic panel has not data in exhaustive mode and in iterative mode, when one selected map is reference map
-        m_alignmentGraphicPanel_2.setVisible(false);
+        m_plotPanel2.setVisible(false);
         pane.setLayout(new BorderLayout());
         TitledBorder titleB = new TitledBorder(null, " LC-MS Map Alignments", TitledBorder.CENTER, TitledBorder.CENTER);
         pane.setBorder(titleB);
         pane.add(mapAlignmentPanel, BorderLayout.PAGE_START);
-        m_splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, m_alignmentGraphicPanel, m_alignmentGraphicPanel_2);
+        m_splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, plotPanel1, m_plotPanel2);
         m_splitPane.setResizeWeight(0.5); //half half for each grapic panel
         m_splitPane.setBorder(BorderFactory.createRaisedBevelBorder());
         pane.add(m_splitPane, BorderLayout.CENTER);
@@ -571,16 +574,16 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         long mapIdDst = getSelectedMapId(m_destMapsCB);
         if (mapIdSrc == mapIdDst) {
             this.m_alignmentGraphicPanel.clearPlotsWithRepaint();
-            if (this.m_alignmentGraphicPanel_2.isVisible()) {//iterative mode, and nobody of source, destination map is reference map
-                this.m_alignmentGraphicPanel_2.setVisible(false);
-                this.m_alignmentGraphicPanel_2.clearPlotsWithRepaint();
+            if (m_plotPanel2.isVisible()) {//iterative mode, and nobody of source, destination map is reference map
+                m_plotPanel2.setVisible(false);
+                m_alignmentGraphicPanel_2.clearPlotsWithRepaint();
             }
             repaint();
         } else {
             MapAlignment map = MapAlignmentConverter.getMapAlgn(mapIdSrc, mapIdDst, m_allMapAlignments);
             if (map != null) // exhaustive mode, or in Iterative mode, one of mapIdA,mapIdZ is the reference map
             {
-                this.m_alignmentGraphicPanel_2.setVisible(false);
+                m_plotPanel2.setVisible(false);
                 setDataGraphicTableModel(map, m_alignmentGraphicPanel);
 
             } else {
@@ -591,7 +594,7 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
                     //from reference to source
                     map = MapAlignmentConverter.getMapAlgn(m_referenceMapId, mapIdDst, m_allMapAlignments);
                     setDataGraphicTableModel(map, m_alignmentGraphicPanel_2);
-                    this.m_alignmentGraphicPanel_2.setVisible(true);
+                    m_plotPanel2.setVisible(true);
                     this.m_splitPane.resetToPreferredSizes();
                 }
             }

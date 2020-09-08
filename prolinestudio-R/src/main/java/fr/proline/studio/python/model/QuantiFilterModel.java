@@ -78,15 +78,16 @@ public class QuantiFilterModel extends FilterTableModel   {
                     if (count<m_threshold) {
                         return false;
                     }
+                    count =0; //reset count for next group
                 }
                 prevGroup = groupCur;
                 double quantitation = ((Number) getDataValueAt(row, m_colsIndex[i])).doubleValue();
                 if (quantitation > 10e-10) {
                     // positive value;
                     count++;
-                }
+                }                
             }
-            return true;
+            return !(count<m_threshold); //Test for last group 
         }
         
         if (m_option == AT_LEAST_ONE_GROUP) {

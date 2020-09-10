@@ -32,12 +32,16 @@ import javax.jms.Session;
 import javax.jms.Topic;
 import javax.swing.JTextField;
 import javax.swing.event.EventListenerList;
-import org.hornetq.api.core.TransportConfiguration;
-import org.hornetq.api.jms.HornetQJMSClient;
-import org.hornetq.api.jms.JMSFactoryType;
-import org.hornetq.core.remoting.impl.netty.NettyConnectorFactory;
-import org.hornetq.core.remoting.impl.netty.TransportConstants;
-import org.hornetq.jms.client.HornetQConnectionFactory;
+//import org.hornetq.api.core.TransportConfiguration;
+//import org.hornetq.api.jms.HornetQJMSClient;
+//import org.hornetq.api.jms.JMSFactoryType;
+//import org.hornetq.core.remoting.impl.netty.NettyConnectorFactory;
+///import org.hornetq.core.remoting.impl.netty.TransportConstants;
+//import org.hornetq.jms.client.HornetQConnectionFactory;
+
+import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.command.ActiveMQTopic;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +100,7 @@ public class JMSConnectionManager {
     private int m_connectionState;//Connection current state
 
     public String m_jmsServerHost = null;/* Default = HornetQ Proline Prod Grenoble = "132.168.72.129" */
-    public static int m_jmsServerPort = 5445;
+    public static int m_jmsServerPort = 61616; // 5445; //JPM.JMS.TODO
 
     private Connection m_connection = null;
     private Queue m_serviceQueue = null;
@@ -208,24 +212,26 @@ public class JMSConnectionManager {
             String queueName = m_parameter.getStringValue();
 
             m_loggerProline.info(" Use JMS Queure " + queueName);
-            m_serviceQueue = HornetQJMSClient.createQueue(queueName);
-            m_notificationTopic = HornetQJMSClient.createTopic(SERVICE_MONITORING_NOTIFICATION_TOPIC_NAME);
+
+
 
             // Step 2. Instantiate the TransportConfiguration object which contains the knowledge of what
             // transport to use, the server port etc.
-            final Map<String, Object> connectionParams = new HashMap<>();
+            //final Map<String, Object> connectionParams = new HashMap<>();
             /* JMS Server hostname or IP */
-            connectionParams.put(TransportConstants.HOST_PROP_NAME, m_jmsServerHost);
+            //connectionParams.put(TransportConstants.HOST_PROP_NAME, m_jmsServerHost);
             /* JMS port */
-            connectionParams.put(TransportConstants.PORT_PROP_NAME, Integer.valueOf(m_jmsServerPort));
+            //connectionParams.put(TransportConstants.PORT_PROP_NAME, Integer.valueOf(m_jmsServerPort));
 
-            final TransportConfiguration transportConfiguration = new TransportConfiguration(
-                    NettyConnectorFactory.class.getName(), connectionParams);
+            //final TransportConfiguration transportConfiguration = new TransportConfiguration(
+            //        NettyConnectorFactory.class.getName(), connectionParams);
 
             // Step 3 Directly instantiate the JMS ConnectionFactory object using that TransportConfiguration
-            final HornetQConnectionFactory cf = (HornetQConnectionFactory) HornetQJMSClient
-                    .createConnectionFactoryWithoutHA(JMSFactoryType.CF, transportConfiguration);
-            cf.setReconnectAttempts(10);
+            //final HornetQConnectionFactory cf = (HornetQConnectionFactory) HornetQJMSClient
+            //        .createConnectionFactoryWithoutHA(JMSFactoryType.CF, transportConfiguration);
+
+            ActiveMQConnectionFactory cf = new ActiveMQConnectionFactory("tcp://"+m_jmsServerHost+":"+m_jmsServerPort); //JPM.JMS.TODO
+            //cf.setReconnectAttempts(10);//JPM.JMS.TODO
             
             // Step 4.Create a JMS Connection
             m_connection = cf.createConnection();
@@ -233,6 +239,10 @@ public class JMSConnectionManager {
             // Step 5. Create a JMS Session (Session MUST be confined in current Thread)
             // Not transacted, AUTO_ACKNOWLEDGE
             m_mainSession = m_connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+            m_serviceQueue = m_mainSession.createQueue(queueName);
+            m_notificationTopic = m_mainSession.createTopic(SERVICE_MONITORING_NOTIFICATION_TOPIC_NAME);
+
             // Step 6. Create the subscription and the subscriber.//TODO : create & listen only when asked !?
             m_topicSuscriber = m_mainSession.createConsumer(m_notificationTopic);
             m_notifListener = new ServiceNotificationListener();

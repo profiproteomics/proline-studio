@@ -106,7 +106,20 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>prolinestudio-commons</artifactId>
             <version>${project.version}</version>
-        </dependency>   
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-core</artifactId>
+            <version>5.7.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-client</artifactId>
+            <version>5.16.0</version>
+        </dependency>
+
+        <!--
         <dependency>
             <groupId>org.jboss.spec.javax.jms</groupId>
             <artifactId>jboss-jms-api_2.0_spec</artifactId>
@@ -128,6 +141,7 @@
             <artifactId>hornetq-core-client</artifactId>
             <version>2.4.7.Final</version>
         </dependency>
+        -->
         <!--
         <dependency>
             <groupId>io.netty</groupId>

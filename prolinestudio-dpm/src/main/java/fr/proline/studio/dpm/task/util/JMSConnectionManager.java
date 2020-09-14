@@ -230,7 +230,7 @@ public class JMSConnectionManager {
             //final HornetQConnectionFactory cf = (HornetQConnectionFactory) HornetQJMSClient
             //        .createConnectionFactoryWithoutHA(JMSFactoryType.CF, transportConfiguration);
 
-            ActiveMQConnectionFactory cf = new ActiveMQConnectionFactory("tcp://"+m_jmsServerHost+":"+m_jmsServerPort); //JPM.JMS.TODO
+            ActiveMQConnectionFactory cf = new ActiveMQConnectionFactory("tcp://"+m_jmsServerHost+":"+m_jmsServerPort+"?soTimeout=60000"); //JPM.JMS.TODO
             //cf.setReconnectAttempts(10);//JPM.JMS.TODO
             
             // Step 4.Create a JMS Connection

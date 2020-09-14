@@ -126,8 +126,12 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
             // Step 6. Create a JMS Message Producer (Producer MUST be confined in current Thread)
             m_producer = m_session.createProducer(JMSConnectionManager.getJMSConnectionManager().getServiceQueue());
 
+            m_producer.setTimeToLive(10000); //JPM.JMS
+
+
             m_replyQueue = m_session.createTemporaryQueue();
             m_responseConsumer = m_session.createConsumer(m_replyQueue);
+
             if (!m_synchronous) {
                 m_responseConsumer.setMessageListener(this);
             }
@@ -215,8 +219,15 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
     @Override
     public final void onMessage(final Message jmsMessage) {
 
+        try {
+            System.out.println("exp:" + jmsMessage.getJMSExpiration()+"   "+System.currentTimeMillis());
 
 
+        jmsMessage.setJMSExpiration(System.currentTimeMillis()+10000);
+
+        } catch (JMSException e) {
+            e.printStackTrace();
+        }
         System.out.println("JMSTEST "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage start "+getClass());
 
         long endRun = System.currentTimeMillis();

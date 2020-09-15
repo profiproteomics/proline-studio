@@ -22,6 +22,7 @@ import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
+
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -96,9 +97,10 @@ public class DownloadProcessedFileTask extends AbstractJMSTask {
                 m_loggerProline.debug("Saving stream to File [" + m_userFilePath + ']');
 
                 /* Block until all BytesMessage content is streamed into File OutputStream */
-                jmsMessage.setObjectProperty(JMSConnectionManager.HORNET_Q_SAVE_STREAM_KEY, bos);
+                jmsMessage.setObjectProperty("JMS_AMQ_SaveStream", bos);
+                //((ClientMessage) jmsMessage).setOutputStream(bos);
                 success = true;
-            } catch (FileNotFoundException | JMSException ex) {
+            } catch (FileNotFoundException ex) {
                 m_loggerProline.error("Error handling JMS_HQ_SaveStream OutputStream [" + m_userFilePath + ']', ex);
                 errorMsg = "Error handling JMS_HQ_SaveStream OutputStream [" + m_userFilePath + "] ("+ex.getMessage()+")" ;
             } finally {

@@ -219,16 +219,6 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
     @Override
     public final void onMessage(final Message jmsMessage) {
 
-        try {
-            System.out.println("exp:" + jmsMessage.getJMSExpiration()+"   "+System.currentTimeMillis());
-
-
-        jmsMessage.setJMSExpiration(System.currentTimeMillis()+10000);
-
-        } catch (JMSException e) {
-            e.printStackTrace();
-        }
-        System.out.println("JMSTEST "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage start "+getClass());
 
         long endRun = System.currentTimeMillis();
 //        this.m_taskInfo.setDuration(endRun-m_startRun);
@@ -243,7 +233,6 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
 
             } catch (JSONRPC2Error jsonErr) {
 
-                System.out.println("JMSTEST "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage error "+getClass());
                 jsonErr.printStackTrace();
 
                 m_currentState = JMSState.STATE_FAILED;
@@ -264,8 +253,6 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
         } else {
             String msg = "Error receiving message n° " + MESSAGE_COUNT_SEQUENCE.incrementAndGet() + ": timeout should have occured ";
 
-            System.out.println("JMSTEST "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage error3 "+getClass());
-
 
             m_loggerProline.info(msg);
             m_currentState = JMSState.STATE_FAILED;
@@ -278,8 +265,6 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
                 jmsMessage.acknowledge();
             }
         } catch (JMSException ex) {
-
-            System.out.println("JMSTEST "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage error4 "+getClass());
             ex.printStackTrace();
 
             m_loggerProline.error("Error running JMS Message acknowledge", ex);

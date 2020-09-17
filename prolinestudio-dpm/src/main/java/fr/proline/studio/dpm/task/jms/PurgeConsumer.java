@@ -25,12 +25,7 @@ import fr.proline.studio.dpm.task.util.JMSMessageUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import javax.jms.Destination;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-import javax.jms.TextMessage;
+import javax.jms.*;
 import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,21 +76,24 @@ public class PurgeConsumer {
         
         final String selectorString = "JMSMessageID = \'" +msgIdToRemove+"\'";        
 
-        //JPM.DOCK
-
-        /*
-        new Thread() {
+        Thread purgeThread = new Thread() {
 
             @Override
             public void run() {
                 m_logger.debug("Purge Consumer selector [" + selectorString + ']');
-                Session session = AccessJMSManagerThread.getAccessJMSManagerThread().getSession();
+
                 String errorMsg = null;
                 MessageConsumer consumer = null;
                 MessageProducer replyProducer = null;
                 JMSNotificationMessage resultMsg = null;
-                
+                Session session = null;
+
+
                 try {
+                    Connection connection = JMSConnectionManager.getJMSConnectionManager().getJMSConnection();
+
+                    session = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
+
                     consumer = session.createConsumer(JMSConnectionManager.getJMSConnectionManager().getServiceQueue(), selectorString);                
                     //ReplyProducer to send JMS Response Message to Client (Producer MUST be confined in current thread)
                     replyProducer = session.createProducer(null);
@@ -143,6 +141,14 @@ public class PurgeConsumer {
                             m_logger.error("Error closing replyProducer in Purge Consumer", exClose);
                         }
                     }
+
+                    if (session != null) {
+                        try {
+                            session.close();
+                        } catch (Exception exClose) {
+                            m_logger.error("Error closing Session in Purge Consumer", exClose);
+                        }
+                    }
                     
                     boolean success = errorMsg != null;
                     int index;
@@ -167,7 +173,9 @@ public class PurgeConsumer {
                     }
                 }
             } //End Run
-        }.start();
-            */
+        };
+
+        purgeThread.start();
+
     }
 }

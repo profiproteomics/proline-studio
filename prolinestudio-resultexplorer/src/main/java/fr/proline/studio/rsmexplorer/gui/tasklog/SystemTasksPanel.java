@@ -297,6 +297,9 @@ public class SystemTasksPanel extends AbstractTasksPanel {
 
             while (messageEnum.hasMoreElements()) {
                 Message msg = messageEnum.nextElement();
+                if (msg == null) {
+                    continue;
+                }
                 JMSNotificationMessage notifMsg = JMSMessageUtil.buildJMSNotificationMessage(msg, JMSNotificationMessage.MessageStatus.PENDING);
                 if (notifMsg != null) {
                     pendingMsg.add(notifMsg);

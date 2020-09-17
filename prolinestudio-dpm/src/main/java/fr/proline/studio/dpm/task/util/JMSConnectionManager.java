@@ -39,7 +39,11 @@ import javax.swing.event.EventListenerList;
 ///import org.hornetq.core.remoting.impl.netty.TransportConstants;
 //import org.hornetq.jms.client.HornetQConnectionFactory;
 
+import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.RedeliveryPolicy;
+import org.apache.activemq.broker.region.policy.RedeliveryPolicyMap;
+import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.activemq.command.ActiveMQTopic;
 
 import org.slf4j.Logger;
@@ -102,7 +106,7 @@ public class JMSConnectionManager {
     public String m_jmsServerHost = null;/* Default = HornetQ Proline Prod Grenoble = "132.168.72.129" */
     public static int m_jmsServerPort = 61616; // 5445; //JPM.JMS.TODO
 
-    private Connection m_connection = null;
+    private ActiveMQConnection m_connection = null;
     private Queue m_serviceQueue = null;
     private Topic m_notificationTopic = null;
     private Session m_mainSession = null;
@@ -214,27 +218,29 @@ public class JMSConnectionManager {
             m_loggerProline.info(" Use JMS Queure " + queueName);
 
 
+            ActiveMQConnectionFactory cf = new ActiveMQConnectionFactory("tcp://"+m_jmsServerHost+":"+m_jmsServerPort+"?soTimeout=60000");
+            // cf.setReconnectAttempts(10); //JPM.JMS does no longer exist
 
-            // Step 2. Instantiate the TransportConfiguration object which contains the knowledge of what
-            // transport to use, the server port etc.
-            //final Map<String, Object> connectionParams = new HashMap<>();
-            /* JMS Server hostname or IP */
-            //connectionParams.put(TransportConstants.HOST_PROP_NAME, m_jmsServerHost);
-            /* JMS port */
-            //connectionParams.put(TransportConstants.PORT_PROP_NAME, Integer.valueOf(m_jmsServerPort));
 
-            //final TransportConfiguration transportConfiguration = new TransportConfiguration(
-            //        NettyConnectorFactory.class.getName(), connectionParams);
-
-            // Step 3 Directly instantiate the JMS ConnectionFactory object using that TransportConfiguration
-            //final HornetQConnectionFactory cf = (HornetQConnectionFactory) HornetQJMSClient
-            //        .createConnectionFactoryWithoutHA(JMSFactoryType.CF, transportConfiguration);
-
-            ActiveMQConnectionFactory cf = new ActiveMQConnectionFactory("tcp://"+m_jmsServerHost+":"+m_jmsServerPort+"?soTimeout=60000"); //JPM.JMS.TODO
-            //cf.setReconnectAttempts(10);//JPM.JMS.TODO
-            
             // Step 4.Create a JMS Connection
-            m_connection = cf.createConnection();
+            m_connection = (ActiveMQConnection) cf.createConnection();
+
+            /*RedeliveryPolicy queuePolicy = new RedeliveryPolicy();
+            queuePolicy.setInitialRedeliveryDelay(0);
+            queuePolicy.setRedeliveryDelay(1000);
+            queuePolicy.setUseExponentialBackOff(false);
+            queuePolicy.setMaximumRedeliveries(10);
+
+            RedeliveryPolicy topicPolicy = new RedeliveryPolicy();
+            topicPolicy.setInitialRedeliveryDelay(0);
+            topicPolicy.setRedeliveryDelay(1000);
+            topicPolicy.setUseExponentialBackOff(false);
+            topicPolicy.setMaximumRedeliveries(10);
+
+            RedeliveryPolicyMap map = m_connection.getRedeliveryPolicyMap();
+            map.put(new ActiveMQTopic(SERVICE_MONITORING_NOTIFICATION_TOPIC_NAME), topicPolicy);
+            map.put(new ActiveMQQueue(queueName), queuePolicy);*/
+
 
             // Step 5. Create a JMS Session (Session MUST be confined in current Thread)
             // Not transacted, AUTO_ACKNOWLEDGE

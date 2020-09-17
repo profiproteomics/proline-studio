@@ -24,11 +24,7 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.TreeUtils;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
-import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalGroupNode;
-import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
-import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleNode;
-import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
-import fr.proline.studio.rsmexplorer.tree.xic.DatasetReferenceNode;
+import fr.proline.studio.rsmexplorer.tree.xic.*;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Dialog;
@@ -168,8 +164,9 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
                 m_designPanel.setBorder(BorderFactory.createTitledBorder(" Experimental Design "));
                 JScrollPane treePanel = new JScrollPane();
                 m_designPanel.setLayout(new BorderLayout());
-                m_experimentalDesignTree = new QuantExperimentalDesignTree(m_experimentalDesignNode, true, true);
-                //m_designPanel.add(new WizardPanel(step1Title, step1Help), BorderLayout.NORTH);
+                //JPM.TEST
+                m_experimentalDesignTree = new QuantAggregateExperimentalTree(m_experimentalDesignNode, m_quantitations);
+
                 treePanel.setViewportView(m_experimentalDesignTree);
                 m_designPanel.add(treePanel, BorderLayout.CENTER);
 

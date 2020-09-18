@@ -55,6 +55,8 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
 
     private int m_step = STEP_PANEL_DEFINE_EXP_DESIGN;
 
+    private QuantAggregateExperimentalTreePanel m_experimentalDesignPanel;
+
     public static AggregateQuantitationDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
             m_singletonDialog = new AggregateQuantitationDialog(parent);
@@ -165,12 +167,12 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
                 JScrollPane treePanel = new JScrollPane();
                 m_designPanel.setLayout(new BorderLayout());
                 //JPM.TEST
-                m_experimentalDesignTree = new QuantAggregateExperimentalTree(m_experimentalDesignNode, m_quantitations);
+                m_experimentalDesignPanel = new QuantAggregateExperimentalTreePanel(m_experimentalDesignNode, m_quantitations);
 
-                treePanel.setViewportView(m_experimentalDesignTree);
+                treePanel.setViewportView(m_experimentalDesignPanel);
                 m_designPanel.add(treePanel, BorderLayout.CENTER);
 
-                TreeUtils.expandTree(m_experimentalDesignTree, true);
+                TreeUtils.expandTree(m_experimentalDesignPanel.getTree(), true);
             }
             replaceInternalComponent(m_designPanel);
             revalidate();
@@ -205,9 +207,9 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
     @Override
     protected boolean okCalled() {
         if (m_step == STEP_PANEL_DEFINE_EXP_DESIGN) {
-            if (!checkDesignStructure(m_experimentalDesignNode, new HashSet<>())) {
+            if (!checkDesignStructure(m_experimentalDesignPanel.getTree(), m_experimentalDesignNode, new HashSet<>())) {
                 return false;
-            } else if (!checkBiologicalGroupName(m_experimentalDesignNode)) {
+            } else if (!checkBiologicalGroupName(m_experimentalDesignPanel.getTree(), m_experimentalDesignNode)) {
                 return false;
             }
             displayStep2QuantChannelsMapping();

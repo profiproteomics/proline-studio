@@ -98,6 +98,9 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
     //private QuantExperimentalDesignPanel m_experimentalDesignPanel;
     private List<PtmSpecificity> m_identifiedPtms = null;
 
+    private QuantExperimentalDesignPanel m_experimentalDesignPanel;
+
+
     public static CreateQuantitationDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
             m_singletonDialog = new CreateQuantitationDialog(parent);
@@ -126,7 +129,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
      * @param refIdentDataset : the reference identification dataset
      * @param selectionTree : the tree from which identification datasets can be
      * drag'n'dropped to build the experimental design
-     * @param m_quantitationType : the quantification type
+     * @param quantitationType : the quantification type
      */
     public void initializeExperimentalDesignTree(DDataset existingQuantDataset, DDataset refIdentDataset, IdentificationTree selectionTree, QuantitationMethod.Type quantitationType) {
         m_selectionTree = selectionTree;
@@ -498,7 +501,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
 
                 //CreateXICDesignPanel-NEXT button
                 //VDS: Can't checkDesignStructure and checkBiologicalGroupName be merged !!
-                if ((!checkDesignStructure(m_experimentalDesignNode, new HashSet<>())) || (!checkBiologicalGroupName(m_experimentalDesignNode))) {
+                if ((!checkDesignStructure(m_experimentalDesignPanel.getExperimentalDesignTree(), m_experimentalDesignNode, new HashSet<>())) || (!checkBiologicalGroupName(m_experimentalDesignPanel.getExperimentalDesignTree(), m_experimentalDesignNode))) {
                     return false;
                 }
 
@@ -727,7 +730,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
 
                                 } else if (failedRSIds.size() == 1) {
                                     DataSetNode dsNode = spectraNodesPerRsId.get(failedRSIds.get(0));
-                                    showErrorOnNode(dsNode, dsNode.getDataset().getName() + " at least one of the following attributes {First Time, First Scan, First Cycle} must be initialized. Remove the highlighted node from your design.");
+                                    showErrorOnNode(m_experimentalDesignPanel.getExperimentalDesignTree(), dsNode, dsNode.getDataset().getName() + " at least one of the following attributes {First Time, First Scan, First Cycle} must be initialized. Remove the highlighted node from your design.");
                                 } else if (failedRSIds.size() > 1) {
                                     ArrayList<String> failedNodes = new ArrayList<>();
 

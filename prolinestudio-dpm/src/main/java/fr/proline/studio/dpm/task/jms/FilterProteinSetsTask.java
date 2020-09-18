@@ -25,31 +25,47 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
-import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
 
 /**
- * Task to generate spectrum matches
+ * Task to filter RSM proteinSets
+ *
  * @author VD225637
  */
-public class FilterRSMProtSetsTask extends AbstractJMSTask {
+public class FilterProteinSetsTask extends AbstractJMSTask {
+
     private static final String m_serviceName = "proline/dps/msi/FilterRSMProteinSets";
     //private static final String m_version = "2.0";
     
-    private DDataset m_dataset = null;
-    private HashMap<String, String> m_argumentsMap;
-    
-    //Protein PreFilter
-    public static String[] FILTER_KEYS = {"SPECIFIC_PEP","PEP_COUNT", "PEP_SEQ_COUNT", "SCORE", "BH_ADJUSTED_PVALUE"};//TODO USE ENUM
-    public static String[] FILTER_NAME = {"Specific Peptides","Peptides count", "Peptide sequence count","Protein Set Score", "BH adjusted pValue (%)"};
-    
-    public FilterRSMProtSetsTask(AbstractJMSCallback callback,  DDataset dataset,HashMap<String, String> argumentsMap) {
-        super(callback, new TaskInfo( "Filter Protein Sets of Identification Summary "+dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
+    private final DDataset m_dataset;
+    private final HashMap<String, String> m_argumentsMap;
+
+    public enum Filter {
+
+        SPECIFIC_PEP("SPECIFIC_PEP", "Specific Peptides"),
+        PEP_COUNT("PEP_COUNT", "Peptides count"),
+        PEP_SEQ_COUNT("PEP_SEQ_COUNT", "Peptide sequence count"),
+        SCORE("SCORE", "Protein Set Score"),
+        BH_ADJUSTED_PVALUE("BH_ADJUSTED_PVALUE", "BH adjusted pValue (%)");
+
+        public final String key;
+        public final String name;
+
+        Filter(String key, String name) {
+            this.key = key;
+            this.name = name;
+        }
+    }
+
+    public FilterProteinSetsTask(AbstractJMSCallback callback, DDataset dataset, HashMap<String, String> argumentsMap) {
+        super(callback, new TaskInfo( "PSMFilter Protein Sets of Identification Summary "+dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_argumentsMap = argumentsMap;
         m_dataset = dataset; 
     }
@@ -77,23 +93,24 @@ public class FilterRSMProtSetsTask extends AbstractJMSTask {
         m_taskInfo.setJmsMessageID(message.getJMSMessageID());
     }
     
-    private HashMap<String, Object> createParams() {
-        HashMap<String, Object> params = new HashMap<>();
+    private Map<String, Object> createParams() {
+        Map<String, Object> params = new HashMap<>();
+
         params.put("project_id", m_dataset.getProject().getId());
         params.put("result_summary_id", m_dataset.getResultSummaryId());
 
-        // Protein Pre-Filters
-        ArrayList proteinFilters = new ArrayList();
-        for (String filterKey : FILTER_KEYS) {
-            if (m_argumentsMap.containsKey(filterKey)) {
-                HashMap filterCfg = new HashMap();
-                filterCfg.put("parameter", filterKey);
-                if(filterKey.equals("SCORE")) { //TODO USE ENUM
-                    filterCfg.put("threshold", Double.valueOf(m_argumentsMap.get(filterKey)));
-                } if (filterKey.equals("BH_ADJUSTED_PVALUE")) {
-                    filterCfg.put("threshold", Double.valueOf(m_argumentsMap.get(filterKey))/100.0);
-                }else {
-                    filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get(filterKey)));
+        // Protein Pre-PSMFilter
+        List<Map<String, Object>> proteinFilters = new ArrayList<>();
+        for (Filter filter : Filter.values()) {
+            if (m_argumentsMap.containsKey(filter.key)) {
+                Map<String, Object> filterCfg = new HashMap<>();
+                filterCfg.put("parameter", filter.key);
+                if(filter == Filter.SCORE) {
+                    filterCfg.put("threshold", Double.valueOf(m_argumentsMap.get(filter.key)));
+                } if (filter == Filter.BH_ADJUSTED_PVALUE) {
+                    filterCfg.put("threshold", Double.valueOf(m_argumentsMap.get(filter.key))/100.0);
+                } else {
+                    filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get(filter.key)));
                 }
                 proteinFilters.add(filterCfg);
             }

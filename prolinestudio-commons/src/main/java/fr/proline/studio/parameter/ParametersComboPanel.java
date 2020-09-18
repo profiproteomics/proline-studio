@@ -36,7 +36,7 @@ public class ParametersComboPanel extends JPanel {
     this.add(m_selectedParametersPanel, c);
 
     m_comboBox = new JComboBox(m_parameters);
-    m_comboBox.setRenderer(new ParameterComboboxRenderer(null));
+    m_comboBox.setRenderer(new ParameterValueRenderer(null));
 
     c.gridx = 0;
     c.gridy++;

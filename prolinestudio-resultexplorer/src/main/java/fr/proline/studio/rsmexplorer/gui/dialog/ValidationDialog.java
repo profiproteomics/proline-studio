@@ -37,11 +37,11 @@ import org.openide.windows.WindowManager;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
 import java.util.prefs.Preferences;
 
@@ -57,17 +57,17 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
     
     private boolean m_allowPropagateFilters = true;
 
-    private final static String[] TD_ANALYZER_VALUES = {"Basic", "Gorshkov"};
-    private final static String[] TD_ANALYZER_VALUES_ASSOCIATED_KEYS = {"BASIC", "GORSHKOV"};
+//    private final static String[] TD_ANALYZER_VALUES = {"Basic", "Gorshkov"};
+//    private final static String[] TD_ANALYZER_VALUES_ASSOCIATED_KEYS = {"BASIC", "GORSHKOV"};
     private final static String[] FDR_ON_VALUES = {null, "Score", "e-Value", "Adjusted e-Value", "Identity p-Value", "Homology p-Value"};
     private final static String[] FDR_ON_VALUES_ASSOCIATED_KEYS = {null, "SCORE", "MASCOT_EVALUE", "MASCOT_ADJUSTED_EVALUE", "SCORE_IT_P-VALUE", "SCORE_HT_P-VALUE"};
 
-    private final static String[] SCORING_TYPE_OPTIONS = {"Standard","Mascot Mudpit", "Mascot Modified Mudpit", "Fisher"};
-    private final static String[] SCORING_TYPE_VALUES = {"mascot:standard score", "mascot:mudpit score", "mascot:modified mudpit score", "proline:fisher score"};
+    private final static String[] PROTEIN_SCORING_TYPE_OPTIONS = {"Standard","Mascot Mudpit", "Mascot Modified Mudpit", "Fisher"};
+    private final static String[] PROTEIN_SCORING_TYPE_VALUES = {"mascot:standard score", "mascot:mudpit score", "mascot:modified mudpit score", "proline:fisher score"};
 
     private final static String SETTINGS_KEY = "Validation";
 
-    private ParameterList m_parameterList;
+    private final ParameterList m_parameterList;
 
     private AbstractParameter[] m_psmPrefilterParameters;
     private ParametersComboPanel m_psmPrefiltersPanel;
@@ -78,8 +78,8 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
     private AbstractParameter m_fdrFilterParameter;
     private ObjectParameter<String> m_fdrPropertyParameter;
     private AbstractParameter m_proteinFdrFilterParameter;
-    private ObjectParameter<String> m_tdAnalyzerName;
-    private AbstractParameter m_tdAnalyzerParam;
+//    private ObjectParameter<String> m_tdAnalyzerName;
+//    private AbstractParameter m_tdAnalyzerParam;
             
     private AbstractParameter m_propagatePsmFiltersParameter;
     private JCheckBox m_propagatePsmFiltersCheckBox = null;
@@ -93,29 +93,30 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
     private JLabel m_fdrLabel = null;
     private JTextField m_fdrTextField = null;
     private JLabel m_fdrPercentageLabel = null;
-    private JLabel m_tdAnalyzerParamLabel = null;
-    private JTextField m_tdAnalyzerParamTF = null;
+//    private JLabel m_tdAnalyzerParamLabel = null;
+//    private JTextField m_tdAnalyzerParamTF = null;
     
     private JLabel m_proteinFdrLabel = null;
     private JTextField m_proteinFdrTextField = null;
     private JLabel m_proteinFdrPercentageLabel = null;
-    private JComboBox m_fdrPropertyComboBox = null;
+    private JComboBox<String> m_fdrPropertyComboBox = null;
     private JCheckBox m_fdrCheckbox = null;
     private JCheckBox m_proteinFdrCheckbox = null;
-    private JComboBox m_tdAnalyzerComboBox = null;
+//    private JComboBox<String> m_tdAnalyzerComboBox = null;
     
     private JCheckBox m_typicalProteinMatchCheckBox;
     private ChangeTypicalProteinPanel m_changeTypicalPanel = null;
 
-    private JComboBox m_proteinScoringTypeCbx = null;
+    private JComboBox<String> m_proteinScoringTypeCbx = null;
 
-    public enum DecoyStatus {
+  public enum DecoyStatus {
         WAITING,
         HAS_DECOY,
         NO_DECOY
     }
 
     private DecoyStatus m_hasDecoy = DecoyStatus.WAITING;
+    private String m_softwareName = "UNKNOWN";
 
     public static ValidationDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
@@ -157,6 +158,11 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         return m_hasDecoy;
     }
 
+    public synchronized void setSoftwareName(String softwareName) {
+        m_softwareName = softwareName;
+    }
+
+
     public void setAllowPropagateFilters(boolean allowPropagateFilters){
         if(m_allowPropagateFilters != allowPropagateFilters){
             if(!allowPropagateFilters){
@@ -195,17 +201,24 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                int nb = datasetList.size();
-                for (int i = 0; i < nb; i++) {
-                    DDataset dataset = datasetList.get(i);
-                    ResultSet rset = dataset.getResultSet();
+                ValidationDialog.DecoyStatus decoyStatus = DecoyStatus.HAS_DECOY;
+                Set<String> softwareNames = new HashSet<>();
 
+                for (DDataset dataset: datasetList) {
+                    ResultSet rset = dataset.getResultSet();
                     if (rset.getDecoyResultSet() == null) {
-                        setHasDecoy(DecoyStatus.NO_DECOY);
-                        return;
+                        decoyStatus = DecoyStatus.NO_DECOY;
+                    }
+                    if (rset.getMsiSearch() != null) {
+                        softwareNames.add(rset.getMsiSearch().getSearchSetting().getSoftwareName().toUpperCase());
+                    } else {
+                        softwareNames.add("UNKNOWN");
                     }
                 }
-                setHasDecoy(DecoyStatus.HAS_DECOY);
+
+                setHasDecoy(decoyStatus);
+                setSoftwareName((softwareNames.size() == 1) ? softwareNames.iterator().next() : "MIXED");
+
             }
         };
 
@@ -321,7 +334,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
 
     private JPanel createPSMFDRFilterPanel() {
         JPanel fdrPanel = new JPanel(new GridBagLayout());
-        fdrPanel.setBorder(BorderFactory.createTitledBorder(" FDR Filter "));
+        fdrPanel.setBorder(BorderFactory.createTitledBorder(" FDR PSMFilter "));
 
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -331,7 +344,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         boolean fdrUsed = m_fdrFilterParameter.isUsed();
         m_fdrCheckbox = new JCheckBox();
         m_fdrLabel = new JLabel("Ensure FDR <=");
-        m_tdAnalyzerParamLabel = new JLabel("Ratio");
+//        m_tdAnalyzerParamLabel = new JLabel("Ratio");
         m_fdrPercentageLabel = new JLabel("%  on");
 
         updateFDRObjects(fdrUsed);
@@ -352,23 +365,23 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         c.gridx++;
         fdrPanel.add(m_fdrPropertyComboBox, c);
 
-        c.gridx++;
-        fdrPanel.add(m_tdAnalyzerComboBox, c);
-
-        m_tdAnalyzerComboBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                boolean visbility = ((String)m_tdAnalyzerComboBox.getSelectedItem()).equalsIgnoreCase("Gorshkov");
-                m_tdAnalyzerParamLabel.setVisible(visbility);
-                m_tdAnalyzerParamTF.setVisible(visbility);
-            }
-        });
-        
-        c.gridx++;
-        fdrPanel.add(m_tdAnalyzerParamLabel, c);
-        
-        c.gridx++;
-        fdrPanel.add(m_tdAnalyzerParamTF, c);
+//        c.gridx++;
+//        fdrPanel.add(m_tdAnalyzerComboBox, c);
+//
+//        m_tdAnalyzerComboBox.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                boolean visibility = ((String)m_tdAnalyzerComboBox.getSelectedItem()).equalsIgnoreCase("Gorshkov");
+//                m_tdAnalyzerParamLabel.setVisible(visibility);
+//                m_tdAnalyzerParamTF.setVisible(visibility);
+//            }
+//        });
+//
+//        c.gridx++;
+//        fdrPanel.add(m_tdAnalyzerParamLabel, c);
+//
+//        c.gridx++;
+//        fdrPanel.add(m_tdAnalyzerParamTF, c);
         
         c.gridx++;
         c.weightx = 0.1;
@@ -412,18 +425,18 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         m_fdrTextField.setEnabled(enabled);
         m_fdrPercentageLabel.setEnabled(enabled);
         m_fdrPropertyComboBox.setEnabled(enabled);
-        m_tdAnalyzerComboBox.setEnabled(enabled);
-        m_tdAnalyzerParamLabel.setEnabled(enabled);
-        m_tdAnalyzerParamTF.setEnabled(enabled);
-        if (enabled) {
-            Object analyzer = m_tdAnalyzerComboBox.getSelectedItem();
-            boolean visibility = (analyzer != null) && (((String)analyzer).equalsIgnoreCase("Gorshkov"));
-            m_tdAnalyzerParamLabel.setVisible(visibility);
-            m_tdAnalyzerParamTF.setVisible(visibility);
-        }
+//        m_tdAnalyzerComboBox.setEnabled(enabled);
+//        m_tdAnalyzerParamLabel.setEnabled(enabled);
+//        m_tdAnalyzerParamTF.setEnabled(enabled);
+//        if (enabled) {
+//            Object analyzer = m_tdAnalyzerComboBox.getSelectedItem();
+//            boolean visibility = (analyzer != null) && (((String)analyzer).equalsIgnoreCase("Gorshkov"));
+//            m_tdAnalyzerParamLabel.setVisible(visibility);
+//            m_tdAnalyzerParamTF.setVisible(visibility);
+//        }
         m_fdrFilterParameter.setUsed(enabled);
-        m_tdAnalyzerName.setUsed(enabled);
-        m_tdAnalyzerParam.setUsed(enabled);
+//        m_tdAnalyzerName.setUsed(enabled);
+//        m_tdAnalyzerParam.setUsed(enabled);
         m_fdrPropertyParameter.setUsed(enabled);
     }
 
@@ -595,7 +608,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
         JLabel proteinScoringTypeLabel = new JLabel("Scoring Type: ");
-        m_proteinScoringTypeCbx = new JComboBox(SCORING_TYPE_OPTIONS);
+        m_proteinScoringTypeCbx = new JComboBox<>(PROTEIN_SCORING_TYPE_OPTIONS);
 
         c.gridx = 0;
         c.gridy = 0;
@@ -613,7 +626,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
 
     private void restoreScoringTypeParameter(Preferences preferences) {
 
-        String scoringType = preferences.get("ValidationScoringType", SCORING_TYPE_OPTIONS[0]);
+        String scoringType = preferences.get("ValidationScoringType", PROTEIN_SCORING_TYPE_OPTIONS[0]);
         m_proteinScoringTypeCbx.setSelectedItem(scoringType);
 
     }
@@ -639,31 +652,31 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
     private void createParameters() {
         m_psmPrefilterParameters = new AbstractParameter[12]; //<< get sync
         m_psmPrefilterParameters[0] = null;
-        m_psmPrefilterParameters[1] = new IntegerParameter("PSM_" + ValidationTask.RANK_FILTER_KEY, ValidationTask.RANK_FILTER_NAME, new JTextField(6), new Integer(5), new Integer(0), new Integer(10));
+        m_psmPrefilterParameters[1] = new IntegerParameter("PSM_" + ValidationTask.PSMFilter.RANK.key, ValidationTask.PSMFilter.RANK.name, new JTextField(6), new Integer(1), new Integer(0), new Integer(10));
         m_psmPrefilterParameters[1].setAssociatedData("<=");
         m_psmPrefilterParameters[1].addBackwardCompatibleKey("Rank");
         m_psmPrefilterParameters[1].addBackwardCompatibleKey("PSM_RANK");
-        m_psmPrefilterParameters[2] = new IntegerParameter("PSM_" + ValidationTask.PEP_LENGTH_FILTER_KEY, ValidationTask.PEP_LENGTH_FILTER_NAME, new JTextField(6), new Integer(4), new Integer(4), null);
+        m_psmPrefilterParameters[2] = new IntegerParameter("PSM_" + ValidationTask.PSMFilter.PEP_LENGTH.key, ValidationTask.PSMFilter.PEP_LENGTH.name, new JTextField(6), new Integer(4), new Integer(4), null);
         m_psmPrefilterParameters[2].setAssociatedData(">=");
-        m_psmPrefilterParameters[3] = new DoubleParameter("PSM_" + ValidationTask.SCORE_FILTER_KEY, ValidationTask.SCORE_FILTER_NAME, new JTextField(6), new Double(0), new Double(0), null);
+        m_psmPrefilterParameters[3] = new DoubleParameter("PSM_" + ValidationTask.PSMFilter.SCORE.key, ValidationTask.PSMFilter.SCORE.name, new JTextField(6), new Double(0), new Double(0), null);
         m_psmPrefilterParameters[3].setAssociatedData(">=");
-        m_psmPrefilterParameters[4] = new DoubleParameter("PSM_" + ValidationTask.MASCOT_EVAL_FILTER_KEY, ValidationTask.MASCOT_EVAL_FILTER_NAME, new JTextField(6), new Double(1), new Double(0), new Double(1));
+        m_psmPrefilterParameters[4] = new DoubleParameter("PSM_" + ValidationTask.PSMFilter.MASCOT_EVAL.key, ValidationTask.PSMFilter.MASCOT_EVAL.name, new JTextField(6), new Double(1), new Double(0), new Double(1));
         m_psmPrefilterParameters[4].setAssociatedData("<=");
-        m_psmPrefilterParameters[5] = new DoubleParameter("PSM_" + ValidationTask.MASCOT_ADJUSTED_EVAL_FILTER_KEY, ValidationTask.MASCOT_ADJUSTED_EVAL_FILTER_NAME, new JTextField(6), new Double(1), new Double(0), new Double(1));
+        m_psmPrefilterParameters[5] = new DoubleParameter("PSM_" + ValidationTask.PSMFilter.MASCOT_ADJUSTED_EVALUE.key, ValidationTask.PSMFilter.MASCOT_ADJUSTED_EVALUE.name, new JTextField(6), new Double(1), new Double(0), new Double(1));
         m_psmPrefilterParameters[5].setAssociatedData("<=");
-        m_psmPrefilterParameters[6] = new DoubleParameter("PSM_" + ValidationTask.MASCOT_IT_SCORE_FILTER_KEY, ValidationTask.MASCOT_IT_SCORE_FILTER_NAME, new JTextField(6), new Double(0.05), new Double(0), new Double(1));
+        m_psmPrefilterParameters[6] = new DoubleParameter("PSM_" + ValidationTask.PSMFilter.MASCOT_IT_SCORE.key, ValidationTask.PSMFilter.MASCOT_IT_SCORE.name, new JTextField(6), new Double(0.05), new Double(0), new Double(1));
         m_psmPrefilterParameters[6].setAssociatedData("=");
-        m_psmPrefilterParameters[7] = new DoubleParameter("PSM_" + ValidationTask.MASCOT_HT_SCORE_FILTER_KEY, ValidationTask.MASCOT_HT_SCORE_FILTER_NAME, new JTextField(6), new Double(0.05), new Double(0), new Double(1));
+        m_psmPrefilterParameters[7] = new DoubleParameter("PSM_" + ValidationTask.PSMFilter.MASCOT_HT_SCORE.key, ValidationTask.PSMFilter.MASCOT_HT_SCORE.name, new JTextField(6), new Double(0.05), new Double(0), new Double(1));
         m_psmPrefilterParameters[7].setAssociatedData("=");
         JCheckBox singlePerQueryCB = new JCheckBox("post FDR");
-        m_psmPrefilterParameters[8] = new BooleanParameter("PSM_" + ValidationTask.SINGLE_PSM_QUERY_FILTER_KEY, ValidationTask.SINGLE_PSM_QUERY_FILTER_NAME, singlePerQueryCB, false);
+        m_psmPrefilterParameters[8] = new BooleanParameter("PSM_" + ValidationTask.PSMFilter.SINGLE_PSM_QUERY.key, ValidationTask.PSMFilter.SINGLE_PSM_QUERY.name, singlePerQueryCB, false);
         m_psmPrefilterParameters[8].setAssociatedData(":");
         JCheckBox singlePerRankCB = new JCheckBox("post FDR");
-        m_psmPrefilterParameters[9] = new BooleanParameter("PSM_" + ValidationTask.SINGLE_PSM_RANK_FILTER_KEY, ValidationTask.SINGLE_PSM_RANK_FILTER_NAME, singlePerRankCB, false);
+        m_psmPrefilterParameters[9] = new BooleanParameter("PSM_" + ValidationTask.PSMFilter.RANK.key, ValidationTask.PSMFilter.RANK.name, singlePerRankCB, false);
         m_psmPrefilterParameters[9].setAssociatedData(":");
-        m_psmPrefilterParameters[10] = new IntegerParameter("PSM_" + ValidationTask.ISOTOPE_OFFSET_FILTER_KEY, ValidationTask.ISOTOPE_OFFSET_FILTER_NAME, new JTextField(6), new Integer(1), new Integer(0), null);
+        m_psmPrefilterParameters[10] = new IntegerParameter("PSM_" + ValidationTask.PSMFilter.ISOTOPE_OFFSET.key, ValidationTask.PSMFilter.ISOTOPE_OFFSET.name, new JTextField(6), new Integer(1), new Integer(0), null);
         m_psmPrefilterParameters[10].setAssociatedData("<=");
-        m_psmPrefilterParameters[11] = new DoubleParameter("PSM_" + ValidationTask.BH_ADJUSTED_PVALUE_FILTER_KEY, ValidationTask.BH_ADJUSTED_PVALUE_FILTER_NAME, new JTextField(6), new Double(1.0), new Double(0), new Double(100));
+        m_psmPrefilterParameters[11] = new DoubleParameter("PSM_" + ValidationTask.PSMFilter.BH_AJUSTED_PVALUE, ValidationTask.PSMFilter.BH_AJUSTED_PVALUE.name, new JTextField(6), new Double(1.0), new Double(0), new Double(100));
         m_psmPrefilterParameters[11].setAssociatedData("<=");
         
         for (AbstractParameter p : m_psmPrefilterParameters) {
@@ -675,9 +688,33 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
             m_parameterList.add(p);
         }
 
+        m_fdrTextField = new JTextField(5);
+        m_fdrFilterParameter = new DoubleParameter(ValidationTask.ValidationParameters.EXPECTED_FDR.key,ValidationTask.ValidationParameters.EXPECTED_FDR.name, m_fdrTextField, new Double(1), new Double(0), new Double(10));
+        m_fdrFilterParameter.setUsed(false);
+        m_fdrFilterParameter.setCompulsory(false);
+        m_parameterList.add(m_fdrFilterParameter);
+
+        m_fdrPropertyComboBox = new JComboBox<>(FDR_ON_VALUES);
+        m_fdrPropertyParameter = new ObjectParameter<>(ValidationTask.ValidationParameters.EXPECTED_FDR_PARAM.key,ValidationTask.ValidationParameters.EXPECTED_FDR_PARAM.name, m_fdrPropertyComboBox, FDR_ON_VALUES, FDR_ON_VALUES_ASSOCIATED_KEYS, 0, null);
+        m_fdrPropertyParameter.setUsed(false);
+        m_fdrPropertyParameter.setCompulsory(false);
+        m_parameterList.add(m_fdrPropertyParameter);
+
+//        m_tdAnalyzerComboBox = new JComboBox<>(TD_ANALYZER_VALUES);
+//        m_tdAnalyzerName = new ObjectParameter<>("td_analyzer", "FDR Estimator", m_tdAnalyzerComboBox, TD_ANALYZER_VALUES, TD_ANALYZER_VALUES_ASSOCIATED_KEYS, 0, null);
+//        m_tdAnalyzerName.setUsed(false);
+//        m_tdAnalyzerName.setCompulsory(false);
+//        m_parameterList.add(m_tdAnalyzerName);
+//
+//        m_tdAnalyzerParamTF = new JTextField(5);
+//        m_tdAnalyzerParam = new DoubleParameter("db_ratio", "Ratio", m_tdAnalyzerParamTF, new Double(1), new Double(0), Double.MAX_VALUE);
+//        m_tdAnalyzerParam.setUsed(false);
+//        m_tdAnalyzerParam.setCompulsory(false);
+//        m_parameterList.add(m_tdAnalyzerParam);
+
         m_peptidePrefilterParameters = new AbstractParameter[2];
         m_peptidePrefilterParameters[0] = null;
-        m_peptidePrefilterParameters[1] = new DoubleParameter("PEPTIDE_" + ValidationTask.BH_ADJUSTED_PVALUE_FILTER_KEY, ValidationTask.BH_ADJUSTED_PVALUE_FILTER_NAME, new JTextField(6), new Double(1.0), new Double(0), new Double(100));
+        m_peptidePrefilterParameters[1] = new DoubleParameter("PEPTIDE_" + ValidationTask.PSMFilter.BH_AJUSTED_PVALUE.key, ValidationTask.PSMFilter.BH_AJUSTED_PVALUE.name, new JTextField(6), new Double(1.0), new Double(0), new Double(100));
         m_peptidePrefilterParameters[1].setAssociatedData("<=");
         for (AbstractParameter p : m_peptidePrefilterParameters) {
             if (p == null) {
@@ -690,46 +727,23 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         
         m_proteinPrefilterParameters = FilterProteinSetPanel.createProteinSetFilterParameters("PROT_", m_parameterList);
 
-        m_fdrTextField = new JTextField(5);
-        m_fdrFilterParameter = new DoubleParameter("expected_fdr", "FDR", m_fdrTextField, new Double(5), new Double(0), new Double(10));
-        m_fdrFilterParameter.setUsed(false);
-        m_fdrFilterParameter.setCompulsory(false);
-        m_parameterList.add(m_fdrFilterParameter);
-
-        m_fdrPropertyComboBox = new JComboBox(FDR_ON_VALUES);
-        m_fdrPropertyParameter = new ObjectParameter<>("expected_fdr_parameter", "FDR Variable", m_fdrPropertyComboBox, FDR_ON_VALUES, FDR_ON_VALUES_ASSOCIATED_KEYS, 0, null);
-        m_fdrPropertyParameter.setUsed(false);
-        m_fdrPropertyParameter.setCompulsory(false);
-        m_parameterList.add(m_fdrPropertyParameter);
-
-        m_tdAnalyzerComboBox = new JComboBox(TD_ANALYZER_VALUES);
-        m_tdAnalyzerName = new ObjectParameter<>("td_analyzer", "FDR Estimator", m_tdAnalyzerComboBox, TD_ANALYZER_VALUES, TD_ANALYZER_VALUES_ASSOCIATED_KEYS, 0, null);
-        m_tdAnalyzerName.setUsed(false);
-        m_tdAnalyzerName.setCompulsory(false);
-        m_parameterList.add(m_tdAnalyzerName);
-        
-        m_tdAnalyzerParamTF = new JTextField(5);
-        m_tdAnalyzerParam = new DoubleParameter("db_ratio", "Ratio", m_tdAnalyzerParamTF, new Double(1), new Double(0), Double.MAX_VALUE);
-        m_tdAnalyzerParam.setUsed(false);
-        m_tdAnalyzerParam.setCompulsory(false);
-        m_parameterList.add(m_tdAnalyzerParam);
         
         m_proteinFdrTextField = new JTextField(5);
-        m_proteinFdrFilterParameter = new DoubleParameter("protein_expected_fdr", "Protein FDR", m_proteinFdrTextField, new Double(5), new Double(0), new Double(10));
+        m_proteinFdrFilterParameter = new DoubleParameter(ValidationTask.ValidationParameters.PROTEIN_EXPECTED_FDR.key, ValidationTask.ValidationParameters.PROTEIN_EXPECTED_FDR.name, m_proteinFdrTextField, new Double(5), new Double(0), new Double(10));
         m_proteinFdrFilterParameter.setUsed(false);
         m_proteinFdrFilterParameter.setCompulsory(false);
         m_parameterList.add(m_proteinFdrFilterParameter);
 
         m_propagatePsmFiltersCheckBox = new JCheckBox();
         m_propagatePsmFiltersCheckBox.setText("Propagate PSM filtering to child Search Results");
-        m_propagatePsmFiltersParameter = new BooleanParameter("propagate_pep_match_filters", "Propagate PSM Filters", m_propagatePsmFiltersCheckBox, false);
+        m_propagatePsmFiltersParameter = new BooleanParameter("propagate_pep_match_filters", "Propagate PSM PSMFilter", m_propagatePsmFiltersCheckBox, false);
         m_propagatePsmFiltersParameter.setUsed(false);
         m_propagatePsmFiltersParameter.setCompulsory(false);
         m_parameterList.add(m_propagatePsmFiltersParameter);
 
         m_propagateProtSetFiltersCheckBox = new JCheckBox();
         m_propagateProtSetFiltersCheckBox.setText("Propagate ProteinSets filtering to child Search Results (Warning FDR Validation will not be propagated !");
-        m_propagateProtSetFiltersParameter = new BooleanParameter("propagate_prot_set_filters", "Propagate ProteinSet Filters", m_propagateProtSetFiltersCheckBox, false);
+        m_propagateProtSetFiltersParameter = new BooleanParameter("propagate_prot_set_filters", "Propagate ProteinSet PSMFilter", m_propagateProtSetFiltersCheckBox, false);
         m_propagateProtSetFiltersParameter.setUsed(false);
         m_propagateProtSetFiltersParameter.setCompulsory(false);        
         m_parameterList.add(m_propagateProtSetFiltersParameter);    
@@ -747,7 +761,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
     }
 
     public String getScoringType() {
-        return SCORING_TYPE_VALUES[m_proteinScoringTypeCbx.getSelectedIndex()];
+        return PROTEIN_SCORING_TYPE_VALUES[m_proteinScoringTypeCbx.getSelectedIndex()];
     }
 
     @Override
@@ -824,6 +838,39 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
                 }
                 return false;
             }
+
+            // check filters & scoring consistency
+            if (!( m_softwareName.equalsIgnoreCase("MASCOT") || (m_softwareName.equals("UNKNOWN"))) ) {
+
+                AbstractParameter parameter = m_parameterList.getParameter("PSM_" + ValidationTask.PSMFilter.BH_AJUSTED_PVALUE.key);
+                if (parameter.isUsed()) {
+                    setStatus(true, "PSM's BH FDR filtering is only allowed for Mascot datasets");
+                    highlight(parameter.getComponent());
+                    return false;
+                }
+
+                parameter = m_parameterList.getParameter("PEPTIDE_" + ValidationTask.PSMFilter.BH_AJUSTED_PVALUE.key);
+                if (parameter.isUsed()) {
+                    setStatus(true, "Peptide's BH FDR filtering is only allowed for Mascot datasets");
+                    highlight(parameter.getComponent());
+                    return false;
+                }
+
+                if (!getScoringType().equals(PROTEIN_SCORING_TYPE_VALUES[0])) {
+                    setStatus(true, "Mascot and Fisher scoring can only be used for Mascot datasets");
+                    highlight(m_proteinScoringTypeCbx);
+                    return false;
+                }
+
+            }
+
+            if (m_parameterList.getParameter("PSM_" + ValidationTask.PSMFilter.BH_AJUSTED_PVALUE.key).isUsed() &&
+                m_parameterList.getParameter(ValidationTask.ValidationParameters.EXPECTED_FDR.key).isUsed()) {
+                setStatus(true, "Target Decoy FDR and BH FDR cannot used simultaneously");
+                highlight(m_parameterList.getParameter(ValidationTask.ValidationParameters.EXPECTED_FDR.key).getComponent());
+                return false;
+            }
+
         }
 
         // check parameters
@@ -876,8 +923,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
 
                     Preferences preferences = NbPreferences.root();
                     String[] keys = filePreferences.keys();
-                    for (int i = 0; i < keys.length; i++) {
-                        String key = keys[i];
+                    for (String key : keys) {
                         String value = filePreferences.get(key, null);
                         preferences.put(key, value);
                     }
@@ -888,7 +934,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
                     updateFDRObjects(m_fdrFilterParameter.isUsed());
                     updateProteinFDRObjects(m_proteinFdrFilterParameter.isUsed());
                     //
-                    //Initi PSM/Prot filters Propagation if possible
+                    //Init PSM/Prot filters Propagation if possible
                     if(m_allowPropagateFilters){
                         m_propagatePsmFiltersCheckBox.setSelected(m_propagatePsmFiltersParameter.isUsed());
                         m_propagateProtSetFiltersCheckBox.setSelected(m_propagateProtSetFiltersParameter.isUsed());

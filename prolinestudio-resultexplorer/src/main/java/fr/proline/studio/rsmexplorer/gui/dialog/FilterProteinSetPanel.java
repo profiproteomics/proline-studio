@@ -16,7 +16,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
-import fr.proline.studio.dpm.task.jms.FilterRSMProtSetsTask;
+import fr.proline.studio.dpm.task.jms.FilterProteinSetsTask;
 import fr.proline.studio.parameter.AbstractParameter;
 import fr.proline.studio.parameter.DoubleParameter;
 import fr.proline.studio.parameter.IntegerParameter;
@@ -32,18 +32,19 @@ public class FilterProteinSetPanel extends JPanel {
 
     public static AbstractParameter[] createProteinSetFilterParameters(String keyPrefix, ParameterList parameterList) {
       
-        AbstractParameter[] parameters = new AbstractParameter[FilterRSMProtSetsTask.FILTER_KEYS.length + 1];
+        AbstractParameter[] parameters = new AbstractParameter[FilterProteinSetsTask.Filter.values().length + 1];
         parameters[0] = null;
-        for (int index = 1; index <= FilterRSMProtSetsTask.FILTER_KEYS.length; index++) {
-            String filterKey = keyPrefix + FilterRSMProtSetsTask.FILTER_KEYS[index - 1];
-            if (filterKey.endsWith("SCORE")) {
-                parameters[index] = new DoubleParameter(filterKey, FilterRSMProtSetsTask.FILTER_NAME[index - 1], new JTextField(6), new Double(10), new Double(1), null);
+        int index = 1;
+        for (FilterProteinSetsTask.Filter filter : FilterProteinSetsTask.Filter.values()) {
+            String filterKey = keyPrefix + filter.key;
+            if (filter == FilterProteinSetsTask.Filter.SCORE) {
+                parameters[index] = new DoubleParameter(filterKey, filter.name, new JTextField(6), new Double(10), new Double(1), null);
                 parameters[index].setAssociatedData(">=");
-            } if (filterKey.endsWith("BH_ADJUSTED_PVALUE")) { 
-                parameters[index] = new DoubleParameter(filterKey, FilterRSMProtSetsTask.FILTER_NAME[index - 1], new JTextField(6), new Double(1.0), new Double(0), new Double(100));
+            } if (filter == FilterProteinSetsTask.Filter.BH_ADJUSTED_PVALUE) {
+                parameters[index] = new DoubleParameter(filterKey, filter.name, new JTextField(6), new Double(1.0), new Double(0), new Double(100));
                 parameters[index].setAssociatedData("<=");
             } else {
-                parameters[index] = new IntegerParameter(filterKey, FilterRSMProtSetsTask.FILTER_NAME[index - 1], new JTextField(6), new Integer(1), new Integer(1), null);
+                parameters[index] = new IntegerParameter(filterKey, filter.name, new JTextField(6), new Integer(1), new Integer(1), null);
                 parameters[index].setAssociatedData(">=");
             }
 
@@ -53,6 +54,7 @@ public class FilterProteinSetPanel extends JPanel {
                 p.setCompulsory(false);
                 parameterList.add(p);
             }
+            index++;
         }
         
         return parameters;

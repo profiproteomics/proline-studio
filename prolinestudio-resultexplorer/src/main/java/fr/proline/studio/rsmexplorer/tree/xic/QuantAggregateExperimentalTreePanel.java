@@ -7,17 +7,20 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.Exceptions;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
+import fr.proline.studio.dock.container.DockContainerRoot;
+import fr.proline.studio.dock.dragdrop.DockTransferable;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.aggregation.DQuantitationChannelMapping;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.aggregation.QCMappingTreeTable;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.aggregation.QCMappingTreeTableModel;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 
 import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.dnd.DragSource;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
@@ -27,7 +30,7 @@ import java.util.stream.Stream;
 
 public class QuantAggregateExperimentalTreePanel extends JPanel {
 
-    private QuantExperimentalDesignTree m_tree;
+    private AssociatedQuantExperimentalDesignTree m_tree;
     private ChannelPanel m_channelPanel;
     private JTabbedPane m_tabbedPane;
 
@@ -63,7 +66,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
     private JPanel createTreePanel(AbstractNode rootNode) {
 
-        m_tree = new QuantExperimentalDesignTree(rootNode, true, true);
+        m_tree = new AssociatedQuantExperimentalDesignTree(rootNode);
         m_channelPanel = new ChannelPanel();
 
         JPanel treePanel = new JPanel();
@@ -82,7 +85,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
         c.gridx++;
         c.weightx = 1;
-        c.insets = new java.awt.Insets(5, 0, 0, 0);
+        //c.insets = new java.awt.Insets(5, 0, 0, 0);
         treePanel.add(m_channelPanel, c);
 
         return treePanel;
@@ -224,18 +227,85 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
         return stream.map(node -> ((XICBiologicalSampleAnalysisNode) node));
     }
 
+    private class AssociatedQuantExperimentalDesignTree extends QuantExperimentalDesignTree {
 
-    private class ChannelPanel extends JPanel {
+        public AssociatedQuantExperimentalDesignTree(AbstractNode rootNode) {
+            super(rootNode, true, true);
+
+
+        }
+
+        public void paint(Graphics g) {
+            super.paint(g);
+
+            g.setColor(Color.lightGray);
+
+            int nbRow = m_tree.getRowCount();
+
+            for (int i = 0; i < nbRow; i++) {
+                Rectangle r = m_tree.getRowBounds(i);
+
+                TreePath path = m_tree.getPathForRow(i);
+                AbstractNode node = (AbstractNode) path.getLastPathComponent();
+
+                if (node.getType() == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
+
+
+                    g.drawLine(r.x+r.width+PAD, r.y+r.height/2, getPreferredSize().width, r.y+r.height/2);
+
+                }
+
+            }
+
+        }
+    }
+
+
+    private class ChannelPanel extends JPanel implements MouseListener, MouseMotionListener {
 
         private Dimension m_minimumDimension = null;
         private ArrayList<DropZone> m_dropZones;
+        private DropZone m_dragSource = null;
         private DropZone m_selectedDropZone = null;
+        private MouseEvent m_mouseDragBegin;
+
+        private TransferHandler m_transferHandler;
 
         public ChannelPanel() {
 
             m_dropZones = new ArrayList<>();
 
-            setTransferHandler(new TransferHandler() {
+            addMouseListener(this);
+            addMouseMotionListener(this);
+
+
+            m_transferHandler = new TransferHandler() {
+
+                @Override
+                public int getSourceActions(JComponent c) {
+
+                    return MOVE;
+                }
+
+                @Override
+                public Transferable createTransferable(JComponent c) {
+
+                    ArrayList<AbstractNode> nodeList = new ArrayList<>();
+                    nodeList.add(m_dragSource.getNode());
+
+                    XICSelectionTransferable.TransferData data = new XICSelectionTransferable.TransferData();
+                    data.setDesignList(nodeList);//set Transferable data
+                    Integer transferKey = XICSelectionTransferable.register(data);
+                    return new XICSelectionTransferable(transferKey);
+
+                }
+
+                @Override
+                public void exportDone(JComponent c, Transferable t, int action) {
+                    // m_dragSource must be cleaned
+                    m_dragSource.setSelected(false);
+                }
+
                 @Override
                 public boolean canImport(TransferHandler.TransferSupport support) {
 
@@ -244,8 +314,12 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
 
                         if (!support.isDrop()) {
-                            repaint = (m_selectedDropZone != null);
-                            m_selectedDropZone = null;
+                            if (m_selectedDropZone != null) {
+                                m_selectedDropZone.setSelected(false);
+                                m_selectedDropZone = null;
+                                repaint = true;
+                            }
+
                             return false;
                         }
 
@@ -270,6 +344,10 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                                             if (nodesList != null && !nodesList.isEmpty()) {
                                                 AbstractData rootData = ((AbstractNode) nodesList.get(0).getRoot()).getData();
                                                 DDataset sourceDS = ((DataSetData) rootData).getDataset();
+                                                if (sourceDS == null) {
+                                                    // happen for drag and drop from itself
+                                                    sourceDS = dropZone.getSourceDataset();
+                                                }
                                                 DDataset destDS = dropZone.getDataset();
                                                 if (sourceDS.getId() == destDS.getId()) {
                                                     typeCompatible = true;
@@ -285,12 +363,20 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                                 }
 
                                 if (typeCompatible) {
-                                    repaint = (dropZone != m_selectedDropZone);
-                                    m_selectedDropZone = dropZone;
+                                    if (dropZone != m_selectedDropZone) {
+                                        if (m_selectedDropZone != null) {
+                                            m_selectedDropZone.setSelected(false);
+                                        }
+
+                                        m_selectedDropZone = dropZone;
+                                        m_selectedDropZone.setSelected(true);
+                                        repaint = true;
+                                    }
 
                                     return true;
                                 } else {
                                     if (m_selectedDropZone != null) {
+                                        m_selectedDropZone.setSelected(false);
                                         m_selectedDropZone = null;
                                         repaint = true;
                                     }
@@ -303,6 +389,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
 
                         if (m_selectedDropZone != null) {
+                            m_selectedDropZone.setSelected(false);
                             m_selectedDropZone = null;
                             repaint = true;
                         }
@@ -335,9 +422,13 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
                         for (AbstractNode dsNode : transferDsNodesList) {
                             DataSetData userObject = (DataSetData) dsNode.getData();
-                            mapping.put(dropLocationDs, userObject.getChannelNumber());
+                            mapping.put(dropLocationDs, m_selectedDropZone.getChannel().getNumber());
+                            if (userObject.getChannelNumber() != m_selectedDropZone.getChannel().getNumber()) {
+                                // BUG
+                                System.out.println("BUG");
+                            }
 
-                                                            /*
+                           /*
                                     int nextRowIndex = this.m_treeTable.getNextChannelRowIndex(currentRow, QCMappingTreeTable.DOWN);//DOWN ONLY
                                     if (nextRowIndex != -1) {
                                         dropChannelTreeNode = this.m_treeTable.getNodeForRow(nextRowIndex);
@@ -357,6 +448,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                             JOptionPane.showMessageDialog(m_treeTable, doubleChannel);
                         }*/
 
+                        m_selectedDropZone.setSelected(false);
                         m_selectedDropZone = null;
                         repaint();
                         return false;
@@ -371,7 +463,9 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                     return false;
                 }
 
-            });
+            };
+
+            setTransferHandler(m_transferHandler);
 
         }
 
@@ -401,6 +495,8 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
             int nbRow = m_tree.getRowCount();
 
 
+            boolean foundFirstSampleAnalysis = false;
+
             int nodeNumber = 0;
             for (int i = 0; i < nbRow; i++) {
                 Rectangle r = m_tree.getRowBounds(i);
@@ -408,7 +504,13 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                 TreePath path = m_tree.getPathForRow(i);
                 AbstractNode node = (AbstractNode) path.getLastPathComponent();
 
+
+
                 if (node.getType() == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
+
+                    g.setColor(Color.lightGray);
+                    g.drawLine(0, r.y+r.height/2, PAD + COLUMN_WIDTH*m_datasets.size(), r.y+r.height/2);
+
                     DQuantitationChannelMapping mapping = m_parentQCMappings.get(node);
 
                     Map<DDataset, QuantitationChannel> map = mapping.getMappedQuantChannels();
@@ -417,10 +519,6 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                     int decalX = 0;
                     for (DDataset d : m_datasets) {
                         QuantitationChannel channel = map.get(d);
-                        if (channel != null) {
-                            g.drawString(channel.getName(), PAD + decalX, r.y + r.height / 2);
-                        }
-
 
                         int dropZoneIndex = colIndex + nodeNumber*m_datasets.size();
 
@@ -431,22 +529,92 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                         } else {
                             dropZone = m_dropZones.get(dropZoneIndex);
                         }
-                        dropZone.set(d, node);
-                        dropZone.set(decalX, r.y, PAD+decalX+COLUMN_WIDTH, r.height);
+
+                        dropZone.setSourceDataset(d);
+                        dropZone.set(d, channel, node);
+                        dropZone.set(PAD+decalX, r.y, COLUMN_WIDTH-PAD, r.height);
+
+                        dropZone.paint(g);
+
+                        if (!foundFirstSampleAnalysis) {
+                            // draw Title from dataset name
+                            g.setColor(Color.black);
+                            Rectangle titleRectangle = new Rectangle(PAD+decalX, r.y-r.height, COLUMN_WIDTH-PAD, r.height);
+                            paintCenterdString(g, titleRectangle, g.getFont(), d.getName());
+                        }
 
                         decalX += COLUMN_WIDTH;
                         colIndex++;
                     }
 
                     nodeNumber++;
+                    foundFirstSampleAnalysis = true;
+
+
+
 
                 }
 
             }
 
-            if (m_selectedDropZone != null) {
-                m_selectedDropZone.paint(g);
+        }
+
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+
+            if (e.getButton() != MouseEvent.BUTTON1) {
+                return;
             }
+
+            for (DropZone dropZone : m_dropZones) {
+
+                boolean select = dropZone.contains(e.getPoint());
+
+                dropZone.setSelected(select);
+                if (select) {
+                    m_mouseDragBegin = e;
+                    m_selectedDropZone = dropZone;
+                }
+            }
+
+            repaint();
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseDragged(MouseEvent e) {
+            int dx = m_mouseDragBegin.getX() - e.getX();
+            int dy = m_mouseDragBegin.getY() - e.getY();
+            if ((dx * dx + dy * dy) > 16) {
+                m_dragSource = m_selectedDropZone;
+                m_transferHandler.exportAsDrag(this, m_mouseDragBegin, TransferHandler.MOVE);
+                m_mouseDragBegin = null;
+            }
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+
         }
     }
 
@@ -455,18 +623,48 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
         private DDataset m_dataset;
         private AbstractNode m_node;
+        private QuantitationChannel m_channel;
+        private DDataset m_sourceDataset = null; // WART
         private Rectangle m_rectangle = new Rectangle();
+        private boolean m_selected = false;
 
         public DropZone() {
         }
 
-        public void paint(Graphics g) {
-            g.setColor(Color.blue);
-            g.drawRect(m_rectangle.x, m_rectangle.y, m_rectangle.width, m_rectangle.height);
+        public void setSourceDataset(DDataset sourceDataset) {
+            m_sourceDataset = sourceDataset;
         }
 
-        public void set(DDataset dataset, AbstractNode node) {
+        public DDataset getSourceDataset() {
+            return m_sourceDataset;
+        }
+
+        public QuantitationChannel getChannel() {
+            return m_channel;
+        }
+
+        public void setSelected(boolean v) {
+            m_selected = v;
+        }
+
+        public void paint(Graphics g) {
+
+            if (m_channel != null) {
+
+                g.setColor(Color.white);
+                g.fillRect(m_rectangle.x, m_rectangle.y, m_rectangle.width, m_rectangle.height);
+
+                g.setColor(m_selected ? Color.blue : Color.black);
+                g.drawRect(m_rectangle.x, m_rectangle.y, m_rectangle.width, m_rectangle.height);
+
+                paintCenterdString(g, m_rectangle, g.getFont(), m_channel.getName());
+
+            }
+        }
+
+        public void set(DDataset dataset, QuantitationChannel channel, AbstractNode node) {
             m_dataset = dataset;
+            m_channel = channel;
             m_node = node;
         }
         public void set(int x, int y, int width, int height) {
@@ -484,5 +682,20 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
         public boolean contains(Point p) {
             return m_rectangle.contains(p);
         }
+    }
+
+    public static void paintCenterdString(Graphics g, Rectangle zone, Font f, String s) {
+        // Find the size of string s in font f in the current Graphics context g.
+        FontMetrics fm = g.getFontMetrics(f);
+        java.awt.geom.Rectangle2D rect = fm.getStringBounds(s, g);
+
+        int textHeight = (int) (rect.getHeight());
+        int textWidth = (int) (rect.getWidth());
+
+        // Center text horizontally and vertically
+        int x = zone.x + (zone.width - textWidth) / 2;
+        int y = zone.y + (zone.height - textHeight) / 2 + fm.getAscent();
+
+        g.drawString(s, x, y);  // Draw the string.
     }
 }

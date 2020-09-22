@@ -123,7 +123,7 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
                                 }
                             }//else all no computed, 
                             if (!selectedDatasetNodeList.isEmpty()) {
-                                quantificationProfile(null, posX, posY, pID, selectedDatasetNodeList);
+                                quantificationProfile(null, posX, posY, pID, selectedDatasetNodeList, null);
                             }
                         }
                     }
@@ -137,10 +137,10 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
         }
     }
 
-    public static boolean quantificationProfile(final ResultCallback resultCallback, int posX, int posY, Long pID, ArrayList<DataSetNode> nodeList) {
+    public static boolean quantificationProfile(final ResultCallback resultCallback, int posX, int posY, Long pID, ArrayList<DataSetNode> nodeList, DDataset paramsFromdataset) {
         ArrayList<PtmSpecificity> ptms = fetchPtmsFromDAM(nodeList);
         boolean isAggregation = isAllAggregation(nodeList, posX, posY);
-        QuantPostProcessingDialog dialog = new QuantPostProcessingDialog(WindowManager.getDefault().getMainWindow(), ptms, isAggregation);
+        QuantPostProcessingDialog dialog = new QuantPostProcessingDialog(WindowManager.getDefault().getMainWindow(), ptms, isAggregation, paramsFromdataset);
         dialog.setLocation(posX, posY);
         dialog.setVisible(true);
 
@@ -210,10 +210,10 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
         return false;
     }
 
-    public static boolean quantificationProfile(final ResultCallback resultCallback, int posx, int posy, Long pID, DDataset dataSet) {
+    public static boolean quantificationProfile(final ResultCallback resultCallback, int posx, int posy, Long pID, DDataset paramsFromdataSet) {
         ArrayList<DataSetNode> nodeList = new ArrayList();
-        nodeList.add(new DataSetNode(new DataSetData(dataSet)));
-        return quantificationProfile(resultCallback, posx, posy, pID, nodeList);
+        nodeList.add(new DataSetNode(new DataSetData(paramsFromdataSet)));
+        return quantificationProfile(resultCallback, posx, posy, pID, nodeList, paramsFromdataSet);
     }
 
     private static ArrayList<PtmSpecificity> fetchPtmsFromDAM(ArrayList<DataSetNode> nodeList) {

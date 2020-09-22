@@ -17,6 +17,7 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.core.orm.msi.PtmSpecificity;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.corewrapper.data.QuantPostProcessingParams;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.ParameterError;
@@ -44,11 +45,13 @@ import org.slf4j.LoggerFactory;
  */
 public class QuantPostProcessingDialog extends DefaultDialog {
 
+    private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+
     private QuantPostProcessingPanel m_quantPostProcessingPanel;
 
 
     //public QuantPostProcessingMultipleDialog(Window parent, ArrayList<DataSetNode> nodeList) {
-    public QuantPostProcessingDialog(Window parent, ArrayList<PtmSpecificity> ptms, boolean isAggregation) {
+    public QuantPostProcessingDialog(Window parent, ArrayList<PtmSpecificity> ptms, boolean isAggregation, DDataset paramsFromdataset) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         setTitle("Compute PostProcessing on Proteins Sets Abundances");
 
@@ -59,7 +62,7 @@ public class QuantPostProcessingDialog extends DefaultDialog {
 
         setResizable(true);
 
-        init(ptms, isAggregation);
+        init(ptms, isAggregation, paramsFromdataset);
 
     }
 
@@ -159,12 +162,24 @@ public class QuantPostProcessingDialog extends DefaultDialog {
         return m_quantPostProcessingPanel.getQuantParams();
     }
 
-    private void init(ArrayList<PtmSpecificity> ptms, boolean isAggregation) {
+    private void init(ArrayList<PtmSpecificity> ptms, boolean isAggregation, DDataset dataset) {
         Map<Long, String> ptmSpecificityNameById = ptms.stream().collect(Collectors.toMap(ptmS -> ptmS.getId(), ptmS -> ptmS.toString()));
         m_quantPostProcessingPanel = new QuantPostProcessingPanel(false, ptmSpecificityNameById);
+
         Preferences preferences = NbPreferences.root();
         m_quantPostProcessingPanel.getParameterList().loadParameters(preferences);
         m_quantPostProcessingPanel.setDiscardPeptidesSharingPeakelsChB(isAggregation);
+
+        try {
+            if ((dataset != null) && (dataset.getQuantProcessingConfigAsMap() != null)) {
+
+                m_quantPostProcessingPanel.setRefinedParams(dataset.getQuantProcessingConfigAsMap());
+
+            }
+        } catch (Exception ex) {
+            m_logger.error("error while settings quanti params " + ex);
+        }
+
         setInternalComponent(m_quantPostProcessingPanel);
     }
 

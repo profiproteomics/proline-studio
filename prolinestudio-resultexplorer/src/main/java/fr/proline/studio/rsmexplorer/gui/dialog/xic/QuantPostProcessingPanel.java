@@ -860,6 +860,8 @@ public class QuantPostProcessingPanel extends JPanel {
         m_applyProtVarianceCorrectionChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get(QuantPostProcessingParams.APPLY_VARIANCE_CORRECTION).toString()));//VDS TODO :If not completeMode should be set to false
         m_applyProtTTestChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get(QuantPostProcessingParams.APPLY_T_TEST).toString()));//VDS TODO :If not completeMode should be set to false
         m_applyProtZTestChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get(QuantPostProcessingParams.APPLY_Z_TEST).toString()));//VDS TODO :If not completeMode should be set to false
+    
+        updateDiscardPTMs();
     }
 
     /**

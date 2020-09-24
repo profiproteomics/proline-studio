@@ -215,7 +215,9 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                     // ask asynchronous loading of data
                     DatabaseModifyPeptideTask task = new DatabaseModifyPeptideTask(callback);
 
-                    task.initRemovePeptideModifiedOnProtein(m_dataBox.getProjectId(), masterQuantProteinSetModified);
+                    DataboxXicProteinSet databox = (DataboxXicProteinSet) m_dataBox;
+                    DDataset dataset = (DDataset) databox.getData(DDataset.class);
+                    task.initRemovePeptideModifiedOnProtein(m_dataBox.getProjectId(), dataset, masterQuantProteinSetModified);
                     AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
                 }
 

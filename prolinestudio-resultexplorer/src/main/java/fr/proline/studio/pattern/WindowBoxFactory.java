@@ -651,9 +651,9 @@ public class WindowBoxFactory {
     }
 
     public static WindowBox[] getSystemMonitoringWindowBox() {
-        WindowBox[] m_windowBoxes = new WindowBox[1]; //2
+        WindowBox[] m_windowBoxes = new WindowBox[2]; //2
         m_windowBoxes[0] = WindowBoxFactory.getTaskListWindowBox(); //JPM.DOCK.TEST
-        //m_windowBoxes[1] = WindowBoxFactory.getSystemTaskLogWindowBox();
+        m_windowBoxes[1] = WindowBoxFactory.getSystemTaskLogWindowBox();
 
 
         return m_windowBoxes;

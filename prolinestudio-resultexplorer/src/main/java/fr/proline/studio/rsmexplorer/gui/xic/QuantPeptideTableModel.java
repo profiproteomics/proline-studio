@@ -672,7 +672,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         return (f != null); // a peptide with an elutime is linked to a PeptideIon and MasterQuantComponent
     }
 
-    
+
     public ArrayList<DMasterQuantPeptide> listToModifyForValidateModifications(ArrayList selectedRows, XicStatusRenderer.SelectLevelEnum cmdSelectLevel) {
         if (selectedRows.isEmpty()) {
             return null;
@@ -716,9 +716,9 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         }
         return listToModify;
     }
-    
+
     public void validateModifications(final XicPeptidePanel panel,  ArrayList<DMasterQuantPeptide> listToModify) {
-        
+
         if (listToModify == null) {
             panel.modifyStatusActionFinished(true, null);
             return;
@@ -773,7 +773,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         }
 
         return new XicStatusRenderer.SelectLevel(level, XicStatusRenderer.SelectLevelEnum.valueOf(peptide.getSelectionLevel()));
- 
+
     }
 
     @Override
@@ -1147,7 +1147,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                         int globalSelectLevel = mqPep.getSelectionLevel();
                         m_selectionLevelInContext.put(mqPep.getId(), selectLevelByMqPeps.getOrDefault(mqPep.getId(), XicStatusRenderer.SelectLevelEnum.UNKNOWN.getIntValue()));
                         m_globalLevel.put(mqPep.getId(), globalSelectLevel);
-                    
+
                     }
                 }
             }

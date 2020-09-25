@@ -1601,7 +1601,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
      */
     private boolean fetchProteinSetData(SubTask subTask, EntityManager entityManagerMSI) {
         List<Long> sliceOfProteinSetIds = subTask.getSubList(m_proteinSetIds);
-        return fetchProteinSetData(entityManagerMSI, sliceOfProteinSetIds);
+        return fetchProteinSetData(entityManagerMSI, m_dataset, m_masterQuantProteinSetList, sliceOfProteinSetIds);
     }
 
     /**
@@ -1647,9 +1647,9 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
      * @param proteinSetIds
      * @return
      */
-    private boolean fetchProteinSetData(EntityManager entityManagerMSI, List<Long> proteinSetIds) {
-        int nbMQP = m_masterQuantProteinSetList.size();
-        m_logger.debug("fetchProteinSetData for " + proteinSetIds.size() + " of " +nbMQP+" m_masterQuantProteinSetList ");
+    public static boolean fetchProteinSetData(EntityManager entityManagerMSI, DDataset dataset, List<DMasterQuantProteinSet> masterQuantProteinSetList, List<Long> proteinSetIds) {
+        int nbMQP = masterQuantProteinSetList.size();
+        m_logger.debug("fetchProteinSetData for " + proteinSetIds.size() + " of " +nbMQP+" masterQuantProteinSetList ");
         String queryDMasterQuantProteinSet = "SELECT new fr.proline.core.orm.msi.dto.DMasterQuantProteinSet"
                 + "(q.id,  q.selectionLevel, q.objectTreeId,  q.serializedProperties,  p.resultSummary.id,  p.id) "
                 + " FROM MasterQuantComponent q,  ProteinSet p "
@@ -1697,8 +1697,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         Map<Long, Map<Long, Integer>> protMatchPepNumberByIdByQcId = new HashMap();
 
         //Get ProtMatches PepCount and Status in all Quant Channels RSMs
-        if (m_dataset != null && m_dataset.getMasterQuantitationChannels() != null && !m_dataset.getMasterQuantitationChannels().isEmpty()) {
-            listQC = m_dataset.getMasterQuantitationChannels().get(0).getQuantitationChannels();
+        if (dataset != null && dataset.getMasterQuantitationChannels() != null && !dataset.getMasterQuantitationChannels().isEmpty()) {
+            listQC = dataset.getMasterQuantitationChannels().get(0).getQuantitationChannels();
             for (DQuantitationChannel qch : listQC) {
                 Long identQCRsmId = qch.getIdentResultSummaryId();
                 Map<Long, String> statusByProtMatchId = new HashMap();
@@ -1756,7 +1756,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 }
                 dProteinSet.setTypicalProteinMatch(typicalProteinMatch);
             } catch (NoResultException | NonUniqueResultException e) {
-                m_logger.error(getClass().getSimpleName() + " failed", e);
+                m_logger.error("DatabaseLoadXicMasterQuantTask failed", e);
             }
             // load QuantProteinSetList
             String quantProtSetdata = ""; //ObjectTree.clobData
@@ -1840,7 +1840,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             // update in the list
             int index = -1;
             for (int k = 0; k < nbMQP; k++) {
-                if (m_masterQuantProteinSetList.get(k).getProteinSetId() == dProteinSet.getId()) {
+                if (masterQuantProteinSetList.get(k).getProteinSetId() == dProteinSet.getId()) {
                     index = k;
                     break;
                 }
@@ -1850,9 +1850,9 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
 //                m_logger.debug(" REERRR");
 //            }
 //            if (nbrMqPsSet % 100 == 0) {
-//                m_logger.debug("update " + nbrMqPsSet + " m_masterQuantProteinSetList index " + index);
+//                m_logger.debug("update " + nbrMqPsSet + " masterQuantProteinSetList index " + index);
 //            }
-            m_masterQuantProteinSetList.set(index, masterQuantProteinSet);
+            masterQuantProteinSetList.set(index, masterQuantProteinSet);
         }
         //m_logger.debug(" GET Through " + nbrMqPsSet + " updated " + nbrMqPsupdated);
         return true;

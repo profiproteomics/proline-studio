@@ -166,19 +166,20 @@ public class QuantPostProcessingDialog extends DefaultDialog {
         Map<Long, String> ptmSpecificityNameById = ptms.stream().collect(Collectors.toMap(ptmS -> ptmS.getId(), ptmS -> ptmS.toString()));
         m_quantPostProcessingPanel = new QuantPostProcessingPanel(false, ptmSpecificityNameById);
 
-        Preferences preferences = NbPreferences.root();
-        m_quantPostProcessingPanel.getParameterList().loadParameters(preferences);
-        m_quantPostProcessingPanel.setDiscardPeptidesSharingPeakelsChB(isAggregation);
-
         try {
             if ((dataset != null) && (dataset.getQuantProcessingConfigAsMap() != null)) {
 
-                m_quantPostProcessingPanel.setRefinedParams(dataset.getQuantProcessingConfigAsMap());
+                m_quantPostProcessingPanel.setRefinedParams(dataset.getPostQuantProcessingConfigAsMap());
 
+            } else {
+                Preferences preferences = NbPreferences.root();
+                m_quantPostProcessingPanel.getParameterList().loadParameters(preferences);
             }
         } catch (Exception ex) {
             m_logger.error("error while settings quanti params " + ex);
         }
+        
+        m_quantPostProcessingPanel.setDiscardPeptidesSharingPeakelsChB(isAggregation);
 
         setInternalComponent(m_quantPostProcessingPanel);
     }

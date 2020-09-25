@@ -21,6 +21,7 @@ import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
@@ -45,6 +46,7 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
 
     private ArrayList<DMasterQuantPeptide> m_masterQuantPeptideList;
     private ArrayList<DMasterQuantProteinSet> m_masterQuantProteinSetModified;
+    private DDataset m_dataset;
     private long m_projectId;
 
     //private ArrayList<Long> m_proteinSetIds;
@@ -66,12 +68,13 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
         setPriority(Priority.TOP);
     }
 
-    public void initRemovePeptideModifiedOnProtein(long projectId, ArrayList<DMasterQuantProteinSet> masterQuantProteinSetModified) {
+    public void initRemovePeptideModifiedOnProtein(long projectId, DDataset dataset, ArrayList<DMasterQuantProteinSet> masterQuantProteinSetModified) {
         setTaskInfo(new TaskInfo("Proteins Refined", true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
 
         m_action = REMOVE_PEPTIDEMODIFIED_ON_PROTEIN;
         m_projectId = projectId;
         m_masterQuantProteinSetModified = masterQuantProteinSetModified;
+        m_dataset = dataset;
         setPriority(Priority.TOP);
     }
 
@@ -140,6 +143,13 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
                 }
             }
 
+            ArrayList<Long> proteinSetIds = new ArrayList(m_masterQuantProteinSetModified.size());
+            for (DMasterQuantProteinSet masterQuantProteinSet : m_masterQuantProteinSetModified) {
+                proteinSetIds.add(masterQuantProteinSet.getProteinSetId());
+            }
+            
+            DatabaseLoadXicMasterQuantTask.fetchProteinSetData(entityManagerMSI, m_dataset, m_masterQuantProteinSetModified, proteinSetIds);
+            
             /*String queryDMasterQuantProteinSet = "SELECT new fr.proline.core.orm.msi.dto.DMasterQuantProteinSet"
                     + "(q.id,  q.selectionLevel, q.objectTreeId,  q.serializedProperties,  p.resultSummary.id,  p.id) "
                     + " FROM MasterQuantComponent q,  ProteinSet p "

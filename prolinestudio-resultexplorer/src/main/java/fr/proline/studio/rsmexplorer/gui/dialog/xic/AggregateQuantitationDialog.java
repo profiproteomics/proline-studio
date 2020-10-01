@@ -51,7 +51,7 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
     private static AggregateQuantitationDialog m_singletonDialog = null;
 
     private static final int STEP_PANEL_DEFINE_EXP_DESIGN = 0;
-    private static final int STEP_PANEL_DEFINE_AGGREGATION_PARAMS = 1;
+    //private static final int STEP_PANEL_DEFINE_AGGREGATION_PARAMS = 1;
 
     private int m_step = STEP_PANEL_DEFINE_EXP_DESIGN;
 
@@ -70,7 +70,7 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
     /**
      * step 2 Panel
      */
-    private AggregationQuantChannelsPanel m_quantChannelsPanel;
+    //private AggregationQuantChannelsPanel m_quantChannelsPanel;
     private AbstractNode m_experimentalDesignNode = null;
     /**
      * initals Quantitations
@@ -85,7 +85,7 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         setTitle("Aggregate Quantitation Wizard");
         setDocumentationSuffix("id.2dlolyb");//id(location) in help file
-        setSize(750, 576);
+        setSize(750, 750);
         setResizable(true);
     }
 
@@ -106,7 +106,8 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
     public Map<String, Object> getQuantiParameters() {
         Map<String, Object> aggregationConfig = new HashMap<>();
         aggregationConfig.put("quantitation_ids", m_quantitations.stream().map(d -> d.getId()).toArray());
-        aggregationConfig.put("quant_channels_mapping", m_quantChannelsPanel.getQuantChannelsMatching());
+        //TOTOCHE
+        aggregationConfig.put("quant_channels_mapping", m_experimentalDesignPanel.getQuantChannelsMatching());
         aggregationConfig.put("intensity_computation_method_name", "INTENSITY_SUM"); // change manually to MOST_INTENSE to test another summarization method
         return aggregationConfig;
     }
@@ -146,16 +147,22 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
      * @param node
      */
     public void displayStep1ExperimentalDesignTree(AbstractNode node) {
-        String step1Title = "Step 1: Define the aggregation experimental design";
-        String step1Help = " The following experimental design was inferred from the quantitation that will be aggregated. Group, samples and channels (replicates) entities can be modified<br>"
+        String step1Title = "";
+        String step1Help = "<b>Left Panel: Define the aggregation experimental design</b><br><br>" +
+                " The following experimental design was inferred from the quantitation that will be aggregated. Group, samples and channels (replicates) entities can be modified<br>"
                 + " &nbsp - &nbsp Change entities <b>order</b> by drag and drop<br> "
-                + " &nbsp - &nbsp <b>Rename</b> entities by pressing &lt F2 &gt or contextual menu (right click)<br> \n"
-                + " &nbsp - &nbsp <b>Create</b> or <b>delete</b> entities from the contextual menu.";
+                + " &nbsp - &nbsp <b>Rename</b> entities by contextual menu (right click)<br> "
+                + " &nbsp - &nbsp <b>Create</b> or <b>delete</b> entities from the contextual menu<br><br>"
+                + "<b>Center Panel: Define quantitation channels mapping</b><br><br>"
+                + "Each quantitation channel of the aggregation will correspond to sample analyses of aggregated quantitations. The following modifications can be made: <br>"
+                + " &nbsp - &nbsp <b>Change association</b> by dragging and dropping sample analysis from the right panel to a cell or from another cell<br>"
+                + " &nbsp - &nbsp <b>Remove association</b> by using contextual menu or toolbar<br>"
+                + " &nbsp - &nbsp <b>Move</b> analyses up or down by using contextual menu or toolbar";
         this.setHelpHeader(step1Title, step1Help);
         if (m_quantitations != null && m_quantitations.size() > 0) {
             m_step = STEP_PANEL_DEFINE_EXP_DESIGN;
-            setButtonName(DefaultDialog.BUTTON_OK, "Next");
-            setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
+            //setButtonName(DefaultDialog.BUTTON_OK, "Next");
+            //setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
             setButtonVisible(BUTTON_LOAD, false);
             setButtonVisible(BUTTON_SAVE, false);
             setButtonVisible(BUTTON_BACK, false);
@@ -166,7 +173,7 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
                 m_designPanel.setBorder(BorderFactory.createTitledBorder(" Experimental Design "));
                 JScrollPane treePanel = new JScrollPane();
                 m_designPanel.setLayout(new BorderLayout());
-                //JPM.TEST
+
                 m_experimentalDesignPanel = new QuantAggregateExperimentalTreePanel(m_experimentalDesignNode, m_quantitations);
 
                 treePanel.setViewportView(m_experimentalDesignPanel);
@@ -183,7 +190,7 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
     /**
      * setp 2 panel
      */
-    private void displayStep2QuantChannelsMapping() {
+    /*private void displayStep2QuantChannelsMapping() {
         m_step = STEP_PANEL_DEFINE_AGGREGATION_PARAMS;
 
         setButtonName(DefaultDialog.BUTTON_OK, org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
@@ -202,29 +209,34 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
         replaceInternalComponent(m_quantChannelsPanel);
         revalidate();
         repaint();
-    }
+    }*/
 
     @Override
     protected boolean okCalled() {
-        if (m_step == STEP_PANEL_DEFINE_EXP_DESIGN) {
-            if (!checkDesignStructure(m_experimentalDesignPanel.getTree(), m_experimentalDesignNode, new HashSet<>())) {
-                return false;
-            } else if (!checkBiologicalGroupName(m_experimentalDesignPanel.getTree(), m_experimentalDesignNode)) {
-                return false;
-            }
-            displayStep2QuantChannelsMapping();
+        if (!checkDesignStructure(m_experimentalDesignPanel.getTree(), m_experimentalDesignNode, new HashSet<>())) {
             return false;
         }
-        return m_quantChannelsPanel.verifyRedundantChannel();
+        if (!checkBiologicalGroupName(m_experimentalDesignPanel.getTree(), m_experimentalDesignNode)) {
+            return false;
+        }
+
+        QuantAggregateExperimentalTreePanel.DropZone errorZone = m_experimentalDesignPanel.getChannelPanel().checkDuplicateDropZone();
+        if (errorZone != null) {
+            setStatus(true, "Channel is duplicated : "+errorZone.getChannel().getName());
+            highlight(m_experimentalDesignPanel.getChannelPanel(), errorZone.getBounds());
+            return false;
+        }
+
+        return true;
 
     }
 
     @Override
     protected boolean backCalled() {
-        if (m_step == STEP_PANEL_DEFINE_AGGREGATION_PARAMS) {
+        /*if (m_step == STEP_PANEL_DEFINE_AGGREGATION_PARAMS) {
             displayStep1ExperimentalDesignTree(m_experimentalDesignNode);
             return false;
-        }
+        }*/
         return false;
     }
 

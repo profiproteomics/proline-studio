@@ -26,6 +26,7 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DropTargetDragEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -53,10 +54,15 @@ public class XICTransferHandler extends AbstractTreeTransferHandler {
     private BooleanParameter m_parameter;
     private static final String GENERAL_APPLICATION_SETTINGS = "General Application Settings";
     private AbstractTree m_tree;
+    private boolean m_restrictToDnDToItself;
 
     public XICTransferHandler(boolean isSelectionTree, AbstractTree tree) {
-        super(isSelectionTree);
+        this(isSelectionTree, tree, false);
+    }
+    public XICTransferHandler(boolean isSelectionTree, AbstractTree tree, boolean restrictToDnDToItself) {
+        super(isSelectionTree, tree.getId());
         m_tree = tree;
+        m_restrictToDnDToItself = restrictToDnDToItself;
         m_parameterList = new ParameterList(GENERAL_APPLICATION_SETTINGS);
         JCheckBox checkBox = new JCheckBox("Use dataset type to create Xic Design by DnD");
         m_parameter = new BooleanParameter("XIC_Transfer_Handler_Retains_Structure", "XIC Transfer Handler Retains Structure", checkBox, true);
@@ -66,6 +72,7 @@ public class XICTransferHandler extends AbstractTreeTransferHandler {
 
     @Override
     public boolean canImport(TransferHandler.TransferSupport support) {
+
 
         if (!m_isIdentificationSelectionTree) {
 
@@ -85,6 +92,14 @@ public class XICTransferHandler extends AbstractTreeTransferHandler {
                 try {
                     XICSelectionTransferable transfer = (XICSelectionTransferable) support.getTransferable().getTransferData(XICSelectionTransferable.RSMNodeList_FLAVOR);
                     XICSelectionTransferable.TransferData data = XICSelectionTransferable.getData(transfer.getTransferKey());
+
+                    if (m_restrictToDnDToItself) {
+                        // in this case, source and destination of the drag and drop must be the same
+                        if (data.getSourceId() != m_tree.getId()) {
+                            return false;
+                        }
+                    }
+
                     designData = data.isDesignData();
                     if (designData) {
                         designNodeType = data.getDesignNodeType();

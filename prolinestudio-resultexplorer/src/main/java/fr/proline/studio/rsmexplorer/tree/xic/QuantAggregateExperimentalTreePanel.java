@@ -176,6 +176,32 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
     }
 
     public List<Map<String, Object>> getQuantChannelsMatching() {
+
+        // we need to do some cleaning : due to deleted or added channels
+
+        // collect channels node
+        LinkedHashSet<XICBiologicalSampleAnalysisNode> bioSampleAnalysisNodes = new LinkedHashSet<>();
+        collectBioSampleAnalysisNodes((AbstractNode) m_tree.getModel().getRoot(), bioSampleAnalysisNodes);
+
+        // remove unused DQuantitationChannelMapping
+
+        HashSet<XICBiologicalSampleAnalysisNode> nodes = new HashSet<>(m_parentQCMappings.keySet());
+        for (XICBiologicalSampleAnalysisNode node : nodes) {
+            if (!bioSampleAnalysisNodes.contains(node)) {
+                // node had been deleted
+                m_parentQCMappings.remove(node);
+            }
+        }
+
+        // re-index DQuantitationChannelMapping objects
+        int index = 1;
+        for (XICBiologicalSampleAnalysisNode node : bioSampleAnalysisNodes) {
+            DQuantitationChannelMapping mapping = m_parentQCMappings.get(node);
+            mapping.setParentQCNumber(index);
+            index++;
+        }
+
+
         List<Map<String, Object>> mappingList = new ArrayList<>();
         for (DQuantitationChannelMapping entry : m_parentQCMappings.values()) {
             Map<String, Object> mapping = new HashMap<>();
@@ -189,6 +215,17 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
         }
 
         return mappingList;
+    }
+
+    private void collectBioSampleAnalysisNodes(AbstractNode node, HashSet<XICBiologicalSampleAnalysisNode> bioSampleAnalysisNodes) {
+        int nb = node.getChildCount();
+        for (int i=0;i<nb;i++) {
+            AbstractNode child = (AbstractNode) node.getChildAt(i);
+            if (child.getType() == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
+                bioSampleAnalysisNodes.add((XICBiologicalSampleAnalysisNode) child);
+            }
+            collectBioSampleAnalysisNodes(child, bioSampleAnalysisNodes);
+        }
     }
 
 
@@ -815,7 +852,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
                 // we must modify mapping
                 AbstractNode rootNode = (AbstractNode) m_tree.getModel().getRoot();
-                HashSet<XICBiologicalSampleAnalysisNode> bioSampleAnalysisNodes = new HashSet<>();
+                LinkedHashSet<XICBiologicalSampleAnalysisNode> bioSampleAnalysisNodes = new LinkedHashSet<>();
                 collectBioSampleAnalysisNodes(rootNode, bioSampleAnalysisNodes);
 
                 for (XICBiologicalSampleAnalysisNode node : bioSampleAnalysisNodes) {
@@ -853,16 +890,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
             repaint();
         }
 
-        private void collectBioSampleAnalysisNodes(AbstractNode node, HashSet<XICBiologicalSampleAnalysisNode> bioSampleAnalysisNodes) {
-            int nb = node.getChildCount();
-            for (int i=0;i<nb;i++) {
-                AbstractNode child = (AbstractNode) node.getChildAt(i);
-                if (child.getType() == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
-                    bioSampleAnalysisNodes.add((XICBiologicalSampleAnalysisNode) child);
-                }
-                collectBioSampleAnalysisNodes(child, bioSampleAnalysisNodes);
-            }
-        }
+
 
 
         @Override

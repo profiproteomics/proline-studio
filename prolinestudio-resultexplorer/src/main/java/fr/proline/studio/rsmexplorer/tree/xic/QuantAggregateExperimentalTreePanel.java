@@ -14,10 +14,7 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.utils.IconManager;
 
 import javax.swing.*;
-import javax.swing.event.TreeExpansionEvent;
-import javax.swing.event.TreeExpansionListener;
-import javax.swing.event.TreeModelEvent;
-import javax.swing.event.TreeModelListener;
+import javax.swing.event.*;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
@@ -48,7 +45,11 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
     private static final int COLUMN_WIDTH_MIN = 100;
     private static final int COLUMN_WIDTH_MAX = 300;
-    private static final int PAD = 5;
+    private static final int PAD = 14;
+
+    private static final BasicStroke STROKE_1 = new BasicStroke(1);
+    private static final BasicStroke STROKE_2 = new BasicStroke(2);
+    private static final Color SELECTION_COLOR = javax.swing.UIManager.getColor("Table.selectionBackground");
 
     public QuantAggregateExperimentalTreePanel(AbstractNode rootNode, List<DDataset> datasets) {
 
@@ -58,8 +59,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
         m_parentQCMappings = inferDefaultMapping(rootNode);
         JComponent treePanel = createTreePanel(rootNode);
 
-        m_tabbedPane = new JTabbedPane();
-        setMapping(datasets);
+        createTabbedPane();
 
         setLayout(new BorderLayout());
 
@@ -73,11 +73,67 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
     }
 
+    private void createTabbedPane() {
+        m_tabbedPane = new JTabbedPane();
+        setMapping(m_datasets);
+
+
+        m_tabbedPane.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+
+                m_channelPanel.clearSelection();
+
+
+
+            }
+        });
+
+
+    }
+
+
+
     private JComponent createTreePanel(AbstractNode rootNode) {
 
         m_tree = new AssociatedQuantExperimentalDesignTree(rootNode);
         m_channelPanel = new ChannelPanel();
         m_floattingButtonsPanel = createButtonsPanel();
+
+        m_tree.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int row=m_tree.getRowForLocation(e.getX(),e.getY());
+                if(row==-1) //When user clicks on the "empty surface"
+                    m_tree.clearSelection();
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
+
+        m_tree.addTreeSelectionListener(new TreeSelectionListener() {
+            @Override
+            public void valueChanged(TreeSelectionEvent e) {
+                m_channelPanel.repaint();
+            }
+        });
 
         m_tree.addTreeExpansionListener(new TreeExpansionListener() {
             @Override
@@ -421,9 +477,15 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
         public void paint(Graphics g) {
             super.paint(g);
 
-            g.setColor(Color.lightGray);
+            Graphics2D g2D = (Graphics2D) g;
 
             int nbRow = m_tree.getRowCount();
+
+            AbstractNode[] selectedNodes = m_tree.getSelectedNodes();
+            AbstractNode highlightRowNode = null;
+            if (selectedNodes.length == 1) {
+                highlightRowNode = selectedNodes[0];
+            }
 
             for (int i = 0; i < nbRow; i++) {
                 Rectangle r = m_tree.getRowBounds(i);
@@ -433,14 +495,21 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
                 if (node.getType() == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
 
-
+                    boolean highlight = (highlightRowNode == node);
+                    g.setColor(highlight ? SELECTION_COLOR : Color.lightGray);
+                    if (highlight) {
+                        g2D.setStroke(STROKE_2);
+                    }
                     g.drawLine(r.x + r.width + PAD, r.y + r.height / 2, getPreferredSize().width, r.y + r.height / 2);
-
+                    g2D.setStroke(STROKE_1);
                 }
 
             }
 
+
         }
+
+
     }
 
 
@@ -452,6 +521,8 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
         private DropZone[][] m_dropZones; // in order col / row
         private int m_nbCols;
         private int m_nbRows;
+
+        private QuestionPanel m_question = new QuestionPanel();
 
 
         private ArrayList<DropZone> m_selectedDropZoneList = new ArrayList<>();
@@ -604,6 +675,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
 
                 }
+
 
                 private boolean canImportFromDropNode(TransferHandler.TransferSupport support) {
 
@@ -833,7 +905,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
         public DropZone checkDuplicateDropZone() {
             for (int col=0;col< m_nbCols; col++) {
-                for (int row=0;row< m_nbRows; row++) { //TOTOCHE
+                for (int row=0;row< m_nbRows; row++) {
                     if (m_dropZones[col][row].getError()) {
                         return m_dropZones[col][row];
                     }
@@ -866,14 +938,6 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                     }
                 }
 
-                /*for (XICBiologicalSampleAnalysisNode node : m_parentQCMappings.keySet()) {
-                    if (!bioSampleAnalysisNodes.contains(node)) {
-                        // node had been deleted
-                        m_parentQCMappings.remove(node);
-                    }
-                }*/
-
-
 
             } else {
 
@@ -901,7 +965,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
             Dimension d = m_tree.getPreferredSize();
 
-            m_minimumDimension.width = m_columnWidth * m_datasets.size() + PAD * 2;
+            m_minimumDimension.width = m_columnWidth * m_datasets.size() + PAD * 2 + 16 + PAD/2;
             m_minimumDimension.height = d.height;
 
             return m_minimumDimension;
@@ -909,6 +973,8 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
         @Override
         public void paint(Graphics g) {
+
+            Graphics2D g2D = (Graphics2D) g;
 
             // doing drag and drop, for unknown reason, font is change.
             // so get the font from the parent at the first call
@@ -978,6 +1044,15 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
             int textWidthNeededMin = 0;
 
+            AbstractNode[] selectedNodes = m_tree.getSelectedNodes();
+            AbstractNode highlightRowNode = null;
+            if (selectedNodes.length == 1) {
+                highlightRowNode = selectedNodes[0];
+            }
+
+            m_question.setVisible(false);
+
+            int upLineY = 0;
             int rowIndex = 0;
             for (int i = 0; i < nbRow; i++) {
                 Rectangle r = m_tree.getRowBounds(i);
@@ -985,16 +1060,26 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                 TreePath path = m_tree.getPathForRow(i);
                 AbstractNode node = (AbstractNode) path.getLastPathComponent();
 
-
                 if (node.getType() == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
 
-                    g.setColor(Color.lightGray);
+                    boolean rowHighlighted = (highlightRowNode == node);
+
+
+                    if (rowHighlighted) {
+                        g2D.setStroke(STROKE_2);
+                    }
+                    g.setColor(rowHighlighted ? SELECTION_COLOR : Color.lightGray);
                     g.drawLine(0, r.y + r.height / 2, PAD + m_columnWidth * m_datasets.size(), r.y + r.height / 2);
+                    g2D.setStroke(STROKE_1);
+                    if (rowHighlighted) {
+                        m_question.setLocation(PAD+PAD/2 + m_columnWidth * m_datasets.size(), r.y + r.height / 2 - 8);
+                        m_question.setVisible(true);
+                        m_question.paint(g);
+                    }
 
                     DQuantitationChannelMapping mapping = m_parentQCMappings.get(node);
 
                     Map<DDataset, QuantitationChannel> map = mapping.getMappedQuantChannels();
-
 
                     int colIndex = 0;
                     int decalX = 0;
@@ -1012,7 +1097,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                             DropZone dropZoneWithSameChannel = m_duplicatesChannel.get(channel.getId());
                             if (dropZoneWithSameChannel != null) {
                                 dropZoneWithSameChannel.setError(true); // this one must be repainted
-                                dropZoneWithSameChannel.paint(g);
+                                dropZoneWithSameChannel.paint(g, highlightRowNode);
                                 dropZone.setError(true);
 
                             } else {
@@ -1020,7 +1105,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                             }
                         }
 
-                        int textWidthNeeded = dropZone.paint(g);
+                        int textWidthNeeded = dropZone.paint(g, highlightRowNode);
                         if (textWidthNeeded > textWidthNeededMin) {
                             textWidthNeededMin = textWidthNeeded;
                         }
@@ -1033,6 +1118,10 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                             if (textWidthNeeded > textWidthNeededMin) {
                                 textWidthNeededMin = textWidthNeeded;
                             }
+
+                            upLineY = titleRectangle.y;
+
+
                         }
 
                         decalX += m_columnWidth;
@@ -1046,13 +1135,22 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
             }
 
+            // draw selected column
+            int colInTab = m_tabbedPane.getSelectedIndex();
+            Rectangle selectedCol = new Rectangle();
+            DropZone lastInRowDropZone = m_dropZones[colInTab][m_nbRows-1];
+            selectedCol.setBounds(lastInRowDropZone.getBounds().x-PAD/2, upLineY-PAD/2, lastInRowDropZone.getBounds().width+PAD, lastInRowDropZone.getBounds().height+lastInRowDropZone.getBounds().y-upLineY+PAD);
+            g2D.setStroke(STROKE_2);
+            g2D.setColor(SELECTION_COLOR);
+            g.drawRect(selectedCol.x, selectedCol.y, selectedCol.width, selectedCol.height);
+
+            g2D.setStroke(STROKE_1);
 
             if (textWidthNeededMin>m_columnWidth) {
                 m_columnWidth = Math.min(textWidthNeededMin+PAD*2, COLUMN_WIDTH_MAX);
                 setPreferredSize(getPreferredSize());
             }
 
-            //super.paintComponents(g);
 
 
         }
@@ -1062,6 +1160,12 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
         @Override
         public void mouseClicked(MouseEvent e) {
 
+
+            if (m_question.inside(e.getX(), e.getY())) {
+                JOptionPane.showMessageDialog(this, "TEST");
+            } else {
+                m_tree.clearSelection();
+            }
         }
 
         @Override
@@ -1270,6 +1374,18 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
             updateTreeFromDropZone();
         }
 
+        public void clearSelection() {
+            for (DropZone dropZone : m_selectedDropZoneList) {
+                dropZone.setSelected(false);
+            }
+            m_selectedDropZoneList.clear();
+
+            updateFloattingButtons();
+
+            repaint();
+
+        }
+
 
 
         public void moveDropZone(boolean up) {
@@ -1354,8 +1470,45 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
     }
 
 
+    public class QuestionPanel {
 
-    private static final Color SELECTION_COLOR = javax.swing.UIManager.getColor("Table.selectionBackground");
+        private int m_x;
+        private int m_y;
+        private boolean m_visible = false;
+
+        public void QuestionPanel() {
+
+        }
+
+        public void setVisible(boolean v) {
+            m_visible = v;
+        }
+
+        public void setLocation(int x, int y) {
+            m_x = x;
+            m_y = y;
+        }
+
+        public boolean inside(int x, int y) {
+            if (!m_visible) {
+                return false;
+            }
+
+            Image img = IconManager.getImage(IconManager.IconType.QUESTION);
+            return ((x>=m_x) && (y>=m_y) && (x<=m_x+img.getWidth(null)) && (y<=m_y+img.getHeight(null)));
+
+        }
+
+
+
+        public void paint(Graphics g) {
+            if (m_visible) {
+                g.drawImage(IconManager.getImage(IconManager.IconType.QUESTION), m_x, m_y, null);
+            }
+        }
+    }
+
+
     public class DropZone {
 
         private DDataset m_dataset;
@@ -1400,6 +1553,9 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
         public void setSelected(boolean v) {
             m_selected = v;
+            if (m_selected) {
+                m_tabbedPane.setSelectedIndex(m_col);
+            }
         }
 
         public boolean isSelected() {
@@ -1414,7 +1570,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
             return m_error;
         }
 
-        public int paint(Graphics g) {
+        public int paint(Graphics g, AbstractNode highlightRowNode) {
 
             // background is :
             // white generally
@@ -1424,6 +1580,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
             g.fillRect(m_rectangle.x, m_rectangle.y, m_rectangle.width, m_rectangle.height);
 
             // frame is always black
+            //g.setColor((highlightRowNode == m_node) ? SELECTION_COLOR : Color.black);
             g.setColor(Color.black);
             g.drawRect(m_rectangle.x, m_rectangle.y, m_rectangle.width, m_rectangle.height);
 

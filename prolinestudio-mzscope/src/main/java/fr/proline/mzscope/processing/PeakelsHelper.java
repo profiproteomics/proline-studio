@@ -117,10 +117,6 @@ public class PeakelsHelper {
             }
             if (!assigned.containsKey(peakels.get(k).getId())) {
                 
-              if ((Math.abs(peakels.get(k).getMz() - REFMZ) < REFMZ*mzTolPPM/1e6) && (Math.abs(REFRT*60.0 - peakels.get(k).getApexElutionTime()) < 60)) {
-                logger.debug("this one");
-              }
-
                 SpectrumData data = buildSpectrumDataFromPeakels(k, assigned);
 
 //                Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = IsotopicPatternScorer.calcIsotopicPatternHypotheses(data, peakels.get(k).getMz(), mzTolPPM);
@@ -159,11 +155,8 @@ public class PeakelsHelper {
                             gapRank = 0;
                             assigned.put(bestMatching.getId(), bestMatching);
                             l.add(bestMatching);
-                            if ((Math.abs(bestMatching.getMz() - REFMZ) < REFMZ * mzTolPPM / 1e6) && (Math.abs(REFRT * 60.0 - bestMatching.getApexElutionTime()) < 60)) {
-                                logger.debug("this one but assigned as isotope");
-                            }
                         } else {
-                            logger.debug("best isotope match found but already assigned");
+                            logger.trace("best isotope match found but already assigned");
                         }
                     } else {
                         gapRank++;
@@ -172,7 +165,7 @@ public class PeakelsHelper {
                         break;
                 }
                 if (l.isEmpty()) {
-                    logger.warn("Strange situation: peakel {}, {} not found from pattern at mono {}, {}+ (gap: {})", peakels.get(k).getMz(), peakels.get(k).getApexElutionTime()/60.0, bestPattern.monoMz(), bestPattern.charge(), gapRank);
+                    logger.trace("Strange situation: peakel {}, {} not found from pattern at mono {}, {}+ (gap: {})", peakels.get(k).getMz(), peakels.get(k).getApexElutionTime()/60.0, bestPattern.monoMz(), bestPattern.charge(), gapRank);
                     l.add(peakels.get(k));
                 }
                 Feature feature = new Feature(l.get(0).getMz(), bestPattern.charge(), JavaConverters.asScalaBufferConverter(l).asScala(), true);
@@ -191,12 +184,12 @@ public class PeakelsHelper {
         double maxDuration = stats[1].getMax();
         double minMs1Count = stats[2].getPercentile(10);
 
-        logger.info("Thresholds: minIntensity={}, maxDuration={}, minMs1Count{}", minIntensity, maxDuration, minMs1Count);
+        logger.info("Filter dubious features: Thresholds are minIntensity={}, maxDuration={}, minMs1Count{}", minIntensity, maxDuration, minMs1Count);
         for(Feature f: monoPeakelFeatures) {
             if ((f.getBasePeakel().getApexIntensity() >= minIntensity) && (f.calcDuration() <= maxDuration) && (f.getMs1Count() >= minMs1Count)) {
                 features.add(f);
             } else {
-                logger.info("Doubtful Feature  = {}; {}; {}; {}; {} ",f.getMz(), f.getElutionTime() / 60.0, f.getCharge(), f.getBasePeakel().getApexIntensity(),  f.getMs1Count());
+//                logger.info("Doubtful Feature  = {}; {}; {}; {}; {} ",f.getMz(), f.getElutionTime() / 60.0, f.getCharge(), f.getBasePeakel().getApexIntensity(),  f.getMs1Count());
                 features.add(f);
             }
         }
@@ -252,7 +245,7 @@ public class PeakelsHelper {
                     }
                 }
                 if (l.isEmpty()) {
-                    logger.warn("Strange situation : peakel not found within isotopic pattern .... " + peakels.get(k).getMz());
+                    logger.trace("Strange situation : peakel not found within isotopic pattern .... " + peakels.get(k).getMz());
                     l.add(peakels.get(k));
                 }
                 //logger.info("Creates feature with "+l.size()+" peakels at mz="+l.get(0).getMz()+ " from peakel "+peakels[k].getMz()+ " at "+peakels[k].getApexElutionTime()/60.0);                

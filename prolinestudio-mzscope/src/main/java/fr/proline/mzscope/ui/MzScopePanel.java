@@ -218,7 +218,7 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
         return buttonTabComp;
     }
 
-    private ButtonTabComponent addFeatureTab(String s, Component c, String tooltip) {
+    public ButtonTabComponent addFeatureTab(String s, Component c, String tooltip) {
         ButtonTabComponent buttonTabComp = addTab(featuresTabPane, s, c, tooltip);
         featuresTabPane.setSelectedComponent(c);
         return buttonTabComp;

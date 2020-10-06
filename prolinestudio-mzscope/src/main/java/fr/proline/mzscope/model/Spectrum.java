@@ -37,6 +37,7 @@ public class Spectrum {
    private Double precursorMz;
    private Integer precursorCharge;
 
+
    public Spectrum(Integer index, float rt, double[] masses, float[] intensities, int msLevel) {
       this(index, rt, masses, intensities, msLevel, (msLevel == 2) ? ScanType.CENTROID : ScanType.PROFILE);
    }

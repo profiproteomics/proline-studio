@@ -53,7 +53,6 @@ import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -95,19 +94,17 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
 
    protected Spectrum currentScan;   
    protected Spectrum referenceSpectrum;
-   protected Signal currentScanCentroided;
-   
+
    private boolean keepSameMsLevel = true;
    private boolean autoZoom = false;
    private List<AbstractMarker> ipMarkers = new ArrayList();
    private ScansSpinnerModel spinnerModel;
    
    private JButton m_editSignalBtn;
-   private JButton m_showCentroidMarkBtn;
-   private JButton m_clearMarkersBtn;
-   private JButton m_viewCentroidSignal;
+   private JButton m_showCentroidBtn;
+  private JToggleButton m_freezeSpectrumBtn;
 
-class ScansSpinnerModel extends AbstractSpinnerModel {
+  class ScansSpinnerModel extends AbstractSpinnerModel {
 
     @Override
     public Object getValue() {
@@ -177,10 +174,9 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
       });
       
       spectrumToolbar.add(displayIPBtn);
-      
-      JToggleButton freezeSpectrumBtn = new JToggleButton(IconManager.getIcon(IconManager.IconType.PIN));
-      
-      freezeSpectrumBtn.addActionListener(new ActionListener() {
+
+      m_freezeSpectrumBtn = new JToggleButton(IconManager.getIcon(IconManager.IconType.PIN));
+      m_freezeSpectrumBtn.addActionListener(new ActionListener() {
           @Override
           public void actionPerformed(ActionEvent e) {
               JToggleButton tBtn = (JToggleButton)e.getSource();
@@ -192,7 +188,7 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
           }
       });
       
-      spectrumToolbar.add(freezeSpectrumBtn);
+      spectrumToolbar.add(m_freezeSpectrumBtn);
       
        JToggleButton autoZoomBtn = new JToggleButton();
        autoZoomBtn.setIcon(IconManager.getIcon(IconManager.IconType.AUTO_ZOOM));
@@ -207,31 +203,17 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
       
       spectrumToolbar.addSeparator();
       
-      m_showCentroidMarkBtn = new JButton();
-      m_showCentroidMarkBtn.setEnabled(false);
-      m_showCentroidMarkBtn.setIcon(IconManager.getIcon(IconManager.IconType.CENTROID_SPECTRA));
-      m_showCentroidMarkBtn.setToolTipText("Compute and show centroid peaks");
-      m_showCentroidMarkBtn.addActionListener(new ActionListener() {
+      m_showCentroidBtn = new JButton();
+      m_showCentroidBtn.setEnabled(false);
+      m_showCentroidBtn.setIcon(IconManager.getIcon(IconManager.IconType.CENTROID_SPECTRA));
+      m_showCentroidBtn.setToolTipText("Compute and show centroid peaks");
+      m_showCentroidBtn.addActionListener(new ActionListener() {
          @Override
          public void actionPerformed(ActionEvent e) {
             showCentroid();
          }
       });        
-      spectrumToolbar.add(m_showCentroidMarkBtn);
-      
-      m_viewCentroidSignal = new JButton();
-      m_viewCentroidSignal.setIcon(IconManager.getIcon(IconManager.IconType.EXPORT_CENTROID));
-      m_viewCentroidSignal.setEnabled(false);
-      m_viewCentroidSignal.setToolTipText("View computed centroid signal");
-      m_viewCentroidSignal.addActionListener(new ActionListener() {
-         @Override
-         public void actionPerformed(ActionEvent e) {
-            viewCentroidSignal();
-         }
-      });
-      
-      spectrumToolbar.add(m_viewCentroidSignal);
-      
+      spectrumToolbar.add(m_showCentroidBtn);
 
       m_editSignalBtn = new JButton();
       m_editSignalBtn.setEnabled(false);
@@ -246,20 +228,7 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
       spectrumToolbar.add(m_editSignalBtn);
       
       spectrumToolbar.addSeparator();
-      
-      m_clearMarkersBtn = new JButton();      
-      m_clearMarkersBtn.setIcon(IconManager.getIcon(IconManager.IconType.CLEAR_ALL));
-      m_clearMarkersBtn.setToolTipText("Clear markers from signal");
-      m_clearMarkersBtn.addActionListener(new ActionListener() {
-         @Override
-         public void actionPerformed(ActionEvent e) {
-            scanPlot.clearMarkers();            
-         }
-      });
-      
-      spectrumToolbar.add(m_clearMarkersBtn);
-      
-      
+
       spinnerModel = new ScansSpinnerModel(); 
       
       headerSpectrumPanel = new ScanHeaderPanel(null, spinnerModel);
@@ -272,15 +241,13 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
     
    protected void updateToolbar() {
        m_editSignalBtn.setEnabled(true);
-       m_showCentroidMarkBtn.setEnabled(true);
+       m_showCentroidBtn.setEnabled(true);
     }
    
     private void showCentroid() {
         
         Signal signal = getSignal();
         scanPlot.clearMarkers(); //clean previous markers
-        currentScanCentroided = null;
-        m_viewCentroidSignal.setEnabled(false);
         //Get user preference for smoothing algo
         SmoothingParamDialog dialog = new SmoothingParamDialog(WindowManager.getDefault().getMainWindow());
         dialog.pack();
@@ -347,48 +314,16 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
                   realLenght++;
                }
             }
-            Spectrum newSpectrum = new Spectrum(-1, currentScan.getRetentionTime() , Arrays.copyOfRange(newSpMasses, 0, realLenght), Arrays.copyOfRange(newSpIntensities, 0, realLenght), currentScan.getMsLevel(), Spectrum.ScanType.PROFILE);
-            
-//            double[] centroidSignalX = new double[mm.length];
-//            double[] centroidSignalY = new double[mm.length];
-//            int realLenght = 0;
-//            Color markerColor = rawFilePanel.getPlotColor(rawFilePanel.getCurrentRawfile().getName());
-//            for (int k = 0; k < mm.length; k++) {
-//               if(mm[k].isMaximum()){                   
-//                   double massIdx = newSignal.getXSeries()[mm[k].index()];
-//                   centroidSignalX[realLenght] = massIdx;
-//                   centroidSignalY[realLenght] = signal.getYSeries()[mm[k].index()];
-//                   scanPlot.addMarker(new PointMarker(spectrumPlotPanel, new DataCoordinates(massIdx, newSignal.getYSeries()[mm[k].index()]), markerColor));
-//                   realLenght++;
-//               }
-//            }
-          
-            currentScanCentroided = new Signal(Arrays.copyOfRange(centroidSignalX, 0, realLenght),Arrays.copyOfRange(centroidSignalY,0,realLenght));
-            currentScanCentroided.setSignalType(Signal.CENTROID);
-            long step4 = System.currentTimeMillis();      
+            Spectrum newSpectrum = new Spectrum(-1, currentScan.getRetentionTime() , Arrays.copyOfRange(newSpMasses, 0, realLenght), Arrays.copyOfRange(newSpIntensities, 0, realLenght), currentScan.getMsLevel(), Spectrum.ScanType.CENTROID);
+            long step4 = System.currentTimeMillis();
             logger.debug("Create CentroidSignal values + display markers.Nbr real points = "+realLenght+". TIME: "+(step4-step3)+ "TOTAL == "+(step4-start));
             referenceSpectrum = newSpectrum;
             _displayReferenceSpectrum(newSpectrum);
-            m_viewCentroidSignal.setEnabled(true);
+            m_freezeSpectrumBtn.setSelected(true);
+
         }
     }
-    
-    private void viewCentroidSignal(){
-        if(currentScanCentroided==null){
-            JOptionPane.showMessageDialog(this, "No centroid signal to show. Run compute centroid peaks first.", "View Centroid Signal Error", JOptionPane.WARNING_MESSAGE);                                       
-            return;
-        }
-        
-        List<Signal> signals = new ArrayList<>();
-        signals.add(currentScanCentroided);
-        JDialog dialog = new JDialog((JFrame)this.getTopLevelAncestor(), "Computed Centroid Signal Editor", true);
-        dialog.setContentPane(SignalViewerBuilder.buildEditor(signals, false));
-        dialog.setModalityType(Dialog.ModalityType.MODELESS);
-        dialog.pack();
-        dialog.setVisible(true);
-        
-    }
-    
+
     private void editSignal() {
       Signal signal = getSignal();
       List<Signal> signals = new ArrayList<>();
@@ -524,9 +459,7 @@ class ScansSpinnerModel extends AbstractSpinnerModel {
 
       if (scan != null && scan.getMasses().length > 0) {    
         
-         logger.info("display scan id = {}, masses length = {} ", scan.getIndex(), scan.getMasses().length);
-         currentScanCentroided = null;
-         m_viewCentroidSignal.setEnabled(false);
+//         logger.info("display scan id = {}, masses length = {} ", scan.getIndex(), scan.getMasses().length);
          Color plotColor = rawFilePanel.getPlotColor(rawFilePanel.getCurrentRawfile().getName());
          ScanTableModel scanModel = new ScanTableModel(scan);
          scanModel.setColor(plotColor);

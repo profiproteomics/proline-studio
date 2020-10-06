@@ -84,30 +84,34 @@ class PeakelAnnotatorImpl {
   }
 
   public AnnotatedChromatogram annotate(IChromatogram chromatogram, MsnExtractionRequest request, Integer expectedCharge) {
-    List<IPeakel> features = getPeakels().get((int)request.getMz());
+    List<IPeakel> peakels = getPeakels().get((int)request.getMz());
 
-    if (features == null)
+    if (peakels == null)
       return chromatogram == null ? null : new AnnotatedChromatogram(chromatogram, null);
 
-    IPeakel feature = features.stream().filter(f -> {
+    IPeakel peakel = peakels.stream().filter(f -> {
               double tolDa = f.getMz()*params.getMzTolPPM()/1e6;
               double upperTimeLimit = rawFile.getSpectrumElutionTime(rawFile.getNextSpectrumId(rawFile.getNextSpectrumId(rawFile.getSpectrumId(f.getLastElutionTime()), 1), 1));
               double lowerTimeLimit = rawFile.getSpectrumElutionTime(rawFile.getPreviousSpectrumId(rawFile.getSpectrumId(f.getFirstElutionTime()), 1));
               return (request.getElutionTime() * 60.0 >= lowerTimeLimit && request.getElutionTime()*60.0 <= upperTimeLimit && Math.abs(f.getMz() - request.getMz()) < tolDa);
             }
     ).findFirst().orElse(null);
-    if (feature == null) {
+    if (peakel == null) {
       double secondIsotopeMz = request.getMz() + AVERAGE_ISOTOPE_MASS_DIFF/expectedCharge;
-      features = getPeakels().get((int)secondIsotopeMz);
-      feature = features.stream().filter(f -> {
+      peakels = getPeakels().get((int)secondIsotopeMz);
+      if (peakels != null) {
+         peakel = peakels.stream().filter(f -> {
                 double tolDa = f.getMz()*params.getMzTolPPM()/1e6;
                 double upperTimeLimit = rawFile.getSpectrumElutionTime(rawFile.getNextSpectrumId(rawFile.getNextSpectrumId(rawFile.getSpectrumId(f.getLastElutionTime()), 1), 1));
                 double lowerTimeLimit = rawFile.getSpectrumElutionTime(rawFile.getPreviousSpectrumId(rawFile.getSpectrumId(f.getFirstElutionTime()), 1));
                 return (request.getElutionTime() * 60.0 >= lowerTimeLimit && request.getElutionTime()*60.0 <= upperTimeLimit && Math.abs(f.getMz() - secondIsotopeMz) < tolDa);
               }
-      ).findFirst().orElse(null);
+            ).findFirst().orElse(null);
+      }  else {
+          peakel = null;
+      }
     }
-    return new AnnotatedChromatogram(chromatogram, feature);
+    return new AnnotatedChromatogram(chromatogram, peakel);
   }
 }
 

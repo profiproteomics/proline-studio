@@ -32,7 +32,7 @@ public class SmoothingParamDialog extends DefaultDialog{
         String[] methods = {PARTIAL_SG_SMOOTHER, SG_SMOOTHER, BOTH_SMOOTHER};
         public SmoothingParamDialog(Window parent) {
             super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-            setTitle("Smootinh parameters ");
+            setTitle("Smooting parameters ");
             setInternalComponent(createInternalPanel());
         }
 
@@ -47,7 +47,7 @@ public class SmoothingParamDialog extends DefaultDialog{
             c.gridy = 0;
             c.gridwidth = 1;
             c.weightx = 0;
-            JLabel nbrPointLabel = new JLabel("How many points for smoothing algo");            
+            JLabel nbrPointLabel = new JLabel("Number of points ");
             internalPanel.add(nbrPointLabel, c);
             
             c.gridx++;
@@ -71,7 +71,7 @@ public class SmoothingParamDialog extends DefaultDialog{
             c.gridx = 0;
             c.gridy++;
             c.weightx = 0;
-            JLabel methodsLabel = new JLabel("Which smoothing method to apply");            
+            JLabel methodsLabel = new JLabel("Smoothing method ");
             internalPanel.add(methodsLabel, c);
             
             c.gridx++;

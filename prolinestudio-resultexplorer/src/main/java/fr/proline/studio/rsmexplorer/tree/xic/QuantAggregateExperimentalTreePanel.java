@@ -131,7 +131,12 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
         m_tree.addTreeSelectionListener(new TreeSelectionListener() {
             @Override
             public void valueChanged(TreeSelectionEvent e) {
-                m_channelPanel.repaint();
+
+                if (m_tree.getSelectionCount()>0) {
+                    m_channelPanel.clearSelection();
+                } else {
+                    m_channelPanel.repaint();
+                }
             }
         });
 
@@ -1162,7 +1167,54 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
 
             if (m_question.inside(e.getX(), e.getY())) {
-                JOptionPane.showMessageDialog(this, "TEST");
+
+                AbstractNode[] selectedNodes = m_tree.getSelectedNodes();
+                AbstractNode highlightRowNode = selectedNodes[0];
+
+                int rowSelected = 0;
+                for (int row=0;row<m_nbRows;row++) {
+                    if (m_dropZones[0][row].getNode() == highlightRowNode) {
+                        rowSelected = row;
+                        break;
+                    }
+                }
+
+                StringBuilder sb = new StringBuilder();
+
+                sb.append("The abundance of one ion in ");
+                sb.append(highlightRowNode.getData().getName());
+                sb.append(" will be the sum of its values in ");
+                int nb = m_datasets.size();
+                for (int i=0;i<nb;i++) {
+                    DDataset d = m_datasets.get(i);
+                    String name = d.getName();
+                    sb.append(name);
+                    if (i<nb-2) {
+                        sb.append(", ");
+                    } else if (i<nb-1) {
+                        sb.append(" and ");
+                    }
+                }
+                sb.append(".\n\n");
+
+                sb.append("In your Aggregation Quantitation Design, it is the sum of the abundances of this ion in ");
+
+
+                for (int col=0;col<m_nbCols;col++) {
+                    QuantitationChannel channel = m_dropZones[col][rowSelected].getChannel();
+
+                    String name = (channel != null) ? channel.getName() : "<no data>";
+                    sb.append(name);
+                    if (col<m_nbCols-2) {
+                        sb.append(", ");
+                    } else if (col<m_nbCols-1) {
+                        sb.append(" and ");
+                    }
+
+                }
+                sb.append(".");
+
+                JOptionPane.showMessageDialog(this, sb.toString(), "Aggregation Information", JOptionPane.INFORMATION_MESSAGE);
             } else {
                 m_tree.clearSelection();
             }

@@ -39,6 +39,9 @@ import javax.swing.tree.*;
  */
 public abstract class AbstractTree extends JTree implements MouseListener {
 
+    private static int ID_INC = 0;
+    private int m_id = ID_INC++;
+
     private SetRsetNameAction m_subscribedRenamer;
     private int m_expected = -1;
 
@@ -46,6 +49,10 @@ public abstract class AbstractTree extends JTree implements MouseListener {
     protected RSMTreeSelectionModel m_selectionModel;
     protected HashMap<AbstractData, AbstractNode> m_loadingMap = new HashMap<>();
     private HashSet<AbstractNode> m_loadingStartedMap = new HashSet<>();
+
+    public int getId() {
+        return m_id;
+    }
 
     public void subscribeRenamer(SetRsetNameAction subscribedRenamer) {
         this.m_subscribedRenamer = subscribedRenamer;

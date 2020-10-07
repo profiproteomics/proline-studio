@@ -50,32 +50,41 @@ public class DefaultFloatingPanel extends HourglassPanel {
     }
 
     public DefaultFloatingPanel(String infoText, String[] actionName, ActionListener[] a, Icon[] icon) {
+        this(infoText, actionName, a, icon, true);
+    }
+    public DefaultFloatingPanel(String infoText, String[] actionName, ActionListener[] a, Icon[] icon, boolean closable) {
         setBorder(BorderFactory.createLineBorder(Color.darkGray, 1, true));
         setOpaque(true);
         setLayout(new FlowLayout());
 
-        JButton closeButton = new JButton(IconManager.getIcon(IconManager.IconType.CROSS_SMALL7));
-        closeButton.setMargin(new Insets(0, 0, 0, 0));
-        closeButton.setFocusPainted(false);
-        closeButton.setContentAreaFilled(false);
+        if (closable) {
+            JButton closeButton = new JButton(IconManager.getIcon(IconManager.IconType.CROSS_SMALL7));
+            closeButton.setMargin(new Insets(0, 0, 0, 0));
+            closeButton.setFocusPainted(false);
+            closeButton.setContentAreaFilled(false);
 
-        closeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setVisible(false);
-            }
-        });
+            closeButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    setVisible(false);
+                }
+            });
+
+            add(closeButton);
+        }
 
         JLabel infoLabel = null;
         if (infoText != null) {
             infoLabel = new JLabel(infoText);
         }
 
-        add(closeButton);
+
         if (infoLabel != null) {
             add(infoLabel);
         }
 
+        int preferredButtonWidth = 0;
+        int preferredButtonHeight = 0;
         int nbActions = actionName.length;
         m_actionButtonArray = new JButton[nbActions];
         for (int i = 0; i < nbActions; i++) {
@@ -86,7 +95,18 @@ public class DefaultFloatingPanel extends HourglassPanel {
             m_actionButtonArray[i].addActionListener(a[i]);
 
             add(m_actionButtonArray[i]);
+
+            preferredButtonWidth = Math.max(preferredButtonWidth, m_actionButtonArray[i].getPreferredSize().width);
+            preferredButtonHeight = Math.max(preferredButtonWidth, m_actionButtonArray[i].getPreferredSize().height);
         }
+
+        // equalize dimension of buttons
+        Dimension buttonDimension = new Dimension(preferredButtonWidth, preferredButtonHeight);
+        for (int i = 0; i < nbActions; i++) {
+            m_actionButtonArray[i].setPreferredSize(buttonDimension);
+        }
+
+        //
 
         Dimension d = getPreferredSize();
         setBounds(0, 0, (int) d.getWidth(), (int) d.getHeight());
@@ -98,6 +118,16 @@ public class DefaultFloatingPanel extends HourglassPanel {
 
         setVisible(false);
 
+    }
+
+    public void enableButton(int index, boolean value) {
+        m_actionButtonArray[index].setEnabled(value);
+    }
+
+    public void enableAllButtons(boolean value) {
+        for (int i=0;i<m_actionButtonArray.length;i++) {
+            m_actionButtonArray[i].setEnabled(value);
+        }
     }
 
     public class DragGestureAdapter extends MouseAdapter {

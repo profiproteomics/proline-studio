@@ -47,6 +47,10 @@ public class DQuantitationChannelMapping {
         return parentQCNumber;
     }
 
+    public void setParentQCNumber(Integer parentQCNumber) {
+        this.parentQCNumber = parentQCNumber;
+    }
+
     public Map<DDataset, QuantitationChannel> getMappedQuantChannels() {
         return mappedQuantChannels;
     }

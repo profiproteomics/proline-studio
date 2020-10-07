@@ -93,10 +93,15 @@ public class XICSelectionTransferable implements Transferable, Serializable {
         private ArrayList<DataSetNode> m_datasetList = null;
         private ArrayList<AbstractNode> m_designList = null;
         
+
+        private int m_sourceId;
         
-        
-        public TransferData() {
-            
+        public TransferData(int sourceId) {
+            m_sourceId = sourceId;
+        }
+
+        public int getSourceId() {
+            return m_sourceId;
         }
         
         public boolean isDesignData() {

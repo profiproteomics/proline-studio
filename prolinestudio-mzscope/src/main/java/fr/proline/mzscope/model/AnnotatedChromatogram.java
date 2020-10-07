@@ -25,9 +25,9 @@ public class AnnotatedChromatogram implements IChromatogram {
   private IChromatogram chromatogram;
   private IPeakel peakel;
 
-  public AnnotatedChromatogram(IChromatogram chromatogram, IPeakel feature) {
+  public AnnotatedChromatogram(IChromatogram chromatogram, IPeakel peakel) {
     this.chromatogram = chromatogram;
-    this.peakel = feature;
+    this.peakel = peakel;
   }
 
   public IPeakel getAnnotation() {

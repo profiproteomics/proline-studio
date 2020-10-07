@@ -43,7 +43,7 @@ public class QCMappingTransferHandler extends AbstractTreeTransferHandler {
     private QCMappingTreeTableModel m_treeTableModel;
 
     public QCMappingTransferHandler(QCMappingTreeTable tree) {
-        super(false);
+        super(false, -1);
         m_treeTable = tree;
         m_treeTableModel = (QCMappingTreeTableModel) m_treeTable.getTreeTableModel();
     }

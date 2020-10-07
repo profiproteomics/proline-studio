@@ -69,12 +69,15 @@ public class QuantExperimentalDesignTree extends AbstractTree {
     private ArrayList<AbstractRSMAction> m_mainActions;
 
     public QuantExperimentalDesignTree(AbstractNode top, boolean editable, boolean canImport) {
+        this(top, editable, canImport, false);
+    }
+    public QuantExperimentalDesignTree(AbstractNode top, boolean editable, boolean canImport, boolean restrictToDnDToItself) {
 
         setEditable(editable);
 
         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        XICTransferHandler handler = new XICTransferHandler(false, this);
+        XICTransferHandler handler = new XICTransferHandler(false, this, restrictToDnDToItself);
         super.setTransferHandler(handler);
 
         if (canImport) {

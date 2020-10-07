@@ -35,9 +35,12 @@ public class AbstractTreeTransferHandler extends TransferHandler {
     private Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     
     protected boolean m_isIdentificationSelectionTree;
-    
-    protected AbstractTreeTransferHandler(boolean isSelectionTree) {
+
+    private int m_treeId;
+
+    protected AbstractTreeTransferHandler(boolean isSelectionTree, int treeId) {
         m_isIdentificationSelectionTree = isSelectionTree;
+        m_treeId = treeId;
     }
 
     @Override
@@ -52,7 +55,7 @@ public class AbstractTreeTransferHandler extends TransferHandler {
             if (keptNodes.isEmpty()) {
                 return null;
             }
-            XICSelectionTransferable.TransferData data = new XICSelectionTransferable.TransferData();
+            XICSelectionTransferable.TransferData data = new XICSelectionTransferable.TransferData(m_treeId);
             data.setDatasetList(keptNodes);//set Transferable data
             Integer transferKey = XICSelectionTransferable.register(data);
             return new XICSelectionTransferable(transferKey);
@@ -81,7 +84,7 @@ public class AbstractTreeTransferHandler extends TransferHandler {
                 keptNodes.add(node);
             }
             String keptNodesAsString = keptNodes.stream().map(i -> i.toString()).collect(Collectors.joining(",","[","]"));
-            XICSelectionTransferable.TransferData data = new XICSelectionTransferable.TransferData();
+            XICSelectionTransferable.TransferData data = new XICSelectionTransferable.TransferData(m_treeId);
             data.setDesignList(keptNodes);//set Transferable data
             Integer transferKey = XICSelectionTransferable.register(data);
             return new XICSelectionTransferable(transferKey);

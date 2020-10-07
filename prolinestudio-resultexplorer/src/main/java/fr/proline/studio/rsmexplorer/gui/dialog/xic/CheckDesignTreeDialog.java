@@ -21,9 +21,7 @@ import javax.swing.tree.TreePath;
  */
 public class CheckDesignTreeDialog extends DefaultDialog {
 
-    String groupName4checkDesignStructure;
-    QuantExperimentalDesignPanel m_experimentalDesignPanel;
-    QuantExperimentalDesignTree m_experimentalDesignTree;
+    private String groupName4checkDesignStructure;
 
     public CheckDesignTreeDialog(Window parent, ModalityType modalityType) {
         super(parent, modalityType);
@@ -37,10 +35,10 @@ public class CheckDesignTreeDialog extends DefaultDialog {
      * @param duplicates
      * @return
      */
-    public boolean checkDesignStructure(AbstractNode parentNode, Set<String> duplicates) {
+    public boolean checkDesignStructure(QuantExperimentalDesignTree experimentalDesignTree, AbstractNode parentNode, Set<String> duplicates) {
         String nodeName = parentNode.toString();
         if (nodeName.length() > 100) {
-            showErrorOnNode(parentNode, "Name Length should less than 100.");
+            showErrorOnNode(experimentalDesignTree, parentNode, "Name Length should less than 100.");
             return false;
         }
         AbstractNode.NodeTypes type = parentNode.getType();
@@ -49,7 +47,7 @@ public class CheckDesignTreeDialog extends DefaultDialog {
                 groupName4checkDesignStructure = "";
                 if (parentNode.isLeaf()
                         || (parentNode.getChildCount() == 1 && ((AbstractNode) parentNode.getChildAt(0)).getType() == AbstractNode.NodeTypes.DATASET_REFERENCE)) {
-                    showErrorOnNode(parentNode, "Your Experimental Design is empty.");
+                    showErrorOnNode(experimentalDesignTree, parentNode, "Your Experimental Design is empty.");
                     return false;
 
                 }
@@ -57,24 +55,24 @@ public class CheckDesignTreeDialog extends DefaultDialog {
             case BIOLOGICAL_GROUP:
                 groupName4checkDesignStructure = nodeName;
                 if (parentNode.isLeaf()) {
-                    showErrorOnNode(parentNode, "You must add at least one Biological Sample for each Biological Group.");
+                    showErrorOnNode(experimentalDesignTree, parentNode, "You must add at least one Biological Sample for each Biological Group.");
                     return false;
                 }
                 break;
             case BIOLOGICAL_SAMPLE:
                 if ((groupName4checkDesignStructure.length() + nodeName.length()) > 100) {
-                    showErrorOnNode(parentNode, "Group name + sample name, the length should less than 100.");
+                    showErrorOnNode(experimentalDesignTree, parentNode, "Group name + sample name, the length should less than 100.");
                     return false;
                 }
                 if (parentNode.isLeaf()) {
-                    showErrorOnNode(parentNode, "You must add at least one Identification for each Biological Sample.");
+                    showErrorOnNode(experimentalDesignTree, parentNode, "You must add at least one Identification for each Biological Sample.");
                     return false;
                 }
                 break;
             case BIOLOGICAL_SAMPLE_ANALYSIS:
                 if (parentNode.isLeaf()) {
                     if (duplicates.contains(parentNode.toString())) {
-                        showErrorOnNode(parentNode, "Biological Sample Analysis is a duplicate. Please rename using right click!");
+                        showErrorOnNode(experimentalDesignTree, parentNode, "Biological Sample Analysis is a duplicate. Please rename using right click!");
                         return false;
                     } else {
                         duplicates.add(parentNode.toString());
@@ -88,7 +86,7 @@ public class CheckDesignTreeDialog extends DefaultDialog {
         //Iterate over Groups
         while (children.hasMoreElements()) {
             AbstractNode rsmNode = (AbstractNode) children.nextElement();
-            if (!checkDesignStructure(rsmNode, duplicates)) {
+            if (!checkDesignStructure(experimentalDesignTree, rsmNode, duplicates)) {
                 return false;
             }
         }
@@ -103,7 +101,7 @@ public class CheckDesignTreeDialog extends DefaultDialog {
      * @param parentNode
      * @return
      */
-    public boolean checkBiologicalGroupName(AbstractNode parentNode) {
+    public boolean checkBiologicalGroupName(QuantExperimentalDesignTree experimentalDesignTree, AbstractNode parentNode) {
         List<String> listBiologicalGroupName = new ArrayList();
         Enumeration children = parentNode.children();
         //Iterate over Groups
@@ -114,7 +112,7 @@ public class CheckDesignTreeDialog extends DefaultDialog {
                 case BIOLOGICAL_GROUP: {
                     String gName = rsmNode.getData().getName();
                     if (listBiologicalGroupName.contains(gName)) {
-                        showErrorOnNode(rsmNode, "The Biological Group name must be unique.");
+                        showErrorOnNode(experimentalDesignTree, rsmNode, "The Biological Group name must be unique.");
                         return false;
                     }
                     listBiologicalGroupName.add(rsmNode.getData().getName());
@@ -127,7 +125,7 @@ public class CheckDesignTreeDialog extends DefaultDialog {
                         switch (typeS) {
                             case BIOLOGICAL_SAMPLE: {//in one group, the sample name should unique
                                 if (listBiologicalSampleName.contains(sampleNode.getData().getName())) {
-                                    showErrorOnNode(sampleNode, "The Biological Sample name must be unique.");
+                                    showErrorOnNode(experimentalDesignTree, sampleNode, "The Biological Sample name must be unique.");
                                     return false;
                                 }
                                 listBiologicalSampleName.add(sampleNode.getData().getName());
@@ -140,24 +138,22 @@ public class CheckDesignTreeDialog extends DefaultDialog {
         return true;
     }
 
-    protected void showErrorOnNode(AbstractNode node, String error) {
-        if (m_experimentalDesignPanel != null) {
-            m_experimentalDesignTree = m_experimentalDesignPanel.getExperimentalDesignTree();
-        }
+    protected void showErrorOnNode(QuantExperimentalDesignTree experimentalDesignTree, AbstractNode node, String error) {
+
         // expand parentnode if needed
         AbstractNode parentNode = (AbstractNode) node.getParent();
         if (parentNode != null) {
             TreePath pathToExpand = new TreePath(parentNode.getPath());
-            if (!m_experimentalDesignTree.isExpanded(pathToExpand)) {
-                m_experimentalDesignTree.expandPath(pathToExpand);
+            if (!experimentalDesignTree.isExpanded(pathToExpand)) {
+                experimentalDesignTree.expandPath(pathToExpand);
             }
         }
         // scroll to node if needed
         TreePath path = new TreePath(node.getPath());
-        m_experimentalDesignTree.scrollPathToVisible(path);
+        experimentalDesignTree.scrollPathToVisible(path);
 
         // display error
         setStatus(true, error);
-        highlight(m_experimentalDesignTree, m_experimentalDesignTree.getPathBounds(path));
+        highlight(experimentalDesignTree, experimentalDesignTree.getPathBounds(path));
     }
 }

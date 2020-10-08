@@ -220,6 +220,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                 if (finished) {
                     unregisterTask(taskId);
                     addDataChanged(ExtendedTableModelInterface.class);
+                    addDataChanged(ExtendedTableModelInterface.class, ParameterSubtypeEnum.LIST_DATA);
                     propagateDataChanged();
                 }
             }

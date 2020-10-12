@@ -480,6 +480,9 @@ public class YAxis extends Axis {
 
     @Override
     public int valueToPixel(double v) {
+        if (m_isPixel) {
+            return (int) Math.round(m_maxValue-v);
+        }
         if (m_log) {
             double logV = ((v <= LOG_MIN_VALUE) || Double.isNaN(v)) ? Math.log10(LOG_MIN_VALUE) : Math.log10(v);
             double min = Math.log10(m_minValue <= LOG_MIN_VALUE ? LOG_MIN_VALUE : m_minValue);

@@ -33,7 +33,7 @@ public class ExportAction extends AbstractRSMAction {
 
     // Could be ExportXXXAction or ExportXXXJMSAction
     private AbstractRSMAction m_exportDatasetAction;
-    private AbstractRSMAction m_exportPrideAction;
+    private AbstractRSMAction m_exportPrideAction; //VDS To remove... just hide for this version.
     private AbstractRSMAction m_exportPeakViewSpectraAction;
     private AbstractRSMAction m_exportSpectronautSpectraAction;
     private AbstractRSMAction m_exportMzIdentMLAction;
@@ -52,7 +52,8 @@ public class ExportAction extends AbstractRSMAction {
         m_exportDatasetAction = new ExportDatasetJMSAction(getTree());
 
         if (getTree() == IdentificationTree.getCurrentTree()) {
-            m_exportPrideAction = new ExportRSM2PrideJMSAction(getTree());
+            //m_exportPrideAction = new ExportRSM2PrideJMSAction(getTree());
+            m_exportPrideAction = null;
             m_exportMzIdentMLAction = new ExportMzIdentMLAction(getTree());
         } else {
             m_exportPrideAction = null;
@@ -61,10 +62,10 @@ public class ExportAction extends AbstractRSMAction {
 
         JMenuItem exportDatasetItem = new JMenuItem(m_exportDatasetAction);
         m_menu.add(exportDatasetItem);
-        if (m_exportPrideAction != null) {
-            JMenuItem exportPrideItem = new JMenuItem(m_exportPrideAction);
-            m_menu.add(exportPrideItem);
-        }
+//        if (m_exportPrideAction != null) {
+//            JMenuItem exportPrideItem = new JMenuItem(m_exportPrideAction);
+//            m_menu.add(exportPrideItem);
+//        }
 
         if (m_exportMzIdentMLAction != null) {
             JMenuItem exportMzIdentMLItem = new JMenuItem(m_exportMzIdentMLAction);
@@ -91,9 +92,9 @@ public class ExportAction extends AbstractRSMAction {
     public void updateEnabled(AbstractNode[] selectedNodes) {
 
         m_exportDatasetAction.updateEnabled(selectedNodes);
-        if (m_exportPrideAction != null) {
-            m_exportPrideAction.updateEnabled(selectedNodes);
-        }
+//        if (m_exportPrideAction != null) {
+//            m_exportPrideAction.updateEnabled(selectedNodes);
+//        }
         if (m_exportMzIdentMLAction != null) {
             m_exportMzIdentMLAction.updateEnabled(selectedNodes);
         }
@@ -102,7 +103,7 @@ public class ExportAction extends AbstractRSMAction {
         m_exportPeakViewSpectraAction.updateEnabled(selectedNodes);
 
         boolean isEnabled = m_exportDatasetAction.isEnabled()
-                || (m_exportPrideAction != null && m_exportPrideAction.isEnabled())
+//                || (m_exportPrideAction != null && m_exportPrideAction.isEnabled())
                 || m_exportSpectronautSpectraAction.isEnabled()
                 || m_exportPeakViewSpectraAction.isEnabled()
                 || (m_exportMzIdentMLAction != null && m_exportMzIdentMLAction.isEnabled());

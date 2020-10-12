@@ -151,14 +151,15 @@ public class MzdbRawFile implements IRawFile {
     public IChromatogram getTIC(int msLevel) {
         IChromatogram chromatogram = null;
         try {
-            SpectrumHeader[] headers = reader.getSpectrumHeaders();
+            SpectrumHeader[] headers = (msLevel < 0) ? reader.getSpectrumHeaders() : reader.getMs1SpectrumHeaders();
             double[] xAxisData = new double[headers.length];
             double[] yAxisData = new double[headers.length];
             for (int i = 0; i < headers.length; i++) {
                 xAxisData[i] = (headers[i].getElutionTime() / 60.0);
                 yAxisData[i] = ((double) headers[i].getTIC());
             }
-            if (Double.isNaN(elutionEndTime)) elutionEndTime = Math.ceil(xAxisData[headers.length -1]);
+            if (Double.isNaN(elutionEndTime)) elutionEndTime = reader.getLastTime()/60.0;
+//            if (Double.isNaN(elutionEndTime)) elutionEndTime = Math.ceil(xAxisData[headers.length -1]);
             if (Double.isNaN(elutionStartTime))elutionStartTime = Math.floor(xAxisData[0]);
             chromatogram = new Chromatogram(getName(), getName()+" TIC", xAxisData, yAxisData, getElutionStartTime(), getElutionEndTime());
             return chromatogram;

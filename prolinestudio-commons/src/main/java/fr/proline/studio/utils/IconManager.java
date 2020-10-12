@@ -224,7 +224,11 @@ public class IconManager {
         VALIDATED_AND_USED,
         VALIDATED_AND_NOTUSED,
         CENTROID_SPECTRA,
-        EXPORT_CENTROID
+        EXPORT_CENTROID,
+        TIC,
+        TIC_MS1,
+        BPC,
+        MS2;
     }
     
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -719,7 +723,7 @@ public class IconManager {
             case MOUSE_SELECT_FREE:
                 return "fr/proline/studio/images/selection-select-byhand.png";
             case EXPAND:
-                return "fr/proline/studio/images/expand.png";
+                return "fr/proline/studio/images/expand2.png";
             case ARROW_MOVE_UP_BIG:
                 return "fr/proline/studio/images/arrow-090.png";
             case ARROW_MOVE_DOWN_BIG:
@@ -738,6 +742,14 @@ public class IconManager {
                 return "fr/proline/studio/images/centroid.png";
             case EXPORT_CENTROID:
                 return "fr/proline/studio/images/export-centroid.png";
+            case TIC:
+                return "fr/proline/studio/images/tic.png";
+            case TIC_MS1:
+                return "fr/proline/studio/images/tic-ms1.png";
+            case BPC:
+                return "fr/proline/studio/images/bpc.png";
+            case MS2:
+                return "fr/proline/studio/images/ms2.png";
         }
 
         return null; // can not happen

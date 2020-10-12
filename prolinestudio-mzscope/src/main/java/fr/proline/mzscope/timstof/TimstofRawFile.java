@@ -98,7 +98,7 @@ public class TimstofRawFile implements IRawFile{
     }
 
     @Override
-    public IChromatogram getTIC() {
+    public IChromatogram getTIC(int msLevel) {
         if(m_ticChromato == null){
             double[] intensities = new double[m_ttFrames.size()];
             double[] times = new double[m_ttFrames.size()];
@@ -115,7 +115,7 @@ public class TimstofRawFile implements IRawFile{
     
      public float getSpectrumTIC(int index) {         
         if(m_ticChromato == null)
-            getTIC();
+            getTIC(-1);
         
         int frIndx = m_spectra2FrameIndex.get(index);
         double[] intensities = m_ticChromato.getIntensities();

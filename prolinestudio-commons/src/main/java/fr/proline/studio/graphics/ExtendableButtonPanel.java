@@ -24,11 +24,7 @@ import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import javax.swing.AbstractButton;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JToggleButton;
+import javax.swing.*;
 
 /**
  *
@@ -46,25 +42,29 @@ public class ExtendableButtonPanel extends JPanel {
     private boolean m_isExpanded = false;
     
     private ExtendableButtonPanelGroup m_group = null;
-    
+    private final JButton m_expandButton;
+
     public ExtendableButtonPanel(AbstractButton currentButton) {
         
         setBorder(null);
         setOpaque(true);
-        setLayout(new FlowLayout( FlowLayout.LEFT, 2, 2));
+
+//        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setLayout(new FlowLayout( FlowLayout.TRAILING, 0, 0));
         
         m_currentButton = currentButton;
+
+        m_expandButton = new JButton(IconManager.getIcon(IconManager.IconType.EXPAND));
+        m_expandButton.setAlignmentY(JComponent.TOP_ALIGNMENT);
+        m_expandButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        m_expandButton.setFocusPainted(false);
+        m_expandButton.setBorder(null);
+        m_expandButton.setContentAreaFilled(false);
+        m_expandButton.setOpaque(false);
         
-        JButton expandButton = new JButton(IconManager.getIcon(IconManager.IconType.EXPAND));
-        expandButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
-        expandButton.setFocusPainted(false);
-        expandButton.setBorder(null);
-        expandButton.setContentAreaFilled(false);
-        expandButton.setOpaque(false);
+        add(m_expandButton);
         
-        add(expandButton);
-        
-        expandButton.addActionListener(new ActionListener() {
+        m_expandButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (m_isExpanded) {
@@ -112,7 +112,7 @@ public class ExtendableButtonPanel extends JPanel {
     }
     
     private int getXForExpandedPanel() {
-        return m_currentButton.getX() + m_currentButton.getWidth();
+        return m_currentButton.getX() + m_currentButton.getWidth() - m_expandButton.getWidth();
     }
 
     private int getYForExpandedPanel() {
@@ -172,6 +172,7 @@ public class ExtendableButtonPanel extends JPanel {
         
     private void initCurrentButton(AbstractButton button) {
         m_currentButton.setIcon(button.getIcon());
+        m_currentButton.setText(button.getText());
         m_currentButton.setToolTipText(button.getToolTipText());
         for (ActionListener a : m_currentButton.getActionListeners()) {
             m_currentButton.removeActionListener(a);

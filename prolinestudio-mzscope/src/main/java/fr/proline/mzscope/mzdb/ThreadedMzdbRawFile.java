@@ -205,10 +205,10 @@ public class ThreadedMzdbRawFile implements IRawFile {
    }
    
    @Override
-    public IChromatogram getTIC() {
+    public IChromatogram getTIC(int msLevel) {
       try {
          return service.submit(() -> {
-            IChromatogram chromatogram =  mzdbRawFile.getTIC();
+            IChromatogram chromatogram =  mzdbRawFile.getTIC(msLevel);
             return chromatogram;
          }).get();
       } catch (InterruptedException | ExecutionException ex ) {

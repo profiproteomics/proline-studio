@@ -63,7 +63,7 @@ public class MzMLRawFile implements IRawFile {
 
    
    @Override
-    public IChromatogram getTIC() {
+    public IChromatogram getTIC(int msLevel) {
       throw new UnsupportedOperationException("Not supported yet.");      
    }
     

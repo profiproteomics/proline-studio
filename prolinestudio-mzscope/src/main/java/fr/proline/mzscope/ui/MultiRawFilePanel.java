@@ -65,7 +65,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             chromatogramByRawFile.put(rawFile, null);
             colorByRawFilename.put(rawFile.getName(), null);
         }
-        displayTIC();
+        displayTIC(-1);
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -137,7 +137,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
     }
 
     @Override
-    protected void displayTIC() {
+    protected void displayTIC(int msLevel) {
         final List<IRawFile> rawFiles = new ArrayList<>(rawfiles);
         if (rawFileLoading != null){
             rawFileLoading.setWaitingState(true);
@@ -151,7 +151,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             protected Integer doInBackground() throws Exception {
                 int count = 0;    
                 for (IRawFile rawFile : rawFiles) {
-                    IChromatogram c = rawFile.getTIC();
+                    IChromatogram c = rawFile.getTIC(msLevel);
                     chromatogramByRawFile.put(rawFile, c);
                     publish(c);
                 }

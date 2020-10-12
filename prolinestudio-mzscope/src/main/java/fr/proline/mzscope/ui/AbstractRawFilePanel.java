@@ -22,30 +22,21 @@ import fr.proline.mzscope.ui.model.MzScopePreferences;
 import fr.proline.mzscope.utils.Display;
 import fr.proline.mzscope.utils.KeyEventDispatcherDecorator;
 import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.graphics.ExtendableButtonPanel;
 import fr.proline.studio.graphics.marker.IntervalMarker;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.StringUtils;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.KeyEventDispatcher;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
+
+import java.awt.*;
+import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import javax.swing.AbstractButton;
-import javax.swing.JButton;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
-import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
-import javax.swing.SwingWorker;
+import javax.swing.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +63,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
     protected Spectrum currentScan;
     private JToggleButton showMS2EventsButton;
     private JToggleButton overlayBtn;
+    private JLayeredPane m_layeredPane;
 
     protected IRawFileLoading rawFileLoading;
 
@@ -101,7 +93,22 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
 
     private void initComponents() {
         this.setLayout(new BorderLayout());
-        this.add(getMainPanel(), BorderLayout.CENTER);
+
+        m_layeredPane = new JLayeredPane();
+        add(m_layeredPane, BorderLayout.CENTER);
+
+        JPanel mainPanel = getMainPanel();
+        m_layeredPane.add(mainPanel, JLayeredPane.DEFAULT_LAYER);
+        m_layeredPane.addComponentListener(new ComponentAdapter() {
+
+            @Override
+            public void componentResized(ComponentEvent e) {
+                final Component c = e.getComponent();
+                mainPanel.setBounds(0, 0, c.getWidth(), c.getHeight());
+                m_layeredPane.revalidate();
+                m_layeredPane.repaint();
+            }
+        });
     }
 
     private JPanel getMainPanel() {
@@ -175,18 +182,43 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
         ExportButton exportImageButton = new ExportButton("Graphic", chromatogramPanel.getChromatogramPlotPanel());
         chromatogramToolbar.add(exportImageButton);
 
-        JButton displayTICbtn = new JButton("TIC");
-        displayTICbtn.setToolTipText("Display TIC IChromatogram");
+        JButton ticBtn = new JButton(IconManager.getIcon(IconManager.IconType.TIC));
+        ticBtn.setToolTipText("Display TIC Chromatogram");
+        ticBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                displayTIC(-1);
+            }
+        });
+
+        JButton displayTICbtn = new JButton(IconManager.getIcon(IconManager.IconType.TIC));
+        displayTICbtn.setToolTipText("Display TIC Chromatogram");
         displayTICbtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                displayTIC();
+                displayTIC(-1);
             }
         });
-        chromatogramToolbar.add(displayTICbtn);
 
-        JButton displayBPIbtn = new JButton("BPC");
-        displayBPIbtn.setToolTipText("Display Base Peak IChromatogram");
+        JButton displayTICMS1btn = new JButton(IconManager.getIcon(IconManager.IconType.TIC_MS1));
+        displayTICMS1btn.setToolTipText("Display MS1 TIC Chromatogram");
+        displayTICMS1btn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                displayTIC(1);
+            }
+        });
+
+        ExtendableButtonPanel extendableButtonPanel = new ExtendableButtonPanel(ticBtn);
+        m_layeredPane.add(extendableButtonPanel, JLayeredPane.PALETTE_LAYER);
+        extendableButtonPanel.registerButton(displayTICbtn);
+        extendableButtonPanel.registerButton(displayTICMS1btn);
+
+
+        chromatogramToolbar.add(ticBtn);
+
+        JButton displayBPIbtn = new JButton(IconManager.getIcon(IconManager.IconType.BPC));
+        displayBPIbtn.setToolTipText("Display Base Peak Chromatogram");
         displayBPIbtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -206,7 +238,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
 
     protected AbstractButton getShowMS2Button() {
         if (showMS2EventsButton == null) {
-        showMS2EventsButton = new JToggleButton("MS2", false);
+        showMS2EventsButton = new JToggleButton(IconManager.getIcon(IconManager.IconType.MS2), false);
         showMS2EventsButton.setToolTipText("Show or hide MS2 Events");
         showMS2EventsButton.addActionListener(new ActionListener() {
             @Override
@@ -451,7 +483,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
         return false;
     }
 
-    protected abstract void displayTIC();
+    protected abstract void displayTIC(int msLevel);
 
     protected abstract void displayBPI();
 

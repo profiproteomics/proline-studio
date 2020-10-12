@@ -53,7 +53,7 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
       this.rawfile = rawfile;
       updateToolbar();
       if (displayDefaultChrom)
-         displayTIC();
+         displayTIC(-1);
    }
 
    public SingleRawFilePanel(IRawFile rawfile) {
@@ -102,7 +102,7 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
    }
 
    @Override
-   public void displayTIC() {
+   public void displayTIC(int msLevel) {
       final IRawFile rawFile = this.rawfile;
       if (rawFileLoading != null){
         rawFileLoading.setWaitingState(true);
@@ -111,7 +111,7 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
       SwingWorker worker = new SwingWorker<IChromatogram, Void>() {
          @Override
          protected IChromatogram doInBackground() throws Exception {
-            return rawFile.getTIC();
+            return rawFile.getTIC(msLevel);
          }
 
          @Override

@@ -50,9 +50,10 @@ public interface IRawFile {
    
    /**
     * Returns the Total Ion IChromatogram of this rax file.
-    * @return 
+    * @return
+    * @param msLevel
     */
-   public IChromatogram getTIC();
+   public IChromatogram getTIC(int msLevel);
 
    /**
     * Returns the Base Peak IChromatogram.

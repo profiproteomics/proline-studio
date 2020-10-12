@@ -148,7 +148,7 @@ public class MzdbRawFile implements IRawFile {
     }
 
     @Override
-    public IChromatogram getTIC() {
+    public IChromatogram getTIC(int msLevel) {
         IChromatogram chromatogram = null;
         try {
             SpectrumHeader[] headers = reader.getSpectrumHeaders();

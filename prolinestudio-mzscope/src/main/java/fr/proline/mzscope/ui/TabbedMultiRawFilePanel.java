@@ -423,7 +423,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
                     
                 for (IRawFile rawFile : rawfiles) {
                     mapRawFileLoading.get(rawFile).setWaitingState(true);
-                    IChromatogram c = rawFile.getTIC();
+                    IChromatogram c = rawFile.getTIC(-1);
                     count++;
                     publish(c);
                 }

@@ -247,21 +247,15 @@ public class ExportFastaAction extends AbstractRSMAction {
             m_logger.debug("->extraitRsmSequenceRetrived: " + node.toString());
             ResultSummary rsm = node.getResultSummary();
             if (rsm == null) {
-                m_logger.debug("->rsm is null");
-                long rsmId = node.getResultSummaryId();
                 loadResultSummary(node);
             } else {
-                m_logger.debug("->rsm is ok");
                 String properties = rsm.getSerializedProperties();
 
                 if (properties != null && properties.contains(SEQUENCE_RETRIVED) || node.isBioRetrived()) {
-                    m_logger.debug("-->rsm : sequenceRetrived");
                     //write bio sequence
                     extraitProteinSet(node);
                 } else {//not sur,perhaps sequenceRetrived, but properties has not updated, need a reloadResultSummay
-                    m_logger.debug("-->rsm : sequenceRetrived");
                     retriveBioSequence(node);
-
                 }
             }
         }
@@ -329,7 +323,6 @@ public class ExportFastaAction extends AbstractRSMAction {
                         treeModel.nodeChanged(node);
 
                     } else {
-                        m_logger.debug("--->retriveBioSequence ok " + dataSet.getName());
                         ResultSummary rsm = dataSet.getResultSummary();
                         //loadResultSummary(dataSet);
 
@@ -375,10 +368,8 @@ public class ExportFastaAction extends AbstractRSMAction {
 
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                    m_logger.debug("----->call back loadProteinSet");
                     if (success) {
                         DProteinSet[] proteinSetArray = rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).getProteinSetArray();
-                        m_logger.debug("----->call back success, rsm: " + rsm.getId());
                         if (m_exportMode.equals(ExportMode.CONCATENATED)) {
                             addProteinSet(proteinSetArray);
                         } else {
@@ -427,25 +418,28 @@ public class ExportFastaAction extends AbstractRSMAction {
                     DBioSequence bioSequence = typicalProtM.getDBioSequence();
                     String sequence = "";
                     if (bioSequence != null) {
-                        sequence = bioSequence.getSequence();
-                    }
-                    int seqLength = sequence.length();
-                    int start, stop;
-                    bWriter.append(">");
-                    bWriter.append(name);
-                    bWriter.append(" ");
-                    bWriter.append(description);
-                    bWriter.newLine();
-                    start = 0;
-                    for (int i = 0; i < seqLength / lineLength; i++) {
-                        stop = (i + 1) * lineLength;
-                        bWriter.append(sequence.substring(start, stop));
+                        sequence = bioSequence.getSequence();                    
+                        int seqLength = sequence.length();
+                        int start, stop;
+                        bWriter.append(">");
+                        bWriter.append(name);
+                        bWriter.append(" ");
+                        if(description.contains(">")){
+                            description = description.replace('>', ' ');
+                        }
+                        bWriter.append(description);
                         bWriter.newLine();
-                        start = stop;
-                    }
-                    if (start < seqLength) {
-                        bWriter.append(sequence.substring(start));
-                        bWriter.newLine();
+                        start = 0;
+                        for (int i = 0; i < seqLength / lineLength; i++) {
+                            stop = (i + 1) * lineLength;
+                            bWriter.append(sequence.substring(start, stop));
+                            bWriter.newLine();
+                            start = stop;
+                        }
+                        if (start < seqLength) {
+                            bWriter.append(sequence.substring(start));
+                            bWriter.newLine();
+                        }
                     }
                 }
             }

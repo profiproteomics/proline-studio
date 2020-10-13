@@ -65,6 +65,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
     private static final String GENERAL_APPLICATION_SETTINGS = "General";
     
     public static final String MS_FILES_SETTINGS = "MsFiles";
+    public static final String OTHER_PREVIOUS_MS_FILES_SETTINGS = "Conversion/Upload Settings";
     public static final String FILENAME = "Filename";
     public static final String ABSOLUTE_PATH = "Absolute Path";
     public static final String WORKING_SET_ENTRY_NAMING_KEY = "WsEntryLabel";
@@ -153,6 +154,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
     private ParameterList getMsFilesParameters() {
 
         m_msParameterList = new ParameterList(MS_FILES_SETTINGS);
+        m_msParameterList.addBackwardCompatiblePrefix(OTHER_PREVIOUS_MS_FILES_SETTINGS);
 
         String[] converterExtentions = {"exe"};
         String[] converterFilterNames = {"raw2mzDB.exe"};

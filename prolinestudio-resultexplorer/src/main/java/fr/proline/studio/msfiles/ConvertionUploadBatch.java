@@ -90,12 +90,14 @@ public class ConvertionUploadBatch implements Runnable, MsListener {
             MzdbUploadSettings uploadSettings = m_conversions.values().iterator().next().getUploadSettings();
             if (uploadSettings != null) {
                 MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandMultipleTreePath(m_parentDirectories, uploadSettings.getMountingPointPath());
+                MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();
             }
         } else {
             MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
+            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();
         }
 
-        MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();
+        
 
         Iterator it = m_conversions.entrySet().iterator();
         while (it.hasNext()) {

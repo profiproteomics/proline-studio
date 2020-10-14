@@ -68,40 +68,66 @@ import org.openide.util.NbPreferences;
  */
 public class ConvertRawDialog extends DefaultDialog implements FileDialogInterface {
 
-    private static ConvertRawDialog m_singletonDialog = null;
-    private static JList m_fileList;
+    private static ConvertRawDialog m_singletonNonConnectedDialog = null;
+    private static ConvertRawDialog m_singletonConnectedDialog = null;
+    
+    private boolean m_serverConnected;
+    private JList m_fileList;
     private JScrollPane m_fileListScrollPane;
     private JButton m_addFileButton, m_removeFileButton;
-    private static ParameterList m_parameterList;
+    private ParameterList m_parameterList;
     private BooleanParameter m_deleteMzdb, m_deleteRaw, m_uploadMzdb, m_createParentDirectoryParameter;
 
     private FileParameter m_converterFilePath, m_outputFilePath;
 
-    private static ObjectParameter m_uploadLabelParameter;
+    private static ObjectParameter m_uploadLabelParameter = null;
     private String m_lastParentDirectory;
 
     public static ConvertRawDialog getDialog(Window parent) {
-        if (m_singletonDialog == null) {
-            m_singletonDialog = new ConvertRawDialog(parent);
-        } else {
-            ArrayList<String> labels = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_MZDB_FILES);
-            Object[] associatedTable = labels.toArray(new String[labels.size()]);
-            Object[] objectTable = labels.toArray(new String[labels.size()]);
-            m_uploadLabelParameter.updateAssociatedObjects(associatedTable);
-            m_uploadLabelParameter.updateObjects(objectTable);
-            m_parameterList.loadParameters(NbPreferences.root());
-            if (m_fileList != null) {
-                DefaultListModel model = (DefaultListModel) m_fileList.getModel();
-                model.clear();
+        
+        ArrayList<String> labels = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_MZDB_FILES);
+        boolean connectedToServer = (labels != null);
+   
+        if (connectedToServer) {
+            if (m_singletonConnectedDialog == null) {
+                m_singletonConnectedDialog = new ConvertRawDialog(parent, true);
+            } else {
+                Object[] associatedTable = labels.toArray(new String[labels.size()]);
+                Object[] objectTable = labels.toArray(new String[labels.size()]);
+                m_uploadLabelParameter.updateAssociatedObjects(associatedTable);
+                m_uploadLabelParameter.updateObjects(objectTable);
+                m_singletonConnectedDialog.m_parameterList.loadParameters(NbPreferences.root());
+                if (m_singletonConnectedDialog.m_fileList != null) {
+                    DefaultListModel model = (DefaultListModel) m_singletonConnectedDialog.m_fileList.getModel();
+                    model.clear();
+                }
             }
+            
+            return m_singletonConnectedDialog;
+        } else {
+            if (m_singletonNonConnectedDialog == null) {
+                m_singletonNonConnectedDialog = new ConvertRawDialog(parent, false);
+            } else {
+
+                m_singletonNonConnectedDialog.m_parameterList.loadParameters(NbPreferences.root());
+                if (m_singletonNonConnectedDialog.m_fileList != null) {
+                    DefaultListModel model = (DefaultListModel) m_singletonNonConnectedDialog.m_fileList.getModel();
+                    model.clear();
+                }
+            }
+            
+            return m_singletonNonConnectedDialog;
         }
 
-        return m_singletonDialog;
+
+        
     }
 
-    public ConvertRawDialog(Window parent) {
+    private ConvertRawDialog(Window parent, boolean serverConnected) {
         super(parent, Dialog.ModalityType.MODELESS);
 
+        m_serverConnected = serverConnected;
+        
         setTitle("Convert raw file(s)");
 
         setSize(new Dimension(360, 480));
@@ -163,48 +189,57 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
         m_deleteRaw = new BooleanParameter("DELETE_RAW", "Delete raw file after a successful conversion", rawCheckbox, false);
         m_parameterList.add(m_deleteRaw);
 
-        JCheckBox uploadCheckbox = new JCheckBox("Upload .mzdb file successful conversion");
-        m_uploadMzdb = new BooleanParameter("UPLOAD_CONVERTED", "Upload after conversion", uploadCheckbox, false);
-        m_parameterList.add(m_uploadMzdb);
 
-        ArrayList<String> labels = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_MZDB_FILES);
 
-        Object[] associatedTable = labels.toArray(new String[labels.size()]);
-        JComboBox namingComboBox = new JComboBox(associatedTable);
-        Object[] objectTable = labels.toArray(new String[labels.size()]);
-        m_uploadLabelParameter = new ObjectParameter("MZDB_MOUNT_LABEL", "Server's mounting point", namingComboBox, associatedTable, objectTable, 0, null);
-        m_parameterList.add(m_uploadLabelParameter);
+        
+        if (m_serverConnected) {
 
-        JCheckBox mzdbCheckbox = new JCheckBox("Delete .mzdb file after a successful upload");
-        m_deleteMzdb = new BooleanParameter("DELETE_MZDB", "Delete mzdb file after a successful upload", mzdbCheckbox, false);
-        m_parameterList.add(m_deleteMzdb);
-
-        JCheckBox parentDirectoryCheckbox = new JCheckBox("Create Parent Directory in Destination");
-        m_createParentDirectoryParameter = new BooleanParameter("CREATE_PARENT_DIRECTORY", "Create Parent Directory in Destination", parentDirectoryCheckbox, false);
-        m_parameterList.add(m_createParentDirectoryParameter);
+            JCheckBox uploadCheckbox = new JCheckBox("Upload .mzdb file successful conversion");
+            m_uploadMzdb = new BooleanParameter("UPLOAD_CONVERTED", "Upload after conversion", uploadCheckbox, false);
+            m_parameterList.add(m_uploadMzdb);
+            
+            ArrayList<String> labels = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_MZDB_FILES);
+            
+            Object[] associatedTable = labels.toArray(new String[labels.size()]);
+            Object[] objectTable = labels.toArray(new String[labels.size()]);
+            JComboBox namingComboBox = new JComboBox(associatedTable);
+            m_uploadLabelParameter = new ObjectParameter("MZDB_MOUNT_LABEL", "Server's mounting point", namingComboBox, associatedTable, objectTable, 0, null);
+            m_parameterList.add(m_uploadLabelParameter);
+            
+            JCheckBox mzdbCheckbox = new JCheckBox("Delete .mzdb file after a successful upload");
+            m_deleteMzdb = new BooleanParameter("DELETE_MZDB", "Delete mzdb file after a successful upload", mzdbCheckbox, false);
+            m_parameterList.add(m_deleteMzdb);
+            
+            JCheckBox parentDirectoryCheckbox = new JCheckBox("Create Parent Directory in Destination");
+            m_createParentDirectoryParameter = new BooleanParameter("CREATE_PARENT_DIRECTORY", "Create Parent Directory in Destination", parentDirectoryCheckbox, false);
+            m_parameterList.add(m_createParentDirectoryParameter);
+        }
 
         m_parameterList.loadParameters(NbPreferences.root());
 
-        AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(m_parameterList) {
+        AbstractLinkedParameters linkedParameters = null;
+        if (m_serverConnected) {
+            linkedParameters = new AbstractLinkedParameters(m_parameterList) {
 
-            @Override
-            public void valueChanged(String value, Object associatedValue) {
+                @Override
+                public void valueChanged(String value, Object associatedValue) {
 
-                showParameter(m_deleteMzdb, (boolean) m_uploadMzdb.getObjectValue(), (boolean) m_deleteMzdb.getObjectValue());
-                showParameter(m_uploadLabelParameter, (boolean) m_uploadMzdb.getObjectValue(), m_uploadLabelParameter.getObjectValue());
-                showParameter(m_createParentDirectoryParameter, (boolean) m_uploadMzdb.getObjectValue(), (boolean) m_createParentDirectoryParameter.getObjectValue());
-                updateParameterListPanel();
-            }
+                    showParameter(m_deleteMzdb, (boolean) m_uploadMzdb.getObjectValue(), (boolean) m_deleteMzdb.getObjectValue());
+                    showParameter(m_uploadLabelParameter, (boolean) m_uploadMzdb.getObjectValue(), m_uploadLabelParameter.getObjectValue());
+                    showParameter(m_createParentDirectoryParameter, (boolean) m_uploadMzdb.getObjectValue(), (boolean) m_createParentDirectoryParameter.getObjectValue());
+                    updateParameterListPanel();
+                }
 
-        };
-
+            };
+        }
         //linkedParameters.valueChanged("", "");
         JPanel parameterPanel = m_parameterList.getPanel();
         parameterPanel.setBorder(BorderFactory.createTitledBorder(" Conversion & Upload Options "));
 
-        m_uploadMzdb.addLinkedParameters(linkedParameters);
-
-        //linkedParameters.valueChanged("", "");
+        if (m_serverConnected) {
+            m_uploadMzdb.addLinkedParameters(linkedParameters);
+        }
+        
         return parameterPanel;
     }
 
@@ -286,7 +321,7 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
                 fchooser.setAcceptAllFileFilterUsed(false);
 
                 //put the one and only filter here! (.mzdb)
-                int result = fchooser.showOpenDialog(m_singletonDialog);
+                int result = fchooser.showOpenDialog(m_serverConnected ? m_singletonConnectedDialog : m_singletonNonConnectedDialog);
                 if (result == JFileChooser.APPROVE_OPTION) {
 
                     File[] files = fchooser.getSelectedFiles();
@@ -360,7 +395,7 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
 
             File file = (File) m_fileList.getModel().getElementAt(i);
 
-            ConversionSettings conversionSettings = new ConversionSettings(m_converterFilePath.getStringValue(), m_outputFilePath.getStringValue(), (boolean) m_deleteRaw.getObjectValue(), (boolean) m_uploadMzdb.getObjectValue());
+            ConversionSettings conversionSettings = new ConversionSettings(m_converterFilePath.getStringValue(), m_outputFilePath.getStringValue(), (boolean) m_deleteRaw.getObjectValue(), (m_serverConnected) ? (boolean) m_uploadMzdb.getObjectValue() : false);
             
             if(conversionSettings.getUploadAfterConversion()){
                 MzdbUploadSettings uploadSettings = new MzdbUploadSettings((boolean) m_deleteMzdb.getObjectValue(), m_uploadLabelParameter.getStringValue(), (boolean) m_createParentDirectoryParameter.getObjectValue() ? File.separator + file.getParentFile().getName() : "");

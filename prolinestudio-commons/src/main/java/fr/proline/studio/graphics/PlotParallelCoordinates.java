@@ -222,9 +222,21 @@ public class PlotParallelCoordinates extends PlotMultiDataAbstract {
 
     @Override
     public void paintOver(Graphics2D g) {
+        
         int width = m_plotPanel.getWidth();
+        
+        // paint first non selected axis
         for (ParallelCoordinatesAxis axis : m_axisList) {
-            axis.paint(g, width);
+            if (!axis.isSelected()) {
+                axis.paint(g, width);
+            }
+        }
+        
+        // then paint selected axis (so axis title is displayed over others when there are a lot of axis
+        for (ParallelCoordinatesAxis axis : m_axisList) {
+            if (axis.isSelected()) {
+                axis.paint(g, width);
+            }
         }
     }
 

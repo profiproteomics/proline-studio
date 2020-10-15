@@ -1261,7 +1261,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             } else {
                 double factor = 0.20 * zoomDirection;
                 
-                double yValue = (oldMinYRight + oldMaxY) / 2;
+                double yValue = (oldMinYRight + oldMaxYRight) / 2;
                 newYmin = oldMinYRight + (oldMinYRight - yValue) * factor;
                 newYmax = oldMaxYRight - (yValue - oldMaxYRight) * factor;
             }

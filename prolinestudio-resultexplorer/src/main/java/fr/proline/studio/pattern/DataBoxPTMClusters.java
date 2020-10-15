@@ -27,6 +27,7 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
@@ -217,8 +218,17 @@ public class DataBoxPTMClusters extends AbstractDataBox {
 
     private void displayLoadError(long taskId, boolean isFinished){
         TaskInfo ti =  getTaskInfo(taskId);
-        String message = (ti != null && ti.hasTaskError()) ? ti.getTaskError().getErrorText() : "Error loading PTM Cluster";
-        JOptionPane.showMessageDialog(((JPanel) getDataBoxPanelInterface()), message,"PTM Cluster loading error", JOptionPane.ERROR_MESSAGE);
+        
+        TaskError taskError = ti.getTaskError();
+        if (taskError != null) {
+            if (taskError.getErrorTitle().equals(DatabasePTMsTask.ERROR_PTM_CLUSTER_LOADING)) {
+                JOptionPane.showMessageDialog(((JPanel) getDataBoxPanelInterface()), "To display Modification Sites or Modification Clusters, you must run \"Identify Modification Sites\" beforehand.", taskError.getErrorTitle(), JOptionPane.WARNING_MESSAGE);      
+            } else {
+                JOptionPane.showMessageDialog(((JPanel) getDataBoxPanelInterface()), taskError.getErrorText(), DatabasePTMsTask.ERROR_PTM_CLUSTER_LOADING, JOptionPane.ERROR_MESSAGE);
+            }
+            
+        }
+
         ((PTMClustersPanel) getDataBoxPanelInterface()).setData(taskId, null, isFinished);
 
     }

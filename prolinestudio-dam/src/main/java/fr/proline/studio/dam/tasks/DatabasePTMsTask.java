@@ -95,6 +95,8 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
     private final static int FILL_ALL_PTM_INFO = 2;
 
     private boolean m_loadSitesAsClusters;
+    
+    public final static String ERROR_PTM_CLUSTER_LOADING = "PTM Cluster Loading Error";
 
     public DatabasePTMsTask(AbstractDatabaseCallback callback) {
         super(callback);
@@ -246,7 +248,8 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
             //--- Read PTM data in object tree associated to rsm
             ResultSummary rsm = entityManagerMSI.find(ResultSummary.class, m_dataset.getResultSummaryId());
             if (rsm.getObjectTreeIdByName().isEmpty() || rsm.getObjectTreeIdByName().get("result_summary.ptm_dataset") == null) {
-                throw new RuntimeException("\"Identification Moification Sites\"  has not been run on this dataset.");
+                m_taskError = new TaskError(ERROR_PTM_CLUSTER_LOADING, "\"Identification Modification Sites\"  has not been run on this dataset.");
+                throw new RuntimeException("\"Identification Modification Sites\"  has not been run on this dataset.");
             }
             ObjectTree ot = entityManagerMSI.find(ObjectTree.class, rsm.getObjectTreeIdByName().get("result_summary.ptm_dataset"));
             ObjectMapper mapper = new ObjectMapper();
@@ -273,7 +276,10 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
 
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
-            m_taskError = new TaskError(e);
+            if (m_taskError == null) {
+                // we do not replace an error already set.
+                m_taskError = new TaskError(e);
+            }
             try {
                 entityManagerMSI.getTransaction().rollback();
             } catch (Exception rollbackException) {

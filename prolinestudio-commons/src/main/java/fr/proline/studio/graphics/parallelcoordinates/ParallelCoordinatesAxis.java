@@ -82,7 +82,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
     private Double m_rangeMax = null;
     private Double m_rangeMinWithNaN = null;
     private boolean m_forceNaN = false;
-    
+
     
     private enum OverSubObject {
       HANDLE_UP,
@@ -209,14 +209,21 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
             
         }
         
-        
-        // Display Column Name
-        g.setColor(Color.black);
+
         g.setFont(m_valuesFont);
         int fontHeight = m_valuesFontMetrics.getHeight();
-        g.drawString(m_columnName, xForLabel(m_columnName, plotWidth), fontHeight+4);
-        
- 
+
+        // Display Column Name
+        int textX = xForLabel(m_columnName, plotWidth);
+        int textY = fontHeight+4;
+        if (m_displaySelected) {
+            Rectangle2D r = m_valuesFontMetrics.getStringBounds(m_columnName, g);
+            g.setColor(Color.white);
+            g.fillRect(((int) Math.round(r.getX()))+textX-2, ((int) Math.round(r.getY()))+textY, ((int) Math.round(r.getWidth()))+4, ((int) Math.round(r.getHeight())));
+        }
+        g.setColor(Color.black);
+        g.drawString(m_columnName, textX, textY);
+
         // Display Selected values
         if (m_numericAxis) {
             double vMin = m_rangeMinWithNaN;
@@ -229,7 +236,17 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
             } else {
                 min = String.format("%6.5e", m_rangeMin);
             }
-               g.drawString(min, xForLabel(min, plotWidth), m_y+m_heightTotal+fontHeight+4);
+
+
+            textX = xForLabel(min, plotWidth);
+            textY = m_y+m_heightTotal+fontHeight+4;
+            if (m_displaySelected) {
+                Rectangle2D r = m_valuesFontMetrics.getStringBounds(min, g);
+                g.setColor(Color.white);
+                g.fillRect(((int) Math.round(r.getX()))+textX-2, ((int) Math.round(r.getY()))+textY, ((int) Math.round(r.getWidth()))+4, ((int) Math.round(r.getHeight())));
+            }
+            g.setColor(Color.black);
+            g.drawString(min, textX, textY);
             
             // max
             String max;
@@ -238,7 +255,17 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
             } else {
                 max = String.format("%6.5e", m_rangeMax);
             }
-            g.drawString(max, xForLabel(max, plotWidth), PAD_Y_UP/2+fontHeight+4);
+
+
+            textX = xForLabel(max, plotWidth);
+            textY = PAD_Y_UP/2+fontHeight+4;
+            if (m_displaySelected) {
+                Rectangle2D r = m_valuesFontMetrics.getStringBounds(max, g);
+                g.setColor(Color.white);
+                g.fillRect(((int) Math.round(r.getX()))+textX-2, ((int) Math.round(r.getY()))+textY, ((int) Math.round(r.getWidth()))+4, ((int) Math.round(r.getHeight())));
+            }
+            g.setColor(Color.black);
+            g.drawString(max, textX, textY);
             
             // Min Value Selected
             if (y1>m_y) {
@@ -252,8 +279,8 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
                 }
                 
                 Rectangle2D r = m_valuesFontMetrics.getStringBounds(minValueSelected, g);
-                int textX = xForLabel(minValueSelected, plotWidth);
-                int textY = y1-fontHeight;
+                textX = xForLabel(minValueSelected, plotWidth);
+                textY = y1-fontHeight;
                 g.setColor(Color.white);
                 g.fillRect(((int) Math.round(r.getX()))+textX-2, ((int) Math.round(r.getY()))+textY, ((int) Math.round(r.getWidth()))+4, ((int) Math.round(r.getHeight())));
                 
@@ -274,8 +301,8 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
                 
                 
                 Rectangle2D r = m_valuesFontMetrics.getStringBounds(maxValueSelected, g);
-                int textX = xForLabel(maxValueSelected, plotWidth);
-                int textY = y2 + fontHeight + 4;
+                textX = xForLabel(maxValueSelected, plotWidth);
+                textY = y2 + fontHeight + 4;
                 g.setColor(Color.white);
                 g.fillRect(((int) Math.round(r.getX()))+textX-2, ((int) Math.round(r.getY()))+textY, ((int) Math.round(r.getWidth()))+4, ((int) Math.round(r.getHeight())));
                 
@@ -288,12 +315,32 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
             
             // Display Min Value
             String valueMin = m_values.get(0).toString();
-            g.drawString(valueMin, xForLabel(valueMin, plotWidth), PAD_Y_UP / 2 + fontHeight + 4);
+
+
+            textX = xForLabel(valueMin, plotWidth);
+            textY = PAD_Y_UP/2+fontHeight+4;
+            if (m_displaySelected) {
+                Rectangle2D r = m_valuesFontMetrics.getStringBounds(valueMin, g);
+                g.setColor(Color.white);
+                g.fillRect(((int) Math.round(r.getX()))+textX-2, ((int) Math.round(r.getY()))+textY, ((int) Math.round(r.getWidth()))+4, ((int) Math.round(r.getHeight())));
+            }
+
+            g.setColor(Color.black);
+            g.drawString(valueMin, textX, textY);
 
             // Display Max Value
             String valueMax = m_values.get(m_values.size() - 1).toString();
-            g.drawString(valueMax, xForLabel(valueMax, plotWidth), m_y + m_heightTotal + fontHeight + 4);
 
+            textX = xForLabel(valueMax, plotWidth);
+            textY = m_y + m_heightTotal + fontHeight + 4;
+            if (m_displaySelected) {
+                Rectangle2D r = m_valuesFontMetrics.getStringBounds(valueMax, g);
+                g.setColor(Color.white);
+                g.fillRect(((int) Math.round(r.getX()))+textX-2, ((int) Math.round(r.getY()))+textY, ((int) Math.round(r.getWidth()))+4, ((int) Math.round(r.getHeight())));
+            }
+            g.setColor(Color.black);
+
+            g.drawString(valueMax, textX, textY);
 
             // Min Value Selected
             if (y1>m_y) {
@@ -306,14 +353,15 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
                 valueMin = m_values.get(index).toString();
                 
                 Rectangle2D r = m_valuesFontMetrics.getStringBounds(valueMin, g);
-                int textX = xForLabel(valueMin, plotWidth);
-                int textY =  y1-fontHeight;
+                textX = xForLabel(valueMin, plotWidth);
+                textY =  y1-fontHeight;
                 g.setColor(Color.white);
                 g.fillRect(((int) Math.round(r.getX()))+textX-2, ((int) Math.round(r.getY()))+textY, ((int) Math.round(r.getWidth()))+4, ((int) Math.round(r.getHeight())));
                 
                 g.setColor(Color.black);
                 g.drawString(valueMin, textX, textY);
             }
+
             // Max Value Selected
              if (y2 < m_y+m_heightTotal) {
                 int index = (int) Math.round((m_values.size()-1)*m_selectionMaxPercentage-0.5d);
@@ -325,8 +373,8 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
                 valueMax = m_values.get(index).toString();
                 
                 Rectangle2D r = m_valuesFontMetrics.getStringBounds(valueMax, g);
-                int textX =  xForLabel(valueMax, plotWidth);
-                int textY =  y2 + fontHeight + 4;
+                textX =  xForLabel(valueMax, plotWidth);
+                textY =  y2 + fontHeight + 4;
                 g.setColor(Color.white);
                 g.fillRect(((int) Math.round(r.getX()))+textX-2, ((int) Math.round(r.getY()))+textY, ((int) Math.round(r.getWidth()))+4, ((int) Math.round(r.getHeight())));
                 
@@ -334,7 +382,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
                 g.drawString(valueMax, textX, textY);
             }
         }
-        
+
     }
     
     private int xForLabel(String label, int plotWidth) {
@@ -674,7 +722,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
                     break;
             }
         }
-        if (deltaX != 0) {
+        if ((deltaX != 0) && (! m_overSubObject.equals(OverSubObject.HANDLE_BOTTOM)) && (!m_overSubObject.equals(OverSubObject.HANDLE_UP)))  {
             boolean plottingMovableAxisPrevious = Math.abs(m_movingX) > 10;
             m_movingX += deltaX;
             boolean plottingMovableAxis = Math.abs(m_movingX) > 10;

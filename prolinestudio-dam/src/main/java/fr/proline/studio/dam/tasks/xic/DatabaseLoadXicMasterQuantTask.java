@@ -1241,8 +1241,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             peptideInstanceList.add(dpi);
         }
 
-        DatabasePTMSitesTask.fetchReadablePTMData(entityManagerMSI, m_dataset.getResultSetId(), peptideMap);
-        DatabasePTMSitesTask.fetchPTMDataForPeptides(entityManagerMSI, peptideMap);
+        DatabasePTMSitesTask.fetchReadablePTMData(entityManagerMSI, m_dataset.getResultSetId(), peptideMap, null);
+        DatabasePTMSitesTask.fetchPTMDataForPeptides(entityManagerMSI, peptideMap, null);
 
         int nbMP = m_masterQuantPeptideList.size();
         int nbPI = peptideInstanceList.size();
@@ -1481,8 +1481,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             }
         }
 
-        DatabasePTMSitesTask.fetchReadablePTMData(entityManagerMSI, m_dataset.getResultSetId(), peptideMap);
-        DatabasePTMSitesTask.fetchPTMDataForPeptides(entityManagerMSI, peptideMap);
+        DatabasePTMSitesTask.fetchReadablePTMData(entityManagerMSI, m_dataset.getResultSetId(), peptideMap, null);
+        DatabasePTMSitesTask.fetchPTMDataForPeptides(entityManagerMSI, peptideMap, null);
 
         // load masterQuantPeptide not linked to a peptideInstance
         queryDMasterQuantPeptide = "SELECT  new fr.proline.core.orm.msi.dto.DMasterQuantPeptide"
@@ -2259,8 +2259,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
 
         }
 
-        DatabasePTMSitesTask.fetchReadablePTMData(entityManagerMSI, m_dataset.getResultSetId(), peptideMap);
-        DatabasePTMSitesTask.fetchPTMDataForPeptides(entityManagerMSI, peptideMap);
+        DatabasePTMSitesTask.fetchReadablePTMData(entityManagerMSI, m_dataset.getResultSetId(), peptideMap, null);
+        DatabasePTMSitesTask.fetchPTMDataForPeptides(entityManagerMSI, peptideMap, null);
 
         ArrayList<Long> peptideMatchIds = new ArrayList<>(peptideMatchMap.size());
         peptideMatchIds.addAll(peptideMatchMap.keySet());

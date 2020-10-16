@@ -69,7 +69,7 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
     private List<PTMSite> m_ptmSitesOutput = null;    
     private List<PtmSpecificity> m_ptmsOutput = null;    
 
-    final int SLICE_SIZE = 1000;
+    private final static int SLICE_SIZE = 1000;
     
     private int m_action;
     
@@ -789,15 +789,22 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
 
     }
     
-    public static void fetchReadablePTMData(EntityManager entityManagerMSI, Long rsetId, HashMap<Long, Peptide> peptideMap) {
-        if ((peptideMap == null) || peptideMap.isEmpty()) return;
+    public static void fetchReadablePTMData(EntityManager entityManagerMSI, Long rsetId, HashMap<Long, Peptide> peptideMap, List<Long> sliceOfPeptideMatchIds) {
+        if ((peptideMap == null) || peptideMap.isEmpty()) {
+            return;
+        }
+
+        if (sliceOfPeptideMatchIds == null) {
+            sliceOfPeptideMatchIds = new ArrayList<>(peptideMap.keySet());
+        }
+
         // Retrieve PeptideReadablePtmString
         Query ptmStingQuery = entityManagerMSI.createQuery("SELECT p.id, ptmString "
-            + "FROM fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.PeptideReadablePtmString ptmString "
-            + "WHERE p.id IN (:listId) AND ptmString.peptide=p AND ptmString.resultSet.id=:rsetId");
-        ptmStingQuery.setParameter("listId", peptideMap.keySet());
+                + "FROM fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.PeptideReadablePtmString ptmString "
+                + "WHERE p.id IN (:listId) AND ptmString.peptide=p AND ptmString.resultSet.id=:rsetId");
+        ptmStingQuery.setParameter("listId", sliceOfPeptideMatchIds);
         ptmStingQuery.setParameter("rsetId", rsetId);
-        
+
         List<Object[]> ptmStrings = ptmStingQuery.getResultList();
         Iterator<Object[]> it = ptmStrings.iterator();
         while (it.hasNext()) {
@@ -807,21 +814,27 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
             Peptide peptide = peptideMap.get(peptideId);
             peptide.getTransientData().setPeptideReadablePtmString(ptmString);
         }
+
     }
     
 
-    public static void fetchPTMDataForPeptides(EntityManager entityManagerMSI, HashMap<Long, Peptide> peptideById) {
+    public static void fetchPTMDataForPeptides(EntityManager entityManagerMSI, HashMap<Long, Peptide> peptideMap, List<Long> sliceOfPeptideMatchIds) {
 
-        if (!peptideById.isEmpty()) {
+        if (!peptideMap.isEmpty()) {
+
+            if (sliceOfPeptideMatchIds == null) {
+                sliceOfPeptideMatchIds = new ArrayList<>(peptideMap.keySet());
+            }
+
             TypedQuery<DPeptidePTM> ptmQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DPeptidePTM(pptm.peptide.id, pptm.specificity.id, pptm.seqPosition) FROM fr.proline.core.orm.msi.PeptidePtm pptm WHERE pptm.peptide.id IN (:peptideIds)", DPeptidePTM.class);
-            ptmQuery.setParameter("peptideIds", peptideById.keySet());
+            ptmQuery.setParameter("peptideIds", sliceOfPeptideMatchIds);
             List<DPeptidePTM> ptmList = ptmQuery.getResultList();
 
             Iterator<DPeptidePTM> it = ptmList.iterator();
             while (it.hasNext()) {
                 DPeptidePTM ptm = it.next();
 
-                Peptide p = peptideById.get(ptm.getIdPeptide());
+                Peptide p = peptideMap.get(ptm.getIdPeptide());
                 HashMap<Integer, DPeptidePTM> map = p.getTransientData().getDPeptidePtmMap();
                 if (map == null) {
                     map = new HashMap<>();
@@ -832,6 +845,7 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
 
             }
         }
+
     }
     
 }

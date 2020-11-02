@@ -390,6 +390,13 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
     m_modificationInfo ="";
 
     if (m_ptmClusters != null) {
+        m_ptmClusters.sort((o1, o2) -> {
+            if(o1 == null)
+                return -1;
+            if(o2 == null)
+                return 1;
+            return o1.getId().compareTo(o2.getId()); 
+        });
       Map<Boolean, List<PTMCluster>> clustersBySitesCount = m_ptmClusters.stream().collect(Collectors.partitioningBy(c -> c.getPTMSites().size() > 1));
       StringBuilder sb = new StringBuilder();
       Map<String, Long> countByPtms = clustersBySitesCount.get(Boolean.FALSE).stream().collect(Collectors.groupingBy(c -> c.getPTMSites().get(0).getPTMSpecificity().getPtmShortName(), Collectors.counting()));

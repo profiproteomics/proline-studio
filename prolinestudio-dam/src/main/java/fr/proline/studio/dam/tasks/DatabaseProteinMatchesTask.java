@@ -127,7 +127,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseTask {
             entityManagerMSI.getTransaction().begin();
 
             // Load Proteins for PeptideMatch
-            TypedQuery<DProteinMatch> proteinMatchQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(protm.id, protm.accession, protm.score, protm.peptideCount, protm.resultSet.id, protm.description, protm.serializedProperties)  FROM ProteinMatch protm WHERE protm.resultSet.id=:resultSetId ORDER BY protm.score DESC", DProteinMatch.class);
+            TypedQuery<DProteinMatch> proteinMatchQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(protm.id, protm.accession, protm.score, protm.peptideCount, protm.resultSet.id, protm.description, protm.geneName, protm.serializedProperties)  FROM ProteinMatch protm WHERE protm.resultSet.id=:resultSetId ORDER BY protm.score DESC", DProteinMatch.class);
             proteinMatchQuery.setParameter("resultSetId", m_rset.getId());
             List<DProteinMatch> proteinMatchList = proteinMatchQuery.getResultList();
 
@@ -163,7 +163,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseTask {
             entityManagerMSI.getTransaction().begin();
 
             // Load Proteins for PeptideMatch
-            TypedQuery<DProteinMatch> proteinMatchQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(protm.id, protm.accession, protm.score, protm.peptideCount, protm.resultSet.id, protm.description, protm.serializedProperties) FROM ProteinMatch protm, SequenceMatch sm, PeptideMatch pepm, fr.proline.core.orm.msi.Peptide p WHERE pepm.id=:peptideMatchId AND  pepm.peptideId=p.id AND p.id=sm.id.peptideId AND sm.resultSetId=pepm.resultSet.id AND sm.id.proteinMatchId=protm.id ORDER BY protm.score DESC", DProteinMatch.class);
+            TypedQuery<DProteinMatch> proteinMatchQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(protm.id, protm.accession, protm.score, protm.peptideCount, protm.resultSet.id, protm.description, protm.geneName, protm.serializedProperties) FROM ProteinMatch protm, SequenceMatch sm, PeptideMatch pepm, fr.proline.core.orm.msi.Peptide p WHERE pepm.id=:peptideMatchId AND  pepm.peptideId=p.id AND p.id=sm.id.peptideId AND sm.resultSetId=pepm.resultSet.id AND sm.id.proteinMatchId=protm.id ORDER BY protm.score DESC", DProteinMatch.class);
             proteinMatchQuery.setParameter("peptideMatchId", m_peptideMatch.getId());
             List<DProteinMatch> proteinMatchList = proteinMatchQuery.getResultList();
 

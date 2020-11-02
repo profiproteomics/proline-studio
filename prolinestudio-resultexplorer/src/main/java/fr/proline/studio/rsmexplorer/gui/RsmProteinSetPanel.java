@@ -47,7 +47,6 @@ import fr.proline.studio.table.ImportTableSelectionInterface;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.IconManager;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -59,6 +58,13 @@ import javax.swing.event.TableModelListener;
 import org.jdesktop.swingx.JXTable;
 import org.openide.windows.TopComponent;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.util.List;
 
 /**
  * In : Window which display Protein Sets of a Result Summary
@@ -86,6 +92,8 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     private ExportButton m_exportButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
     
+    private boolean m_hideFirstTime = true; // to initialize visible column on first display (then user cfg will be used)
+    
     /**
      * Creates new form RsmProteinSetPanel
      */
@@ -111,7 +119,8 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
         }
  
-        ((ProteinSetTableModel) ((CompoundTableModel)m_proteinSetTable.getModel()).getBaseModel()).setData(taskId, proteinSets, mergedData);
+        ProteinSetTableModel  tableModel = (ProteinSetTableModel) ((CompoundTableModel)m_proteinSetTable.getModel()).getBaseModel();
+        tableModel.setData(taskId, proteinSets, mergedData);
 
         // select the first row
         if ((proteinSets != null) && (proteinSets.length > 0)) {
@@ -121,7 +130,15 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             if (!m_firstPanel) {
                 m_markerContainerPanel.removeAllMarkers();
             }
-
+            
+            if(m_hideFirstTime){               
+                // hide the geneName columns
+                List<Integer> listIdsToHide = tableModel.getDefaultColumnsToHide();
+                for (Integer id : listIdsToHide) {
+                    m_proteinSetTable.getColumnExt(m_proteinSetTable.convertColumnIndexToView(id)).setVisible(false);
+                }
+                m_hideFirstTime = false;
+            }
         }
         
         m_infoToggleButton.updateInfo();
@@ -133,6 +150,15 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
     public void dataUpdated(SubTask subTask, boolean finished) {
         m_proteinSetTable.dataUpdated(subTask, finished);
+        if (m_hideFirstTime) {
+            // hide geneName column
+            List<Integer> listIdsToHide = ((ProteinSetTableModel) ((CompoundTableModel)m_proteinSetTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
+            for (Integer id : listIdsToHide) {
+                m_proteinSetTable.getColumnExt(m_proteinSetTable.convertColumnIndexToView(id)).setVisible(false);
+            }
+            m_hideFirstTime = false;
+
+        }        
     }
 
     public DProteinSet getSelectedProteinSet() {

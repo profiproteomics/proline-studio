@@ -2110,7 +2110,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 for (DMasterQuantPeptideIon masterQuandPeptideIon : m_masterQuantPeptideIonList) {
                     Long rsmId = masterQuandPeptideIon.getResultSummary().getId();
                     for (DDataset d : childrenDatasetList) {
-                        if (d.getResultSummaryId() == rsmId) {
+                        if (d.getResultSummaryId().longValue() == rsmId.longValue()) {
                             masterQuandPeptideIon.getResultSummary().getTransientData(null).setDDataset(d);
                         }
                     }

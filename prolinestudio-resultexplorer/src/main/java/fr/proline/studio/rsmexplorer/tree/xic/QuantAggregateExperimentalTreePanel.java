@@ -63,11 +63,19 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
         createTabbedPane();
 
+        JScrollPane leftScrollPane = new JScrollPane();
+        leftScrollPane.setViewportView(treePanel);
+        
+        JScrollPane rightScrollPane = new JScrollPane();
+        rightScrollPane.setViewportView(m_tabbedPane);
+        
+        
+        
         setLayout(new BorderLayout());
 
         JSplitPane sp = new JSplitPane();
-        sp.setLeftComponent(treePanel);
-        sp.setRightComponent(m_tabbedPane);
+        sp.setLeftComponent(leftScrollPane);
+        sp.setRightComponent(rightScrollPane);
         sp.setDividerLocation(0.70);
         sp.setResizeWeight(0.5);
 

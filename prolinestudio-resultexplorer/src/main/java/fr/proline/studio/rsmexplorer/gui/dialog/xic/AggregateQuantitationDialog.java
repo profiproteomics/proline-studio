@@ -20,12 +20,10 @@ import fr.proline.core.orm.uds.BiologicalGroup;
 import fr.proline.core.orm.uds.BiologicalSample;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.DataSetData;
-import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.TreeUtils;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.xic.*;
-import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Dialog;
 import java.awt.Window;
@@ -50,10 +48,6 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private static AggregateQuantitationDialog m_singletonDialog = null;
 
-    private static final int STEP_PANEL_DEFINE_EXP_DESIGN = 0;
-    //private static final int STEP_PANEL_DEFINE_AGGREGATION_PARAMS = 1;
-
-    private int m_step = STEP_PANEL_DEFINE_EXP_DESIGN;
 
     private QuantAggregateExperimentalTreePanel m_experimentalDesignPanel;
 
@@ -160,24 +154,21 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
                 + " &nbsp - &nbsp <b>Move</b> analyses up or down by using contextual menu or toolbar";
         this.setHelpHeader(step1Title, step1Help);
         if (m_quantitations != null && m_quantitations.size() > 0) {
-            m_step = STEP_PANEL_DEFINE_EXP_DESIGN;
-            //setButtonName(DefaultDialog.BUTTON_OK, "Next");
-            //setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
+
             setButtonVisible(BUTTON_LOAD, false);
             setButtonVisible(BUTTON_SAVE, false);
             setButtonVisible(BUTTON_BACK, false);
 
             if (node != m_experimentalDesignNode) {
                 m_experimentalDesignNode = node;
+                
                 m_designPanel = new JPanel();
                 m_designPanel.setBorder(BorderFactory.createTitledBorder(" Experimental Design "));
-                JScrollPane treePanel = new JScrollPane();
                 m_designPanel.setLayout(new BorderLayout());
 
                 m_experimentalDesignPanel = new QuantAggregateExperimentalTreePanel(m_experimentalDesignNode, m_quantitations);
-
-                treePanel.setViewportView(m_experimentalDesignPanel);
-                m_designPanel.add(treePanel, BorderLayout.CENTER);
+                
+                m_designPanel.add(m_experimentalDesignPanel, BorderLayout.CENTER);
 
                 TreeUtils.expandTree(m_experimentalDesignPanel.getTree(), true);
             }
@@ -187,29 +178,6 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
         }
     }
 
-    /**
-     * setp 2 panel
-     */
-    /*private void displayStep2QuantChannelsMapping() {
-        m_step = STEP_PANEL_DEFINE_AGGREGATION_PARAMS;
-
-        setButtonName(DefaultDialog.BUTTON_OK, org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
-        setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.OK));
-
-        setButtonVisible(BUTTON_BACK, true);
-        setButtonVisible(BUTTON_LOAD, false);
-        setButtonVisible(BUTTON_SAVE, false);
-        String step2Title = "Step2. Define quantitation channels mapping";
-        String step2Help = "Each quantitation channel of the aggregation will correspond to sample analyses of aggregated quantitations. The following modifications can be made: <br>"
-                + " &nbsp - &nbsp <b>Change association</b> by dragging and dropping sample analysis from the right panel to the table cell<br>"
-                + " &nbsp - &nbsp <b>Remove association</b> by using the contextual menu or the toolbar<br>"
-                + " &nbsp - &nbsp <b>Move</b> analyses up or down by using the toolbar or the contextual menu.";
-        this.setHelpHeader(step2Title, step2Help);
-        m_quantChannelsPanel = AggregationQuantChannelsPanel.getPanel(m_experimentalDesignNode, m_quantitations);
-        replaceInternalComponent(m_quantChannelsPanel);
-        revalidate();
-        repaint();
-    }*/
 
     @Override
     protected boolean okCalled() {
@@ -233,10 +201,7 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
 
     @Override
     protected boolean backCalled() {
-        /*if (m_step == STEP_PANEL_DEFINE_AGGREGATION_PARAMS) {
-            displayStep1ExperimentalDesignTree(m_experimentalDesignNode);
-            return false;
-        }*/
+
         return false;
     }
 

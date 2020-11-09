@@ -641,17 +641,25 @@ public class DefaultDialog extends javax.swing.JDialog {
         int width = getWidth();
         int height = getHeight() + 30; // +30 is for window task bar
 
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        if (x + width > screenSize.width) {
-            x = screenSize.width - width;
+        Rectangle screenBounds = getScreenBounds(x, y);
+        
+        
+        if (x + width > screenBounds.x + screenBounds.width) {
+            x = screenBounds.x + screenBounds.width - width;
         }
-        if (y + height > screenSize.height) {
-            y = screenSize.height - height;
+        if (y + height > screenBounds.y + screenBounds.height) {
+            y = screenBounds.y + screenBounds.height - height;
+        }
+        if (x < screenBounds.x) {
+            x = screenBounds.x;
+        }
+        if (y < screenBounds.y) {
+            y = screenBounds.y;
         }
 
         super.setLocation(x, y);
     }
-
+    
     public void centerToWindow(Window w) {
 
         // pack must have been done beforehand
@@ -677,18 +685,34 @@ public class DefaultDialog extends javax.swing.JDialog {
         // pack must have been done beforehand
         pack();
 
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        Rectangle screenBounds = getScreenBounds(getX(), getY());
+
 
         int width = getWidth();
         int height = getHeight();
 
-        int x = (screenSize.width - width) / 2;
-        int y = (screenSize.height - height) / 2;
+        int x = (screenBounds.width - width) / 2 + screenBounds.x;
+        int y = (screenBounds.height - height) / 2 + screenBounds.y;
 
         super.setLocation(x, y);
 
     }
 
+    private Rectangle getScreenBounds(int x, int y) {
+        
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice[] gd = ge.getScreenDevices();
+        for (int i = 0; i < gd.length; i++) {
+            GraphicsConfiguration gc = gd[i].getDefaultConfiguration();
+            Rectangle r = gc.getBounds();
+            if (r.contains(x, y)) {
+                return r;
+            }
+        }
+        return null;
+    }
+    
+    
     public void setBusy(boolean busy) {
 
         if (m_busyGlassPane == null) {

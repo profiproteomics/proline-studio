@@ -19,6 +19,7 @@ package fr.proline.studio.pattern;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -76,6 +77,12 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
         rsmList.add(m_rsm);
         final int loadingId = setLoading();
 
+        if (m_previousTaskId != null) {
+                        // old task is suppressed if it has not been already done
+            AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousTaskId);
+            m_previousTaskId = null;
+        }
+        
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
             @Override
             public boolean mustBeCalledInAWT() {
@@ -95,10 +102,11 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
             }
         };
         DatabaseLoadPeptidesInstancesTask task = new DatabaseLoadPeptidesInstancesTask(callback, getProjectId(), proteinMatch, rsmList);
-        Long taskId = task.getId();
+        m_previousTaskId = task.getId();
 
         registerTask(task);
     }
+    private Long m_previousTaskId = null;
 
     protected ArrayList<Integer> getSelectedIndex() {
         ArrayList<Integer>  result = new ArrayList();

@@ -71,12 +71,12 @@ public class PTMPeptidesGraphicView extends JPanel {
     }
 
     public void setViewPosition(int sequencePosition) {
-        int selectedIndex = m_dataModel.getPeptideIndex(sequencePosition);
-        if (selectedIndex == -1) {
+        /*int selectedIndex = m_dataModel.getPeptideIndex(sequencePosition);
+        if (selectedIndex == -1) {*/
             this.m_internalPanel.setHorizonScrollLocation(sequencePosition);
-        } else {
+        /*} else {
             this.m_internalPanel.setViewPosition(sequencePosition, selectedIndex);
-        }
+        }*/
         repaint();
     }
 
@@ -225,6 +225,10 @@ public class PTMPeptidesGraphicView extends JPanel {
         private void setHorizonScrollLocation(int ajustedLocation) {
             JScrollBar bar = this.m_scrollPane.getHorizontalScrollBar();
             int max = bar.getMaximum();
+            int visibleAmount = bar.getVisibleAmount();
+            
+            ajustedLocation -= (int) Math.round((m_sequenceLength * ((double)(visibleAmount/2))/max));
+            
             int x = (int) ((float) max / m_sequenceLength * (ajustedLocation - AJUSTE_GAP));
             bar.setValue(x);
         }

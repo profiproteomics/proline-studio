@@ -74,14 +74,14 @@ public class PeptideOnProteinOverviewPanel extends RsmProteinAndPeptideOverviewP
      */
     private void setSelectedOnProtein(int position) {
         this.m_selectedPosition = position;
-        List<PTMPeptideInstance> pepList = this.m_postionPTMPeptideMap.get(position);
+        /*List<PTMPeptideInstance> pepList = this.m_postionPTMPeptideMap.get(position);
         if (pepList != null) {
             int begin = position;
             for (PTMPeptideInstance pep : pepList) {
                 begin = Math.min(pep.getStartPosition(), begin);
             }
             this.m_selectedPosition = begin;
-        }
+        }*/
         //m_logger.debug("selected positon en protein is : {}", m_selectedPosition);
     }
 

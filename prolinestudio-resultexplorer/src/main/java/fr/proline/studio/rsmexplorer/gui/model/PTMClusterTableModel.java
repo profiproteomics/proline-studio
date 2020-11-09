@@ -398,7 +398,7 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
                 return -1;
             if(o2 == null)
                 return 1;
-            return o1.getId().compareTo(o2.getId()); 
+            return o1.getId().compareTo(o2.getId());
         });
       Map<Boolean, List<PTMCluster>> clustersBySitesCount = m_ptmClusters.stream().collect(Collectors.partitioningBy(c -> c.getPTMSites().size() > 1));
       StringBuilder sb = new StringBuilder();

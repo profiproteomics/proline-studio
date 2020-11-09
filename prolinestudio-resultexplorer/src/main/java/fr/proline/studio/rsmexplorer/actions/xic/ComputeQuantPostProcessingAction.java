@@ -108,7 +108,7 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
                             if (!computedList.isEmpty()) {
                                 String[] options = {"Refine All", "Skip already refined"};
                                 String computedNodeName = computedList.stream().map(node->node.getDataset().getName()).collect(Collectors.joining(","));
-                                String message = computedNodeName + ": Proteins Sets Abundances have already been refined \n(Compute Qaunt Post Processing done).";
+                                String message = "Dataset "+ computedNodeName + ": Proteins Sets Abundances have already been refined \n(Compute Quant Post Processing done).";
                                 OptionDialog yesNoDialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Refine Proteins Sets Abundances", message);
                                 yesNoDialog.setButtonName(DefaultDialog.BUTTON_OK, options[0]);
                                 yesNoDialog.setButtonName(DefaultDialog.BUTTON_CANCEL, options[1]);

@@ -151,7 +151,7 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
         if (user != null) {
             userLoginSB.append(user.getLogin());
         } else {
-            userLoginSB.append("Unknonw user");
+            userLoginSB.append("Unknown user");
         }
         String hostIP;
         try {

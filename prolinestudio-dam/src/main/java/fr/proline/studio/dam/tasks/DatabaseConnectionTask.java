@@ -81,10 +81,10 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
 
 
         m_databaseProperties = databaseProperties;
-        m_databaseProperties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
-        //m_databaseProperties.put("connection_pool_size", 1);
-        m_databaseProperties.put("hbm2ddl.auto", 2);
-        m_databaseProperties.put("cache.provider_class", "org.hibernate.cache.internal.StandardQueryCache");
+//        m_databaseProperties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+//        //m_databaseProperties.put("connection_pool_size", 1);
+//        m_databaseProperties.put("hbm2ddl.auto", 2);
+//        m_databaseProperties.put("cache.provider_class", "org.hibernate.cache.internal.StandardQueryCache");
 //        m_databaseProperties.put("hibernate.show_sql", Boolean.TRUE); //TO TEST SQL query
 //        m_databaseProperties.put("hibernate.format_sql", Boolean.TRUE);
         

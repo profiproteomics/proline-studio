@@ -88,32 +88,32 @@ public class TasksPanel extends AbstractTasksPanel {
     }
     
     
-    @Override
-    protected AbstractJMSCallback getServiceNotificationCallback(JMSNotificationMessage[] sysInfoResult) {
-        AbstractJMSCallback notifierCallback = new AbstractJMSCallback() {
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
-
-            @Override
-            public void run(boolean success) {
-                if (sysInfoResult[0].getEventType().equals(JMSNotificationMessage.MessageStatus.STARTED)) {
-                    TaskInfo tiToUpdate = TaskInfoManager.getTaskInfoManager().getTaskInfoWithJMSId(sysInfoResult[0].getServerUniqueMsgId());
-                    if (tiToUpdate != null) {
-                        tiToUpdate.setRunning(true);
-                    }
-                }
-            }
-        };
-        return notifierCallback;
-    }
+//    @Override
+//    protected AbstractJMSCallback getServiceNotificationCallback(JMSNotificationMessage[] sysInfoResult) {
+//        AbstractJMSCallback notifierCallback = new AbstractJMSCallback() {
+//            @Override
+//            public boolean mustBeCalledInAWT() {
+//                return true;
+//            }
+//
+//            @Override
+//            public void run(boolean success) {
+//                if (sysInfoResult[0].getEventType().equals(JMSNotificationMessage.MessageStatus.STARTED)) {
+//                    TaskInfo tiToUpdate = TaskInfoManager.getTaskInfoManager().getTaskInfoWithJMSId(sysInfoResult[0].getServerUniqueMsgId());
+//                    if (tiToUpdate != null) {
+//                        tiToUpdate.setRunning(true);
+//                    }
+//                }
+//            }
+//        };
+//        return notifierCallback;
+//    }
     
     //Nothing specific to do after cancel message was done : already taken into account be message response
-    @Override
-    protected AbstractJMSCallback getPurgeConsumerCallback(JMSNotificationMessage[] purgerResult){
-        return null;
-    }
+//    @Override
+//    protected AbstractJMSCallback getPurgeConsumerCallback(JMSNotificationMessage[] purgerResult){
+//        return null;
+//    }
     
     // default start data collect is enough
     @Override

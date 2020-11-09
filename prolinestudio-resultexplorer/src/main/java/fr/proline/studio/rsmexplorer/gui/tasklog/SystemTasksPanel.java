@@ -69,7 +69,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
     private SystemMessageTable m_messageTable;
 
     //QueueBrowser attributes
-    private QueueBrowser m_qBrowser = null;
+//    private QueueBrowser m_qBrowser = null;
     private static final int UPDATE_DELAY = 1000;
     private Timer m_updateTimer = null;
     private static int m_connectionErrCount = 0;
@@ -199,73 +199,73 @@ public class SystemTasksPanel extends AbstractTasksPanel {
 
     @Override
     protected boolean checkJMSVariables() {
-        if (m_qBrowser == null) {
-            m_qBrowser = JMSConnectionManager.getJMSConnectionManager().getQueueBrowser();
-            if (m_qBrowser == null) {
-                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "Unable to get JMS Queue Browser !! No server tasks monitoring will be done.", "Server Tasks Logs error", JOptionPane.ERROR_MESSAGE);
-                return false;
-            }
-        }
+//        if (m_qBrowser == null) {
+//            m_qBrowser = JMSConnectionManager.getJMSConnectionManager().getQueueBrowser();
+//            if (m_qBrowser == null) {
+//                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "Unable to get JMS Queue Browser !! No server tasks monitoring will be done.", "Server Tasks Logs error", JOptionPane.ERROR_MESSAGE);
+//                return false;
+//            }
+//        }
         return super.checkJMSVariables(); // AbstractTasksPanel checks listener params
     }
 
     // Creates specific callback method to be called when service event notification occurs
-    @Override
-    protected AbstractJMSCallback getServiceNotificationCallback(JMSNotificationMessage[] sysInfoResult) {
-        AbstractJMSCallback notifierCallback = new AbstractJMSCallback() {
-
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
-
-            @Override
-            public void run(boolean success) {
-
-                int selectedRow = m_messageTable.getSelectedRow();
-                if (selectedRow >= 0) {
-                    selectedRow = m_messageTable.convertRowIndexToModel(selectedRow);
-                }
-
-                ((SystemMessageTableModel) m_messageTable.getModel()).addMessage(sysInfoResult[0]);
-
-                if (selectedRow >= 0) {
-                    int modelIndex = m_messageTable.convertRowIndexToView(selectedRow);
-                    m_messageTable.setRowSelectionInterval(modelIndex, modelIndex);
-                }
-            }
-        };
-        return notifierCallback;
-    }
+//    @Override
+//    protected AbstractJMSCallback getServiceNotificationCallback(JMSNotificationMessage[] sysInfoResult) {
+//        AbstractJMSCallback notifierCallback = new AbstractJMSCallback() {
+//
+//            @Override
+//            public boolean mustBeCalledInAWT() {
+//                return true;
+//            }
+//
+//            @Override
+//            public void run(boolean success) {
+//
+//                int selectedRow = m_messageTable.getSelectedRow();
+//                if (selectedRow >= 0) {
+//                    selectedRow = m_messageTable.convertRowIndexToModel(selectedRow);
+//                }
+//
+//                ((SystemMessageTableModel) m_messageTable.getModel()).addMessage(sysInfoResult[0]);
+//
+//                if (selectedRow >= 0) {
+//                    int modelIndex = m_messageTable.convertRowIndexToView(selectedRow);
+//                    m_messageTable.setRowSelectionInterval(modelIndex, modelIndex);
+//                }
+//            }
+//        };
+//        return notifierCallback;
+//    }
 
     // Creates specific callback method to be called when purge consumer has been executed
-    @Override
-    protected AbstractJMSCallback getPurgeConsumerCallback(JMSNotificationMessage[] purgerResult) {
-        AbstractJMSCallback purgerCallback = new AbstractJMSCallback() {
-
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
-
-            @Override
-            public void run(boolean success) {
-                int selectedRow = m_messageTable.getSelectedRow();
-                if (selectedRow >= 0) {
-                    selectedRow = m_messageTable.convertRowIndexToModel(selectedRow);
-                }
-
-                ((SystemMessageTableModel) m_messageTable.getModel()).addMessage(purgerResult[0]);
-
-                if (selectedRow >= 0) {
-                    int modelIndex = m_messageTable.convertRowIndexToView(selectedRow);
-                    m_messageTable.setRowSelectionInterval(modelIndex, modelIndex);
-                }
-
-            }
-        };
-        return purgerCallback;
-    }
+//    @Override
+//    protected AbstractJMSCallback getPurgeConsumerCallback(JMSNotificationMessage[] purgerResult) {
+//        AbstractJMSCallback purgerCallback = new AbstractJMSCallback() {
+//
+//            @Override
+//            public boolean mustBeCalledInAWT() {
+//                return true;
+//            }
+//
+//            @Override
+//            public void run(boolean success) {
+//                int selectedRow = m_messageTable.getSelectedRow();
+//                if (selectedRow >= 0) {
+//                    selectedRow = m_messageTable.convertRowIndexToModel(selectedRow);
+//                }
+//
+//                ((SystemMessageTableModel) m_messageTable.getModel()).addMessage(purgerResult[0]);
+//
+//                if (selectedRow >= 0) {
+//                    int modelIndex = m_messageTable.convertRowIndexToView(selectedRow);
+//                    m_messageTable.setRowSelectionInterval(modelIndex, modelIndex);
+//                }
+//
+//            }
+//        };
+//        return purgerCallback;
+//    }
 
 
     /*
@@ -279,7 +279,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
 
                 @Override
                 public void actionPerformed(ActionEvent evt) {
-                    browsePendingMessages();
+//                    browsePendingMessages();
                 }
             };
             m_updateTimer = new Timer(UPDATE_DELAY, taskPerformer);
@@ -289,60 +289,60 @@ public class SystemTasksPanel extends AbstractTasksPanel {
         m_updateTimer.start();
     }
 
-    private void browsePendingMessages() {
-        try {
-
-            Enumeration<Message> messageEnum = m_qBrowser.getEnumeration();
-            List<JMSNotificationMessage> pendingMsg = new ArrayList<>();
-
-            while (messageEnum.hasMoreElements()) {
-                Message msg = messageEnum.nextElement();
-                JMSNotificationMessage notifMsg = JMSMessageUtil.buildJMSNotificationMessage(msg, JMSNotificationMessage.MessageStatus.PENDING);
-                if (notifMsg != null) {
-                    pendingMsg.add(notifMsg);
-                    //m_logger.debug(notifMsg.toString());
-                } else {
-                    m_logger.debug("Invalid message in Queue ! " + msg);
-                }
-            }
-
-            int selectedRow = m_messageTable.getSelectedRow();
-            if (selectedRow >= 0) {
-                selectedRow = m_messageTable.convertRowIndexToModel(selectedRow);
-            }
-            ((SystemMessageTableModel) m_messageTable.getModel()).addMessages(pendingMsg);
-            if (selectedRow >= 0) {
-                int modelIndex = m_messageTable.convertRowIndexToView(selectedRow);
-                m_messageTable.setRowSelectionInterval(modelIndex, modelIndex);
-            }
-
-        } catch (Exception jmsE) {
-
-            jmsE.printStackTrace();
-
-            m_connectionErrCount++;
-            if (m_connectionErrCount < 2) {
-                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "Unable to browse pending messages (JMS Connection problem ?! : " + jmsE.getMessage() + ")", "Server Tasks Logs error", JOptionPane.ERROR_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "Unable to browse pending messages. Stop browsing server tasks ", "Server Tasks Logs error", JOptionPane.ERROR_MESSAGE);
-                stopOtherDataCollecting();
-                m_reconnectButton.setEnabled(true);
-//                m_qBrowser = null;
-//                //TODO: add method in JMSConnectionManager to disconnect/reconnect without reset of variables
-//                String jmsHost = JMSConnectionManager.getJMSConnectionManager().m_jmsServerHost;
-//                JMSConnectionManager.getJMSConnectionManager().closeConnection();
-//                JMSConnectionManager.getJMSConnectionManager().setJMSServerHost(jmsHost);                
-//                if (!checkJMSVariables()) { // still can't connect 
-//                    stopOtherDataCollecting();
+//    private void browsePendingMessages() {
+//        try {
+//
+//            Enumeration<Message> messageEnum = m_qBrowser.getEnumeration();
+//            List<JMSNotificationMessage> pendingMsg = new ArrayList<>();
+//
+//            while (messageEnum.hasMoreElements()) {
+//                Message msg = messageEnum.nextElement();
+//                JMSNotificationMessage notifMsg = JMSMessageUtil.buildJMSNotificationMessage(msg, JMSNotificationMessage.MessageStatus.PENDING);
+//                if (notifMsg != null) {
+//                    pendingMsg.add(notifMsg);
+//                    //m_logger.debug(notifMsg.toString());
+//                } else {
+//                    m_logger.debug("Invalid message in Queue ! " + msg);
 //                }
-//                reInitConnection();
-                m_connectionErrCount = 0;
-            }
-        }
-    }
+//            }
+//
+//            int selectedRow = m_messageTable.getSelectedRow();
+//            if (selectedRow >= 0) {
+//                selectedRow = m_messageTable.convertRowIndexToModel(selectedRow);
+//            }
+//            ((SystemMessageTableModel) m_messageTable.getModel()).addMessages(pendingMsg);
+//            if (selectedRow >= 0) {
+//                int modelIndex = m_messageTable.convertRowIndexToView(selectedRow);
+//                m_messageTable.setRowSelectionInterval(modelIndex, modelIndex);
+//            }
+//
+//        } catch (Exception jmsE) {
+//
+//            jmsE.printStackTrace();
+//
+//            m_connectionErrCount++;
+//            if (m_connectionErrCount < 2) {
+//                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "Unable to browse pending messages (JMS Connection problem ?! : " + jmsE.getMessage() + ")", "Server Tasks Logs error", JOptionPane.ERROR_MESSAGE);
+//            } else {
+//                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "Unable to browse pending messages. Stop browsing server tasks ", "Server Tasks Logs error", JOptionPane.ERROR_MESSAGE);
+//                stopOtherDataCollecting();
+//                m_reconnectButton.setEnabled(true);
+////                m_qBrowser = null;
+////                //TODO: add method in JMSConnectionManager to disconnect/reconnect without reset of variables
+////                String jmsHost = JMSConnectionManager.getJMSConnectionManager().m_jmsServerHost;
+////                JMSConnectionManager.getJMSConnectionManager().closeConnection();
+////                JMSConnectionManager.getJMSConnectionManager().setJMSServerHost(jmsHost);
+////                if (!checkJMSVariables()) { // still can't connect
+////                    stopOtherDataCollecting();
+////                }
+////                reInitConnection();
+//                m_connectionErrCount = 0;
+//            }
+//        }
+//    }
 
     private void reInitConnection() {
-        m_qBrowser = null;
+//        m_qBrowser = null;
         //TODO: add method in JMSConnectionManager to disconnect/reconnect without reset of variables
         String jmsHost = JMSConnectionManager.getJMSConnectionManager().m_jmsServerHost;
         JMSConnectionManager.getJMSConnectionManager().closeConnection();
@@ -361,8 +361,8 @@ public class SystemTasksPanel extends AbstractTasksPanel {
      */
     @Override
     protected void stopOtherDataCollecting() {
-        m_qBrowser = null;
-        m_updateTimer.stop();
+//        m_qBrowser = null;
+//        m_updateTimer.stop();
     }
 
     class SystemMessageTable extends DecoratedTable {

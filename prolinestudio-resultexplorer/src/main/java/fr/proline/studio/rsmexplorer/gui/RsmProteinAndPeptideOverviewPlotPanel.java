@@ -415,10 +415,6 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
             super();
         }
 
-        public void mouseClicked(MouseEvent e) {//for selected on the protein, _action will be transfer to superCtrl
-            requestFocusInWindow();
-            actionMouseClicked(e);
-        }
 
         @Override
         public void mouseMoved(MouseEvent e) {//for tooltips
@@ -428,6 +424,7 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
             setToolTipText(tips);//null will turn off tooltip
         }
 
+        @Override
         public void mousePressed(MouseEvent event) {
             _action = null;
             Point point = event.getPoint();
@@ -435,11 +432,17 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
             startY = point.y;
         }
 
+        @Override
         public void mouseReleased(MouseEvent event) {
             Point p = event.getPoint();
             currentX = p.x;
             currentY = p.y;
             if (_action == null) {
+                
+                if (event.getButton() == MouseEvent.BUTTON1 ) {
+                    actionMouseClicked(event);
+                }
+                
                 return;
             }
             switch (_action) {
@@ -469,6 +472,7 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
             startY = currentY;
         }
 
+        @Override
         public void mouseDragged(MouseEvent event) {
             Point p = event.getPoint();
             currentX = p.x;
@@ -482,7 +486,7 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
                     //m_logger.debug(" Zoom out");
                 }
 
-            } else if (SwingUtilities.isLeftMouseButton(event) && (currentX - startX != 0)) {
+            } else if (SwingUtilities.isLeftMouseButton(event) && (Math.abs(currentX - startX) >= 3)) {
                 _action = ZoomMouseAction.MOVE_HORIZONTAL;
             }
             if (_action == ZoomMouseAction.MOVE_HORIZONTAL) {//move droit, gauch
@@ -490,6 +494,7 @@ public class RsmProteinAndPeptideOverviewPlotPanel extends JPanel {
             }
         }
 
+        @Override
         public void mouseWheelMoved(MouseWheelEvent event) {
             Point p = event.getPoint();
             currentX = p.x;

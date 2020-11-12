@@ -20,6 +20,7 @@ import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.SystemInfoTask;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.gui.HourglassPanel;
 import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -37,16 +38,19 @@ public class SystemInfoDialog extends DefaultDialog {
 
     private static SystemInfoDialog m_singletonDialog = null;
     private JTextArea m_txtArea;
+    private HourglassPanel m_internalPanel=null;
 
     protected SystemInfoDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         setTitle("System Information ");
-        setInternalComponent(createPanel());
+        m_internalPanel = createPanel();
+                
+        setInternalComponent(m_internalPanel);
         setResizable(true);
     }
 
-    private JPanel createPanel() {
-        JPanel internalPanel = new JPanel();
+    private HourglassPanel createPanel() {
+        HourglassPanel internalPanel = new HourglassPanel();
         internalPanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -88,6 +92,7 @@ public class SystemInfoDialog extends DefaultDialog {
     public void updateInfo() {
 
         final String[] sysInfoResult = new String[1];
+        m_internalPanel.setLoading(1);
         AbstractJMSCallback callback = new AbstractJMSCallback() {
 
             @Override
@@ -97,7 +102,7 @@ public class SystemInfoDialog extends DefaultDialog {
 
             @Override
             public void run(boolean success) {
-
+                m_internalPanel.setLoaded(1);
                 String sysInfoText = sysInfoResult[0];
 
                 StringBuilder sb = new StringBuilder();

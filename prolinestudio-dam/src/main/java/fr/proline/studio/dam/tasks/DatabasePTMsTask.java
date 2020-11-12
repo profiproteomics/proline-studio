@@ -751,6 +751,8 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
         
         int nbrPepIds = sliceOfPeptideIds.size();
         Long rsetId = m_ptmDataset.getDataset().getResultSetId();
+        if(rsetId == null && m_ptmDataset.getDataset().getResultSummary() != null && m_ptmDataset.getDataset().getResultSummary().getResultSet() != null)
+            rsetId = m_ptmDataset.getDataset().getResultSummary().getResultSet().getId();
         Long dsRsmId = m_ptmDataset.getDataset().getResultSummaryId();
         List<Long> allRsmIds = m_ptmDataset.getLeafResultSummaryIds();
         boolean datasetIsLeaf = (allRsmIds.size() == 1 && m_ptmDataset.getLeafResultSummaryIds().get(0).equals(dsRsmId));

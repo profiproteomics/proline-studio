@@ -15,3 +15,9 @@
 /prolinestudio-resultexplorer/prolinestudio-resultexplorer.iml
 /prolinestudio-parent.iml
 /prolinestudio-logger/prolinestudio-logger.iml
+/branding/target/
+/builder/ProlineStudio.iml
+/prolinestudio-commons/target/
+/prolinestudio-corewrapper/target/
+/prolinestudio-dam/target/
+/prolinestudio-logger/target/

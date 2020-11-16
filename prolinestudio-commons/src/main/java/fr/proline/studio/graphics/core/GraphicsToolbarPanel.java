@@ -246,8 +246,12 @@ public abstract class GraphicsToolbarPanel extends HourglassPanel implements Plo
         m_toolbar.add(m_gridButton);
         m_toolbar.add(m_viewAllMapButton);
         
-        fillToolbar(m_toolbar);
+//        fillToolbar(m_toolbar);
         return m_toolbar;
+    }
+    
+    protected void fillGraphicToolbar(){
+        fillToolbar(m_toolbar);
     }
     
     protected abstract JPanel createInternalPanel();

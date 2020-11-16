@@ -20,7 +20,6 @@ import fr.proline.studio.extendedtablemodel.LockedDataModel;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.graphics.BestGraphicsInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
-import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -94,11 +93,11 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
     private boolean m_setHideButton;
 
     public MultiGraphicsPanel(boolean dataLocked, boolean canChooseColor, boolean isDoubleYAxis, boolean setHideButton) {
-        super(dataLocked, isDoubleYAxis);
-        
+        super(dataLocked, isDoubleYAxis);        
         columnXYIndex = new int[2];
         m_canChooseColor = canChooseColor;
-        m_setHideButton = setHideButton;
+        m_setHideButton = setHideButton; 
+        fillGraphicToolbar();
     }
 
     @Override

@@ -71,7 +71,7 @@ public class MonoGraphicsPanel extends GraphicsToolbarPanel {
     
     public MonoGraphicsPanel(boolean dataLocked) {
         super(dataLocked, false);
-
+        fillGraphicToolbar();
     }
     
     public PlotBaseAbstract getPlotGraphics() {

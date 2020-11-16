@@ -29,6 +29,7 @@ import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.SecondAxisTableModelInterface;
+import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.rsmexplorer.gui.PTMPeptidesTablePanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
@@ -286,6 +287,27 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
             if (parameterSubtype == ParameterSubtypeEnum.LIST_DATA) {
                 if (parameterType.equals(ExtendedTableModelInterface.class)) {
                     return getTableModelInterfaceList();
+                }
+            }
+            
+            if (parameterSubtype == ParameterSubtypeEnum.PEPTIDES_SELECTION_LIST) {
+                if (parameterType.equals(Integer.class)) {
+                    CrossSelectionInterface crossSelectionInterface = ((PTMPeptidesTablePanel) this.m_panel).getCrossSelectionInterface();
+                    ArrayList<Integer> result = new ArrayList();
+                    if (crossSelectionInterface != null) {
+                        ArrayList<Long> selection = null;
+                        try {
+                            selection = crossSelectionInterface.getSelection();
+                        } catch (Exception e) {
+                            m_logger.error("wart : selection not ready ", e);
+                        }
+                        if (selection != null) {
+                            for (Long l : selection) {
+                                result.add(l.intValue());
+                            }
+                        }
+                    }
+                    return result;
                 }
             }
             

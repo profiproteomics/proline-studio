@@ -24,7 +24,9 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.graphics.PlotDataSpec;
 import fr.proline.studio.graphics.PlotInformation;
+import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.table.LazyData;
+import fr.proline.studio.utils.GlobalValues;
 import java.awt.Color;
 import javax.swing.table.TableModel;
 import java.util.ArrayList;
@@ -177,7 +179,8 @@ public class XICComparePeptideTableModel implements ExtendedTableModelInterface,
         plotInformation.setSelected(m_isSelected);
         if (m_quantPeptide.getPeptideInstance() != null && m_quantPeptide.getPeptideInstance().getPeptide() != null) {
             Peptide peptide = m_quantPeptide.getPeptideInstance().getPeptide();
-            StringBuilder sb = new StringBuilder(peptide.getSequence());
+            String sequence =  PeptideRenderer.constructPeptideDisplay(peptide).replaceAll(GlobalValues.HTML_TAG_BEGIN, "").replaceAll(GlobalValues.HTML_TAG_END, "");
+            StringBuilder sb = new StringBuilder(sequence);
             if (peptide.getTransientData().isPeptideReadablePtmStringLoaded() && peptide.getTransientData().getPeptideReadablePtmString() != null) {
                 sb.append(" - ").append(peptide.getTransientData().getPeptideReadablePtmString().getReadablePtmString());
             }

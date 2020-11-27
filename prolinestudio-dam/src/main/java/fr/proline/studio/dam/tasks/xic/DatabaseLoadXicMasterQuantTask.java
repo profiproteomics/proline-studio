@@ -540,13 +540,17 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 // Set the ResultSummary of the Dataset as the ResultSummary of the first MasterQuantitationChannel
                 MasterQuantitationChannel masterQuantitationChannel = listMasterQuantitationChannels.get(0);
                 Long resultSummaryId = masterQuantitationChannel.getQuantResultSummaryId();
-                if (dataset.getResultSummary() == null) {
+                if (dataset.getResultSummary() == null || dataset.getResultSetId() == null || dataset.getResultSet() == null) {
                     ResultSummary rsm = entityManagerMSI.find(ResultSummary.class, resultSummaryId);
                     Set<String> objTreeByName = rsm.getObjectTreeIdByName().keySet(); //to init Lazy map
-                    dataset.setResultSummaryId(resultSummaryId);
-                    dataset.setResultSummary(rsm);
-                    dataset.setResultSet(rsm.getResultSet());
-                    dataset.setResultSetId(rsm.getResultSet().getId());
+                    if(dataset.getResultSummaryId() == null)
+                        dataset.setResultSummaryId(resultSummaryId);
+                    if(dataset.getResultSummary() == null)
+                        dataset.setResultSummary(rsm);
+                    if(dataset.getResultSet() == null)
+                        dataset.setResultSet(rsm.getResultSet());                    
+                    if(dataset.getResultSetId()== null)
+                        dataset.setResultSetId(rsm.getResultSet().getId());                    
                 }
             } //End if at least 1 MQC exits
 

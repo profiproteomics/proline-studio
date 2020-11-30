@@ -299,6 +299,7 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
                             Double v1 = ((value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue());
                             value = cloudData.getDataValueAt(i, axisY);
                             Double v2 = ((value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue());
+                            //mimic classical settings filtering matches over deltaRT 600s
                             if (Math.abs(v2) < 600.0)
                                 data.add(Pair.of(v1, v2));
                         }
@@ -315,30 +316,32 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
                     }
                     try {
 
-
                         LoessInterpolator interpolator = new LoessInterpolator(bandwidth, LoessInterpolator.DEFAULT_ROBUSTNESS_ITERS, LoessInterpolator.DEFAULT_ACCURACY);
                         double[] yfit = interpolator.smooth(x, y);
                         createRegressionPlot(x, yfit);
 
-                        PrintWriter writer = new PrintWriter("squared_residuals.csv");
-                        
                         double[] residuals = new double[yfit.length];
                         for (int k = 0; k < yfit.length; k++) {
                             residuals[k] = (y[k] - yfit[k]) * (y[k] - yfit[k]);
-                            writer.println(residuals[k]+","+x[k]);
                         }
-
-                        writer.close();
                         
-                        interpolator = new LoessInterpolator(Math.max(0.15, bandwidth), LoessInterpolator.DEFAULT_ROBUSTNESS_ITERS, LoessInterpolator.DEFAULT_ACCURACY);
+                        interpolator = new LoessInterpolator(Math.max(0.50, bandwidth), LoessInterpolator.DEFAULT_ROBUSTNESS_ITERS, LoessInterpolator.DEFAULT_ACCURACY);
                         double[] sd = interpolator.smooth(x, residuals);
                         double[] upper = new double[yfit.length];
                         double[] lower = new double[yfit.length];
                         for (int k = 0; k < yfit.length; k++) {
                             double s = Math.sqrt(Math.max(0, sd[k]));
-                            upper[k] = yfit[k] + 2 * s;
-                            lower[k] = yfit[k] - 2 * s;
+                            upper[k] = yfit[k] + 3.89 * s;
+                            lower[k] = yfit[k] - 3.89 * s;
                         }
+
+//                        PrintWriter writer = new PrintWriter("squared_residuals.csv");
+//                        writer.println("rt, deltaRt, predDeltaRt, residuals, sd");
+//                        for (int k = 0; k < yfit.length; k++) {
+//                            writer.println(x[k]+","+y[k]+","+yfit[k]+","+residuals[k]+","+Math.sqrt(Math.max(0, sd[k])));
+//                        }
+//
+//                        writer.close();
 
                         createRegressionPlot(x, upper);
                         createRegressionPlot(x, lower);

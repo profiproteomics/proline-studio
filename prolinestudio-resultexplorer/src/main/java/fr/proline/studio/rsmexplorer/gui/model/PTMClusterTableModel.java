@@ -57,21 +57,23 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
   public static final int COLTYPE_PROTEIN_ID = 1;
   public static final int COLTYPE_PROTEIN_NAME = 2;
   public static final int COLTYPE_PEPTIDE_NAME = 3;
-  public static final int COLTYPE_PEPTIDE_SCORE = 4;
-  public static final int COLTYPE_PEPTIDE_COUNT = 5;
-  public static final int COLTYPE_PTMSITE_COUNT = 6;
-  public static final int COLTYPE_PTMSITE_POSITIONS = 7;
-  public static final int COLTYPE_PTM_CLUSTER_CONFIDENCE = 8;
-  public static final int COLTYPE_PTMSITE_CONFIDENCES = 9;
+  public static final int COLTYPE_PEPTIDE_PTM = 4;
+  public static final int COLTYPE_PTM_PROBA = 5;
 
-  public static final int COLTYPE_PEPTIDE_PTM = 10;
-  public static final int COLTYPE_DELTA_MASS_PTM = 11;
-  public static final int COLTYPE_PTM_PROBA = 12;
+
+  public static final int COLTYPE_PEPTIDE_SCORE = 6;
+  public static final int COLTYPE_PEPTIDE_COUNT = 7;
+  public static final int COLTYPE_PTMSITE_COUNT = 8;
+  public static final int COLTYPE_PTMSITE_POSITIONS = 9;
+  public static final int COLTYPE_PTM_CLUSTER_CONFIDENCE = 10;
+  public static final int COLTYPE_PTMSITE_CONFIDENCES = 11;
+
+  public static final int COLTYPE_DELTA_MASS_PTM = 12;
   public static final int COLTYPE_SPECTRUM_TITLE = 13;
   public static final int LAST_STATIC_COLUMN = COLTYPE_SPECTRUM_TITLE;
   
-  private static final String[] m_columnNames = {"Id", "Protein Id", "Protein", "Peptide", "Score", "Peptide count",  "Site count", "Sites Loc.", "Confidence" ,"Sites Confid.(%)", "PTMs", "PTM D.Mass", "PTMs Confid.(MDScore, %)", "Spectrum title"};
-  private static final String[] m_columnTooltips = {"PTM cluster Id", "Protein match Id", "Protein", "Peptide", "Score of the peptide match", "Number of peptides matching the modification site", "Number of modification sites grouped into the cluster", "Sites localisation on the protein", "Sites combined confidence", "Sites localisation confidence (%)", "Peptide's PTMs", "PTMs delta mass", "PTMs localisation confidence (%)", "Peptide match spectrum title"};
+  private static final String[] m_columnNames = {"Id", "Protein Id", "Protein", "Peptide", "PTMs", "PTMs Confid.(MDScore, %)", "Score", "Peptide count",  "Site count", "Sites Loc.", "Confidence" ,"Sites Confid.(%)", "PTM D.Mass", "Spectrum title"};
+  private static final String[] m_columnTooltips = {"PTM cluster Id", "Protein match Id", "Protein", "Peptide", "Peptide's PTMs", "PTMs localisation confidence (%)", "Score of the peptide match", "Number of peptides matching the modification site", "Number of modification sites grouped into the cluster", "Sites localisation on the protein", "Sites combined confidence", "Sites localisation confidence (%)", "PTMs delta mass", "Peptide match spectrum title"};
      
   //Dynamique columns
 
@@ -161,6 +163,7 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
   public List<Integer> getDefaultColumnsToHide() {  
     List<Integer> listIds = new ArrayList();
     listIds.add(COLTYPE_PROTEIN_ID);
+    listIds.add(COLTYPE_PTM_CLUSTER_CONFIDENCE);
     if(m_isQuantitationDS){
         for (int i = m_quantChannels.length - 1; i >= 0; i--) {
             listIds.add(COLTYPE_START_QUANT_INDEX + COLTYPE_RAW_ABUNDANCE + (i * m_columnNamesQC.length));            

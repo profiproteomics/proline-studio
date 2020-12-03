@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019 
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -76,7 +76,7 @@ public class Installer extends VersionInstaller {
         if(secIndex>0)
             productVersion = moduleVersion.substring(0, secIndex);
         
-        String buildnumber = productVersion+" Milestone ("+moduleBuildDate+")"; //specify if Milestone, Release Candidate or release (or nothing = release)
+        String buildnumber = productVersion;//+" Milestone ("+moduleBuildDate+")"; //specify if Milestone, Release Candidate or release (or nothing = release)
         
         // set the proline version for the application title
         System.setProperty("netbeans.buildnumber", buildnumber);  //"1.0.1 (alpha : build date @build.date@)"

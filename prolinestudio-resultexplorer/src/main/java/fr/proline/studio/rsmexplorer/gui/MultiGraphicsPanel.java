@@ -204,7 +204,7 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
             @Override
             public void actionPerformed(ActionEvent e) {
                 fillXYCombobox();
-                setDataImpl(false);
+                setDataImpl(false, null);
                 updateXYCbxVisibility();
 
             }
@@ -375,10 +375,10 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
     }
 
     public void setData(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList) {
-        this.setData(valuesList, crossSelectionInterfaceList, m_valueOn2Yxis, false);
+        this.setData(valuesList, crossSelectionInterfaceList, m_valueOn2Yxis, false, null);
     }
 
-    public void setData(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList, SecondAxisTableModelInterface value2, boolean keepZoom) {
+    public void setData(List<ExtendedTableModelInterface> valuesList, List<CrossSelectionInterface> crossSelectionInterfaceList, SecondAxisTableModelInterface value2, boolean keepZoom, Double limitMinAxisY) {
         if (m_plotPanel.isLocked()) {
             return;
         }
@@ -396,8 +396,8 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
                 valuesList.set(i, values);//replace values with the same but locked values
             }
         }
-        this.setXYZComboBox();
-        this.setDataImpl(keepZoom);
+        setXYZComboBox();
+        setDataImpl(keepZoom, limitMinAxisY);
         if (m_dataLocked) {
             // check that plotPanel corresponds, it can not correspond at the first call
             m_plotPanel.lockData(m_dataLocked);
@@ -407,7 +407,7 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
     /**
      *
      */
-    private void setDataImpl(boolean keepZoom) {
+    private void setDataImpl(boolean keepZoom, Double limitMinAxisY) {
         ReferenceToColumn refX = (ReferenceToColumn) m_valueXComboBox.getSelectedItem();
         ReferenceToColumn refY = (ReferenceToColumn) m_valueYComboBox.getSelectedItem();
         if (refX != null && refY != null) {
@@ -418,30 +418,61 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
         PlotType plotType = (PlotType) m_allPlotsComboBox.getSelectedItem();
         switch (plotType) {
             case LINEAR_PLOT: {
-                
+
                 // Values if keepZoom is true
                 XAxis xAxis = m_plotPanel.getXAxis();
                 double minXValue = xAxis.getMinValue();
                 double maxXValue = xAxis.getMaxValue();
                 keepZoom &= (maxXValue>minXValue);
+                
+                
                 YAxis yAxis = m_plotPanel.getYAxis();
                 double minYValue = yAxis.getMinValue();
                 double maxYValue = yAxis.getMaxValue();
-                keepZoom &= (maxYValue>minYValue);
                 
+                double minYValueRight = 0;
+                double maxYValueRight = 0;
+                if (m_isDoubleYAxis) {
+                    YAxis yAxisRight = m_plotPanel.getYAxisRight();
+                    minYValueRight = yAxisRight.getMinValue();
+                    maxYValueRight = yAxisRight.getMaxValue();
+                }
+                
+
                 m_plotPanel.clearPlots();
                 if (m_isDoubleYAxis) {
-                    setPlotsWithDoubleYAxis();
+                    setPlotsWithDoubleYAxis(limitMinAxisY);
                 } else {
-                    setPlots();
+                    setPlots(limitMinAxisY);
                 }
+
+                keepZoom &= (maxYValue>minYValue);
+                keepZoom &= (xAxis.getRangeModifiedByUser() || yAxis.getRangeModifiedByUser() || ((m_isDoubleYAxis) && m_plotPanel.getYAxisRight().getRangeModifiedByUser()));
                 
                 if (keepZoom) {
                     xAxis = m_plotPanel.getXAxis(); // axis has been changed
-                    xAxis.setRange(minXValue, maxXValue);
+                    if (xAxis.isEnum()) {
+                        xAxis.setRange(minXValue+0.5, maxXValue-0.5); //JPM.WART : 0.5 is added to enum X Axis, so to keep the zoom, remove it
+                    } else {
+                        xAxis.setRange(minXValue, maxXValue);
+                    }
                     yAxis = m_plotPanel.getYAxis();
-                    yAxis.setRange(minYValue, maxYValue);
+                    if (yAxis.isEnum()) {
+                        yAxis.setRange(minYValue+0.5, maxYValue-0.5); //JPM.WART : 0.5 is added to enum X Axis, so to keep the zoom, remove it
+                    } else {
+                        yAxis.setRange(minYValue, maxYValue);
+                    }
+
+                    if (m_isDoubleYAxis) {
+                        YAxis yAxisRight = m_plotPanel.getYAxisRight();
+                        if (yAxisRight.isEnum()) {
+                            yAxisRight.setRange(minYValueRight + 0.5, maxYValueRight - 0.5); //JPM.WART : 0.5 is added to enum X Axis, so to keep the zoom, remove it
+                        } else {
+                            yAxisRight.setRange(minYValueRight, maxYValueRight);
+                        }
+                    }
                 }
+               
                 
                 m_plotPanel.repaint();
 
@@ -450,25 +481,25 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
         }
     }
 
-    private void setPlots() {
+    private void setPlots(Double limitMinAxisY) {
         for (int i = 0; i < m_valuesList.size(); i++) {
             CrossSelectionInterface crossSelectionInterface = (m_crossSelectionInterfaceList == null) || (m_crossSelectionInterfaceList.size() <= i) ? null : m_crossSelectionInterfaceList.get(i);
             //create plotGraphics for each table
-            PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valuesList.get(i), crossSelectionInterface, columnXYIndex[COL_X_ID], columnXYIndex[COL_Y_ID]);
+            PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valuesList.get(i), crossSelectionInterface, columnXYIndex[COL_X_ID], columnXYIndex[COL_Y_ID], limitMinAxisY);
             plotGraphics.setPlotInformation(m_valuesList.get(i).getPlotInformation());
             plotGraphics.setIsPaintMarker(false);
             m_plotPanel.addPlot(plotGraphics, true);
         }
     }
 
-    private void setPlotsWithDoubleYAxis() {
+    private void setPlotsWithDoubleYAxis(Double limitMinAxisY) {
   
         double mainPlotMaxY = Double.NEGATIVE_INFINITY;
         double secondPlotMaxY = Double.NEGATIVE_INFINITY;
         for (int i = 0; i < m_valuesList.size(); i++) {
             CrossSelectionInterface crossSelectionInterface = (m_crossSelectionInterfaceList == null) || (m_crossSelectionInterfaceList.size() <= i) ? null : m_crossSelectionInterfaceList.get(i);
             //create plotGraphics for each table
-            PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valuesList.get(i), crossSelectionInterface, columnXYIndex[COL_X_ID], columnXYIndex[COL_Y_ID]);
+            PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valuesList.get(i), crossSelectionInterface, columnXYIndex[COL_X_ID], columnXYIndex[COL_Y_ID], limitMinAxisY);
             mainPlotMaxY = Math.max(mainPlotMaxY, plotGraphics.getYMax());
             plotGraphics.setPlotInformation(m_valuesList.get(i).getPlotInformation());
             plotGraphics.setIsPaintMarker(false);
@@ -477,7 +508,7 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
         //plot on second Axis Y
         if (m_valueOn2Yxis != null && m_valueOn2Yxis.getRowCount() != 0) {//creat a plot which show PlotLinear on 2nd Axis  
             CrossSelectionInterface crossSelectionInterface2 = null;
-            PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valueOn2Yxis, crossSelectionInterface2, columnXYIndex[COL_X_ID], columnXYIndex[COL_Y_ID]);
+            PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valueOn2Yxis, crossSelectionInterface2, columnXYIndex[COL_X_ID], columnXYIndex[COL_Y_ID], limitMinAxisY);
             secondPlotMaxY = plotGraphics.getYMax();
             plotGraphics.setPlotInformation(m_valueOn2Yxis.getPlotInformation());
             plotGraphics.setIsPaintMarker(false);

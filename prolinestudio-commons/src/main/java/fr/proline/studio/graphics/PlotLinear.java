@@ -107,8 +107,16 @@ public class PlotLinear extends PlotXYAbstract {
     private boolean displayAntiAliasing = true;
     private double m_tolerance;
 
+    private Double m_limitMinY = null;  // minY must be <= limitMinY
+    
     public PlotLinear(BasePlotPanel plotPanel, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
+        this(plotPanel, compareDataInterface, crossSelectionInterface, colX, colY, null);
+    }
+    public PlotLinear(BasePlotPanel plotPanel, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY, Double limitMinY) {
         super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
+        
+        m_limitMinY = limitMinY;
+        
         int[] cols = new int[2]; //JPM.TODO enhance
         cols[COL_X_ID] = colX;
         cols[COL_Y_ID] = colY;
@@ -523,7 +531,12 @@ public class PlotLinear extends PlotXYAbstract {
 
         m_xMin = minX;
         m_xMax = maxX;
-        m_yMin = minY;
+        
+        if (m_limitMinY != null) {
+            m_yMin = Math.min(minY, m_limitMinY);
+        } else {
+            m_yMin = minY;
+        }
         m_yMax = maxY;
 
         // we let margins

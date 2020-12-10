@@ -100,6 +100,8 @@ public abstract class Axis {
     protected int m_minimumAxisWidth = 0;
 
     private boolean m_maxZoomDone = false;
+    
+    private boolean m_rangeModifiedByUser = false;
 
     protected static final double LOG_MIN_VALUE = 10e-13;
             
@@ -248,7 +250,7 @@ public abstract class Axis {
                     min = Math.pow(10, min);
                     max = Math.pow(10, max);
                 }
-                m_axis.setRange(min, max);
+                m_axis.setRange(min, max, true);
                 m_axis.m_plotPanel.repaintUpdateDoubleBuffer();
             } else {
                 InfoDialog errorDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Error", "Min value cannot be greater than or equal to the max value.");
@@ -361,6 +363,17 @@ public abstract class Axis {
         m_height = height;
     }
 
+    public boolean getRangeModifiedByUser() {
+        return m_rangeModifiedByUser;
+    }
+    public void setRangeModifiedByUser(boolean rangeModifiedByUser) {
+        m_rangeModifiedByUser = rangeModifiedByUser;
+    }
+    
+    public void setRange(double min, double max, boolean rangeModifiedByUser) {
+        setRange(min, max);
+        setRangeModifiedByUser(rangeModifiedByUser);
+    }
     public void setRange(double min, double max) {
         if (!Double.isNaN(m_lockedMinValue) && (min < m_lockedMinValue) && m_lockedMinValue < max) {
             m_minValue = m_lockedMinValue;

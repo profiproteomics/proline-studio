@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.pattern.ParameterSubtypeEnum;
+import fr.proline.studio.pattern.extradata.GraphicExtraData;
 import fr.proline.studio.rsmexplorer.gui.xic.PeakTableModel;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -381,7 +382,7 @@ public class DataboxChildFeature extends AbstractDataBox {
     @Override
     public Object getExtraData(Class parameterType) {
         if (parameterType.equals(ExtendedTableModelInterface.class)) {
-            return m_keepZoom; // True during xic extraction 
+            return new GraphicExtraData(m_keepZoom, null); // True during xic extraction 
         }
         
         return super.getExtraData(parameterType);

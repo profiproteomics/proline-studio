@@ -23,6 +23,7 @@ import fr.proline.studio.rsmexplorer.gui.MultiGraphicsPanel;
 import java.util.List;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.SecondAxisTableModelInterface;
+import fr.proline.studio.pattern.extradata.GraphicExtraData;
 import fr.proline.studio.rsmexplorer.gui.xic.XICComparePeptideTableModel;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -123,9 +124,16 @@ public class DataboxMultiGraphics extends AbstractDataBox {
             }
         }
         
-        Boolean keepZoom = (Boolean) m_previousDataBox.getExtraData(ExtendedTableModelInterface.class); // True during xic extraction
-        if (keepZoom == null) {
-            keepZoom = Boolean.FALSE;
+        GraphicExtraData extraData = (GraphicExtraData) m_previousDataBox.getExtraData(ExtendedTableModelInterface.class); // True during xic extraction
+       
+        Boolean keepZoom = Boolean.FALSE;
+        Double limitMinAxisY = null;
+        if (extraData != null) {
+            keepZoom = extraData.getKeepZoom();
+            if (keepZoom == null) {
+                keepZoom = Boolean.FALSE;
+            }
+            limitMinAxisY = extraData.getLimitMinY();
         }
 
         //final List<ExtendedTableModelInterface> dataModelInterfaceSet1 = (List<ExtendedTableModelInterface>) getData(false, ExtendedTableModelInterface.class, true);
@@ -140,7 +148,7 @@ public class DataboxMultiGraphics extends AbstractDataBox {
         m_crossSelectionValues = crossSelectionInterfaceL;
         m_plotSecondAxisValues = dataModelInterfaceSet2;
         if (m_plotValues != null) {
-            ((MultiGraphicsPanel) getDataBoxPanelInterface()).setData(m_plotValues, m_crossSelectionValues, m_plotSecondAxisValues, keepZoom);
+            ((MultiGraphicsPanel) getDataBoxPanelInterface()).setData(m_plotValues, m_crossSelectionValues, m_plotSecondAxisValues, keepZoom, limitMinAxisY);
         }
     }
 
@@ -163,7 +171,7 @@ public class DataboxMultiGraphics extends AbstractDataBox {
                 }
             }
         }
-        ((MultiGraphicsPanel) getDataBoxPanelInterface()).setData(m_plotValues, m_crossSelectionValues, m_plotSecondAxisValues, false);
+        ((MultiGraphicsPanel) getDataBoxPanelInterface()).setData(m_plotValues, m_crossSelectionValues, m_plotSecondAxisValues, false, null);
     }
 
 }

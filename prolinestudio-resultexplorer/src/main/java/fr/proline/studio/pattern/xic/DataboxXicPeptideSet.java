@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.SecondAxisTableModelInterface;
+import fr.proline.studio.pattern.extradata.GraphicExtraData;
 import fr.proline.studio.rsmexplorer.gui.xic.XICComparePeptideTableModel;
 import fr.proline.studio.rsmexplorer.gui.xic.XicAbundanceProteinTableModel;
 import java.util.Objects;
@@ -63,6 +64,8 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     private boolean m_isXICMode = true;
     //Display only a subList of peptides instances not all from Peptide/ProteinSet
     private boolean m_displayPeptidesSubList = false;
+    
+    private Boolean m_keepZoom = Boolean.TRUE;
 
     public DataboxXicPeptideSet() {
         this(false);
@@ -220,7 +223,9 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                     unregisterTask(taskId);
                     addDataChanged(ExtendedTableModelInterface.class);
                     addDataChanged(ExtendedTableModelInterface.class, ParameterSubtypeEnum.LIST_DATA);
+                    m_keepZoom = Boolean.FALSE;
                     propagateDataChanged();
+                    m_keepZoom = Boolean.TRUE;
                 }
             }
         };
@@ -332,6 +337,19 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         return super.getDataImpl(parameterType, parameterSubtype);
     }
 
+       /**
+     * Return potential extra data available for the corresponding parameter of class type
+     * @param c
+     * @return 
+     */
+    @Override
+    public Object getExtraData(Class parameterType) {
+        if (parameterType.equals(ExtendedTableModelInterface.class)) {
+            return new GraphicExtraData(m_keepZoom, new Double(0)); // Keep Zoom - minimal value of min Y value
+        }
+        
+        return super.getExtraData(parameterType);
+    }
 
 
     @Override

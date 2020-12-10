@@ -1050,9 +1050,9 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                 int endX = isBasePlot ? m_zoomGesture.getEndX() : m_viewAllPanel.convertToBasePlotX(m_zoomGesture.getEndX());
                 int startY = isBasePlot ? m_zoomGesture.getStartY() : m_viewAllPanel.convertToBasePlotY(m_zoomGesture.getStartY());
                 int endY = isBasePlot ? m_zoomGesture.getEndY() : m_viewAllPanel.convertToBasePlotY(m_zoomGesture.getEndY());
-                m_xAxis.setRange(m_xAxis.pixelToValue(startX), m_xAxis.pixelToValue(endX));
-                m_yAxis.setRange(m_yAxis.pixelToValue(endY), m_yAxis.pixelToValue(startY));
-                m_yAxisRight.setRange(m_yAxisRight.pixelToValue(endY), m_yAxisRight.pixelToValue(startY));
+                m_xAxis.setRange(m_xAxis.pixelToValue(startX), m_xAxis.pixelToValue(endX), true);
+                m_yAxis.setRange(m_yAxis.pixelToValue(endY), m_yAxis.pixelToValue(startY), true);
+                m_yAxisRight.setRange(m_yAxisRight.pixelToValue(endY), m_yAxisRight.pixelToValue(startY), true);
                 m_updateDoubleBuffer = true;
                 fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY, oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue());
 
@@ -1064,6 +1064,12 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                     double oldMaxY = m_yAxis.getMaxValue();
                     updateAxis(getXAxis().getPlots().get(0));
                     fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY, oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue());
+                    // after a view all, axis have not been zoomed by the user
+                    getXAxis().setRangeModifiedByUser(false);
+                    getYAxis().setRangeModifiedByUser(false);
+                    if (m_yAxisRight != null) {
+                        m_yAxisRight.setRangeModifiedByUser(false);
+                    }
                 }
                 m_updateDoubleBuffer = true;
             } else if (e.isPopupTrigger()) { // action == ZoomGesture.ACTION_NONE
@@ -1180,15 +1186,15 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             }
            
             if (doZoom) {
-                m_xAxis.setRange(newXmin, newXmax);
+                m_xAxis.setRange(newXmin, newXmax, true);
                 if (fixedCoordinateX != null) {
                     if (m_xAxis.isLog()) {
                         int coordinateNowX = m_xAxis.valueToPixel(fixedX);
                         double mult = m_xAxis.deltaPixelToLogMultValue(fixedCoordinateX - coordinateNowX);
-                        m_xAxis.setRange(m_xAxis.getMinValue() / mult, m_xAxis.getMaxValue() / mult);
+                        m_xAxis.setRange(m_xAxis.getMinValue() / mult, m_xAxis.getMaxValue() / mult, true);
                     } else {
                         double valueTranslated = m_xAxis.pixelToValue(fixedCoordinateX);
-                        m_xAxis.setRange(newXmin + (fixedX - valueTranslated), newXmax + (fixedX - valueTranslated));
+                        m_xAxis.setRange(newXmin + (fixedX - valueTranslated), newXmax + (fixedX - valueTranslated), true);
                     }
                 }
             }
@@ -1222,15 +1228,15 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                 newYmax = oldMaxY - (yValue - oldMaxY) * factor;
             }
             if (doZoom) {
-                m_yAxis.setRange(newYmin, newYmax);
+                m_yAxis.setRange(newYmin, newYmax, true);
                 if (fixedCoordinateY != null) {
                     if (m_yAxis.isLog()) {
                         int coordinateNowY = m_yAxis.valueToPixel(fixedY);
                         double mult = m_yAxis.deltaPixelToLogMultValue(coordinateNowY - fixedCoordinateY);
-                        m_yAxis.setRange(m_yAxis.getMinValue() / mult, m_yAxis.getMaxValue() / mult);
+                        m_yAxis.setRange(m_yAxis.getMinValue() / mult, m_yAxis.getMaxValue() / mult, true);
                     } else {
                         double valueTranslated = m_yAxis.pixelToValue(fixedCoordinateY);
-                        m_yAxis.setRange(newYmin + (fixedY - valueTranslated), newYmax + (fixedY - valueTranslated));
+                        m_yAxis.setRange(newYmin + (fixedY - valueTranslated), newYmax + (fixedY - valueTranslated), true);
                     }
                 }
             }
@@ -1267,16 +1273,16 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             }
             
             if (doZoom) {
-                m_yAxisRight.setRange(newYmin, newYmax);
+                m_yAxisRight.setRange(newYmin, newYmax, true);
 
                 if (fixedCoordinateY != null) {
                     if (m_yAxis.isLog()) {
                         int coordinateNowY = m_yAxisRight.valueToPixel(fixedYRight);
                         double mult = m_yAxisRight.deltaPixelToLogMultValue(coordinateNowY - fixedCoordinateY);
-                         m_yAxisRight.setRange(m_yAxisRight.getMinValue() / mult, m_yAxisRight.getMaxValue() / mult);
+                         m_yAxisRight.setRange(m_yAxisRight.getMinValue() / mult, m_yAxisRight.getMaxValue() / mult, true);
                     } else {
                         double valueTranslated = m_yAxisRight.pixelToValue(fixedCoordinateY);
-                        m_yAxisRight.setRange(newYmin + (fixedYRight - valueTranslated), newYmax + (fixedYRight - valueTranslated));
+                        m_yAxisRight.setRange(newYmin + (fixedYRight - valueTranslated), newYmax + (fixedYRight - valueTranslated), true);
                     }
                 }
             }
@@ -1293,6 +1299,14 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         for (PlotBaseAbstract plot : getXAxis().getPlots()) {
             updateAxis(plot.getDoubleBufferingPolicy());
         }
+        
+        // after a view all, axis have not been zoomed by the user
+        getXAxis().setRangeModifiedByUser(false);
+        getYAxis().setRangeModifiedByUser(false);
+        if (m_yAxisRight != null) {
+            m_yAxisRight.setRangeModifiedByUser(false);
+        }
+        
         repaint();
     }
 
@@ -1363,27 +1377,27 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             if (m_panAxisGesture.getPanningAxis() == PanAxisGesture.X_AXIS_PAN) {
                 if (m_xAxis.isLog()) {
                     double mult = m_xAxis.deltaPixelToLogMultValue(e.getX() - m_panAxisGesture.getPreviousX());
-                    m_xAxis.setRange(m_xAxis.getMinValue() / mult, m_xAxis.getMaxValue() / mult);
+                    m_xAxis.setRange(m_xAxis.getMinValue() / mult, m_xAxis.getMaxValue() / mult, true);
                 } else {
                     double delta = m_xAxis.deltaPixelToDeltaValue(m_panAxisGesture.getPreviousX() - e.getX());
-                    m_xAxis.setRange(m_xAxis.getMinValue() + delta, m_xAxis.getMaxValue() + delta);
+                    m_xAxis.setRange(m_xAxis.getMinValue() + delta, m_xAxis.getMaxValue() + delta, true);
                 }
                 fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY, oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue());
             } else if (m_panAxisGesture.getPanningAxis() == PanAxisGesture.Y_AT_RIGHT_AXIS_PAN) {
                  if (m_yAxisRight.isLog()) {
                     double mult = m_yAxisRight.deltaPixelToLogMultValue(m_panAxisGesture.getPreviousY()-e.getY());
-                    m_yAxisRight.setRange(m_yAxisRight.getMinValue()/mult, m_yAxisRight.getMaxValue()/mult);
+                    m_yAxisRight.setRange(m_yAxisRight.getMinValue()/mult, m_yAxisRight.getMaxValue()/mult, true);
                 } else {
                     double delta = m_yAxisRight.deltaPixelToDeltaValue(m_panAxisGesture.getPreviousY()-e.getY());
-                    m_yAxisRight.setRange(m_yAxisRight.getMinValue() + delta, m_yAxisRight.getMaxValue() + delta);       
+                    m_yAxisRight.setRange(m_yAxisRight.getMinValue() + delta, m_yAxisRight.getMaxValue() + delta, true);       
                 }
             } else {
                 if (m_yAxis.isLog()) {
                     double mult = m_yAxis.deltaPixelToLogMultValue(m_panAxisGesture.getPreviousY() - e.getY());
-                    m_yAxis.setRange(m_yAxis.getMinValue() / mult, m_yAxis.getMaxValue() / mult);
+                    m_yAxis.setRange(m_yAxis.getMinValue() / mult, m_yAxis.getMaxValue() / mult, true);
                 } else {
                     double delta = m_yAxis.deltaPixelToDeltaValue(m_panAxisGesture.getPreviousY() - e.getY());
-                    m_yAxis.setRange(m_yAxis.getMinValue() + delta, m_yAxis.getMaxValue() + delta);
+                    m_yAxis.setRange(m_yAxis.getMinValue() + delta, m_yAxis.getMaxValue() + delta, true);
                 }
                 fireUpdateAxisRange(oldMinX, oldMaxX, m_xAxis.getMinValue(), m_xAxis.getMaxValue(), oldMinY, oldMaxY, m_yAxis.getMinValue(), m_yAxis.getMaxValue());
             }
@@ -1906,27 +1920,27 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
         if (m_xAxis.isLog()) {
             double mult = m_xAxis.deltaPixelToLogMultValue(deltaX);
-            m_xAxis.setRange(m_xAxis.getMinValue() / mult, m_xAxis.getMaxValue() / mult);
+            m_xAxis.setRange(m_xAxis.getMinValue() / mult, m_xAxis.getMaxValue() / mult, true);
         } else {
             double delta = m_xAxis.deltaPixelToDeltaValue(deltaX);
-            m_xAxis.setRange(m_xAxis.getMinValue() - delta, m_xAxis.getMaxValue() - delta);
+            m_xAxis.setRange(m_xAxis.getMinValue() - delta, m_xAxis.getMaxValue() - delta, true);
         }
 
         if (m_yAxis.isLog()) {
             double mult = m_yAxis.deltaPixelToLogMultValue(-deltaY);
-            m_yAxis.setRange(m_yAxis.getMinValue() / mult, m_yAxis.getMaxValue() / mult);
+            m_yAxis.setRange(m_yAxis.getMinValue() / mult, m_yAxis.getMaxValue() / mult, true);
         } else {
             double delta = m_yAxis.deltaPixelToDeltaValue(-deltaY);
-            m_yAxis.setRange(m_yAxis.getMinValue() + delta, m_yAxis.getMaxValue() + delta);
+            m_yAxis.setRange(m_yAxis.getMinValue() + delta, m_yAxis.getMaxValue() + delta, true);
         }
         
         if ((m_yAxisRight!=null) && (m_yAxisRight.hasPlots())) {
             if (m_yAxisRight.isLog()) {
                 double mult = m_yAxisRight.deltaPixelToLogMultValue(-deltaY);
-                m_yAxisRight.setRange(m_yAxisRight.getMinValue() / mult, m_yAxisRight.getMaxValue() / mult);
+                m_yAxisRight.setRange(m_yAxisRight.getMinValue() / mult, m_yAxisRight.getMaxValue() / mult, true);
             } else {
                 double delta = m_yAxisRight.deltaPixelToDeltaValue(-deltaY);
-                m_yAxisRight.setRange(m_yAxisRight.getMinValue() + delta, m_yAxisRight.getMaxValue() + delta);
+                m_yAxisRight.setRange(m_yAxisRight.getMinValue() + delta, m_yAxisRight.getMaxValue() + delta, true);
             }
         }
 

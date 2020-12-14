@@ -28,7 +28,6 @@ import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
-import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
@@ -39,6 +38,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
@@ -391,7 +391,7 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements GlobalT
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
         int colIdx = 0;
         colIdx++;//COLTYPE_PEPTIDE_ID
-        filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_QC_NAME
+        filtersMap.put(colIdx, new StringDiffFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_QC_NAME
             
         ConvertValueInterface peptideConverter = new ConvertValueInterface() {
             @Override
@@ -403,7 +403,7 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements GlobalT
             }
 
         };
-        filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), peptideConverter, colIdx));  colIdx++;//COLTYPE_PEPTIDE_NAME
+        filtersMap.put(colIdx, new StringDiffFilter(getColumnName(colIdx), peptideConverter, colIdx));  colIdx++;//COLTYPE_PEPTIDE_NAME
         filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_SCORE
             
         ConvertValueInterface msQueryConverter = new ConvertValueInterface() {
@@ -425,7 +425,7 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements GlobalT
         filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_MISSED_CLIVAGE
         filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_RETENTION_TIME
         filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_ION_PARENT_INTENSITY
-        filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_PTM
+        filtersMap.put(colIdx, new StringDiffFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_PTM
 
     }
 

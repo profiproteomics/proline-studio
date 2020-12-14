@@ -148,7 +148,7 @@ public class IdentifyPtmSitesJMSAction extends AbstractRSMAction {
         return;
       }
 
-      if (!dataSetNode.hasResultSet()) {
+      if (!dataSetNode.hasResultSet() || !dataSetNode.hasResultSummary()) {
         setEnabled(false);
         return;
       }

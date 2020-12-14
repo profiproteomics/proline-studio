@@ -30,7 +30,6 @@ import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringDiffFilter;
-import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
@@ -638,7 +637,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                     filtersMap.put(i, new IntegerFilter(getColumnName(i), null, i));
                     break;
                 case COLTYPE_STATUS: //should only occur for spectral count
-                    filtersMap.put(i, new StringFilter(getColumnName(i), null, i));
+                    filtersMap.put(i, new StringDiffFilter(getColumnName(i), null, i));
                     break;
                 default:
                     filtersMap.put(i, new DoubleFilter(getColumnName(i), null, i));

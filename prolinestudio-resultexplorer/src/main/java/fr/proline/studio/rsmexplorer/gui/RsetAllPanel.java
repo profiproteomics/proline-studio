@@ -32,7 +32,6 @@ import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.IntegerFilter;
-import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.gui.HourglassPanel;
@@ -49,6 +48,7 @@ import fr.proline.studio.table.AbstractTableAction;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.pattern.DataboxGeneric;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
@@ -810,10 +810,10 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
             filtersMap.put(ResultSetTableModel.COLTYPE_RSET_ID, new IntegerFilter(getColumnName(ResultSetTableModel.COLTYPE_RSET_ID), longConverter, ResultSetTableModel.COLTYPE_RSET_ID));
 
-            filtersMap.put(ResultSetTableModel.COLTYPE_RSET_NAME, new StringFilter(getColumnName(ResultSetTableModel.COLTYPE_RSET_NAME), null, ResultSetTableModel.COLTYPE_RSET_NAME));
-            filtersMap.put(ResultSetTableModel.COLTYPE_PEAKLIST_PATH, new StringFilter(getColumnName(ResultSetTableModel.COLTYPE_PEAKLIST_PATH), null, ResultSetTableModel.COLTYPE_PEAKLIST_PATH));
-            filtersMap.put(ResultSetTableModel.COLTYPE_MSISEARCH_FILE_NAME, new StringFilter(getColumnName(ResultSetTableModel.COLTYPE_MSISEARCH_FILE_NAME), null, ResultSetTableModel.COLTYPE_MSISEARCH_FILE_NAME));
-            filtersMap.put(ResultSetTableModel.COLTYPE_MSISEARCH_FILE_DIRECTORY, new StringFilter(getColumnName(ResultSetTableModel.COLTYPE_MSISEARCH_FILE_DIRECTORY), null, ResultSetTableModel.COLTYPE_MSISEARCH_FILE_DIRECTORY));
+            filtersMap.put(ResultSetTableModel.COLTYPE_RSET_NAME, new StringDiffFilter(getColumnName(ResultSetTableModel.COLTYPE_RSET_NAME), null, ResultSetTableModel.COLTYPE_RSET_NAME));
+            filtersMap.put(ResultSetTableModel.COLTYPE_PEAKLIST_PATH, new StringDiffFilter(getColumnName(ResultSetTableModel.COLTYPE_PEAKLIST_PATH), null, ResultSetTableModel.COLTYPE_PEAKLIST_PATH));
+            filtersMap.put(ResultSetTableModel.COLTYPE_MSISEARCH_FILE_NAME, new StringDiffFilter(getColumnName(ResultSetTableModel.COLTYPE_MSISEARCH_FILE_NAME), null, ResultSetTableModel.COLTYPE_MSISEARCH_FILE_NAME));
+            filtersMap.put(ResultSetTableModel.COLTYPE_MSISEARCH_FILE_DIRECTORY, new StringDiffFilter(getColumnName(ResultSetTableModel.COLTYPE_MSISEARCH_FILE_DIRECTORY), null, ResultSetTableModel.COLTYPE_MSISEARCH_FILE_DIRECTORY));
 
             ConvertValueInterface dateConverter = new ConvertValueInterface() {
                 @Override
@@ -832,7 +832,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
             };
 
-            filtersMap.put(ResultSetTableModel.COLTYPE_MSISEARCH_SEARCH_DATE, new StringFilter(getColumnName(ResultSetTableModel.COLTYPE_MSISEARCH_SEARCH_DATE), dateConverter, ResultSetTableModel.COLTYPE_MSISEARCH_SEARCH_DATE));
+            filtersMap.put(ResultSetTableModel.COLTYPE_MSISEARCH_SEARCH_DATE, new StringDiffFilter(getColumnName(ResultSetTableModel.COLTYPE_MSISEARCH_SEARCH_DATE), dateConverter, ResultSetTableModel.COLTYPE_MSISEARCH_SEARCH_DATE));
         }
 
         @Override

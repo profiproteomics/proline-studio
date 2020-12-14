@@ -20,11 +20,11 @@ import fr.proline.core.orm.lcms.Map;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.Filter;
-import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
@@ -196,8 +196,8 @@ public class MapTableModel extends LazyTableModel implements GlobalTableModelInt
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
 
-        filtersMap.put(COLTYPE_MAP_NAME, new StringFilter(getColumnName(COLTYPE_MAP_NAME), null, COLTYPE_MAP_NAME));
-        filtersMap.put(COLTYPE_MAP_DESCRIPTION, new StringFilter(getColumnName(COLTYPE_MAP_DESCRIPTION), null, COLTYPE_MAP_DESCRIPTION));
+        filtersMap.put(COLTYPE_MAP_NAME, new StringDiffFilter(getColumnName(COLTYPE_MAP_NAME), null, COLTYPE_MAP_NAME));
+        filtersMap.put(COLTYPE_MAP_DESCRIPTION, new StringDiffFilter(getColumnName(COLTYPE_MAP_DESCRIPTION), null, COLTYPE_MAP_DESCRIPTION));
 
     }
 

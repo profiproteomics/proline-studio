@@ -21,10 +21,10 @@ import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
-import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.graphics.PlotDataSpec;
 import fr.proline.studio.table.LazyData;
 import java.util.ArrayList;
@@ -239,7 +239,7 @@ public class MapTableModel extends AbstractTableModel implements GlobalTableMode
         for (int k = 0; k < columns.size(); k++) {
             switch (columns.get(k).clazz.getSimpleName()) {
                 case "String":
-                    filtersMap.put(k, new StringFilter(getColumnName(k), null, k));
+                    filtersMap.put(k, new StringDiffFilter(getColumnName(k), null, k));
                     break;
                 case "Double":
                 case "double":

@@ -34,7 +34,6 @@ import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
-import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.BooleanRenderer;
@@ -45,6 +44,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -667,8 +667,8 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
         int usedColIndex = convertColToColUsed(modelColumnType);
         Filter filter = null;
         if (usedColIndex != -1) {
-            if (filterClass == StringFilter.class) {
-                filter = new StringFilter(getColumnName(usedColIndex), converter, usedColIndex);
+            if (filterClass == StringDiffFilter.class) {
+                filter = new StringDiffFilter(getColumnName(usedColIndex), converter, usedColIndex);
             } else if (filterClass == IntegerFilter.class) {
                 filter = new IntegerFilter(getColumnName(usedColIndex), converter, usedColIndex);
             } else if (filterClass == DoubleFilter.class) {
@@ -687,7 +687,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
 
         // COLTYPE_PEPTIDE_PREVIOUS_AA
         if (m_hasPrevNextAA) {
-            putFilter(COLTYPE_PEPTIDE_PREVIOUS_AA, StringFilter.class, null, filtersMap);
+            putFilter(COLTYPE_PEPTIDE_PREVIOUS_AA, StringDiffFilter.class, null, filtersMap);
         }
 
         ConvertValueInterface peptideConverter = new ConvertValueInterface() {
@@ -700,11 +700,11 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
             }
 
         };
-        putFilter(COLTYPE_PEPTIDE_NAME, StringFilter.class, peptideConverter, filtersMap);
+        putFilter(COLTYPE_PEPTIDE_NAME, StringDiffFilter.class, peptideConverter, filtersMap);
 
         // COLTYPE_PEPTIDE_NEXT_AA
         if (m_hasPrevNextAA) {
-            putFilter(COLTYPE_PEPTIDE_NEXT_AA, StringFilter.class, null, filtersMap);
+            putFilter(COLTYPE_PEPTIDE_NEXT_AA, StringDiffFilter.class, null, filtersMap);
         }
         putFilter(COLTYPE_PEPTIDE_LENGTH, IntegerFilter.class, null, filtersMap);
         putFilter(COLTYPE_PEPTIDE_SCORE, DoubleFilter.class, null, filtersMap);
@@ -735,7 +735,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
 
         if (m_forRSM) {
             putFilter(COLTYPE_PEPTIDE_PROTEIN_SET_COUNT, IntegerFilter.class, null, filtersMap);
-            putFilter(COLTYPE_PEPTIDE_PROTEIN_SET_NAMES, StringFilter.class, null, filtersMap);
+            putFilter(COLTYPE_PEPTIDE_PROTEIN_SET_NAMES, StringDiffFilter.class, null, filtersMap);
         }
         putFilter(COLTYPE_PEPTIDE_ION_PARENT_INTENSITY, DoubleFilter.class, null, filtersMap);
         if (m_isDecoyAndValidated) {
@@ -747,9 +747,9 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
         putFilter(COLTYPE_PEPTIDE_MSQUERY, IntegerFilter.class, msQueryConverter, filtersMap);
 
         if (m_isMerged) {
-            putFilter(COLTYPE_SRC_DAT_FILE, StringFilter.class, null, filtersMap);
+            putFilter(COLTYPE_SRC_DAT_FILE, StringDiffFilter.class, null, filtersMap);
         }
-        putFilter(COLTYPE_SPECTRUM_TITLE, StringFilter.class, null, filtersMap);
+        putFilter(COLTYPE_SPECTRUM_TITLE, StringDiffFilter.class, null, filtersMap);
     }
 
     @Override

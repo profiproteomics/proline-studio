@@ -27,7 +27,7 @@ import fr.proline.studio.dam.tasks.data.LightProteinMatch;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterMapInterface;
-import fr.proline.studio.filter.StringFilter;
+import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.rsmexplorer.adjacencymatrix.ordering.ClusterAComponent;
 import fr.proline.studio.search.ApplySearchInterface;
 import fr.proline.studio.search.SearchInterface;
@@ -221,7 +221,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
             int nbProteins = proteinSet.size();
             for (int i = 0; i < nbProteins; i++) {
                 LightProteinMatch pm = proteinSet.get(i);
-                if (((StringFilter) filter).filter((String) pm.getAccession(), null)) {
+                if (((StringDiffFilter) filter).filter((String) pm.getAccession(), null)) {
                     return true;
                 }
             }
@@ -231,7 +231,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
             int nbPeptides = peptideSet.size();
             for (int i = 0; i < nbPeptides; i++) {
                 LightPeptideMatch pm = peptideSet.get(i);
-                if (((StringFilter) filter).filter((String) pm.getSequence(), null)) {
+                if (((StringDiffFilter) filter).filter((String) pm.getSequence(), null)) {
                     return true;
                 }
             }
@@ -244,10 +244,10 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
 
         LinkedHashMap<Integer, Filter> filtersMap = new LinkedHashMap<>(2);
 
-        StringFilter proteinFilter = new StringFilter("Protein", null, PROTEIN);
+        StringDiffFilter proteinFilter = new StringDiffFilter("Protein", null, PROTEIN);
         filtersMap.put(PROTEIN, proteinFilter);
 
-        StringFilter peptideFilter = new StringFilter("Peptide", null, PEPTIDE);
+        StringDiffFilter peptideFilter = new StringDiffFilter("Peptide", null, PEPTIDE);
         filtersMap.put(PEPTIDE, peptideFilter);
 
         return filtersMap;

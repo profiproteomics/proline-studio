@@ -31,7 +31,7 @@ import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.LongFilter;
-import fr.proline.studio.filter.StringFilter;
+import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.gui.DefaultDialog;
 import static fr.proline.studio.gui.DefaultDialog.BUTTON_CANCEL;
 import static fr.proline.studio.gui.DefaultDialog.BUTTON_OK;
@@ -575,12 +575,12 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         @Override
         public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
             filtersMap.put(COLTYPE_STATUS, new IntegerFilter(m_columnNames[COLTYPE_STATUS], null, COLTYPE_STATUS));
-            filtersMap.put(COLTYPE_NAME, new StringFilter(m_columnNames[COLTYPE_NAME], null, COLTYPE_NAME));
+            filtersMap.put(COLTYPE_NAME, new StringDiffFilter(m_columnNames[COLTYPE_NAME], null, COLTYPE_NAME));
             filtersMap.put(COLTYPE_PROJECTID, new LongFilter(m_columnNames[COLTYPE_PROJECTID], null, COLTYPE_PROJECTID));
-            filtersMap.put(COLTYPE_NAME, new StringFilter(m_columnNames[COLTYPE_NAME], null, COLTYPE_NAME));
-            filtersMap.put(COLTYPE_DESCRIPTION, new StringFilter(m_columnNames[COLTYPE_DESCRIPTION], null, COLTYPE_DESCRIPTION));
-            filtersMap.put(COLTYPE_USER, new StringFilter(m_columnNames[COLTYPE_USER], null, COLTYPE_USER));
-            filtersMap.put(COLTYPE_DB_NAME, new StringFilter(m_columnNames[COLTYPE_DB_NAME], null, COLTYPE_DB_NAME));
+            filtersMap.put(COLTYPE_NAME, new StringDiffFilter(m_columnNames[COLTYPE_NAME], null, COLTYPE_NAME));
+            filtersMap.put(COLTYPE_DESCRIPTION, new StringDiffFilter(m_columnNames[COLTYPE_DESCRIPTION], null, COLTYPE_DESCRIPTION));
+            filtersMap.put(COLTYPE_USER, new StringDiffFilter(m_columnNames[COLTYPE_USER], null, COLTYPE_USER));
+            filtersMap.put(COLTYPE_DB_NAME, new StringDiffFilter(m_columnNames[COLTYPE_DB_NAME], null, COLTYPE_DB_NAME));
             ConvertValueInterface dateConverter = new ConvertValueInterface() {
                 @Override
                 public Object convertValue(Object o) {

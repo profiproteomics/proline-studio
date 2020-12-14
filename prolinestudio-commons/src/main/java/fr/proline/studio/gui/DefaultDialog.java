@@ -628,20 +628,25 @@ public class DefaultDialog extends javax.swing.JDialog {
         // pack must have been done beforehand
         pack();
 
-        // we do not allow the dialog to be partially out of the screen
-        // top left corner check
-        if (x < 0) {
-            x = 0;
-        }
-        if (y < 0) {
-            y = 0;
-        }
+
 
         // bottom right corner check
         int width = getWidth();
         int height = getHeight() + 30; // +30 is for window task bar
 
         Rectangle screenBounds = getScreenBounds(x, y);
+        if (screenBounds == null) {
+            // we do not allow the dialog to be partially out of the screen
+            // top left corner check
+            if (x < 0) {
+                x = 0;
+            }
+            if (y < 0) {
+                y = 0;
+            }
+            screenBounds = getScreenBounds(x, y);
+            
+        }
         
         
         if (x + width > screenBounds.x + screenBounds.width) {

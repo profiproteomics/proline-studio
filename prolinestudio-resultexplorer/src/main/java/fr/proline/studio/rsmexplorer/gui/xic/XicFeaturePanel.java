@@ -465,8 +465,12 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             }
  
             m_dataBox.addDataChanged(Feature.class);
-            ((DataboxChildFeature) m_dataBox).propagateDataChanged();
-
+            
+            if (m_viewType == VIEW_ALL_ISOTOPES_FOR_FEATURE) {
+                ((DataboxChildFeature) m_dataBox).propagateModelChangeWithoutModifyingZoom();
+            } else {
+                ((DataboxChildFeature) m_dataBox).propagateDataChanged();
+            }
 
         }
         

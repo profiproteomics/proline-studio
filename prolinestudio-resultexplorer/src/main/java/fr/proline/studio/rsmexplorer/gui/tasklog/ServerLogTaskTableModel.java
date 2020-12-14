@@ -24,7 +24,6 @@ import fr.proline.studio.filter.DateFilter;
 import fr.proline.studio.filter.DurationFilter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringDiffFilter;
-import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.filter.ValueFilter;
 import fr.proline.studio.table.AbstractDecoratedGlobalTableModel;
 import java.awt.Color;
@@ -276,7 +275,7 @@ public class ServerLogTaskTableModel extends AbstractDecoratedGlobalTableModel<L
 
         ValueFilter statusFilter = new ValueFilter(getColumnName(COLTYPE_STATUS), LogTask.STATUS.values(), null, ValueFilter.ValueFilterType.EQUAL, statusConverter, COLTYPE_STATUS);
         filtersMap.put(COLTYPE_STATUS, statusFilter);
-        filtersMap.put(COLTYPE_PROJECT_ID, new StringFilter(getColumnName(COLTYPE_PROJECT_ID), null, COLTYPE_PROJECT_ID));//Integer
+        filtersMap.put(COLTYPE_PROJECT_ID, new StringDiffFilter(getColumnName(COLTYPE_PROJECT_ID), null, COLTYPE_PROJECT_ID));//Integer
         filtersMap.put(COLTYPE_START_TIME, new DateFilter(getColumnName(COLTYPE_START_TIME), null, COLTYPE_START_TIME));
         filtersMap.put(COLTYPE_STOP_TIME, new DateFilter(getColumnName(COLTYPE_STOP_TIME), null, COLTYPE_STOP_TIME));
 

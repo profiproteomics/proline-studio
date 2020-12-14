@@ -26,7 +26,6 @@ import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
-import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.pattern.MsQueryInfoRsm;
@@ -36,6 +35,7 @@ import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
@@ -361,7 +361,7 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
         filtersMap.put(COLTYPE_MSQUERY_LAST_SCAN, new IntegerFilter(getColumnName(COLTYPE_MSQUERY_LAST_SCAN), null, COLTYPE_MSQUERY_LAST_SCAN));
         filtersMap.put(COLTYPE_MSQUERY_FIRST_TIME, new DoubleFilter(getColumnName(COLTYPE_MSQUERY_FIRST_TIME), null, COLTYPE_MSQUERY_FIRST_TIME));
         filtersMap.put(COLTYPE_MSQUERY_LAST_TIME, new DoubleFilter(getColumnName(COLTYPE_MSQUERY_LAST_TIME), null, COLTYPE_MSQUERY_LAST_TIME));
-        filtersMap.put(COLTYPE_MSQUERY_SPECTRUM_TITLE, new StringFilter(getColumnName(COLTYPE_MSQUERY_SPECTRUM_TITLE), null, COLTYPE_MSQUERY_SPECTRUM_TITLE));
+        filtersMap.put(COLTYPE_MSQUERY_SPECTRUM_TITLE, new StringDiffFilter(getColumnName(COLTYPE_MSQUERY_SPECTRUM_TITLE), null, COLTYPE_MSQUERY_SPECTRUM_TITLE));
     }
 
     @Override

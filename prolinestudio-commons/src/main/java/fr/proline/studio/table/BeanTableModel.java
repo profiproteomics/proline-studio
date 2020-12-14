@@ -21,10 +21,10 @@ import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
-import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.graphics.PlotDataSpec;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -360,7 +360,7 @@ public class BeanTableModel<T> extends AbstractTableModel implements GlobalTable
             
             switch (m_descriptors[descriptorIndex].getPropertyType().getSimpleName()) {
                 case "String":
-                    filtersMap.put(columnIndex, new StringFilter(getColumnName(columnIndex), null, columnIndex));
+                    filtersMap.put(columnIndex, new StringDiffFilter(getColumnName(columnIndex), null, columnIndex));
                     break;
                 case "Double":
                 case "double":

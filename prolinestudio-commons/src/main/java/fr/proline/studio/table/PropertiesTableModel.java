@@ -21,7 +21,7 @@ import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.Filter;
-import fr.proline.studio.filter.StringFilter;
+import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.DataGroup.GroupObject;
@@ -256,8 +256,8 @@ public abstract class PropertiesTableModel extends DecoratedTableModel implement
             
         };
         
-        filtersMap.put(DataGroup.COLTYPE_GROUP_NAME, new StringFilter(getColumnName(DataGroup.COLTYPE_GROUP_NAME), convertValueInterface, DataGroup.COLTYPE_GROUP_NAME));
-        filtersMap.put(DataGroup.COLTYPE_PROPERTY_NAME, new StringFilter(getColumnName(DataGroup.COLTYPE_PROPERTY_NAME), convertValueInterface, DataGroup.COLTYPE_PROPERTY_NAME));
+        filtersMap.put(DataGroup.COLTYPE_GROUP_NAME, new StringDiffFilter(getColumnName(DataGroup.COLTYPE_GROUP_NAME), convertValueInterface, DataGroup.COLTYPE_GROUP_NAME));
+        filtersMap.put(DataGroup.COLTYPE_PROPERTY_NAME, new StringDiffFilter(getColumnName(DataGroup.COLTYPE_PROPERTY_NAME), convertValueInterface, DataGroup.COLTYPE_PROPERTY_NAME));
     }
 
     @Override

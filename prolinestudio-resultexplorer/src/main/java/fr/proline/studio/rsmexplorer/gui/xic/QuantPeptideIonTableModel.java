@@ -32,7 +32,6 @@ import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringDiffFilter;
-import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
@@ -550,12 +549,12 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
 
         };
         filtersMap.put(COLTYPE_PEPTIDE_ION_NAME, new StringDiffFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_NAME), peptideConverter, COLTYPE_PEPTIDE_ION_NAME));
-        filtersMap.put(COLTYPE_PEPTIDE_PTM, new StringFilter(getColumnName(COLTYPE_PEPTIDE_PTM), null, COLTYPE_PEPTIDE_PTM));
+        filtersMap.put(COLTYPE_PEPTIDE_PTM, new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_PTM), null, COLTYPE_PEPTIDE_PTM));
         filtersMap.put(COLTYPE_PEPTIDE_SCORE, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_SCORE), null, COLTYPE_PEPTIDE_SCORE));
         filtersMap.put(COLTYPE_PEPTIDE_ION_CHARGE, new IntegerFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_CHARGE), null, COLTYPE_PEPTIDE_ION_CHARGE));
         filtersMap.put(COLTYPE_PEPTIDE_ION_MOZ, new DoubleFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_MOZ), null, COLTYPE_PEPTIDE_ION_MOZ));
         filtersMap.put(COLTYPE_PEPTIDE_PROTEIN_SET_COUNT, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_PROTEIN_SET_COUNT), null, COLTYPE_PEPTIDE_PROTEIN_SET_COUNT));
-        filtersMap.put(COLTYPE_PEPTIDE_PROTEIN_SET_NAMES, new StringFilter(getColumnName(COLTYPE_PEPTIDE_PROTEIN_SET_NAMES), null, COLTYPE_PEPTIDE_PROTEIN_SET_NAMES));
+        filtersMap.put(COLTYPE_PEPTIDE_PROTEIN_SET_NAMES, new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_PROTEIN_SET_NAMES), null, COLTYPE_PEPTIDE_PROTEIN_SET_NAMES));
 
         ConvertValueInterface minuteConverter = new ConvertValueInterface() {
             @Override

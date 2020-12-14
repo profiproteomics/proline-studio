@@ -29,7 +29,6 @@ import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.IntegerFilter;
-import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.filter.ValueFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
@@ -41,6 +40,7 @@ import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.IconManager;
@@ -515,7 +515,7 @@ public class TasksPanel extends AbstractTasksPanel {
 
             };
             filtersMap.put(COLTYPE_TASKINFO_CRITICALITY, new ValueFilter(getColumnName(COLTYPE_TASKINFO_CRITICALITY), TaskInfo.IMPORTANCE_VALUES, null, ValueFilter.ValueFilterType.GREATER_EQUAL, criticalityConverter, COLTYPE_TASKINFO_CRITICALITY));
-            filtersMap.put(COLTYPE_DESCRIPTION, new StringFilter(getColumnName(COLTYPE_DESCRIPTION), null, COLTYPE_DESCRIPTION));
+            filtersMap.put(COLTYPE_DESCRIPTION, new StringDiffFilter(getColumnName(COLTYPE_DESCRIPTION), null, COLTYPE_DESCRIPTION));
 
         }
 

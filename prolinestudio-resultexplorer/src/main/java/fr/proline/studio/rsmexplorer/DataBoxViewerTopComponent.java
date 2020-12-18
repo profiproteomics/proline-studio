@@ -160,7 +160,7 @@ public class DataBoxViewerTopComponent extends TopComponent {
     }
     
     public Object getData(Class parameterType){
-        return getData(parameterType, null);
+        return getData(parameterType, ParameterSubtypeEnum.SINGLE_DATA);
     }
     public Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype){
         return m_windowBox.getEntryBox().getData(parameterType, parameterSubtype);

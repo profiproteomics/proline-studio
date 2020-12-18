@@ -140,14 +140,15 @@ public class TreeFileChooserPanel extends JPanel {
             @Override
             public void valueChanged(TreeSelectionEvent e) {
 
-                if (m_fileSelectionInterface ==null) {
+                if (m_fileSelectionInterface == null) {
                     return;
                 }
                 
                 ArrayList<FileToTransfer> files = new ArrayList<>();
                 ArrayList<FileToTransfer> directories = new ArrayList<>();
-                getSelectedFilesAndDirectories(files, directories);
-                m_fileSelectionInterface.downSelectionChanged(files, directories);
+                ArrayList<FileToTransfer> parentDirectory = new ArrayList<>();
+                getSelectedFilesAndDirectories(files, directories, parentDirectory);
+                m_fileSelectionInterface.downSelectionChanged(files, directories, parentDirectory);
   
             }
         });
@@ -359,9 +360,7 @@ public class TreeFileChooserPanel extends JPanel {
         }
     }
 
-    private void getSelectedFilesAndDirectories(ArrayList<FileToTransfer> files, ArrayList<FileToTransfer> directories) {
-        files.clear();
-        directories.clear();
+    private void getSelectedFilesAndDirectories(ArrayList<FileToTransfer> files, ArrayList<FileToTransfer> directories, ArrayList<FileToTransfer> parentDirectory) {
         
         TreePath[] paths = m_tree.getSelectionPaths();
         if (paths != null) {
@@ -385,9 +384,36 @@ public class TreeFileChooserPanel extends JPanel {
                         return;
                     }
                 }
+            }
+            
+            // special case : if a file is selected and no directory
+            // the parent directory is considerer as potential drop directory
+            if (directories.isEmpty() && (files.size() == 1)) {
+                for (TreePath path : paths) {
 
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+                    Object data = node.getUserObject();
+                    if (data instanceof IconData) {
+                        Object extraData = ((IconData) data).getObject();
+                        if (extraData instanceof FileNode) {
+                            File f = ((FileNode) extraData).getFile();
 
-
+                            if (f.isFile()) {
+                                TreePath parentPath = path.getParentPath();
+                                DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) parentPath.getLastPathComponent();
+                                Object parentData = parentNode.getUserObject();
+                                if (parentData instanceof IconData) {
+                                    Object parentExtraData = ((IconData) parentData).getObject();
+                                    if (parentExtraData instanceof FileNode) {
+                                        File parentFile = ((FileNode) parentExtraData).getFile();
+                                        parentDirectory.add(new FileToTransfer(parentFile, parentPath));
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

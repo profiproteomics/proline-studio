@@ -284,8 +284,8 @@ public class TreeFileChooserTransferHandler extends TransferHandler {
             Object extraData = ((IconData) data).getObject();
             if (extraData instanceof TreeFileChooserPanel.FileNode) {
                 File f = ((TreeFileChooserPanel.FileNode) extraData).getFile();
-                if (! f.isDirectory()) {
-                    return null;
+                if (!f.isDirectory()) {
+                    return checkServer(treePath.getParentPath());
                 }
             }
         }

@@ -269,8 +269,9 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
                 
                 ArrayList<FileToTransfer> files = new ArrayList<>();
                 ArrayList<FileToTransfer> directories = new ArrayList<>();
-                getSelectedFilesAndDirectories(files, directories);
-                m_fileSelectionInterface.upSelectionChanged(files, directories);
+                ArrayList<FileToTransfer> parentDirectory = new ArrayList<>();
+                getSelectedFilesAndDirectories(files, directories, parentDirectory);
+                m_fileSelectionInterface.upSelectionChanged(files, directories, parentDirectory);
   
             }
         });
@@ -327,10 +328,8 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
         return selectedURLs;
     }
     
-    private void getSelectedFilesAndDirectories(ArrayList<FileToTransfer> files, ArrayList<FileToTransfer> directories) {
-        files.clear();
-        directories.clear();
-        
+    private void getSelectedFilesAndDirectories(ArrayList<FileToTransfer> files, ArrayList<FileToTransfer> directories, ArrayList<FileToTransfer> parentDirectory) {
+ 
         TreePath[] paths = m_tree.getSelectionPaths();
         if (paths != null) {
             for (TreePath path : paths) {
@@ -348,6 +347,31 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
                     directories.add(new FileToTransfer(f,path));
                 }
 
+            }
+            
+            // special case : if a file is selected and no directory
+            // the parent directory is considerer as potential drop directory
+            if (directories.isEmpty() && (files.size() == 1)) {
+                for (TreePath path : paths) {
+
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+                    File f = (File) node.getUserObject();
+
+                    if (f.isFile()) {
+                    
+                        String url = f.getAbsolutePath().toLowerCase();
+                        if (url.endsWith(".mzdb") || url.endsWith(".raw") || url.endsWith(".wiff") || url.endsWith(".dat")) {
+                            TreePath parentPath = path.getParentPath();
+                            DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) parentPath.getLastPathComponent();
+                            File parentFile = (File) parentNode.getUserObject();
+                            if (parentFile.isDirectory()) {
+                                parentDirectory.add(new FileToTransfer(parentFile, parentPath));
+                                break;
+                            }
+                        }
+                    }
+
+                }
             }
         }
     }

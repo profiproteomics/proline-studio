@@ -19,7 +19,6 @@ package fr.proline.studio.msfiles;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.DownloadFileTask;
-import fr.proline.studio.dpm.task.jms.DownloadProcessedFileTask;
 import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import java.io.File;
 import java.nio.file.Path;

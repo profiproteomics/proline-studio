@@ -31,7 +31,6 @@ import java.io.File;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
@@ -46,6 +45,9 @@ public class MsFilesExplorer extends JPanel {
     private final TreeFileChooserPanel m_tree;
     private final TreeFileChooserTransferHandler m_transferHandler;
     private final LocalFileSystemView m_localFileSystemView;
+    
+    private boolean m_downAllowed = false;
+    private boolean m_upAllowed = false;
 
     public MsFilesExplorer() {
         setLayout(new GridBagLayout());
@@ -73,13 +75,11 @@ public class MsFilesExplorer extends JPanel {
         m_transferHandler.addComponent(m_localFileSystemView);
 
         m_tree = new TreeFileChooserPanel(ServerFileSystemView.getServerFileSystemView(), m_transferHandler, true);
-        JScrollPane treeScrollPane = new JScrollPane();
-        treeScrollPane.setViewportView(m_tree);
-        treeScrollPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Proline Server File System"), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+        m_tree.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Proline Server File System"), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
         c.gridy++;
         c.weighty = 1;
-        add(treeScrollPane, c);
+        add(m_tree, c);
         
         m_tree.setFileSelectionListener(transferPanel);
         m_localFileSystemView.setFileSelectionListener(transferPanel);
@@ -94,18 +94,20 @@ public class MsFilesExplorer extends JPanel {
     }
     
     public interface FileSelectionInterface {
-        void upSelectionChanged(ArrayList<FileToTransfer> files, ArrayList<FileToTransfer> directories);
-        void downSelectionChanged(ArrayList<FileToTransfer> files, ArrayList<FileToTransfer> directories);
+        void upSelectionChanged(ArrayList<FileToTransfer> files, ArrayList<FileToTransfer> directories, ArrayList<FileToTransfer> parentDirectory);
+        void downSelectionChanged(ArrayList<FileToTransfer> files, ArrayList<FileToTransfer> directories, ArrayList<FileToTransfer> parentDirectory);
     }
     
     public class TransferFileButtonsPanel extends JPanel implements FileSelectionInterface {
         
-        private JButton m_downButton;
-        private JButton m_upButton;
+        private final JButton m_downButton;
+        private final JButton m_upButton;
         private ArrayList<FileToTransfer> m_filesUp = null;
         private ArrayList<FileToTransfer> m_directoriesUp = null;
+        private ArrayList<FileToTransfer> m_parentDirectoriesUp = null;
         private ArrayList<FileToTransfer> m_filesDown = null;
         private ArrayList<FileToTransfer> m_directoriesDown = null;
+        private ArrayList<FileToTransfer> m_parentDirectoriesDown = null;
         
         
         public TransferFileButtonsPanel() {
@@ -123,7 +125,6 @@ public class MsFilesExplorer extends JPanel {
             
             m_downButton = new JButton(IconManager.getIcon(IconManager.IconType.ARROW_MOVE_DOWN_BIG));
             m_downButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
-            m_downButton.setEnabled(false);
             
             c.gridx++;
             c.weightx = 0;
@@ -134,7 +135,6 @@ public class MsFilesExplorer extends JPanel {
             
             m_upButton = new JButton(IconManager.getIcon(IconManager.IconType.ARROW_MOVE_UP_BIG));
             m_upButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
-            m_upButton.setEnabled(false);
             
             c.gridx++;
             add(m_upButton, c);
@@ -143,21 +143,33 @@ public class MsFilesExplorer extends JPanel {
             c.weightx = 1;
             add(Box.createHorizontalGlue(), c);
 
-            m_downButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    
-                }
-            });
             
             m_upButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                    
+                    if (m_filesDown == null) {
+                        JOptionPane.showMessageDialog(m_upButton, "You must select from the Proline Server File System to download them to the Local File System.", "Upload Error", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                    if (!m_directoriesDown.isEmpty()) {
+                        JOptionPane.showMessageDialog(m_upButton, "Downloading a directory from the Proline Server File System to the Local File System is not allowed.", "Upload Error", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                    if (m_filesDown.isEmpty()) {
+                        JOptionPane.showMessageDialog(m_upButton, "You must select files from the Proline Server File System to download to the Local File System.", "Upload Error", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                    if ((m_directoriesUp == null) || ((m_directoriesUp.size() != 1) || (!m_filesUp.isEmpty())) && (m_parentDirectoriesUp.size() != 1)) {
+                        JOptionPane.showMessageDialog(m_upButton, "You must select a directory of the Local File System where the files will be downloaded.", "Upload Error", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                    
                     ArrayList<File> fileList = new ArrayList<>(); 
                     for (FileToTransfer f : m_filesDown) {
                         fileList.add(f.getFile());
                     }
-                    TreePath path = m_directoriesUp.get(0).getPath();
+                    TreePath path =  (!m_parentDirectoriesUp.isEmpty()) ? m_parentDirectoriesUp.get(0).getPath() : m_directoriesUp.get(0).getPath();
                     MzdbDownloadBatch downloadBatch = new MzdbDownloadBatch(fileList, path, MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().getSelectedRoot());
                     Thread downloadThread = new Thread(downloadBatch);
                     downloadThread.start();
@@ -167,11 +179,30 @@ public class MsFilesExplorer extends JPanel {
             m_downButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
+
+                    if (m_filesUp == null) {
+                        JOptionPane.showMessageDialog(m_downButton, "You must select .dat .mzdb .raw or .wiff files from the Local File System to upload them to the Server.", "Upload Error", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                    if (! m_directoriesUp.isEmpty()) {
+                        JOptionPane.showMessageDialog(m_downButton, "Uploading a directory from the Local File System to the Server is not allowed.", "Upload Error", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                    if (m_filesUp.isEmpty()) {
+                        JOptionPane.showMessageDialog(m_downButton, "You must select .dat .mzdb .raw or .wiff files from the Local File System to upload to the Server.", "Upload Error", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                    if ( (m_directoriesDown == null) || ((m_directoriesDown.size()!=1) || (!m_filesDown.isEmpty())) && (m_parentDirectoriesDown.size()!=1)) {
+                        JOptionPane.showMessageDialog(m_downButton, "You must select a directory of the Proline Server File System where the files will be uploaded.", "Upload Error", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+
+                    
                     ArrayList<File> fileList = new ArrayList<>(); 
                     for (FileToTransfer f : m_filesUp) {
                         fileList.add(f.getFile());
                     }
-                    TreePath path = m_directoriesDown.get(0).getPath();
+                    TreePath path =  (!m_parentDirectoriesDown.isEmpty()) ? m_parentDirectoriesDown.get(0).getPath() : m_directoriesDown.get(0).getPath();
                     if (!m_transferHandler.treeTransfer(fileList, path)) {
                         JOptionPane.showMessageDialog(m_downButton, "You can not transfer selected file(s) to the selected directory.");
                     }
@@ -180,35 +211,20 @@ public class MsFilesExplorer extends JPanel {
         }
 
         @Override
-        public void upSelectionChanged(ArrayList<FileToTransfer> files, ArrayList<FileToTransfer> directories) {
+        public void upSelectionChanged(ArrayList<FileToTransfer> files, ArrayList<FileToTransfer> directories, ArrayList<FileToTransfer> parentDirectory) {
             m_filesUp = files;
             m_directoriesUp = directories;
-            selectionChanged();
+            m_parentDirectoriesUp = parentDirectory;
         }
         
         @Override
-        public void downSelectionChanged(ArrayList<FileToTransfer> files, ArrayList<FileToTransfer> directories) {
+        public void downSelectionChanged(ArrayList<FileToTransfer> files, ArrayList<FileToTransfer> directories, ArrayList<FileToTransfer> parentDirectory) {
             m_filesDown = files;
             m_directoriesDown = directories;
-            selectionChanged();
+            m_parentDirectoriesDown = parentDirectory;
         }
         
         
-        public void selectionChanged() {
-            boolean downAllowed;
-            boolean upAllowed;        
-            if ((m_filesUp == null) || (m_filesDown == null)) {
-                downAllowed = false;
-                upAllowed = false;
-            } else {
-                downAllowed = (m_directoriesDown.size()==1) && (m_filesDown.isEmpty()) && (m_directoriesUp.isEmpty()) && (!m_filesUp.isEmpty());
-                upAllowed = (m_directoriesUp.size()==1) && (m_filesUp.isEmpty()) && (m_directoriesDown.isEmpty()) && (!m_filesDown.isEmpty());
-            }
-            
-            
-            m_downButton.setEnabled(downAllowed);
-            m_upButton.setEnabled(upAllowed);
-        }
     }
     
     

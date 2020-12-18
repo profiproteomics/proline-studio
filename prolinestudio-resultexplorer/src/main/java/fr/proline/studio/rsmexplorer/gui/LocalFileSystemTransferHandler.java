@@ -16,7 +16,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui;
 
-import fr.proline.studio.dpm.task.jms.DownloadProcessedFileTask;
+
 import fr.proline.studio.msfiles.MzdbDownloadBatch;
 import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
 import java.awt.datatransfer.Transferable;
@@ -79,8 +79,6 @@ public class LocalFileSystemTransferHandler extends TransferHandler {
 
     @Override
     protected void exportDone(JComponent source, Transferable data, int action) {
-        //clearHighlights();
-        ;
     }
 
     @Override
@@ -101,11 +99,15 @@ public class LocalFileSystemTransferHandler extends TransferHandler {
                     return false;
                 }
                 
+                /*
+                Now we can drop on a file (corresponds to usual behaviour on Window)
+                But when we drop on a file, in fact we drop on the parent directory of the file
+                
                 TreePath dropPath = ((JTree.DropLocation) support.getDropLocation()).getPath();
                 File dropFile = pathToFile(MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().getSelectedRoot(), dropPath);
                 if (!dropFile.isDirectory()) {
                     return false;
-                }
+                }*/
  
                 return true;
             }else if(support.getComponent() instanceof TreeFileChooserPanel){
@@ -130,6 +132,11 @@ public class LocalFileSystemTransferHandler extends TransferHandler {
                 JTree.DropLocation dropLocation = (JTree.DropLocation) support.getDropLocation();
                 
                 TreePath dropPath = dropLocation.getPath();
+                File dropFile = pathToFile(MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().getSelectedRoot(), dropPath);
+                if (dropFile.isFile()) {
+                    // drop on a file corresponds to a drop on the parent directory
+                    dropPath = dropPath.getParentPath();
+                }
                 
                 MzdbDownloadBatch downloadBatch = new MzdbDownloadBatch(filesToTransfer, dropPath, MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().getSelectedRoot());
                 Thread downloadThread = new Thread(downloadBatch);

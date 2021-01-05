@@ -23,7 +23,6 @@ import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.gui.SplittedPanelContainer;
-import fr.proline.studio.parameter.DefaultParameterDialog;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
@@ -37,13 +36,11 @@ import java.util.HashSet;
 import java.util.List;
 import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-import org.openide.windows.WindowManager;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.SecondAxisTableModelInterface;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_X_ID;
@@ -52,6 +49,7 @@ import fr.proline.studio.graphics.PlotPanel;
 import fr.proline.studio.graphics.XAxis;
 import fr.proline.studio.graphics.YAxis;
 import fr.proline.studio.graphics.core.GraphicsToolbarPanel;
+import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.DataboxMultiGraphics;
 import java.awt.Color;
 import org.slf4j.Logger;
@@ -131,32 +129,13 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
     @Override
     public final void fillToolbar(JToolBar toolbar) {
 
+        SettingsButton settingsButton = new SettingsButton(null, m_plotPanel);
+        
         ExportButton exportImageButton = new ExportButton("Graphic", m_plotPanel);
-
-        JButton colorPicker = new JButton(IconManager.getIcon(IconManager.IconType.SETTINGS));
-        colorPicker.setFocusPainted(false);
-        colorPicker.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ArrayList<ParameterList> parameterListArray = m_plotPanel.getParameters();
-                if (parameterListArray == null) {
-                    return;
-                }
-                DefaultParameterDialog parameterDialog = new DefaultParameterDialog(WindowManager.getDefault().getMainWindow(), "Plot Parameters", parameterListArray);
-                parameterDialog.setLocationRelativeTo(m_plotPanel);
-                parameterDialog.setVisible(true);
-
-                if (parameterDialog.getButtonClicked() == DefaultParameterDialog.BUTTON_OK) {
-                    m_plotPanel.parametersChanged();
-                }
-
-            }
-        });
 
         // add buttons to toolbar
         if (m_canChooseColor) {
-            toolbar.add(colorPicker);
+            toolbar.add(settingsButton);
         }
         if (m_setHideButton) {
             JToggleButton showSelectionButton;
@@ -439,11 +418,12 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
                 }
                 
 
+                ArrayList<ParameterList> previousSharedParameters = m_plotPanel.getParameters();
                 m_plotPanel.clearPlots();
                 if (m_isDoubleYAxis) {
-                    setPlotsWithDoubleYAxis(limitMinAxisY);
+                    setPlotsWithDoubleYAxis(limitMinAxisY, previousSharedParameters);
                 } else {
-                    setPlots(limitMinAxisY);
+                    setPlots(limitMinAxisY, previousSharedParameters);
                 }
 
                 keepZoom &= (maxYValue>minYValue);
@@ -481,34 +461,37 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
         }
     }
 
-    private void setPlots(Double limitMinAxisY) {
+    private void setPlots(Double limitMinAxisY, ArrayList<ParameterList> sharedParameterListArray) {
+
         for (int i = 0; i < m_valuesList.size(); i++) {
             CrossSelectionInterface crossSelectionInterface = (m_crossSelectionInterfaceList == null) || (m_crossSelectionInterfaceList.size() <= i) ? null : m_crossSelectionInterfaceList.get(i);
             //create plotGraphics for each table
-            PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valuesList.get(i), crossSelectionInterface, columnXYIndex[COL_X_ID], columnXYIndex[COL_Y_ID], limitMinAxisY);
+            PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valuesList.get(i), crossSelectionInterface, columnXYIndex[COL_X_ID], columnXYIndex[COL_Y_ID], limitMinAxisY, sharedParameterListArray);
             plotGraphics.setPlotInformation(m_valuesList.get(i).getPlotInformation());
             plotGraphics.setIsPaintMarker(false);
+            sharedParameterListArray = plotGraphics.getParameters();
             m_plotPanel.addPlot(plotGraphics, true);
         }
     }
 
-    private void setPlotsWithDoubleYAxis(Double limitMinAxisY) {
+    private void setPlotsWithDoubleYAxis(Double limitMinAxisY, ArrayList<ParameterList> sharedParameterListArray) {
   
         double mainPlotMaxY = Double.NEGATIVE_INFINITY;
         double secondPlotMaxY = Double.NEGATIVE_INFINITY;
         for (int i = 0; i < m_valuesList.size(); i++) {
             CrossSelectionInterface crossSelectionInterface = (m_crossSelectionInterfaceList == null) || (m_crossSelectionInterfaceList.size() <= i) ? null : m_crossSelectionInterfaceList.get(i);
             //create plotGraphics for each table
-            PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valuesList.get(i), crossSelectionInterface, columnXYIndex[COL_X_ID], columnXYIndex[COL_Y_ID], limitMinAxisY);
+            PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valuesList.get(i), crossSelectionInterface, columnXYIndex[COL_X_ID], columnXYIndex[COL_Y_ID], limitMinAxisY, sharedParameterListArray);
             mainPlotMaxY = Math.max(mainPlotMaxY, plotGraphics.getYMax());
             plotGraphics.setPlotInformation(m_valuesList.get(i).getPlotInformation());
             plotGraphics.setIsPaintMarker(false);
+            sharedParameterListArray = plotGraphics.getParameters();
             m_plotPanel.addPlot(plotGraphics, true);
         }
         //plot on second Axis Y
         if (m_valueOn2Yxis != null && m_valueOn2Yxis.getRowCount() != 0) {//creat a plot which show PlotLinear on 2nd Axis  
             CrossSelectionInterface crossSelectionInterface2 = null;
-            PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valueOn2Yxis, crossSelectionInterface2, columnXYIndex[COL_X_ID], columnXYIndex[COL_Y_ID], limitMinAxisY);
+            PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valueOn2Yxis, crossSelectionInterface2, columnXYIndex[COL_X_ID], columnXYIndex[COL_Y_ID], limitMinAxisY, null);
             secondPlotMaxY = plotGraphics.getYMax();
             plotGraphics.setPlotInformation(m_valueOn2Yxis.getPlotInformation());
             plotGraphics.setIsPaintMarker(false);

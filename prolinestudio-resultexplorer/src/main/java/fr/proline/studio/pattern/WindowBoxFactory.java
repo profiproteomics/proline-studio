@@ -506,7 +506,7 @@ public class WindowBoxFactory {
         ((DataboxXicProteinSet) boxes[0]).setXICMode(xicMode);
         boxes[1] = new DataboxXicPeptideSet();
         ((DataboxXicPeptideSet) boxes[1]).setXICMode(xicMode);        
-        boxes[2] = new DataboxMultiGraphics(false,false,true);
+        boxes[2] = new DataboxMultiGraphics(false,true,true);
         ((DataboxMultiGraphics)boxes[2]).setHideButton(true);
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
         if (xicMode) {

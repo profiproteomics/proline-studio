@@ -103,6 +103,7 @@ public class PlotLinear extends PlotXYAbstract {
     private static final Color SELECTED_COLOR = new Color(0, 120, 215); //= JTable default getSelectionColor, blue
 
     private ArrayList<ParameterList> m_parameterListArray = null;
+    private boolean m_hasSharedParameters = false; // shared parameter list if for multiple PlotLinear with same color for instance
 
     private boolean displayAntiAliasing = true;
     private double m_tolerance;
@@ -110,10 +111,15 @@ public class PlotLinear extends PlotXYAbstract {
     private Double m_limitMinY = null;  // minY must be <= limitMinY
     
     public PlotLinear(BasePlotPanel plotPanel, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
-        this(plotPanel, compareDataInterface, crossSelectionInterface, colX, colY, null);
+        this(plotPanel, compareDataInterface, crossSelectionInterface, colX, colY, null, null);
     }
-    public PlotLinear(BasePlotPanel plotPanel, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY, Double limitMinY) {
+    public PlotLinear(BasePlotPanel plotPanel, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY, Double limitMinY, ArrayList<ParameterList> sharedParameterListArray) {
         super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
+        
+        if (sharedParameterListArray != null) {
+            m_hasSharedParameters = true;
+            m_parameterListArray = sharedParameterListArray;
+        }
         
         m_limitMinY = limitMinY;
         
@@ -122,21 +128,28 @@ public class PlotLinear extends PlotXYAbstract {
         cols[COL_Y_ID] = colY;
         update(cols, null);
 
-        // Color parameter
-        ParameterList colorParameterList = new ParameterList("Colors");
+        if (!m_hasSharedParameters) {
+            // Color parameter
+            ParameterList colorParameterList = new ParameterList("Colors");
 
-        ColorOrGradient colorOrGradient = new ColorOrGradient();
-        colorOrGradient.setColor(CyclicColorPalette.getColor(21, 128));//purple bordeaux brightness modified
-        float[] fractions = {0.0f, 1.0f};
-        Color[] colors = {Color.white, Color.red};
-        LinearGradientPaint gradient = ColorOrGradientChooserPanel.getGradientForPanel(colors, fractions);
-        colorOrGradient.setGradient(gradient);
+            ColorOrGradient colorOrGradient = new ColorOrGradient();
+            colorOrGradient.setColor(CyclicColorPalette.getColor(21, 128));//purple bordeaux brightness modified
+            float[] fractions = {0.0f, 1.0f};
+            Color[] colors = {Color.white, Color.red};
+            LinearGradientPaint gradient = ColorOrGradientChooserPanel.getGradientForPanel(colors, fractions);
+            colorOrGradient.setGradient(gradient);
 
-        m_colorParameter = new ColorOrGradientParameter(PLOT_SCATTER_COLOR_KEY, "Scatter Plot Color", colorOrGradient, null);
-        colorParameterList.add(m_colorParameter);
+            m_colorParameter = new ColorOrGradientParameter(PLOT_SCATTER_COLOR_KEY, "Scatter Plot Color", colorOrGradient, null);
+            colorParameterList.add(m_colorParameter);
 
-        m_parameterListArray = new ArrayList<>(1);
-        m_parameterListArray.add(colorParameterList);
+            m_parameterListArray = new ArrayList<>(1);
+            m_parameterListArray.add(colorParameterList);
+        
+        } else {
+            ParameterList colorParameterList = m_parameterListArray.get(0);
+            m_colorParameter = (ColorOrGradientParameter) colorParameterList.getParameter(PLOT_SCATTER_COLOR_KEY);
+            
+        }
         m_tolerance = 0;
         
         m_plotPanel.enableButton(PlotToolbarListenerInterface.BUTTONS.VIEW_ALL_MAP, true);
@@ -931,10 +944,19 @@ public class PlotLinear extends PlotXYAbstract {
         if (plotInformation != null) {
             setDrawPoints(plotInformation.isDrawPoints());
             setDrawGap(plotInformation.isDrawGap());
+            
+            Color c = plotInformation.getPlotColor();
+            if (c != null) {
+                m_colorParameter.getColor().setColor(c);
+                m_colorParameter.getColor().setColorSelected();
+            }
         }
     }
 
     public PlotInformation getPlotInformation() {
+        if (m_plotInformation.getPlotColor() != null) {
+            m_plotInformation.setPlotColor(m_colorParameter.getColor().getColor());
+        }
         return this.m_plotInformation;
     }
 

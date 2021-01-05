@@ -482,11 +482,11 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
     @Override
     public ArrayList<ParameterList> getParameters() {
-        if (m_xAxis == null) {
+        if (m_yAxis == null) {
             return null;
         }
 
-        for (PlotBaseAbstract plot : m_xAxis.getPlots()) {
+        for (PlotBaseAbstract plot : m_yAxis.getPlots()) {
             return plot.getParameters();
         }
         return null;

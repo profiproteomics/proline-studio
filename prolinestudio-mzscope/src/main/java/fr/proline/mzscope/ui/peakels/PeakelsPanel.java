@@ -16,21 +16,31 @@
  */
 package fr.proline.mzscope.ui.peakels;
 
+import com.almworks.sqlite4java.SQLiteException;
+import fr.profi.mzdb.model.Feature;
 import fr.profi.mzdb.model.Peakel;
 import fr.profi.mzdb.model.SpectrumData;
+import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.IPeakel;
+import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.Spectrum;
+import fr.proline.mzscope.mzdb.MzdbFeatureWrapper;
 import fr.proline.mzscope.processing.PeakelsHelper;
 import fr.proline.mzscope.ui.IMzScopeController;
+import fr.proline.mzscope.ui.dialog.RTParamDialog;
+import fr.proline.mzscope.ui.model.MzScopePreferences;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
+import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.utils.IconManager;
+import java.awt.Window;
+import java.io.StreamCorruptedException;
 
 import javax.swing.*;
-import javax.swing.event.RowSorterListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.openide.util.Exceptions;
 
 /**
  * Panel presenting a list of peakels in a table
@@ -76,6 +86,13 @@ public class PeakelsPanel extends AbstractPeakelsPanel  {
 
     toolbar.add(buildSpectrumBtn);
 
+    JButton buildFeaturesBtn = new JButton();
+    buildFeaturesBtn.setIcon(IconManager.getIcon(IconManager.IconType.ISOTOPES_PREDICTION));
+    buildFeaturesBtn.setToolTipText("Build Features from peakels");
+    buildFeaturesBtn.addActionListener(e -> buildFeatures());
+
+    toolbar.add(buildFeaturesBtn);
+
     return toolbar;
   }
 
@@ -83,13 +100,45 @@ public class PeakelsPanel extends AbstractPeakelsPanel  {
     List<IPeakel> peakels = getSelectedIPeakels();
     Peakel peakel = peakels.get(0).getPeakel();
     PeakelsHelper helper = getPeakelsHelper();
-    List<Peakel> coelutingPeakels = helper.findCoelutigPeakels(peakel.getApexMz() - 5,
-            peakel.getApexMz() + 5,
-            peakel.getFirstElutionTime(),
-            peakel.getLastElutionTime());
-    SpectrumData spectrumData = helper.buildSpectrumDataFromPeakels(peakel, coelutingPeakels);
-    Spectrum spectrum = new Spectrum(-1, peakel.getApexElutionTime(), spectrumData.getMzList(), spectrumData.getIntensityList(), 1, Spectrum.ScanType.CENTROID);
-    m_viewersController.getRawFileViewer(peakels.get(0).getRawFile(), true).setReferenceSpectrum(spectrum);
+
+    RTParamDialog dialog = new RTParamDialog((Window)this.getTopLevelAncestor());
+    dialog.pack();
+    dialog.setVisible(true);
+    
+    if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+      
+      List<Peakel> coelutingPeakels = helper.findCoelutingPeakels(peakel.getApexMz() - 5,
+              peakel.getApexMz() + 5,
+              peakel.getElutionTime() - dialog.getRTTolerance(),
+              peakel.getLastElutionTime() + dialog.getRTTolerance());
+      SpectrumData spectrumData = helper.buildSpectrumDataFromPeakels(peakel, coelutingPeakels);
+      Spectrum spectrum = new Spectrum(-1, peakel.getElutionTime(), spectrumData.getMzList(), spectrumData.getIntensityList(), 1, Spectrum.ScanType.CENTROID);
+      m_viewersController.getRawFileViewer(peakels.get(0).getRawFile(), true).setReferenceSpectrum(spectrum);
+    }
+  }
+  
+   private void buildFeatures() {
+  
+    RTParamDialog dialog = new RTParamDialog(null);
+    dialog.pack();
+    dialog.setVisible(true);
+    
+    if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+      try {
+        
+        PeakelsHelper helper = getPeakelsHelper();
+        List<Feature> features = helper.deisotopePeakels(MzScopePreferences.getInstance().getMzPPMTolerance(), dialog.getRTTolerance());
+        List<IFeature> listF = new ArrayList<>();
+        IRawFile rawFile = m_peakels.get(0).getRawFile();
+        features.forEach(f -> listF.add(new MzdbFeatureWrapper(f, rawFile, 1)));
+        m_viewersController.displayFeatures(listF);
+        
+      } catch (StreamCorruptedException ex) {
+        Exceptions.printStackTrace(ex);
+      } catch (SQLiteException ex) {
+        Exceptions.printStackTrace(ex);
+      }
+    }
   }
 
   private PeakelsHelper getPeakelsHelper() {

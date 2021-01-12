@@ -331,17 +331,17 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
                         double[] lower = new double[yfit.length];
                         for (int k = 0; k < yfit.length; k++) {
                             double s = Math.sqrt(Math.max(0, sd[k]));
-                            upper[k] = yfit[k] + 3.89 * s;
-                            lower[k] = yfit[k] - 3.89 * s;
+                            upper[k] = yfit[k] + 4.42 * s;
+                            lower[k] = yfit[k] - 4.42 * s;
                         }
 
-//                        PrintWriter writer = new PrintWriter("squared_residuals.csv");
-//                        writer.println("rt, deltaRt, predDeltaRt, residuals, sd");
-//                        for (int k = 0; k < yfit.length; k++) {
-//                            writer.println(x[k]+","+y[k]+","+yfit[k]+","+residuals[k]+","+Math.sqrt(Math.max(0, sd[k])));
-//                        }
-//
-//                        writer.close();
+                        PrintWriter writer = new PrintWriter("squared_residuals.csv");
+                        writer.println("rt, deltaRt, predDeltaRt, residuals, sd, upperRt, lowerRT");
+                        for (int k = 0; k < yfit.length; k++) {
+                            writer.println(x[k]+","+y[k]+","+yfit[k]+","+residuals[k]+","+Math.sqrt(Math.max(0, sd[k]))+","+upper[k]+","+lower[k]);
+                        }
+
+                        writer.close();
 
                         createRegressionPlot(x, upper);
                         createRegressionPlot(x, lower);

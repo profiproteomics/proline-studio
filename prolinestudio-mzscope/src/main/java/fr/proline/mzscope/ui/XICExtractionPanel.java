@@ -217,7 +217,7 @@ public class XICExtractionPanel extends JPanel{
             fragmentToleranceTF.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent evt) {
-                                        float ppm = Float.parseFloat(fragmentToleranceTF.getText().trim());
+                    float ppm = Float.parseFloat(fragmentToleranceTF.getText().trim());
                     MzScopePreferences.getInstance().setFragmentMzPPMTolerance(ppm);
                     if (!getFragmentMassRangeTF().getText().isEmpty()) {
                         startExtraction();

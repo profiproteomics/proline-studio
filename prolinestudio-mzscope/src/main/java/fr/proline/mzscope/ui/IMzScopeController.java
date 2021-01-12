@@ -16,7 +16,9 @@
  */
 package fr.proline.mzscope.ui;
 
+import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.IRawFile;
+import java.util.List;
 
 /**
  *
@@ -29,4 +31,6 @@ public interface IMzScopeController {
     IRawFileViewer getRawFileViewer(IRawFile rawFile, boolean setVisible);
 
     IRawFileViewer getTabbedMultiRawFileViewer();
+    
+    void displayFeatures(List<IFeature> features);
 }

@@ -24,8 +24,11 @@ import fr.proline.mzscope.model.IPeakel;
 import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.processing.PeakelsHelper;
 import fr.proline.mzscope.ui.IMzScopeController;
+import fr.proline.mzscope.ui.dialog.RTParamDialog;
+import fr.proline.mzscope.ui.model.MzScopePreferences;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.extendedtablemodel.ImportedDataTableModel;
+import fr.proline.studio.gui.DefaultDialog;
 
 import java.io.File;
 import java.util.*;
@@ -36,6 +39,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.table.AbstractTableModel;
 
 import fr.proline.studio.utils.IconManager;
+import java.awt.Window;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -103,13 +107,20 @@ public class FeaturesPanel extends AbstractPeakelsPanel {
     List<IPeakel> peakels = getSelectedIPeakels();
     Peakel peakel = peakels.get(0).getPeakel();
     PeakelsHelper helper = getPeakelsHelper();
-    List<Peakel> coelutingPeakels = helper.findCoelutigPeakels(peakel.getApexMz() - 5,
+        RTParamDialog dialog = new RTParamDialog((Window)this.getTopLevelAncestor());
+    dialog.pack();
+    dialog.setVisible(true);
+    
+    if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+
+      List<Peakel> coelutingPeakels = helper.findCoelutingPeakels(peakel.getApexMz() - 5,
             peakel.getApexMz() + 5,
-            peakel.getFirstElutionTime(),
-            peakel.getLastElutionTime());
-    SpectrumData spectrumData = helper.buildSpectrumDataFromPeakels(peakel, coelutingPeakels);
-    Spectrum spectrum = new Spectrum(-1, peakel.getApexElutionTime(), spectrumData.getMzList(), spectrumData.getIntensityList(), 1, Spectrum.ScanType.CENTROID);
-    m_viewersController.getRawFileViewer(peakels.get(0).getRawFile(), true).setReferenceSpectrum(spectrum);
+             peakel.getElutionTime() - dialog.getRTTolerance(),
+             peakel.getLastElutionTime() + dialog.getRTTolerance());
+      SpectrumData spectrumData = helper.buildSpectrumDataFromPeakels(peakel, coelutingPeakels);
+      Spectrum spectrum = new Spectrum(-1, peakel.getElutionTime(), spectrumData.getMzList(), spectrumData.getIntensityList(), 1, Spectrum.ScanType.CENTROID);
+      m_viewersController.getRawFileViewer(peakels.get(0).getRawFile(), true).setReferenceSpectrum(spectrum);
+    }
   }
 
   private PeakelsHelper getPeakelsHelper() {
@@ -172,7 +183,7 @@ public class FeaturesPanel extends AbstractPeakelsPanel {
       ImportedDataTableModel importedTableModel = new ImportedDataTableModel();
       Exception csvException  = ImportedDataTableModel.loadFile(importedTableModel, csvFile.getAbsolutePath(), ';', true, false);
       if (csvException == null) {
-      int mzColumnIdx = findColumn(importedTableModel, new String[]{"moz", "m/z", "mz"});
+      int mzColumnIdx = findColumn(importedTableModel, new String[]{"moz", "m/z", "mz", "exp. moz"});
       int rtColumnIdx = findColumn(importedTableModel, new String[]{"rt", "retention_time", "retention time", "elution_time", "elution time", "time"});
       int zColumnIdx = findColumn(importedTableModel, new String[]{"charge", "z"});
 
@@ -186,7 +197,7 @@ public class FeaturesPanel extends AbstractPeakelsPanel {
           zValues.add((zColumnIdx != -1) ? ((Long) importedTableModel.getValueAt(k, zColumnIdx)).intValue() : 0);
         }
 
-        matchFeatures(mzValues, rtValues, zValues);
+        matchFeatures(mzValues, rtValues, zValues, importedTableModel);
       } else {
         StringBuffer columnNamesBuffer = new StringBuffer("[");
         for (int i = 0; i < importedTableModel.getColumnCount(); i++) {
@@ -206,8 +217,8 @@ public class FeaturesPanel extends AbstractPeakelsPanel {
     }
   }
 
-  private void matchFeatures(List<Double> mzValues, List<Double> rtValues, List<Integer> zValues) {
-    float moztol = 10; //MzScopePreferences.getInstance().getMzPPMTolerance();
+  private void matchFeatures(List<Double> mzValues, List<Double> rtValues, List<Integer> zValues, ImportedDataTableModel importedTableModel) {
+    float moztol = MzScopePreferences.getInstance().getMzPPMTolerance(); //10
 
     Map<Integer, List<IFeature>> featuresByNominalMass = m_features.stream().collect(Collectors.groupingBy(f -> Integer.valueOf((int) f.getMz()), Collectors.toList()));
     int matchingCount = 0;
@@ -239,13 +250,13 @@ public class FeaturesPanel extends AbstractPeakelsPanel {
           BaseFeature f = new BaseFeature(mz, (float) rt, (float) rt, (float) rt, null, 1);
           f.setCharge(z);
           notFound.add(f);
-          logger.warn("no feature found for {}, {}, {}+", mz, rt / 60.0, z);
+          logger.warn("no feature found for {}, {}, {}+, {}", mz, rt / 60.0, z, getRowAsString(k, importedTableModel));
         }
       } else {
         BaseFeature f = new BaseFeature(mz, (float) rt, (float) rt, (float) rt, null, 1);
         f.setCharge(z);
         notFound.add(f);
-        logger.warn("no feature found for {}, {}, {}+", mz, rt / 60.0, z);
+        logger.warn("no feature found for {}, {}, {}+, {}", mz, rt / 60.0, z,  getRowAsString(k, importedTableModel));
       }
     }
 
@@ -272,10 +283,21 @@ public class FeaturesPanel extends AbstractPeakelsPanel {
 
   }
 
+  private String getRowAsString(int row, ImportedDataTableModel tableModel) {
+    StringBuilder stb = new StringBuilder();
+    for (int k = 0; k < tableModel.getColumnCount(); k++) {
+      stb.append(tableModel.getValueAt(row, k)).append(", ");
+    }
+    return stb.toString();
+  }
   private int findColumn(AbstractTableModel tableModel, String[] alternativeNames) {
     int columnIdx = -1;
     for (String name : alternativeNames) {
-      columnIdx = tableModel.findColumn(name);
+        for (int i = 0; i < tableModel.getColumnCount(); i++) {
+            if (name.equalsIgnoreCase(tableModel.getColumnName(i))) {
+                columnIdx = i;
+            }
+        }
       if (columnIdx != -1) {
         break;
       }

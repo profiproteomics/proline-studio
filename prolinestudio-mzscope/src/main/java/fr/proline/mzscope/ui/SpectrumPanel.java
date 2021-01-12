@@ -354,8 +354,8 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
 
         //IsotopicPatternUtils.compareIsotopicPatternPredictions(currentScan.getSpectrumData(), positionMarker.getValue(), ppmTol);
 
-        TheoreticalIsotopePattern pattern = IsotopicPatternUtils.predictIsotopicPattern(currentScan.getSpectrumData(), positionMarker.getValue(), ppmTol);
-        
+        Tuple2<Object, TheoreticalIsotopePattern> prediction = IsotopicPatternUtils.predictIsotopicPattern(currentScan.getSpectrumData(), positionMarker.getValue(), ppmTol);
+        TheoreticalIsotopePattern pattern = prediction._2;
         // search for the index of the user selected mz value
         int referenceMzIdx = 0;
         int idx = SpectrumUtils.getNearestPeakIndex(currentScan.getSpectrumData().getMzList(), positionMarker.getValue());
@@ -385,7 +385,9 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
             }
             Double mz = 0.1+((Double)pattern.mzAbundancePairs()[0]._1 + (Double)pattern.mzAbundancePairs()[1]._1)/2.0;
             Float ab = (Float)pattern.mzAbundancePairs()[0]._2 * 0.75f;
-            LabelMarker label = new LabelMarker(spectrumPlotPanel, new DataCoordinates(mz, ab * abundance / normAbundance), "charge "+pattern.charge()+"+", ORIENTATION_XY_MIDDLE,ORIENTATION_XY_MIDDLE, CyclicColorPalette.getColor(0));
+            StringBuilder labelTxt = new StringBuilder("charge ");
+            labelTxt.append(pattern.charge()).append("+ (").append(prediction._1).append(")");
+            LabelMarker label = new LabelMarker(spectrumPlotPanel, new DataCoordinates(mz, ab * abundance / normAbundance), labelTxt.toString(), ORIENTATION_XY_MIDDLE,ORIENTATION_XY_MIDDLE, CyclicColorPalette.getColor(0));
             ipMarkers.add(label);
             scanPlot.addMarker(label);
 

@@ -119,7 +119,7 @@ public class SpectrumUtils {
         for (int i = lowerIdx; i <= upperIdx; i++) {
             int k = peakelIndexesByMz[i].getRight();
             if ((1e6 * Math.abs(peakels[k].getMz() - moz) / moz < mzTolPPM)
-                    && ((Math.abs(peakels[k].getApexElutionTime() - referencePeakel.getApexElutionTime()) / referencePeakel.calcDuration()) < 0.25)
+                    && ((Math.abs(peakels[k].getElutionTime() - referencePeakel.getElutionTime()) / referencePeakel.calcDuration()) < 0.25)
                     && (Math.abs(peakels[k].getMz() - moz) < min)) {
                 min = Math.abs(peakels[k].getMz() - moz);
                 resultIdx = k;
@@ -146,8 +146,8 @@ public class SpectrumUtils {
         for (int i = lowerIdx; i <= upperIdx; i++) {
             int k = peakelIndexesByMz[i].getRight();
             if ((1e6 * Math.abs(peakels[k].getMz() - moz) / moz < mzTolPPM)
-                    && (peakels[k].getApexElutionTime() >= referencePeakel.getFirstElutionTime())
-                    && (peakels[k].getApexElutionTime() <= referencePeakel.getLastElutionTime())) {
+                    && (peakels[k].getElutionTime() >= referencePeakel.getFirstElutionTime())
+                    && (peakels[k].getElutionTime() <= referencePeakel.getLastElutionTime())) {
                 double corr = correlation(referencePeakel, peakels[k]);
                 //logger.debug("correlation "+referencePeakel.getMz()+ " with "+peakels[k].getMz()+" = "+corr);
                 if (corr > MIN_CORRELATION_SCORE && (corr > maxCorr)) {

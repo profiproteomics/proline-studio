@@ -28,6 +28,7 @@ public class FeaturesExtractionRequest extends MsnExtractionRequest {
   public static final float MIN_MAX_RATIO = 0.75f;
   public static final float INTENSITY_PERCENTILE = 0.9f;
   public static final int MAX_CONSECUTIVE_GAPS = 3;
+  public static final float COELUTION_RT_TOLERANCE = 40;
 
   public enum ExtractionMethod {
     EXTRACT_MS2_FEATURES, DETECT_PEAKELS, DETECT_FEATURES
@@ -128,6 +129,7 @@ public class FeaturesExtractionRequest extends MsnExtractionRequest {
   private float maxIntensityRelativeThreshold;
   private float intensityPercentile;
   private int maxConsecutiveGaps;
+  private float coelutionRtTolerance;
 
   protected FeaturesExtractionRequest(Builder builder) {
     super(builder);
@@ -139,6 +141,7 @@ public class FeaturesExtractionRequest extends MsnExtractionRequest {
     this.maxIntensityRelativeThreshold = builder.maxIntensityRelativeThreshold;
     this.intensityPercentile = builder.intensityPercentile;
     this.maxConsecutiveGaps = builder.maxConsecutiveGaps;
+    this.coelutionRtTolerance = COELUTION_RT_TOLERANCE;
   }
 
   public ExtractionMethod getExtractionMethod() {
@@ -173,6 +176,11 @@ public class FeaturesExtractionRequest extends MsnExtractionRequest {
     return maxConsecutiveGaps;
   }
 
+  public float getCoelutionRtTolerance() {
+    return coelutionRtTolerance;
+  }
+
+ 
   public String getExtractionParamsString() {
     StringBuilder sb = new StringBuilder();
     String em = "";
@@ -195,6 +203,9 @@ public class FeaturesExtractionRequest extends MsnExtractionRequest {
     sb.append(": <br/>");
     sb.append("m/z tolerance (ppm): ");
     sb.append(Float.toString(getMzTolPPM()));
+    sb.append("<br/>");
+    sb.append("rt coelution tolerance (s): ");
+    sb.append(Float.toString(getCoelutionRtTolerance()));
     sb.append("<br/>");
     if (isRemoveBaseline()) {
       sb.append("Use Peakels baseline remover <br/>");

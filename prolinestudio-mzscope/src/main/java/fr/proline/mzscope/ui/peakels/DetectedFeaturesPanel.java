@@ -26,13 +26,15 @@ public class DetectedFeaturesPanel extends JPanel {
 
   public void addFeatures(List<IFeature> features) {
     Map<Boolean, List<IFeature>> list = features.stream().collect(Collectors.partitioningBy(f -> f.getPeakelsCount() > 1));
-    featuresPanel.addFeatures(list.get(Boolean.TRUE));
+    //featuresPanel.addFeatures(list.get(Boolean.TRUE));
+    featuresPanel.addFeatures(features);
     invalidFeaturesPanel.addFeatures(list.get(Boolean.FALSE));
   }
 
   public void setFeatures(List<IFeature> features, boolean displayRawFileColumn) {
     Map<Boolean, List<IFeature>> list = features.stream().collect(Collectors.partitioningBy(f -> f.getPeakelsCount() > 1));
-    featuresPanel.setFeatures(list.get(Boolean.TRUE), displayRawFileColumn);
+    //featuresPanel.setFeatures(list.get(Boolean.TRUE), displayRawFileColumn);
+    featuresPanel.setFeatures(features, displayRawFileColumn);
     invalidFeaturesPanel.setFeatures(list.get(Boolean.FALSE), displayRawFileColumn);
   }
 

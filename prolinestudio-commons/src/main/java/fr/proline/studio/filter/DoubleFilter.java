@@ -164,7 +164,7 @@ public class DoubleFilter extends Filter {
         c.weightx = 1;
         JTextField minTextField = ((JTextField) getComponent(VALUE_MIN));
         if (minTextField == null) {
-            minTextField = new JTextField(4);
+            minTextField = new JTextField(8);
             if (m_min != null) {
                 minTextField.setText(m_min.toString());
             }
@@ -196,7 +196,7 @@ public class DoubleFilter extends Filter {
         c.weightx = 1;
         JTextField maxTextField = ((JTextField) getComponent(VALUE_MAX));
         if (maxTextField == null) {
-            maxTextField = new JTextField(4);
+            maxTextField = new JTextField(8);
             if (m_max != null) {
                 maxTextField.setText(m_max.toString());
             }

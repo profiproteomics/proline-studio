@@ -55,7 +55,7 @@ public class UpdatePeaklistSoftDialog extends DefaultDialog {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
         setTitle("Update Spectrum Parameters");
-        
+        setDocumentationSuffix("id.2zbgiuw");         
         setResizable(true);
 
         setInternalComponent(createInternalPanel());   

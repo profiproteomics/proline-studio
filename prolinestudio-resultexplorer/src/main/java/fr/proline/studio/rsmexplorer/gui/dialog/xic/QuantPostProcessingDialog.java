@@ -55,7 +55,7 @@ public class QuantPostProcessingDialog extends DefaultDialog {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         setTitle("Compute Post-Processing on Proteins Sets Abundances");
 
-        setDocumentationSuffix("id.2dlolyb");
+        setDocumentationSuffix("id.9w7dzygm9m69");
 
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);

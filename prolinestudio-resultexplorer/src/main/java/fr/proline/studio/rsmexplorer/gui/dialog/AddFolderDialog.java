@@ -51,7 +51,7 @@ public class AddFolderDialog  extends DefaultDialog {
 
         setTitle("Add Folder");
 
-        // JPM.TODO setDocumentationSuffix("id.2p2csry");
+        setDocumentationSuffix("h.2f0stx4xclce");
 
 
         setInternalComponent(createFolderPanel());

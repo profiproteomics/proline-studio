@@ -133,7 +133,7 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
         setSize(new Dimension(360, 480));
         setResizable(true);
 
-        this.setDocumentationSuffix(null);
+        this.setDocumentationSuffix("h.x6aqgbmas2le");
 
         setButtonVisible(BUTTON_CANCEL, true);
         setButtonName(BUTTON_OK, "OK");

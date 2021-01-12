@@ -66,7 +66,7 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         setTitle("ProteinSet Filtering");
 
-        setDocumentationSuffix("id.26in1rg");
+        setDocumentationSuffix("id.2lwamvv");
 
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);

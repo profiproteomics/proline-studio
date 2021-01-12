@@ -53,7 +53,7 @@ public class Export2MzIdentMLDialog extends DefaultDialog {
         setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);
-
+        setDocumentationSuffix("id.37m2jsg");
         m_paramPanel = new Export2MzIdentMLParamPanel(this);
         this.setHelpHeader(IconManager.getIcon(IconManager.IconType.INFORMATION),"MzIdentML parameters", NbBundle.getMessage(Export2MzIdentMLDialog.class,"Export2MzIdentMLDialog.help.text"));
         setInternalComponent(m_paramPanel);

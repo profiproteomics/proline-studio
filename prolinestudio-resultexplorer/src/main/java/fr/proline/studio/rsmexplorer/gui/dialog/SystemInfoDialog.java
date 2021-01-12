@@ -44,7 +44,7 @@ public class SystemInfoDialog extends DefaultDialog {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         setTitle("System Information ");
         m_internalPanel = createPanel();
-                
+        setButtonVisible(BUTTON_HELP, false);
         setInternalComponent(m_internalPanel);
         setResizable(true);
     }

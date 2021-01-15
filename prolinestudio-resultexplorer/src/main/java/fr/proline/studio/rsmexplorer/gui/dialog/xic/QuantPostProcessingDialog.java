@@ -53,7 +53,7 @@ public class QuantPostProcessingDialog extends DefaultDialog {
     //public QuantPostProcessingMultipleDialog(Window parent, ArrayList<DataSetNode> nodeList) {
     public QuantPostProcessingDialog(Window parent, ArrayList<PtmSpecificity> ptms, boolean isAggregation, DDataset paramsFromdataset) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-        setTitle("Compute PostProcessing on Proteins Sets Abundances");
+        setTitle("Compute Post-Processing on Proteins Sets Abundances");
 
         setDocumentationSuffix("id.2dlolyb");
 

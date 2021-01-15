@@ -162,7 +162,27 @@ public class XicStatusRenderer extends DefaultTableCellRenderer implements Mouse
 
     }
 
-    public static enum SelectLevel {
+    
+    public static class SelectLevel {
+        public SelectLevelEnum m_status;
+        public SelectLevelEnum m_globalStatus;
+        
+        public SelectLevel(SelectLevelEnum status, SelectLevelEnum globalStatus) {
+            m_status = status;
+            m_globalStatus = globalStatus;
+        }
+        
+        public String getDescription() {
+            return m_status.getDescription();
+        }
+        
+        public SelectLevelEnum getStatus() {
+            return m_status;
+        }
+        
+    }
+    
+    public static enum SelectLevelEnum {
         DESELECTED_MANUAL(0, "Invalidated manually"),
         DESELECTED_AUTO(1, "Invalidated automatically"),
         SELECTED_AUTO(2, "Validated automatically"),
@@ -174,15 +194,23 @@ public class XicStatusRenderer extends DefaultTableCellRenderer implements Mouse
         private String _description;
         private static HashMap map = new HashMap<>();
 
-        private SelectLevel(int value, String description) {
+        private SelectLevelEnum(int value, String description) {
             this._intValue = value;
             this._description = description;
         }
 
         static {
-            for (SelectLevel status : SelectLevel.values()) {
+            for (SelectLevelEnum status : SelectLevelEnum.values()) {
                 map.put(status._intValue, status);
             }
+        }
+        
+        public boolean isSelected() {
+            return this.equals(SELECTED_AUTO) || this.equals(SELECTED_MANUAL);
+        }
+        
+        public boolean isDeselected() {
+            return this.equals(DESELECTED_AUTO) || this.equals(DESELECTED_MANUAL);
         }
 
         public int getIntValue() {
@@ -193,8 +221,8 @@ public class XicStatusRenderer extends DefaultTableCellRenderer implements Mouse
             return _description;
         }
 
-        public static SelectLevel valueOf(int status) {
-            return (SelectLevel) map.get(status);
+        public static SelectLevelEnum valueOf(int status) {
+            return (SelectLevelEnum) map.get(status);
         }
 
     }
@@ -219,16 +247,29 @@ public class XicStatusRenderer extends DefaultTableCellRenderer implements Mouse
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Object status = value;
+
         if (status instanceof SelectLevel) {
-            SelectLevel statusValue = (SelectLevel) status;
+            SelectLevelEnum globalStatusValue = ((SelectLevel) status).m_globalStatus;
+            SelectLevelEnum statusValue = ((SelectLevel) status).m_status;
+
+            boolean locallyModified = statusValue.getIntValue() != globalStatusValue.getIntValue();
             switch (statusValue) {
                 case DESELECTED_MANUAL: //0 
                 case DESELECTED_AUTO: //1
-                    this.setIcon(IconManager.getIcon(IconManager.IconType.INVALIDATED));
+                    if (globalStatusValue.isDeselected()) {
+                        setIcon(IconManager.getIcon(IconManager.IconType.INVALIDATED));
+                    } else {
+                        setIcon(IconManager.getIcon(IconManager.IconType.INVALIDATED_LOCALLY));
+                    }
+                    
                     break;
                 case SELECTED_AUTO: //2
                 case SELECTED_MANUAL: //3
-                    this.setIcon(IconManager.getIcon(IconManager.IconType.VALIDATED));
+                    if (globalStatusValue.isSelected()) {
+                        setIcon(IconManager.getIcon(IconManager.IconType.VALIDATED));
+                    } else {
+                        setIcon(IconManager.getIcon(IconManager.IconType.VALIDATED_LOCALLY));
+                    }
                     break;
                 default:
                     this.setIcon(IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));

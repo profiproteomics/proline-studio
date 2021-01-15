@@ -106,10 +106,10 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
                         if (m_nbLoadedQuanti == selectedNodes.length) {//Last one is loaded, all loaded
                             
                             if (!computedList.isEmpty()) {
-                                String[] options = {"Refine All", "Skip already refined"};
+                                String[] options = {"Compute All", "Skip already computed"};
                                 String computedNodeName = computedList.stream().map(node->node.getDataset().getName()).collect(Collectors.joining(","));
-                                String message = "Dataset "+ computedNodeName + ": Proteins Sets Abundances have already been refined \n(Compute Quant Post Processing done).";
-                                OptionDialog yesNoDialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Refine Proteins Sets Abundances", message);
+                                String message = "Dataset "+ computedNodeName + ": Proteins Sets Abundances have already been post-processed \n(Compute Quant Post-Processing done).";
+                                OptionDialog yesNoDialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Compute Post-Processing on Proteins Sets Abundances", message);
                                 yesNoDialog.setButtonName(DefaultDialog.BUTTON_OK, options[0]);
                                 yesNoDialog.setButtonName(DefaultDialog.BUTTON_CANCEL, options[1]);
                                 yesNoDialog.setLocation(posX, posY);
@@ -130,7 +130,7 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
                 }
 
             };
-            //load Quantitation, in order to test if the dataset is already refined
+            //load Quantitation, in order to test if the dataset is already post-processed
             DatabaseDataSetTask loadTask = new DatabaseDataSetTask(masterQuantChannelCallback);
             loadTask.initLoadQuantitation(ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject(), dataSet);
             AccessDatabaseThread.getAccessDatabaseThread().addTask(loadTask);

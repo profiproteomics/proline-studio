@@ -168,6 +168,11 @@ public class PlotLinear extends PlotXYAbstract {
     @Override
     public ArrayList<ParameterList> getParameters() {
 
+        if ((m_plotInformation != null) && (m_plotInformation.getPlotColor() != null)) {
+            // color can not be changed
+            return null;
+        }
+        
         // update parameters
         ArrayList<ReferenceIdName> m_potentialGradientParamArray = new ArrayList<>();
         HashSet<Class> acceptedValues = m_plotType.getAcceptedValuesAsParam();

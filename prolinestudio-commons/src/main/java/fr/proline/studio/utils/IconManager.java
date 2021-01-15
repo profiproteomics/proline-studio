@@ -189,6 +189,7 @@ public class IconManager {
         CONTROL_PLAY,
         CONTROL_PAUSE,
         GEAR,
+        HAND_OPEN,
         TOOLBOX_PLUS,
         TOOLBOX_MINUS,
         REFINE,
@@ -223,6 +224,8 @@ public class IconManager {
         VALIDATED,
         VALIDATED_AND_USED,
         VALIDATED_AND_NOTUSED,
+        INVALIDATED_LOCALLY,
+        VALIDATED_LOCALLY,
         CENTROID_SPECTRA,
         EXPORT_CENTROID,
         TIC,
@@ -670,6 +673,8 @@ public class IconManager {
                 return "fr/proline/studio/images/control-pause.png";
             case GEAR:
                 return "fr/proline/studio/images/gear.png";
+            case HAND_OPEN:
+                return "fr/proline/studio/images/hand-open.png";
             case TOOLBOX_PLUS:
                 return "fr/proline/studio/images/toolbox-plus.png";
             case TOOLBOX_MINUS:
@@ -732,8 +737,12 @@ public class IconManager {
                 return "fr/proline/studio/images/view-all.png";
             case INVALIDATED:
                 return "fr/proline/studio/images/invalidated.png";
+            case INVALIDATED_LOCALLY:
+                return "fr/proline/studio/images/invalidatedLocally.png";
             case VALIDATED:
                 return "fr/proline/studio/images/validated.png";
+            case VALIDATED_LOCALLY:
+                return "fr/proline/studio/images/validatedLocally.png";
             case VALIDATED_AND_USED:
                 return "fr/proline/studio/images/validated_and_used.png";
             case VALIDATED_AND_NOTUSED:

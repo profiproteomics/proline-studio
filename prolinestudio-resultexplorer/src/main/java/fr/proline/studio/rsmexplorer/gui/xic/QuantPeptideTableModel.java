@@ -99,7 +99,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     public static final int COLTYPE_PEPTIDE_CLUSTER = 11;
     public static final int LAST_STATIC_COLUMN = COLTYPE_PEPTIDE_CLUSTER;
     private static final String[] m_columnNames = {"Id", "Status", "Peptide Sequence", "PTMs", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets", "Overview", "Cluster"};
-    private static final String[] m_toolTipColumns = {"MasterQuantPeptide Id", "Peptide Status: Validated or Invalidate (manually or automatically) or invalid for quatitation,", "Identified Peptide Sequence", "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Retention Time (min)", "Number of Protein Set identified by this Peptide", "List of Protein Sets identified by this Peptide", "Overview", "Cluster Number"};
+    private static final String[] m_toolTipColumns = {"MasterQuantPeptide Id", "Peptide Status: Validated or Invalidated (manually or automatically)", "Identified Peptide Sequence", "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Retention Time (min)", "Number of Protein Set identified by this Peptide", "List of Protein Sets identified by this Peptide", "Overview", "Cluster Number"};
 
     public static final int COLTYPE_SELECTION_LEVEL = 0;
     public static final int COLTYPE_IDENT_PSM = 1;
@@ -119,6 +119,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     private List<DMasterQuantPeptide> m_quantPeptides = null;
     private DMasterQuantProteinSet m_mqProtSetContext = null; //Context in which DMasterQuantPeptide are displayed. May be null
     private Map<Long, Integer> m_selectionLevelInContext = null;
+    private Map<Long, Integer> m_globalLevel = null;
     private DQuantitationChannel[] m_quantChannels = null;
     private int m_quantChannelNumber;
 
@@ -671,11 +672,11 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         return (f != null); // a peptide with an elutime is linked to a PeptideIon and MasterQuantComponent
     }
 
-    public void validateModifications(final XicPeptidePanel panel, ArrayList selectedRows, XicStatusRenderer.SelectLevel cmdSelectLevel) {
+    
+    public ArrayList<DMasterQuantPeptide> listToModifyForValidateModifications(ArrayList selectedRows, XicStatusRenderer.SelectLevelEnum cmdSelectLevel) {
         if (selectedRows.isEmpty()) {
-            return;
+            return null;
         }
-        int selectLevel;
 
         ArrayList<DMasterQuantPeptide> listToModify = new ArrayList<>();
         Iterator<Integer> rowIt = selectedRows.iterator();
@@ -699,10 +700,10 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                         break;
                     case RESET_AUTO:
                         if (thisSelectLevel == 0) {//DESELECTED_MANUAL
-                            masterQuantPeptide.setSelectionLevel(XicStatusRenderer.SelectLevel.DESELECTED_AUTO.getIntValue());//DESELECTED_AUTO
+                            masterQuantPeptide.setSelectionLevel(XicStatusRenderer.SelectLevelEnum.DESELECTED_AUTO.getIntValue());//DESELECTED_AUTO
                             listToModify.add(masterQuantPeptide);
                         } else if (thisSelectLevel == 3) {//SELECTED_MANUAL
-                            masterQuantPeptide.setSelectionLevel(XicStatusRenderer.SelectLevel.SELECTED_AUTO.getIntValue());//SELECTED_AUTO
+                            masterQuantPeptide.setSelectionLevel(XicStatusRenderer.SelectLevelEnum.SELECTED_AUTO.getIntValue());//SELECTED_AUTO
                             listToModify.add(masterQuantPeptide);
                         }
                         break;
@@ -711,6 +712,14 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             }
         }
         if (listToModify.isEmpty()) {
+            return null;
+        }
+        return listToModify;
+    }
+    
+    public void validateModifications(final XicPeptidePanel panel,  ArrayList<DMasterQuantPeptide> listToModify) {
+        
+        if (listToModify == null) {
             panel.modifyStatusActionFinished(true, null);
             return;
         }
@@ -749,19 +758,22 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     }
 
     public XicStatusRenderer.SelectLevel getSelectionLevelFor(DMasterQuantPeptide peptide) {
-        XicStatusRenderer.SelectLevel level = XicStatusRenderer.SelectLevel.UNKNOWN;
+        XicStatusRenderer.SelectLevelEnum level = XicStatusRenderer.SelectLevelEnum.UNKNOWN;
+
         if (m_mqProtSetContext != null && !m_selectionLevelInContext.isEmpty()) {
             Integer value = m_selectionLevelInContext.get(peptide.getId());
             if (value != null) {
-                level = XicStatusRenderer.SelectLevel.valueOf(m_selectionLevelInContext.get(peptide.getId()));
+                level = XicStatusRenderer.SelectLevelEnum.valueOf(m_selectionLevelInContext.get(peptide.getId()));
 //                logger.debug(" use masterQuantProtein specific selection for peptide " + peptide.getId() + ": " + level.toString());
             }
 
         }
-        if (level == null || level.equals(XicStatusRenderer.SelectLevel.UNKNOWN)) {
-            level = XicStatusRenderer.SelectLevel.valueOf(peptide.getSelectionLevel());
+        if (level == null || level.equals(XicStatusRenderer.SelectLevelEnum.UNKNOWN)) {
+            level = XicStatusRenderer.SelectLevelEnum.valueOf(peptide.getSelectionLevel());
         }
-        return level;
+
+        return new XicStatusRenderer.SelectLevel(level, XicStatusRenderer.SelectLevelEnum.valueOf(peptide.getSelectionLevel()));
+ 
     }
 
     @Override
@@ -1125,13 +1137,17 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         m_quantChannels = quantChannels;
         m_mqProtSetContext = masterQuantProtSetContext;
         m_selectionLevelInContext = new HashMap();
+        m_globalLevel = new HashMap();
         if (m_mqProtSetContext != null) {
             MasterQuantProteinSetProperties prop = m_mqProtSetContext.getMasterQuantProtSetProperties();
             if (prop != null) {
                 Map<Long, Integer> selectLevelByMqPeps = prop.getMqPeptideSelLevelById();
                 if (selectLevelByMqPeps != null) {
                     for (DMasterQuantPeptide mqPep : m_quantPeptides) {
-                        m_selectionLevelInContext.put(mqPep.getId(), selectLevelByMqPeps.getOrDefault(mqPep.getId(), XicStatusRenderer.SelectLevel.UNKNOWN.getIntValue()));
+                        int globalSelectLevel = mqPep.getSelectionLevel();
+                        m_selectionLevelInContext.put(mqPep.getId(), selectLevelByMqPeps.getOrDefault(mqPep.getId(), XicStatusRenderer.SelectLevelEnum.UNKNOWN.getIntValue()));
+                        m_globalLevel.put(mqPep.getId(), globalSelectLevel);
+                    
                     }
                 }
             }
@@ -1477,7 +1493,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         if (columnIndex == COLTYPE_PEPTIDE_ID) {
             return peptide.getId();
         } else if (columnIndex == COLTYPE_MQPEPTIDE_SELECTION_LEVEL) {
-            return ((XicStatusRenderer.SelectLevel) data).getIntValue();
+            return ((XicStatusRenderer.SelectLevelEnum) data).getIntValue();
         }
 
         return data;
@@ -1534,8 +1550,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
             Boolean peptideSelected = true;
             if (m_isXICMode) {
-                XicStatusRenderer.SelectLevel status = (XicStatusRenderer.SelectLevel) getValueAt(row, COLTYPE_MQPEPTIDE_SELECTION_LEVEL);
-                peptideSelected = status.getIntValue() >= 2;
+                XicStatusRenderer.SelectLevel status = ((XicStatusRenderer.SelectLevel) getValueAt(row, COLTYPE_MQPEPTIDE_SELECTION_LEVEL));
+                peptideSelected = status.getStatus().getIntValue() >= 2;
             }
 
             grayed = !peptideSelected;

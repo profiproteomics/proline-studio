@@ -69,7 +69,7 @@ public class DatabaseModifyPeptideTask extends AbstractDatabaseTask {
     }
 
     public void initRemovePeptideModifiedOnProtein(long projectId, DDataset dataset, ArrayList<DMasterQuantProteinSet> masterQuantProteinSetModified) {
-        setTaskInfo(new TaskInfo("Proteins Refined", true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
+        setTaskInfo(new TaskInfo("Post-Processed Proteins", true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
 
         m_action = REMOVE_PEPTIDEMODIFIED_ON_PROTEIN;
         m_projectId = projectId;

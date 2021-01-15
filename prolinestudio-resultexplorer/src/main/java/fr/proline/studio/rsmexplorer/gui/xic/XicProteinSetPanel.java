@@ -174,7 +174,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         ResultCallback resultCallback = new ResultCallback() {
             @Override
             public void run(boolean success) {
-                m_refineProteinsPanel.actionFinished(success, success ? null : "Refine failed. Look to Tasks Log for more information.");
+                m_refineProteinsPanel.actionFinished(success, success ? null : "Computing Post-Processing on Abundances has failed. Look to Tasks Log for more information.");
 
                 if (success) {
 
@@ -239,11 +239,11 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         };
 
-        String[] actionText = {"Refine"};
+        String[] actionText = {"Compute"};
         ActionListener[] actionListeners = {refineAction};
         Icon[] icons = {IconManager.getIcon(IconManager.IconType.REFINE)};
 
-        DefaultFloatingPanel refineProteinsPanel = new DefaultFloatingPanel("Proteins need to be refined : ", actionText, actionListeners, icons) {
+        DefaultFloatingPanel refineProteinsPanel = new DefaultFloatingPanel("You need to compute Post-Processing on Abundances : ", actionText, actionListeners, icons) {
             @Override
             public void actionFinished(boolean success, String errorMessage) {
                 super.actionFinished(success, errorMessage);

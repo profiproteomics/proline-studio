@@ -97,7 +97,7 @@ public class DefaultFloatingPanel extends HourglassPanel {
             add(m_actionButtonArray[i]);
 
             preferredButtonWidth = Math.max(preferredButtonWidth, m_actionButtonArray[i].getPreferredSize().width);
-            preferredButtonHeight = Math.max(preferredButtonWidth, m_actionButtonArray[i].getPreferredSize().height);
+            preferredButtonHeight = Math.max(preferredButtonHeight, m_actionButtonArray[i].getPreferredSize().height);
         }
 
         // equalize dimension of buttons

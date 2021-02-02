@@ -72,6 +72,7 @@ public class SettingsButton extends JButton implements ActionListener {
             return;
         }
         DefaultParameterDialog parameterDialog = new DefaultParameterDialog(WindowManager.getDefault().getMainWindow(), "Settings", parameterListArray);
+        parameterDialog.setDocumentationSuffix("h.u8efk3coyb70");
         parameterDialog.setLocationRelativeTo(this);
         parameterDialog.setVisible(true);
         

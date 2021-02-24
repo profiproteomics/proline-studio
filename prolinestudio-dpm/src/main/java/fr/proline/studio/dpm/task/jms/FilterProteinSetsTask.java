@@ -52,8 +52,7 @@ public class FilterProteinSetsTask extends AbstractJMSTask {
         SPECIFIC_PEP("SPECIFIC_PEP", "Specific Peptides"),
         PEP_COUNT("PEP_COUNT", "Peptides count"),
         PEP_SEQ_COUNT("PEP_SEQ_COUNT", "Peptide sequence count"),
-        SCORE("SCORE", "Protein Set Score"),
-        BH_ADJUSTED_PVALUE("BH_ADJUSTED_PVALUE", "BH adjusted pValue (%)");
+        SCORE("SCORE", "Protein Set Score");
 
         public final String key;
         public final String name;
@@ -107,9 +106,7 @@ public class FilterProteinSetsTask extends AbstractJMSTask {
                 filterCfg.put("parameter", filter.key);
                 if(filter == Filter.SCORE) {
                     filterCfg.put("threshold", Double.valueOf(m_argumentsMap.get(filter.key)));
-                } if (filter == Filter.BH_ADJUSTED_PVALUE) {
-                    filterCfg.put("threshold", Double.valueOf(m_argumentsMap.get(filter.key))/100.0);
-                } else {
+                }  else {
                     filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get(filter.key)));
                 }
                 proteinFilters.add(filterCfg);

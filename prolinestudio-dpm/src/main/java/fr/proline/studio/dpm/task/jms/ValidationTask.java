@@ -48,8 +48,7 @@ public class ValidationTask extends AbstractJMSTask  {
         MASCOT_HT_SCORE("SCORE_HT_P-VALUE", "Homology p-Value"),
         SINGLE_PSM_QUERY("SINGLE_PSM_PER_QUERY","Single PSM per MS Query"),
         SINGLE_PSM_RANK("SINGLE_PSM_PER_RANK","Single PSM per Rank"),
-        ISOTOPE_OFFSET("ISOTOPE_OFFSET", "Isotope Offset"),
-        BH_AJUSTED_PVALUE("BH_AJUSTED_PVALUE", "BH adjusted pValue (%)");
+        ISOTOPE_OFFSET("ISOTOPE_OFFSET", "Isotope Offset");
 
         public final String key;
         public final String name;
@@ -62,10 +61,13 @@ public class ValidationTask extends AbstractJMSTask  {
 
     public enum ValidationParameters {
 
+        EXPECTED_FDR_METHOD("expected_fdr_method", "FDR control method"),
         EXPECTED_FDR("expected_fdr", "FDR"),
         EXPECTED_FDR_PARAM("expected_fdr_parameter", "FDR Variable"),
-        PROTEIN_EXPECTED_FDR("protein_expected_fdr", "Protein FDR");
-
+        PROTEIN_EXPECTED_FDR("protein_expected_fdr", "Protein FDR"),
+        PEPTIDE_EXPECTED_FDR("peptide_expected_fdr", "Peptide FDR"),
+        TD_ANALYZER("td_analyzer", "Target/Decoy method");
+        
         public final String key;
         public final String name;
 
@@ -158,9 +160,11 @@ public class ValidationTask extends AbstractJMSTask  {
                     m_loggerProline.debug("Result :\n" + result);                    
                     Long rsmId = (Long) ((Map) result).get(m_dataset.getResultSetId().toString());
                     m_resultSummaryId[0] = rsmId.intValue();
-                    ((Map<String,Long>) result).forEach( (String key, Long value) -> {
-                        m_rsmIdsPerRsIds.put(Long.parseLong(key), value);
-                    });                                                           
+                    if (m_rsmIdsPerRsIds != null) {
+                      ((Map<String,Long>) result).forEach( (String key, Long value) -> {
+                          m_rsmIdsPerRsIds.put(Long.parseLong(key), value);
+                      });
+                    }
                 }
             } else {
                 if (result == null || ! Long.class.isInstance(result) ) {
@@ -183,6 +187,20 @@ public class ValidationTask extends AbstractJMSTask  {
   
     
     private HashMap<String, Object> createParams() {
+
+      HashMap<String, Object> params =  _createParams();
+      
+      m_version = m_argumentsMap.getOrDefault("version", "version 2.0").split(" ")[1];
+      // TEST PURPOSE ONLY: remove 3.0 params to check service compatibility
+      if (m_version.equals("2.0")) {
+        if (params.containsKey("fdr_analyzer_config")) {
+          params.remove("fdr_analyzer_config");
+        }
+      }
+      return params;
+    }
+    
+    private HashMap<String, Object> _createParams() {
 
         HashMap<String, Object> params = new HashMap<>();
         params.put("project_id", m_dataset.getProject().getId());
@@ -254,12 +272,6 @@ public class ValidationTask extends AbstractJMSTask  {
             filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get("PSM_"+ PSMFilter.ISOTOPE_OFFSET.key)));
             psmFilters.add(filterCfg);
         }
-        if (m_argumentsMap.containsKey("PSM_"+ PSMFilter.BH_AJUSTED_PVALUE.key)) {
-            HashMap filterCfg = new HashMap();
-            filterCfg.put("parameter", PSMFilter.BH_AJUSTED_PVALUE.key);
-            filterCfg.put("threshold", Double.valueOf(m_argumentsMap.get("PSM_"+ PSMFilter.BH_AJUSTED_PVALUE.key))/100.0);
-            psmFilters.add(filterCfg);
-        }
 
         params.put("pep_match_filters", psmFilters);
 
@@ -271,33 +283,41 @@ public class ValidationTask extends AbstractJMSTask  {
             params.put("pep_match_validator_config", pepMatchValidator);
         }
 
-        if (m_argumentsMap.containsKey("td_analyzer")) {
-            HashMap tdAnalyzerConfig = new HashMap();
-            tdAnalyzerConfig.put("method_name", m_argumentsMap.get("td_analyzer"));
-            
-            if (m_argumentsMap.containsKey("db_ratio")) {
-                HashMap tdAnalyzerParams = new HashMap();
-                tdAnalyzerParams.put("ratio", m_argumentsMap.get("db_ratio"));            
-                tdAnalyzerConfig.put("params", tdAnalyzerParams);
-            }
-            params.put("td_analyzer_config", tdAnalyzerConfig);
-            
-        }
+        HashMap fdrConfig = new HashMap();
+        if (m_argumentsMap.containsKey(ValidationParameters.EXPECTED_FDR.key) ||
+            m_argumentsMap.containsKey(ValidationParameters.PEPTIDE_EXPECTED_FDR.key) ||
+            m_argumentsMap.containsKey(ValidationParameters.PROTEIN_EXPECTED_FDR.key)) {
+          
+          if ((m_argumentsMap.containsKey(ValidationParameters.EXPECTED_FDR_METHOD.key))) {
+              fdrConfig.put("method_name", (m_argumentsMap.get(ValidationParameters.EXPECTED_FDR_METHOD.key)));
+          }
 
-        // Peptide Filters
-        ArrayList peptideFilters = new ArrayList();
-        if (m_argumentsMap.containsKey("PEPTIDE_"+ PSMFilter.BH_AJUSTED_PVALUE.key)) {
-            HashMap filterCfg = new HashMap();
-            filterCfg.put("parameter", PSMFilter.BH_AJUSTED_PVALUE.key);
-            filterCfg.put("threshold", Double.valueOf(m_argumentsMap.get("PEPTIDE_"+ PSMFilter.BH_AJUSTED_PVALUE.key))/100.0);
-            peptideFilters.add(filterCfg);
+          if (m_argumentsMap.containsKey(ValidationParameters.TD_ANALYZER.key)) {
+              HashMap tdAnalyzerConfig = new HashMap();
+              tdAnalyzerConfig.put("method_name", m_argumentsMap.get(ValidationParameters.TD_ANALYZER.key));
+
+              if (m_argumentsMap.containsKey("db_ratio")) {
+                  HashMap tdAnalyzerParams = new HashMap();
+                  tdAnalyzerParams.put("ratio", m_argumentsMap.get("db_ratio"));            
+                  tdAnalyzerConfig.put("params", tdAnalyzerParams);
+              }
+              fdrConfig.put("td_analyzer_config", tdAnalyzerConfig);            
+          }
+          
+          params.put("fdr_analyzer_config", fdrConfig);
         }
-        params.put("peptide_filters", peptideFilters);
         
+        // Peptide validator
+        if (m_argumentsMap.containsKey(ValidationParameters.PEPTIDE_EXPECTED_FDR.key)) {
+            HashMap peptideValidatorConfig = new HashMap();
+            peptideValidatorConfig.put("parameter", "BH");
+            peptideValidatorConfig.put("expected_fdr", m_argumentsMap.get(ValidationParameters.PEPTIDE_EXPECTED_FDR.key));
+            params.put("pep_validator_config", peptideValidatorConfig);
+        }
         
         params.put("pep_set_score_type", m_scoringType);
 
-        // Protein Pre-PSMFilter
+        // Protein Pre-Filters
         ArrayList proteinFilters = new ArrayList();
 
         for (FilterProteinSetsTask.Filter filter: FilterProteinSetsTask.Filter.values()) {
@@ -307,8 +327,6 @@ public class ValidationTask extends AbstractJMSTask  {
                 filterCfg.put("parameter", filter.key);
                 if (filter == FilterProteinSetsTask.Filter.SCORE) {
                     filterCfg.put("threshold", Double.valueOf(m_argumentsMap.get(filterKeyOfInMap)));
-                } else if (filter == FilterProteinSetsTask.Filter.BH_ADJUSTED_PVALUE) {
-                    filterCfg.put("threshold", Double.valueOf(m_argumentsMap.get(filterKeyOfInMap))/100.0);                  
                 } else {
                     filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get(filterKeyOfInMap)));
                 }
@@ -326,21 +344,23 @@ public class ValidationTask extends AbstractJMSTask  {
             protSetValidator.put("expected_fdr", m_argumentsMap.get(ValidationParameters.PROTEIN_EXPECTED_FDR.key));
             protSetValidator.put("validation_method", "PROTEIN_SET_RULES");
             params.put("prot_set_validator_config", protSetValidator);
+            // Verify that a td_analyzer_config have been supplied at PSM level, if not set it to BASIC
+            if (!fdrConfig.containsKey("td_analyzer_config")) {
+              HashMap tdAnalyzerConfig = new HashMap();
+              tdAnalyzerConfig.put("method_name", "BASIC");
+              fdrConfig.put("td_analyzer_config", tdAnalyzerConfig);
+            }
         }
-
+        
         if(m_argumentsMap.containsKey("propagate_prot_set_filters") ){            
             params.put("propagate_prot_set_filters", Boolean.parseBoolean(m_argumentsMap.get("propagate_prot_set_filters")));
-            m_version = "2.0";
         }
         
         if(m_argumentsMap.containsKey("propagate_pep_match_filters")) {
             params.put("propagate_pep_match_filters",  Boolean.parseBoolean(m_argumentsMap.get("propagate_pep_match_filters")));
-            m_version = "2.0";
         }
         
         return params;
     }
-
-
     
 }

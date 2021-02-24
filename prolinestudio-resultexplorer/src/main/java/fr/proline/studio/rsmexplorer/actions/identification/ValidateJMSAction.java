@@ -117,7 +117,7 @@ public class ValidateJMSAction extends AbstractRSMAction {
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
 
             // retrieve parameters
-            final HashMap<String, String> parserArguments = dialog.getArguments();
+            final HashMap<String, String> validationArguments = dialog.getArguments();
             final List<ChangeTypicalRule> changeTypicalRules  = dialog.getChangeTypicalRules();
             final String scoringType = dialog.getScoringType();
             //VDTEST
@@ -138,9 +138,13 @@ public class ValidateJMSAction extends AbstractRSMAction {
                 if (dataSetNode.hasResultSummary()) {                                        
                     removePreviousValidation(dataSetNode, propagateValidation);
                 } 
-                askValidation(dataSetNode, parserArguments, changeTypicalRules, scoringType, propagateValidation);
+                askValidation(dataSetNode, validationArguments, changeTypicalRules, scoringType, propagateValidation);
             }
-        }
+        } else {
+          // TEST PURPOSE ONLY to check params without calling the service
+          HashMap<String, String> validationArguments = dialog.getArguments();
+          List<ChangeTypicalRule> changeTypicalRules  = dialog.getChangeTypicalRules();
+        } 
     }
     
     private void removePreviousValidation(DataSetNode dataSetNode, boolean removeInHierarchy){
@@ -156,7 +160,7 @@ public class ValidateJMSAction extends AbstractRSMAction {
         taskRemoveValidation.fetchData();        
     }
 
-    private void askValidation(final DataSetNode dataSetNode, HashMap<String, String> parserArguments, final List<ChangeTypicalRule> changeTypicalRules, final String scoringType,final boolean v2Service) {
+    private void askValidation(final DataSetNode dataSetNode, HashMap<String, String> parserArguments, final List<ChangeTypicalRule> changeTypicalRules, final String scoringType,final boolean propagate) {
 
         final DDataset d = dataSetNode.getDataset();
 
@@ -187,9 +191,13 @@ public class ValidateJMSAction extends AbstractRSMAction {
             }
         };
         
-        ValidationTask task = new ValidationTask(callback, d, "", parserArguments, _resultSummaryId, scoringType);
-        if(v2Service)
-            task = new ValidationTask(callback, d, "", parserArguments, _resultSummaryId,_rsmIdsByRsIds, scoringType);    
+        ValidationTask task = null;
+        
+        if (propagate)
+           task = new ValidationTask(callback, d, "", parserArguments, _resultSummaryId,_rsmIdsByRsIds, scoringType);    
+        else 
+           task = new ValidationTask(callback, d, "", parserArguments, _resultSummaryId, scoringType);
+        
         AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
     }

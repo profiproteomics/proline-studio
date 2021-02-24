@@ -40,10 +40,7 @@ public class FilterProteinSetPanel extends JPanel {
             if (filter == FilterProteinSetsTask.Filter.SCORE) {
                 parameters[index] = new DoubleParameter(filterKey, filter.name, new JTextField(6), new Double(10), new Double(1), null);
                 parameters[index].setAssociatedData(">=");
-            } if (filter == FilterProteinSetsTask.Filter.BH_ADJUSTED_PVALUE) {
-                parameters[index] = new DoubleParameter(filterKey, filter.name, new JTextField(6), new Double(1.0), new Double(0), new Double(100));
-                parameters[index].setAssociatedData("<=");
-            } else {
+            }  else {
                 parameters[index] = new IntegerParameter(filterKey, filter.name, new JTextField(6), new Integer(1), new Integer(1), null);
                 parameters[index].setAssociatedData(">=");
             }

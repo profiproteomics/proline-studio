@@ -83,7 +83,7 @@ public class ValidationTask extends AbstractJMSTask  {
     private final String m_scoringType;
     private final Integer[] m_resultSummaryId;
     private Map<Long,Long> m_rsmIdsPerRsIds = null;        
-    private String m_version = null;
+    private String m_version = "3.0";
     
     public ValidationTask(AbstractJMSCallback callback, DDataset dataset, String description, HashMap<String, String> argumentsMap, Integer[] resultSummaryId, String scoringType) {
         super(callback, new TaskInfo("JMS Validation of Search Result " + dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
@@ -151,30 +151,20 @@ public class ValidationTask extends AbstractJMSTask  {
 	    }
 
 	    final Object result = jsonResponse.getResult();
-            if(m_version != null){
-                
-                if (result == null || ! Map.class.isInstance(result) ) {
-                    m_loggerProline.debug("Invalid or no result");
-                    throw new Exception("null or invalid result "+result);
-                } else {
-                    m_loggerProline.debug("Result :\n" + result);                    
-                    Long rsmId = (Long) ((Map) result).get(m_dataset.getResultSetId().toString());
-                    m_resultSummaryId[0] = rsmId.intValue();
-                    if (m_rsmIdsPerRsIds != null) {
-                      ((Map<String,Long>) result).forEach( (String key, Long value) -> {
-                          m_rsmIdsPerRsIds.put(Long.parseLong(key), value);
-                      });
-                    }
-                }
-            } else {
-                if (result == null || ! Long.class.isInstance(result) ) {
-                    m_loggerProline.debug("Invalid or no result");
-                    throw new Exception("null or invalid result "+result);
-                } else {
-                    m_loggerProline.debug("Result :\n" + result);
-                    m_resultSummaryId[0] = ((Long) result).intValue();
-                }
+            
+          if (result == null || !Map.class.isInstance(result)) {
+            m_loggerProline.debug("Invalid or no result");
+            throw new Exception("null or invalid result " + result);
+          } else {
+            m_loggerProline.debug("Result :\n" + result);
+            Long rsmId = (Long) ((Map) result).get(m_dataset.getResultSetId().toString());
+            m_resultSummaryId[0] = rsmId.intValue();
+            if (m_rsmIdsPerRsIds != null) {
+              ((Map<String, Long>) result).forEach((String key, Long value) -> {
+                m_rsmIdsPerRsIds.put(Long.parseLong(key), value);
+              });
             }
+          }
         }
         
         /*
@@ -187,20 +177,6 @@ public class ValidationTask extends AbstractJMSTask  {
   
     
     private HashMap<String, Object> createParams() {
-
-      HashMap<String, Object> params =  _createParams();
-      
-      m_version = m_argumentsMap.getOrDefault("version", "version 2.0").split(" ")[1];
-      // TEST PURPOSE ONLY: remove 3.0 params to check service compatibility
-      if (m_version.equals("2.0")) {
-        if (params.containsKey("fdr_analyzer_config")) {
-          params.remove("fdr_analyzer_config");
-        }
-      }
-      return params;
-    }
-    
-    private HashMap<String, Object> _createParams() {
 
         HashMap<String, Object> params = new HashMap<>();
         params.put("project_id", m_dataset.getProject().getId());

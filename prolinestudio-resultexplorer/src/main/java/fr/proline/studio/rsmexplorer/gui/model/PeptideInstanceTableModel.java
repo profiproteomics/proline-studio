@@ -45,6 +45,8 @@ import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.table.TableDefaultRendererManager;
+import fr.proline.studio.utils.StudioExceptions;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;

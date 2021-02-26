@@ -127,7 +127,6 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
     private ChangeTypicalProteinPanel m_changeTypicalPanel = null;
 
     private JComboBox<String> m_proteinScoringTypeCbx = null;
-    private JComboBox<String> versionCbx;
 
     public enum DecoyStatus {
         WAITING,
@@ -295,14 +294,6 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
 
         c.gridy++;
         psmTabPanel.add(createProteinSetFilterPanel(), c);
-
-        c.gridy++;
-        JPanel versionPanel = new JPanel();
-        versionPanel.setLayout(new BorderLayout());
-        versionCbx = new JComboBox<>( new String[]{"version 2.0", "version 3.0"} );
-        versionPanel.add(versionCbx, BorderLayout.CENTER);
-        psmTabPanel.add(versionPanel, c);
-
 
         return psmTabPanel;
     }
@@ -924,9 +915,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
     }
 
     public HashMap<String, String> getArguments() {
-        HashMap<String, String> map = m_parameterList.getValues();
-        map.put("version", (String)versionCbx.getSelectedItem());
-        return map;
+        return m_parameterList.getValues();
     }
 
     public List<ChangeTypicalRule> getChangeTypicalRules() {

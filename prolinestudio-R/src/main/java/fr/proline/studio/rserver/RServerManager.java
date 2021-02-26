@@ -73,28 +73,34 @@ public class RServerManager {
     
     public synchronized boolean startRProcessWithRetry() throws Exception {
         
+        LoggerFactory.getLogger("ProlineStudio.R").info("startRProcessWithRetry()");
+        
         boolean RStarted = false;
         
         try {
             RStarted = startRProcess();
         } catch (Exception e) {
-            
+            LoggerFactory.getLogger("ProlineStudio.R").error("Unexpected Exception while Starting R Server ", e);
         }
         
         if (!RStarted) {
+            LoggerFactory.getLogger("ProlineStudio.R").info("startRProcessWithRetry() : Retry");
             RStarted = startRProcess();
         }
         
         if (RStarted) {
             try {
+                LoggerFactory.getLogger("ProlineStudio.R").info("startRProcessWithRetry() : Connect");
                 connect(false);
             } catch (Exception e) {
-
+                LoggerFactory.getLogger("ProlineStudio.R").error("Unexpected Exception while connecting to R Server ", e);
             }
         }
         
         if (RStarted && !isConnected()) {
             // R has started, but we can not connect correctly
+            LoggerFactory.getLogger("ProlineStudio.R").info("startRProcessWithRetry() : R has started, but we can not connect correctly");
+            
             stopRProcess();
             Thread.sleep(5000);
             RStarted = startRProcess();
@@ -112,26 +118,34 @@ public class RServerManager {
     private boolean startRProcess() throws Exception {
 
         if (m_RProcess != null) {
+            LoggerFactory.getLogger("ProlineStudio.R").info("startRProcess() : Process already exists");
+            
             return true;
         }
         
         // process can have been created outside
         if (isConnected()) {
+            LoggerFactory.getLogger("ProlineStudio.R").info("startRProcess() : Process created outside");
+            
             return true;
         }
         
         // try to connect without starting the process
         try {
+            LoggerFactory.getLogger("ProlineStudio.R").info("startRProcess() : try to connect");
             connect(false);
         } catch (Exception e) {
-            
+            LoggerFactory.getLogger("ProlineStudio.R").error("Unexpected Exception 2 while connecting to R Server ", e);
         }
         if (isConnected()) {
+            LoggerFactory.getLogger("ProlineStudio.R").info("startRProcess() : Process Connected");
             return true;
         }
 
         
         File f = null;
+        
+        LoggerFactory.getLogger("ProlineStudio.R").info("startRProcess() : Try to find R.exe if the path is defined in the RServerExePath key of the preference file");
         
         // try to read R.exe path potentially defined in Properties file (saved in key "RServerExePath" )
         Preferences preferences = NbPreferences.root();
@@ -150,6 +164,8 @@ public class RServerManager {
 
         // if R.exe path is not defined in Preferences file, we read it in default application path
         if (f == null) {
+            LoggerFactory.getLogger("ProlineStudio.R").info("startRProcess() : Try to find R.exe in the path");
+        
             f = new File(".");
             pathToExe = f.getCanonicalPath() + File.separatorChar + "R" + File.separatorChar + "bin" + File.separatorChar + "R.exe";
             f = new File(pathToExe);
@@ -166,6 +182,9 @@ public class RServerManager {
         String operatingSystem = System.getProperty("os.name");
         if (operatingSystem != null && operatingSystem.startsWith("Windows")) {
 
+            LoggerFactory.getLogger("ProlineStudio.R").info("startRProcess() : Windows system, start R.exe");
+        
+            
             String[] cmds = {pathToExe, "-e", "\"library(Rserve);Rserve(TRUE,args='--no-save')\"", "--no-save"};
             //String[] cmds = {pathToExe, "-e", "\"library(Rserve);Rserve(TRUE,args='--no-save --slave')\"", "--no-save", "--slave"};
             m_RProcess = Runtime.getRuntime().exec(cmds);
@@ -199,20 +218,27 @@ public class RServerManager {
     public void stopRProcess() {
         
         // try to close the process by quitting
-        try {
-            parseAndEval("quit()");
-        } catch (Exception e) {
-            // quit() launches an exception but server is really quitted !
+        if (m_connection != null) {
+            try {
+                LoggerFactory.getLogger("ProlineStudio.R").info("stopRProcess() : Quit R");
+
+                parseAndEval("quit()");
+            } catch (Exception e) {
+                // quit() launches an exception but server is really quitted !
+                LoggerFactory.getLogger("ProlineStudio.R").error("Unexpected Exception while quitting R Server Process ", e);
+            }
         }
         
         // close connection if needed
+        LoggerFactory.getLogger("ProlineStudio.R").info("stopRProcess() : Close R Connection");
         close();
         
         if (m_RProcess != null) {
             try {
+                LoggerFactory.getLogger("ProlineStudio.R").info("stopRProcess() : Destroy R Process");
                 m_RProcess.destroy(); // does not work with java 7.0 : m_RProcess.destroyForcibly();
             } catch (Exception e) {
-                
+                LoggerFactory.getLogger("ProlineStudio.R").error("Unexpected Exception while destroying R Server Process ", e);
             } finally {
                 m_RProcess = null;
             }
@@ -231,9 +257,11 @@ public class RServerManager {
         String user = null;
         String password = null;
 
+        LoggerFactory.getLogger("ProlineStudio.R").info("connect() : Connect to R Process");
         connect(serverURL, port, user, password, log);
         
         if (isConnected()) {
+             LoggerFactory.getLogger("ProlineStudio.R").info("connect() : Connection done, loading ProlineStudioInit.R");
            try {
                 File f = new File(".");
                 String pathToInitRFile = f.getCanonicalPath() + File.separatorChar + "R" + File.separatorChar + "ProlineStudioInit.R";
@@ -242,7 +270,7 @@ public class RServerManager {
                      m_connection.voidEval("source('"+ StatsUtil.getPath(f)+"')");
                 }
             } catch  (Exception e) {
-                LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed", e);
+                LoggerFactory.getLogger("ProlineStudio.R").error("Loading ProlineStudioInit.R failed", e);
                 throw new RServerException(e.getMessage());
             }
         }
@@ -254,6 +282,7 @@ public class RServerManager {
     public RConnection connect(String host, int port, String user, String password, boolean log) throws RServerException {
         
         if (m_connection != null) {
+            LoggerFactory.getLogger("ProlineStudio.R").info("connect() : Already Connected");
             return m_connection;
         }
         
@@ -271,8 +300,12 @@ public class RServerManager {
 
         } catch (RserveException e) {
             if (log) {
-                LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed", e);
+                LoggerFactory.getLogger("ProlineStudio.R").error("connect() failed", e);
+            
                 StudioExceptions.notify(e.getMessage(), e);
+            } else {
+                LoggerFactory.getLogger("ProlineStudio.R").info("connect() , no existing R Server found to connect");
+            
             }
             m_connection = null;
             throw new RServerException(e.getMessage());
@@ -476,7 +509,7 @@ public class RServerManager {
                 try {
                     success = startRProcessWithRetry();
                 } catch (Exception e) {
-                    
+                     LoggerFactory.getLogger("ProlineStudio.R").error("Unexpected Exception while starting R Process with retry ", e);
                 }
                 final boolean _success = success;
                 SwingUtilities.invokeLater(new Runnable() {

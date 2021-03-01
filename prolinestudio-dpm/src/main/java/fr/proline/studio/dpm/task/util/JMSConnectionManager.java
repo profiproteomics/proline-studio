@@ -207,7 +207,7 @@ public class JMSConnectionManager {
             m_jmsSettingsPList.loadParameters(NbPreferences.root());
             String queueName = m_parameter.getStringValue();
 
-            m_loggerProline.info(" Use JMS Queure " + queueName);
+            m_loggerProline.info(" Use JMS Queue " + queueName);
             m_serviceQueue = HornetQJMSClient.createQueue(queueName);
             m_notificationTopic = HornetQJMSClient.createTopic(SERVICE_MONITORING_NOTIFICATION_TOPIC_NAME);
 

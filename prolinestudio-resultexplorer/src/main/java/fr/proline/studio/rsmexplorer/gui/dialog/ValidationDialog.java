@@ -24,7 +24,6 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.data.ChangeTypicalRule;
-import fr.proline.studio.dpm.task.jms.FilterRSMProtSetsTask;
 import fr.proline.studio.dpm.task.jms.ValidationTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.InfoDialog;
@@ -33,29 +32,18 @@ import fr.proline.studio.parameter.*;
 import fr.proline.studio.settings.FilePreferences;
 import fr.proline.studio.settings.SettingsDialog;
 import fr.proline.studio.settings.SettingsUtils;
-import fr.proline.studio.utils.IconManager;
-import java.awt.Dialog;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.prefs.Preferences;
-import javax.swing.*;
 import org.openide.util.NbPreferences;
 import org.openide.windows.WindowManager;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import javax.swing.Timer;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.File;
+import java.util.*;
+import java.util.List;
+import java.util.prefs.Preferences;
 
 /**
  * Dialog used to validate an identification and ask the creation of a Result
@@ -69,59 +57,85 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
     
     private boolean m_allowPropagateFilters = true;
 
-//    private final static String[] FDR_ESTIMATOR_VALUES = {null, "Default", "Competition Based"};
-//    private final static String[] FDR_ESTIMATOR_VALUES_ASSOCIATED_KEYS = {null, "false", "true"};
+    private final static String[] FDR_METHODS_VALUES = {"Target/Decoy", "BH"};
+    private final static String[] FDR_METHODS_ASSOCIATED_KEYS = {"TARGET_DECOY", "BH"};
+
+    private final static String[] TD_ANALYZER_VALUES = {"Basic", "Gorshkov"};
+    private final static String[] TD_ANALYZER_VALUES_ASSOCIATED_KEYS = {"BASIC", "GORSHKOV"};
     private final static String[] FDR_ON_VALUES = {null, "Score", "e-Value", "Adjusted e-Value", "Identity p-Value", "Homology p-Value"};
     private final static String[] FDR_ON_VALUES_ASSOCIATED_KEYS = {null, "SCORE", "MASCOT_EVALUE", "MASCOT_ADJUSTED_EVALUE", "SCORE_IT_P-VALUE", "SCORE_HT_P-VALUE"};
 
-    private final static String[] SCORING_TYPE_OPTIONS = {"Standard","Mascot Mudpit", "Mascot Modified Mudpit"};
-    private final static String[] SCORING_TYPE_VALUES = {"mascot:standard score", "mascot:mudpit score", "mascot:modified mudpit score"};
+    private final static String[] PROTEIN_SCORING_TYPE_OPTIONS = {"Standard","Mascot Mudpit", "Mascot Modified Mudpit", "Fisher"};
+    private final static String[] PROTEIN_SCORING_TYPE_VALUES = {"mascot:standard score", "mascot:mudpit score", "mascot:modified mudpit score", "proline:fisher score"};
 
     private final static String SETTINGS_KEY = "Validation";
 
-    private ParameterList m_parameterList;
+    private final ParameterList m_parameterList;
 
     private AbstractParameter[] m_psmPrefilterParameters;
+    private ParametersComboPanel m_psmPrefiltersPanel;
+
+    private AbstractParameter[] m_peptidePrefilterParameters;
+    private ParametersComboPanel m_peptidePrefiltersPanel;
 
     private AbstractParameter m_fdrFilterParameter;
-    private ObjectParameter<String> m_fdrOnValueParameter;
+    private ObjectParameter<String> m_fdrPropertyParameter;
+    private ObjectParameter<String> m_fdrMethodParameter;
     private AbstractParameter m_proteinFdrFilterParameter;
-
-    private JPanel m_psmPrefiltersSelectedPanel = null;
-    private JComboBox m_psmPrefilterJComboBox = null;
+    private AbstractParameter m_peptideFdrFilterParameter;
+    
+    private ObjectParameter<String> m_tdAnalyzerName;
+    private AbstractParameter m_tdAnalyzerParam;
+            
     private AbstractParameter m_propagatePsmFiltersParameter;
     private JCheckBox m_propagatePsmFiltersCheckBox = null;
     
     private AbstractParameter[] m_proteinPrefilterParameters;
-    private FilterProteinSetPanel m_proteinPrefiltersPanel;
+    private ParametersComboPanel m_proteinPrefiltersPanel;
     
     private AbstractParameter m_propagateProtSetFiltersParameter;
     private JCheckBox m_propagateProtSetFiltersCheckBox = null;
     
-    private JLabel m_fdrLabel = null;
+    // psm FDR components
+    private JLabel m_fdrLabelEnsure = null;
+    private JLabel m_fdrLabelFDRLessThan = null;
     private JTextField m_fdrTextField = null;
     private JLabel m_fdrPercentageLabel = null;
-
+    private JComboBox<String> m_fdrPropertyComboBox = null;
+    private JComboBox<String> m_fdrMethodComboBox = null;
+    private JCheckBox m_fdrCheckbox = null;
+    private JComboBox<String> m_tdAnalyzerComboBox = null;
+    private JPanel m_tdParamsPanel;
+    private JLabel m_tdAnalyzerParamLabel = null;
+    private JTextField m_tdAnalyzerParamTF = null;
+    
+    // protein FDR components
     private JLabel m_proteinFdrLabel = null;
     private JTextField m_proteinFdrTextField = null;
     private JLabel m_proteinFdrPercentageLabel = null;
-    private JComboBox m_fdrOnValueComboBox = null;
-    private JCheckBox m_fdrCheckbox = null;
+    private JComboBox<String> m_proteinFdrMethodComboBox = null;
     private JCheckBox m_proteinFdrCheckbox = null;
-
+    
+    // peptide FDR components
+    private JLabel m_peptideFdrLabel = null;
+    private JTextField m_peptideFdrTextField = null;
+    private JLabel m_peptideFdrPercentageLabel = null;
+    private JComboBox<String> m_peptideFdrMethodComboBox = null;
+    private JCheckBox m_peptideFdrCheckbox = null;
+    
     private JCheckBox m_typicalProteinMatchCheckBox;
     private ChangeTypicalProteinPanel m_changeTypicalPanel = null;
 
-    private JComboBox m_proteinScoringTypeCbx = null;
+    private JComboBox<String> m_proteinScoringTypeCbx = null;
 
     public enum DecoyStatus {
-
         WAITING,
         HAS_DECOY,
         NO_DECOY
     }
 
     private DecoyStatus m_hasDecoy = DecoyStatus.WAITING;
+    private String m_softwareName = "UNKNOWN";
 
     public static ValidationDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
@@ -144,14 +158,14 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         m_parameterList = new ParameterList("Validation");
         createParameters();
         m_parameterList.updateValues(NbPreferences.root());
-        
+        // force fdr method usage to true
+        m_fdrMethodParameter.setUsed(true);
         setInternalComponent(createInternalPanel());
-
-        initPsmPrefilterPanel();
-        m_proteinPrefiltersPanel.initProteinFilterPanel();
+        
+        updatePSMFDRObjects(m_fdrFilterParameter.isUsed());
+        updateSelectedFilters();
 
         restoreScoringTypeParameter(NbPreferences.root());
-
         restoreTypicalProteinParameters(NbPreferences.root());
 
     }
@@ -163,6 +177,11 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
     public synchronized DecoyStatus getHasDecoy() {
         return m_hasDecoy;
     }
+
+    public synchronized void setSoftwareName(String softwareName) {
+        m_softwareName = softwareName;
+    }
+
 
     public void setAllowPropagateFilters(boolean allowPropagateFilters){
         if(m_allowPropagateFilters != allowPropagateFilters){
@@ -202,17 +221,24 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                int nb = datasetList.size();
-                for (int i = 0; i < nb; i++) {
-                    DDataset dataset = datasetList.get(i);
-                    ResultSet rset = dataset.getResultSet();
+                ValidationDialog.DecoyStatus decoyStatus = DecoyStatus.HAS_DECOY;
+                Set<String> softwareNames = new HashSet<>();
 
+                for (DDataset dataset: datasetList) {
+                    ResultSet rset = dataset.getResultSet();
                     if (rset.getDecoyResultSet() == null) {
-                        setHasDecoy(DecoyStatus.NO_DECOY);
-                        return;
+                        decoyStatus = DecoyStatus.NO_DECOY;
+                    }
+                    if (rset.getMsiSearch() != null) {
+                        softwareNames.add(rset.getMsiSearch().getSearchSetting().getSoftwareName().toUpperCase());
+                    } else {
+                        softwareNames.add("UNKNOWN");
                     }
                 }
-                setHasDecoy(DecoyStatus.HAS_DECOY);
+
+                setHasDecoy(decoyStatus);
+                setSoftwareName((softwareNames.size() == 1) ? softwareNames.iterator().next() : "MIXED");
+
             }
         };
 
@@ -222,19 +248,24 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
     }
-    
+
+    private void updateSelectedFilters() {
+        m_psmPrefiltersPanel.updatePanel();
+        m_proteinPrefiltersPanel.updatePanel();
+        m_peptidePrefiltersPanel.updatePanel();
+    }
+
     private JPanel createInternalPanel() {
 
         JPanel internalPanel = new JPanel(new GridBagLayout());
-
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
         JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("Validation Parameters", null, createPSMTabPanel(), null);
-        tabbedPane.addTab("Typical Protein Parameters", null, createTypicalProteinTabPanel(), null);
+        tabbedPane.addTab("Validation Parameters", null, createValidationPanel(), null);
+        tabbedPane.addTab("Typical Protein Parameters", null, createTypicalProteinPanel(), null);
 
         c.gridx = 0;
         c.gridy = 0;
@@ -244,7 +275,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         return internalPanel;
     }
 
-    private JPanel createPSMTabPanel() {
+    private JPanel createValidationPanel() {
 
         JPanel psmTabPanel = new JPanel(new GridBagLayout());
 
@@ -256,7 +287,10 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1.0;
-        psmTabPanel.add(createPSMPanel(), c);
+        psmTabPanel.add(createPSMFilterPanel(), c);
+
+        c.gridy++;
+        psmTabPanel.add(createPeptideFilterPanel(), c);
 
         c.gridy++;
         psmTabPanel.add(createProteinSetFilterPanel(), c);
@@ -264,30 +298,31 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         return psmTabPanel;
     }
     
-    private JPanel createTypicalProteinTabPanel() {
+    private JPanel createPeptideFilterPanel() {
+      JPanel panel = new JPanel(new GridBagLayout());
+       panel.setBorder(BorderFactory.createTitledBorder(" Peptide"));
+       
+      GridBagConstraints c = new GridBagConstraints();
+      c.anchor = GridBagConstraints.NORTHWEST;
+      c.fill = GridBagConstraints.BOTH;
+      c.insets = new java.awt.Insets(5, 5, 5, 5);
 
-        JPanel tabPanel = new JPanel(new GridBagLayout());
+      c.gridx = 0;
+      c.gridy = 0;
+      c.weightx = 1.0;
 
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
+      m_peptidePrefiltersPanel =  new ParametersComboPanel(" Filter(s) ", m_peptidePrefilterParameters);
+      panel.add(m_peptidePrefiltersPanel, c);
 
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1.0;
-        tabPanel.add(createTypicalProteinPanel(), c);
+      c.gridy++;
+      panel.add(createPeptideFDRPanel(), c);
 
-        c.gridy++;
-        c.weighty = 1.0;
-        tabPanel.add(Box.createVerticalGlue(), c);
-
-        return tabPanel;
+      return panel;
     }
-
-    private JPanel createPSMPanel() {
-        JPanel psmPanel = new JPanel(new GridBagLayout());
-        psmPanel.setBorder(BorderFactory.createTitledBorder(" PSM"));
+    
+    private JPanel createPSMFilterPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createTitledBorder(" PSM"));
 
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -299,7 +334,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         if(!m_allowPropagateFilters)
            m_propagatePsmFiltersCheckBox.setSelected(false);
         m_propagatePsmFiltersCheckBox.setEnabled(m_allowPropagateFilters);
-        psmPanel.add(m_propagatePsmFiltersCheckBox, c);
+        panel.add(m_propagatePsmFiltersCheckBox, c);
         m_propagatePsmFiltersCheckBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -310,211 +345,226 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         
         c.gridy++;   
         c.weightx = 1.0;
-        psmPanel.add(createPsmPreFilterPanel(), c);
+        m_psmPrefiltersPanel =  new ParametersComboPanel(" Prefilter(s) ", m_psmPrefilterParameters);
+        panel.add(m_psmPrefiltersPanel, c);
 
+        m_psmPrefiltersPanel.addComponentListener(this);
         c.gridy++;
-        psmPanel.add(createFDRFilterPanel(), c);
+        panel.add(createPSMFDRPanel(), c);
 
-//        c.gridy++;
-//        psmPanel.add(createFDREstimatorPanel(), c);
-        return psmPanel;
+        return panel;
     }
 
-    private JPanel createPsmPreFilterPanel() {
-        JPanel prefilterPanel = new JPanel(new GridBagLayout());
-        prefilterPanel.setBorder(BorderFactory.createTitledBorder(" Prefilter(s) "));
-
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-        m_psmPrefiltersSelectedPanel = new JPanel(new GridBagLayout());
-        c.gridx = 0;
-        c.gridy = 0;
-        prefilterPanel.add(m_psmPrefiltersSelectedPanel, c);
-
-        m_psmPrefilterJComboBox = new JComboBox(m_psmPrefilterParameters);
-        m_psmPrefilterJComboBox.setRenderer(new ParameterComboboxRenderer(null));
-
-        c.gridx = 0;
-        c.gridy++;
-        c.weightx = 1;
-        prefilterPanel.add(m_psmPrefilterJComboBox, c);
-
-        c.gridx++;
-        c.weightx = 1.0;
-        prefilterPanel.add(Box.createHorizontalBox(), c);
-        
-        m_psmPrefilterJComboBox.addItemListener(new ItemListener() {
-
-            @Override
-            public void itemStateChanged(ItemEvent ie) {
-                AbstractParameter p = (AbstractParameter) m_psmPrefilterJComboBox.getSelectedItem();
-                if (p == null) {
-                    return;
-                }
-                p.setUsed(true);
-                initPsmPrefilterPanel();
-            }
-        });
-
-        return prefilterPanel;
-    }
-
-    private void initPsmPrefilterPanel() {
-
-        m_psmPrefiltersSelectedPanel.removeAll();
-        m_psmPrefilterJComboBox.removeAllItems();
-
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-        c.gridy = 0;
-
-        int nbUsed = 0;
-        boolean putAndInFront = false;
-        int nbParameters = m_psmPrefilterParameters.length;
-        for (int i = 0; i < nbParameters; i++) {
-            final AbstractParameter p = m_psmPrefilterParameters[i];
-
-            if ((p != null) && (p.isUsed())) {
-
-                c.gridx = 0;
-                if (putAndInFront) {
-                    m_psmPrefiltersSelectedPanel.add(new JLabel("AND"), c);
-                } else {
-                    putAndInFront = true;
-                    m_psmPrefiltersSelectedPanel.add(new JLabel("   "), c);
-                }
-
-                c.gridx++;
-                JLabel prefilterNameLabel = new JLabel(p.getName());
-                prefilterNameLabel.setHorizontalAlignment(JLabel.RIGHT);
-                m_psmPrefiltersSelectedPanel.add(prefilterNameLabel, c);
-
-                if (p.hasComponent()) {
-                    c.gridx++;
-                    JLabel cmpLabel = new JLabel(((String) p.getAssociatedData()));
-                    cmpLabel.setHorizontalAlignment(JLabel.CENTER);
-                    m_psmPrefiltersSelectedPanel.add(cmpLabel, c);
-
-                    c.weightx = 1;
-                    c.gridx++;
-                    m_psmPrefiltersSelectedPanel.add(p.getComponent(), c);
-                } else {
-                    c.gridx++;
-                    c.gridx++;
-                }
-
-                c.weightx = 0;
-                c.gridx++;
-                JButton removeButton = new JButton(IconManager.getIcon(IconManager.IconType.CROSS_SMALL7));
-                removeButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
-                removeButton.addActionListener(new ActionListener() {
-
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        p.setUsed(false);
-                        initPsmPrefilterPanel();
-                    }
-                });
-                m_psmPrefiltersSelectedPanel.add(removeButton, c);
-
-                nbUsed++;
-
-                c.gridy++;
-            } else {
-                m_psmPrefilterJComboBox.addItem(p);
-            }
-
-        }
-
-        boolean hasUnusedParameters = (nbUsed != nbParameters);
-        m_psmPrefilterJComboBox.setVisible(hasUnusedParameters);        
-
-        repack();
-    }
-
-    private JPanel createFDRFilterPanel() {
+    private JPanel createPSMFDRPanel() {
         JPanel fdrPanel = new JPanel(new GridBagLayout());
-        fdrPanel.setBorder(BorderFactory.createTitledBorder(" FDR Filter "));
+        fdrPanel.setBorder(BorderFactory.createTitledBorder(" FDR PSM Filter "));
 
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
+        c.insets = new java.awt.Insets(5, 2, 5, 2);
 
-        boolean fdrUsed = m_fdrFilterParameter.isUsed();
         m_fdrCheckbox = new JCheckBox();
-        m_fdrLabel = new JLabel("Ensure FDR <=");
-        m_fdrPercentageLabel = new JLabel("%  on");
-
-        updateFdrObjects(fdrUsed);
-
+        m_fdrLabelEnsure = new JLabel("ensure");
+        m_fdrLabelFDRLessThan = new JLabel("FDR <=");
+        m_fdrPercentageLabel = new JLabel("%");
+ 
         c.gridx = 0;
         c.gridy = 0;
         fdrPanel.add(m_fdrCheckbox, c);
 
         c.gridx++;
-        fdrPanel.add(m_fdrLabel, c);
+        fdrPanel.add(m_fdrLabelEnsure, c);
+
+        c.gridx++;
+        fdrPanel.add(m_fdrMethodComboBox, c);
+        
+        c.gridx++;
+        fdrPanel.add(m_fdrLabelFDRLessThan, c);
 
         c.gridx++;
         fdrPanel.add(m_fdrTextField, c);
 
         c.gridx++;
-
         fdrPanel.add(m_fdrPercentageLabel, c);
+        
+        c.gridx++;
+        c.weightx = 0.1;
+        fdrPanel.add(Box.createHorizontalBox(), c);
+        
+        c.gridx = 0;
+        c.gridy++;
+        c.weightx = 0;
+        c.gridwidth = 6;
+        fdrPanel.add(createTDPSMParamsPanel(), c);
+        
+        c.gridx++;
+        c.weightx = 0.1;
+        m_tdParamsPanel.add(Box.createHorizontalBox(), c);
+        
+        m_fdrCheckbox.addActionListener((ActionEvent e) -> {
+          updatePSMFDRObjects(m_fdrCheckbox.isSelected());
+        });
+
+        // enable frd by clicking on any component 
+        MouseListener actionOnClick = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (!m_fdrCheckbox.isSelected()) {
+                    updatePSMFDRObjects(true);
+                    if (JComponent.class.isAssignableFrom(e.getSource().getClass())) {
+                        ((JComponent)e.getSource()).requestFocusInWindow();
+                    }
+                }
+            }
+        };
+        m_fdrLabelEnsure.addMouseListener(actionOnClick);
+        m_fdrLabelFDRLessThan.addMouseListener(actionOnClick);
+        m_fdrTextField.addMouseListener(actionOnClick);
+        m_fdrMethodComboBox.addMouseListener(actionOnClick);
+        return fdrPanel;
+    }
+
+    private JPanel createTDPSMParamsPanel() {
+      
+        m_tdParamsPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 2, 5, 2);
+        
+        m_tdAnalyzerParamLabel = new JLabel("ratio");
+
+        c.gridy = 0;
+        c.gridx = 0;
+        c.weightx = 0.1;
+        m_tdParamsPanel.add(Box.createHorizontalBox(), c);
+        
+        c.gridx++;
+        c.weightx = 0;
+        m_tdParamsPanel.add(new JLabel("Optimisation based on "), c);
+        
+        c.gridx++;                
+        m_tdParamsPanel.add(m_fdrPropertyComboBox, c);
 
         c.gridx++;
-        fdrPanel.add(m_fdrOnValueComboBox, c);
+        m_tdParamsPanel.add(m_tdAnalyzerComboBox, c);
+
+        m_tdAnalyzerComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updatePSMFDRObjects(m_fdrCheckbox.isSelected());
+            }
+        });
+
+        c.gridx++;
+        m_tdParamsPanel.add(m_tdAnalyzerParamLabel, c);
+
+        c.gridx++;
+        m_tdParamsPanel.add(m_tdAnalyzerParamTF, c);
+        
+        c.gridx++;
+        c.weightx = 0.1;
+        m_tdParamsPanel.add(Box.createHorizontalBox(), c);
+
+        return m_tdParamsPanel;
+    }
+    
+    private void updatePSMFDRObjects(boolean enabled) {
+
+        m_fdrCheckbox.setSelected(enabled);
+        m_fdrLabelEnsure.setEnabled(enabled);
+        m_fdrLabelFDRLessThan.setEnabled(enabled);
+        m_fdrTextField.setEnabled(enabled);
+        m_fdrPercentageLabel.setEnabled(enabled);
+        setPanelEnabled(m_tdParamsPanel, enabled);
+        m_fdrMethodComboBox.setEnabled(enabled);
+
+        if (enabled) {
+            Object analyzer = m_tdAnalyzerComboBox.getSelectedItem();
+            boolean GorshkovParamsVisibility = (analyzer != null) && (((String)analyzer).equalsIgnoreCase("Gorshkov"));
+            m_tdAnalyzerParamLabel.setVisible(GorshkovParamsVisibility);
+            m_tdAnalyzerParamTF.setVisible(GorshkovParamsVisibility);
+
+            Object fdrMethod = m_fdrMethodComboBox.getSelectedItem();
+            boolean isTargetDecoyFdr = (fdrMethod != null) && (((String)fdrMethod).toLowerCase().contains("decoy"));
+            setPanelEnabled(m_tdParamsPanel, isTargetDecoyFdr);
+            m_tdAnalyzerName.setUsed(isTargetDecoyFdr);
+            m_tdAnalyzerParam.setUsed(isTargetDecoyFdr);
+            m_fdrPropertyParameter.setUsed(isTargetDecoyFdr);
+
+        } else {
+          m_tdAnalyzerName.setUsed(false);
+          m_tdAnalyzerParam.setUsed(false);
+          m_fdrPropertyParameter.setUsed(false);
+        }
+          m_fdrFilterParameter.setUsed(enabled);
+        
+    }
+
+        private JPanel createPeptideFDRPanel() {
+        JPanel fdrPanel = new JPanel(new GridBagLayout());
+        fdrPanel.setBorder(BorderFactory.createTitledBorder(" FDR Peptide Filter "));
+
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+
+        boolean parameterUsed = m_peptideFdrFilterParameter.isUsed();
+        m_peptideFdrCheckbox = new JCheckBox("");
+        m_peptideFdrLabel = new JLabel("Peptide FDR <=");
+        m_peptideFdrCheckbox.setSelected(parameterUsed);
+        m_peptideFdrPercentageLabel = new JLabel(" %");
+
+        updatePeptideFDRObjects(parameterUsed);
+
+        c.gridx = 0;
+        c.gridy = 0;
+        fdrPanel.add(m_peptideFdrCheckbox, c);
+
+        c.gridx++;
+        fdrPanel.add(m_peptideFdrMethodComboBox, c);
+        
+        m_peptideFdrMethodComboBox.addActionListener((ActionEvent e) -> {
+          synchFDRMethods((JComboBox<String>)e.getSource());
+        });
+        
+        c.gridx++;
+        fdrPanel.add(m_peptideFdrLabel, c);
+
+        c.gridx++;
+        fdrPanel.add(m_peptideFdrTextField, c);
+
+        c.gridx++;
+        fdrPanel.add(m_peptideFdrPercentageLabel, c);
 
         c.gridx++;
         c.weightx = 1.0;
         fdrPanel.add(Box.createHorizontalBox(), c);
 
-        m_fdrCheckbox.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                boolean enabled = (m_fdrCheckbox.isSelected());
-                updateFdrObjects(enabled);
-            }
+        m_peptideFdrCheckbox.addActionListener((ActionEvent e) -> {
+          updatePeptideFDRObjects(m_peptideFdrCheckbox.isSelected());
         });
 
         MouseListener actionOnClick = new MouseAdapter() {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                boolean enabled = (m_fdrCheckbox.isSelected());
-                if (!enabled) {
-                    updateFdrObjects(true);
-
-                    if (e.getSource().equals(m_fdrTextField)) {
-                        m_fdrTextField.requestFocusInWindow();
+                if (!m_peptideFdrCheckbox.isSelected()) {
+                    updatePeptideFDRObjects(true);
+                    if (JComponent.class.isAssignableFrom(e.getSource().getClass())) {
+                        ((JComponent)e.getSource()).requestFocusInWindow();
                     }
-
                 }
             }
         };
 
-        m_fdrLabel.addMouseListener(actionOnClick);
-        m_fdrTextField.addMouseListener(actionOnClick);
-
+        m_peptideFdrLabel.addMouseListener(actionOnClick);
+        m_peptideFdrTextField.addMouseListener(actionOnClick);
+        m_peptideFdrMethodComboBox.addMouseListener(actionOnClick);
+        
         return fdrPanel;
-    }
-
-    private void updateFdrObjects(boolean enabled) {
-
-        m_fdrCheckbox.setSelected(enabled);
-
-        m_fdrLabel.setEnabled(enabled);
-        m_fdrTextField.setEnabled(enabled);
-        m_fdrPercentageLabel.setEnabled(enabled);
-        m_fdrOnValueComboBox.setEnabled(enabled);
-        m_fdrFilterParameter.setUsed(enabled);
-        m_fdrOnValueParameter.setUsed(enabled);
     }
 
     private JPanel createProteinSetFilterPanel() {
@@ -536,19 +586,18 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         m_propagateProtSetFiltersCheckBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                boolean enabled = (m_propagateProtSetFiltersCheckBox.isSelected());
-                m_propagateProtSetFiltersParameter.setUsed(enabled);
+                m_propagateProtSetFiltersParameter.setUsed(m_propagateProtSetFiltersCheckBox.isSelected());
             }
         });
         
         c.gridy++;
         c.weightx = 1.0;
-        m_proteinPrefiltersPanel = new FilterProteinSetPanel(" Filter(s) ", m_proteinPrefilterParameters);
-        m_proteinPrefiltersPanel.addComponentListener((ComponentListener) this);
+        m_proteinPrefiltersPanel = new ParametersComboPanel(" Filter(s) ", m_proteinPrefilterParameters);
+        m_proteinPrefiltersPanel.addComponentListener(this);
         proteinSetFilterPanel.add(m_proteinPrefiltersPanel, c);
 
         c.gridy++;
-        proteinSetFilterPanel.add(createProteinFDRFilterPanel(), c);
+        proteinSetFilterPanel.add(createProteinFDRPanel(), c);
 
         c.gridy++;
         proteinSetFilterPanel.add(createScoringTypePanel(), c);
@@ -557,6 +606,19 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
     }
 
     private JPanel createTypicalProteinPanel() {
+      
+        JPanel panel = new JPanel(new GridBagLayout());
+
+        GridBagConstraints c1 = new GridBagConstraints();
+        c1.anchor = GridBagConstraints.NORTHWEST;
+        c1.fill = GridBagConstraints.BOTH;
+        c1.insets = new java.awt.Insets(5, 5, 5, 5);
+
+        c1.gridx = 0;
+        c1.gridy = 0;
+        c1.weightx = 1.0;
+        
+        
         JPanel typicalProteinPanel = new JPanel(new GridBagLayout());
         typicalProteinPanel.setBorder(BorderFactory.createTitledBorder("Set Typical Protein Match "));
 
@@ -572,11 +634,9 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         typicalProteinPanel.add(m_typicalProteinMatchCheckBox, c);
 
         m_typicalProteinMatchCheckBox.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent e) {
-                boolean enabled = m_typicalProteinMatchCheckBox.isSelected();
-                m_changeTypicalPanel.enableRules(enabled);
+                m_changeTypicalPanel.enableRules(m_typicalProteinMatchCheckBox.isSelected());
             }
         });
 
@@ -588,13 +648,19 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         c.gridy++;
         c.weighty = 1;
         typicalProteinPanel.add(Box.createVerticalGlue(), c);
+        
+        panel.add(typicalProteinPanel, c1);
 
-        return typicalProteinPanel;
+        c1.gridy++;
+        c1.weighty = 1.0;
+        panel.add(Box.createVerticalGlue(), c1);
+        
+        return panel;
     }
 
-    private JPanel createProteinFDRFilterPanel() {
+    private JPanel createProteinFDRPanel() {
         JPanel fdrPanel = new JPanel(new GridBagLayout());
-        fdrPanel.setBorder(BorderFactory.createTitledBorder(" FDR Filter "));
+        fdrPanel.setBorder(BorderFactory.createTitledBorder(" FDR Protein Filter "));
 
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -607,12 +673,19 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         m_proteinFdrCheckbox.setSelected(parameterUsed);
         m_proteinFdrPercentageLabel = new JLabel(" %");
 
-        updateproteinFdrObjects(parameterUsed);
+        updateProteinFDRObjects(parameterUsed);
 
         c.gridx = 0;
         c.gridy = 0;
         fdrPanel.add(m_proteinFdrCheckbox, c);
 
+        c.gridx++;
+        fdrPanel.add(m_proteinFdrMethodComboBox, c);
+        
+        m_proteinFdrMethodComboBox.addActionListener((ActionEvent e) -> {
+          synchFDRMethods((JComboBox<String>)e.getSource());
+        });
+        
         c.gridx++;
         fdrPanel.add(m_proteinFdrLabel, c);
 
@@ -626,25 +699,17 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         c.weightx = 1.0;
         fdrPanel.add(Box.createHorizontalBox(), c);
 
-        m_proteinFdrCheckbox.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                boolean enabled = (m_proteinFdrCheckbox.isSelected());
-                updateproteinFdrObjects(enabled);
-            }
+        m_proteinFdrCheckbox.addActionListener((ActionEvent e) -> {
+          updateProteinFDRObjects(m_proteinFdrCheckbox.isSelected());
         });
 
         MouseListener actionOnClick = new MouseAdapter() {
-
             @Override
             public void mouseClicked(MouseEvent e) {
-                boolean enabled = (m_proteinFdrCheckbox.isSelected());
-                if (!enabled) {
-
-                    updateproteinFdrObjects(true);
-                    if (e.getSource().equals(m_proteinFdrTextField)) {
-                        m_proteinFdrTextField.requestFocusInWindow();
+                if (!m_proteinFdrCheckbox.isSelected()) {
+                    updateProteinFDRObjects(true);
+                     if (JComponent.class.isAssignableFrom(e.getSource().getClass())) {
+                        ((JComponent)e.getSource()).requestFocusInWindow();
                     }
                 }
             }
@@ -652,7 +717,8 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
 
         m_proteinFdrLabel.addMouseListener(actionOnClick);
         m_proteinFdrTextField.addMouseListener(actionOnClick);
-
+        m_proteinFdrMethodComboBox.addMouseListener(actionOnClick);
+        
         return fdrPanel;
     }
 
@@ -666,7 +732,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
         JLabel proteinScoringTypeLabel = new JLabel("Scoring Type: ");
-        m_proteinScoringTypeCbx = new JComboBox(SCORING_TYPE_OPTIONS);
+        m_proteinScoringTypeCbx = new JComboBox<>(PROTEIN_SCORING_TYPE_OPTIONS);
 
         c.gridx = 0;
         c.gridy = 0;
@@ -684,7 +750,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
 
     private void restoreScoringTypeParameter(Preferences preferences) {
 
-        String scoringType = preferences.get("ValidationScoringType", SCORING_TYPE_OPTIONS[0]);
+        String scoringType = preferences.get("ValidationScoringType", PROTEIN_SCORING_TYPE_OPTIONS[0]);
         m_proteinScoringTypeCbx.setSelectedItem(scoringType);
 
     }
@@ -698,41 +764,62 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         m_changeTypicalPanel.enableRules(useTypicalProteinRegex);
     }
 
-    private void updateproteinFdrObjects(boolean enabled) {
+    private void updateProteinFDRObjects(boolean enabled) {
         m_proteinFdrCheckbox.setSelected(enabled);
-
         m_proteinFdrLabel.setEnabled(enabled);
         m_proteinFdrTextField.setEnabled(enabled);
         m_proteinFdrPercentageLabel.setEnabled(enabled);
+        m_proteinFdrMethodComboBox.setEnabled(enabled);
         m_proteinFdrFilterParameter.setUsed(enabled);
+    }
+
+    private void synchFDRMethods(JComboBox<String> source) {
+      if (source != m_fdrMethodComboBox) {
+        m_fdrMethodComboBox.setSelectedItem(source.getSelectedItem());
+      }
+      if (source != m_peptideFdrMethodComboBox) {
+        m_peptideFdrMethodComboBox.setSelectedItem(source.getSelectedItem());
+      }
+      if (source != m_proteinFdrMethodComboBox) {
+        m_proteinFdrMethodComboBox.setSelectedItem(source.getSelectedItem());
+      }
+    }
+    
+    private void updatePeptideFDRObjects(boolean enabled) {
+        m_peptideFdrCheckbox.setSelected(enabled);
+        m_peptideFdrLabel.setEnabled(enabled);
+        m_peptideFdrTextField.setEnabled(enabled);
+        m_peptideFdrPercentageLabel.setEnabled(enabled);
+        m_peptideFdrMethodComboBox.setEnabled(enabled);
+        
+        m_peptideFdrFilterParameter.setUsed(enabled);
+        
     }
 
     private void createParameters() {
         m_psmPrefilterParameters = new AbstractParameter[11]; //<< get sync
         m_psmPrefilterParameters[0] = null;
-        m_psmPrefilterParameters[1] = new IntegerParameter("PSM_" + ValidationTask.RANK_FILTER_KEY, ValidationTask.RANK_FILTER_NAME, new JTextField(6), new Integer(5), new Integer(0), new Integer(10));
+        m_psmPrefilterParameters[1] = new IntegerParameter("PSM_" + ValidationTask.PSMFilter.RANK.key, ValidationTask.PSMFilter.RANK.name, new JTextField(6), new Integer(1), new Integer(0), new Integer(10));
         m_psmPrefilterParameters[1].setAssociatedData("<=");
         m_psmPrefilterParameters[1].addBackwardCompatibleKey("Rank");
         m_psmPrefilterParameters[1].addBackwardCompatibleKey("PSM_RANK");
-        m_psmPrefilterParameters[2] = new IntegerParameter("PSM_" + ValidationTask.PEP_LENGTH_FILTER_KEY, ValidationTask.PEP_LENGTH_FILTER_NAME, new JTextField(6), new Integer(4), new Integer(4), null);
+        m_psmPrefilterParameters[2] = new IntegerParameter("PSM_" + ValidationTask.PSMFilter.PEP_LENGTH.key, ValidationTask.PSMFilter.PEP_LENGTH.name, new JTextField(6), new Integer(4), new Integer(4), null);
         m_psmPrefilterParameters[2].setAssociatedData(">=");
-        m_psmPrefilterParameters[3] = new DoubleParameter("PSM_" + ValidationTask.SCORE_FILTER_KEY, ValidationTask.SCORE_FILTER_NAME, new JTextField(6), new Double(0), new Double(0), null);
+        m_psmPrefilterParameters[3] = new DoubleParameter("PSM_" + ValidationTask.PSMFilter.SCORE.key, ValidationTask.PSMFilter.SCORE.name, new JTextField(6), new Double(0), new Double(0), null);
         m_psmPrefilterParameters[3].setAssociatedData(">=");
-        m_psmPrefilterParameters[4] = new DoubleParameter("PSM_" + ValidationTask.MASCOT_EVAL_FILTER_KEY, ValidationTask.MASCOT_EVAL_FILTER_NAME, new JTextField(6), new Double(1), new Double(0), new Double(1));
+        m_psmPrefilterParameters[4] = new DoubleParameter("PSM_" + ValidationTask.PSMFilter.MASCOT_EVAL.key, ValidationTask.PSMFilter.MASCOT_EVAL.name, new JTextField(6), new Double(1), new Double(0), new Double(1));
         m_psmPrefilterParameters[4].setAssociatedData("<=");
-        m_psmPrefilterParameters[5] = new DoubleParameter("PSM_" + ValidationTask.MASCOT_ADJUSTED_EVAL_FILTER_KEY, ValidationTask.MASCOT_ADJUSTED_EVAL_FILTER_NAME, new JTextField(6), new Double(1), new Double(0), new Double(1));
+        m_psmPrefilterParameters[5] = new DoubleParameter("PSM_" + ValidationTask.PSMFilter.MASCOT_ADJUSTED_EVALUE.key, ValidationTask.PSMFilter.MASCOT_ADJUSTED_EVALUE.name, new JTextField(6), new Double(1), new Double(0), new Double(1));
         m_psmPrefilterParameters[5].setAssociatedData("<=");
-        m_psmPrefilterParameters[6] = new DoubleParameter("PSM_" + ValidationTask.MASCOT_IT_SCORE_FILTER_KEY, ValidationTask.MASCOT_IT_SCORE_FILTER_NAME, new JTextField(6), new Double(0.05), new Double(0), new Double(1));
+        m_psmPrefilterParameters[6] = new DoubleParameter("PSM_" + ValidationTask.PSMFilter.MASCOT_IT_SCORE.key, ValidationTask.PSMFilter.MASCOT_IT_SCORE.name, new JTextField(6), new Double(0.05), new Double(0), new Double(1));
         m_psmPrefilterParameters[6].setAssociatedData("=");
-        m_psmPrefilterParameters[7] = new DoubleParameter("PSM_" + ValidationTask.MASCOT_HT_SCORE_FILTER_KEY, ValidationTask.MASCOT_HT_SCORE_FILTER_NAME, new JTextField(6), new Double(0.05), new Double(0), new Double(1));
+        m_psmPrefilterParameters[7] = new DoubleParameter("PSM_" + ValidationTask.PSMFilter.MASCOT_HT_SCORE.key, ValidationTask.PSMFilter.MASCOT_HT_SCORE.name, new JTextField(6), new Double(0.05), new Double(0), new Double(1));
         m_psmPrefilterParameters[7].setAssociatedData("=");
-        JCheckBox singlePerQueryCB = new JCheckBox("post FDR");
-        m_psmPrefilterParameters[8] = new BooleanParameter("PSM_" + ValidationTask.SINGLE_PSM_QUERY_FILTER_KEY, ValidationTask.SINGLE_PSM_QUERY_FILTER_NAME, singlePerQueryCB, false);
+        m_psmPrefilterParameters[8] = new NoneParameter("PSM_" + ValidationTask.PSMFilter.SINGLE_PSM_QUERY.key, ValidationTask.PSMFilter.SINGLE_PSM_QUERY.name);
         m_psmPrefilterParameters[8].setAssociatedData(":");
-        JCheckBox singlePerRankCB = new JCheckBox("post FDR");
-        m_psmPrefilterParameters[9] = new BooleanParameter("PSM_" + ValidationTask.SINGLE_PSM_RANK_FILTER_KEY, ValidationTask.SINGLE_PSM_RANK_FILTER_NAME, singlePerRankCB, false);
+        m_psmPrefilterParameters[9] = new NoneParameter("PSM_" + ValidationTask.PSMFilter.SINGLE_PSM_RANK.key, ValidationTask.PSMFilter.SINGLE_PSM_RANK.name);
         m_psmPrefilterParameters[9].setAssociatedData(":");
-        m_psmPrefilterParameters[10] = new IntegerParameter("PSM_" + ValidationTask.ISOTOPE_OFFSET_FILTER_KEY, ValidationTask.ISOTOPE_OFFSET_FILTER_NAME, new JTextField(6), new Integer(1), new Integer(0), null);
+        m_psmPrefilterParameters[10] = new IntegerParameter("PSM_" + ValidationTask.PSMFilter.ISOTOPE_OFFSET.key, ValidationTask.PSMFilter.ISOTOPE_OFFSET.name, new JTextField(6), new Integer(1), new Integer(0), null);
         m_psmPrefilterParameters[10].setAssociatedData("<=");
         
         for (AbstractParameter p : m_psmPrefilterParameters) {
@@ -744,60 +831,84 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
             m_parameterList.add(p);
         }
 
-        m_proteinPrefilterParameters = new AbstractParameter[FilterRSMProtSetsTask.FILTER_KEYS.length + 1];
-        m_proteinPrefilterParameters[0] = null;
-        for (int index = 1; index <= FilterRSMProtSetsTask.FILTER_KEYS.length; index++) {
-            String filterKey = "PROT_" + FilterRSMProtSetsTask.FILTER_KEYS[index - 1];
-            switch (filterKey) {
-                case "SCORE":
-                    m_proteinPrefilterParameters[index] = new DoubleParameter(filterKey, FilterRSMProtSetsTask.FILTER_NAME[index - 1], new JTextField(6), new Double(10), new Double(1), null);
-                    m_proteinPrefilterParameters[index].setAssociatedData(">=");
-                    break;
-                default:
-                    m_proteinPrefilterParameters[index] = new IntegerParameter(filterKey, FilterRSMProtSetsTask.FILTER_NAME[index - 1], new JTextField(6), new Integer(1), new Integer(1), null);
-                    m_proteinPrefilterParameters[index].setAssociatedData(">=");
-                    break;
-            }
-
-            AbstractParameter p = m_proteinPrefilterParameters[index];
-            if (p != null) {
-                p.setUsed(false);
-                p.setCompulsory(false);
-                m_parameterList.add(p);
-            }
-        }
-
         m_fdrTextField = new JTextField(5);
-        m_fdrFilterParameter = new DoubleParameter("expected_fdr", "FDR", m_fdrTextField, new Double(5), new Double(0), new Double(10));
+        m_fdrFilterParameter = new DoubleParameter(ValidationTask.ValidationParameters.EXPECTED_FDR.key,ValidationTask.ValidationParameters.EXPECTED_FDR.name, m_fdrTextField, new Double(1), new Double(0), new Double(10));
         m_fdrFilterParameter.setUsed(false);
         m_fdrFilterParameter.setCompulsory(false);
         m_parameterList.add(m_fdrFilterParameter);
 
-        m_fdrOnValueComboBox = new JComboBox(FDR_ON_VALUES);
-        m_fdrOnValueParameter = new ObjectParameter<>("expected_fdr_parameter", "FDR Variable", m_fdrOnValueComboBox, FDR_ON_VALUES, FDR_ON_VALUES_ASSOCIATED_KEYS, 0, null);
-        m_fdrOnValueParameter.setUsed(false);
-        m_fdrOnValueParameter.setCompulsory(false);
-        m_parameterList.add(m_fdrOnValueParameter);
+        m_fdrPropertyComboBox = new JComboBox<>(FDR_ON_VALUES);
+        m_fdrPropertyParameter = new ObjectParameter<>(ValidationTask.ValidationParameters.EXPECTED_FDR_PARAM.key,ValidationTask.ValidationParameters.EXPECTED_FDR_PARAM.name, m_fdrPropertyComboBox, FDR_ON_VALUES, FDR_ON_VALUES_ASSOCIATED_KEYS, 0, null);
+        m_fdrPropertyParameter.setUsed(false);
+        m_fdrPropertyParameter.setCompulsory(false);
+        m_parameterList.add(m_fdrPropertyParameter);
 
-//        m_fdrEstimatorComboBox = new JComboBox(FDR_ESTIMATOR_VALUES);
-//        ObjectParameter<String> fdrEstimatorParameter = new ObjectParameter<>("use_td_competition", "FDR Estimator", m_fdrEstimatorComboBox, FDR_ESTIMATOR_VALUES, FDR_ESTIMATOR_VALUES_ASSOCIATED_KEYS, 0, null);
-//        m_parameterList.add(fdrEstimatorParameter);
+        m_fdrMethodComboBox = new JComboBox<>(FDR_METHODS_VALUES);
+        m_peptideFdrMethodComboBox = new JComboBox<>(FDR_METHODS_VALUES);
+        m_proteinFdrMethodComboBox = new JComboBox<>(FDR_METHODS_VALUES);
+        m_fdrMethodComboBox.addActionListener((ActionEvent e) -> {
+          if (m_fdrCheckbox != null) {
+            updatePSMFDRObjects(m_fdrCheckbox.isSelected());
+          }
+          synchFDRMethods((JComboBox<String>)e.getSource());
+        });
+
+        m_fdrMethodParameter = new ObjectParameter<>(ValidationTask.ValidationParameters.EXPECTED_FDR_METHOD.key,ValidationTask.ValidationParameters.EXPECTED_FDR_METHOD.name, m_fdrMethodComboBox, FDR_METHODS_VALUES, FDR_METHODS_ASSOCIATED_KEYS, 0, null);
+        m_fdrMethodParameter.setUsed(true);
+        m_fdrMethodParameter.setCompulsory(false);
+        m_parameterList.add(m_fdrMethodParameter);
+        
+        m_tdAnalyzerComboBox = new JComboBox<>(TD_ANALYZER_VALUES);
+        m_tdAnalyzerName = new ObjectParameter<>(ValidationTask.ValidationParameters.TD_ANALYZER.key, ValidationTask.ValidationParameters.TD_ANALYZER.name, m_tdAnalyzerComboBox, TD_ANALYZER_VALUES, TD_ANALYZER_VALUES_ASSOCIATED_KEYS, 0, null);
+        m_tdAnalyzerName.setUsed(false);
+        m_tdAnalyzerName.setCompulsory(false);
+        m_parameterList.add(m_tdAnalyzerName);
+
+        m_tdAnalyzerParamTF = new JTextField(5);
+        m_tdAnalyzerParam = new DoubleParameter("db_ratio", "Ratio", m_tdAnalyzerParamTF, new Double(1), new Double(0), Double.MAX_VALUE);
+        m_tdAnalyzerParam.setUsed(false);
+        m_tdAnalyzerParam.setCompulsory(false);
+        m_parameterList.add(m_tdAnalyzerParam);
+
+        m_peptidePrefilterParameters = new AbstractParameter[1];
+        m_peptidePrefilterParameters[0] = null;
+
+        for (AbstractParameter p : m_peptidePrefilterParameters) {
+            if (p == null) {
+                continue;
+            }
+            p.setUsed(false);
+            p.setCompulsory(false);
+            m_parameterList.add(p);
+        }
+        
+        
+        m_peptideFdrTextField = new JTextField(5);
+        m_peptideFdrFilterParameter = new DoubleParameter(ValidationTask.ValidationParameters.PEPTIDE_EXPECTED_FDR.key, ValidationTask.ValidationParameters.PEPTIDE_EXPECTED_FDR.name, m_peptideFdrTextField, new Double(1), new Double(0), new Double(10));
+        m_peptideFdrFilterParameter.setUsed(false);
+        m_peptideFdrFilterParameter.setCompulsory(false);
+        m_parameterList.add(m_peptideFdrFilterParameter);
+        
+        m_proteinPrefilterParameters = FilterProteinSetPanel.createProteinSetFilterParameters("PROT_", m_parameterList);
+        
         m_proteinFdrTextField = new JTextField(5);
-        m_proteinFdrFilterParameter = new DoubleParameter("protein_expected_fdr", "Protein FDR", m_proteinFdrTextField, new Double(5), new Double(0), new Double(10));
+        m_proteinFdrFilterParameter = new DoubleParameter(ValidationTask.ValidationParameters.PROTEIN_EXPECTED_FDR.key, ValidationTask.ValidationParameters.PROTEIN_EXPECTED_FDR.name, m_proteinFdrTextField, new Double(5), new Double(0), new Double(10));
         m_proteinFdrFilterParameter.setUsed(false);
         m_proteinFdrFilterParameter.setCompulsory(false);
         m_parameterList.add(m_proteinFdrFilterParameter);
 
+        
+
         m_propagatePsmFiltersCheckBox = new JCheckBox();
         m_propagatePsmFiltersCheckBox.setText("Propagate PSM filtering to child Search Results");
-        m_propagatePsmFiltersParameter = new BooleanParameter("propagate_pep_match_filters", "Propagate PSM Filters", m_propagatePsmFiltersCheckBox, false);
+        m_propagatePsmFiltersParameter = new BooleanParameter("propagate_pep_match_filters", "Propagate PSM PSMFilter", m_propagatePsmFiltersCheckBox, false);
         m_propagatePsmFiltersParameter.setUsed(false);
         m_propagatePsmFiltersParameter.setCompulsory(false);
         m_parameterList.add(m_propagatePsmFiltersParameter);
 
         m_propagateProtSetFiltersCheckBox = new JCheckBox();
         m_propagateProtSetFiltersCheckBox.setText("Propagate ProteinSets filtering to child Search Results (Warning FDR Validation will not be propagated !");
-        m_propagateProtSetFiltersParameter = new BooleanParameter("propagate_prot_set_filters", "Propagate ProteinSet Filters", m_propagateProtSetFiltersCheckBox, false);
+        m_propagateProtSetFiltersParameter = new BooleanParameter("propagate_prot_set_filters", "Propagate ProteinSet PSMFilter", m_propagateProtSetFiltersCheckBox, false);
         m_propagateProtSetFiltersParameter.setUsed(false);
         m_propagateProtSetFiltersParameter.setCompulsory(false);        
         m_parameterList.add(m_propagateProtSetFiltersParameter);    
@@ -811,11 +922,11 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
 		if(m_typicalProteinMatchCheckBox.isSelected())
 			return m_changeTypicalPanel.getChangeTypicalRules();
 		 else 
-            return new ArrayList<>();
+      return new ArrayList<>();
     }
 
     public String getScoringType() {
-        return SCORING_TYPE_VALUES[m_proteinScoringTypeCbx.getSelectedIndex()];
+        return PROTEIN_SCORING_TYPE_VALUES[m_proteinScoringTypeCbx.getSelectedIndex()];
     }
 
     @Override
@@ -863,9 +974,10 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         }
 
         if (checkFDR) {
-            boolean aFdrSelected = m_fdrCheckbox.isSelected() || m_proteinFdrCheckbox.isSelected();
+            boolean aTDFdrSelected = (m_fdrCheckbox.isSelected() || m_proteinFdrCheckbox.isSelected() || m_peptideFdrCheckbox.isSelected()) &&
+                ((String)m_fdrMethodComboBox.getSelectedItem()).toLowerCase().endsWith("decoy");
 
-            if (aFdrSelected && (getHasDecoy() == DecoyStatus.WAITING)) {
+            if (aTDFdrSelected && (getHasDecoy() == DecoyStatus.WAITING)) {
                 // we have not finished to read data for decoy check
                 // we are waiting for one second
                 setBusy(true);
@@ -883,15 +995,47 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
 
             setBusy(false);
 
-            if (aFdrSelected && (getHasDecoy() == DecoyStatus.NO_DECOY)) {
-                setStatus(true, "A FDR can not be calculated with no Decoy Data");
+            if (aTDFdrSelected && (getHasDecoy() == DecoyStatus.NO_DECOY)) {
+                setStatus(true, "A Target/Decoy FDR can not be calculated without decoy data");
                 if (m_fdrCheckbox.isSelected()) {
                     highlight(m_fdrCheckbox);
-                } else {
+                } else if (m_proteinFdrCheckbox.isSelected()) {
                     highlight(m_proteinFdrCheckbox);
+                } else {
+                  highlight(m_peptideFdrCheckbox);
                 }
                 return false;
             }
+
+            boolean bhProtFdrSelected = m_proteinFdrCheckbox.isSelected() && ((String)m_fdrMethodComboBox.getSelectedItem()).toLowerCase().startsWith("bh");
+            
+            if (bhProtFdrSelected) {
+              if (!getScoringType().toLowerCase().startsWith("proline:fisher")) {
+                    setStatus(true, "Protein BH FDR is only compatible with Fisher protein scoring");
+                    highlight(m_proteinScoringTypeCbx);
+                    return false;
+                }
+            }
+
+            // check filters & scoring consistency
+            if (!( m_softwareName.equalsIgnoreCase("MASCOT") || (m_softwareName.equals("UNKNOWN"))) ) {
+
+              
+                AbstractParameter parameter = m_parameterList.getParameter(ValidationTask.ValidationParameters.EXPECTED_FDR_METHOD.key);
+                if (parameter.isUsed() && parameter.getStringValue().equals(FDR_METHODS_VALUES[1])) {
+                    setStatus(true, "Peptide's BH FDR filtering is only allowed for Mascot datasets");
+                    highlight(parameter.getComponent());
+                    return false;
+                }
+
+                if (!getScoringType().equals(PROTEIN_SCORING_TYPE_VALUES[0])) {
+                    setStatus(true, "Mascot and Fisher scoring can only be used for Mascot datasets");
+                    highlight(m_proteinScoringTypeCbx);
+                    return false;
+                }
+
+            }
+
         }
 
         // check parameters
@@ -944,8 +1088,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
 
                     Preferences preferences = NbPreferences.root();
                     String[] keys = filePreferences.keys();
-                    for (int i = 0; i < keys.length; i++) {
-                        String key = keys[i];
+                    for (String key : keys) {
                         String value = filePreferences.get(key, null);
                         preferences.put(key, value);
                     }
@@ -953,19 +1096,18 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
                     m_parameterList.loadParameters(filePreferences);
                     restoreScoringTypeParameter(filePreferences);
                     restoreTypicalProteinParameters(filePreferences);
-                    updateFdrObjects(m_fdrFilterParameter.isUsed());
-                    updateproteinFdrObjects(m_proteinFdrFilterParameter.isUsed());
+                    updatePSMFDRObjects(m_fdrFilterParameter.isUsed());
+                    updateProteinFDRObjects(m_proteinFdrFilterParameter.isUsed());
+                    updatePeptideFDRObjects(m_peptideFdrFilterParameter.isUsed());
                     //
-                    //Initi PSM/Prot filters Propagation if possible
+                    //Init PSM/Prot filters Propagation if possible
                     if(m_allowPropagateFilters){
                         m_propagatePsmFiltersCheckBox.setSelected(m_propagatePsmFiltersParameter.isUsed());
                         m_propagateProtSetFiltersCheckBox.setSelected(m_propagateProtSetFiltersParameter.isUsed());
-                    }        
-                    initPsmPrefilterPanel();
-                    m_proteinPrefiltersPanel.initProteinFilterPanel();
+                    }
 
-                    
-                    
+                    updateSelectedFilters();
+
                 } catch (Exception e) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);
                     setStatus(true, "Parsing of your Settings File failed");
@@ -1000,4 +1142,16 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
 
     }
 
+    void setPanelEnabled(JPanel panel, Boolean isEnabled) {
+    panel.setEnabled(isEnabled);
+
+    Component[] components = panel.getComponents();
+    for(int i = 0; i < components.length; i++) {
+        if(JPanel.class.isAssignableFrom(components[i].getClass())) {
+            setPanelEnabled((JPanel) components[i], isEnabled);
+        }
+
+        components[i].setEnabled(isEnabled);
+    }
+}
 }

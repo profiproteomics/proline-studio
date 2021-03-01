@@ -329,7 +329,7 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
             dpm.setMsQuery(msq);
             
             if (!leafPeptideInstancesById.containsKey(pi.getId())) {
-                DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptide().getId(), pi.getValidatedProteinSetCount(), pi.getElutionTime());
+                DPeptideInstance dpi = new DPeptideInstance(pi);
                 dpi.setResultSummary(pi.getResultSummary());
                 dpi.setPeptide(p);
                 dpi.setPeptideMatches(new ArrayList<>());
@@ -349,7 +349,7 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
         Map<Long, DPeptideInstance> parentPeptideInstancesByPepId = new HashMap<>();
         while (it.hasNext()) {
             PeptideInstance pi = it.next();
-            DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptide().getId(), pi.getValidatedProteinSetCount(), pi.getElutionTime());
+            DPeptideInstance dpi = new DPeptideInstance(pi);
             dpi.setPeptide(pi.getPeptide());
             parentPeptideInstancesByPepId.put(dpi.getPeptideId(), dpi);
         }
@@ -473,7 +473,7 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
             dpm.setMsQuery(msq);
             
             if (!leafPeptideInstancesById.containsKey(pi.getId())) {
-                DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptide().getId(), pi.getValidatedProteinSetCount(), pi.getElutionTime());
+                DPeptideInstance dpi = new DPeptideInstance(pi);
                 dpi.setResultSummary(pi.getResultSummary());
                 dpi.setPeptide(p);
                 dpi.setPeptideMatches(new ArrayList<>());
@@ -491,7 +491,7 @@ public class DatabasePTMSitesTask extends AbstractDatabaseTask {
         List<DPeptideInstance> parentPeptideInstances = new ArrayList<>();
         while (it.hasNext()) {
             PeptideInstance pi = it.next();
-            DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptide().getId(), pi.getValidatedProteinSetCount(), pi.getElutionTime());
+            DPeptideInstance dpi = new DPeptideInstance(pi);
             dpi.setPeptide(pi.getPeptide());
             parentPeptideInstances.add(dpi);
         }

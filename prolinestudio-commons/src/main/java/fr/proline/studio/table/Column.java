@@ -42,13 +42,16 @@ public class Column {
   }
 
   public static Column[] pack(Class modelClass) {
+    System.out.println("supplied class = " + modelClass);
 
     Field[] declaredFields = modelClass.getFields();
     List<Column> columns = new ArrayList<Column>();
     for (Field field : declaredFields) {
       if (java.lang.reflect.Modifier.isStatic(field.getModifiers()) && field.getType().equals(Column.class)) {
+        System.out.println("field = " + field.getName());
         try {
           Column value = (Column) field.get(null);
+          System.out.println("column value = " + value);
           columns.add(value);
         } catch (IllegalAccessException e) {
           e.printStackTrace();

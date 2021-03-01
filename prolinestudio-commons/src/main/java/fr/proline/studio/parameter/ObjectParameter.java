@@ -62,7 +62,7 @@ public class ObjectParameter<E> extends AbstractParameter {
         m_parameterComponent = comboBox;
         m_associatedObjects = associatedObjects;
         if (paramToString != null) {
-            comboBox.setRenderer(new ParameterValueRenderer(paramToString));
+            comboBox.setRenderer(new ParameterComboboxRenderer(paramToString));
         }
     }
 
@@ -92,7 +92,7 @@ public class ObjectParameter<E> extends AbstractParameter {
 
         if (m_graphicalType.equals(JComboBox.class)) {
             JComboBox combobox = new JComboBox(m_objects);
-            combobox.setRenderer(new ParameterValueRenderer(m_paramToString));
+            combobox.setRenderer(new ParameterComboboxRenderer(m_paramToString));
 
             if ((value == null) || (!selectItem(combobox, value))) {
                 combobox.setSelectedIndex(m_defaultIndex);

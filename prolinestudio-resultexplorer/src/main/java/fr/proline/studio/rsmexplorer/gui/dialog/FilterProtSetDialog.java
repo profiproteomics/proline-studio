@@ -16,24 +16,30 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
+import fr.proline.studio.dpm.task.jms.FilterRSMProtSetsTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.AbstractParameter;
+import fr.proline.studio.parameter.DoubleParameter;
+import fr.proline.studio.parameter.IntegerParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
-import fr.proline.studio.parameter.ParametersComboPanel;
 import fr.proline.studio.settings.FilePreferences;
 import fr.proline.studio.settings.SettingsDialog;
 import fr.proline.studio.settings.SettingsUtils;
-import org.openide.util.NbPreferences;
-import org.slf4j.LoggerFactory;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Dialog;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Window;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.io.File;
 import java.util.HashMap;
 import java.util.prefs.Preferences;
+import javax.swing.JFileChooser;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import org.openide.util.NbPreferences;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -45,7 +51,7 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
 
     private ParameterList m_parameterList;
     private AbstractParameter[] m_proteinFilterParameters;
-    private ParametersComboPanel m_proteinPrefiltersPanel;
+    private FilterProteinSetPanel m_proteinPrefiltersPanel;
 
     private final static String SETTINGS_KEY = "ProtSetFiltering";
 
@@ -66,13 +72,39 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
         setButtonVisible(BUTTON_SAVE, true);
 
         m_parameterList = new ParameterList("ProtSet Filtering");
-        m_proteinFilterParameters = FilterProteinSetPanel.createProteinSetFilterParameters("", m_parameterList);
+        createParameters();
         m_parameterList.updateValues(NbPreferences.root());
 
         setInternalComponent(createInternalPanel());
 
-//        m_proteinPrefiltersPanel.initProteinFilterPanel();
+        m_proteinPrefiltersPanel.initProteinFilterPanel();
 
+    }
+
+    private void createParameters() {
+
+        m_proteinFilterParameters = new AbstractParameter[FilterRSMProtSetsTask.FILTER_KEYS.length + 1];
+        m_proteinFilterParameters[0] = null;
+        for (int index = 1; index <= FilterRSMProtSetsTask.FILTER_KEYS.length; index++) {
+            String filterKey = FilterRSMProtSetsTask.FILTER_KEYS[index - 1];
+            switch (filterKey) {
+                case "SCORE":
+                    m_proteinFilterParameters[index] = new DoubleParameter(filterKey, FilterRSMProtSetsTask.FILTER_NAME[index - 1], new JTextField(6), new Double(10), new Double(1), null);
+                    m_proteinFilterParameters[index].setAssociatedData(">=");
+                    break;
+                default:
+                    m_proteinFilterParameters[index] = new IntegerParameter(filterKey, FilterRSMProtSetsTask.FILTER_NAME[index - 1], new JTextField(6), new Integer(1), new Integer(1), null);
+                    m_proteinFilterParameters[index].setAssociatedData(">=");
+                    break;
+            }
+
+            AbstractParameter p = m_proteinFilterParameters[index];
+            if (p != null) {
+                p.setUsed(false);
+                p.setCompulsory(false);
+                m_parameterList.add(p);
+            }
+        }
     }
 
     private JPanel createInternalPanel() {
@@ -87,7 +119,7 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1.0;
-        m_proteinPrefiltersPanel = new ParametersComboPanel(" Filter(s) ", m_proteinFilterParameters);
+        m_proteinPrefiltersPanel = new FilterProteinSetPanel(" Filter(s) ", m_proteinFilterParameters);
         m_proteinPrefiltersPanel.addComponentListener((ComponentListener) this);
         internalPanel.add(m_proteinPrefiltersPanel, c);
 
@@ -174,7 +206,7 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
                     }
 
                     m_parameterList.loadParameters(filePreferences);
-                    m_proteinPrefiltersPanel.updatePanel();
+                    m_proteinPrefiltersPanel.initProteinFilterPanel();
 
                 } catch (Exception e) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);

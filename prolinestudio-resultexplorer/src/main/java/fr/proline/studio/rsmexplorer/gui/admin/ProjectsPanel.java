@@ -27,11 +27,14 @@ import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.filter.ConvertValueInterface;
+import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.LongFilter;
 import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.gui.DefaultDialog;
+import static fr.proline.studio.gui.DefaultDialog.BUTTON_CANCEL;
+import static fr.proline.studio.gui.DefaultDialog.BUTTON_OK;
 import fr.proline.studio.table.AbstractDecoratedGlobalTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.TableDefaultRendererManager;
@@ -570,7 +573,7 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         }
 
         @Override
-        public void addFilters(LinkedHashMap<Integer, fr.proline.studio.filter.Filter> filtersMap) {
+        public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
             filtersMap.put(COLTYPE_STATUS, new IntegerFilter(m_columnNames[COLTYPE_STATUS], null, COLTYPE_STATUS));
             filtersMap.put(COLTYPE_NAME, new StringDiffFilter(m_columnNames[COLTYPE_NAME], null, COLTYPE_NAME));
             filtersMap.put(COLTYPE_PROJECTID, new LongFilter(m_columnNames[COLTYPE_PROJECTID], null, COLTYPE_PROJECTID));
@@ -724,8 +727,8 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         }
 
         @Override
-        public void addFilters(LinkedHashMap<Integer, fr.proline.studio.filter.Filter> filtersMap) {
-            //no PSMFilter
+        public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
+            //no Filters
         }
 
     }

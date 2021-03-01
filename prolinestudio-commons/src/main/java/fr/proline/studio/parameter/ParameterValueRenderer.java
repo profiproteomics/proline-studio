@@ -22,16 +22,16 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 
 /**
- * Renderer for Paramters displayed in a combobox
+ * Renderer for Parameter's values displayed in a combobox
  *
  * @author JM235353
  * @param <E>
  */
-public class ParameterComboboxRenderer<E> extends DefaultListCellRenderer {
+public class ParameterValueRenderer<E> extends DefaultListCellRenderer {
 
     private AbstractParameterToString<E> m_paramToString = null;
 
-    public ParameterComboboxRenderer(AbstractParameterToString<E> paramToString) {
+    public ParameterValueRenderer(AbstractParameterToString<E> paramToString) {
         m_paramToString = paramToString;
     }
 

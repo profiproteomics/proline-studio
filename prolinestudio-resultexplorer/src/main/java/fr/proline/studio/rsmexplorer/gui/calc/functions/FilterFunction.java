@@ -16,7 +16,6 @@
  */
 package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
-import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterDialog;
 import fr.proline.studio.filter.FilterMirroredTableModel;
 import fr.proline.studio.filter.FilterTableModel;
@@ -41,7 +40,7 @@ import org.openide.windows.WindowManager;
  */
 public class FilterFunction extends AbstractFunction {
 
-    private Filter[] m_filters = null;
+    private fr.proline.studio.filter.Filter[] m_filters = null;
     private boolean m_settingsDone = false;
     private boolean m_calculationDone = false;
     
@@ -154,10 +153,10 @@ public class FilterFunction extends AbstractFunction {
         addModel(filterTableModel);
         addModel(new FilterMirroredTableModel(filterTableModel));
         
-        LinkedHashMap<Integer, Filter> filtersMap = ((FilterTableModelInterface) m_globalTableModelInterface.get(0)).getFilters();
-        m_filters = new Filter[filtersMap.size()];
+        LinkedHashMap<Integer, fr.proline.studio.filter.Filter> filtersMap = ((FilterTableModelInterface) m_globalTableModelInterface.get(0)).getFilters();
+        m_filters = new fr.proline.studio.filter.Filter[filtersMap.size()];
         int index = 0;
-        for (Map.Entry<Integer, Filter> entry : filtersMap.entrySet()) {
+        for (Map.Entry<Integer, fr.proline.studio.filter.Filter> entry : filtersMap.entrySet()) {
             m_filters[index++] = entry.getValue();
         }
         

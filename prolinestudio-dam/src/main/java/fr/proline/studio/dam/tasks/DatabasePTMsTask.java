@@ -877,7 +877,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
             if(dsRsmId.equals(pi.getResultSummary().getId()) ) {
                 //PARENT PepInstance
                 if(!parentPeptideInstancesByPepId.containsKey(p.getId())){                 
-                    DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptide().getId(), pi.getValidatedProteinSetCount(), pi.getElutionTime());
+                    DPeptideInstance dpi = new DPeptideInstance(pi);
                     dpi.setResultSummary(pi.getResultSummary());
                     dpi.setPeptide(p);
                     dpi.setPeptideMatches(new ArrayList<>());
@@ -903,7 +903,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
                     }
                 }
                 if (!alreadyread) {
-                    DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptide().getId(), pi.getValidatedProteinSetCount(), pi.getElutionTime());
+                    DPeptideInstance dpi = new DPeptideInstance(pi);
                     dpi.setResultSummary(pi.getResultSummary());
                     dpi.setPeptide(p);
                     dpi.setPeptideMatches(new ArrayList<>());

@@ -23,7 +23,7 @@ import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
-import fr.proline.studio.dpm.task.jms.FilterRSMProtSetsTask;
+import fr.proline.studio.dpm.task.jms.FilterProteinSetsTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.FilterProtSetDialog;
@@ -98,7 +98,7 @@ public class FilterRSMProteinSetsJMSAction extends AbstractRSMAction{
                 };
 
 
-                FilterRSMProtSetsTask task = new FilterRSMProtSetsTask(callback, d, filtersArguments);
+                FilterProteinSetsTask task = new FilterProteinSetsTask(callback, d, filtersArguments);
                 AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
             }

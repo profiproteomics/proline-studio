@@ -415,7 +415,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
     }
     
     
-    public static void fetchPeptideDataForProteinMatch(EntityManager entityManagerMSI, ResultSummary rsm, DProteinMatch proteinMatch, HashMap<Long, Peptide> peptideMap) throws Exception {
+    public static void fetchPeptideDataForProteinMatch(EntityManager entityManagerMSI, ResultSummary rsm, DProteinMatch proteinMatch, HashMap<Long, Peptide> peptideMap) {
 
         // Retrieve peptideSet of a proteinMatch
         DPeptideSet peptideSet = proteinMatch.getPeptideSet(rsm.getId());
@@ -444,7 +444,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
         while (itPeptidesQuery.hasNext()) {
             Object[] resCur = itPeptidesQuery.next();
             PeptideInstance pi = (PeptideInstance) resCur[0];
-            DPeptideInstance dpi = new DPeptideInstance(pi);
+            DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptide().getId(), pi.getValidatedProteinSetCount(), pi.getElutionTime());
             
             Long pmId = (Long) resCur[1];
             Integer pmRank = (Integer) resCur[2];

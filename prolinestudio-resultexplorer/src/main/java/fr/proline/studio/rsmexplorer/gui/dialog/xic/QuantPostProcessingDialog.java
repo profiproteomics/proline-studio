@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import fr.proline.studio.NbPreferences;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**

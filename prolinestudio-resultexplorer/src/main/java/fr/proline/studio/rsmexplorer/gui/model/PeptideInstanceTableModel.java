@@ -16,6 +16,8 @@
  */
 package fr.proline.studio.rsmexplorer.gui.model;
 
+import fr.proline.studio.WindowManager;
+import fr.proline.studio.dock.gui.InfoLabel;
 import fr.proline.studio.table.*;
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
@@ -45,7 +47,7 @@ import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.table.TableDefaultRendererManager;
-import fr.proline.studio.utils.StudioExceptions;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -292,7 +294,7 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
                 Double score = (Double)((Map<String, Object>)properties.get("score")).get("score");
                 return score.floatValue();
               } catch (Exception e) {
-                StudioExceptions.notify("Peptide instance property cannot be read", e);
+                  WindowManager.getDefault().getMainWindow().alert(InfoLabel.INFO_LEVEL.ERROR,"Peptide instance property cannot be read", e);
                 return null;
               }
             }

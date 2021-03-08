@@ -133,7 +133,7 @@ public class LocalFileSystemTransferHandler extends TransferHandler {
                 JTree.DropLocation dropLocation = (JTree.DropLocation) support.getDropLocation();
                 
                 TreePath dropPath = dropLocation.getPath();
-                File dropFile = pathToFile(MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().getSelectedRoot(), dropPath);
+                File dropFile = pathToFile(MzdbFilesTopPanel.getExplorer().getLocalFileSystemView().getSelectedRoot(), dropPath);
                 if (dropFile.isFile()) {
                     // drop on a file corresponds to a drop on the parent directory
                     dropPath = dropPath.getParentPath();

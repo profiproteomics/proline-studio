@@ -24,7 +24,6 @@ import fr.proline.studio.parameter.ParametersComboPanel;
 import fr.proline.studio.settings.FilePreferences;
 import fr.proline.studio.settings.SettingsDialog;
 import fr.proline.studio.settings.SettingsUtils;
-import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
@@ -34,11 +33,8 @@ import java.awt.event.ComponentListener;
 import java.io.File;
 import java.util.HashMap;
 import java.util.prefs.Preferences;
-import javax.swing.JFileChooser;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 import fr.proline.studio.NbPreferences;
-import org.slf4j.LoggerFactory;
+
 
 /**
  *

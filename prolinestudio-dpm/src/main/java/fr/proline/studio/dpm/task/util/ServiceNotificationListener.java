@@ -79,12 +79,13 @@ public class ServiceNotificationListener implements MessageListener {
 //            m_loggerProline.debug("SKIP Notification message  : " + JMSMessageUtil.formatMessage(jmsMessage));
 //
 //        } else {
-            m_loggerProline.info(" *** JMSNOTIF *** Notification Listener Receiving message  : " + JMSMessageUtil.formatMessage(jmsMessage));
+            m_loggerProline.info(" *** JMSNOTIF 1 *** Notification Listener Receiving message  : " + JMSMessageUtil.formatMessage(jmsMessage));
             if (jmsMessage instanceof TextMessage) {
                 final TextMessage textMessage = (TextMessage) jmsMessage;
-                m_loggerProline.info(" *** JMSNOTIF *** message : "+textMessage.toString());
+                m_loggerProline.info(" *** JMSNOTIF 2 *** message : "+textMessage.toString());
                 try {
                     final String jsonString = textMessage.getText();
+                    m_loggerProline.info(" *** JMSNOTIF 3 *** text message : "+jsonString);
                     final JSONRPC2Notification  jsonNotif = JSONRPC2Notification.parse(jsonString);
                     m_loggerProline.info(" *** JMSNOTIF *** JSONRPC2Notification : "+jsonNotif.toJSONString());
                     Map<String,Object> params = jsonNotif.getNamedParams();                

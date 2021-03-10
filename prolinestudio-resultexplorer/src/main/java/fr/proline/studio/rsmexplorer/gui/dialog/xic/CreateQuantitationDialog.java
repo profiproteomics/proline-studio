@@ -95,9 +95,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
     private SelectRawFilesPanel m_selectRawFilePanel = null;
     private AbstractParamsPanel m_quantMethodParamsPanel;
     private DatabaseVerifySpectrumFromResultSets m_spectrumTask;
-    //private QuantExperimentalDesignPanel m_experimentalDesignPanel;
     private List<PtmSpecificity> m_identifiedPtms = null;
-
     private QuantExperimentalDesignPanel m_experimentalDesignPanel;
 
 
@@ -209,8 +207,14 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
 
         m_step = STEP_PANEL_LINK_RAW_FILES;
 
-        setButtonName(DefaultDialog.BUTTON_OK, "Next");
-        setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
+        Map<String, Object> quantiParams = m_quantMethodParamsPanel.getQuantParams();
+        if (m_quantitationType == QuantitationMethod.Type.LABEL_FREE || ((Boolean)quantiParams.get("label_free_quant_config")) ) {
+          setButtonName(DefaultDialog.BUTTON_OK, "Next");
+          setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
+        } else {
+          setButtonName(DefaultDialog.BUTTON_OK, org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
+          setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.OK));
+        }
         setButtonVisible(BUTTON_LOAD, false);
         setButtonVisible(BUTTON_SAVE, false);
         setButtonVisible(BUTTON_BACK, true);
@@ -250,7 +254,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
                         if (success) {
                             m_identifiedPtms = ptms;
                             m_quantMethodParamsPanel = new ResidueMethodParamsPanel(m_experimentalDesignPanel.getQuantitationMethod(), m_identifiedPtms);
-                            setHelpHeader("<html><b>Step 1.5:</b> Specify residue labeling method parameters.</html>", null);
+                            setHelpHeader("<html><b>Step 1.a:</b> Specify residue labeling method parameters.</html>", null);
                             replaceInternalComponent(m_quantMethodParamsPanel);
                             revalidate();
                             repaint();
@@ -270,19 +274,18 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
                 AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
             } else {
                 m_quantMethodParamsPanel = new ResidueMethodParamsPanel(m_experimentalDesignPanel.getQuantitationMethod(), m_identifiedPtms);
-                setHelpHeader("<html><b>Step 1.5:</b> Specify residue labeling method parameters.</html>", null);
+                setHelpHeader("<html><b>Step 1.a:</b> Specify residue labeling method parameters.</html>", null);
                 replaceInternalComponent(m_quantMethodParamsPanel);
                 revalidate();
                 repaint();
             }
         } else if (m_quantitationType == QuantitationMethod.Type.ISOBARIC_TAGGING) {
             m_quantMethodParamsPanel = new IsobaricMethodParamsPanel(m_experimentalDesignPanel.getQuantitationMethod());
-            setHelpHeader("<html><b>Step 1.5:</b> Specify isobaric quantitation method parameters.</html>", null);
+            setHelpHeader("<html><b>Step 1.a:</b> Specify isobaric quantitation method parameters.</html>", null);
             replaceInternalComponent(m_quantMethodParamsPanel);
             revalidate();
             repaint();
         }
-
     }
 
     //for step 3
@@ -467,7 +470,11 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
             return lfParamas;
         } else {
             Map<String, Object> quantiParams = m_quantMethodParamsPanel.getQuantParams();
-            quantiParams.put("label_free_quant_config", lfParamas);
+            if ((Boolean)quantiParams.get("label_free_quant_config")) {
+              quantiParams.put("label_free_quant_config", lfParamas);
+            } else {
+              quantiParams.remove("label_free_quant_config");
+            }
             return quantiParams;
         }
     }
@@ -485,7 +492,10 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
                 displayLinkRawFilesPanel();
                 break;
             case STEP_PANEL_LINK_RAW_FILES:
-                displayLabelFreeParamsPanel();
+                Map<String, Object> quantiParams = m_quantMethodParamsPanel.getQuantParams();
+                if (m_quantitationType == QuantitationMethod.Type.LABEL_FREE || ((Boolean)quantiParams.get("label_free_quant_config")) ) {
+                    displayLabelFreeParamsPanel();
+                } 
                 break;
             default:
                 break;
@@ -498,33 +508,28 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
         switch (m_step) {
             case STEP_PANEL_CREATE_EXPERIMENTAL_DESIGN:
                 //verify sample, group name length
-
-                //CreateXICDesignPanel-NEXT button
                 //VDS: Can't checkDesignStructure and checkBiologicalGroupName be merged !!
-                if ((!checkDesignStructure(m_experimentalDesignPanel.getExperimentalDesignTree(), m_experimentalDesignNode, new HashSet<>())) || (!checkBiologicalGroupName(m_experimentalDesignPanel.getExperimentalDesignTree(), m_experimentalDesignNode))) {
-                    return false;
+                if ((checkDesignStructure(m_experimentalDesignPanel.getExperimentalDesignTree(), m_experimentalDesignNode, new HashSet<>())) &&
+                    (checkBiologicalGroupName(m_experimentalDesignPanel.getExperimentalDesignTree(), m_experimentalDesignNode))) {
+                  //Will call displayLinkRawFilesPanel if Spectrum are OK !
+                  checkSpectrum();
                 }
-
-                //Will call displayLinkRawFilesPanel if Spectrum are OK !
-                checkSpectrum();
-
                 return false;
             case STEP_PANEL_QUANT_METHOD_PARAMS:
                 displayNextPanel();
-
                 return false;
             case STEP_PANEL_LINK_RAW_FILES:
-                //SelectRawFilesPanel-NEXT button
-
-                if (!checkRawFiles()) {
-                    return false;
+                if (checkRawFiles()) {
+                  Map<String, Object> quantiParams = m_quantMethodParamsPanel.getQuantParams();
+                  if (m_quantitationType == QuantitationMethod.Type.LABEL_FREE || ((Boolean)quantiParams.get("label_free_quant_config")) ) {
+                    displayNextPanel();
+                  } else {
+                    // LINK_RAW_FILE was the last panel, hide tje dialog by returning true
+                    return true;
+                  }
                 }
-
-                displayNextPanel();
-
                 return false;
             default:
-                //STEP_PANEL_DEFINE_XIC_PARAMS , LabelFreeMSParamsPanel-OK button
 
                 if (!checkQuantParameters()) {
                     return false;

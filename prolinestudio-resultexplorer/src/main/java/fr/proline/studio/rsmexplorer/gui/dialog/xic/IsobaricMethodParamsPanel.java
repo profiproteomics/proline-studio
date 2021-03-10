@@ -17,13 +17,17 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.core.orm.uds.QuantitationMethod;
+import static fr.proline.studio.rsmexplorer.gui.dialog.xic.AbstractLabelFreeMSParamsPanel.DEFAULT_ALIGN_VALUE;
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -35,10 +39,11 @@ import javax.swing.JTextField;
  */
 public class IsobaricMethodParamsPanel extends AbstractParamsPanel {
 
-    private QuantitationMethod m_quantMethod;
+    private final QuantitationMethod m_quantMethod;
     private JTextField m_extractionMoZTolTF;   
     private JComboBox<String> m_reporterSourceCbx;
-    
+    private JCheckBox m_rescaleAbundancestoMS1CB;
+        
     public IsobaricMethodParamsPanel(QuantitationMethod method) {
         m_quantMethod = method;
         
@@ -62,7 +67,9 @@ public class IsobaricMethodParamsPanel extends AbstractParamsPanel {
         c.gridy++;
         mainPanel.add(createReporterSourcePanel(), c);
         
-
+        c.gridy++;
+        mainPanel.add(createRescalePanel(), c);
+        
         c.gridy++;
         c.weighty = 1;
         mainPanel.add(Box.createVerticalGlue(), c);
@@ -77,7 +84,7 @@ public class IsobaricMethodParamsPanel extends AbstractParamsPanel {
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
-        JLabel extractionMoZTolLabel = new JLabel("reporter ion source:");
+        JLabel extractionMoZTolLabel = new JLabel("Reporter ions will be extracted from:");
         c.gridx = 0;
         c.gridy = 0;
         c.gridwidth=1;
@@ -105,7 +112,7 @@ public class IsobaricMethodParamsPanel extends AbstractParamsPanel {
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
-        JLabel extractionMoZTolLabel = new JLabel("Moz tolerance (ppm):");
+        JLabel extractionMoZTolLabel = new JLabel("Reporter ions m/z tolerance (ppm):");
         c.gridx = 0;
         c.gridy = 0;
         c.gridwidth=1;
@@ -134,6 +141,9 @@ public class IsobaricMethodParamsPanel extends AbstractParamsPanel {
         params.put("extraction_params", extractionParams);
         String sourceValue = (String)m_reporterSourceCbx.getSelectedItem();
         params.put("reporter_ion_data_source", sourceValue.replaceAll(" ", "_").toUpperCase());
+        //temporary put this value into "label_free_quant_config". If true this value will be replaced
+        // by the label_free configuration, if false it will be removed from the params
+        params.put("label_free_quant_config", m_rescaleAbundancestoMS1CB.isSelected());
         return params;
     }
 
@@ -141,6 +151,24 @@ public class IsobaricMethodParamsPanel extends AbstractParamsPanel {
     public void setQuantParams(Map<String, Object> quantParams) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+  private Component createRescalePanel() {
+    JPanel panel = new JPanel(new GridBagLayout());
+    GridBagConstraints c = new GridBagConstraints();
+    c.fill = GridBagConstraints.BOTH;
+    c.insets = new java.awt.Insets(5, 5, 5, 5);
+    c.gridx = 0;
+    c.gridy = 0;
+    
+    m_rescaleAbundancestoMS1CB = new JCheckBox("Rescale reporter abundances to MS1 signal", false);
+    panel.add(m_rescaleAbundancestoMS1CB, c);
+    
+    c.gridx++;
+    c.weightx = 1;
+    panel.add(Box.createHorizontalGlue(), c);
+    
+    return panel;
+  }
 
     
 }

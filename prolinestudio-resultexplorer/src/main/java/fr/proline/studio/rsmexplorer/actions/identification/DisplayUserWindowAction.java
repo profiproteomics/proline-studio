@@ -86,7 +86,7 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
             try {
                 AbstractDataBox databox = (AbstractDataBox) genericDatabox.getClass().newInstance();
 
-                final WindowBox wbox = WindowBoxFactory.getUserDefinedWindowBox(dataSet.getName(), dataSet.getName()+" "+dialog.getWndTitle(), databox, false, dataSetNode.isQuantXIC(), m_windowType);
+                final WindowBox wbox = WindowBoxFactory.getUserDefinedWindowBox(dataSet.getName(), dataSet.getName()+" "+dialog.getWndTitle(), databox, false, dataSetNode.isQuantitation() && !dataSetNode.isQuantSC(), m_windowType);
 
                 if (forRsm()) {
                     

@@ -78,7 +78,7 @@ public class DisplaySavedWindowAction extends AbstractRSMAction {
         
         AbstractDataBox[] databoxes = WindowSavedManager.readBoxes(savedWindow);
         databoxes[0].setProjectId(projectId);
-        WindowBox wbox = WindowBoxFactory.getFromBoxesWindowBox(dataSet.getName()+" "+windowName, databoxes, false, dataSetNode.isQuantXIC(),  windowType);
+        WindowBox wbox = WindowBoxFactory.getFromBoxesWindowBox(dataSet.getName()+" "+windowName, databoxes, false, dataSetNode.isQuantitation() && !dataSetNode.isQuantSC(),  windowType);
         
         if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_RSM) {
             ResultSummary rsm = dataSetNode.getResultSummary();

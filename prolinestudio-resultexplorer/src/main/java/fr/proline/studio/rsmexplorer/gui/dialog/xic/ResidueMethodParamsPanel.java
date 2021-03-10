@@ -157,6 +157,9 @@ public class ResidueMethodParamsPanel extends AbstractParamsPanel {
             tags.add(labelParams);
         }
         params.put("tags", tags);
+        // Residue labelling needs a label free configuration: set this value to true. If true this value will be replaced
+        // by the label_free configuration, if false it will be removed from the params
+        params.put("label_free_quant_config", true);
         return params;
     }
 

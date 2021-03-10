@@ -306,7 +306,7 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
 
         int mode = -1;
         if (selectedNodes[0] instanceof DataSetNode) {
-            mode = ((DataSetNode) selectedNodes[0]).isQuantSC() ? 1 : (((DataSetNode) selectedNodes[0]).isQuantXIC() ? 2 : 0);
+            mode = ((DataSetNode) selectedNodes[0]).isQuantSC() ? 1 : (((DataSetNode) selectedNodes[0]).isQuantitation() ? 2 : 0);
         }
         for (AbstractNode node : selectedNodes) {
             if (node.isChanging()) {
@@ -328,7 +328,7 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
             }
 
             // node must have same nature (identification, xic or sc)
-            int currMode = (datasetNode.isQuantSC() ? 1 : (datasetNode.isQuantXIC() ? 2 : 0));
+            int currMode = (datasetNode.isQuantSC() ? 1 : (datasetNode.isQuantitation() ? 2 : 0));
             if (currMode != mode) {
                 setEnabled(false);
                 return;

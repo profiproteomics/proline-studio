@@ -130,8 +130,8 @@ public class DisplayXICPTMClusterAction extends AbstractRSMAction {
                 return;
             }
             
-             // must be a quantitation XIC
-            if (! dataSetNode.isQuantXIC()) {
+             // must be a quantitation 
+            if (! (dataSetNode.isQuantitation() && !dataSetNode.isQuantSC()) ) {
                 setEnabled(false);
                 return;
             }

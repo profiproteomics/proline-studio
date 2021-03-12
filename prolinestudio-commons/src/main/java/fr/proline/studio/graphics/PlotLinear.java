@@ -952,8 +952,10 @@ public class PlotLinear extends PlotXYAbstract {
             
             Color c = plotInformation.getPlotColor();
             if (c != null) {
-                m_colorParameter.getColor().setColor(c);
-                m_colorParameter.getColor().setColorSelected();
+                // JPM : these lines have been done for #22157, but it leads to a big bug : #22453
+                // for the moment, I remove them and I reopen the ticket 22157
+                //m_colorParameter.getColor().setColor(c);
+                //m_colorParameter.getColor().setColorSelected();
             }
         }
     }

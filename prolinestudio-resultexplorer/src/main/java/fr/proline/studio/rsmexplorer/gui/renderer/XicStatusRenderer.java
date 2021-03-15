@@ -163,7 +163,7 @@ public class XicStatusRenderer extends DefaultTableCellRenderer implements Mouse
     }
 
     
-    public static class SelectLevel {
+    public static class SelectLevel implements Comparable<SelectLevel> {
         public SelectLevelEnum m_status;
         public SelectLevelEnum m_globalStatus;
         
@@ -178,6 +178,16 @@ public class XicStatusRenderer extends DefaultTableCellRenderer implements Mouse
         
         public SelectLevelEnum getStatus() {
             return m_status;
+        }
+
+        @Override
+        public int compareTo(SelectLevel o) {
+            int deltaStatus = m_globalStatus.getIntValue()-o.m_globalStatus.getIntValue();
+            if (deltaStatus != 0) {
+                return deltaStatus;
+            }
+            return m_status.getIntValue()-o.m_status.getIntValue();
+            
         }
         
     }

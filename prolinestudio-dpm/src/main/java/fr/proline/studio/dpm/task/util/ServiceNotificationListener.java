@@ -86,6 +86,10 @@ public class ServiceNotificationListener implements MessageListener {
                 try {
                     final String jsonString = textMessage.getText();
                     m_loggerProline.info(" *** JMSNOTIF 3 *** text message : "+jsonString);
+                    if(!jsonString.startsWith("{\"method\":")) {
+                        m_loggerProline.error(" *** None valide JSONRPC2Notification : Do not start with method entry.");
+                        return;
+                    }
                     final JSONRPC2Notification  jsonNotif = JSONRPC2Notification.parse(jsonString);
                     m_loggerProline.info(" *** JMSNOTIF *** JSONRPC2Notification : "+jsonNotif.toJSONString());
                     Map<String,Object> params = jsonNotif.getNamedParams();                

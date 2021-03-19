@@ -101,7 +101,7 @@ public class AccessJMSManagerThread extends Thread {
                 // init session if needed
                 initSession();
 
-                System.out.println("JMSTEST "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" task.askJMS "+task.getClass());
+                LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" task.askJMS "+task.getClass());
 
                 // fetch data
                 task.askJMS();

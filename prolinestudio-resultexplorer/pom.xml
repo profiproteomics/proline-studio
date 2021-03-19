@@ -15,7 +15,10 @@
     <name>ProlineStudio-ResultExplorer</name>
 
     <properties>
+        <assembly.file.path>${project.basedir}/src/main/resources/assembly.xml</assembly.file.path>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <sqlite4java.version>1.0.392</sqlite4java.version>
+        <sqlite4java.library.path>${project.build.directory}/sqlite4java</sqlite4java.library.path>
     </properties>
     
 <!--    <repositories>-->
@@ -268,10 +271,69 @@
                 <artifactId>replacer</artifactId>
                 <!-- Version inherited from ProFI-Pom -->
 
-
-
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+
+                                <artifactItem>
+                                    <groupId>com.almworks.sqlite4java</groupId>
+                                    <artifactId>sqlite4java-win32-x64</artifactId>
+                                    <version>${sqlite4java.version}</version>
+                                    <type>dll</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${sqlite4java.library.path}</outputDirectory>
+                                </artifactItem>
+
+                                <artifactItem>
+                                    <groupId>com.almworks.sqlite4java</groupId>
+                                    <artifactId>libsqlite4java-linux-amd64</artifactId>
+                                    <version>${sqlite4java.version}</version>
+                                    <type>so</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${sqlite4java.library.path}</outputDirectory>
+                                </artifactItem>
+
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeTypes>jar</includeTypes>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                    </execution>
+
+                </executions>
+            </plugin>
+
+            <!-- Build Zip Assembly -->
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <!-- Version inherited from ProFI-Pom -->
+                <configuration>
+                    <finalName>${project.name}-${project.version}</finalName>
+                    <descriptors>
+                        <descriptor>${assembly.file.path}</descriptor>
+                    </descriptors>
+                </configuration>
+            </plugin>
         </plugins>
 
     </build>

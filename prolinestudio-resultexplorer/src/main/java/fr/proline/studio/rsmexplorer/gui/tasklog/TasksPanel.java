@@ -88,26 +88,26 @@ public class TasksPanel extends AbstractTasksPanel {
     }
     
     
-//    @Override
-//    protected AbstractJMSCallback getServiceNotificationCallback(JMSNotificationMessage[] sysInfoResult) {
-//        AbstractJMSCallback notifierCallback = new AbstractJMSCallback() {
-//            @Override
-//            public boolean mustBeCalledInAWT() {
-//                return true;
-//            }
-//
-//            @Override
-//            public void run(boolean success) {
-//                if (sysInfoResult[0].getEventType().equals(JMSNotificationMessage.MessageStatus.STARTED)) {
-//                    TaskInfo tiToUpdate = TaskInfoManager.getTaskInfoManager().getTaskInfoWithJMSId(sysInfoResult[0].getServerUniqueMsgId());
-//                    if (tiToUpdate != null) {
-//                        tiToUpdate.setRunning(true);
-//                    }
-//                }
-//            }
-//        };
-//        return notifierCallback;
-//    }
+    @Override
+    protected AbstractJMSCallback getServiceNotificationCallback(JMSNotificationMessage[] sysInfoResult) {
+        AbstractJMSCallback notifierCallback = new AbstractJMSCallback() {
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success) {
+                if (sysInfoResult[0].getEventType().equals(JMSNotificationMessage.MessageStatus.STARTED)) {
+                    TaskInfo tiToUpdate = TaskInfoManager.getTaskInfoManager().getTaskInfoWithJMSId(sysInfoResult[0].getServerUniqueMsgId());
+                    if (tiToUpdate != null) {
+                        tiToUpdate.setRunning(true);
+                    }
+                }
+            }
+        };
+        return notifierCallback;
+    }
     
     //Nothing specific to do after cancel message was done : already taken into account be message response
 //    @Override
@@ -445,7 +445,8 @@ public class TasksPanel extends AbstractTasksPanel {
 
             TaskInfo taskInfo = m_taskInfoList.get(rowIndex);
             switch (columnIndex) {
-                case COLTYPE_STEP: {
+                case COLTYPE_STEP:
+                case COLTYPE_TASKINFO_CRITICALITY: {
                     return taskInfo;
                 }
                 case COLTYPE_TASKINFO_ID: {
@@ -453,9 +454,6 @@ public class TasksPanel extends AbstractTasksPanel {
                 }
                 case COLTYPE_TASKINFO_CATEGORY: {
                     return taskInfo.getIdList();
-                }
-                case COLTYPE_TASKINFO_CRITICALITY: {
-                    return taskInfo;
                 }
                 case COLTYPE_DESCRIPTION: {
                     return taskInfo.getTaskDescription();

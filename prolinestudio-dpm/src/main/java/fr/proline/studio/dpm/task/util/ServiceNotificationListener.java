@@ -91,7 +91,7 @@ public class ServiceNotificationListener implements MessageListener {
                         return;
                     }
                     final JSONRPC2Notification  jsonNotif = JSONRPC2Notification.parse(jsonString);
-                    m_loggerProline.info(" *** JMSNOTIF *** JSONRPC2Notification : "+jsonNotif.toJSONString());
+                    m_loggerProline.info(" *** JMSNOTIF 4 *** JSONRPC2Notification : "+jsonNotif.toJSONString());
                     Map<String,Object> params = jsonNotif.getNamedParams();                
                     final JMSNotificationMessage resultMsg = new JMSNotificationMessage(params.getOrDefault(NOTIFICATION_SERVICE_NAME_KEY, "Undefined").toString(),params.getOrDefault(NOTIFICATION_SERVICE_VERSION_KEY, "default").toString(),
                             params.getOrDefault(NOTIFICATION_SERVICE_SOURCE_KEY, "Unknown").toString(), params.getOrDefault(NOTIFICATION_SERVICE_DESCR_KEY, "").toString(),

@@ -256,10 +256,10 @@ public class JMSConnectionManager {
         }
     }
 
-//    public ServiceNotificationListener getNotificationListener() {
-//        return m_notifListener;
-//    }
-    
+    public ServiceNotificationListener getNotificationListener() {
+        return m_notifListener;
+    }
+
     /**
      * Get Proline Server service Queue QueueBrowser, create JMS connection if necessary
      * @return

@@ -210,33 +210,33 @@ public class SystemTasksPanel extends AbstractTasksPanel {
     }
 
     // Creates specific callback method to be called when service event notification occurs
-//    @Override
-//    protected AbstractJMSCallback getServiceNotificationCallback(JMSNotificationMessage[] sysInfoResult) {
-//        AbstractJMSCallback notifierCallback = new AbstractJMSCallback() {
-//
-//            @Override
-//            public boolean mustBeCalledInAWT() {
-//                return true;
-//            }
-//
-//            @Override
-//            public void run(boolean success) {
-//
-//                int selectedRow = m_messageTable.getSelectedRow();
-//                if (selectedRow >= 0) {
-//                    selectedRow = m_messageTable.convertRowIndexToModel(selectedRow);
-//                }
-//
-//                ((SystemMessageTableModel) m_messageTable.getModel()).addMessage(sysInfoResult[0]);
-//
-//                if (selectedRow >= 0) {
-//                    int modelIndex = m_messageTable.convertRowIndexToView(selectedRow);
-//                    m_messageTable.setRowSelectionInterval(modelIndex, modelIndex);
-//                }
-//            }
-//        };
-//        return notifierCallback;
-//    }
+    @Override
+    protected AbstractJMSCallback getServiceNotificationCallback(JMSNotificationMessage[] sysInfoResult) {
+        AbstractJMSCallback notifierCallback = new AbstractJMSCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success) {
+
+                int selectedRow = m_messageTable.getSelectedRow();
+                if (selectedRow >= 0) {
+                    selectedRow = m_messageTable.convertRowIndexToModel(selectedRow);
+                }
+
+                ((SystemMessageTableModel) m_messageTable.getModel()).addMessage(sysInfoResult[0]);
+
+                if (selectedRow >= 0) {
+                    int modelIndex = m_messageTable.convertRowIndexToView(selectedRow);
+                    m_messageTable.setRowSelectionInterval(modelIndex, modelIndex);
+                }
+            }
+        };
+        return notifierCallback;
+    }
 
     // Creates specific callback method to be called when purge consumer has been executed
 //    @Override

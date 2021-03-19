@@ -115,7 +115,7 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
     public void askJMS() throws JMSException {
         try {
 
-            System.out.println("JMSTEST "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" askJMS Start "+getClass());
+            LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" askJMS Start "+getClass());
 
 
             /*
@@ -139,11 +139,11 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
                 onMessage(responseMsg);
             }
 
-            System.out.println("JMSTEST "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" askJMS end "+getClass());
+            LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" askJMS end "+getClass());
 
         } catch (Exception ex) {
 
-            System.out.println("JMSTEST "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" error "+getClass());
+            LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" error "+getClass());
             ex.printStackTrace();
 
             m_loggerProline.error("Error sending JMS Message", ex);
@@ -217,7 +217,7 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
 
 
 
-        System.out.println("JMSTEST "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage start "+getClass());
+        LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage start "+getClass());
 
         long endRun = System.currentTimeMillis();
 //        this.m_taskInfo.setDuration(endRun-m_startRun);
@@ -232,7 +232,7 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
 
             } catch (JSONRPC2Error jsonErr) {
 
-                System.out.println("JMSTEST "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage error "+getClass());
+                LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage error "+getClass());
                 jsonErr.printStackTrace();
 
                 m_currentState = JMSState.STATE_FAILED;
@@ -243,7 +243,7 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
                 m_taskError = new TaskError(jsonErr);
             } catch (Exception e) {
 
-                System.out.println("JMSTEST "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage error2 "+getClass());
+                LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage error2 "+getClass());
                 e.printStackTrace();
 
                 m_currentState = JMSState.STATE_FAILED;
@@ -253,7 +253,7 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
         } else {
             String msg = "Error receiving message n° " + MESSAGE_COUNT_SEQUENCE.incrementAndGet() + ": timeout should have occured ";
 
-            System.out.println("JMSTEST "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage error3 "+getClass());
+            LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage error3 "+getClass());
 
 
             m_loggerProline.info(msg);
@@ -268,7 +268,7 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
             }
         } catch (JMSException ex) {
 
-            System.out.println("JMSTEST "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage error4 "+getClass());
+            LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage error4 "+getClass());
             ex.printStackTrace();
 
             m_loggerProline.error("Error running JMS Message acknowledge", ex);

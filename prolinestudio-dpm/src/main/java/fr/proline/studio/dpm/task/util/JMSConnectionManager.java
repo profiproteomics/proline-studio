@@ -23,13 +23,7 @@ import fr.proline.studio.parameter.StringParameter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.prefs.Preferences;
-import javax.jms.Connection;
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.Queue;
-import javax.jms.QueueBrowser;
-import javax.jms.Session;
-import javax.jms.Topic;
+import javax.jms.*;
 import javax.swing.JTextField;
 import javax.swing.event.EventListenerList;
 import org.hornetq.api.core.TransportConfiguration;
@@ -95,17 +89,23 @@ public class JMSConnectionManager {
     private final EventListenerList m_connectionListenersList;//ConnectionListeners list
     private int m_connectionState;//Connection current state
 
-    public String m_jmsServerHost = null;/* Default = HornetQ Proline Prod Grenoble = "132.168.72.129" */
+    public String m_jmsServerHost = null;
     public static int m_jmsServerPort = 5445;
 
+    //Queue objects
     private Connection m_connection = null;
     private Queue m_serviceQueue = null;
-    private Topic m_notificationTopic = null;
+
     private Session m_mainSession = null;
 
-//    private QueueBrowser m_browser = null;
+    //Topic objects
+    private TopicConnection m_topicConnection = null;
+    private TopicSession m_topicSession = null;
+    private Topic m_notificationTopic = null;
     private ServiceNotificationListener m_notifListener = null;
     private MessageConsumer m_topicSuscriber;
+//    private QueueBrowser m_browser = null;
+
     private static JMSConnectionManager m_jmsConnectionManager = null;
 
     public static synchronized JMSConnectionManager getJMSConnectionManager() {
@@ -129,9 +129,11 @@ public class JMSConnectionManager {
 
     private void resetConnObjects() {
         m_connection = null;
+        m_topicConnection = null;
         m_serviceQueue = null;
         m_notificationTopic = null;
         m_mainSession = null;
+        m_topicSession = null;
 //        m_browser = null;
         m_notifListener = null;
         m_topicSuscriber = null;
@@ -192,6 +194,11 @@ public class JMSConnectionManager {
         return m_serviceQueue;
     }
 
+    public  void  startJMSConnections() throws Exception {
+        getJMSConnection().start();
+        m_topicConnection.start();
+    }
+
     private void createConnection() throws JMSException {
         try {
             if (m_jmsServerHost == null) {
@@ -207,8 +214,11 @@ public class JMSConnectionManager {
             m_jmsSettingsPList.loadParameters(NbPreferences.root());
             String queueName = m_parameter.getStringValue();
 
-            m_loggerProline.info(" Use JMS Queue " + queueName);
+            m_loggerProline.info(" Use JMS Queue " + queueName+" and JMS topic "+SERVICE_MONITORING_NOTIFICATION_TOPIC_NAME);
+            //Queue Data
             m_serviceQueue = HornetQJMSClient.createQueue(queueName);
+
+            //Topic data
             m_notificationTopic = HornetQJMSClient.createTopic(SERVICE_MONITORING_NOTIFICATION_TOPIC_NAME);
 
             // Step 2. Instantiate the TransportConfiguration object which contains the knowledge of what
@@ -229,23 +239,30 @@ public class JMSConnectionManager {
             
             // Step 4.Create a JMS Connection
             m_connection = cf.createConnection();
+            m_topicConnection = cf.createTopicConnection();
 
             // Step 5. Create a JMS Session (Session MUST be confined in current Thread)
             // Not transacted, AUTO_ACKNOWLEDGE
             m_mainSession = m_connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            m_topicSession = m_topicConnection.createTopicSession(false,Session.AUTO_ACKNOWLEDGE);
+
             // Step 6. Create the subscription and the subscriber.//TODO : create & listen only when asked !?
-            m_topicSuscriber = m_mainSession.createConsumer(m_notificationTopic);
+            m_topicSuscriber = m_topicSession.createConsumer(m_notificationTopic);
             m_notifListener = new ServiceNotificationListener();
             m_topicSuscriber.setMessageListener(m_notifListener);
             m_connectionState = ConnectionListener.CONNECTION_DONE;
             fireConnectionStateChanged(ConnectionListener.CONNECTION_DONE);
         } catch (RuntimeException | JMSException je) {
-            if (m_connection != null) {
+            if (m_connection != null || m_topicConnection != null) {
                 try {
-                    m_connection.close();
+                    if(m_connection != null)
+                        m_connection.close();
                     m_loggerProline.info("JMS Connection closed on error " + je.getMessage());
+                    if(m_topicConnection != null)
+                        m_topicConnection.close();
+                    m_loggerProline.info("JMS Topic Connection closed on error " + je.getMessage());
                 } catch (Exception exClose) {
-                    m_loggerProline.error("Error closing JMS Connection", exClose);
+                    m_loggerProline.error("Error closing JMS [Topic] Connection", exClose);
                 } finally {
                     resetConnObjects();
                 }
@@ -292,11 +309,16 @@ public class JMSConnectionManager {
 
                 // need to cleanup jms thread
                 AccessJMSManagerThread.getAccessJMSManagerThread().cleanup();
-                m_topicSuscriber.close();
                 m_mainSession.close();
                 m_connection.close();
 
                 m_loggerProline.info("JMS Connection closed");
+                if(m_topicConnection != null) {
+                    m_topicSuscriber.close();
+                    m_topicSession.close();
+                    m_topicConnection.close();
+                }
+
             } catch (Exception exClose) {
                 m_loggerProline.error("Error closing JMS Connection", exClose);
             } finally {

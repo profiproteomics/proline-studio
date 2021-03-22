@@ -58,7 +58,7 @@ public abstract class AbstractTasksPanel extends HourglassPanel implements DataB
 
     public AbstractTasksPanel(){
         this.m_isConnected = false;
-        initListener(); //calling it in constructor is incorrect: it calls overriden methods
+//        initListener(); //calling it in constructor is incorrect: it calls overriden methods
     }
     
    

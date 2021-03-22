@@ -121,7 +121,7 @@ public class AccessJMSManagerThread extends Thread {
             try {
                 // Get JMS Connection
                 m_connection = JMSConnectionManager.getJMSConnectionManager().getJMSConnection();
-                m_connection.start(); // Explicitely start connection to begin Consumer reception
+                JMSConnectionManager.getJMSConnectionManager().startJMSConnections();// Explicitely start connection to begin Consumer reception
                 //m_session = m_connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
             } catch (JMSException je) {
                 LoggerFactory.getLogger("ProlineStudio.DPM").error("Unexpected exception when initializing JMS Connection", je);

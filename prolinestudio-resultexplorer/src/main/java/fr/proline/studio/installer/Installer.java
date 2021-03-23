@@ -65,17 +65,26 @@ public class Installer extends VersionInstaller {
         
         // for Mac : we need to use Metal UI, otherwise the browse file on server does not work
         forceMetalUIForMac();
-        
+               
+        //VDS: module version should be release or SNAPSHOT
+        // if release => keep vesion number only
+        // if SNAPSHOT => add Milestone + build date
         String productVersion = moduleVersion;
-        int firstIndex = moduleVersion.indexOf('.');
-        int secIndex =  moduleVersion.length();
-        if(firstIndex >0)
-            secIndex = moduleVersion.indexOf('.', firstIndex+1);        
-        if(secIndex>0)
-            productVersion = moduleVersion.substring(0, secIndex);
-        
-        String buildnumber = productVersion+" Milestone ("+moduleBuildDate+")"; //specify if Milestone, Release Candidate or release (or nothing = release)
-        
+        int snapIndex = moduleVersion.toLowerCase().indexOf("-snapshot");
+        boolean isSnapshot = snapIndex > 0;
+        if(snapIndex > 0)
+            productVersion = moduleVersion.substring(0, snapIndex);
+//        int firstIndex = moduleVersion.indexOf('.');
+//        int secIndex =  moduleVersion.length();
+//        int thirdIndex =  -1;
+//        if(firstIndex >0)
+//            secIndex = moduleVersion.indexOf('.', firstIndex+1);
+//        if(secIndex>0)
+//            productVersion = moduleVersion.substring(0, secIndex);
+
+        //Hardcoded # of Milestone !
+        String buildnumber = isSnapshot ? productVersion+" Milestone 1.b ("+moduleBuildDate+")" : productVersion; //specify if Milestone, Release Candidate or release (or nothing = release)
+                              
         // set the proline version for the application title
         System.setProperty("netbeans.buildnumber", buildnumber);  //"1.0.1 (alpha : build date @build.date@)"
         

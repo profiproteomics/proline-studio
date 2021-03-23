@@ -202,13 +202,16 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
         repaint();
     }
 
+    private boolean isQuantConfigPanelNeeded() {
+         return (m_quantitationType == QuantitationMethod.Type.LABEL_FREE  || ( m_quantMethodParamsPanel != null && ((Boolean)m_quantMethodParamsPanel.getQuantParams().get("label_free_quant_config"))) );         
+    }
+        
     //for step 2
     protected void displayLinkRawFilesPanel() {
 
         m_step = STEP_PANEL_LINK_RAW_FILES;
 
-        Map<String, Object> quantiParams = m_quantMethodParamsPanel.getQuantParams();
-        if (m_quantitationType == QuantitationMethod.Type.LABEL_FREE || ((Boolean)quantiParams.get("label_free_quant_config")) ) {
+        if (isQuantConfigPanelNeeded()) {
           setButtonName(DefaultDialog.BUTTON_OK, "Next");
           setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
         } else {
@@ -492,8 +495,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
                 displayLinkRawFilesPanel();
                 break;
             case STEP_PANEL_LINK_RAW_FILES:
-                Map<String, Object> quantiParams = m_quantMethodParamsPanel.getQuantParams();
-                if (m_quantitationType == QuantitationMethod.Type.LABEL_FREE || ((Boolean)quantiParams.get("label_free_quant_config")) ) {
+                if (isQuantConfigPanelNeeded()) {
                     displayLabelFreeParamsPanel();
                 } 
                 break;
@@ -520,8 +522,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
                 return false;
             case STEP_PANEL_LINK_RAW_FILES:
                 if (checkRawFiles()) {
-                  Map<String, Object> quantiParams = m_quantMethodParamsPanel.getQuantParams();
-                  if (m_quantitationType == QuantitationMethod.Type.LABEL_FREE || ((Boolean)quantiParams.get("label_free_quant_config")) ) {
+                  if (isQuantConfigPanelNeeded()) {
                     displayNextPanel();
                   } else {
                     // LINK_RAW_FILE was the last panel, hide tje dialog by returning true

@@ -17,29 +17,21 @@
 package fr.proline.studio.rsmexplorer.gui.renderer;
 
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon.PepIonStatus;
-import fr.proline.studio.rsmexplorer.gui.xic.QuantPeptideTableModel;
 import fr.proline.studio.utils.IconManager;
 import java.util.HashMap;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.Desktop;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.prefs.Preferences;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import org.openide.util.NbPreferences;
-import org.slf4j.LoggerFactory;
 
 /**
  *

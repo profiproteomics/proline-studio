@@ -136,7 +136,7 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         cols[COL_X_ID] = colX;
         cols[COL_Y_ID] = colY;
 
-        update(cols, null); //by call this methode, min max X, min max Y are calculated
+      //  update(cols, null); //by call this methode, min max X, min max Y are calculated
 
         // Color parameter
         ParameterList colorParameteList = new ParameterList("Colors");
@@ -188,6 +188,8 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
 
         m_logAlgoParameter.addLinkedParameters(linkedParameters);
 
+        update(cols, null); //by call this methode, min max X, min max Y are calculated
+          
         int selection = Integer.parseInt(m_logAlgoParameter.getStringValue());
         linkedParameters.valueChanged((String) logOptions[selection], objectTable[selection]);
 

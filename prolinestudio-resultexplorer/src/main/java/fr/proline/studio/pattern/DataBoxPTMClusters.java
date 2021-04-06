@@ -221,7 +221,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         
         TaskError taskError = ti.getTaskError();
         if (taskError != null) {
-            if (taskError.getErrorTitle().equals(DatabasePTMsTask.ERROR_PTM_CLUSTER_LOADING)) {
+            if (DatabasePTMsTask.ERROR_PTM_CLUSTER_LOADING.equals(taskError.getErrorTitle()) ) {
                 JOptionPane.showMessageDialog(((JPanel) getDataBoxPanelInterface()), "To display Modification Sites or Modification Clusters, you must run \"Identify Modification Sites\" beforehand.", taskError.getErrorTitle(), JOptionPane.WARNING_MESSAGE);      
             } else {
                 JOptionPane.showMessageDialog(((JPanel) getDataBoxPanelInterface()), taskError.getErrorText(), DatabasePTMsTask.ERROR_PTM_CLUSTER_LOADING, JOptionPane.ERROR_MESSAGE);

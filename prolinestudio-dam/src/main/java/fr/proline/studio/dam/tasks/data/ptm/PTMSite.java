@@ -185,8 +185,7 @@ public class PTMSite {
                 proba = pepMatch.getPtmSiteProperties().getMascotProbabilityBySite().get(m_ptmSpecificity.toOtherReadablePtmString(position));
             }
             //END VDS Workaround
-
-            if (proba > bestProba[0]) {
+            if (proba != null && proba > bestProba[0]) {
                 bestPM[0] = pepMatch;
                 bestProba[0] = proba;
             }

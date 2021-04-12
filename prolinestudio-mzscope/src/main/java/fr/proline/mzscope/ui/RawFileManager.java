@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.JOptionPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +71,12 @@ public class RawFileManager {
             files.put(file.getName(), currentFile);
             logger.info("mzML Rawfile {} added to RawFileManager",file.getAbsolutePath());
         } else if(file.getAbsolutePath().toLowerCase().endsWith(".d")){
-            currentFile = new TimstofRawFile(file);
+            String[] options = {TimstofRawFile.MS1_SINGLE_SPECTRA, TimstofRawFile.MS1_SPECTRA_PER_SCAN};
+            int reply = JOptionPane.showOptionDialog(null, "MS1 Spectra display", "MS1 Format",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE, null, options, TimstofRawFile.MS1_SINGLE_SPECTRA);
+            if (reply == JOptionPane.YES_OPTION) 
+                currentFile = new TimstofRawFile(file);
+            else
+                currentFile = new TimstofRawFile(file, TimstofRawFile.MS1_SPECTRA_PER_SCAN);
             files.put(file.getName(), currentFile);
             logger.info("TimsTof Rawfile {} added to RawFileManager",file.getAbsolutePath());
         }

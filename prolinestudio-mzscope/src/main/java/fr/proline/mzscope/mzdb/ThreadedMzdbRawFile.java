@@ -266,6 +266,13 @@ public class ThreadedMzdbRawFile implements IRawFile {
     
     @Override
     public void closeIRawFile() {
-        mzdbRawFile.closeIRawFile();
+     try {
+         Future future = service.submit(() -> {
+             mzdbRawFile.closeIRawFile();
+         });
+         future.get();
+      } catch (InterruptedException | ExecutionException ex) {
+         logger.error("mzdbRawFile clise failed", ex);
+      }         
     }     
 }

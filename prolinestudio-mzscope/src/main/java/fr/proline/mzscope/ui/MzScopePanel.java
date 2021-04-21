@@ -165,7 +165,7 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
     public void openRaw(List<File> files, boolean display) {
         List<IRawFile> rawfiles = new ArrayList();
         for (File f : files) {
-            IRawFile rawfile = RawFileManager.getInstance().getFile(f.getName());
+            IRawFile rawfile = RawFileManager.getInstance().getFile(f.getAbsolutePath());
             if (rawfile == null) {
                 rawfile = RawFileManager.getInstance().addRawFile(f);
             }
@@ -177,7 +177,7 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
     }
 
     public void openRawAndExtract(File file, final double moz, final double elutionTime, final double firstScanTime, final double lastScanTime) {
-        IRawFile tmpRawFile = RawFileManager.getInstance().getFile(file.getName());
+        IRawFile tmpRawFile = RawFileManager.getInstance().getFile(file.getAbsolutePath());
         if (tmpRawFile == null) {
             tmpRawFile = RawFileManager.getInstance().addRawFile(file);
         }

@@ -475,8 +475,12 @@ public abstract class AbstractPeptideSpectrumPanel extends HourglassPanel implem
     m_dataSet.addSeries(SERIES_NAME, data);
 
     // Set title
-    String title = "Query " + msQuery.getInitialId() + " - " + p.getSequence();
-    m_chart.setTitle(title);
+    StringBuffer title = new StringBuffer("Query ");
+    title.append(msQuery.getInitialId()).append(" - ").append(p.getSequence());
+    if(!p.getPtmString().isEmpty() && p.getTransientData().isPeptideReadablePtmStringLoaded())
+      title.append(" [").append(p.getTransientData().getPeptideReadablePtmString().getReadablePtmString()).append("] ");
+      title.append(" ").append(pm.getCharge()).append("+");
+    m_chart.setTitle(title.toString());
 
     m_spectrumPanel.setBackground(Color.white);
 

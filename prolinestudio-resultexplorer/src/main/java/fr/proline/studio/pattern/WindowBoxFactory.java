@@ -634,13 +634,13 @@ public class WindowBoxFactory {
         return winBox;
     }
 
-//    public static WindowBox getSystemTaskLogWindowBox() {
-//        AbstractDataBox[] boxes = new AbstractDataBox[1];
-//        boxes[0] = new DataBoxSystemTasks();
-//
-//        WindowBox winBox = new WindowBox("Server Tasks", generatePanel(boxes), boxes[0], null);
-//        return winBox;
-//    }
+    public static WindowBox getSystemTaskLogWindowBox() {
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        boxes[0] = new DataBoxSystemTasks();
+
+        WindowBox winBox = new WindowBox("Server Tasks", generatePanel(boxes), boxes[0], null);
+        return winBox;
+    }
 
     public static WindowBox getDataAnalyzerWindowBox() {
         AbstractDataBox[] boxes = new AbstractDataBox[2];
@@ -651,11 +651,12 @@ public class WindowBoxFactory {
     }
 
     public static WindowBox[] getSystemMonitoringWindowBox() {
-        WindowBox[] m_windowBoxes = new WindowBox[1]; //2
+        WindowBox[] m_windowBoxes = new WindowBox[2]; //2
         m_windowBoxes[0] = WindowBoxFactory.getTaskListWindowBox(); //JPM.DOCK.TEST
-       // m_windowBoxes[1] = WindowBoxFactory.getSystemTaskLogWindowBox();
+        m_windowBoxes[1] = WindowBoxFactory.getSystemTaskLogWindowBox();
 
-
+//        WindowBox[] m_windowBoxes = new WindowBox[1];
+//        m_windowBoxes[0] = WindowBoxFactory.getTaskListWindowBox();
         return m_windowBoxes;
     }
 

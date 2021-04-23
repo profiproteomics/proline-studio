@@ -265,7 +265,7 @@ public class XicStatusRenderer extends DefaultTableCellRenderer implements Mouse
                     } else {
                         setIcon(IconManager.getIcon(IconManager.IconType.INVALIDATED_LOCALLY));
                     }
-
+                    
                     break;
                 case SELECTED_AUTO: //2
                 case SELECTED_MANUAL: //3

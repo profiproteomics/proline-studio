@@ -21,7 +21,6 @@ import fr.proline.logparser.model.LogTask;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
-import fr.proline.studio.info.InfoInterface;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.TablePopupMenu;
 import java.awt.Component;
@@ -50,7 +49,7 @@ public class ServerLogTaskListView extends JScrollPane implements TaskListInterf
     private ArrayList<LogTask> m_taskList;//data model used by TableModel
     private ServerLogTaskTable m_table;
     private ServerLogTaskTableModel m_tableModel;
-    private CompoundTableModel m_CompoundTableModel;
+    private CompoundTableModel m_compoundTableModel;
 
     ServerLogTaskListView(ServerLogControlPanel control) {
 
@@ -60,16 +59,16 @@ public class ServerLogTaskListView extends JScrollPane implements TaskListInterf
         this.setPreferredSize(new Dimension(1400, 250));
         m_taskList = new ArrayList();
         m_tableModel = new ServerLogTaskTableModel();
-        m_CompoundTableModel = new CompoundTableModel(m_tableModel, true);//true = Filter
+        m_compoundTableModel = new CompoundTableModel(m_tableModel, true);//true = Filter
         m_table = new ServerLogTaskTable();
-        m_table.setModel(m_CompoundTableModel);
+        m_table.setModel(m_compoundTableModel);
         m_table.init();
         this.setViewportView(m_table);
         m_table.setFillsViewportHeight(true);
     }
 
     public CompoundTableModel getCompoundTableModel() {
-        return m_CompoundTableModel;
+        return m_compoundTableModel;
     }
 
     public ServerLogTaskTable getTable() {
@@ -143,6 +142,7 @@ public class ServerLogTaskListView extends JScrollPane implements TaskListInterf
             if (!lsm.isSelectionEmpty()) {
                 int sortedIndex = lsm.getMinSelectionIndex();//only the first one
                 int selectedIndex = m_table.convertRowIndexToModel(sortedIndex);
+                selectedIndex = m_compoundTableModel.convertCompoundRowToBaseModelRow(selectedIndex);
                 LogTask task = m_taskList.get(selectedIndex);
                 String taskOrder = (task == null) ? "" : "" + task.getTaskOrder();
                 m_ctrl.valueChanged(task);
@@ -158,12 +158,16 @@ public class ServerLogTaskListView extends JScrollPane implements TaskListInterf
 
         @Override
         public String getExportRowCell(int row, int col) {
-            return m_tableModel.getExportRowCell(convertRowIndexToModel(row), convertColumnIndexToModel(col));
+            int selectedIndex = convertRowIndexToModel(row);
+            selectedIndex = m_compoundTableModel.convertCompoundRowToBaseModelRow(selectedIndex);
+            return m_tableModel.getExportRowCell(selectedIndex, convertColumnIndexToModel(col));
         }
 
         @Override
         public ArrayList<ExportFontData> getExportFonts(int row, int col) {
-            return m_tableModel.getExportFonts(convertRowIndexToModel(row), convertColumnIndexToModel(col));
+            int selectedIndex = convertRowIndexToModel(row);
+            selectedIndex = m_compoundTableModel.convertCompoundRowToBaseModelRow(selectedIndex);
+            return m_tableModel.getExportFonts(selectedIndex, convertColumnIndexToModel(col));
         }
 
         @Override

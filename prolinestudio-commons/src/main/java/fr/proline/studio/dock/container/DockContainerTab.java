@@ -96,11 +96,6 @@ public class DockContainerTab extends DockContainerMulti {
 
 
 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> origin/feature/WONetbeans
     public void add(DockContainer container, DockPosition position)  throws DockException {
 
         if (! (container instanceof DockComponent)) {

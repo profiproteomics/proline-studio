@@ -61,7 +61,7 @@ public class ValidationTask extends AbstractJMSTask  {
 
     public enum ValidationParameters {
 
-        EXPECTED_FDR_METHOD("expected_fdr_method", "FDR control method"),
+        FDR_METHOD("fdr_method", "FDR control method"),
         EXPECTED_FDR("expected_fdr", "FDR"),
         EXPECTED_FDR_PARAM("expected_fdr_parameter", "FDR Variable"),
         PROTEIN_EXPECTED_FDR("protein_expected_fdr", "Protein FDR"),
@@ -264,21 +264,29 @@ public class ValidationTask extends AbstractJMSTask  {
             m_argumentsMap.containsKey(ValidationParameters.PEPTIDE_EXPECTED_FDR.key) ||
             m_argumentsMap.containsKey(ValidationParameters.PROTEIN_EXPECTED_FDR.key)) {
           
-          if ((m_argumentsMap.containsKey(ValidationParameters.EXPECTED_FDR_METHOD.key))) {
-              fdrConfig.put("method_name", (m_argumentsMap.get(ValidationParameters.EXPECTED_FDR_METHOD.key)));
-          }
-
-          if (m_argumentsMap.containsKey(ValidationParameters.TD_ANALYZER.key)) {
-              HashMap tdAnalyzerConfig = new HashMap();
-              tdAnalyzerConfig.put("method_name", m_argumentsMap.get(ValidationParameters.TD_ANALYZER.key));
-
-              if (m_argumentsMap.containsKey("db_ratio")) {
-                  HashMap tdAnalyzerParams = new HashMap();
-                  tdAnalyzerParams.put("ratio", m_argumentsMap.get("db_ratio"));            
-                  tdAnalyzerConfig.put("params", tdAnalyzerParams);
+          if ((m_argumentsMap.containsKey(ValidationParameters.FDR_METHOD.key))) {
+              fdrConfig.put("method_name", (m_argumentsMap.get(ValidationParameters.FDR_METHOD.key)));
+              
+              if (m_argumentsMap.get(ValidationParameters.FDR_METHOD.key).equals("TARGET_DECOY") ) {
+                // force basic tdAnalyzer usage
+                HashMap tdAnalyzerConfig = new HashMap();
+                tdAnalyzerConfig.put("method_name", "BASIC");
+                fdrConfig.put("td_analyzer_config", tdAnalyzerConfig);
               }
-              fdrConfig.put("td_analyzer_config", tdAnalyzerConfig);            
+              
           }
+          
+//          if (m_argumentsMap.containsKey(ValidationParameters.TD_ANALYZER.key)) {
+//              HashMap tdAnalyzerConfig = new HashMap();
+//              tdAnalyzerConfig.put("method_name", m_argumentsMap.get(ValidationParameters.TD_ANALYZER.key));
+//
+//              if (m_argumentsMap.containsKey("db_ratio")) {
+//                  HashMap tdAnalyzerParams = new HashMap();
+//                  tdAnalyzerParams.put("ratio", m_argumentsMap.get("db_ratio"));            
+//                  tdAnalyzerConfig.put("params", tdAnalyzerParams);
+//              }
+//              fdrConfig.put("td_analyzer_config", tdAnalyzerConfig);            
+//          }
           
           params.put("fdr_analyzer_config", fdrConfig);
         }

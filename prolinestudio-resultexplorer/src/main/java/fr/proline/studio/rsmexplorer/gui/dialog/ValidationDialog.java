@@ -60,8 +60,8 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
     private final static String[] FDR_METHODS_VALUES = {"Target/Decoy", "BH"};
     private final static String[] FDR_METHODS_ASSOCIATED_KEYS = {"TARGET_DECOY", "BH"};
 
-    private final static String[] TD_ANALYZER_VALUES = {"Basic", "Gorshkov"};
-    private final static String[] TD_ANALYZER_VALUES_ASSOCIATED_KEYS = {"BASIC", "GORSHKOV"};
+//    private final static String[] TD_ANALYZER_VALUES = {"Basic", "Gorshkov"};
+//    private final static String[] TD_ANALYZER_VALUES_ASSOCIATED_KEYS = {"BASIC", "GORSHKOV"};
     private final static String[] FDR_ON_VALUES = {null, "Score", "e-Value", "Adjusted e-Value", "Identity p-Value", "Homology p-Value"};
     private final static String[] FDR_ON_VALUES_ASSOCIATED_KEYS = {null, "SCORE", "MASCOT_EVALUE", "MASCOT_ADJUSTED_EVALUE", "SCORE_IT_P-VALUE", "SCORE_HT_P-VALUE"};
 
@@ -84,8 +84,8 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
     private AbstractParameter m_proteinFdrFilterParameter;
     private AbstractParameter m_peptideFdrFilterParameter;
     
-    private ObjectParameter<String> m_tdAnalyzerName;
-    private AbstractParameter m_tdAnalyzerParam;
+//    private ObjectParameter<String> m_tdAnalyzerName;
+//    private AbstractParameter m_tdAnalyzerParam;
             
     private AbstractParameter m_propagatePsmFiltersParameter;
     private JCheckBox m_propagatePsmFiltersCheckBox = null;
@@ -106,8 +106,8 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
     private JCheckBox m_fdrCheckbox = null;
     private JComboBox<String> m_tdAnalyzerComboBox = null;
     private JPanel m_tdParamsPanel;
-    private JLabel m_tdAnalyzerParamLabel = null;
-    private JTextField m_tdAnalyzerParamTF = null;
+//    private JLabel m_tdAnalyzerParamLabel = null;
+//    private JTextField m_tdAnalyzerParamTF = null;
     
     // protein FDR components
     private JLabel m_proteinFdrLabel = null;
@@ -163,8 +163,9 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         setInternalComponent(createInternalPanel());
         
         updatePSMFDRObjects(m_fdrFilterParameter.isUsed());
+        updatePeptideFDRConsistency();
         updateSelectedFilters();
-
+        
         restoreScoringTypeParameter(NbPreferences.root());
         restoreTypicalProteinParameters(NbPreferences.root());
 
@@ -433,7 +434,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 2, 5, 2);
         
-        m_tdAnalyzerParamLabel = new JLabel("ratio");
+//        m_tdAnalyzerParamLabel = new JLabel("ratio");
 
         c.gridy = 0;
         c.gridx = 0;
@@ -447,21 +448,21 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         c.gridx++;                
         m_tdParamsPanel.add(m_fdrPropertyComboBox, c);
 
-        c.gridx++;
-        m_tdParamsPanel.add(m_tdAnalyzerComboBox, c);
-
-        m_tdAnalyzerComboBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updatePSMFDRObjects(m_fdrCheckbox.isSelected());
-            }
-        });
-
-        c.gridx++;
-        m_tdParamsPanel.add(m_tdAnalyzerParamLabel, c);
-
-        c.gridx++;
-        m_tdParamsPanel.add(m_tdAnalyzerParamTF, c);
+//        c.gridx++;
+//        m_tdParamsPanel.add(m_tdAnalyzerComboBox, c);
+//
+//        m_tdAnalyzerComboBox.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                updatePSMFDRObjects(m_fdrCheckbox.isSelected());
+//            }
+//        });
+//
+//        c.gridx++;
+//        m_tdParamsPanel.add(m_tdAnalyzerParamLabel, c);
+//
+//        c.gridx++;
+//        m_tdParamsPanel.add(m_tdAnalyzerParamTF, c);
         
         c.gridx++;
         c.weightx = 0.1;
@@ -481,21 +482,21 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         m_fdrMethodComboBox.setEnabled(enabled);
 
         if (enabled) {
-            Object analyzer = m_tdAnalyzerComboBox.getSelectedItem();
-            boolean GorshkovParamsVisibility = (analyzer != null) && (((String)analyzer).equalsIgnoreCase("Gorshkov"));
-            m_tdAnalyzerParamLabel.setVisible(GorshkovParamsVisibility);
-            m_tdAnalyzerParamTF.setVisible(GorshkovParamsVisibility);
+//            Object analyzer = m_tdAnalyzerComboBox.getSelectedItem();
+//            boolean GorshkovParamsVisibility = (analyzer != null) && (((String)analyzer).equalsIgnoreCase("Gorshkov"));
+//            m_tdAnalyzerParamLabel.setVisible(GorshkovParamsVisibility);
+//            m_tdAnalyzerParamTF.setVisible(GorshkovParamsVisibility);
 
             Object fdrMethod = m_fdrMethodComboBox.getSelectedItem();
             boolean isTargetDecoyFdr = (fdrMethod != null) && (((String)fdrMethod).toLowerCase().contains("decoy"));
             setPanelEnabled(m_tdParamsPanel, isTargetDecoyFdr);
-            m_tdAnalyzerName.setUsed(isTargetDecoyFdr);
-            m_tdAnalyzerParam.setUsed(isTargetDecoyFdr);
+//            m_tdAnalyzerName.setUsed(isTargetDecoyFdr);
+//            m_tdAnalyzerParam.setUsed(isTargetDecoyFdr);
             m_fdrPropertyParameter.setUsed(isTargetDecoyFdr);
 
         } else {
-          m_tdAnalyzerName.setUsed(false);
-          m_tdAnalyzerParam.setUsed(false);
+//          m_tdAnalyzerName.setUsed(false);
+//          m_tdAnalyzerParam.setUsed(false);
           m_fdrPropertyParameter.setUsed(false);
         }
           m_fdrFilterParameter.setUsed(enabled);
@@ -528,6 +529,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         
         m_peptideFdrMethodComboBox.addActionListener((ActionEvent e) -> {
           synchFDRMethods((JComboBox<String>)e.getSource());
+          updatePeptideFDRConsistency();
         });
         
         c.gridx++;
@@ -782,6 +784,17 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
       }
       if (source != m_proteinFdrMethodComboBox) {
         m_proteinFdrMethodComboBox.setSelectedItem(source.getSelectedItem());
+      }      
+    }
+    
+    private void updatePeptideFDRConsistency() {
+      Object fdrMethod = m_peptideFdrMethodComboBox.getSelectedItem();
+      boolean isTargetDecoyFdr = (fdrMethod != null) && (((String)fdrMethod).toLowerCase().contains("decoy"));
+      if (isTargetDecoyFdr) {
+        updatePeptideFDRObjects(false);
+        m_peptideFdrCheckbox.setEnabled(false);
+      } else {
+        m_peptideFdrCheckbox.setEnabled(true);        
       }
     }
     
@@ -791,9 +804,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         m_peptideFdrTextField.setEnabled(enabled);
         m_peptideFdrPercentageLabel.setEnabled(enabled);
         m_peptideFdrMethodComboBox.setEnabled(enabled);
-        
         m_peptideFdrFilterParameter.setUsed(enabled);
-        
     }
 
     private void createParameters() {
@@ -853,22 +864,22 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
           synchFDRMethods((JComboBox<String>)e.getSource());
         });
 
-        m_fdrMethodParameter = new ObjectParameter<>(ValidationTask.ValidationParameters.EXPECTED_FDR_METHOD.key,ValidationTask.ValidationParameters.EXPECTED_FDR_METHOD.name, m_fdrMethodComboBox, FDR_METHODS_VALUES, FDR_METHODS_ASSOCIATED_KEYS, 0, null);
+        m_fdrMethodParameter = new ObjectParameter<>(ValidationTask.ValidationParameters.FDR_METHOD.key,ValidationTask.ValidationParameters.FDR_METHOD.name, m_fdrMethodComboBox, FDR_METHODS_VALUES, FDR_METHODS_ASSOCIATED_KEYS, 0, null);
         m_fdrMethodParameter.setUsed(true);
         m_fdrMethodParameter.setCompulsory(false);
         m_parameterList.add(m_fdrMethodParameter);
         
-        m_tdAnalyzerComboBox = new JComboBox<>(TD_ANALYZER_VALUES);
-        m_tdAnalyzerName = new ObjectParameter<>(ValidationTask.ValidationParameters.TD_ANALYZER.key, ValidationTask.ValidationParameters.TD_ANALYZER.name, m_tdAnalyzerComboBox, TD_ANALYZER_VALUES, TD_ANALYZER_VALUES_ASSOCIATED_KEYS, 0, null);
-        m_tdAnalyzerName.setUsed(false);
-        m_tdAnalyzerName.setCompulsory(false);
-        m_parameterList.add(m_tdAnalyzerName);
+//        m_tdAnalyzerComboBox = new JComboBox<>(TD_ANALYZER_VALUES);
+//        m_tdAnalyzerName = new ObjectParameter<>(ValidationTask.ValidationParameters.TD_ANALYZER.key, ValidationTask.ValidationParameters.TD_ANALYZER.name, m_tdAnalyzerComboBox, TD_ANALYZER_VALUES, TD_ANALYZER_VALUES_ASSOCIATED_KEYS, 0, null);
+//        m_tdAnalyzerName.setUsed(false);
+//        m_tdAnalyzerName.setCompulsory(false);
+//        m_parameterList.add(m_tdAnalyzerName);
 
-        m_tdAnalyzerParamTF = new JTextField(5);
-        m_tdAnalyzerParam = new DoubleParameter("db_ratio", "Ratio", m_tdAnalyzerParamTF, new Double(1), new Double(0), Double.MAX_VALUE);
-        m_tdAnalyzerParam.setUsed(false);
-        m_tdAnalyzerParam.setCompulsory(false);
-        m_parameterList.add(m_tdAnalyzerParam);
+//        m_tdAnalyzerParamTF = new JTextField(5);
+//        m_tdAnalyzerParam = new DoubleParameter("db_ratio", "Ratio", m_tdAnalyzerParamTF, new Double(1), new Double(0), Double.MAX_VALUE);
+//        m_tdAnalyzerParam.setUsed(false);
+//        m_tdAnalyzerParam.setCompulsory(false);
+//        m_parameterList.add(m_tdAnalyzerParam);
 
         m_peptidePrefilterParameters = new AbstractParameter[1];
         m_peptidePrefilterParameters[0] = null;
@@ -1021,7 +1032,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
             if (!( m_softwareName.equalsIgnoreCase("MASCOT") || (m_softwareName.equals("UNKNOWN"))) ) {
 
               
-                AbstractParameter parameter = m_parameterList.getParameter(ValidationTask.ValidationParameters.EXPECTED_FDR_METHOD.key);
+                AbstractParameter parameter = m_parameterList.getParameter(ValidationTask.ValidationParameters.FDR_METHOD.key);
                 if (parameter.isUsed() && parameter.getStringValue().equals(FDR_METHODS_VALUES[1])) {
                     setStatus(true, "Peptide's BH FDR filtering is only allowed for Mascot datasets");
                     highlight(parameter.getComponent());

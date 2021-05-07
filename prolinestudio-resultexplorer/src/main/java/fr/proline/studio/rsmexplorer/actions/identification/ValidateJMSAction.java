@@ -147,11 +147,29 @@ public class ValidateJMSAction extends AbstractRSMAction {
         } 
     }
     
+
     private void removePreviousValidation(DataSetNode dataSetNode, boolean removeInHierarchy){
-        if(removeInHierarchy){
+        
+        if (removeInHierarchy) {
+        Runnable callback = new Runnable() {
+            @Override
+            public void run() {
+                removePreviousValidationImpl(dataSetNode, removeInHierarchy);
+            }
+
+        };
+        
+        IdentificationTree.getCurrentTree().loadNode(dataSetNode, callback, true);
+        } else {
+            removePreviousValidationImpl(dataSetNode, removeInHierarchy);
+        }
+    }
+    
+    private void removePreviousValidationImpl(DataSetNode dataSetNode, boolean removeInHierarchy){
+        if (removeInHierarchy) {
             Enumeration e = dataSetNode.children();
             while(e.hasMoreElements()){
-                removePreviousValidation((DataSetNode) e.nextElement(),removeInHierarchy);
+                removePreviousValidationImpl((DataSetNode) e.nextElement(),removeInHierarchy);
             }
         }
         

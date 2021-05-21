@@ -83,7 +83,7 @@ public class Installer extends VersionInstaller {
 //            productVersion = moduleVersion.substring(0, secIndex);
 
         //Hardcoded # of Milestone !
-        String buildnumber = isSnapshot ? productVersion+" Milestone 1.b ("+moduleBuildDate+")" : productVersion; //specify if Milestone, Release Candidate or release (or nothing = release)
+        String buildnumber = isSnapshot ? productVersion+" Milestone 2 ("+moduleBuildDate+")" : productVersion; //specify if Milestone, Release Candidate or release (or nothing = release)
                               
         // set the proline version for the application title
         System.setProperty("netbeans.buildnumber", buildnumber);  //"1.0.1 (alpha : build date @build.date@)"

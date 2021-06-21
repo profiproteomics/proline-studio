@@ -111,7 +111,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
         setTitle("Quantitation Wizard");
-        setDocumentationSuffix("id.2dlolyb");
+        setDocumentationSuffix("id.3ls5o66");
         setSize(1000, 768);
         setResizable(true);
 

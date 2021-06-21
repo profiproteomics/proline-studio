@@ -150,7 +150,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
 
         setTitle("Identification Validation");
 
-        setDocumentationSuffix("id.46r0co2");
+        setDocumentationSuffix("id.42ddq1a");
 
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);

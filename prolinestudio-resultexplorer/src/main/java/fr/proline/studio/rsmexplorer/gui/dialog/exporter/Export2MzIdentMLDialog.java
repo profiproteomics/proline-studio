@@ -53,7 +53,7 @@ public class Export2MzIdentMLDialog extends DefaultDialog {
         setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);
-        setDocumentationSuffix("id.37m2jsg");
+        setDocumentationSuffix("id.338fx5o");
         m_paramPanel = new Export2MzIdentMLParamPanel(this);
         this.setHelpHeader(IconManager.getIcon(IconManager.IconType.INFORMATION),"MzIdentML parameters", "Spectrum Matches should have been generated before exporting to MzidentML format.<br> It is also recommended to jave run 'Retrieve proteins sequences'.");
         setInternalComponent(m_paramPanel);

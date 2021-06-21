@@ -101,7 +101,7 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
 
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);
-        setDocumentationSuffix("h.7476uhv1hgtn");
+        setDocumentationSuffix("h.1tuee74");
         setResizable(true);
         setMinimumSize(new Dimension(200, 240));
 

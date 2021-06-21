@@ -46,7 +46,7 @@ public class ChangeTypicalProteinDialog extends DefaultDialog {
 
         setTitle("Change Typical Protein");
 
-        setDocumentationSuffix("id.111kx3o");
+        setDocumentationSuffix("id.wnyagw");
 
         setStatusVisible(false);
 

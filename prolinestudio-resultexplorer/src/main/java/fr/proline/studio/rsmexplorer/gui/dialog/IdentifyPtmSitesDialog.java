@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 public class IdentifyPtmSitesDialog extends DefaultDialog {
 
-  private final List<Ptm> m_ptms;  
+  private final List<Ptm> m_ptms;
   private List<Ptm> m_selectedPtms;
   private HashMap<String, Ptm> m_ptmsByFullName;
   private JLabel m_clusteringMethod;
@@ -40,8 +40,9 @@ public class IdentifyPtmSitesDialog extends DefaultDialog {
   public IdentifyPtmSitesDialog(Window parent, List<Ptm> ptms) {
     super(parent, Dialog.ModalityType.APPLICATION_MODAL);
     ptms.sort(Comparator.comparing(Ptm::getShortName));
-    m_ptms = ptms;        
-    setDocumentationSuffix("h.uro34erlji2q");
+    m_ptms = ptms;
+    m_selectedPtms = new ArrayList<>(m_ptms);
+      setDocumentationSuffix("h.2wwbldi");
     setTitle("Identify Ptm sites");
     setHelpHeaderText("Select the list of modifications of interest <br>" +
             "(other modifications will be ignored during clustering) and set <br>" +
@@ -60,7 +61,7 @@ public class IdentifyPtmSitesDialog extends DefaultDialog {
         m_ptmsByFullName.put(nextPtm.getFullName(),nextPtm);
       });
   }
-  
+
   private void initInternalPanel() {
 
     JPanel clusteringMethodPanel = new JPanel(new GridBagLayout());
@@ -96,7 +97,7 @@ public class IdentifyPtmSitesDialog extends DefaultDialog {
     JPanel parametersPanel = new JPanel();
     parametersPanel.setLayout(new java.awt.GridBagLayout());
 
-    JPanel ptmOIPanel = new JPanel(new GridBagLayout());        
+    JPanel ptmOIPanel = new JPanel(new GridBagLayout());
     //ptmOIPanel.setBorder(BorderFactory.createTitledBorder("PTMs of interest"));
     c = new GridBagConstraints();
     c.gridx = 0;
@@ -105,7 +106,7 @@ public class IdentifyPtmSitesDialog extends DefaultDialog {
     c.anchor = GridBagConstraints.NORTHWEST;
     c.fill = GridBagConstraints.HORIZONTAL;
     c.insets = new java.awt.Insets(5, 15, 5, 5);
-    
+
     final JCheckBox allSelectedChkBox = new JCheckBox("select/unselect all",true);
     allSelectedChkBox.addActionListener(evt -> {
         boolean isSelectAll = ((JCheckBox) evt.getSource()).isSelected();
@@ -120,10 +121,10 @@ public class IdentifyPtmSitesDialog extends DefaultDialog {
                 }
             }
         }
-    });     
+    });
     ptmOIPanel.add(allSelectedChkBox, c);
     c.gridx++;
-     
+
     for (Ptm ptm : m_ptms) {
       JCheckBox checkbox = new JCheckBox(ptm.getFullName(), true);
       checkbox.addActionListener(evt -> {
@@ -134,7 +135,7 @@ public class IdentifyPtmSitesDialog extends DefaultDialog {
     }
 
     JScrollPane m_scrollPane = new JScrollPane();
-    m_scrollPane.setBorder(BorderFactory.createTitledBorder("PTMs of interest")); 
+    m_scrollPane.setBorder(BorderFactory.createTitledBorder("PTMs of interest"));
     m_scrollPane.setViewportView(ptmOIPanel);
     m_scrollPane.createVerticalScrollBar();
 
@@ -144,7 +145,7 @@ public class IdentifyPtmSitesDialog extends DefaultDialog {
     c.insets = new java.awt.Insets(5, 5, 5, 5);
     c.gridx = 0;
     c.gridy = 0;
-   
+
     parametersPanel.add(clusteringMethodPanel, c);
     c.gridy++;
     c.weighty=1;
@@ -153,13 +154,13 @@ public class IdentifyPtmSitesDialog extends DefaultDialog {
 
      setInternalComponent(parametersPanel);
   }
-  
+
   private void setPTMSelectStatus(Ptm ptm, boolean selectStatus){
     if (selectStatus) {
         m_selectedPtms.add(ptm);
     } else {
         m_selectedPtms.remove(ptm);
-    }      
+    }
   }
 
   public List<Long> getPtms() {

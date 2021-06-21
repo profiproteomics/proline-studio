@@ -97,7 +97,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         setMinimumSize(new Dimension(720, 480));
         setResizable(true);
 
-        setDocumentationSuffix("h.eb8nfjv41vkz");
+        setDocumentationSuffix("h.1smtxgf");
 
         setButtonVisible(BUTTON_CANCEL, true);
         setButtonName(BUTTON_OK, "OK");

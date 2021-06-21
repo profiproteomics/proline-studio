@@ -78,7 +78,7 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
     private AggregateQuantitationDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         setTitle("Aggregate Quantitation Wizard");
-        setDocumentationSuffix("id.i7znpnhacfo6");//id(location) in help file
+        setDocumentationSuffix("id.2eclud0");//id(location) in help file
         setSize(750, 750);
         setResizable(true);
     }

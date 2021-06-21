@@ -57,7 +57,7 @@ public class GenerateSpectrumMatchesDialog extends DefaultDialog {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
          
         setTitle("Generate Spectrum Matches");
-        setDocumentationSuffix("id.1mrcu09");
+        setDocumentationSuffix("id.1idq7dh");
         setHelpHeaderText("Choose Fragmentation Rule Set that will be used to generate spectrum matches.<br>" +
                 " With force parameter set, new generated spectrum matches will overwrite existing ones.");
         initInternalPanel();

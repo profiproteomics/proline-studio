@@ -41,7 +41,7 @@ public class IdentifyPtmSitesDialog extends DefaultDialog {
     ptms.sort(Comparator.comparing(Ptm::getShortName));
     m_ptms = ptms;
     m_selectedPtms = new ArrayList<>(m_ptms);
-      setDocumentationSuffix("h.uro34erlji2q");
+      setDocumentationSuffix("h.2wwbldi");
     setTitle("Identify Ptm sites");
     setHelpHeaderText("Select the list of modifications of interest <br>" +
             "(other modifications will be ignored during clustering) and set <br>" +

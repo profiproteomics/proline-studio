@@ -59,7 +59,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
     private ServerConnectionDialog(Window parent) {
         super(parent, "Server Connection", " Server Parameter ", "Server Host :");
 
-        setDocumentationSuffix("id.1pxezwc");
+        setDocumentationSuffix("id.2szc72q");
 
         setButtonVisible(BUTTON_DEFAULT, true);
 

@@ -65,7 +65,7 @@ public class MSDiagDialog extends DefaultDialog {
 
         setTitle("Define settings for Statistical Reports");
 
-        setDocumentationSuffix("id.28h4qwu");
+        setDocumentationSuffix("id.1qoc8b1");
 
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);

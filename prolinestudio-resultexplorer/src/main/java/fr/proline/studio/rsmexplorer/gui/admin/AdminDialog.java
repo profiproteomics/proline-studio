@@ -52,7 +52,7 @@ public class AdminDialog extends DefaultDialog  {
         setMinimumSize(new Dimension(400, 360));
         setResizable(true);
 
-        setDocumentationSuffix("h.gktawz9n942e");
+        setDocumentationSuffix("h.3w19e94");
 
         setButtonVisible(BUTTON_CANCEL, false);
         setButtonName(BUTTON_OK, "Close");

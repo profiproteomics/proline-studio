@@ -52,7 +52,7 @@ public class ImportIdentificationDialogUpdated extends DefaultDialog implements 
 
         setTitle("Import Search Results");
 
-        setDocumentationSuffix("id.147n2zr");
+        setDocumentationSuffix("id.319y80a  ");
 
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);

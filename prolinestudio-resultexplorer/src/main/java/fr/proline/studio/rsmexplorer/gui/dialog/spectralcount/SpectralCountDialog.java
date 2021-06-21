@@ -50,7 +50,7 @@ public class SpectralCountDialog extends DefaultDialog {
 
         setResizable(true);
 
-        setDocumentationSuffix("id.1egqt2p");
+        setDocumentationSuffix("id.2mn7vak");
 
         setButtonName(DefaultDialog.BUTTON_OK, "Next");
         setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));

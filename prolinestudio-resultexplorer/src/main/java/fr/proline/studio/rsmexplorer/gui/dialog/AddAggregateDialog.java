@@ -47,7 +47,7 @@ public class AddAggregateDialog extends DefaultDialog {
 
         setTitle("Add Dataset");
 
-        setDocumentationSuffix("id.2p2csry");
+        setDocumentationSuffix("id.2eclud0");
 
         setButtonVisible(BUTTON_DEFAULT, true);
 

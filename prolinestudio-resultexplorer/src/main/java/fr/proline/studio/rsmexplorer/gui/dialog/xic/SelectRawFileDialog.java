@@ -44,7 +44,7 @@ public class SelectRawFileDialog extends DefaultDialog {
 
         setTitle("Select a Raw File");
 
-        setDocumentationSuffix("id.3cqmetx");
+        setDocumentationSuffix("id.3cqmetx");//VDS pas mis a jour , quelle doc ?!
 
         setInternalComponent(createInternalPanel());
 

@@ -16,8 +16,10 @@
  */
   package fr.proline.mzscope.ui;
 
+import fr.proline.mzscope.ui.dialog.IsotopicPredictionParamDialog;
 import fr.proline.mzscope.ui.model.ScanTableModel;
 import fr.profi.ms.model.TheoreticalIsotopePattern;
+import fr.profi.mzdb.algo.DotProductPatternScorer;
 import fr.profi.mzdb.algo.signal.filtering.ISignalSmoother;
 import fr.profi.mzdb.algo.signal.filtering.PartialSavitzkyGolaySmoother;
 import fr.profi.mzdb.algo.signal.filtering.SavitzkyGolaySmoother;
@@ -58,6 +60,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -102,7 +105,9 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
    
    private JButton m_editSignalBtn;
    private JButton m_showCentroidBtn;
-  private JToggleButton m_freezeSpectrumBtn;
+   private JToggleButton m_freezeSpectrumBtn;
+
+   private static final DecimalFormat df = new DecimalFormat("#.###");
 
   class ScansSpinnerModel extends AbstractSpinnerModel {
 
@@ -169,7 +174,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
       displayIPBtn.addActionListener(new ActionListener() {
          @Override
          public void actionPerformed(ActionEvent e) {
-            displayIsotopicPatterns();
+           displayIsotopicPrediction(positionMarker.getValue());
          }
       });
       
@@ -344,56 +349,81 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
           currentSignal.setSignalType(Signal.CENTROID);
       return currentSignal;
     }
-    
-    private void displayIsotopicPatterns() {
-        ipMarkers.stream().forEach((m) -> {
-            scanPlot.removeMarker(m);
-        });
-        ipMarkers = new ArrayList();
-        float ppmTol = MzScopePreferences.getInstance().getMzPPMTolerance();
 
-        //IsotopicPatternUtils.compareIsotopicPatternPredictions(currentScan.getSpectrumData(), positionMarker.getValue(), ppmTol);
+  public void displayIsotopicPrediction(double mozToPredict) {
 
-        Tuple2<Object, TheoreticalIsotopePattern> prediction = IsotopicPatternUtils.predictIsotopicPattern(currentScan.getSpectrumData(), positionMarker.getValue(), ppmTol);
-        TheoreticalIsotopePattern pattern = prediction._2;
-        // search for the index of the user selected mz value
-        int referenceMzIdx = 0;
-        int idx = SpectrumUtils.getNearestPeakIndex(currentScan.getSpectrumData().getMzList(), positionMarker.getValue());
-        for (Tuple2 t : pattern.mzAbundancePairs()) {
-            if (1e6 * (Math.abs(currentScan.getSpectrumData().getMzList()[idx] - (double) t._1) / currentScan.getSpectrumData().getMzList()[idx]) < ppmTol) {
-                break;
-            }
-            referenceMzIdx++;
-        }
+    Spectrum spectrum = currentScan;
 
-        if (referenceMzIdx < pattern.isotopeCount()) {
-            float abundance = currentScan.getSpectrumData().getIntensityList()[idx];
-            float normAbundance = (Float) pattern.mzAbundancePairs()[referenceMzIdx]._2;
-            for (Tuple2 t : pattern.mzAbundancePairs()) {
-                Double mz = (Double) t._1;
-                Float ab = (Float) t._2;
-                PointMarker m = new PointMarker(spectrumPlotPanel, new DataCoordinates(mz, ab * abundance / normAbundance), CyclicColorPalette.getColor(0));
-                ipMarkers.add(m);
-                scanPlot.addMarker(m);
-                int peakIdx = SpectrumUtils.getPeakIndex(currentScan.getSpectrumData().getMzList(), mz, ppmTol);
-                if ((peakIdx != -1) && (currentScan.getSpectrumData().getIntensityList()[peakIdx] < 2.0 * ab * abundance / normAbundance)) {
-                    logger.info("Peak found mz= " + mz + " expected= " + (ab * abundance / normAbundance) + " observed= " + currentScan.getSpectrumData().getIntensityList()[peakIdx]);
-                    PointMarker pm = new PointMarker(spectrumPlotPanel, new DataCoordinates(currentScan.getSpectrumData().getMzList()[peakIdx], currentScan.getSpectrumData().getIntensityList()[peakIdx]), CyclicColorPalette.getColor(5));
-                    ipMarkers.add(pm);
-                    scanPlot.addMarker(pm);
-                }
-            }
-            Double mz = 0.1+((Double)pattern.mzAbundancePairs()[0]._1 + (Double)pattern.mzAbundancePairs()[1]._1)/2.0;
-            Float ab = (Float)pattern.mzAbundancePairs()[0]._2 * 0.75f;
-            StringBuilder labelTxt = new StringBuilder("charge ");
-            labelTxt.append(pattern.charge()).append("+ (").append(prediction._1).append(")");
-            LabelMarker label = new LabelMarker(spectrumPlotPanel, new DataCoordinates(mz, ab * abundance / normAbundance), labelTxt.toString(), ORIENTATION_XY_MIDDLE,ORIENTATION_XY_MIDDLE, CyclicColorPalette.getColor(0));
-            ipMarkers.add(label);
-            scanPlot.addMarker(label);
-
-        }
-        spectrumPlotPanel.repaintUpdateDoubleBuffer();
+    if (referenceSpectrum != null) {
+      IsotopicPredictionParamDialog dialog = new IsotopicPredictionParamDialog(WindowManager.getDefault().getMainWindow());
+      dialog.pack();
+      dialog.setVisible(true);
+      if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+        spectrum = (dialog.getSpectrum() == IsotopicPredictionParamDialog.CURRENT_SPECTRUM) ? currentScan : referenceSpectrum;
+      }
     }
+
+    ipMarkers.stream().forEach((m) -> {
+      scanPlot.removeMarker(m);
+    });
+    ipMarkers = new ArrayList();
+    float ppmTol = MzScopePreferences.getInstance().getMzPPMTolerance();
+
+    //IsotopicPatternUtils.compareIsotopicPatternPredictions(currentScan.getSpectrumData(), positionMarker.getValue(), ppmTol);
+
+    Tuple2<Object, TheoreticalIsotopePattern> prediction = IsotopicPatternUtils.predictIsotopicPattern(spectrum.getSpectrumData(), mozToPredict, ppmTol);
+    displayIsotopes(spectrum, mozToPredict, prediction, ppmTol, 5);
+
+//    // display alternative scoring before prediction re-ranking
+//    Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = DotProductPatternScorer.calcIsotopicPatternHypotheses(spectrum.getSpectrumData(), mozToPredict, ppmTol);
+//
+//    if ((putativePatterns[0]._2.charge() != prediction._2.charge()) || (1e6*(Math.abs(putativePatterns[0]._2.monoMz() - prediction._2.monoMz())/putativePatterns[0]._2.monoMz()) > ppmTol)) {
+//      displayIsotopes(spectrum, mozToPredict, putativePatterns[0], ppmTol, 2);
+//    } else if ((putativePatterns[1]._2.charge() != prediction._2.charge()) || (1e6*(Math.abs(putativePatterns[1]._2.monoMz() - prediction._2.monoMz())/putativePatterns[1]._2.monoMz()) > ppmTol)) {
+//      displayIsotopes(spectrum, mozToPredict, putativePatterns[1], ppmTol, 2);
+//    }
+    
+    spectrumPlotPanel.repaintUpdateDoubleBuffer();
+  }
+
+  private void displayIsotopes(Spectrum spectrum, double mozToPredict, Tuple2<Object, TheoreticalIsotopePattern> scoredPattern, float ppmTol, int colorIndex) {
+    // search for the index of the user selected mz value
+    int referenceMzIdx = 0;
+    TheoreticalIsotopePattern pattern = scoredPattern._2;
+    int idx = SpectrumUtils.getNearestPeakIndex(spectrum.getSpectrumData().getMzList(), mozToPredict);
+    for (Tuple2 t : pattern.mzAbundancePairs()) {
+      if (1e6 * (Math.abs(spectrum.getSpectrumData().getMzList()[idx] - (double) t._1) / spectrum.getSpectrumData().getMzList()[idx]) < ppmTol) {
+        break;
+      }
+      referenceMzIdx++;
+    }
+
+    if (referenceMzIdx < pattern.isotopeCount()) {
+      float abundance = spectrum.getSpectrumData().getIntensityList()[idx];
+      float normAbundance = (Float) pattern.mzAbundancePairs()[referenceMzIdx]._2;
+      for (Tuple2 t : pattern.mzAbundancePairs()) {
+        Double mz = (Double) t._1;
+        Float ab = (Float) t._2;
+        PointMarker m = new PointMarker(spectrumPlotPanel, new DataCoordinates(mz, ab * abundance / normAbundance), CyclicColorPalette.getColor(0));
+        ipMarkers.add(m);
+        scanPlot.addMarker(m);
+        int peakIdx = SpectrumUtils.getPeakIndex(spectrum.getSpectrumData().getMzList(), mz, ppmTol);
+        if ((peakIdx != -1) && (spectrum.getSpectrumData().getIntensityList()[peakIdx] < 2.0 * ab * abundance / normAbundance)) {
+          logger.info("Peak found mz= " + mz + " expected= " + (ab * abundance / normAbundance) + " observed= " + spectrum.getSpectrumData().getIntensityList()[peakIdx]);
+          PointMarker pm = new PointMarker(spectrumPlotPanel, new DataCoordinates(spectrum.getSpectrumData().getMzList()[peakIdx], spectrum.getSpectrumData().getIntensityList()[peakIdx]), CyclicColorPalette.getColor(colorIndex));
+          ipMarkers.add(pm);
+          scanPlot.addMarker(pm);
+        }
+      }
+      Double mz = 0.1 + ((Double) pattern.mzAbundancePairs()[0]._1 + (Double) pattern.mzAbundancePairs()[1]._1) / 2.0;
+      Float ab = (Float) pattern.mzAbundancePairs()[0]._2 * 0.75f;
+      StringBuilder labelTxt = new StringBuilder("charge ");
+      labelTxt.append(pattern.charge()).append("+").append("(").append(df.format(scoredPattern._1)).append(")");
+      LabelMarker label = new LabelMarker(spectrumPlotPanel, new DataCoordinates(mz, ab * abundance / normAbundance), labelTxt.toString(), ORIENTATION_XY_MIDDLE, ORIENTATION_XY_MIDDLE, CyclicColorPalette.getColor(0));
+      ipMarkers.add(label);
+      scanPlot.addMarker(label);
+    }
+  }
 
         
     @Override

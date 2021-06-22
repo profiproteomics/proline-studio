@@ -9,10 +9,13 @@ import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import javax.swing.table.TableCellRenderer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PeakelsTableModel extends AbstractNonLazyTableModel implements GlobalTableModelInterface {
 
@@ -25,8 +28,10 @@ public class PeakelsTableModel extends AbstractNonLazyTableModel implements Glob
   public static final Column COLTYPE_FEATURE_AREA_COL = new Column("Area", "Area", Double.class,4, BIG_FLOAT);
   public static final Column COLTYPE_FEATURE_SCAN_COUNT_COL = new Column("MS Count", "MS Count", Integer.class, 5);
   public static final Column COLTYPE_FEATURE_RAWFILE = new Column("Raw file", "Raw File Name", String.class,6, Column.STRING_LEFT);
+  public static final Column COLTYPE_FEATURE_MZ_STDEV = new Column("mz Stdev", "m/z standard deviation", Double.class,7, Column.DOUBLE_5DIGITS_RIGHT);
 
   protected List<IPeakel> m_peakels = new ArrayList<>();
+  protected Map<Integer, Double> m_statistics = new HashMap<>();
 
   @Override
   public int[] getKeysColumn() {
@@ -71,9 +76,24 @@ public class PeakelsTableModel extends AbstractNonLazyTableModel implements Glob
         return m_peakels.get(rowIndex).getScanCount();
       } else if (columnIndex == COLTYPE_FEATURE_RAWFILE.getIndex()) {
         return m_peakels.get(rowIndex).getRawFile().getName();
+      } else if (columnIndex == COLTYPE_FEATURE_MZ_STDEV.getIndex()) {
+        return m_statistics.get(rowIndex);
       }
 
       return null; // should not happen
+  }
+
+  private Double getMzStats(int row, IPeakel iPeakel) {
+    if (!m_statistics.containsKey(row)) {
+      if (iPeakel.getPeakel() != null) {
+        double[] mzValues = iPeakel.getPeakel().mzValues();
+        double standardDeviation = new DescriptiveStatistics(mzValues).getStandardDeviation();
+        m_statistics.put(row, 1e6 * standardDeviation / iPeakel.getMz());
+      } else {
+        return 0.0;
+      }
+    }
+    return m_statistics.get(row);
   }
 
   @Override
@@ -95,13 +115,22 @@ public class PeakelsTableModel extends AbstractNonLazyTableModel implements Glob
   }
 
   public void setPeakels(List<IPeakel> peakels) {
+    m_statistics.clear();
     m_peakels.clear();
     m_peakels.addAll(peakels);
+    int row = 0;
+    for(IPeakel p : m_peakels) {
+      getMzStats(row++, p);
+    }
     fireTableDataChanged();
   }
 
   public void addPeakels(List<IPeakel> features) {
+    int row = m_peakels.size()-1;
     m_peakels.addAll(features);
+    for(IPeakel p : features) {
+      getMzStats(row++, p);
+    }
     fireTableDataChanged();
   }
 

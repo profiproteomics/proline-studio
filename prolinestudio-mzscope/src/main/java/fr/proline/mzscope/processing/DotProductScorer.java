@@ -66,7 +66,7 @@ public class DotProductScorer implements Scorer {
         double sumExpected = 0.0;
         double product = 0.0;
 
-      for (int k = 0; (k < observed.length) && (expected[k] > 0.1) ; k++) {
+      for (int k = 0; k < observed.length; k++) {
             product += observed[k]*expected[k];
             sumExpected += expected[k]*expected[k];
             sumObserved += observed[k]*observed[k];

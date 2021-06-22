@@ -345,8 +345,8 @@ public class MzdbRawFile implements IRawFile {
             
             long start = System.currentTimeMillis();
             PeakelsHelper helper = new PeakelsHelper(peakels);
-            List<Feature> features = helper.deisotopePeakels(params.getMzTolPPM(), params.getCoelutionRtTolerance());
-            features.forEach(f -> result.add(new MzdbFeatureWrapper(f, this, 1)));
+            Map<String, List<Feature>> featuresMap = helper.deisotopePeakels(params.getMzTolPPM(), params.getCoelutionRtTolerance());
+            featuresMap.get(PeakelsHelper.VALID_FEATURES).forEach(f -> result.add(new MzdbFeatureWrapper(f, this, 1)));
             LOG.info("Deisotoping took {} ms", (System.currentTimeMillis()-start));
         } catch (SQLiteException | StreamCorruptedException ex) {
             LOG.error("Error while getting LcMs RunSlice Iterator: " + ex);

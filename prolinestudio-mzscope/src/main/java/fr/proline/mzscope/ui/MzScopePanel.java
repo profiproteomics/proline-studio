@@ -23,7 +23,6 @@ import fr.proline.mzscope.ui.peakels.DetectedFeaturesPanel;
 import fr.proline.mzscope.ui.peakels.PeakelsPanel;
 import fr.proline.mzscope.utils.ButtonTabComponent;
 import com.google.common.base.Strings;
-import fr.profi.mzdb.model.Feature;
 import fr.profi.mzdb.peakeldb.io.PeakelDbReader;
 import fr.profi.mzdb.model.Peakel;
 import fr.proline.mzscope.map.LcMsMap;
@@ -718,7 +717,7 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
     }
 
   @Override
-  public void displayFeatures(List<IFeature> features) {
+  public void displayFeatures(Map<String, List<IFeature>> features) {
     final DetectedFeaturesPanel featurePanel = new DetectedFeaturesPanel(this);
     addFeatureTab("Generated Features", featurePanel, "generated");
     featuresTabPane.setSelectedComponent(featurePanel);

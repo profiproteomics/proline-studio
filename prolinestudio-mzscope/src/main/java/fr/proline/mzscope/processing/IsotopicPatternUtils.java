@@ -18,7 +18,8 @@ package fr.proline.mzscope.processing;
 
 import fr.profi.ms.algo.IsotopePatternEstimator;
 import fr.profi.ms.model.TheoreticalIsotopePattern;
-import fr.profi.mzdb.algo.IsotopicPatternScorer;
+import fr.profi.mzdb.algo.DotProductPatternScorer;
+import fr.profi.mzdb.algo.LegacyIsotopicPatternScorer;
 import fr.profi.mzdb.model.SpectrumData;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -95,7 +96,7 @@ public class IsotopicPatternUtils {
             }
         }
         Map<Pattern, List<Double>> map = new HashMap<>();
-        Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = IsotopicPatternScorer.calcIsotopicPatternHypotheses(spectrum, mz, fittedPpmTol);
+        Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = LegacyIsotopicPatternScorer.calcIsotopicPatternHypotheses(spectrum, mz, fittedPpmTol);
         for (Tuple2<Object, TheoreticalIsotopePattern> t : putativePatterns) {
             Pattern p = new Pattern(t._2.monoMz(), t._2.charge());
             if (!map.containsKey(p)) map.put(p, new ArrayList<>());
@@ -103,7 +104,7 @@ public class IsotopicPatternUtils {
         }
         //tracePredictions("Proline", mz, ppmTol, putativePatterns);
         
-        putativePatterns = calcIsotopicPatternHypotheses(spectrum, mz, fittedPpmTol, new ChiSquareScorer());
+        putativePatterns = _calcIsotopicPatternHypotheses(spectrum, mz, fittedPpmTol, new ChiSquareScorer());
         for (Tuple2<Object, TheoreticalIsotopePattern> t : putativePatterns) {
             Pattern p = new Pattern(t._2.monoMz(), t._2.charge());
             if (!map.containsKey(p)) { 
@@ -113,7 +114,7 @@ public class IsotopicPatternUtils {
             map.get(p).add((Double)t._1);
         }
         
-        putativePatterns = calcIsotopicPatternHypotheses(spectrum, mz, fittedPpmTol, new DotProductScorer());
+        putativePatterns = _calcIsotopicPatternHypotheses(spectrum, mz, fittedPpmTol, new DotProductScorer());
         for (Tuple2<Object, TheoreticalIsotopePattern> t : putativePatterns) {
             Pattern p = new Pattern(t._2.monoMz(), t._2.charge());
             if (!map.containsKey(p)) { 
@@ -130,24 +131,29 @@ public class IsotopicPatternUtils {
 //        long start = System.currentTimeMillis();
         double fittedPpmTol = ppmTol;
         
-        int nearestPeakIdx = SpectrumUtils.getNearestPeakIndex(spectrum.getMzList(), mz);
-        if (SpectrumUtils.isInRange(spectrum.getMzList()[nearestPeakIdx], mz, ppmTol) && (spectrum.getLeftHwhmList() != null)) {
-            if (spectrum.getLeftHwhmList()[nearestPeakIdx] > 0.0f) {
-                fittedPpmTol = (float) (1e6 * spectrum.getLeftHwhmList()[nearestPeakIdx] / spectrum.getMzList()[nearestPeakIdx]);
-            }
-        }
-
-//        if (fittedPpmTol > ppmTol) {
-//          logger.debug("tol set to {} instead of {}", fittedPpmTol, ppmTol);
+//        int nearestPeakIdx = SpectrumUtils.getNearestPeakIndex(spectrum.getMzList(), mz);
+//        if (SpectrumUtils.isInRange(spectrum.getMzList()[nearestPeakIdx], mz, ppmTol) && (spectrum.getLeftHwhmList() != null)) {
+//            if (spectrum.getLeftHwhmList()[nearestPeakIdx] > 0.0f) {
+//                fittedPpmTol = (float) (1e6 * spectrum.getLeftHwhmList()[nearestPeakIdx] / spectrum.getMzList()[nearestPeakIdx]);
+//            }
 //        }
-        //Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = IsotopicPatternScorer.calcIsotopicPatternHypotheses(spectrum, mz, fittedPpmTol);
-        Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = calcIsotopicPatternHypotheses(spectrum, mz, fittedPpmTol, new WeightedDotProductScorer());
+
+        Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = DotProductPatternScorer.calcIsotopicPatternHypotheses(spectrum, mz, fittedPpmTol);
+        Tuple2<Object, TheoreticalIsotopePattern> bestPatternHypothese = DotProductPatternScorer.selectBestPatternHypothese(putativePatterns, 0.1);
+
+//        if (bestPatternHypothese != putativePatterns[0]) {
+//          logger.info("isotopic pattern hypothesis have been re-ranked");
+//        }
+
+        //Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = _calcIsotopicPatternHypotheses(spectrum, mz, fittedPpmTol, new WeightedDotProductScorer());
         // AAAARRRRRRGGGG : CBy rule : if two DotProduct predictions are close, prefer higher charge state or lower mono MZ
-        selectBestHypothesis(putativePatterns, 0.1);
+        //selectBestHypothesis(putativePatterns, 0.1);
+        //return putativePatterns[0];
 
 //        Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = calcIsotopicPatternHypotheses(spectrum, mz, fittedPpmTol, new ProlineLikeScorer());
 //        logger.info("Prediction took {} ms", (System.currentTimeMillis() - start));
-        return putativePatterns[0];
+
+      return bestPatternHypothese;
     }
 
   private static void selectBestHypothesis(Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns, double deltaScore) {
@@ -203,7 +209,7 @@ public class IsotopicPatternUtils {
         
      }
     
-     private static Tuple2<Object, TheoreticalIsotopePattern>[] calcIsotopicPatternHypotheses(SpectrumData currentSpectrum, double mz, double ppmTol, Scorer scorer) {
+     private static Tuple2<Object, TheoreticalIsotopePattern>[] _calcIsotopicPatternHypotheses(SpectrumData currentSpectrum, double mz, double ppmTol, Scorer scorer) {
             
       List<Tuple2<Double, TheoreticalIsotopePattern>> result = new ArrayList<>();
       for (int charge = 1; charge <= MAX_CHARGE_STATE; charge++) {
@@ -225,13 +231,9 @@ public class IsotopicPatternUtils {
          result.add(p);
       }
       if (!result.isEmpty()) {
-        Collections.sort(result, new Comparator<Tuple2<Double, TheoreticalIsotopePattern>>() {
-           @Override
-           public int compare(Tuple2<Double, TheoreticalIsotopePattern> o1, Tuple2<Double, TheoreticalIsotopePattern> o2) {
-              int sign = (int)Math.signum(o1._1 - o2._1);
-              return (sign == 0) ? o2._2.charge() - o1._2.charge() : sign;
-           }
-
+        Collections.sort(result, (o1, o2) -> {
+           int sign = (int)Math.signum(o1._1 - o2._1);
+           return (sign == 0) ? o2._2.charge() - o1._2.charge() : sign;
         });
       }
       Tuple2<Object, TheoreticalIsotopePattern>[] patterns = result.toArray(new Tuple2[result.size()]);

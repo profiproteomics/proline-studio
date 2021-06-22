@@ -30,13 +30,9 @@ import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.extendedtablemodel.ImportedDataTableModel;
 import fr.proline.studio.gui.DefaultDialog;
 
-import java.io.File;
 import java.util.*;
-import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.table.AbstractTableModel;
 
 import fr.proline.studio.utils.IconManager;
 import java.awt.Window;
@@ -53,26 +49,12 @@ import org.slf4j.LoggerFactory;
 public class FeaturesPanel extends AbstractPeakelsPanel {
 
   final private static Logger logger = LoggerFactory.getLogger(FeaturesPanel.class);
-  private final static String LAST_DIR = "mzscope.last.csv.features.directory";
 
-  private JFileChooser m_fchooser;
   private List<IFeature> m_features = new ArrayList<>();
   private PeakelsHelper m_helper = null;
 
   public FeaturesPanel(IMzScopeController controller) {
     super(controller);
-    m_fchooser = new JFileChooser();
-    m_fchooser.setFileFilter(new FileFilter() {
-      @Override
-      public boolean accept(File f) {
-        return f.getName().endsWith(".csv");
-      }
-
-      @Override
-      public String getDescription() {
-        return "*.csv";
-      }
-    });
   }
 
   protected CompoundTableModel buildTableModel() {
@@ -107,7 +89,9 @@ public class FeaturesPanel extends AbstractPeakelsPanel {
     List<IPeakel> peakels = getSelectedIPeakels();
     Peakel peakel = peakels.get(0).getPeakel();
     PeakelsHelper helper = getPeakelsHelper();
-        RTParamDialog dialog = new RTParamDialog((Window)this.getTopLevelAncestor());
+    RTParamDialog dialog = new RTParamDialog((Window)this.getTopLevelAncestor());
+    dialog.setHelpHeaderText("The spectrum construction needs to search for co-eluting peakels.<br>" +
+            " The coelution definition is based on the following time tolerance.");
     dialog.pack();
     dialog.setVisible(true);
     
@@ -117,7 +101,7 @@ public class FeaturesPanel extends AbstractPeakelsPanel {
             peakel.getApexMz() + 5,
              peakel.getElutionTime() - dialog.getRTTolerance(),
              peakel.getLastElutionTime() + dialog.getRTTolerance());
-      SpectrumData spectrumData = helper.buildSpectrumDataFromPeakels(peakel, coelutingPeakels);
+      SpectrumData spectrumData = helper.buildSpectrumFromPeakels(coelutingPeakels, peakel);
       Spectrum spectrum = new Spectrum(-1, peakel.getElutionTime(), spectrumData.getMzList(), spectrumData.getIntensityList(), 1, Spectrum.ScanType.CENTROID);
       m_viewersController.getRawFileViewer(peakels.get(0).getRawFile(), true).setReferenceSpectrum(spectrum);
     }
@@ -159,150 +143,112 @@ public class FeaturesPanel extends AbstractPeakelsPanel {
 
   public void setFeatures(List<IFeature> features, boolean displayRawFileColumn) {
     m_modelSelectedRowBeforeSort = -1;
-    m_helper = null;
-    ((FeaturesTableModel)m_compoundTableModel.getBaseModel()).setFeatures(features);
-    this.m_features = features;
-    m_markerContainerPanel.setMaxLineNumber(features.size());
+    m_helper = null;    
+    m_features = features == null ? new ArrayList<IFeature>() : features;
+    ((FeaturesTableModel)m_compoundTableModel.getBaseModel()).setFeatures(m_features);
+    m_markerContainerPanel.setMaxLineNumber(m_features.size());
     // hide RawFileName column
     m_table.getColumnExt(m_table.convertColumnIndexToView(FeaturesTableModel.COLTYPE_FEATURE_RAWFILE.getIndex())).setVisible(displayRawFileColumn);
   }
 
-  private void matchCSVIons() {
-    Preferences prefs = Preferences.userNodeForPackage(this.getClass());
-    String directory = prefs.get(LAST_DIR, m_fchooser.getCurrentDirectory().getAbsolutePath());
-    m_fchooser.setCurrentDirectory(new File(directory));
-    int result = m_fchooser.showOpenDialog(this);
-    if (result == JFileChooser.APPROVE_OPTION) {
-      File csvFile = m_fchooser.getSelectedFile();
-      String fileName = csvFile.getName();
-      if (!fileName.endsWith(".csv")) {
-        JOptionPane.showMessageDialog(this, "The file must be a csv file", "Error", JOptionPane.ERROR_MESSAGE);
-        return;
-      }
-      prefs.put(LAST_DIR, csvFile.getParentFile().getAbsolutePath());
-      ImportedDataTableModel importedTableModel = new ImportedDataTableModel();
-      Exception csvException  = ImportedDataTableModel.loadFile(importedTableModel, csvFile.getAbsolutePath(), ';', true, false);
-      if (csvException == null) {
-      int mzColumnIdx = findColumn(importedTableModel, new String[]{"moz", "m/z", "mz", "exp. moz"});
-      int rtColumnIdx = findColumn(importedTableModel, new String[]{"rt", "retention_time", "retention time", "elution_time", "elution time", "time"});
-      int zColumnIdx = findColumn(importedTableModel, new String[]{"charge", "z"});
 
-      if (mzColumnIdx != -1) {
-        List<Double> mzValues = new ArrayList<>();
-        List<Double> rtValues = new ArrayList<>();
-        List<Integer> zValues = new ArrayList<>();
-        for (int k = 0; k < importedTableModel.getRowCount(); k++) {
-          mzValues.add((Double) importedTableModel.getValueAt(k, mzColumnIdx));
-          rtValues.add((rtColumnIdx != -1) ? (Double) importedTableModel.getValueAt(k, rtColumnIdx) : -1.0);
-          zValues.add((zColumnIdx != -1) ? ((Long) importedTableModel.getValueAt(k, zColumnIdx)).intValue() : 0);
-        }
+  protected void matchIons(List<BaseFeature> ions, ImportedDataTableModel importedTableModel) {
 
-        matchFeatures(mzValues, rtValues, zValues, importedTableModel);
-      } else {
-        StringBuffer columnNamesBuffer = new StringBuffer("[");
-        for (int i = 0; i < importedTableModel.getColumnCount(); i++) {
-          columnNamesBuffer.append(importedTableModel.getColumnName(i)).append(";");
-        }
-        columnNamesBuffer.deleteCharAt(columnNamesBuffer.length()-1);
-        columnNamesBuffer.append("]");
-        
-        String message = "No column named \"mz\",\"moz\" or \"m/z\" detected in the imported file.\n Verify the column headers (the column separator must be \";\") \n" +
-            columnNamesBuffer.toString();
-        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
-      }
-      } else {
-        
-        JOptionPane.showMessageDialog(this, "Error while redading CSV file : "+csvException.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);        
-      }
-    }
-  }
-
-  private void matchFeatures(List<Double> mzValues, List<Double> rtValues, List<Integer> zValues, ImportedDataTableModel importedTableModel) {
-    float moztol = MzScopePreferences.getInstance().getMzPPMTolerance(); //10
-
+    float moztol = MzScopePreferences.getInstance().getMzPPMTolerance();
     Map<Integer, List<IFeature>> featuresByNominalMass = m_features.stream().collect(Collectors.groupingBy(f -> Integer.valueOf((int) f.getMz()), Collectors.toList()));
     int matchingCount = 0;
 
-    List<Pair<Integer, IFeature>> matched = new ArrayList<>();
+    List<Pair<Integer, IFeature>> matchedFeatures = new ArrayList<>();
     List<IFeature> notFound = new ArrayList<>();
-    List<IFeature> dubiousFeatures = new ArrayList<>();
 
-    for (int k = 0; k < mzValues.size(); k++) {
-      double mz = mzValues.get(k);
-      double rt = rtValues.get(k) * 60.0;
-      int z = zValues.get(k);
+    List<IFeature> duplicateIons = ions.stream().filter(i -> Collections.frequency(ions, i) > 1).collect(Collectors.toList());
+    logger.info("ions duplicates summary :: {}", duplicateIons.size());
+
+
+    for (int k = 0; k < ions.size(); k++) {
+      BaseFeature ion = ions.get(k);
+      double mz = ion.getMz();
+      double rt = ion.getElutionTime() * 60.0;
+      int z = ion.getCharge();
+      double i = ion.getApexIntensity();
+      
       List<IFeature> features = featuresByNominalMass.get(Integer.valueOf((int) mz));
+      if (Math.abs( Integer.valueOf((int) mz) - mz) < 0.01) {
+        features.addAll(featuresByNominalMass.get(Integer.valueOf((int) mz) - 1));
+      } else if (Math.abs( Integer.valueOf((int) mz) - mz) > 0.99) {
+        features.addAll(featuresByNominalMass.get(Integer.valueOf((int) mz) + 1));
+      }
+
       if (features != null) {
         IFeature feature = features.stream().filter(f -> {
-                  double tolDa = f.getMz() * moztol / 1e6;
-                  return (rt >= f.getFirstElutionTime() && rt <= f.getLastElutionTime() && (Math.abs(f.getMz() - mz) < tolDa) && ((f.getCharge() == 0) || (z == 0) || (z == f.getCharge())));
+                  double tolDa = (f.getMz() * moztol) / 1e6;
+                  return (rt >= (f.getFirstElutionTime() -0.6) && rt <= (f.getLastElutionTime()+0.6) && (Math.abs(f.getMz() - mz) < tolDa) && ((f.getCharge() == 0) || (z == 0) || (z == f.getCharge())));
                 }
         ).findFirst().orElse(null);
 
         if (feature != null) {
           matchingCount++;
-          matched.add(new ImmutablePair<>(k, feature));
-          logger.info("Feature matching: {}; {}; {}; {}+ = {}; {}; {}+; {}", k, mz, rt, z, feature.getMz(), feature.getElutionTime(), feature.getCharge(), feature.getPeakelsCount());
-          if (feature.getPeakelsCount() <= 2) {
-            dubiousFeatures.add(feature);
+          matchedFeatures.add(new ImmutablePair<>(k, feature));
+          //logger.info("Feature matching: {}; {}; {}; {}+ = {}; {}; {}+; {}", k, mz, rt, z, feature.getMz(), feature.getElutionTime(), feature.getCharge(), feature.getPeakelsCount());
+          if ((z == 0) || (feature.getCharge() == 0)) {
+            logger.warn("Charge 0 detected !!!!!!!!!!");
           }
+
+          if (Math.abs(ion.getApexIntensity() - feature.getApexIntensity()) > 2) {
+            Peakel[] peakels = feature.getPeakels();
+            int j = 0;
+            for (; j < peakels.length; j++) {
+              if (Math.abs(ion.getApexIntensity() - peakels[j].getApexIntensity()) < 2) {
+                break;
+              }
+            }
+           
+            if (j >= peakels.length) {
+              logger.info("Inconsistent matching : the ion intensity cannot be found: {}; {}; {}; {}; {}+ = {}; {}; {}; {}+; {}", k, mz, rt/60.0, i , z, feature.getMz(), feature.getElutionTime()/60.0, feature.getApexIntensity(), feature.getCharge(), feature.getPeakelsCount());
+            } else {
+              logger.info("The peakel matching the ion has been found at index {}. Feature matching: {}; {}; {}; {}; {}+ = {}; {}; {}; {}+; {}", j,  k, mz, rt/60.0, i , z, feature.getMz(), feature.getElutionTime()/60.0, feature.getApexIntensity(), feature.getCharge(), feature.getPeakelsCount());
+            }
+          }
+
+
         } else {
-          BaseFeature f = new BaseFeature(mz, (float) rt, (float) rt, (float) rt, null, 1);
-          f.setCharge(z);
-          notFound.add(f);
-          logger.warn("no feature found for {}, {}, {}+, {}", mz, rt / 60.0, z, getRowAsString(k, importedTableModel));
+          notFound.add(ion);
+          //logger.warn("no feature found for {}, {}, {}+, {}", mz, rt / 60.0, z, getRowAsString(k, importedTableModel));
         }
       } else {
-        BaseFeature f = new BaseFeature(mz, (float) rt, (float) rt, (float) rt, null, 1);
-        f.setCharge(z);
-        notFound.add(f);
-        logger.warn("no feature found for {}, {}, {}+, {}", mz, rt / 60.0, z,  getRowAsString(k, importedTableModel));
+        notFound.add(ion);
+        //logger.warn("no feature found for {}, {}, {}+, {}", mz, rt / 60.0, z,  getRowAsString(k, importedTableModel));
       }
     }
 
-    logger.info("Found {} matches over {}", matchingCount, mzValues.size());
+    logger.info("Found {} matches over {} ions among {} features ", matchingCount, ions.size(), m_features.size());
 
-    logger.info("Not matched summary :: {}", matched.size());
-    matched.forEach(p -> logger.info("matched Feature  = {}; {}; {}; {}; {} ",p.getLeft(), p.getRight().getMz(), p.getRight().getElutionTime() / 60.0, p.getRight().getCharge(), p.getRight().getPeakelsCount()));
+    logger.info("Matched summary :: {}", matchedFeatures.size());
+     //matchedFeatures.forEach(p -> logger.info("matched Feature  = {}; {}; {}; {}; {} ",p.getLeft(), p.getRight().getMz(), p.getRight().getElutionTime() / 60.0, p.getRight().getCharge(), p.getRight().getPeakelsCount()));
 
     logger.info("Not found summary :: {}", notFound.size());
-    notFound.forEach(feature -> logger.info("Feature not found = {}, {}, {}+", feature.getMz(), feature.getElutionTime() / 60.0, feature.getCharge()));
+    //notFound.forEach(feature -> logger.info("Feature not found = {}, {}, {}+", feature.getMz(), feature.getElutionTime() / 60.0, feature.getCharge()));
 
-    logger.info("Dubious features summary :: {} ", dubiousFeatures.size());
-
-    dubiousFeatures.forEach(feature -> logger.info("Dubious Feature  = {}, {}, {}+, {} ", feature.getMz(), feature.getElutionTime() / 60.0, feature.getCharge(), feature.getPeakelsCount()));
-
-    logger.info("Found {} matches over {}", matchingCount, mzValues.size());
+    logger.info("Found {} matches over {}", matchingCount, ions.size());
+    logger.info("Distinct features matched :: {}", matchedFeatures.stream().map(p -> p.getRight()).distinct().count());
     logger.info("Not found summary :: {}", notFound.size());
-    logger.info("Dubious features summary :: {} ", dubiousFeatures.size());
 
-    Map<Integer, Long> result = dubiousFeatures.stream().collect(Collectors.groupingBy(IFeature::getPeakelsCount, Collectors.counting()));
-    for (Map.Entry<Integer, Long> e : result.entrySet()) {
-      logger.info("dubious features with {} peakels: {}", e.getKey(), e.getValue());
+    Map<Integer, List<IFeature>> result = matchedFeatures.stream().map(p -> p.getRight()).collect(Collectors.groupingBy(IFeature::getPeakelsCount, Collectors.toList()));
+    for (Map.Entry<Integer, List<IFeature>> e : result.entrySet()) {
+      logger.info("matched Features with {} peakels: {} or {} distinct", e.getKey(), e.getValue().size(), e.getValue().stream().distinct().count());
+
+//      List<IFeature> list = e.getValue();
+//      List<IFeature> duplicates = list.stream().filter(i -> Collections.frequency(list, i) > 1).collect(Collectors.toList());
+//      logger.info("duplicates matches :: {}", duplicates.size());
+
     }
+
+    List<IFeature> monoIsotopicFeatures = matchedFeatures.stream().map(p -> p.getRight()).filter(f -> f.getPeakelsCount() == 1).collect(Collectors.toList());
+    logger.info("Mono isotopic features summary :: {}", monoIsotopicFeatures.size());
+    //monoIsotopicFeatures.forEach(feature -> logger.info("Mono Feature  = {}, {}, {}+, {} ", feature.getMz(), feature.getElutionTime() / 60.0, feature.getCharge(), feature.getPeakelsCount()));
 
   }
 
-  private String getRowAsString(int row, ImportedDataTableModel tableModel) {
-    StringBuilder stb = new StringBuilder();
-    for (int k = 0; k < tableModel.getColumnCount(); k++) {
-      stb.append(tableModel.getValueAt(row, k)).append(", ");
-    }
-    return stb.toString();
-  }
-  private int findColumn(AbstractTableModel tableModel, String[] alternativeNames) {
-    int columnIdx = -1;
-    for (String name : alternativeNames) {
-        for (int i = 0; i < tableModel.getColumnCount(); i++) {
-            if (name.equalsIgnoreCase(tableModel.getColumnName(i))) {
-                columnIdx = i;
-            }
-        }
-      if (columnIdx != -1) {
-        break;
-      }
-    }
-    return columnIdx;
-  }
+
 }
 

@@ -18,11 +18,13 @@ package fr.proline.mzscope.ui.peakels;
 
 import fr.profi.mzdb.model.Feature;
 import fr.proline.mzscope.model.IFeature;
+import fr.proline.mzscope.model.IPeakel;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.table.Column;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Table model for Features
@@ -31,8 +33,8 @@ import java.util.List;
  */
 public class FeaturesTableModel extends PeakelsTableModel {
 
-  public static final Column COLTYPE_FEATURE_CHARGE_COL = new Column("Charge", "Charge state", Integer.class, 7);
-  public static final Column COLTYPE_FEATURE_PEAKELS_COUNT_COL = new Column("Peakels", "number of isotopes", Integer.class, 8);
+  public static final Column COLTYPE_FEATURE_CHARGE_COL = new Column("Charge", "Charge state", Integer.class, 8);
+  public static final Column COLTYPE_FEATURE_PEAKELS_COUNT_COL = new Column("Peakels", "number of isotopes", Integer.class, 9);
 
   @Override
   public Object getValueAt(int rowIndex, int columnIndex) {
@@ -53,16 +55,12 @@ public class FeaturesTableModel extends PeakelsTableModel {
     return list;
   }
 
-
   public void setFeatures(List<IFeature> features) {
-    m_peakels.clear();
-    m_peakels.addAll(features);
-    fireTableDataChanged();
+    super.setPeakels(features.stream().map(f -> ((IPeakel)f)).collect(Collectors.toList()));
   }
 
   public void addFeatures(List<IFeature> features) {
-    m_peakels.addAll(features);
-    fireTableDataChanged();
+    super.addPeakels(features.stream().map(f -> ((IPeakel)f)).collect(Collectors.toList()));
   }
 
 }

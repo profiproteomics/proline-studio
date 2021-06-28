@@ -61,9 +61,15 @@ public class ParametersComboPanel extends JPanel {
     });
 
     }
-
+  public void clearPanel() {
+    updatePanel(true);
+  }
 
   public void updatePanel() {
+    updatePanel(false);
+  }
+
+  private void updatePanel(boolean clearItem) {
 
     m_selectedParametersPanel.removeAll();
     m_comboBox.removeAllItems();
@@ -79,7 +85,8 @@ public class ParametersComboPanel extends JPanel {
     int nbParameters = m_parameters.length;
     for (int i = 0; i < nbParameters; i++) {
       final AbstractParameter p = m_parameters[i];
-
+      if((p != null) && clearItem)
+        p.setUsed(false);
       if ((p != null) && (p.isUsed())) {
 
         c.gridx = 0;

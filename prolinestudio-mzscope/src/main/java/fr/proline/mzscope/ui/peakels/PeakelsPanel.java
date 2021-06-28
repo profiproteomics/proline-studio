@@ -133,23 +133,9 @@ public class PeakelsPanel extends AbstractPeakelsPanel  {
             peakel = filteredPeakelList.stream().collect(Collectors.minBy(Comparator.comparingDouble(p -> Math.abs(ionMz-p.getApexMz())))).get();
           }
 
-//          if ((Math.abs(peakel.getApexMz() - 546.31072) < 0.001) && (Math.abs(peakel.getApexElutionTime()/60.0 - 138.59) < 0.01)) {
-//            logger.info("stop here");
-//          }
           List<Peakel> isotopes = helper.findFeatureIsotopes(peakel, ionCharge, mzPPMTolerance);
           Feature feature = new Feature(isotopes.get(0).getMz(), ionCharge, JavaConverters.asScalaBufferConverter(isotopes).asScala(), true);
           matchedFeatures.add(new ImmutablePair<>(k, new MzdbFeatureWrapper(feature, rawFile, 1)));
-
-          if (isotopes.size() > 1) {
-            double dm = (isotopes.get(1).getMz() - isotopes.get(0).getMz()) * ionCharge;
-            if (Math.abs(dm - IsotopePatternEstimator.avgIsoMassDiff()) < 0.01) {
-              metric.addValue("isotopic dmass", dm);
-            } else {
-              metric.incr("missing second isotope detected");
-            }
-          } else {
-            metric.incr("mono isotopic feature detected");
-          }
 
           //try to assess monoisotope and charge of the matched peakel
           List<Peakel> coelutingPeakels = helper.findCoelutingPeakels(peakel.getApexMz() - helper.HALF_MZ_WINDOW,
@@ -197,7 +183,6 @@ public class PeakelsPanel extends AbstractPeakelsPanel  {
 
           if ((pattern.charge() != ionCharge) || (Math.abs(pattern.monoMz() - peakel.getMz()) > tolDa)) {
             metric.incr("incorrect prediction");
-            metric.addValue("incorrect prediction intensity distribution", ionApexIntensity);
 
             logger.info("incorrect prediction: expected {}, {}+, predicted {}, {}+ (rt = {})", peakel.getMz(), ionCharge, pattern.monoMz(), pattern.charge(), ionRt / 60.0);
             // try to predict from the psm RT
@@ -239,6 +224,21 @@ public class PeakelsPanel extends AbstractPeakelsPanel  {
 //              float psmRt = ((Double) importedTableModel.getValueAt(k, psmRtColumnIdx)).floatValue() * 60.0f;
 //              testPrediction(psmRt, helper, peakel, tolRt, mzPPMTolerance, tolDa, ionCharge, metric, "ctr psm rt");
 //            }
+
+            if (isotopes.size() > 1) {
+              double dm = (isotopes.get(1).getMz() - isotopes.get(0).getMz()) * ionCharge;
+              if (Math.abs(dm - IsotopePatternEstimator.avgIsoMassDiff()) < 0.01) {
+                metric.addValue("isotopic dmass", dm);
+              } else {
+                metric.incr("missing second isotope detected");
+                logger.info("missing second isotope for {}; {}; {}; {}+", ionMz, ionRt/60.0, ionApexIntensity , ionCharge);
+
+              }
+            } else {
+              metric.incr("mono isotopic feature detected");
+            }
+
+
             metric.addValue("correct prediction intensity distribution", ionApexIntensity);
           }
           

@@ -19,10 +19,13 @@ package fr.proline.studio.main;
 
 
 
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.rsmexplorer.MainFrame;
 import fr.proline.studio.rsmexplorer.SplashScreenWindow;
 import fr.proline.studio.WindowManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import javax.swing.*;
@@ -31,10 +34,29 @@ import java.awt.*;
 public class Main {
 
 
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
 
     public static void main(String[] args) {
 
+        // Only one parameter is taken in account :
+        // --userdir dirParam : to specify where the Preferences.properties is saved
+        String userPath = null;
+        boolean nextIsuserDirPath = false;
+        for (String arg : args) {
+            if (arg.compareToIgnoreCase("--userdir") == 0) {
+                nextIsuserDirPath = true;
+            } else if (nextIsuserDirPath) {
+                userPath = arg;
+                break;
+            } else {
+                m_logger.warn("Application Parameter has not been recognized: " + arg);
+            }
+
+        }
+        if (userPath != null) {
+            NbPreferences.initPreferences(userPath);
+        }
 
 
 

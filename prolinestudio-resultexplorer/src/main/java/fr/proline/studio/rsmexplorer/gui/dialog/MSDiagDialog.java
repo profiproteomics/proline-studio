@@ -16,22 +16,18 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
-import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.parameter.*;
-import fr.proline.studio.progress.ProgressInterface;
-import fr.proline.studio.settings.FilePreferences;
-import fr.proline.studio.settings.SettingsDialog;
+import fr.proline.studio.NbPreferences;
+import fr.proline.studio.gui.DefaultStorableDialog;
+import fr.proline.studio.parameter.IntegerParameter;
+import fr.proline.studio.parameter.ParameterList;
+import fr.proline.studio.parameter.StringParameter;
+
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
-import javax.swing.*;
 import java.util.prefs.Preferences;
-
-import fr.proline.studio.NbPreferences;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -39,12 +35,10 @@ import org.slf4j.LoggerFactory;
  *
  * @author AW
  */
-public class MSDiagDialog extends DefaultDialog {
+public class MSDiagDialog extends DefaultStorableDialog {
 
     private static MSDiagDialog m_singletonDialog = null;
-    private static final String MSDIAG_SETTINGS = "General Settings";
-
-    private final static String SETTINGS_KEY = "Settings key for msdiag";
+    private final static String SETTINGS_KEY = "MSDiag";
 
     private JComboBox m_parserComboBox;
     private ParameterList m_sourceParameterList;
@@ -67,15 +61,11 @@ public class MSDiagDialog extends DefaultDialog {
 
         setDocumentationSuffix("id.1qoc8b1");
 
-        setButtonVisible(BUTTON_LOAD, true);
-        setButtonVisible(BUTTON_SAVE, true);
-
         setResizable(true);
         setMinimumSize(new Dimension(200, 240));
 
         initInternalPanel();
 
-        restoreInitialParameters(NbPreferences.root());
     }
 
     private void initInternalPanel() {
@@ -198,10 +188,72 @@ public class MSDiagDialog extends DefaultDialog {
     }
 
     @Override
+    protected String getSettingsKey() {
+        return SETTINGS_KEY;
+    }
+
+    @Override
+    protected boolean checkParameters() {
+        //       ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
+        // check source parameters
+        //ParameterError error = m_sourceParameterList.checkParameters();
+        // check specific parameters
+//        if (error == null) {
+//            error = parameterList.checkParameters();
+//        }
+//
+//        // report error
+//        if (error != null) {
+//            setStatus(true, error.getErrorMessage());
+//            highlight(error.getParameterComponent());
+//            return false;
+//        }
+        return true;
+    }
+
+    @Override
+    protected void resetParameters() throws Exception {
+        ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
+        parameterList.initDefaults();
+
+    }
+
+    @Override
+    protected void loadParameters(Preferences filePreferences) throws Exception {
+        Preferences preferences = NbPreferences.root();
+        String[] keys = filePreferences.keys();
+        for (int i = 0; i < keys.length; i++) {
+            String key = keys[i];
+            String value = filePreferences.get(key, null);
+            preferences.put(key, value);
+        }
+
+
+        ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
+        parameterList.loadParameters(filePreferences);
+    }
+
+
+    @Override
+    protected void saveParameters(Preferences preferences) {
+
+        ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
+
+        // save parser
+        String parserSelected = parameterList.toString();
+        preferences.put("IdentificationParser", parserSelected);
+
+        // save file path
+        // Save Other Parameters
+        //m_sourceParameterList.saveParameters(preferences);
+        //parameterList.saveParameters(preferences);
+    }
+
+    @Override
     protected boolean okCalled() {
 
         // check parameters
-        if (!checkParametersForOK()) {
+        if (!checkParameters()) {
             return false;
         }
 
@@ -216,109 +268,6 @@ public class MSDiagDialog extends DefaultDialog {
         return true;
     }
 
-//    @Override
-//    protected boolean saveCalled() {
-//        // check parameters
-//        if (!checkParametersForSave()) {
-//            return false;
-//        }
-//
-//        JFileChooser fileChooser = SettingsUtils.getFileChooser(SETTINGS_KEY);
-//        int result = fileChooser.showSaveDialog(this);
-//        if (result == JFileChooser.APPROVE_OPTION) {
-//            File f = fileChooser.getSelectedFile();
-//            FilePreferences filePreferences = new FilePreferences(f, null, "");
-//
-//            saveParameters(filePreferences);
-//            
-//            SettingsUtils.addSettingsPath(SETTINGS_KEY, f.getAbsolutePath());
-//            SettingsUtils.writeDefaultDirectory(SETTINGS_KEY, f.getParent());
-//        }
-//
-//        return false;
-//    }
-    @Override
-    protected boolean loadCalled() {
-
-        SettingsDialog settingsDialog = new SettingsDialog(this, SETTINGS_KEY);
-        settingsDialog.setLocationRelativeTo(this);
-        settingsDialog.setVisible(true);
-
-        if (settingsDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
-            if (settingsDialog.isDefaultSettingsSelected()) {
-                ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
-                parameterList.initDefaults();
-            } else {
-                try {
-                    File settingsFile = settingsDialog.getSelectedFile();
-                    FilePreferences filePreferences = new FilePreferences(settingsFile, null, "");
-
-                    Preferences preferences = NbPreferences.root();
-                    String[] keys = filePreferences.keys();
-                    for (int i = 0; i < keys.length; i++) {
-                        String key = keys[i];
-                        String value = filePreferences.get(key, null);
-                        preferences.put(key, value);
-                    }
-
-                    restoreInitialParameters(preferences);
-
-                    ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
-                    parameterList.loadParameters(filePreferences);
-
-                } catch (Exception e) {
-                    LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);
-                    setStatus(true, "Parsing of your Settings File failed");
-                }
-            }
-        }
-
-        return false;
-    }
-
-    private boolean checkParametersForOK() {
-        // check files selected
-
-        // if problem:    return false;
-        return checkParametersForSave();
-    }
-
-    private boolean checkParametersForSave() {
-
- //       ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
-        // check source parameters
-        //ParameterError error = m_sourceParameterList.checkParameters();
-        // check specific parameters
-//        if (error == null) {
-//            error = parameterList.checkParameters();
-//        }
-//        
-//        // report error
-//        if (error != null) {
-//            setStatus(true, error.getErrorMessage());
-//            highlight(error.getParameterComponent());
-//            return false;
-//        }
-        return true;
-    }
-
-    private void saveParameters(Preferences preferences) {
-
-        ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
-
-        // save parser
-        String parserSelected = parameterList.toString();
-        preferences.put("IdentificationParser", parserSelected);
-
-        // save file path
-        // Save Other Parameters    
-        //m_sourceParameterList.saveParameters(preferences);
-        //parameterList.saveParameters(preferences);
-    }
-
-    private void restoreInitialParameters(Preferences preferences) {
-
-    }
 
     public HashMap<String, String> getMSDiagSettings() {
         ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
@@ -333,31 +282,12 @@ public class MSDiagDialog extends DefaultDialog {
     }
 
     private ParameterList createMSDiagSettings() {
-        ParameterList parameterList = new ParameterList(MSDIAG_SETTINGS);
+        ParameterList parameterList = new ParameterList(SETTINGS_KEY);
         parameterList.add(new StringParameter("score.windows", "Score windows (ex: 20-40-60)", JTextField.class, "20-40-60", null, null));
         parameterList.add(new IntegerParameter("max.rank", "Max rank", JTextField.class, new Integer(1), new Integer(0), null));
         //parameterList.add(new IntegerParameter("scan.groups.size", "Scan groups size", JTextField.class, new Integer(1), new Integer(0), new Integer(0)));
 
         return parameterList;
     }
-
-    public class CertifyIdentificationProgress implements ProgressInterface {
-
-        private boolean m_isLoaded = false;
-
-        @Override
-        public boolean isLoaded() {
-            return m_isLoaded;
-        }
-
-        @Override
-        public int getLoadingPercentage() {
-            return 0; // progress bar displayed as a waiting bar
-        }
-
-        public void setLoaded() {
-            m_isLoaded = true;
-        }
-    };
 
 }

@@ -17,6 +17,7 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.core.orm.msi.PtmSpecificity;
+import fr.proline.studio.Exceptions;
 import fr.proline.studio.dock.gui.InfoLabel;
 import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
 import fr.proline.core.orm.uds.Project;
@@ -57,6 +58,7 @@ import java.awt.HeadlessException;
 import java.awt.Point;
 import java.awt.Window;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.*;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -571,16 +573,25 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
         JFileChooser fileChooser = SettingsUtils.getFileChooser(SETTINGS_KEY);
         int result = fileChooser.showSaveDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
-            File f = fileChooser.getSelectedFile();
-            FilePreferences filePreferences = new FilePreferences(f, null, "");
+            try {
+                File f = fileChooser.getSelectedFile();
+                if(f.exists()){
+                    FileOutputStream fos = new FileOutputStream(f);
+                    fos.close();
+                }
+                FilePreferences filePreferences = new FilePreferences(f, null, "");
 
-            // Save Parameters  
-            ParameterList parameterList = LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().getParameterList();
-            parameterList.saveParameters(filePreferences);
-            filePreferences.putBoolean(AbstractLabelFreeMSParamsPanel.XIC_SIMPLIFIED_PARAMS, LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().isSimplifiedPanel());
-            filePreferences.put(AbstractLabelFreeMSParamsPanel.XIC_PARAMS_VERSION_KEY, LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsVersion());
-            SettingsUtils.addSettingsPath(SETTINGS_KEY, f.getAbsolutePath());
-            SettingsUtils.writeDefaultDirectory(SETTINGS_KEY, f.getParent());
+                // Save Parameters
+                ParameterList parameterList = LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().getParameterList();
+                parameterList.saveParameters(filePreferences);
+                filePreferences.putBoolean(AbstractLabelFreeMSParamsPanel.XIC_SIMPLIFIED_PARAMS, LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().isSimplifiedPanel());
+                filePreferences.put(AbstractLabelFreeMSParamsPanel.XIC_PARAMS_VERSION_KEY, LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsVersion());
+                SettingsUtils.addSettingsPath(SETTINGS_KEY, f.getAbsolutePath());
+                SettingsUtils.writeDefaultDirectory(SETTINGS_KEY, f.getParent());
+            } catch (Exception e) {
+                Exceptions.printStackTrace(e);
+                JOptionPane.showMessageDialog(this, "Error saving settings "+e.getMessage(), "Save Settings Error",JOptionPane.ERROR_MESSAGE);
+            }
         }
 
         return false;

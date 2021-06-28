@@ -17,21 +17,19 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.exporter;
 
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.settings.FilePreferences;
-import fr.proline.studio.settings.SettingsUtils;
+import fr.proline.studio.gui.DefaultStorableDialog;
 import fr.proline.studio.utils.IconManager;
-import java.awt.Dialog;
-import java.awt.Window;
-import java.io.File;
+
+import java.awt.*;
 import java.util.HashMap;
-import javax.swing.JFileChooser;
+import java.util.prefs.Preferences;
 
 
 /**
  *
  * @author VD225637
  */
-public class Export2MzIdentMLDialog extends DefaultDialog {
+public class Export2MzIdentMLDialog extends DefaultStorableDialog {
 
     protected final static String MZIDENT_SETTINGS_KEY = "Export2MzIdentML";
 
@@ -51,8 +49,6 @@ public class Export2MzIdentMLDialog extends DefaultDialog {
 //        setDocumentationSuffix(m_contact_FN_key); //VDS TODO
         setButtonName(BUTTON_OK, "Next");
         setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
-        setButtonVisible(BUTTON_LOAD, true);
-        setButtonVisible(BUTTON_SAVE, true);
         setDocumentationSuffix("id.338fx5o");
         m_paramPanel = new Export2MzIdentMLParamPanel(this);
         this.setHelpHeader(IconManager.getIcon(IconManager.IconType.INFORMATION),"MzIdentML parameters", "Spectrum Matches should have been generated before exporting to MzidentML format.<br> It is also recommended to jave run 'Retrieve proteins sequences'.");
@@ -61,6 +57,33 @@ public class Export2MzIdentMLDialog extends DefaultDialog {
 
     public void setTask(DefaultDialog.ProgressTask task) {
         m_task = task;
+    }
+
+    /***  DefaultStorableDialog Abstract methods ***/
+
+    @Override
+    protected String getSettingsKey() {
+        return MZIDENT_SETTINGS_KEY;
+    }
+
+    @Override
+    protected void saveParameters(Preferences filePreferences)  {
+        m_paramPanel.saveParameters(filePreferences);
+    }
+
+    @Override
+    protected boolean checkParameters() {
+        return true;
+    }
+
+    @Override
+    protected void resetParameters()  {
+        m_paramPanel.resetParameters();
+    }
+
+    @Override
+    protected void loadParameters(Preferences preferences) throws Exception {
+        m_paramPanel.loadParameters(preferences);
     }
 
     @Override
@@ -100,7 +123,7 @@ public class Export2MzIdentMLDialog extends DefaultDialog {
     @Override
     protected boolean loadCalled() {
         if (m_step == STEP_PANEL_EXPORT_PARAM_DEF) {
-            m_paramPanel.loadParameters();
+           super.loadCalled();
         }
         return false;
     }
@@ -115,16 +138,7 @@ public class Export2MzIdentMLDialog extends DefaultDialog {
                 return false;
             }
 
-            JFileChooser fileChooser = SettingsUtils.getFileChooser(MZIDENT_SETTINGS_KEY);
-            int result = fileChooser.showSaveDialog(this);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                File f = fileChooser.getSelectedFile();
-                FilePreferences filePreferences = new FilePreferences(f, null, "");
-
-                m_paramPanel.saveParameters(filePreferences);
-                SettingsUtils.addSettingsPath(MZIDENT_SETTINGS_KEY, f.getAbsolutePath());
-                SettingsUtils.writeDefaultDirectory(MZIDENT_SETTINGS_KEY, f.getParent());
-            }
+            return super.saveCalled();
         }
         return false;
     }

@@ -16,31 +16,23 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
-import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.parameter.AbstractParameter;
-import fr.proline.studio.parameter.ParameterError;
-import fr.proline.studio.parameter.ParameterList;
-import fr.proline.studio.parameter.ParametersComboPanel;
-import fr.proline.studio.settings.FilePreferences;
-import fr.proline.studio.settings.SettingsDialog;
-import fr.proline.studio.settings.SettingsUtils;
-import org.slf4j.LoggerFactory;
+import fr.proline.studio.NbPreferences;
+import fr.proline.studio.gui.DefaultStorableDialog;
+import fr.proline.studio.parameter.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.io.File;
 import java.util.HashMap;
 import java.util.prefs.Preferences;
-import fr.proline.studio.NbPreferences;
 
 
 /**
  *
  * @author VD225637
  */
-public class FilterProtSetDialog extends DefaultDialog implements ComponentListener {
+public class FilterProtSetDialog extends DefaultStorableDialog implements ComponentListener {
 
     private static FilterProtSetDialog m_singletonDialog = null;
 
@@ -62,9 +54,6 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
         setTitle("ProteinSet Filtering");
 
         setDocumentationSuffix("id.2lwamvv");
-
-        setButtonVisible(BUTTON_LOAD, true);
-        setButtonVisible(BUTTON_SAVE, true);
 
         m_parameterList = new ParameterList("ProtSet Filtering");
         m_proteinFilterParameters = FilterProteinSetPanel.createProteinSetFilterParameters("", m_parameterList);
@@ -89,7 +78,7 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
         c.gridy = 0;
         c.weightx = 1.0;
         m_proteinPrefiltersPanel = new ParametersComboPanel(" Filter(s) ", m_proteinFilterParameters);
-        m_proteinPrefiltersPanel.addComponentListener((ComponentListener) this);
+        m_proteinPrefiltersPanel.addComponentListener( this);
         internalPanel.add(m_proteinPrefiltersPanel, c);
 
         return internalPanel;
@@ -114,13 +103,22 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
         return true;
     }
 
-    private void saveParameters(Preferences preferences) {
+    /***  DefaultStorableDialog Abstract methods ***/
+
+    @Override
+    protected String getSettingsKey() {
+        return SETTINGS_KEY;
+    }
+
+    @Override
+    protected void saveParameters(Preferences preferences) {
         // Save Parameters        
         m_parameterList.saveParameters(preferences);
 
     }
 
-    private boolean checkParameters() {
+    @Override
+    protected boolean checkParameters() {
         // check parameters
         ParameterError error = m_parameterList.checkParameters();
         if (error != null) {
@@ -132,60 +130,24 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
     }
 
     @Override
-    protected boolean saveCalled() {
-        // check parameters
-        if (!checkParameters()) {
-            return false;
-        }
-
-        JFileChooser fileChooser = SettingsUtils.getFileChooser(SETTINGS_KEY);
-        int result = fileChooser.showSaveDialog(this);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File f = fileChooser.getSelectedFile();
-            FilePreferences filePreferences = new FilePreferences(f, null, "");
-
-            saveParameters(filePreferences);
-
-            SettingsUtils.addSettingsPath(SETTINGS_KEY, f.getAbsolutePath());
-            SettingsUtils.writeDefaultDirectory(SETTINGS_KEY, f.getParent());
-        }
-        return false;
+    protected void resetParameters() {
+        m_parameterList.initDefaults();
+        m_proteinPrefiltersPanel.clearPanel();
     }
 
     @Override
-    protected boolean loadCalled() {
-
-        SettingsDialog settingsDialog = new SettingsDialog(this, SETTINGS_KEY);
-        settingsDialog.setLocationRelativeTo(this);
-        settingsDialog.setVisible(true);
-
-        if (settingsDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
-            if (settingsDialog.isDefaultSettingsSelected()) {
-                m_parameterList.initDefaults();
-            } else {
-                try {
-                    File settingsFile = settingsDialog.getSelectedFile();
-                    FilePreferences filePreferences = new FilePreferences(settingsFile, null, "");
-
-                    Preferences preferences = NbPreferences.root();
-                    String[] keys = filePreferences.keys();
-                    for (String key : keys) {
-                        String value = filePreferences.get(key, null);
-                        preferences.put(key, value);
-                    }
-
-                    m_parameterList.loadParameters(filePreferences);
-                    m_proteinPrefiltersPanel.updatePanel();
-
-                } catch (Exception e) {
-                    LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);
-                    setStatus(true, "Parsing of your Settings File failed");
-                }
-            }
+    protected void loadParameters(Preferences filePreferences) throws Exception {
+        Preferences preferences = NbPreferences.root();
+        String[] keys = filePreferences.keys();
+        for (String key : keys) {
+            String value = filePreferences.get(key, null);
+            preferences.put(key, value);
         }
 
-        return false;
+        m_parameterList.loadParameters(filePreferences);
+        m_proteinPrefiltersPanel.updatePanel();
     }
+
 
     @Override
     public void componentResized(ComponentEvent e) {

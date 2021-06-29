@@ -12,7 +12,7 @@
     <artifactId>prolinestudio-resultexplorer</artifactId>
     <packaging>jar</packaging>
 
-    <name>ProlineStudio-ResultExplorer</name>
+    <name>prolinestudio</name>
 
     <properties>
         <assembly.file.path>${project.basedir}/src/main/resources/assembly.xml</assembly.file.path>
@@ -323,15 +323,46 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <!-- Version inherited from ProFI-Pom -->
+                <executions>
+
+                    <!-- Copy scripts to '/target' with jar -->
+                    <execution>
+                        <id>copy-scripts</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <encoding>UTF-8</encoding>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources</directory>
+                                    <filtering>true</filtering>
+                                    <includes>
+                                        <include>*.bat</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+
+                </executions>
+            </plugin>
+
             <!-- Build Zip Assembly -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <!-- Version inherited from ProFI-Pom -->
                 <configuration>
-                    <finalName>${project.name}-${project.version}</finalName>
+                    <finalName>${project.name}</finalName>
                     <descriptors>
                         <descriptor>${assembly.file.path}</descriptor>
                     </descriptors>
+                    <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
             </plugin>
         </plugins>

@@ -74,33 +74,39 @@ public class DisplayXICProteinSetAction extends AbstractRSMAction {
     public void updateEnabled(AbstractNode[] selectedNodes) {
 
         // only one node selected
-        if (selectedNodes.length != 1) {
+//        if (selectedNodes.length != 1) {
+//            setEnabled(false);
+//            return;
+//        }
+
+        if (selectedNodes.length <0) {
             setEnabled(false);
             return;
         }
 
-        AbstractNode node = (AbstractNode) selectedNodes[0];
+        for (int i=0;i<selectedNodes.length;i++) {
+            AbstractNode node =  selectedNodes[i];
 
-        // the node must not be in changing state
-        if (node.isChanging()) {
-            setEnabled(false);
-            return;
+            // the node must not be in changing state
+            if (node.isChanging()) {
+                setEnabled(false);
+                return;
+            }
+
+            // must be a dataset
+            if (node.getType() != AbstractNode.NodeTypes.DATA_SET) {
+                setEnabled(false);
+                return;
+            }
+
+            DataSetNode datasetNode = (DataSetNode) node;
+
+            // must be a quantitation
+            if (!datasetNode.isQuantitation()) {
+                setEnabled(false);
+                return;
+            }
         }
-
-        // must be a dataset 
-        if (node.getType() != AbstractNode.NodeTypes.DATA_SET) {
-            setEnabled(false);
-            return;
-        }
-
-        DataSetNode datasetNode = (DataSetNode) node;
-
-        // must be a quantitation 
-        if (!datasetNode.isQuantitation()) {
-            setEnabled(false);
-            return;
-        }
-
         setEnabled(true);
     }
 }

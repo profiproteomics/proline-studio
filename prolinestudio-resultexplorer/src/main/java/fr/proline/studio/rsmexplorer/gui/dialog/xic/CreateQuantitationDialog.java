@@ -68,6 +68,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import fr.proline.studio.NbPreferences;
 import fr.proline.studio.WindowManager;
+import fr.proline.studio.utils.StudioResourceBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -217,7 +218,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
           setButtonName(DefaultDialog.BUTTON_OK, "Next");
           setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
         } else {
-          setButtonName(DefaultDialog.BUTTON_OK, org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
+          setButtonName(DefaultDialog.BUTTON_OK, StudioResourceBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
           setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.OK));
         }
         setButtonVisible(BUTTON_LOAD, false);
@@ -297,7 +298,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
     protected void displayLabelFreeParamsPanel() {
         m_step = STEP_PANEL_LABEL_FREE_PARAMS;
 
-        setButtonName(DefaultDialog.BUTTON_OK, org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
+        setButtonName(DefaultDialog.BUTTON_OK, StudioResourceBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
         setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.OK));
 
         setButtonVisible(BUTTON_BACK, true);

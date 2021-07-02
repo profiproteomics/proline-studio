@@ -4,16 +4,15 @@ import fr.proline.core.orm.uds.BiologicalGroup;
 import fr.proline.core.orm.uds.BiologicalSample;
 import fr.proline.core.orm.uds.QuantitationChannel;
 import fr.proline.core.orm.uds.dto.DDataset;
-import org.openide.util.Exceptions;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
-import fr.proline.studio.gui.DefaultFloatingPanel;
-import fr.proline.studio.rsmexplorer.gui.calc.DataTreeTransferable;
 import fr.proline.studio.gui.DefaultFloatingPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.aggregation.DQuantitationChannelMapping;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.utils.IconManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -25,14 +24,15 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.*;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class QuantAggregateExperimentalTreePanel extends JPanel {
 
+    private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private AssociatedQuantExperimentalDesignTree m_tree;
     private ChannelPanel m_channelPanel;
     private DefaultFloatingPanel m_floattingButtonsPanel;
@@ -828,7 +828,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                     } catch (UnsupportedFlavorException ex) {
                         //m_logger.error(getClass().getSimpleName() + " DnD error ", ex);
                     } catch (IOException ex) {
-                        Exceptions.printStackTrace(ex);
+                        m_logger.error(ex.getMessage(), ex);
                     }
 
                     for (DropZone dropZone : m_selectedDropZoneList) {
@@ -897,7 +897,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                     } catch (UnsupportedFlavorException ex) {
                         //m_logger.error(getClass().getSimpleName() + " DnD error ", ex);
                     } catch (IOException ex) {
-                        Exceptions.printStackTrace(ex);
+                        m_logger.error(ex.getMessage(), ex);
                     }
 
                     for (DropZone dropZone : m_selectedDropZoneList) {

@@ -143,7 +143,7 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
 
         } catch (Exception ex) {
 
-            LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" error "+getClass());
+            LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" askJMS error "+getClass());
             ex.printStackTrace();
 
             m_loggerProline.error("Error sending JMS Message", ex);

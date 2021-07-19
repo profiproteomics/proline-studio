@@ -76,13 +76,13 @@ public abstract class AbstractTasksPanel extends HourglassPanel implements DataB
     }
     
     protected boolean checkJMSVariables(){        
-        if(m_serviceListener == null) {
-            m_serviceListener =  JMSConnectionManager.getJMSConnectionManager().getNotificationListener();
-             if(m_serviceListener == null) {
-                JOptionPane.showMessageDialog( WindowManager.getDefault().getMainWindow(), "Unable to get Notification Listener (JMS Connection problem ?!). Try Later", "Server Tasks Logs error",JOptionPane.ERROR_MESSAGE);
-                return false;
-             }
-        }
+//        if(m_serviceListener == null) {
+//            m_serviceListener =  JMSConnectionManager.getJMSConnectionManager().getNotificationListener();
+//             if(m_serviceListener == null) {
+//                JOptionPane.showMessageDialog( WindowManager.getDefault().getMainWindow(), "Unable to get Notification Listener (JMS Connection problem ?!). Try Later", "Server Tasks Logs error",JOptionPane.ERROR_MESSAGE);
+//                return false;
+//             }
+//        }
         return true;
     }
     
@@ -99,11 +99,11 @@ public abstract class AbstractTasksPanel extends HourglassPanel implements DataB
             switch(newStatus) {
             case CONNECTION_DONE: 
                 if(!m_isConnected){
-                    m_serviceListener= null;
+//                    m_serviceListener= null;
                     if (checkJMSVariables()){
                         final JMSNotificationMessage[] sysInfoResult = new JMSNotificationMessage[1];
                         m_notifierCallback = getServiceNotificationCallback(sysInfoResult);
-                        m_serviceListener.addServiceNotifierCallback(m_notifierCallback, sysInfoResult);
+//                        m_serviceListener.addServiceNotifierCallback(m_notifierCallback, sysInfoResult);
 
 //                        final JMSNotificationMessage[] purgerResult = new JMSNotificationMessage[1];
 //                        m_purgerCallback = getPurgeConsumerCallback(purgerResult);
@@ -117,9 +117,9 @@ public abstract class AbstractTasksPanel extends HourglassPanel implements DataB
                 break;
             case CONNECTION_FAILED :
             case NOT_CONNECTED:
-                if(m_isConnected && m_serviceListener != null){
-                    if(m_notifierCallback != null)
-                        m_serviceListener.removeCallback(m_notifierCallback);
+                if(m_isConnected /*&& m_serviceListener != null*/){
+//                    if(m_notifierCallback != null)
+//                        m_serviceListener.removeCallback(m_notifierCallback);
                     m_serviceListener = null;
                     m_notifierCallback = null;
 //                    if(m_purgerCallback != null)

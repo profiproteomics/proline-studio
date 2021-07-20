@@ -25,10 +25,17 @@ public class JavaVersion {
 
   private static String m_productVersion = null;
   private static String m_productDate = null;
+  private static String m_milestoneVersion = null;
+  private static boolean m_isMilestone;
 
   public static String getProductVersion() {
     decodeVersion();
     return m_productVersion;
+  }
+
+  public static String getMilestoneProductVersion() {
+    decodeVersion();
+    return m_milestoneVersion;
   }
 
   public static String getProductDate() {
@@ -57,6 +64,13 @@ public class JavaVersion {
     if (index != -1) {
       m_productDate = tmp.substring(0, index);
     }
+
+    m_isMilestone = m_productVersion.contains("SNAPSHOT");
+    index = m_productVersion.indexOf(('-'));
+    if (index != -1) {
+      m_milestoneVersion = m_productVersion.substring(0, index)+" Milestone "+m_productDate;
+    }
+
   }
 
 

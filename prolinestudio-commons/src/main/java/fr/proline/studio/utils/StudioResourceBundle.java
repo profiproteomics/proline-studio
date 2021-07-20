@@ -18,7 +18,7 @@ public class StudioResourceBundle {
       throw new IllegalArgumentException("StudioResourceBundle: must specify a valid class and key.");
     }
 
-    StringBuilder sb = new StringBuilder(c.getPackage().toString());
+    StringBuilder sb = new StringBuilder(c.getPackage().getName());
     sb.append(".Bundle");
     try {
       ResourceBundle rsc = ResourceBundle.getBundle(sb.toString());

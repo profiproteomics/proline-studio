@@ -19,7 +19,6 @@ package fr.proline.mzscope.ui.peakels;
 import com.almworks.sqlite4java.SQLiteException;
 import fr.profi.ms.algo.IsotopePatternEstimator;
 import fr.profi.ms.model.TheoreticalIsotopePattern;
-import fr.profi.mzdb.algo.DotProductPatternScorer;
 import fr.profi.mzdb.algo.PeakelsPatternPredictor;
 import fr.profi.mzdb.model.Feature;
 import fr.profi.mzdb.model.Peakel;
@@ -29,7 +28,6 @@ import fr.proline.mzscope.model.*;
 import fr.proline.mzscope.mzdb.MzdbFeatureWrapper;
 import fr.proline.mzscope.processing.IsotopicPatternUtils;
 import fr.proline.mzscope.processing.PeakelsHelper;
-import fr.proline.mzscope.processing.SpectrumUtils;
 import fr.proline.mzscope.ui.IMzScopeController;
 import fr.proline.mzscope.ui.dialog.RTParamDialog;
 import fr.proline.mzscope.ui.model.MzScopePreferences;
@@ -46,15 +44,12 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.openide.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
 import scala.collection.mutable.ArrayBuffer;
-
-import static fr.proline.mzscope.processing.SpectrumUtils.MIN_CORRELATION_SCORE;
 
 /**
  * Panel presenting a list of peakels in a table
@@ -295,7 +290,7 @@ public class PeakelsPanel extends AbstractPeakelsPanel  {
       int idx = java.util.Arrays.binarySearch(peakel.getElutionTimes(), psmRt);
       idx = (idx < 0) ? ~idx : idx;
       // build spectrum from the spectrumId
-      Tuple2<ArrayBuffer<Object>, ArrayBuffer<Object>> pairs = PeakelsPatternPredictor.slicePeakels(JavaConverters.asScalaBufferConverter(coelutingPeakels).asScala(), peakel.getSpectrumIds()[idx]);
+      Tuple2<ArrayBuffer<Object>, ArrayBuffer<Object>> pairs = PeakelsPatternPredictor.slicePeakels(JavaConverters.asScalaBufferConverter(coelutingPeakels).asScala(), peakel.getSpectrumIds()[idx], 1);
       List<Object> objectList = JavaConverters.bufferAsJavaListConverter(pairs._1).asJava();
       double[] mzList = new double[objectList.size()];
       int j = 0;
@@ -328,7 +323,7 @@ public class PeakelsPanel extends AbstractPeakelsPanel  {
     JButton buildSpectrumBtn = new JButton();
     buildSpectrumBtn.setIcon(IconManager.getIcon(IconManager.IconType.CENTROID_SPECTRA));
     buildSpectrumBtn.setToolTipText("Build Spectrum from peakels");
-    buildSpectrumBtn.addActionListener(e -> buildSpectrum());
+    buildSpectrumBtn.addActionListener(e -> buildSpectrumFromPeakels());
 
     toolbar.add(buildSpectrumBtn);
 
@@ -349,7 +344,7 @@ public class PeakelsPanel extends AbstractPeakelsPanel  {
     return toolbar;
   }
 
-  private void buildSpectrum() {
+  private void buildSpectrumFromPeakels() {
     List<IPeakel> peakels = getSelectedIPeakels();
     Peakel peakel = peakels.get(0).getPeakel();
     PeakelsHelper helper = getPeakelsHelper();

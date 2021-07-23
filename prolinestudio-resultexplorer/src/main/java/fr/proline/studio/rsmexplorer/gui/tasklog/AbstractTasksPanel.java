@@ -54,11 +54,11 @@ public abstract class AbstractTasksPanel extends HourglassPanel implements DataB
         
     private ServiceNotificationListener m_serviceListener = null;
     private AbstractJMSCallback m_notifierCallback = null; //Callback to be called by ServiceNotificationListener
-//    private AbstractJMSCallback m_purgerCallback = null; //Callback to be called by purger
+    private AbstractJMSCallback m_purgerCallback = null; //Callback to be called by purger
 
     public AbstractTasksPanel(){
         this.m_isConnected = false;
-//        initListener(); //calling it in constructor is incorrect: it calls overriden methods
+        initListener(); //calling it in constructor is incorrect: it calls overriden methods
     }
     
    
@@ -76,19 +76,19 @@ public abstract class AbstractTasksPanel extends HourglassPanel implements DataB
     }
     
     protected boolean checkJMSVariables(){        
-//        if(m_serviceListener == null) {
-//            m_serviceListener =  JMSConnectionManager.getJMSConnectionManager().getNotificationListener();
-//             if(m_serviceListener == null) {
-//                JOptionPane.showMessageDialog( WindowManager.getDefault().getMainWindow(), "Unable to get Notification Listener (JMS Connection problem ?!). Try Later", "Server Tasks Logs error",JOptionPane.ERROR_MESSAGE);
-//                return false;
-//             }
-//        }
+        if(m_serviceListener == null) {
+            m_serviceListener =  JMSConnectionManager.getJMSConnectionManager().getNotificationListener();
+             if(m_serviceListener == null) {
+                JOptionPane.showMessageDialog( WindowManager.getDefault().getMainWindow(), "Unable to get Notification Listener (JMS Connection problem ?!). Try Later", "Server Tasks Logs error",JOptionPane.ERROR_MESSAGE);
+                return false;
+             }
+        }
         return true;
     }
     
     abstract protected AbstractJMSCallback getServiceNotificationCallback(JMSNotificationMessage[] sysInfoResult);
     
-//    abstract protected AbstractJMSCallback getPurgeConsumerCallback(JMSNotificationMessage[] purgerResult);
+    abstract protected AbstractJMSCallback getPurgeConsumerCallback(JMSNotificationMessage[] purgerResult);
     
     abstract void startOtherDataCollecting();
     
@@ -99,17 +99,17 @@ public abstract class AbstractTasksPanel extends HourglassPanel implements DataB
             switch(newStatus) {
             case CONNECTION_DONE: 
                 if(!m_isConnected){
-//                    m_serviceListener= null;
+                    m_serviceListener= null;
                     if (checkJMSVariables()){
                         final JMSNotificationMessage[] sysInfoResult = new JMSNotificationMessage[1];
                         m_notifierCallback = getServiceNotificationCallback(sysInfoResult);
-//                        m_serviceListener.addServiceNotifierCallback(m_notifierCallback, sysInfoResult);
+                        m_serviceListener.addServiceNotifierCallback(m_notifierCallback, sysInfoResult);
 
-//                        final JMSNotificationMessage[] purgerResult = new JMSNotificationMessage[1];
-//                        m_purgerCallback = getPurgeConsumerCallback(purgerResult);
-//                        if(m_purgerCallback != null){
-//                            PurgeConsumer.getPurgeConsumer().addCallback(m_purgerCallback, purgerResult);
-//                        }
+                        final JMSNotificationMessage[] purgerResult = new JMSNotificationMessage[1];
+                        m_purgerCallback = getPurgeConsumerCallback(purgerResult);
+                        if(m_purgerCallback != null){
+                            PurgeConsumer.getPurgeConsumer().addCallback(m_purgerCallback, purgerResult);
+                        }
                         startOtherDataCollecting();
                     }
                     m_isConnected = true;
@@ -117,14 +117,14 @@ public abstract class AbstractTasksPanel extends HourglassPanel implements DataB
                 break;
             case CONNECTION_FAILED :
             case NOT_CONNECTED:
-                if(m_isConnected /*&& m_serviceListener != null*/){
-//                    if(m_notifierCallback != null)
-//                        m_serviceListener.removeCallback(m_notifierCallback);
+                if(m_isConnected && m_serviceListener != null){
+                    if(m_notifierCallback != null)
+                        m_serviceListener.removeCallback(m_notifierCallback);
                     m_serviceListener = null;
                     m_notifierCallback = null;
-//                    if(m_purgerCallback != null)
-//                        PurgeConsumer.getPurgeConsumer().removeCallback(m_purgerCallback);
-//                    m_purgerCallback = null;
+                    if(m_purgerCallback != null)
+                        PurgeConsumer.getPurgeConsumer().removeCallback(m_purgerCallback);
+                    m_purgerCallback = null;
                     stopOtherDataCollecting();
                 }
                 m_isConnected = false;

@@ -191,52 +191,6 @@
             <version>3.4.13-EDyP</version>
             
         </dependency>
-        <!--        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.7.3</version> 
-
-        </dependency>-->
-        
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>4.1.42.Final</version>    
-        </dependency><!--
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>2.7.3</version>
-
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>2.7.3</version>
-             <exclusions>
-                <exclusion>
-                    <groupId>jfree</groupId>
-                    <artifactId>jfreechart</artifactId>
-                </exclusion>            
-            </exclusions>
-        </dependency>              -->
-        <!-- batik -->
-        <!--  <dependency>
-            <groupId>org.apache.xmlgraphics</groupId>
-            <artifactId>batik-dom</artifactId>
-            <version>1.8</version>
-            <exclusions>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.xmlgraphics</groupId>
-            <artifactId>batik-svggen</artifactId>
-            <version>1.8</version>
-            <exclusions>
-            </exclusions>
-        </dependency> -->
-        
 
         <dependency> 
             <groupId>sape.inf.usi.ch</groupId> 

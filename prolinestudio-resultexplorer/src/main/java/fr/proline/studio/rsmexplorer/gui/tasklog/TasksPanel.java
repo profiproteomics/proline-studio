@@ -110,10 +110,10 @@ public class TasksPanel extends AbstractTasksPanel {
     }
     
     //Nothing specific to do after cancel message was done : already taken into account be message response
-//    @Override
-//    protected AbstractJMSCallback getPurgeConsumerCallback(JMSNotificationMessage[] purgerResult){
-//        return null;
-//    }
+    @Override
+    protected AbstractJMSCallback getPurgeConsumerCallback(JMSNotificationMessage[] purgerResult){
+        return null;
+    }
     
     // default start data collect is enough
     @Override

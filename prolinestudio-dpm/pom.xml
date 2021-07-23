@@ -26,19 +26,7 @@
             <version>${project.version}</version>
             <type>pom</type>
         </dependency>
-        <dependency>
-            <groupId>com.google.http-client</groupId>
-            <artifactId>google-http-client</artifactId>
-            <version>1.20.0</version>
 
-            <!-- Use SLF4J instead of Apache common-loggings -->
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>              
-            </exclusions>
-        </dependency>
         <!--        <dependency>
              <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>       
@@ -62,18 +50,6 @@
             <groupId>org.jboss.logging</groupId>
             <artifactId>jboss-logging</artifactId>
             <version>3.3.0.Final</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>com.google.http-client</groupId>
-            <artifactId>google-http-client-jackson2</artifactId>
-            <version>1.20.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.http-client</groupId>
-            <artifactId>google-http-client-gson</artifactId>
-            <version>1.20.0</version>
         </dependency>
         <!--
         <dependency>
@@ -141,12 +117,12 @@
             <artifactId>jsonrpc2-base</artifactId>
             <type>jar</type>
         </dependency>
-        <!-- needed for jsonRCP ?? --> 
-        <dependency>
-            <groupId>net.minidev</groupId>
-            <artifactId>json-smart</artifactId>
-            <version>2.2</version>
-        </dependency> 
+<!--        &lt;!&ndash; needed for jsonRCP ?? &ndash;&gt; -->
+<!--        <dependency>-->
+<!--            <groupId>net.minidev</groupId>-->
+<!--            <artifactId>json-smart</artifactId>-->
+<!--            <version>2.2</version>-->
+<!--        </dependency> -->
         
         <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>

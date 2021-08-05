@@ -18,6 +18,7 @@
         <netbeans.run.params>${netbeans.run.params.ide} -J-Xmx1024m  -J-Dfr.proline.level=1000 </netbeans.run.params>  <!-- -J-Dnetbeans.preresolve.classes=true -->
         <all.clusters>${project.build.directory}/${brandingToken}</all.clusters>
         <sqlite4java.library.path>${project.build.directory}/${brandingToken}/sqlite4java</sqlite4java.library.path>
+        <netbeans.verify.integrity>false</netbeans.verify.integrity>
     </properties>
 
     <!--    <repositories> 
@@ -43,13 +44,19 @@
             <version>${netbeans.version}</version>
             <type>pom</type>
         </dependency>
-
+        
         <!-- NbModuleSuite functional in RELEASE70 or later: -->
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-modules-nbjunit</artifactId>
             <version>${netbeans.version}</version>
             <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+        <groupId>org.netbeans.modules</groupId>
+        <artifactId>org-netbeans-modules-apisupport-harness</artifactId>
+        <version>${netbeans.version}</version>
         </dependency>
         
         <!-- To use Jelly Tools in your functional tests, add or replace with:

@@ -17,9 +17,7 @@
     <properties>
         <maven.compiler.source>13</maven.compiler.source>
         <maven.compiler.target>13</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <sqlite4java.version>1.0.392</sqlite4java.version>
-        <mzdb.version>1.1.0_jdk11-SNAPSHOT</mzdb.version>
+
     </properties>
     
     <dependencies>
@@ -35,6 +33,7 @@
                 </exclusion>
             </exclusions>  
         </dependency>
+
         <dependency>
             <groupId>fr.profi</groupId>
             <artifactId>mzdb-processing_${scala.compat.version}</artifactId>
@@ -46,16 +45,33 @@
                 </exclusion>  
             </exclusions>
         </dependency>
+
          <dependency>
             <groupId>fr.profi</groupId>
             <artifactId>timstof-access</artifactId>
-            <version>1.1.0_jdk11-SNAPSHOT</version>
+            <version>${util.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>xerces</groupId>
                     <artifactId>xercesImpl</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.typelevel</groupId>
+                    <artifactId>scala-library</artifactId>
+                </exclusion>
             </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>fr.profi.util</groupId>
+            <artifactId>profi-commons-java</artifactId>
+            <version>${util.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>fr.profi</groupId>
+            <artifactId>profi-proteomics_${scala.compat.version}</artifactId>
+            <version>${util.version}</version>
         </dependency>
 
         <!-- Proline Studio Commons -->
@@ -64,26 +80,18 @@
             <artifactId>prolinestudio-commons</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
-<!--        <dependency>-->
-<!--            <groupId>${project.groupId}</groupId>-->
-<!--            <artifactId>prolinestudio-corewrapper</artifactId>-->
-<!--            <version>${project.version}</version>-->
-<!--        </dependency>-->
 
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>prolinestudio-logger</artifactId>
-            <version>${project.version}</version>
-            <type>pom</type>
+            <groupId>com.github.davidmoten</groupId>
+            <artifactId>rtree</artifactId>
+            <version>0.8.7</version>
         </dependency>
 
         <!--  -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>28.0-jre</version>
-            <!-- ALERT Upgrade com.google.guava:guava to version 24.1.1 or later. For example:  -->
+            <version>30.1.1-jre</version>
             <type>jar</type>
         </dependency>
         
@@ -98,8 +106,6 @@
         <dependency>
             <groupId>org.swinglabs.swingx</groupId>
             <artifactId>swingx-all</artifactId>
-            <version>1.6.5-1</version>
-            <type>jar</type>
         </dependency>
         
         <dependency>
@@ -126,19 +132,13 @@
             <version>7.3-20070317</version>
         </dependency>
 
-<!--        &lt;!&ndash;  xml serialization &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>com.thoughtworks.xstream</groupId>-->
-<!--            <artifactId>xstream</artifactId>-->
-<!--            <version>1.4.8</version>-->
-<!--        </dependency> -->
-        
+
         <!-- org.scala-lang -->
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
         </dependency>
-        
+
         <!-- sqlite4java -->
         <!-- SQLite Jar then native libraries -->
         <dependency>
@@ -146,12 +146,7 @@
             <artifactId>sqlite4java</artifactId>
             <version>${sqlite4java.version}</version>
         </dependency>
-        
-        <dependency>
-            <groupId>com.sun.activation</groupId>
-            <artifactId>javax.activation</artifactId>
-            <version>1.2.0</version>
-        </dependency>
+
 
     </dependencies>
 

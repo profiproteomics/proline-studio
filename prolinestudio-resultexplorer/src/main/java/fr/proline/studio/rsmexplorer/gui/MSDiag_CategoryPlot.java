@@ -26,12 +26,12 @@ import javax.swing.JToolBar;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
-import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.renderer.category.StackedBarRenderer3D;
+import org.jfree.chart.renderer.category.StackedBarRenderer;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.slf4j.LoggerFactory;
@@ -75,7 +75,7 @@ public class MSDiag_CategoryPlot extends HourglassPanel {
         numberaxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 	        // NumberAxis numberaxis1 = new NumberAxis("Y");   
 
-        m_chart = ChartFactory.createStackedBarChart3D(
+        m_chart = ChartFactory.createStackedBarChart(
                 "", // chart title
                 "", // domain axis label
                 "", // range axis label
@@ -96,7 +96,7 @@ public class MSDiag_CategoryPlot extends HourglassPanel {
                 true
         );
 
-        StackedBarRenderer3D renderer = (StackedBarRenderer3D) plot.getRenderer();
+        StackedBarRenderer renderer = (StackedBarRenderer) plot.getRenderer();
         renderer.setShadowVisible(true);
         //renderer.setDrawBarOutline();
         renderer.setSeriesPaint(0, new Color(220, 220, 220/*254,60,60*/));
@@ -162,7 +162,7 @@ public class MSDiag_CategoryPlot extends HourglassPanel {
     public void writeToPNG(String fileName) {
         m_pngFile = new File(fileName);
         try {
-            ChartUtilities.saveChartAsPNG(m_pngFile, m_chart, m_chromatogragmPanel.getWidth(), m_chromatogragmPanel.getHeight());
+            ChartUtils.saveChartAsPNG(m_pngFile, m_chart, m_chromatogragmPanel.getWidth(), m_chromatogragmPanel.getHeight());
         } catch (IOException e) {
             LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("writeToPNG", e);
         }

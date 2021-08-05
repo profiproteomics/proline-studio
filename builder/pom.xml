@@ -5,6 +5,7 @@
     <artifactId>ProlineStudio</artifactId>
     <version>2.2.0_jdk11-SNAPSHOT</version>
     <packaging>pom</packaging>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <studio.version>${project.version}</studio.version>
@@ -26,9 +27,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.oracle</groupId>
+            <groupId>org.openjdk</groupId>
             <artifactId>jre</artifactId>
-            <version>1.8.77-EDyP</version>
+            <version>11.0.11</version>
             <type>zip</type>
             <classifier>${os.classifier}</classifier>
         </dependency>

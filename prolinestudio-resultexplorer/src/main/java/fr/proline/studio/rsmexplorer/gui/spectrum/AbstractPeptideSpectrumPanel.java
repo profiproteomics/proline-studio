@@ -40,8 +40,8 @@ import org.jfree.chart.title.TextTitle;
 import org.jfree.data.Range;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
-import org.jfree.ui.RectangleAnchor;
-import org.jfree.ui.TextAnchor;
+import org.jfree.chart.ui.RectangleAnchor;
+import org.jfree.chart.ui.TextAnchor;
 import fr.proline.studio.WindowManager;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +102,7 @@ public abstract class AbstractPeptideSpectrumPanel extends HourglassPanel implem
     plot.setBackgroundPaint(Color.white);
 
     XYStickRenderer renderer = new XYStickRenderer();
-    renderer.setBaseStroke(new BasicStroke(1.0f));
+    renderer.setDefaultStroke(new BasicStroke(1.0f));
 
     plot.setRenderer(renderer);
 
@@ -537,8 +537,8 @@ public abstract class AbstractPeptideSpectrumPanel extends HourglassPanel implem
       double x = dataset.getXValue(series, item);
       double y = dataset.getYValue(series, item);
       if (!Double.isNaN(y)) {
-        org.jfree.ui.RectangleEdge xAxisLocation = plot.getDomainAxisEdge();
-        org.jfree.ui.RectangleEdge yAxisLocation = plot.getRangeAxisEdge();
+        org.jfree.chart.ui.RectangleEdge xAxisLocation = plot.getDomainAxisEdge();
+        org.jfree.chart.ui.RectangleEdge yAxisLocation = plot.getRangeAxisEdge();
         double transX = domainAxis.valueToJava2D(x, dataArea, xAxisLocation);
         double transY = rangeAxis.valueToJava2D(y, dataArea, yAxisLocation);
         double transOY = rangeAxis.valueToJava2D(0, dataArea, yAxisLocation);
@@ -554,8 +554,8 @@ public abstract class AbstractPeptideSpectrumPanel extends HourglassPanel implem
         }
         int domainAxisIndex = plot.getDomainAxisIndex(domainAxis);
         int rangeAxisIndex = plot.getRangeAxisIndex(rangeAxis);
-        updateCrosshairValues(crosshairState, x, y, domainAxisIndex, rangeAxisIndex, transX, transY,
-                orientation);
+        //VDS TODO Fixme To see which data should be specified  int datasetIndex
+        updateCrosshairValues(crosshairState, x, y, domainAxisIndex, /*rangeAxisIndex,*/ transX, transY, orientation);
 
       }
     }

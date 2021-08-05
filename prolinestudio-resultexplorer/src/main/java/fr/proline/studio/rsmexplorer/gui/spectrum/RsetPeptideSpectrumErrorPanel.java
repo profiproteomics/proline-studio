@@ -23,7 +23,7 @@ import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYPointerAnnotation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.Range;
-import org.jfree.ui.TextAnchor;
+import org.jfree.chart.ui.TextAnchor;
 
 import java.awt.*;
 import org.jfree.chart.plot.Marker;

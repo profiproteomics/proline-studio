@@ -16,10 +16,9 @@
  */
 package fr.proline.studio.extendedtablemodel;
 
+import com.opencsv.CSVReader;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.export.ExportModelUtilities;
-import fr.proline.studio.extendedtablemodel.ExtraDataType;
-import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.LongFilter;
@@ -32,14 +31,14 @@ import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
+
+import javax.swing.table.TableCellRenderer;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.swing.table.TableCellRenderer;
-import au.com.bytecode.opencsv.CSVReader;
 
 /**
  *
@@ -274,7 +273,6 @@ import au.com.bytecode.opencsv.CSVReader;
         
         try {
             CSVReader reader = new CSVReader(new FileReader(filePath), separator);
-
             
             
         // read column headers

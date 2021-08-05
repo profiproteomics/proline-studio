@@ -347,14 +347,14 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
 
                 if (m_matrix[row][col].contains("ABC")) {
                      ArrayList<ExportFontData> ExportFontDatas = new ArrayList<>();
-                    ExportFontData newSubStringFont = new ExportFontData(0, exportString.length(), HSSFColor.LIGHT_BLUE.index, Font.BOLD);
+                    ExportFontData newSubStringFont = new ExportFontData(0, exportString.length(), HSSFColor.HSSFColorPredefined.LIGHT_BLUE.getIndex(), Font.BOLD);
                     ExportFontDatas.add(newSubStringFont);   
                     return ExportFontDatas;
 
                 } else if (m_matrix[row][col].contains("XYZ")) {
                     ArrayList<ExportFontData> ExportFontDatas = new ArrayList<>();
 
-                    ExportFontData newSubStringFont = new ExportFontData(0, exportString.length(), HSSFColor.RED.index, Font.BOLD);
+                    ExportFontData newSubStringFont = new ExportFontData(0, exportString.length(), HSSFColor.HSSFColorPredefined.RED.getIndex(), Font.BOLD);
                     ExportFontDatas.add(newSubStringFont);    
                     return ExportFontDatas;
                     

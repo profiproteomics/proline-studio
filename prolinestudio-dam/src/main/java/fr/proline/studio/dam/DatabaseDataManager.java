@@ -20,6 +20,7 @@ import fr.proline.core.orm.uds.*;
 import fr.proline.core.orm.uds.repository.ExternalDbRepository;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.repository.ProlineDatabaseType;
+import fr.proline.studio.Exceptions;
 
 import fr.proline.module.seq.DatabaseAccess;
 import fr.proline.repository.IDatabaseConnector;

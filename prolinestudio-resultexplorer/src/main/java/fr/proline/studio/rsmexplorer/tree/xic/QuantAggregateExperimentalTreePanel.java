@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.event.*;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
@@ -390,13 +391,11 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
     private Map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping> inferDefaultMapping(AbstractNode node) {
 
         Map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping> mappings = new HashMap<>();
-        Stream<Object> groupStream = Collections.list(node.children()).stream()
-                .filter(n -> (((AbstractNode) n).getType() == AbstractNode.NodeTypes.BIOLOGICAL_GROUP));
+        Stream<TreeNode> groupStream = Collections.list(node.children()).stream().filter(n -> (((AbstractNode) n).getType() == AbstractNode.NodeTypes.BIOLOGICAL_GROUP));
         AtomicInteger index = new AtomicInteger(1);
         List<XICBiologicalGroupNode> groupNodes = groupStream.map(o -> ((XICBiologicalGroupNode) o)).collect(Collectors.toList());
         for (XICBiologicalGroupNode groupNode : groupNodes) {
-            Stream<Object> sampleStream = Collections.list(groupNode.children()).stream()
-                    .filter(n -> (((AbstractNode) n).getType() == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE));
+            Stream<TreeNode> sampleStream = Collections.list(groupNode.children()).stream().filter(n -> (((AbstractNode) n).getType() == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE));
             List<XICBiologicalSampleNode> sampleNodeList = sampleStream.map(s -> ((XICBiologicalSampleNode) s)).collect(Collectors.toList());
             for (XICBiologicalSampleNode sampleNode : sampleNodeList) {
                 //@KX for each group, create a  DQuantitationChannelMapping, the parentQCNumber of DQuantitationChannelMapping increse+1 at each time
@@ -477,7 +476,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
      * @return
      */
     private Stream<XICBiologicalSampleAnalysisNode> parseSample(XICBiologicalSampleNode sampleNode) {
-        Stream<Object> stream = Collections.list(sampleNode.children()).stream();
+        Stream<TreeNode> stream = Collections.list(sampleNode.children()).stream();
         return stream.map(node -> ((XICBiologicalSampleAnalysisNode) node));
     }
 

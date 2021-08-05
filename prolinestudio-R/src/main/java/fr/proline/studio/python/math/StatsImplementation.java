@@ -29,10 +29,11 @@ import fr.proline.studio.table.LazyData;
 import fr.proline.studio.types.LogInfo;
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.apache.commons.math.MathException;
-import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math.stat.inference.TTest;
-import org.apache.commons.math.stat.inference.TTestImpl;
+import org.apache.commons.math3.exception.MaxCountExceededException;
+import org.apache.commons.math3.exception.NullArgumentException;
+import org.apache.commons.math3.exception.NumberIsTooSmallException;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.inference.TTest;
 import org.python.core.PyFloat;
 import org.python.core.PyInteger;
 import org.python.core.PyTuple;
@@ -242,7 +243,7 @@ public class StatsImplementation {
         return resTable;
     }
     
-    public static ColDoubleData ttd(PyTuple p1, PyTuple p2) throws MathException {
+    public static ColDoubleData ttd(PyTuple p1, PyTuple p2)  {
 
         Table t = ((ColRef) p1.get(0)).getTable();
 
@@ -266,7 +267,7 @@ public class StatsImplementation {
         return new ColDoubleData(t, ttdArray, null);
     }
 
-    public static ColDoubleData pvalue(PyTuple p1, PyTuple p2) throws MathException {
+    public static ColDoubleData pvalue(PyTuple p1, PyTuple p2) throws RuntimeException {
 
         Table t = ((ColRef) p1.get(0)).getTable();
 
@@ -278,7 +279,7 @@ public class StatsImplementation {
             DescriptiveStatistics ds1 = _toDescriptiveStatistics(p1, row);
             DescriptiveStatistics ds2 = _toDescriptiveStatistics(p2, row);
 
-            TTest tTest = new TTestImpl();
+            TTest tTest = new TTest();
 
             // calculate Welch t-test pvalue
             double pvalue;
@@ -290,7 +291,7 @@ public class StatsImplementation {
                     // avoid -0.0
                     pvalue += 0.0;
                 }
-            } catch (IllegalArgumentException | MathException ex) {
+            } catch ( MaxCountExceededException | NumberIsTooSmallException | NullArgumentException ex ) {
                 pvalue = Double.NaN;
             }
 
@@ -405,12 +406,12 @@ public class StatsImplementation {
  
     }
     
-    public static Table quantifilter(PyTuple p, Table t, PyInteger option, PyInteger threshold, boolean reversed) throws MathException {
+    public static Table quantifilter(PyTuple p, Table t, PyInteger option, PyInteger threshold, boolean reversed) throws RuntimeException {
         PyTuple[] pArray = StatsUtil.colTupleToTuplesArray(p);
         return quantifilter(pArray, t, option, threshold, reversed);
     }
     
-    public static Table quantifilter(PyTuple[] pArray, Table t, PyInteger option, PyInteger threshold, boolean reversed) throws MathException {
+    public static Table quantifilter(PyTuple[] pArray, Table t, PyInteger option, PyInteger threshold, boolean reversed) throws RuntimeException {
 
         ColRef[] cols = StatsUtil.colTupleToColArray(pArray);
         

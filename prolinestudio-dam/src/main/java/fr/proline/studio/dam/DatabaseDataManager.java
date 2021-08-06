@@ -22,6 +22,8 @@ import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.repository.ProlineDatabaseType;
 import fr.proline.studio.Exceptions;
 
+import javax.persistence.EntityManager;
+import java.util.*;
 /**
  * Static reference of the several UDS values : project, instruments ....
  * @author jm235353

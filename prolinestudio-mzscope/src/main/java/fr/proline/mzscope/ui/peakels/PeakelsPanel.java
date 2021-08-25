@@ -31,25 +31,25 @@ import fr.proline.mzscope.processing.PeakelsHelper;
 import fr.proline.mzscope.ui.IMzScopeController;
 import fr.proline.mzscope.ui.dialog.RTParamDialog;
 import fr.proline.mzscope.ui.model.MzScopePreferences;
+import fr.proline.studio.Exceptions;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.extendedtablemodel.ImportedDataTableModel;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.utils.IconManager;
-import java.awt.Window;
-import java.io.StreamCorruptedException;
-
-import javax.swing.*;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.openide.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
 import scala.collection.mutable.ArrayBuffer;
+
+import javax.swing.*;
+import java.awt.*;
+import java.io.StreamCorruptedException;
+import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Panel presenting a list of peakels in a table

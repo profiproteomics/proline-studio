@@ -60,7 +60,7 @@ public class MainFrame extends AbstractDockFrame implements WindowListener {
     }
 
     private MainFrame() {
-        super("Proline Studio "+JavaVersion.getMilestoneProductVersion());
+        super("Proline Studio "+ (JavaVersion.isMileStoneVersion() ? JavaVersion.getMilestoneProductVersion() : JavaVersion.getProductVersion()) );
         setSize(1000, 800);
 
         setIconImage(IconManager.getImage(IconManager.IconType.FRAME_ICON));

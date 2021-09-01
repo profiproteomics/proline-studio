@@ -11,7 +11,7 @@
 
     <appender name="DebugRollingfileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <append>true</append>
-        <File>log/proline_studio_debug.log</File>
+        <File>logs/proline_studio_debug.log</File>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>logs/proline_studio_debug_.%d{yyyy-MM-dd}.%i.txt</fileNamePattern>
@@ -28,7 +28,7 @@
     </appender>
 
     <appender name="FappenderError" class="ch.qos.logback.core.FileAppender">
-        <file>log/proline_studio_error-${user.name}.log</file>
+        <file>logs/proline_studio_error-${user.name}.log</file>
         <append>true</append>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>WARN</level>
@@ -40,9 +40,6 @@
 
 
     <logger name="ProlineStudio" level="DEBUG">
-    </logger>
-  
-    <logger name="ProlineWebCore" level="DEBUG">
     </logger>
 
    <logger name="fr.proline" level="debug"/>

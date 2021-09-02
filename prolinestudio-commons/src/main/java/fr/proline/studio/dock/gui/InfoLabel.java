@@ -88,6 +88,8 @@ public class InfoLabel extends JLabel implements MouseListener {
         if (m_throwable != null) {
             ExceptionDialog.getSingleton(m_throwable.getMessage(), m_throwable).setVisible(true);
         }
+        //ResetPanel
+        setInfo(INFO_LEVEL.INFO, "", null);
     }
 
     @Override

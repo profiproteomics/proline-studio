@@ -18,6 +18,7 @@ package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -39,58 +40,69 @@ import fr.proline.studio.WindowManager;
  */
 public class ClearDatasetAction extends AbstractRSMAction {
     
-    
+    boolean m_fullClear = false;
+
     public ClearDatasetAction(AbstractTree tree) {
-        super("Clear", tree);
+        super("Clear Validation", tree);
+    }
+
+    public ClearDatasetAction(AbstractTree tree, boolean fullClear) {
+        super(fullClear ? "Clear All" : "Clear Validation", tree);
+        m_fullClear = fullClear;
     }
 
      @Override
     public void actionPerformed(final AbstractNode[] selectedNodes, int x, int y) {
-        String msg = "The Clear action will delete generated data : Merged DataSet or Identification Summary.\n (can not be undone) Are you sure ?";
+        StringBuilder sb = new StringBuilder("The Clear action will delete generated data (Identification Summary");
+         if (m_fullClear) {
+             sb.append(" and Merged DataSet)");
+         } else {
+             sb.append(")");
+         }
+         sb.append("\n(This can not be undone) Are you sure ?");
         String title = "Clear Dataset";
-        int n = JOptionPane.showConfirmDialog(WindowManager.getDefault().getMainWindow(),
-                msg, title, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        int n = JOptionPane.showConfirmDialog(WindowManager.getDefault().getMainWindow(),sb.toString(), title, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         if (n == JOptionPane.YES_OPTION) {
-        IdentificationTree tree = IdentificationTree.getCurrentTree();
-        final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-        
-        int nbNodes = selectedNodes.length;
-        for (int i = 0; i < nbNodes; i++) {
-            final DataSetNode node = (DataSetNode) selectedNodes[i];
-            node.setIsChanging(true);
-            treeModel.nodeChanged(node);
-            
-            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+            IdentificationTree tree = IdentificationTree.getCurrentTree();
+            final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
 
-                @Override
-                public boolean mustBeCalledInAWT() {
-                    return true;
-                }
+            int nbNodes = selectedNodes.length;
+            for (int i = 0; i < nbNodes; i++) {
+                final DataSetNode node = (DataSetNode) selectedNodes[i];
+                node.setIsChanging(true);
+                treeModel.nodeChanged(node);
 
+                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
-                @Override
-                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                    
-                    if (success) {
-                        DDataset dataset = node.getDataset();
-                        dataset.setResultSummaryId(null);
-                        dataset.setResultSummary(null);
-                        if (!node.isLeaf()) {
-                            dataset.setResultSetId(null);
-                            dataset.setResultSet(null);
-                        }
+                    @Override
+                    public boolean mustBeCalledInAWT() {
+                        return true;
                     }
-                    node.setIsChanging(false);
-                    treeModel.nodeChanged(node);
-                }
-            };
-            
-            DDataset dataset = node.getDataset();
-            DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-            task.initClearDataset(dataset, !node.isLeaf());
-            
-            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-        }
+
+
+                    @Override
+                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+
+                        if (success) {
+                            DDataset dataset = node.getDataset();
+                            dataset.setResultSummaryId(null);
+                            dataset.setResultSummary(null);
+                            if (m_fullClear && !node.isLeaf())  {
+                                dataset.setResultSetId(null);
+                                dataset.setResultSet(null);
+                            }
+                        }
+                        node.setIsChanging(false);
+                        treeModel.nodeChanged(node);
+                    }
+                };
+
+                DDataset dataset = node.getDataset();
+                DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+                task.initClearDataset(dataset, (m_fullClear && !node.isLeaf()) );
+
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+            }
         }
         
     }
@@ -141,6 +153,22 @@ public class ClearDatasetAction extends AbstractRSMAction {
                     setEnabled(false);
                     return;
                 } else {
+
+                    if (!datasetNode.hasResultSummary() && !m_fullClear) {
+                        setEnabled(false);
+                        return;
+                    }
+
+
+                    DDatasetType.AggregationInformation aggInfo = datasetNode.getDataset().getAggregationInformation();
+                        if(aggInfo.equals(DDatasetType.AggregationInformation.IDENTIFICATION_SUMMARY_AGG) || aggInfo.equals(DDatasetType.AggregationInformation.IDENTIFICATION_SUMMARY_UNION)){
+                        // Identification merged only full clear
+                        if(!m_fullClear) {
+                            setEnabled(false);
+                            return;
+                        }
+                    }
+
                     AbstractNode parentNode = (AbstractNode) datasetNode.getParent();
                     if (parentNode.getType() == AbstractNode.NodeTypes.DATA_SET) {
                         DataSetNode parentDatasetNode = (DataSetNode) parentNode;

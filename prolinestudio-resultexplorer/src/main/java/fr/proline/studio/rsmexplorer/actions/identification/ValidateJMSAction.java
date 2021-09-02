@@ -135,7 +135,7 @@ public class ValidateJMSAction extends AbstractRSMAction {
 
                 final DDataset d = dataSetNode.getDataset();
 
-                if (dataSetNode.hasResultSummary()) {                                        
+                if (dataSetNode.hasResultSummary() || propagateValidation ) {
                     removePreviousValidation(dataSetNode, propagateValidation);
                 } 
                 askValidation(dataSetNode, validationArguments, changeTypicalRules, scoringType, propagateValidation);
@@ -151,15 +151,15 @@ public class ValidateJMSAction extends AbstractRSMAction {
     private void removePreviousValidation(DataSetNode dataSetNode, boolean removeInHierarchy){
         
         if (removeInHierarchy) {
-        Runnable callback = new Runnable() {
-            @Override
-            public void run() {
-                removePreviousValidationImpl(dataSetNode, removeInHierarchy);
-            }
+            Runnable callback = new Runnable() {
+                @Override
+                public void run() {
+                    removePreviousValidationImpl(dataSetNode, removeInHierarchy);
+                }
 
-        };
-        
-        IdentificationTree.getCurrentTree().loadNode(dataSetNode, callback, true);
+            };
+
+            IdentificationTree.getCurrentTree().loadNode(dataSetNode, callback, true);
         } else {
             removePreviousValidationImpl(dataSetNode, removeInHierarchy);
         }

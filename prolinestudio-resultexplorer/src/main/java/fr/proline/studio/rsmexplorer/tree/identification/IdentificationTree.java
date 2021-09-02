@@ -732,7 +732,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 // create the actions
                 Boolean showHiddenFunctionnality = false; // JPM.TODO : completely removed for the moment preferences.getBoolean("Profi", false);
 
-                m_mainActions = new ArrayList<>(25);  // <--- get in sync
+                m_mainActions = new ArrayList<>(26);  // <--- get in sync
 
 
                 DisplayRsetAction displayRsetAction = new DisplayRsetAction(this);
@@ -762,8 +762,11 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 RenameRsetAction renameRsetAction = new RenameRsetAction(this);
                 m_mainActions.add(renameRsetAction);
 
-                ClearDatasetAction clearAction = new ClearDatasetAction(this);
+                ClearDatasetAction clearAction = new ClearDatasetAction(this, false);
                 m_mainActions.add(clearAction);
+
+                ClearDatasetAction clearFullAction = new ClearDatasetAction(this, true);
+                m_mainActions.add(clearFullAction);
 
                 DeleteAction deleteAction = new DeleteAction(this);
                 m_mainActions.add(deleteAction);

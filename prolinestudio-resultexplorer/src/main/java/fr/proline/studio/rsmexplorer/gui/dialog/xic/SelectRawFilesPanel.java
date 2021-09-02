@@ -316,6 +316,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
         yesNoDialog.setVisible(true);
         if (yesNoDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
             m_model.cleanRawFile();
+            resetDropZonePanel();
             repaint();
         }
     }

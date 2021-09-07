@@ -72,9 +72,8 @@ public class IdentifyPtmSitesTask extends AbstractJMSTask {
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, m_serviceName);
         if(m_version != null )
             message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, m_version);
-        addSourceToMessage(message);    
-        addDescriptionToMessage(message);
-        
+        addSupplementaryInfo(message);
+
         setTaskInfoRequest(message.getText());
 	
         //  Send the Message

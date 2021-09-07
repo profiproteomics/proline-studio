@@ -17,6 +17,7 @@
 package fr.proline.studio.dpm.task.jms;
 
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
+import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.UserAccount;
 import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.DatabaseDataManager;
@@ -166,6 +167,12 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
         m_taskInfo.setRequestContent(content);
     }
 
+    protected void  addSupplementaryInfo(Message message)throws JMSException {
+        addSourceToMessage(message);
+        addDescriptionToMessage(message);
+        addProjectIdToMessage(message);
+    }
+
     protected void addSourceToMessage(Message message) throws JMSException {
 
         StringBuilder userLoginSB = new StringBuilder();
@@ -188,6 +195,15 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
 
     protected void addDescriptionToMessage(Message message) throws JMSException {
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_DESCR_KEY, m_taskInfo.getTaskDescription());
+    }
+
+    protected void addProjectIdToMessage(Message message) throws JMSException {
+
+        Project p = DatabaseDataManager.getDatabaseDataManager().getCurrentProject();
+        String pId = null;
+        if(p!=null)
+            pId = String.valueOf(p.getId());
+        message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_PROJECT_ID_KEY, pId);
     }
 
     /**

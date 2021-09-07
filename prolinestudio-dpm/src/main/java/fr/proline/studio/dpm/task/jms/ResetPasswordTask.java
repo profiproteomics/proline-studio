@@ -68,9 +68,8 @@ public class ResetPasswordTask extends AbstractJMSTask {
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, m_serviceName);
         //message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, m_version);
-        addSourceToMessage(message);
-        addDescriptionToMessage(message);
-        
+        addSupplementaryInfo(message);
+
         setTaskInfoRequest(message.getText());
 	
         //  Send the Message

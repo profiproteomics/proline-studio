@@ -563,6 +563,7 @@ public class ProjectExplorerPanel extends JPanel {
                                 getProjectExplorerPanel().selectProject(item);
 
                                 if ((item != null) && (item.getProjectIdentificationData() != null) && (!item.isChanging())) {
+                                    DatabaseDataManager.getDatabaseDataManager().setCurrentProject(item.getProjectIdentificationData().getProject());
                                     m_editProjectButton.setEnabled(true);
                                     m_propertiesProjectButton.setEnabled(true);
                                     m_clearProjectButton.setEnabled(true);
@@ -570,6 +571,7 @@ public class ProjectExplorerPanel extends JPanel {
                                     Preferences preferences = NbPreferences.root();
                                     preferences.put("DefaultSelectedProject", item.getProjectIdentificationData().getName());
                                 } else {
+                                    DatabaseDataManager.getDatabaseDataManager().setCurrentProject(null);
                                     m_editProjectButton.setEnabled(false);
                                     m_propertiesProjectButton.setEnabled(false);
                                     m_clearProjectButton.setEnabled(false);
@@ -674,7 +676,8 @@ public class ProjectExplorerPanel extends JPanel {
                         if (serializedProperties != null) {
                             JsonObject jsonObject = parser.parse(serializedProperties).getAsJsonObject();
                             JsonPrimitive isActiveObject = jsonObject.getAsJsonPrimitive("is_active");
-                            isActive = isActiveObject.getAsBoolean();
+                            if(isActiveObject != null)
+                                isActive = isActiveObject.getAsBoolean();
                         }
                         projectItem.setIsActive(isActive);
                         

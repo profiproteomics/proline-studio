@@ -60,8 +60,7 @@ public class RetrieveBioSeqTask extends AbstractJMSTask {
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/seq/RetrieveBioSeqForRSMs");
-        addSourceToMessage(message);
-        addDescriptionToMessage(message);
+        addSupplementaryInfo(message);
         setTaskInfoRequest(message.getText());
 
         //  Send the Message        

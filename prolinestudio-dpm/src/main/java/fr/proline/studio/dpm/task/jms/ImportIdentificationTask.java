@@ -80,8 +80,7 @@ public class ImportIdentificationTask extends AbstractJMSTask {
         //SERVICE - ImportValidateGenerateSpectrumMatches service TEST
 //        message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/ImportValidateGenerateSM");
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/ImportResultFiles");
-        addSourceToMessage(message);
-        addDescriptionToMessage(message);
+        addSupplementaryInfo(message);
 
         setTaskInfoRequest(message.getText());
         //  Send the Message

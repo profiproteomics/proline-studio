@@ -62,6 +62,8 @@ public class JMSConnectionManager {
 
     public static final String PROLINE_SERVICE_NAME_KEY = "Proline_ServiceName";
 
+    public static final String PROLINE_SERVICE_PROJECT_ID_KEY = "Proline_Service_ProjectId";
+
     public static final String PROLINE_SERVICE_VERSION_KEY = "Proline_ServiceVersion";
 
     public static final String PROLINE_SERVICE_SOURCE_KEY = "Proline_ServiceSource";

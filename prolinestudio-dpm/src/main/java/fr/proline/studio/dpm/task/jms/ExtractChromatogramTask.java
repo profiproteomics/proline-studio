@@ -73,8 +73,7 @@ public class ExtractChromatogramTask extends AbstractJMSTask {
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, m_serviceName);
-        addSourceToMessage(message);
-        addDescriptionToMessage(message);
+        addSupplementaryInfo(message);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, m_version);
 
         setTaskInfoRequest(message.getText());

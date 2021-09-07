@@ -88,10 +88,9 @@ public class ImportMaxQuantTask extends AbstractJMSTask {
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/ImportMaxQuantResults");
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, "2.0");
-        
-        addSourceToMessage(message);  
-        addDescriptionToMessage(message);
-        
+
+        addSupplementaryInfo(message);
+
         setTaskInfoRequest(message.getText());
         //  Send the Message
         m_producer.send(message);

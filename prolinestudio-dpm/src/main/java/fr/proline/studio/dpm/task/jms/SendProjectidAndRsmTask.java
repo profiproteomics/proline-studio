@@ -50,8 +50,7 @@ public class SendProjectidAndRsmTask extends AbstractJMSTask {
         final TextMessage message = m_session.createTextMessage(jsonRequest.toJSONString());
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/GetProteinSequence");
-        addSourceToMessage(message);  
-        addDescriptionToMessage(message);
+        addSupplementaryInfo(message);
         setTaskInfoRequest(message.getText());
         m_producer.send(message);
         m_loggerProline.info("Message [{}] sent", message.getJMSMessageID());

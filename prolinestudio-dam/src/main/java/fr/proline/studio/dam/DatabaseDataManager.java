@@ -42,6 +42,7 @@ public class DatabaseDataManager  {
     private String m_jdbcURL;
     private String m_jdbcDriver;
     private HashMap<Object, Object> m_serverConnectionProperties;
+    private Project m_currentProject;
     
     private HashMap<Aggregation.ChildNature, Aggregation> m_aggregationMap = null;
     
@@ -197,7 +198,15 @@ public class DatabaseDataManager  {
     public UserAccount[] getProjectUsersArray() {
         return m_projectUsers;
     }
-    
+
+    public void setCurrentProject(Project currentProject){
+        m_currentProject = currentProject;
+    }
+
+    public Project getCurrentProject(){
+        return m_currentProject;
+    }
+
     public void setLoggedUser(UserAccount loggedUser) {
         m_loggedUser = loggedUser;
     }

@@ -119,8 +119,7 @@ public class FileUploadTask extends AbstractJMSTask {
                 message.setStringProperty("dest_folder_path", m_mountLabel + m_destinationPath);
             }
 
-            addSourceToMessage(message);
-            addDescriptionToMessage(message);
+            addSupplementaryInfo(message);
 
             in = new FileInputStream(uploadFile);
             BufferedInputStream inBuf = new BufferedInputStream(in);

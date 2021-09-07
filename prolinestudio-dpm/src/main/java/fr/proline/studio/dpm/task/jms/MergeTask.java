@@ -106,9 +106,8 @@ public class MergeTask extends AbstractJMSTask {
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/MergeResults");
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, "2.0");
-        addSourceToMessage(message);      
-        addDescriptionToMessage(message);
-        
+        addSupplementaryInfo(message);
+
         setTaskInfoRequest(message.getText());
 
         //  Send the Message

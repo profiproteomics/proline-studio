@@ -29,31 +29,44 @@ public class OverArea {
     private DockPosition m_position;
     private Rectangle m_zone;
 
-    public OverArea(DockContainerTab container, DockPosition position) {
+    public OverArea(DockContainerTab container, DockPosition dockPosition) {
         m_container = container;
-        m_position = position;
+        m_position = dockPosition;
 
         JComponent c = container.getComponent();
-        Point p = c.getLocationOnScreen();
+
+        int position = dockPosition.getPosition();
+
+        if (position>=0) {
+            // We are over a Tabbed Label
+            Component tabComponent = ((JTabbedPane) c).getTabComponentAt(position);
+            Point  p = tabComponent.getLocationOnScreen();
+            final int MARGIN = 5;
+            m_zone = new Rectangle(p.x-MARGIN, p.y-MARGIN, tabComponent.getWidth()+MARGIN*2, tabComponent.getHeight()+MARGIN*2);
+        } else {
+
+            Point p = c.getLocationOnScreen();
 
 
-        m_zone = new Rectangle(p.x, p.y, c.getWidth(), c.getHeight());
+            m_zone = new Rectangle(p.x, p.y, c.getWidth(), c.getHeight());
 
-        switch (position) {
-            case NORTH:
-                m_zone.height /= 2;
-                break;
-            case SOUTH:
-                m_zone.height /= 2;
-                m_zone.y += m_zone.height;
-                break;
-            case WEST:
-                m_zone.width /= 2;
-                break;
-            case EAST:
-                m_zone.width /= 2;
-                m_zone.x += m_zone.width;
-                break;
+
+            switch (position) {
+                case DockPosition.NORTH:
+                    m_zone.height /= 2;
+                    break;
+                case DockPosition.SOUTH:
+                    m_zone.height /= 2;
+                    m_zone.y += m_zone.height;
+                    break;
+                case DockPosition.WEST:
+                    m_zone.width /= 2;
+                    break;
+                case DockPosition.EAST:
+                    m_zone.width /= 2;
+                    m_zone.x += m_zone.width;
+                    break;
+            }
         }
 
 

@@ -38,10 +38,12 @@ public class TabbedPaneLabel extends JPanel implements DockComponentListener {
 
     private DockingExportTransferHandler m_transferHandler;
     private MouseEvent m_mouseBegin;
+    private boolean m_exportAsDrag = false;
 
     private JLabel m_titleLabel;
     private JButton m_closeButton = null;
     private JButton m_minimizeButton = null;
+
 
     public TabbedPaneLabel(DockContainerTab dockContainerTab, DockComponent dockComponent) {
         m_dockContainerTab = dockContainerTab;
@@ -69,7 +71,6 @@ public class TabbedPaneLabel extends JPanel implements DockComponentListener {
 
         m_titleLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                ((JTabbedPane) m_dockContainerTab.getComponent()).setSelectedComponent(m_dockComponent.getComponent());
             }
             public void mousePressed(MouseEvent evt) {
                 m_mouseBegin = evt;
@@ -79,7 +80,11 @@ public class TabbedPaneLabel extends JPanel implements DockComponentListener {
 
                 if (evt.isPopupTrigger()) {
                     popup(evt.getX(), evt.getY());
+                } else if (!m_exportAsDrag) {
+                    ((JTabbedPane) m_dockContainerTab.getComponent()).setSelectedComponent(m_dockComponent.getComponent());
                 }
+
+                m_exportAsDrag = false;
             }
         });
 
@@ -138,8 +143,16 @@ public class TabbedPaneLabel extends JPanel implements DockComponentListener {
             int dx = m_mouseBegin.getX() - evt.getX();
             int dy = m_mouseBegin.getY() - evt.getY();
             if ((dx * dx + dy * dy) > 16) {
+
+                JComponent component = m_dockComponent.getComponent();
+                JTabbedPane tabbedPane = (JTabbedPane) m_dockContainerTab.getComponent();
+                int index = tabbedPane.indexOfComponent(component);
+
+                tabbedPane.setSelectedIndex(index);
+
                 m_transferHandler.exportAsDrag(this, m_mouseBegin, TransferHandler.MOVE);
                 m_mouseBegin = null;
+                m_exportAsDrag = true;
             }
         }
 

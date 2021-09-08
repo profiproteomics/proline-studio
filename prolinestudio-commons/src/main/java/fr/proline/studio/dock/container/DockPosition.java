@@ -19,21 +19,42 @@ package fr.proline.studio.dock.container;
 
 import java.awt.*;
 
-public enum DockPosition {
+public class DockPosition {
 
-    CENTER(BorderLayout.CENTER),
-    WEST(BorderLayout.WEST),
-    EAST(BorderLayout.EAST),
-    NORTH(BorderLayout.NORTH),
-    SOUTH(BorderLayout.SOUTH);
+    public static final int CENTER = -1;
+    public static final int WEST   = -2;
+    public static final int EAST   = -3;
+    public static final int NORTH  = -4;
+    public static final int SOUTH  = -5;
+    // positive value correspond to an index of a sub component.
 
-    private String m_borderLayout;
+    private int m_position;
 
-    DockPosition(String borderLayout) {
-        m_borderLayout = borderLayout;
+    public DockPosition(int position) {
+        m_position = position;
     }
+
 
     public String getBorderLayout() {
-        return m_borderLayout;
+        switch (m_position) {
+            case DockPosition.CENTER:
+                return BorderLayout.CENTER;
+            case DockPosition.WEST:
+                return BorderLayout.WEST;
+            case DockPosition.EAST:
+                return BorderLayout.EAST;
+            case DockPosition.NORTH:
+                return BorderLayout.NORTH;
+            case DockPosition.SOUTH:
+                return BorderLayout.SOUTH;
+        }
+        return null;
     }
+
+    public int getPosition() {
+        return m_position;
+    }
+
+
+
 }

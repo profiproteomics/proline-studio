@@ -35,7 +35,6 @@ public class DockContainerRoot extends DockContainer implements DockMultiInterfa
 
 
     private final DraggingOverlayPanel m_draggingOverlayPanel;
-    private JComponent m_oldGlassPanel = null;
 
     private JPanel m_mainPanel;
     private InfoLabel m_infoLabel;
@@ -158,8 +157,9 @@ public class DockContainerRoot extends DockContainer implements DockMultiInterfa
 
 
     public OverArea getOverArea(Point screenPoint) {
+
         for (DockContainerMulti container : m_containerMap.keySet()) {
-            //Point containerPoint = SwingUtilities.convertPoint(getComponent(), screenPoint, container.getComponent());
+
             OverArea overArea = container.getOverArea(screenPoint);
             if (overArea != null) {
                 return overArea;
@@ -172,26 +172,23 @@ public class DockContainerRoot extends DockContainer implements DockMultiInterfa
 
     public void startDragging() {
 
+        if (firstDrag) {
+            firstDrag = false;
+            JRootPane rootPane = m_component.getRootPane();
+            rootPane.setGlassPane(m_draggingOverlayPanel);
+        }
 
-        JRootPane rootPane = m_component.getRootPane();
-        m_oldGlassPanel = (JComponent) rootPane.getGlassPane();
-
-        rootPane.setGlassPane(m_draggingOverlayPanel);
         m_draggingOverlayPanel.setVisible(true);
 
-        rootPane.revalidate();
-        rootPane.repaint();
+        m_component.repaint();
     }
+    private boolean firstDrag = true;
 
     public void stopDragging() {
 
-        JRootPane rootPane = m_component.getRootPane();
+        m_draggingOverlayPanel.setVisible(false);
 
-        rootPane.setGlassPane(m_oldGlassPanel);
-        m_oldGlassPanel = null;
-
-        rootPane.revalidate();
-        rootPane.repaint();
+        m_component.repaint();
     }
 
     @Override

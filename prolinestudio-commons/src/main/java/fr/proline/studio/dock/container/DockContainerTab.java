@@ -28,6 +28,7 @@ import java.util.HashSet;
 
 public class DockContainerTab extends DockContainerMulti {
 
+
     private HashSet<DockContainer> m_dockContainerSet = new HashSet();
 
     public DockContainerTab() {
@@ -96,7 +97,7 @@ public class DockContainerTab extends DockContainerMulti {
 
 
 
-    public void add(DockContainer container, DockPosition position)  throws DockException {
+    public void add(DockContainer container, DockPosition dockPosition)  throws DockException {
 
         if (! (container instanceof DockComponent)) {
             throw new DockException("Must add DockComponent to DockContainerTab");
@@ -107,12 +108,12 @@ public class DockContainerTab extends DockContainerMulti {
 
 
 
-        switch(position) {
-            case CENTER: {
+        switch(dockPosition.getPosition()) {
+            case DockPosition.CENTER: {
                 add(component);
                 break;
             }
-            case WEST: {
+            case DockPosition.WEST: {
                 DockContainerSplit dockContainerSplit = new DockContainerSplit();
                 DockContainerTab containerTab = new DockContainerTab();
                 containerTab.setZoneArea(getZoneArea());
@@ -121,7 +122,7 @@ public class DockContainerTab extends DockContainerMulti {
                 parent.replace(this, dockContainerSplit);
                 break;
             }
-            case EAST: {
+            case DockPosition.EAST: {
                 DockContainerSplit dockContainerSplit = new DockContainerSplit();
                 DockContainerTab containerTab = new DockContainerTab();
                 containerTab.setZoneArea(getZoneArea());
@@ -131,7 +132,7 @@ public class DockContainerTab extends DockContainerMulti {
                 parent.replace(this, dockContainerSplit);
                 break;
             }
-            case NORTH: {
+            case DockPosition.NORTH: {
                 DockContainerSplit dockContainerSplit = new DockContainerSplit();
                 DockContainerTab containerTab = new DockContainerTab();
                 containerTab.setZoneArea(getZoneArea());
@@ -140,7 +141,7 @@ public class DockContainerTab extends DockContainerMulti {
                 parent.replace(this, dockContainerSplit);
                 break;
             }
-            case SOUTH: {
+            case DockPosition.SOUTH: {
                 DockContainerSplit dockContainerSplit = new DockContainerSplit();
                 DockContainerTab containerTab = new DockContainerTab();
                 containerTab.setZoneArea(getZoneArea());
@@ -150,6 +151,10 @@ public class DockContainerTab extends DockContainerMulti {
                 parent.replace(this, dockContainerSplit);
                 break;
             }
+            default: {
+                add(component, dockPosition.getPosition());
+            }
+
         }
 
 
@@ -170,6 +175,28 @@ public class DockContainerTab extends DockContainerMulti {
         TabbedPaneLabel tpl =  new TabbedPaneLabel(this, container);
         tabbedPane.setTabComponentAt(index, tpl);
         tabbedPane.setSelectedIndex(index);
+
+        m_dockContainerSet.add(container);
+        container.setParent(this);
+
+        if (container.getComponent() instanceof AbstractTopPanel) {
+            AbstractTopPanel topPanel = (AbstractTopPanel) container.getComponent();
+            topPanel.componentAdded();
+        }
+
+    }
+
+    public void add(DockComponent container, int destIndex) {
+
+        JTabbedPane tabbedPane = ((JTabbedPane)m_component);
+
+
+        tabbedPane.insertTab (container.getTitle(), null, container.getComponent(), null, destIndex);
+
+
+        TabbedPaneLabel tpl =  new TabbedPaneLabel(this, container);
+        tabbedPane.setTabComponentAt(destIndex, tpl);
+        tabbedPane.setSelectedIndex(destIndex);
 
         m_dockContainerSet.add(container);
         container.setParent(this);
@@ -234,23 +261,35 @@ public class DockContainerTab extends DockContainerMulti {
             return null;
         }
 
+
+        JTabbedPane tabbedPane = ((JTabbedPane)m_component);
+        int tabCount = tabbedPane.getTabCount();
+        for (int i=0;i<tabCount;i++) {
+            Component c = tabbedPane.getTabComponentAt(i);
+            final int MARGIN = 5;
+            if ((localPoint.x>=c.getX()-MARGIN) && (localPoint.x<=c.getX()+c.getWidth()+MARGIN) && (localPoint.y>=c.getY()-MARGIN) && (localPoint.y<=c.getY()+c.getWidth()+MARGIN)) {
+                return new OverArea(this, new DockPosition(i)); // Tab index
+            }
+        }
+
+
         if (localPoint.y < bounds.y + bounds.height / 3) {
-            return new OverArea(this, DockPosition.NORTH);
+            return new OverArea(this, new DockPosition(DockPosition.NORTH));
         }
 
         if (localPoint.y > bounds.y + bounds.height * 2 / 3) {
-            return new OverArea(this, DockPosition.SOUTH);
+            return new OverArea(this, new DockPosition(DockPosition.SOUTH));
         }
 
         if (localPoint.x > bounds.x + bounds.width * 2 / 3) {
-            return new OverArea(this, DockPosition.EAST);
+            return new OverArea(this, new DockPosition(DockPosition.EAST));
         }
 
         if (localPoint.x < bounds.x + bounds.width / 3) {
-            return new OverArea(this, DockPosition.WEST);
+            return new OverArea(this, new DockPosition(DockPosition.WEST));
         }
 
-        return new OverArea(this, DockPosition.CENTER);
+        return new OverArea(this, new DockPosition(DockPosition.CENTER));
 
     }
 

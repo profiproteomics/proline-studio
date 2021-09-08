@@ -106,7 +106,7 @@ public class MainFrame extends AbstractDockFrame implements WindowListener {
             m_mainContainerSplit.setCanRemoveChildren(false);
 
             // add right tab to root
-            m_containerRoot.add(m_mainContainerSplit, DockPosition.CENTER);
+            m_containerRoot.add(m_mainContainerSplit, new DockPosition(DockPosition.CENTER));
 
             // -- Divider Location
             SwingUtilities.invokeLater(new Runnable() {

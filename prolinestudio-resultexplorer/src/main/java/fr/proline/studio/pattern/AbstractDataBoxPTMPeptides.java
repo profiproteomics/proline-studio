@@ -17,6 +17,7 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
@@ -33,12 +34,14 @@ import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.rsmexplorer.gui.PTMPeptidesTablePanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
+import fr.proline.studio.types.XicMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -52,7 +55,7 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
     protected List<PTMPeptideInstance> m_ptmPepInstances;
     protected List<PTMCluster> m_ptmClusters;
 
-    protected boolean m_isXICResult = true;
+    protected boolean m_isMS1LabelFreeQuantitation = true;
     protected boolean m_displayAllPepMatches = false;
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.ptm");
 
@@ -71,7 +74,7 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
         inParameter.addParameter(PTMPeptideInstance.class);
         
         inParameter.addParameter(PTMDataset.class);
-        if (m_isXICResult) {
+        if (m_isMS1LabelFreeQuantitation) {
             inParameter.addParameter(QuantChannelInfo.class);
             inParameter.addParameter(DMasterQuantProteinSet.class);
         }
@@ -88,8 +91,11 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
         outParameter.addParameter(DPeptideInstance.class, ParameterSubtypeEnum.LIST_DATA);
         outParameter.addParameter(ResultSummary.class);
         outParameter.addParameter(PTMDataset.class);
-        if (m_isXICResult) {
+        if (m_isMS1LabelFreeQuantitation) {
             outParameter.addParameter(ExtendedTableModelInterface.class);
+            outParameter.addParameter(DMasterQuantPeptide.class);
+            outParameter.addParameter(QuantChannelInfo.class);
+            outParameter.addParameter(XicMode.class);
         }
         outParameter.addParameter(MsQueryInfoRsm.class);
         registerOutParameter(outParameter);
@@ -99,8 +105,8 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
         return m_displayAllPepMatches;
     }
 
-    protected boolean isQuantiResult() {
-        return m_isXICResult;
+    protected boolean isMS1LabelFreeQuantitation() {
+        return m_isMS1LabelFreeQuantitation;
     }
 
     @Override
@@ -266,7 +272,7 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
                 } else {
                     m_previousPTMTaskId = null;
                     unregisterTask(taskId);
-                    if (m_isXICResult) {
+                    if (m_isMS1LabelFreeQuantitation) {
                         loadXicAndPropagate();
                     } else {
                         ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, m_ptmPepInstances, m_ptmClusters, null, finished);

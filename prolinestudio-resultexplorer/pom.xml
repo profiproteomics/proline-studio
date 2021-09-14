@@ -160,19 +160,7 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>no.uib</groupId>
-            <artifactId>ols-dialog</artifactId>
-            <version>3.4.1</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>jfree</groupId>
-                    <artifactId>jfreechart</artifactId>
-                </exclusion>            
-            </exclusions>
-        </dependency>
-        -->   
+
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>       

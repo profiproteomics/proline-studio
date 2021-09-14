@@ -26,10 +26,11 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.rsmexplorer.gui.ptm.PTMGraphicCtrlPanel;
-import java.util.ArrayList;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class is very similaire as DataBoxPTMSitePeptides
@@ -47,7 +48,7 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
     public DataBoxPTMPeptidesGraphic() {
         super(DataboxType.DataBoxPTMPeptidesGraphic, DataboxStyle.STYLE_RSM);
         m_displayAllPepMatches = false;
-        m_isXICResult = false;
+        m_isMS1LabelFreeQuantitation = false;
 
         // Name of this databox
         m_typeName = "Graphical Peptides PTMs info";

@@ -19,43 +19,44 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 import fr.proline.core.orm.lcms.MapAlignment;
 import fr.proline.core.orm.lcms.MapTime;
 import fr.proline.core.orm.lcms.ProcessedMap;
+import fr.proline.studio.Exceptions;
+import fr.proline.studio.WindowManager;
+import fr.proline.studio.dam.tasks.xic.MapAlignmentConverter;
+import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.graphics.*;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.dam.tasks.xic.MapAlignmentConverter;
-import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.pattern.xic.DataboxMapAlignment;
+import fr.proline.studio.rsmexplorer.gui.dialog.xic.AbstractLabelFreeMSParamsPanel;
+import fr.proline.studio.rsmexplorer.gui.xic.alignment.IonsRTScatterPlot;
+import fr.proline.studio.rsmexplorer.gui.xic.alignment.IonsRTTableModel;
+import fr.proline.studio.table.BeanTableModel;
+import fr.proline.studio.utils.CyclicColorPalette;
+import fr.proline.studio.utils.IconManager;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.*;
-import javax.swing.*;
-
-import fr.proline.studio.utils.CyclicColorPalette;
-import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
-import org.apache.commons.lang3.tuple.Pair;
-import fr.proline.studio.WindowManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
-import fr.proline.studio.pattern.xic.DataboxMapAlignment;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.AbstractLabelFreeMSParamsPanel;
-import fr.proline.studio.rsmexplorer.gui.xic.alignment.IonsRTTableModel;
-import fr.proline.studio.rsmexplorer.gui.xic.alignment.IonsRTScatterPlot;
-import fr.proline.studio.table.BeanTableModel;
-import fr.proline.studio.utils.IconManager;
-import java.io.PrintWriter;
-
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-import javax.swing.border.TitledBorder;
 
 import static java.util.stream.Collectors.averagingDouble;
 import static java.util.stream.Collectors.groupingBy;
@@ -134,7 +135,7 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         pane.setBorder(titleB);
         pane.add(mapAlignmentPanel, BorderLayout.PAGE_START);
         m_splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, plotPanel1, m_plotPanel2);
-        m_splitPane.setResizeWeight(0.5); //half half for each grapic panel
+        m_splitPane.setResizeWeight(0.5); //half half for each graphic panel
         m_splitPane.setBorder(BorderFactory.createRaisedBevelBorder());
         pane.add(m_splitPane, BorderLayout.CENTER);
         this.setLayout(new BorderLayout());
@@ -288,20 +289,21 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
 
                     bandwidth = Double.parseDouble(dialog.getValueTF().getText());
 
-                    int axisX = cloudData.getColumnIndex(mapIdSrc);
-                    int axisY = cloudData.getColumnIndex(mapIdDst);
+                    int sourceMapRTColumn = cloudData.getColumnIndex(mapIdSrc);
+                    int destMapDeltaRTColumn = cloudData.getColumnIndex(mapIdDst);
                     int size = cloudData.getRowCount();
                     List<Pair<Double, Double>> data = new ArrayList<>(size);
 
+                    double ftAlignmentTimeTolerance = ((DataboxMapAlignment) this.m_dataBox).getFeatureAlignmentTimeTolerance();
+
                     for (int i = 0; i < size; i++) {
-                        if (!cloudData.isCrossAssigned(i, axisY)) {
-                            Object value = cloudData.getDataValueAt(i, axisX);
-                            Double v1 = ((value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue());
-                            value = cloudData.getDataValueAt(i, axisY);
-                            Double v2 = ((value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue());
-                            //mimic classical settings filtering matches over deltaRT 600s
-                            if (Math.abs(v2) < 600.0)
-                                data.add(Pair.of(v1, v2));
+                        if (!cloudData.isCrossAssigned(i, destMapDeltaRTColumn)) {
+                            Object value = cloudData.getDataValueAt(i, sourceMapRTColumn);
+                            Double rt = ((value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue());
+                            value = cloudData.getDataValueAt(i, destMapDeltaRTColumn);
+                            Double deltaRT = ((value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue());
+                            if (Math.abs(deltaRT) <= ftAlignmentTimeTolerance)
+                                data.add(Pair.of(rt, deltaRT));
                         }
                     }
 
@@ -316,7 +318,10 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
                     }
                     try {
 
-                        LoessInterpolator interpolator = new LoessInterpolator(bandwidth, LoessInterpolator.DEFAULT_ROBUSTNESS_ITERS, LoessInterpolator.DEFAULT_ACCURACY);
+
+                        int robustness = 4; // LoessInterpolator.DEFAULT_ROBUSTNESS_ITERS
+                        double accuracy = 1e-24; //LoessInterpolator.DEFAULT_ACCURACY
+                        LoessInterpolator interpolator = new LoessInterpolator(bandwidth, robustness, accuracy);
                         double[] yfit = interpolator.smooth(x, y);
                         createRegressionPlot(x, yfit);
 
@@ -325,23 +330,27 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
                             residuals[k] = (y[k] - yfit[k]) * (y[k] - yfit[k]);
                         }
                         
-                        interpolator = new LoessInterpolator(Math.max(0.50, bandwidth), LoessInterpolator.DEFAULT_ROBUSTNESS_ITERS, LoessInterpolator.DEFAULT_ACCURACY);
+                        interpolator = new LoessInterpolator(bandwidth, robustness, accuracy);
                         double[] sd = interpolator.smooth(x, residuals);
                         double[] upper = new double[yfit.length];
                         double[] lower = new double[yfit.length];
+                        // 4.417 for 99.999% probability
+                        // 3.890 for 99.99% probability
+                        double nsigma = 3.890;
+
                         for (int k = 0; k < yfit.length; k++) {
                             double s = Math.sqrt(Math.max(0, sd[k]));
-                            upper[k] = yfit[k] + 4.42 * s;
-                            lower[k] = yfit[k] - 4.42 * s;
+                            upper[k] = yfit[k] + nsigma * s;
+                            lower[k] = yfit[k] - nsigma * s;
                         }
 
-//                        PrintWriter writer = new PrintWriter("squared_residuals.csv");
-//                        writer.println("rt, deltaRt, predDeltaRt, residuals, sd, upperRt, lowerRT");
-//                        for (int k = 0; k < yfit.length; k++) {
-//                            writer.println(x[k]+","+y[k]+","+yfit[k]+","+residuals[k]+","+Math.sqrt(Math.max(0, sd[k]))+","+upper[k]+","+lower[k]);
-//                        }
-//
-//                        writer.close();
+                        PrintWriter writer = new PrintWriter("squared_residuals.csv");
+                        writer.println("rt, deltaRt, predDeltaRt, residuals, sd, upperRt, lowerRT");
+                        for (int k = 0; k < yfit.length; k++) {
+                            writer.println(x[k]+","+y[k]+","+yfit[k]+","+residuals[k]+","+Math.sqrt(Math.max(0, sd[k]))+","+upper[k]+","+lower[k]);
+                        }
+
+                        writer.close();
 
                         createRegressionPlot(x, upper);
                         createRegressionPlot(x, lower);
@@ -604,34 +613,82 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         }
     }
 
-    private void setDataGraphicTableModel(MapAlignment map, BasePlotPanel graphicPanel) {
-        CrossSelectionInterface crossSelectionTableModel;
-        ExtendedTableModelInterface extendedTableModel;
-        Long mapIdSrc = map.getSourceMap().getId();
-        Long mapIdDst = map.getDestinationMap().getId();
+    private void setDataGraphicTableModel(MapAlignment mapAlignment, BasePlotPanel graphicPanel) {
 
-        MapTimePanel mapTimePanel;
-        List<MapTime> listMapTime = map.getMapTimeList();
-        mapTimePanel = new MapTimePanel();
+        Long mapIdSrc = mapAlignment.getSourceMap().getId();
+        Long mapIdDst = mapAlignment.getDestinationMap().getId();
         String mapTitleFrom = m_quantChannelInfo.getMapTitle(mapIdSrc);
         String mapTitleTo = m_quantChannelInfo.getMapTitle(mapIdDst);
         String title = "Map Alignment from " + mapTitleFrom + " (to. " + mapTitleTo + ")";
         Color color = m_quantChannelInfo.getMapColor(mapIdDst);
-        mapTimePanel.setData((long) -1, map, listMapTime, color, title, true, mapTitleFrom, mapTitleTo);//set graphic content
 
-        crossSelectionTableModel = mapTimePanel.getCrossSelectionInterface();
-        extendedTableModel = mapTimePanel.getGlobalTableModelInterface();
-        double tolerance = ((DataboxMapAlignment) this.m_dataBox).getRT_Tolerance();
-        PlotLinear alignmentCurve = new PlotLinear(graphicPanel, extendedTableModel, crossSelectionTableModel,
-                PlotBaseAbstract.COL_X_ID, PlotBaseAbstract.COL_Y_ID);
+        double crossAssignmentTimeTolerance = ((DataboxMapAlignment) this.m_dataBox).getCrossAssignmentTimeTolerance();
+        double featureAlignmentTimeTolerance = ((DataboxMapAlignment) this.m_dataBox).getFeatureAlignmentTimeTolerance();
 
-        alignmentCurve.setPlotInformation(extendedTableModel.getPlotInformation());//set Color
-        alignmentCurve.setStroke(3f);  //set Stroke
-        alignmentCurve.setTolerance(tolerance);
+        ExtendedTableModelInterface extendedTableModel = new MapTimeTableModel(mapAlignment.getMapTimeList(), color, title, mapTitleFrom, mapTitleTo);
+        PlotLinear alignmentCurve = new PlotLinear(graphicPanel, extendedTableModel,null, PlotBaseAbstract.COL_X_ID, PlotBaseAbstract.COL_Y_ID);
 
+        alignmentCurve.setPlotInformation(extendedTableModel.getPlotInformation());
+        alignmentCurve.setStroke(3f);
         graphicPanel.setPlot(alignmentCurve);
 
         if (this.m_isIonsCloudLoaded) {
+
+            if (crossAssignmentTimeTolerance > 0) {
+
+                List <MapTime> timeList = mapAlignment.getMapTimeList();
+                PlotInformation plotInformation = extendedTableModel.getPlotInformation();
+                plotInformation.setDashed(true);
+                Map<String, Object> serializedPropsAsMap = null;
+
+                try {
+                    serializedPropsAsMap = mapAlignment.getSerializedPropertiesAsMap();
+                } catch (Exception e) {
+                    Exceptions.printStackTrace(e);
+                }
+
+                List<Double> toleranceMapTime = serializedPropsAsMap == null ? null : (List<Double>)serializedPropsAsMap.get("tolerance_time_list");
+                List<MapTime> newToleranceMapTime = new ArrayList<>(timeList.size());
+                List <MapTime> maxToleranceTimeList = new ArrayList<>(timeList.size());
+                List <MapTime> minToleranceTimeList = new ArrayList<>(timeList.size());
+                for (int i = 0 ; i < timeList.size(); i++) {
+                    MapTime mt = timeList.get(i);
+                    double delta = toleranceMapTime != null ? toleranceMapTime.get(i) : crossAssignmentTimeTolerance;
+                    maxToleranceTimeList.add(new MapTime(mt.getTime(), mt.getDeltaTime()+delta));
+                    minToleranceTimeList.add(new MapTime(mt.getTime(), mt.getDeltaTime()-delta));
+                }
+
+                PlotLinear maxDeltaRtCurve = getPlotLinear(graphicPanel, mapTitleFrom, mapTitleTo, title, color, plotInformation, maxToleranceTimeList);
+                graphicPanel.addPlot(maxDeltaRtCurve);
+
+                PlotLinear minDeltaRtCurve = getPlotLinear(graphicPanel, mapTitleFrom, mapTitleTo, title, color, plotInformation, minToleranceTimeList);
+                graphicPanel.addPlot(minDeltaRtCurve);
+
+                // temporarily add two additional curves at the tolerance value (because we cannot guess if the autoRT was ON or OFF
+                // and then if the stored tolerance_time_list was effectively used)
+
+                // creates a new PlotInformation, with solid line
+
+                plotInformation = extendedTableModel.getPlotInformation();
+                plotInformation.setDashed(false);
+
+                maxToleranceTimeList = new ArrayList<>(timeList.size());
+                minToleranceTimeList = new ArrayList<>(timeList.size());
+                for (int i = 0 ; i < timeList.size(); i++) {
+                    MapTime mt = timeList.get(i);
+                    maxToleranceTimeList.add(new MapTime(mt.getTime(), mt.getDeltaTime()+crossAssignmentTimeTolerance));
+                    minToleranceTimeList.add(new MapTime(mt.getTime(), mt.getDeltaTime()-crossAssignmentTimeTolerance));
+                }
+
+                maxDeltaRtCurve = getPlotLinear(graphicPanel, mapTitleFrom, mapTitleTo, title, color, plotInformation, maxToleranceTimeList);
+                graphicPanel.addPlot(maxDeltaRtCurve);
+
+                minDeltaRtCurve = getPlotLinear(graphicPanel, mapTitleFrom, mapTitleTo, title, color, plotInformation, minToleranceTimeList);
+                graphicPanel.addPlot(minDeltaRtCurve);
+
+            }
+
+
             IonsRTTableModel cloudData = getCloudData(mapIdSrc);
             if (cloudData != null) {
                 int axisX = cloudData.getColumnIndex(mapIdSrc);
@@ -640,18 +697,25 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
                 m_ionsScatterPlot = new IonsRTScatterPlot(graphicPanel, cloudData, null, axisX, axisY);
                 m_ionsScatterPlot.showCrossAssignedIons(m_showHideCrossAssigned.getActionCommand().equals("HIDE"));
                 m_ionsScatterPlot.setColor(color);
+                m_ionsScatterPlot.setFeatureAlignmentTimeTolerance(featureAlignmentTimeTolerance);
                 if (m_zoomMode == CLOUD_VIEW_BEST_FIT) {
                     //set visible Min Max, the real Min Max are too large to show the alignment PlotLinear
                     double yMax = alignmentCurve.getYMax();
                     double yMin = alignmentCurve.getYMin();
-                    m_ionsScatterPlot.setYMax(yMax + 2 * tolerance);
-                    m_ionsScatterPlot.setYMin(yMin - 2 * tolerance);
+                    m_ionsScatterPlot.setYMax(yMax + 2 * crossAssignmentTimeTolerance);
+                    m_ionsScatterPlot.setYMin(yMin - 2 * crossAssignmentTimeTolerance);
                 }
-                graphicPanel.setPlot(m_ionsScatterPlot);
-                graphicPanel.addPlot(alignmentCurve, true);
+                graphicPanel.addPlot(m_ionsScatterPlot);
             }
         }
         graphicPanel.repaint();
+    }
+
+    private PlotLinear getPlotLinear(BasePlotPanel graphicPanel, String mapTitleFrom, String mapTitleTo, String title, Color color, PlotInformation plotInformation, List<MapTime> minDeltaRt) {
+        ExtendedTableModelInterface minExtendedTableModel = new MapTimeTableModel(minDeltaRt, color, title, mapTitleFrom, mapTitleTo);
+        PlotLinear minDeltaRtCurve = new PlotLinear(graphicPanel, minExtendedTableModel, null, PlotBaseAbstract.COL_X_ID, PlotBaseAbstract.COL_Y_ID);
+        minDeltaRtCurve.setPlotInformation(plotInformation);
+        return minDeltaRtCurve;
     }
 
     private IonsRTTableModel getCloudData(long mapIdSrc) {

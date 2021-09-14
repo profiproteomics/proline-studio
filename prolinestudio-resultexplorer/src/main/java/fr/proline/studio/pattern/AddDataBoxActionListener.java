@@ -16,14 +16,14 @@
  */
 package fr.proline.studio.pattern;
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.rsmexplorer.gui.dialog.DataBoxChooserDialog;
+
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-import fr.proline.studio.WindowManager;
 
 /**
  * Action to add a new Databox at the end of the queue
@@ -57,7 +57,7 @@ public class AddDataBoxActionListener implements ActionListener {
                 } else if (DataboxMultiGraphics.class.isInstance(newGenericDatabox) ){                    
                     newGenericDatabox = new DataboxMultiGraphics(false, false, ((DataboxMultiGraphics)genericDatabox).isDoubleYAxis());                    
                 } else if (DataBoxPTMPeptides.class.equals(newGenericDatabox.getClass())){                    
-                    newGenericDatabox = new DataBoxPTMPeptides(((DataBoxPTMPeptides)genericDatabox).isQuantiResult(), ((DataBoxPTMPeptides)genericDatabox).isAllPSMsDisplayed());
+                    newGenericDatabox = new DataBoxPTMPeptides(((DataBoxPTMPeptides)genericDatabox).isMS1LabelFreeQuantitation(), ((DataBoxPTMPeptides)genericDatabox).isAllPSMsDisplayed());
                 }
                 genericDatabox = newGenericDatabox;
             } catch (InstantiationException | IllegalAccessException e) {

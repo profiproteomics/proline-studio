@@ -1,9 +1,9 @@
-/* 
+/*
  * Copyright (C) 2019 VD225637
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
- * ; either version 2.1 
+ * ; either version 2.1
  * of the License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -11,64 +11,45 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * CeCILL License V2.1 for more details.
  *
- * You should have received a copy of the CeCILL License 
+ * You should have received a copy of the CeCILL License
  * along with this program; If not, see <http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html>.
  */
 package fr.proline.studio.rsmexplorer.gui.xic;
 
-import fr.proline.core.orm.lcms.MapAlignment;
 import fr.proline.core.orm.lcms.MapTime;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
-import fr.proline.studio.export.ExportFontData;
-import fr.proline.studio.filter.DoubleFilter;
-import fr.proline.studio.filter.Filter;
+import fr.proline.studio.graphics.PlotDataSpec;
 import fr.proline.studio.graphics.PlotInformation;
-import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
-import fr.proline.studio.table.renderer.DoubleRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.TimeRenderer;
-import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
-import fr.proline.studio.table.LazyData;
-import fr.proline.studio.table.LazyTable;
-import fr.proline.studio.table.LazyTableModel;
-import fr.proline.studio.table.TableDefaultRendererManager;
-import java.awt.Color;
+
+import java.awt.*;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.swing.table.TableCellRenderer;
 
 /**
- * map alignment table model (table not displayed, only used for graphic)
+ * map alignment table model
  *
- * @author MB243701
+ * @author CB205360
  */
-public class MapTimeTableModel extends LazyTableModel implements GlobalTableModelInterface {
+public class MapTimeTableModel implements ExtendedTableModelInterface {
 
     public static final int COLTYPE_TIME = 0;
     public static final int COLTYPE_DELTA_TIME = 1;
 
-    private String[] m_columnNames;
+    private String[] m_columnNames = {"Time in Reference Map (min)", "Delta time (s)"};;
     private static final String[] m_toolTipColumns = {"Time (min)", "Delta time (s)"};
 
-    private MapAlignment m_mapAlignment;
     private List<MapTime> m_mapTimes = null;
     private Color m_color = null;
     private String m_title = null;
 
-    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
-    private String m_modelName;
-
-    public MapTimeTableModel(LazyTable table) {
-        super(table);
-        m_columnNames = new String[]{"Time in Reference Map (min)", "Delta time (s)"};
-    }
-
-    @Override
-    public int getSubTaskId(int col) {
-        return -1;
+    public MapTimeTableModel(List<MapTime> mapTimes, Color color, String title, String fromMapName, String toMapName) {
+        m_mapTimes = mapTimes;
+        m_color = color;
+        m_title = title;
+        m_columnNames[0] = "Time in Map " + fromMapName + " (min)";
+        m_columnNames[1] = "Delta time in Map " + toMapName + " (s)";
     }
 
     @Override
@@ -81,69 +62,10 @@ public class MapTimeTableModel extends LazyTableModel implements GlobalTableMode
         return m_columnNames.length;
     }
 
-    @Override
-    public String getColumnName(int col) {
-        return m_columnNames[col];
-    }
-
-    @Override
-    public Object getValueAt(int rowIndex, int columnIndex) {
-        // Retrieve MapTime
-        MapTime mapTime = m_mapTimes.get(rowIndex);
-
-        switch (columnIndex) {
-            case COLTYPE_TIME: {
-                LazyData lazyData = getLazyData(rowIndex, columnIndex);
-                lazyData.setData(mapTime.getTime());
-                return lazyData;
-
-            }
-            case COLTYPE_DELTA_TIME: {
-                LazyData lazyData = getLazyData(rowIndex, columnIndex);
-                lazyData.setData(mapTime.getDeltaTime());
-                return lazyData;
-
-            }
-        }
-        return null; // should never happen
-    }
-
-    @Override
-    public String getToolTipForHeader(int col) {
-        return m_toolTipColumns[col];
-    }
-
-    @Override
-    public String getTootlTipValue(int row, int col) {
-        return null;
-    }
-
-    @Override
-    public TableCellRenderer getRenderer(int row, int col) {
-        if (m_rendererMap.containsKey(col)) {
-            return m_rendererMap.get(col);
-        }
-
-        TableCellRenderer renderer = null;
-
-        switch (col) {
-            case COLTYPE_TIME: {
-                renderer = new TimeRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
-                break;
-            }
-            case COLTYPE_DELTA_TIME: {
-                renderer = new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
-                break;
-            }
-        }
-
-        m_rendererMap.put(col, renderer);
-        return renderer;
-    }
 
     @Override
     public String getDataColumnIdentifier(int columnIndex) {
-        return getColumnName(columnIndex);
+        return m_columnNames[columnIndex];
     }
 
     @Override
@@ -187,12 +109,12 @@ public class MapTimeTableModel extends LazyTableModel implements GlobalTableMode
 
     @Override
     public void setName(String name) {
-        m_modelName = name;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public String getName() {
-        return m_modelName;
+        return "Signal";
     }
 
     @Override
@@ -211,91 +133,8 @@ public class MapTimeTableModel extends LazyTableModel implements GlobalTableMode
     }
 
     @Override
-    public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
-        filtersMap.put(COLTYPE_TIME, new DoubleFilter(getColumnName(COLTYPE_TIME), null, COLTYPE_TIME));
-        filtersMap.put(COLTYPE_DELTA_TIME, new DoubleFilter(getColumnName(COLTYPE_DELTA_TIME), null, COLTYPE_DELTA_TIME));
-    }
-
-    @Override
-    public boolean isLoaded() {
-        return m_table.isLoaded();
-    }
-
-    @Override
-    public int getLoadingPercentage() {
-        return m_table.getLoadingPercentage();
-    }
-
-    @Override
-    public PlotType getBestPlotType() {
-        return PlotType.LINEAR_PLOT;
-    }
-
-    @Override
-    public int[] getBestColIndex(PlotType plotType) {
-
-        switch (plotType) {
-            case LINEAR_PLOT: {
-                int[] cols = new int[2];
-                cols[0] = COLTYPE_TIME;
-                cols[1] = COLTYPE_DELTA_TIME;
-                return cols;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public String getExportRowCell(int row, int col) {
-        return null; // no specific export
-    }
-
-    @Override
-    public ArrayList<ExportFontData> getExportFonts(int row, int col) {
-        return null;
-    }
-
-    @Override
-    public String getExportColumnName(int col) {
-        return m_columnNames[col];
-    }
-
-    public void setData(Long taskId, MapAlignment mapAlignment, List<MapTime> mapTimes, Color color, String title) {
-        this.setData(taskId, mapAlignment, mapTimes, color, title, "(Reference map)", "");
-    }
-
-    public void setData(Long taskId, MapAlignment mapAlignment, List<MapTime> mapTimes, Color color, String title, String fromMapName) {
-        this.setData(taskId, mapAlignment, mapTimes, color, title, fromMapName, "");
-    }
-
-    public void setData(Long taskId, MapAlignment mapAlignment, List<MapTime> mapTimes, Color color, String title, String fromMapName, String toMapName) {
-        m_mapAlignment = mapAlignment;
-        m_mapTimes = mapTimes;
-        m_color = color;
-        m_title = title;
-        m_taskId = taskId;
-        m_columnNames[0] = "Time in Map " + fromMapName + " (min)";
-        m_columnNames[1] = "Delta time in Map " + toMapName + " (s)";
-        fireTableDataChanged();
-    }
-
-    public void dataUpdated() {
-        // no need to do an updateMinMax : scores are known at once
-        fireTableDataChanged();
-
-    }
-
-    @Override
-    public GlobalTableModelInterface getFrozzenModel() {
-        return this;
-    }
-
-    @Override
     public ArrayList<ExtraDataType> getExtraDataTypes() {
-        ArrayList<ExtraDataType> list = new ArrayList<>();
-        list.add(new ExtraDataType(MapTime.class, true));
-        registerSingleValuesAsExtraTypes(list);
-        return list;
+        return null;
     }
 
     @Override
@@ -316,4 +155,29 @@ public class MapTimeTableModel extends LazyTableModel implements GlobalTableMode
         return null;
     }
 
+    @Override
+    public void addSingleValue(Object v) {
+
+    }
+
+    @Override
+    public Object getSingleValue(Class c) {
+        return null;
+    }
+
+
+    @Override
+    public long row2UniqueId(int rowIndex) {
+        return rowIndex;
+    }
+
+    @Override
+    public int uniqueId2Row(long id) {
+        return (int) id;
+    }
+
+    @Override
+    public PlotDataSpec getDataSpecAt(int i) {
+        return null;
+    }
 }

@@ -35,6 +35,7 @@ import fr.proline.studio.rsmexplorer.gui.PTMPeptidesTablePanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XICComparePeptideTableModel;
 import fr.proline.studio.rsmexplorer.gui.xic.XicAbundanceProteinTableModel;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +51,7 @@ import java.util.stream.Collectors;
  */
 public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
 
-    //For XIC Data only
+    //For Quantitation data only
     private QuantChannelInfo m_quantChannelInfo;
     private List<DMasterQuantPeptide> m_masterQuantPeptideList;
     private DMasterQuantProteinSet m_masterQuantProteinSet;
@@ -82,10 +83,11 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
     public DataBoxPTMPeptides(boolean xicResult, boolean showAllPepMatches) {
         super(getDataboxType(xicResult, showAllPepMatches), xicResult ? DataboxStyle.STYLE_XIC : DataboxStyle.STYLE_RSM);
         m_displayAllPepMatches = showAllPepMatches;
-        m_isXICResult = xicResult;
-        m_typeName = m_displayAllPepMatches ? "PSMs" : "Peptides";
-        m_description = m_displayAllPepMatches ? "PSMs matching a modification site or cluster" : "Peptides matching of modification site or cluster";
-        m_logger.debug(" ----> Created DataBoxPTMPeptides " + m_typeName);
+        m_isMS1LabelFreeQuantitation = xicResult;
+        StringBuilder stb = (m_isMS1LabelFreeQuantitation) ? new StringBuilder("Quanti. ") : new StringBuilder();
+        m_typeName = m_displayAllPepMatches ? stb.append("PSMs of modification site").toString() : stb.append("Peptides of modification site").toString();
+        stb = (m_isMS1LabelFreeQuantitation) ? new StringBuilder("Quantified ") : new StringBuilder();
+        m_description = m_displayAllPepMatches ? stb.append("PSMs matching a modification site or cluster").toString() : stb.append("Peptides matching of modification site or cluster").toString();
 
         // Register in parameters          
         super.registerParameters();
@@ -93,7 +95,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
 
     @Override
     public void createPanel() {
-        PTMPeptidesTablePanel p = new PTMPeptidesTablePanel(m_displayAllPepMatches, m_isXICResult);
+        PTMPeptidesTablePanel p = new PTMPeptidesTablePanel(m_displayAllPepMatches, m_isMS1LabelFreeQuantitation);
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);
@@ -126,7 +128,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
             }
 
             //Get QuantInfo        
-            if (m_isXICResult) {
+            if (m_isMS1LabelFreeQuantitation) {
                 m_quantChannelInfo = (QuantChannelInfo) getData(QuantChannelInfo.class);
                 if (m_quantChannelInfo != null) {
                     panel.addSingleValue(m_quantChannelInfo);
@@ -138,7 +140,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
 
             if (notLoadedPtmSite.isEmpty()) {
                 resetPrevPTMTaskId();
-                if (m_isXICResult) {
+                if (m_isMS1LabelFreeQuantitation) {
                     loadXicAndPropagate();
                 } else {
                     ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, m_ptmPepInstances, m_ptmClusters, null, true);
@@ -265,7 +267,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                 (!(panel instanceof SplittedPanelContainer.ReactiveTabbedComponent)
                     || ((panel instanceof SplittedPanelContainer.ReactiveTabbedComponent)
                     && ((SplittedPanelContainer.ReactiveTabbedComponent) panel).isShowed()))  //JPM.DATABOX : this check could produce bugs
-                && m_isXICResult) {
+                && m_isMS1LabelFreeQuantitation) {
 
             // Returning single data
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {

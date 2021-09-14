@@ -23,6 +23,7 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.graphics.PlotDataSpec;
 import fr.proline.studio.graphics.PlotInformation;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,20 +38,11 @@ public class IonsRTTableModel implements ExtendedTableModelInterface {
 
     private String m_modelName;
 
-    /**
-     * Map: MapId,resultSummaryId
-     */
-    private Map<Long, Long> m_idMap;
+    private Map<Long, Long> m_rsmIdByMapId;
     private long[] m_rsmIdArray;
     private List<IonRTRow> m_data;
 
-    public List<IonRTRow> getData() {
-        return m_data;
-    }
-    /**
-     * Map : rsmId,MapTitleName
-     */
-    private Map<Long, String> m_idNameMap;
+    private Map<Long, String> m_mapTitleByRsmId;
     private String[] m_columnName;
     private static int PEPTIDE_ID = 0;
     private static int PEPTIDE_SEQUENCE = 1;
@@ -60,76 +52,81 @@ public class IonsRTTableModel implements ExtendedTableModelInterface {
 
     /**
      *
-     * @param mapIdFrom
-     * @param idTitleMap, Map<MapId,msFileName>
-     * @param idMap, Map<MapId,resultSummaryId>
-     * @param m_masterQuantPeptideIonList
+     * @param mapTitleByRsmId: Map<MapId,msFileName>
+     * @param rsmIdByMapId: Map<MapId,resultSummaryId>
+     * @param rsmIdArray
      */
     public IonsRTTableModel(List<DMasterQuantPeptideIon> m_masterQuantPeptideIonList,
-                            Map<Long, Long> idMap, Map<Long, String> idNameMap, long[] rsmIdArray) {
+                            Map<Long, Long> rsmIdByMapId, Map<Long, String> mapTitleByRsmId, long[] rsmIdArray) {
         m_mapCount = rsmIdArray.length;
-        m_idNameMap = idNameMap;
-        m_idMap = idMap;
+        m_mapTitleByRsmId = mapTitleByRsmId;
+        m_rsmIdByMapId = rsmIdByMapId;
         m_rsmIdArray = rsmIdArray;
         m_data = new ArrayList<>();
         m_columnName = new String[rsmIdArray.length + 3];
-        m_columnName[PEPTIDE_ID] = "Peptide Id";//[0]
-        m_columnName[PEPTIDE_SEQUENCE] = "Peptide Sequence";//[1]
-        m_columnName[CHARGE] = "Charge";//[2]
-        m_columnName[ELUTION_TIME_FROM] = "Time in Map " + m_idNameMap.get(rsmIdArray[0]) + " (min)";
+        m_columnName[PEPTIDE_ID] = "Peptide Id";
+        m_columnName[PEPTIDE_SEQUENCE] = "Peptide Sequence";
+        m_columnName[CHARGE] = "Charge";
+        m_columnName[ELUTION_TIME_FROM] = "Time in Map " + m_mapTitleByRsmId.get(rsmIdArray[0]) + " (min)";
         for (int i = 4; i < rsmIdArray.length + 3; i++) {
-            m_columnName[i] = "Delta time in Map " + m_idNameMap.get(rsmIdArray[i - 3]) + " (s)";
+            m_columnName[i] = "Delta time in Map " + m_mapTitleByRsmId.get(rsmIdArray[i - 3]) + " (s)";
         }
 
-        long peptideId;
-        String peptideSequence;
-        int charge;
         float rTimeFrom;
         float[] rTimeTo;
         int matchCountFrom;
         int[] matchCountTo;
-        DPeptideInstance pi;
-        Map<Long, DQuantPeptideIon> nbPepInMap; //Map<key=rsmId<>mapId, DQuantPeptideIon>
-        for (DMasterQuantPeptideIon masterPep : m_masterQuantPeptideIonList) {
+        DPeptideInstance peptideInstance;
+
+        Map<Long, DQuantPeptideIon> qPepIonByQCId; //Map<key=rsmId<>mapId, DQuantPeptideIon>
+        for (DMasterQuantPeptideIon masterQuantPeptideIon : m_masterQuantPeptideIonList) {
             rTimeTo = new float[m_mapCount - 1];
             matchCountTo = new int[rTimeTo.length];
-            pi = masterPep.getPeptideInstance();
-            if (pi == null)
+            peptideInstance = masterQuantPeptideIon.getPeptideInstance();
+            if (peptideInstance == null)
                 continue;
-            peptideId = pi.getPeptideId();
-            peptideSequence = pi.getPeptide().getSequence();
-            charge = masterPep.getCharge();
-            nbPepInMap = masterPep.getQuantPeptideIonByQchIds();
-            if (nbPepInMap == null || nbPepInMap.isEmpty()) {
+                        qPepIonByQCId = masterQuantPeptideIon.getQuantPeptideIonByQchIds();
+            if (qPepIonByQCId == null || qPepIonByQCId.isEmpty()) {
                 continue;
             } else {
                 Long rsmIdFrom = rsmIdArray[0];
-                this.m_modelName = idNameMap.get(rsmIdFrom) + " ElutionTime compare table model";
-                DQuantPeptideIon element = nbPepInMap.get(rsmIdFrom);
-                if (element == null) {
+                m_modelName = mapTitleByRsmId.get(rsmIdFrom) + " ElutionTime compare table model";
+                DQuantPeptideIon srcQPepIon = qPepIonByQCId.get(rsmIdFrom);
+                if (srcQPepIon == null) {
                     continue;
                 }
-                rTimeFrom = element.getElutionTime();
-                matchCountFrom = element.getPeptideMatchesCount();
-                DQuantPeptideIon quantPeptideIon;
+                rTimeFrom = srcQPepIon.getElutionTime();
+                matchCountFrom = srcQPepIon.getPeptideMatchesCount();
+                DQuantPeptideIon destQPepIon;
                 for (int i = 1; i < rsmIdArray.length; i++) {//0 is from
-                    quantPeptideIon = nbPepInMap.get(rsmIdArray[i]);
-                    if (quantPeptideIon == null) {
+                    destQPepIon = qPepIonByQCId.get(rsmIdArray[i]);
+                    if (destQPepIon == null) {
                         rTimeTo[i - 1] = Float.NaN; //not a number, then show nothing in the PlotLiner
                     } else {
-                        float deltaTime = quantPeptideIon.getElutionTime() - rTimeFrom;
+                        float deltaTime = destQPepIon.getElutionTime() - rTimeFrom;
                         rTimeTo[i - 1] = deltaTime;
-                        matchCountTo[i - 1] = quantPeptideIon.getPeptideMatchesCount();
+                        matchCountTo[i - 1] = destQPepIon.getPeptideMatchesCount();
                     }
                 }
             }
-            this.m_data.add(new IonRTRow(peptideId, peptideSequence, charge, rTimeFrom, rTimeTo, matchCountFrom, matchCountTo));
+            m_data.add(
+                    new IonRTRow(peptideInstance.getPeptideId(),
+                                 peptideInstance.getPeptide().getSequence(),
+                                 masterQuantPeptideIon.getCharge(),
+                                 rTimeFrom,
+                                 rTimeTo,
+                                 matchCountFrom,
+                                 matchCountTo)
+            );
         }
     }
 
-    public String getInfo(int rowIndex) {
-        return this.m_data.get(rowIndex).toString();
+    public List<IonRTRow> getData() {
+        return m_data;
+    }
 
+    public String getInfo(int rowIndex) {
+        return m_data.get(rowIndex).toString();
     }
 
     @Override
@@ -198,7 +195,7 @@ public class IonsRTTableModel implements ExtendedTableModelInterface {
 
     @Override
     public Object getDataValueAt(int rowIndex, int columnIndex) {
-        IonRTRow row = this.m_data.get(rowIndex);
+        IonRTRow row = m_data.get(rowIndex);
         if (columnIndex == IonsRTTableModel.PEPTIDE_ID) {
             return row._peptideId;
         } else if (columnIndex == IonsRTTableModel.PEPTIDE_SEQUENCE) {
@@ -207,17 +204,17 @@ public class IonsRTTableModel implements ExtendedTableModelInterface {
             return row._charge;
         } else if (columnIndex == IonsRTTableModel.ELUTION_TIME_FROM) {
             return row._eTimeFrom / 60d; //in minute
-        } else if (columnIndex > 3 && columnIndex < this.m_mapCount + 3) {
+        } else if (columnIndex > 3 && columnIndex < m_mapCount + 3) {
             return row._eTimeTo[columnIndex - 4]; //in seconde
-        } else if (columnIndex == 3 + this.m_mapCount) {
+        } else if (columnIndex == 3 + m_mapCount) {
             return row._MatchCountTo;
         } else {
-            return row._MatchCountTo[columnIndex - 4 - this.m_mapCount];
+            return row._MatchCountTo[columnIndex - 4 - m_mapCount];
         }
     }
 
     public boolean isCrossAssigned(int rowIndex, int colY) {
-        IonRTRow row = this.m_data.get(rowIndex);
+        IonRTRow row = m_data.get(rowIndex);
         int countFrom = row._MatchCountFrom;
         int countTo = row._MatchCountTo[colY - 4];
         return (countFrom == 0 || countTo == 0);
@@ -231,7 +228,7 @@ public class IonsRTTableModel implements ExtendedTableModelInterface {
      * @return
      */
     public int getColumnIndex(Long mapId) {
-        long rsmId = this.m_idMap.get(mapId);
+        long rsmId = m_rsmIdByMapId.get(mapId);
         for (int i = 0; i < m_rsmIdArray.length; i++) {
             if (m_rsmIdArray[i] == rsmId) {
                 return i + 3;
@@ -256,7 +253,7 @@ public class IonsRTTableModel implements ExtendedTableModelInterface {
      * @return 
      */
     public String getToolTipInfo(int rowIndex) {
-        IonRTRow row = this.m_data.get(rowIndex);
+        IonRTRow row = m_data.get(rowIndex);
         String infoValue = " Peptide id : " + row._peptideId + "<BR>";
         infoValue += ("Sequence : ") + row._peptideSequence + "<BR>";
         infoValue += ("charge : ") + row._charge + "<BR>";

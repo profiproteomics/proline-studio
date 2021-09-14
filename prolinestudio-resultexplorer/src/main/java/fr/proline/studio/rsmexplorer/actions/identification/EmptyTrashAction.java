@@ -36,8 +36,8 @@ import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 
 /**
  * Action to empty the Trash
@@ -48,7 +48,7 @@ public class EmptyTrashAction extends AbstractRSMAction {
 
 
     public EmptyTrashAction(AbstractTree tree) {
-        super(NbBundle.getMessage(EmptyTrashAction.class, "CTL_EmptyTrashAction"), tree);
+        super("Empty Trash", tree);
     }
 
 //    @Override

@@ -17,6 +17,8 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.core.orm.msi.PtmSpecificity;
+import fr.proline.studio.Exceptions;
+import fr.proline.studio.dock.gui.InfoLabel;
 import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.QuantitationLabel;
@@ -51,12 +53,12 @@ import fr.proline.studio.settings.FilePreferences;
 import fr.proline.studio.settings.SettingsDialog;
 import fr.proline.studio.settings.SettingsUtils;
 import fr.proline.studio.utils.IconManager;
-import fr.proline.studio.utils.StudioExceptions;
 import java.awt.Dialog;
 import java.awt.HeadlessException;
 import java.awt.Point;
 import java.awt.Window;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.*;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -64,8 +66,9 @@ import javax.persistence.EntityManager;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
-import org.openide.util.NbPreferences;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.NbPreferences;
+import fr.proline.studio.WindowManager;
+import fr.proline.studio.utils.StudioResourceBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -165,7 +168,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
                 }
             } catch (Exception ex) {
                 LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Error while setting Quant Param ", ex);
-                StudioExceptions.notify("An error occured while cloning XIC parameters", ex);
+                WindowManager.getDefault().getMainWindow().alert(InfoLabel.INFO_LEVEL.ERROR, "An error occured while cloning XIC parameters", ex);
             }
         } else {
             // set refDataset node
@@ -215,7 +218,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
           setButtonName(DefaultDialog.BUTTON_OK, "Next");
           setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
         } else {
-          setButtonName(DefaultDialog.BUTTON_OK, org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
+          setButtonName(DefaultDialog.BUTTON_OK, StudioResourceBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
           setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.OK));
         }
         setButtonVisible(BUTTON_LOAD, false);
@@ -295,7 +298,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
     protected void displayLabelFreeParamsPanel() {
         m_step = STEP_PANEL_LABEL_FREE_PARAMS;
 
-        setButtonName(DefaultDialog.BUTTON_OK, org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
+        setButtonName(DefaultDialog.BUTTON_OK, StudioResourceBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
         setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.OK));
 
         setButtonVisible(BUTTON_BACK, true);
@@ -571,16 +574,25 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
         JFileChooser fileChooser = SettingsUtils.getFileChooser(SETTINGS_KEY);
         int result = fileChooser.showSaveDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
-            File f = fileChooser.getSelectedFile();
-            FilePreferences filePreferences = new FilePreferences(f, null, "");
+            try {
+                File f = fileChooser.getSelectedFile();
+                if(f.exists()){
+                    FileOutputStream fos = new FileOutputStream(f);
+                    fos.close();
+                }
+                FilePreferences filePreferences = new FilePreferences(f, null, "");
 
-            // Save Parameters  
-            ParameterList parameterList = LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().getParameterList();
-            parameterList.saveParameters(filePreferences);
-            filePreferences.putBoolean(AbstractLabelFreeMSParamsPanel.XIC_SIMPLIFIED_PARAMS, LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().isSimplifiedPanel());
-            filePreferences.put(AbstractLabelFreeMSParamsPanel.XIC_PARAMS_VERSION_KEY, LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsVersion());
-            SettingsUtils.addSettingsPath(SETTINGS_KEY, f.getAbsolutePath());
-            SettingsUtils.writeDefaultDirectory(SETTINGS_KEY, f.getParent());
+                // Save Parameters
+                ParameterList parameterList = LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().getParameterList();
+                parameterList.saveParameters(filePreferences);
+                filePreferences.putBoolean(AbstractLabelFreeMSParamsPanel.XIC_SIMPLIFIED_PARAMS, LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().isSimplifiedPanel());
+                filePreferences.put(AbstractLabelFreeMSParamsPanel.XIC_PARAMS_VERSION_KEY, LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsVersion());
+                SettingsUtils.addSettingsPath(SETTINGS_KEY, f.getAbsolutePath());
+                SettingsUtils.writeDefaultDirectory(SETTINGS_KEY, f.getParent());
+            } catch (Exception e) {
+                Exceptions.printStackTrace(e);
+                JOptionPane.showMessageDialog(this, "Error saving settings "+e.getMessage(), "Save Settings Error",JOptionPane.ERROR_MESSAGE);
+            }
         }
 
         return false;

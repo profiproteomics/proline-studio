@@ -16,13 +16,13 @@
  */
 package fr.proline.studio.rsmexplorer.tree;
 
+import fr.proline.studio.Sheet;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.PropertiesProviderInterface;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
-import org.openide.nodes.Sheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

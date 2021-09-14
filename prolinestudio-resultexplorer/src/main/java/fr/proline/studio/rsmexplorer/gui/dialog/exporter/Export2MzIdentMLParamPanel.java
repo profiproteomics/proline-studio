@@ -16,26 +16,17 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog.exporter;
 
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.AbstractParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.parameter.StringParameter;
-import fr.proline.studio.settings.FilePreferences;
-import fr.proline.studio.settings.SettingsDialog;
 
-import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
-import java.io.File;
+import javax.swing.*;
+import java.awt.*;
 import java.util.HashMap;
 import java.util.prefs.Preferences;
-import javax.swing.Box;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
-import org.openide.util.NbPreferences;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -205,37 +196,23 @@ public class Export2MzIdentMLParamPanel extends JPanel {
             return false;
         }
     }
-    
-    protected void loadParameters(){
-        SettingsDialog settingsDialog = new SettingsDialog(m_parent, Export2MzIdentMLDialog.MZIDENT_SETTINGS_KEY);
-        settingsDialog.setLocationRelativeTo(this);
-        settingsDialog.setVisible(true);
 
-        if (settingsDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
-            if (settingsDialog.isDefaultSettingsSelected()) {
-                 m_parameterList.initDefaults();              
-            } else {
-                try {
-                    File settingsFile = settingsDialog.getSelectedFile();
-                    FilePreferences filePreferences = new FilePreferences(settingsFile, null, "");
-
-                    Preferences preferences = NbPreferences.root();
-                    String[] keys = filePreferences.keys();
-                    for (String key : keys) {
-                        String value = filePreferences.get(key, null);
-                        preferences.put(key, value);
-                    }
-
-                    m_parameterList.loadParameters(filePreferences);
-
-                } catch (Exception e) {
-                    LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);
-                    m_parent.setStatus(true, "Parsing of your Settings File failed");
-                }                
-            }
+    protected void loadParameters(Preferences filePreferences ) throws Exception{
+        Preferences preferences = NbPreferences.root();
+        String[] keys = filePreferences.keys();
+        for (String key : keys) {
+            String value = filePreferences.get(key, null);
+            preferences.put(key, value);
         }
-           
+
+        m_parameterList.loadParameters(filePreferences);
     }
+
+    protected void resetParameters(){
+        m_parameterList.initDefaults();
+
+    }
+
            
     private void setUsedParams(){
         for (AbstractParameter param : m_parameterList) {

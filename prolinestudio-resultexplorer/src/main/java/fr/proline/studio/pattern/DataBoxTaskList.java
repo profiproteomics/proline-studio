@@ -48,7 +48,8 @@ public class DataBoxTaskList extends AbstractDataBox {
 
     @Override
     public void createPanel() {
-        TasksPanel p = new TasksPanel();        
+        TasksPanel p = new TasksPanel();
+        p.initListener();
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);

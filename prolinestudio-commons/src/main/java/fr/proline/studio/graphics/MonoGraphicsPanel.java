@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.graphics;
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.graphics.core.GraphicsToolbarPanel;
 import fr.proline.studio.extendedtablemodel.LockedDataModel;
 import fr.proline.studio.export.ExportButton;
@@ -41,7 +42,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**

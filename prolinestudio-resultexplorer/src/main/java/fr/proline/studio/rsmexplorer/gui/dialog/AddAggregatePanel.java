@@ -18,10 +18,13 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 
 
 import fr.proline.core.orm.uds.Aggregation;
+import fr.proline.studio.utils.StudioResourceBundle;
+
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ResourceBundle;
 import javax.swing.*;
 
 /**
@@ -63,15 +66,15 @@ public class AddAggregatePanel extends javax.swing.JPanel {
         multipleAggregateCheckBox = new javax.swing.JCheckBox();
         nbAggregateSpinner = new javax.swing.JSpinner();
 
-        parameterPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(AddAggregatePanel.class, "AddAggregatePanel.parameterPanel.border.title"))); // NOI18N
+        parameterPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(StudioResourceBundle.getMessage(AddAggregatePanel.class, "AddAggregatePanel.parameterPanel.border.title"))); // NOI18N
 
-        nameLabel.setText(org.openide.util.NbBundle.getMessage(AddAggregatePanel.class, "AddAggregatePanel.nameLabel.text")); // NOI18N
+        nameLabel.setText(StudioResourceBundle.getMessage(AddAggregatePanel.class, "AddAggregatePanel.nameLabel.text")); // NOI18N
 
-        nameTextfield.setText(org.openide.util.NbBundle.getMessage(AddAggregatePanel.class, "AddAggregatePanel.nameTextfield.text")); // NOI18N
+        nameTextfield.setText(StudioResourceBundle.getMessage(AddAggregatePanel.class, "AddAggregatePanel.nameTextfield.text")); // NOI18N
 
-        typeLabel.setText(org.openide.util.NbBundle.getMessage(AddAggregatePanel.class, "AddAggregatePanel.typeLabel.text")); // NOI18N
+        typeLabel.setText(StudioResourceBundle.getMessage(AddAggregatePanel.class, "AddAggregatePanel.typeLabel.text")); // NOI18N
 
-        multipleAggregateCheckBox.setText(org.openide.util.NbBundle.getMessage(AddAggregatePanel.class, "AddAggregatePanel.multipleAggregateCheckBox.text")); // NOI18N
+        multipleAggregateCheckBox.setText(StudioResourceBundle.getMessage(AddAggregatePanel.class, "AddAggregatePanel.multipleAggregateCheckBox.text")); // NOI18N
         multipleAggregateCheckBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 multipleAggregateCheckBoxActionPerformed(evt);

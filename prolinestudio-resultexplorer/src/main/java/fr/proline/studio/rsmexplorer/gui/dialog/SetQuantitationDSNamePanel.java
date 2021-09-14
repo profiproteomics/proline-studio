@@ -16,6 +16,8 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
+import fr.proline.studio.utils.StudioResourceBundle;
+
 import javax.swing.JTextField;
 
 /**
@@ -69,18 +71,18 @@ public class SetQuantitationDSNamePanel extends javax.swing.JPanel {
         jTextArea1.setRows(5);
         jScrollPane1.setViewportView(jTextArea1);
 
-        setToolTipText(org.openide.util.NbBundle.getMessage(SetQuantitationDSNamePanel.class, "SetQuantitationDSNamePanel.toolTipText")); // NOI18N
+        setToolTipText(StudioResourceBundle.getMessage(SetQuantitationDSNamePanel.class, "SetQuantitationDSNamePanel.toolTipText")); // NOI18N
 
-        propertiesPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(SetQuantitationDSNamePanel.class, "SetQuantitationDSNamePanel.propertiesPanel.border.title"))); // NOI18N
+        propertiesPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(StudioResourceBundle.getMessage(SetQuantitationDSNamePanel.class, "SetQuantitationDSNamePanel.propertiesPanel.border.title"))); // NOI18N
         propertiesPanel.setMinimumSize(new java.awt.Dimension(50, 50));
 
-        nameLabel.setText(org.openide.util.NbBundle.getMessage(SetQuantitationDSNamePanel.class, "SetQuantitationDSNamePanel.nameLabel.text")); // NOI18N
+        nameLabel.setText(StudioResourceBundle.getMessage(SetQuantitationDSNamePanel.class, "SetQuantitationDSNamePanel.nameLabel.text")); // NOI18N
 
-        nameTextField.setText(org.openide.util.NbBundle.getMessage(SetQuantitationDSNamePanel.class, "SetQuantitationDSNamePanel.nameTextField.text")); // NOI18N
+        nameTextField.setText(StudioResourceBundle.getMessage(SetQuantitationDSNamePanel.class, "SetQuantitationDSNamePanel.nameTextField.text")); // NOI18N
 
-        descrPanel.setText(org.openide.util.NbBundle.getMessage(SetQuantitationDSNamePanel.class, "SetQuantitationDSNamePanel.descrPanel.text")); // NOI18N
+        descrPanel.setText(StudioResourceBundle.getMessage(SetQuantitationDSNamePanel.class, "SetQuantitationDSNamePanel.descrPanel.text")); // NOI18N
 
-        descrTextField.setText(org.openide.util.NbBundle.getMessage(SetQuantitationDSNamePanel.class, "SetQuantitationDSNamePanel.descrTextField.text")); // NOI18N
+        descrTextField.setText(StudioResourceBundle.getMessage(SetQuantitationDSNamePanel.class, "SetQuantitationDSNamePanel.descrTextField.text")); // NOI18N
 
         javax.swing.GroupLayout propertiesPanelLayout = new javax.swing.GroupLayout(propertiesPanel);
         propertiesPanel.setLayout(propertiesPanelLayout);

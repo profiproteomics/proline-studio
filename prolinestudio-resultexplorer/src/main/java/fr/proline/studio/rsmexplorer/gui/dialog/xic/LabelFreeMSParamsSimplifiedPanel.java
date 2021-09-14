@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.*;
 
-import org.openide.util.NbPreferences;
+import fr.proline.studio.NbPreferences;
 
 /**
  *

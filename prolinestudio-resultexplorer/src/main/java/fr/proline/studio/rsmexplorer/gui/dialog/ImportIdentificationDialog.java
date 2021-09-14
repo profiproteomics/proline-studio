@@ -16,40 +16,35 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
-import fr.proline.core.orm.uds.InstrumentConfiguration;
 import fr.proline.core.orm.uds.FragmentationRuleSet;
+import fr.proline.core.orm.uds.InstrumentConfiguration;
 import fr.proline.core.orm.uds.PeaklistSoftware;
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dpm.serverfilesystem.RootInfo;
 import fr.proline.studio.dpm.serverfilesystem.ServerFile;
 import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.gui.DefaultStorableDialog;
 import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.parameter.*;
-import fr.proline.studio.progress.ProgressInterface;
-import fr.proline.studio.settings.FilePreferences;
-import fr.proline.studio.settings.SettingsDialog;
-import fr.proline.studio.settings.SettingsUtils;
 import fr.proline.studio.utils.IconManager;
+import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Iterator;
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.util.List;
+import java.util.*;
 import java.util.prefs.Preferences;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import org.openide.util.NbPreferences;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -59,7 +54,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jm235353
  */
-public class ImportIdentificationDialog extends DefaultDialog {
+public class ImportIdentificationDialog extends DefaultStorableDialog {
 
     private static ImportIdentificationDialog m_singletonDialog = null;
 
@@ -91,7 +86,6 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private final static String SETTINGS_KEY = "ImporteIdentification";
 
     private JList<File> m_fileList;
-    private JScrollPane m_fileListScrollPane;
 
     private JButton m_addFileButton;
     private JButton m_removeFileButton;
@@ -104,7 +98,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private JComboBox m_instrumentsComboBox = null;
     private JComboBox m_fragmentationRuleSetsComboBox = null;
     private JComboBox m_peaklistSoftwaresComboBox = null;
-    //private JCheckBox m_saveSpectrumCheckBox ;
+
     private JComboBox m_decoyComboBox = null;
     private JLabel m_decoyAccessionRegexLabel = null;
     private JTextField m_decoyRegexTextField = null;
@@ -133,15 +127,91 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
         setDocumentationSuffix("id.147n2zr");
 
-        setButtonVisible(BUTTON_LOAD, true);
-        setButtonVisible(BUTTON_SAVE, true);
-
         setResizable(true);
         setMinimumSize(new Dimension(200, 240));
 
         initInternalPanel();
 
         restoreInitialParameters(NbPreferences.root());
+    }
+
+    /***  DefaultStorableDialog Abstract methods ***/
+
+    @Override
+    protected String getSettingsKey() {
+        return SETTINGS_KEY;
+    }
+
+
+    @Override
+    protected void resetParameters() throws Exception {
+        ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
+        parameterList.initDefaults();
+    }
+
+    @Override
+    protected void loadParameters(Preferences filePreferences) throws Exception {
+
+        Preferences preferences = NbPreferences.root();
+        String[] keys = filePreferences.keys();
+        for (int i = 0; i < keys.length; i++) {
+            String key = keys[i];
+            String value = filePreferences.get(key, null);
+            preferences.put(key, value);
+        }
+
+        restoreInitialParameters(preferences);
+
+        ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
+        parameterList.loadParameters(filePreferences);
+        m_sourceParameterList.loadParameters(filePreferences);
+    }
+
+    @Override
+    protected  void saveParameters(Preferences preferences) {
+
+        ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
+
+        // save parser
+        String parserSelected = parameterList.toString();
+        preferences.put("IdentificationParser", parserSelected);
+
+        // save file path
+        if (m_defaultDirectory != null) {
+            preferences.put("IdentificationFilePath", m_defaultDirectory.getAbsolutePath());
+        }
+
+        // Save Other Parameters
+        m_sourceParameterList.saveParameters(preferences);
+        parameterList.saveParameters(preferences);
+
+        if (m_decoyRegexTextField.isEnabled()) {
+            ArrayList<String> regexArrayList = readRegexArray(m_decoyRegexTextField.getText());
+            writeRegexArray(preferences, regexArrayList);
+        }
+
+    }
+
+    @Override
+    protected boolean checkParameters() {
+        ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
+
+        // check source parameters
+        ParameterError error = m_sourceParameterList.checkParameters();
+
+        // check specific parameters
+        if (error == null) {
+            error = parameterList.checkParameters();
+        }
+
+        // report error
+        if (error != null) {
+            setStatus(true, error.getErrorMessage());
+            highlight(error.getParameterComponent());
+            return false;
+        }
+
+        return true;
     }
 
     private void initInternalPanel() {
@@ -220,7 +290,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         fileSelectionPanel.setBorder(BorderFactory.createTitledBorder(" Files Selection "));
 
         m_fileList = new JList<>(new DefaultListModel());
-        m_fileListScrollPane = new JScrollPane(m_fileList) {
+        JScrollPane m_fileListScrollPane = new JScrollPane(m_fileList) {
 
             private Dimension preferredSize = new Dimension(360, 200);
 
@@ -588,25 +658,6 @@ public class ImportIdentificationDialog extends DefaultDialog {
         return decoyPanel;
     }
 
-    /*private JPanel createSaveSpectrumPanel() {
-        
-     JPanel saveSpectrumPanel = new JPanel(new GridBagLayout());
-
-
-        
-     // Placement of Objects for Parser Panel
-     GridBagConstraints c = new GridBagConstraints();
-     c.anchor = GridBagConstraints.NORTHWEST;
-     c.fill = GridBagConstraints.BOTH;
-     c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-     //        c.gridx = 0;
-     //        c.gridy = 0;
-     //        c.weightx = 1;
-     //        saveSpectrumPanel.add(m_saveSpectrumCheckBox, c);
-        
-     return saveSpectrumPanel;
-     }*/
     private ArrayList<String> readRegexArray(String regexToAdd) {
 
         ArrayList<String> regexArrayList = new ArrayList();
@@ -766,67 +817,6 @@ public class ImportIdentificationDialog extends DefaultDialog {
         return true;
     }
 
-    @Override
-    protected boolean saveCalled() {
-        // check parameters
-        if (!checkParametersForSave()) {
-            return false;
-        }
-
-        JFileChooser fileChooser = SettingsUtils.getFileChooser(SETTINGS_KEY);
-        int result = fileChooser.showSaveDialog(this);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File f = fileChooser.getSelectedFile();
-            FilePreferences filePreferences = new FilePreferences(f, null, "");
-
-            saveParameters(filePreferences);
-
-            SettingsUtils.addSettingsPath(SETTINGS_KEY, f.getAbsolutePath());
-            SettingsUtils.writeDefaultDirectory(SETTINGS_KEY, f.getParent());
-        }
-
-        return false;
-    }
-
-    @Override
-    protected boolean loadCalled() {
-
-        SettingsDialog settingsDialog = new SettingsDialog(this, SETTINGS_KEY);
-        settingsDialog.setLocationRelativeTo(this);
-        settingsDialog.setVisible(true);
-
-        if (settingsDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
-            if (settingsDialog.isDefaultSettingsSelected()) {
-                ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
-                parameterList.initDefaults();
-            } else {
-                try {
-                    File settingsFile = settingsDialog.getSelectedFile();
-                    FilePreferences filePreferences = new FilePreferences(settingsFile, null, "");
-
-                    Preferences preferences = NbPreferences.root();
-                    String[] keys = filePreferences.keys();
-                    for (int i = 0; i < keys.length; i++) {
-                        String key = keys[i];
-                        String value = filePreferences.get(key, null);
-                        preferences.put(key, value);
-                    }
-
-                    restoreInitialParameters(preferences);
-
-                    ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
-                    parameterList.loadParameters(filePreferences);
-                    m_sourceParameterList.loadParameters(filePreferences);
-
-                } catch (Exception e) {
-                    LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);
-                    setStatus(true, "Parsing of your Settings File failed");
-                }
-            }
-        }
-
-        return false;
-    }
 
     private boolean checkParametersForOK() {
         // check files selected
@@ -837,54 +827,9 @@ public class ImportIdentificationDialog extends DefaultDialog {
             return false;
         }
 
-        return checkParametersForSave();
+        return checkParameters();
     }
 
-    private boolean checkParametersForSave() {
-
-        ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
-
-        // check source parameters
-        ParameterError error = m_sourceParameterList.checkParameters();
-
-        // check specific parameters
-        if (error == null) {
-            error = parameterList.checkParameters();
-        }
-
-        // report error
-        if (error != null) {
-            setStatus(true, error.getErrorMessage());
-            highlight(error.getParameterComponent());
-            return false;
-        }
-
-        return true;
-    }
-
-    private void saveParameters(Preferences preferences) {
-
-        ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
-
-        // save parser
-        String parserSelected = parameterList.toString();
-        preferences.put("IdentificationParser", parserSelected);
-
-        // save file path
-        if (m_defaultDirectory != null) {
-            preferences.put("IdentificationFilePath", m_defaultDirectory.getAbsolutePath());
-        }
-
-        // Save Other Parameters    
-        m_sourceParameterList.saveParameters(preferences);
-        parameterList.saveParameters(preferences);
-
-        if (m_decoyRegexTextField.isEnabled()) {
-            ArrayList<String> regexArrayList = readRegexArray(m_decoyRegexTextField.getText());
-            writeRegexArray(preferences, regexArrayList);
-        }
-
-    }
 
     private void restoreInitialParameters(Preferences preferences) {
         String parser = preferences.get("IdentificationParser", null);
@@ -970,11 +915,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         return fragmentationRuleSet.getId();
     }
 
-//    public boolean getSaveSpectrumMatches() {
-////        return m_saveSpectrumCheckBox.isEnabled() && m_saveSpectrumCheckBox.isSelected();
-//    	// return false for mascot result files, true otherwise
-//        return (m_parserComboBox.getSelectedItem().toString().compareTo(MASCOT_PARSER) != 0);
-//    }
+
     public String getParserId() {
         return PARSER_IDS[m_parserComboBox.getSelectedIndex()];
     }
@@ -997,9 +938,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
     private ParameterList createMascotParser() {
         ParameterList parameterList = new ParameterList(MASCOT_PARSER);
-//        parameterList.add(new DoubleParameter("ion.score.cutoff", "Ion Score Cutoff", JTextField.class, new Double(0.0), new Double(0), null));
         parameterList.add(new DoubleParameter("subset.threshold", "Subset Threshold", JTextField.class, new Double(1.0), new Double(0), new Double(1)));
-//        parameterList.add(new StringParameter("mascot.server.url", "Mascot Server URL (including /cgi/)", JTextField.class, "http://www.matrixscience.com/cgi/", null, null));
 
         return parameterList;
     }
@@ -1016,8 +955,6 @@ public class ImportIdentificationDialog extends DefaultDialog {
         String[] fileFilterNames2 = {"PTM composition File"};
         String[] fileFilterExtensions2 = {"txt"};
         parameterList.add(new FileParameter(ServerFileSystemView.getServerFileSystemView(), "ptm.composition.file", "PTM composition file path", JTextField.class, preferences.get("Omssa_Parser.PTM_composition_file_path", ""), fileFilterNames2, fileFilterExtensions2));
-//        parameterList.add(new BooleanParameter("fasta.contains.target", "Fasta contains target entries", JCheckBox.class, Boolean.TRUE));
-//        parameterList.add(new BooleanParameter("fasta.contains.decoy", "Fasta contains decoy entries", JCheckBox.class, Boolean.TRUE));
 
         return parameterList;
     }
@@ -1119,9 +1056,6 @@ public class ImportIdentificationDialog extends DefaultDialog {
         m_decoyRegexParameter.setCompulsory(false);
         parameterList.add(m_decoyRegexParameter);
 
-//        BooleanParameter saveSpectrumParameter = new BooleanParameter("save_spectrum_matches", "Save Spectrum Matches", JCheckBox.class, Boolean.FALSE);
-//        m_saveSpectrumCheckBox = (JCheckBox) saveSpectrumParameter.getComponent(null);
-//        parameterList.add(saveSpectrumParameter);
         return parameterList;
     }
 
@@ -1307,24 +1241,5 @@ public class ImportIdentificationDialog extends DefaultDialog {
             return m_regexArrayList;
         }
     }
-
-    public class CertifyIdentificationProgress implements ProgressInterface {
-
-        private boolean m_isLoaded = false;
-
-        @Override
-        public boolean isLoaded() {
-            return m_isLoaded;
-        }
-
-        @Override
-        public int getLoadingPercentage() {
-            return 0; // progress bar displayed as a waiting bar
-        }
-
-        public void setLoaded() {
-            m_isLoaded = true;
-        }
-    };
 
 }

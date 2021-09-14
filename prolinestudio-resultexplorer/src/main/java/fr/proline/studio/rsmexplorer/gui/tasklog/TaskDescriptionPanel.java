@@ -16,6 +16,8 @@
  */
 package fr.proline.studio.rsmexplorer.gui.tasklog;
 
+import fr.proline.studio.WindowManager;
+import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.utils.StringUtils;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
@@ -34,8 +36,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.*;
-import org.openide.DialogDisplayer;
-import org.openide.NotifyDescriptor;
+
 
 /**
  * Panel to display information about a specific task
@@ -55,13 +56,12 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
     private JTextArea m_errorTextArea;
     private JButton m_requestButton;
 
-    private RequestContentDialog m_requestDialog;
 
+    private String m_content;
     private String m_requestURL;
 
     public TaskDescriptionPanel() {
         initComponents();
-        m_requestDialog = new RequestContentDialog();
     }
 
     private void initComponents() {
@@ -89,7 +89,9 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         m_requestButton.setAction(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                m_requestDialog.showRequestDetailsDialog();
+                RequestContentDialog dialog = RequestContentDialog.getSingleton(m_content, m_requestURL);
+
+                dialog.setVisible(true);
             }
         });
         m_requestButton.setEnabled(false);
@@ -251,8 +253,7 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         m_endTimeTextfield.setText(formatTime(taskInfo.getEndTimestamp()));
         m_deltaEndTimeTextfield.setText(formatDeltaTime(taskInfo.getDuration()));
 
-        m_requestDialog.setRequestContent(taskInfo.getRequestContent());
-
+        m_content = taskInfo.getRequestContent();
         m_requestURL = taskInfo.getRequestURL();
 
         m_requestButton.setEnabled((m_requestURL != null) && (!m_requestURL.isEmpty()));
@@ -270,7 +271,6 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         m_deltaEndTimeTextfield.setText("");
         m_requestURL = null;
         m_requestButton.setEnabled(false);
-        m_requestDialog.reinit();
     }
 
     private String formatTime(long timestamp) {
@@ -323,20 +323,54 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         return m_dataBox.getSaveAction(splittedPanel);
     }
 
-    class RequestContentDialog {
+    private static class RequestContentDialog extends DefaultDialog {
 
         private JTextArea _requestDialogContentTextarea;
         private JSplitPane _requestDialogContentPane;
         private JTree _requestContentTree;
         private String _requestContent = "";
+        private boolean m_firstDisplay = true;
 
-        public RequestContentDialog() {
-            _requestDialogContentTextarea = new JTextArea();
-            //_requestDialogContentTextarea.setSize(600, 100);
-            _requestDialogContentPane = new JSplitPane();
+        private static RequestContentDialog m_singleton= null;
+
+        private RequestContentDialog() {
+            super(WindowManager.getDefault().getMainWindow());
+            setTitle("Request details");
+
+            setButtonVisible(BUTTON_CANCEL, false);
+            setButtonVisible(BUTTON_HELP, false);
+
         }
 
-        public void showRequestDetailsDialog() {
+        public static RequestContentDialog getSingleton(String content, String requestURL) {
+            if (m_singleton == null) {
+                m_singleton = new RequestContentDialog();
+
+            }
+
+            m_singleton.setContent(content, requestURL);
+
+            return m_singleton;
+        }
+
+        @Override
+        public void setVisible(boolean v) {
+            if (m_firstDisplay) {
+                m_singleton.centerToWindow(WindowManager.getDefault().getMainWindow());
+                m_firstDisplay = false;
+            }
+
+
+            super.setVisible(v);
+
+
+        }
+
+        private void setContent(String content, String requestURL) {
+
+            _requestContent = content;
+            _requestContentTree = StringUtils.createExpandedTreeFromJson(content, "content");
+
 
             JPanel requestPanel = new JPanel(new GridBagLayout());
             requestPanel.setPreferredSize(new Dimension(600, 400));
@@ -346,7 +380,7 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
             c.insets = new java.awt.Insets(5, 5, 5, 5);
 
             JTextField requestURLTextfield = new JTextField();
-            requestURLTextfield.setText(m_requestURL);
+            requestURLTextfield.setText(requestURL);
 
             _requestDialogContentTextarea = new JTextArea();
             _requestDialogContentTextarea.setText(_requestContent);
@@ -373,31 +407,13 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
             _requestDialogContentPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, top, bottom);
             _requestDialogContentPane.setDividerLocation(60);
             requestPanel.add(_requestDialogContentPane, c);
-            NotifyDescriptor nd = new NotifyDescriptor(
-                    requestPanel, // instance of your panel
-                    "Request details", // title of the dialog
-                    NotifyDescriptor.PLAIN_MESSAGE, // it is Yes/No dialog ...
-                    NotifyDescriptor.PLAIN_MESSAGE, // ... of a question type => a question mark icon
-                    null,
-                    null
-            );
 
-            DialogDisplayer.getDefault().notify(nd);
+            replaceInternalComponent(requestPanel);
 
+            pack();
         }
 
-        private void setRequestContent(String content) {
-            _requestContent = content;
-            _requestContentTree = StringUtils.createExpandedTreeFromJson(content, "content");
-            _requestDialogContentTextarea.setText(_requestContent);
-            int nbLine = _requestDialogContentTextarea.getLineCount();
 
-        }
-
-        private void reinit() {
-            _requestContent = "";
-            _requestContentTree = null;
-        }
     }
 
 }

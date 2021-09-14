@@ -41,7 +41,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,7 +100,7 @@ public abstract class Axis {
     protected int m_minimumAxisWidth = 0;
 
     private boolean m_maxZoomDone = false;
-    
+
     private boolean m_rangeModifiedByUser = false;
 
     protected static final double LOG_MIN_VALUE = 10e-13;
@@ -369,7 +369,7 @@ public abstract class Axis {
     public void setRangeModifiedByUser(boolean rangeModifiedByUser) {
         m_rangeModifiedByUser = rangeModifiedByUser;
     }
-    
+
     public void setRange(double min, double max, boolean rangeModifiedByUser) {
         setRange(min, max);
         setRangeModifiedByUser(rangeModifiedByUser);

@@ -448,7 +448,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
 
     /**
      * Return potential extra data available for the corresponding parameter of class type
-     * @param c
+     * @param parameterType
      * @return 
      */
     public Object getExtraData(Class parameterType) {

@@ -28,7 +28,7 @@ import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleNode;
 import javax.swing.Action;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 
 /**
  *

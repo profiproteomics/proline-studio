@@ -42,8 +42,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.util.NbBundle;
-import org.openide.util.NbPreferences;
+
+import fr.proline.studio.NbPreferences;
 
 /**
  * Action to Merge data from a set of Search Results (rset) or Identification Summaries (rsm)
@@ -56,7 +56,7 @@ public class MergeJMSAction extends AbstractRSMAction {
     private ConfigurableMergeAction m_unionMergeAction;
     
     public MergeJMSAction(AbstractTree tree) {
-        super(NbBundle.getMessage(MergeJMSAction.class, "CTL_MergeAction"), tree);
+        super("Merge Datasets", tree);
     }
     
     @Override

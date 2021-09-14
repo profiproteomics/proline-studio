@@ -213,7 +213,7 @@ public class PerformanceTestData {
         }
         
         public void display() {
-            
+
             try {
                 m_logger.debug(m_fullKey + " Total:" + m_totalTime + "ms" + "   **** NbCalls:" + m_callNumbers + "  Average:" + m_totalTime / m_callNumbers + "ms  Min:" + m_minTime + "ms  Max:" + m_maxTime + "ms");
             } catch (Exception e) {

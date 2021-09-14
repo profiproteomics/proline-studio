@@ -74,7 +74,6 @@ import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -2158,7 +2157,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         int nbM = m_masterQuantPeptideIonList.size();
 
         int nbMsub = listMasterPeptideIonsIds == null ? 0 : listMasterPeptideIonsIds.size();
-        long start = System.currentTimeMillis();
+//        long start = System.currentTimeMillis();
 
         String queryMasterPeptideIons = "SELECT new fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon(pi, mqpi, p, pm) "
                 + "FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.MasterQuantPeptideIon mqpi, "
@@ -2211,8 +2210,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             indexes.add(index);
         } // end for
 
-        m_logger.info("DMQPep ions for " + nbMsub + " ions duration = " + (System.currentTimeMillis() - start) + " ms");
-        start = System.currentTimeMillis();
+//        m_logger.info("DMQPep ions for " + nbMsub + " ions duration = " + (System.currentTimeMillis() - start) + " ms");
+//        start = System.currentTimeMillis();
 
         /////////////////////////////////
         HashMap<Long, Peptide> peptideMap = new HashMap<>();
@@ -2304,8 +2303,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
 
         fetchPeptideIonAbundances(listObjectTreeId, entityManagerMSI, indexes);
 
-        m_logger.info("Fetch ions pepInstance, pepMatch & Ab. for " + nbMsub + " ions duration = " + (System.currentTimeMillis() - start) + " ms");
-        start = System.currentTimeMillis();
+//        m_logger.info("Fetch ions pepInstance, pepMatch & Ab. for " + nbMsub + " ions duration = " + (System.currentTimeMillis() - start) + " ms");
+//        start = System.currentTimeMillis();
 
         return true;
     }

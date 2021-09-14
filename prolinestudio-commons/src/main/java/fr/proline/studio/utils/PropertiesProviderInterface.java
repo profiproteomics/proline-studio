@@ -16,7 +16,8 @@
  */
 package fr.proline.studio.utils;
 
-import org.openide.nodes.Sheet;
+
+import fr.proline.studio.Sheet;
 
 /**
  * A class must implements this interface to provide properties

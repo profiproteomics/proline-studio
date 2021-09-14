@@ -16,9 +16,12 @@
  */
 package fr.proline.studio.rsmexplorer;
 
+import fr.proline.studio.WindowManager;
+import fr.proline.studio.dock.AbstractTopPanel;
+
 import java.util.ArrayList;
 import java.util.Iterator;
-import org.openide.windows.TopComponent;
+import java.util.Set;
 
 /**
  *
@@ -31,12 +34,13 @@ public class DataBoxViewerManager {
     
     public static void loadedDataModified(long projectId, Long rsetId, Long rsmId, Class c, ArrayList modificationsList, int reason) {
 
-        Iterator<TopComponent> itTop = TopComponent.getRegistry().getOpened().iterator();
+        Set<AbstractTopPanel> tcs = WindowManager.getDefault().getMainWindow().getTopPanels();
+        Iterator<AbstractTopPanel> itTop = tcs.iterator();
         while (itTop.hasNext()) {
-            TopComponent topComponent = itTop.next();
-            if (topComponent instanceof DataBoxViewerTopComponent) {
+            AbstractTopPanel topComponent = itTop.next();
+            if (topComponent instanceof DataBoxViewerTopPanel) {
 
-                DataBoxViewerTopComponent databoxViewerTP = ((DataBoxViewerTopComponent) topComponent);
+                DataBoxViewerTopPanel databoxViewerTP = ((DataBoxViewerTopPanel) topComponent);
 
                 long pId = databoxViewerTP.getProjectId();
                 if (pId != projectId) {

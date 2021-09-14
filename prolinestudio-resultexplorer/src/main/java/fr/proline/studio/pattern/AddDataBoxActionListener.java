@@ -23,7 +23,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 
 /**
  * Action to add a new Databox at the end of the queue

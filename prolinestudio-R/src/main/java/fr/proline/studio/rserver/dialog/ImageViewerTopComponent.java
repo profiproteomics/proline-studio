@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.rserver.dialog;
 
+import fr.proline.studio.dock.AbstractTopPanel;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.utils.IconManager;
@@ -23,7 +24,6 @@ import java.awt.*;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
-import org.openide.windows.TopComponent;
 
 /**
  *
@@ -31,7 +31,7 @@ import org.openide.windows.TopComponent;
  * 
  * @author JM235353
  */
-public class ImageViewerTopComponent extends TopComponent {
+public class ImageViewerTopComponent extends AbstractTopPanel {
 
     public ImageViewerTopComponent(String name, Image img) {
 
@@ -48,9 +48,29 @@ public class ImageViewerTopComponent extends TopComponent {
     }
 
     @Override
+    public String getTopPanelIdentifierKey() {
+        return null;
+    }
+
     public Image getIcon() {
         return IconManager.getImage(IconManager.IconType.WAVE);
     }
+
+    @Override
+    public String getTitle() {
+        return getName();
+    }
+
+    @Override
+    protected void componentOpened() {
+        // nothing to do
+    }
+
+    @Override
+    public void componentClosed() {
+        // nothing to do
+    }
+
 
     public class ImagePanel extends HourglassPanel {
 

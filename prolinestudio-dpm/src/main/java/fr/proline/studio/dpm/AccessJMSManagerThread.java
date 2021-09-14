@@ -32,8 +32,10 @@ public class AccessJMSManagerThread extends Thread {
     
     private static AccessJMSManagerThread m_instance;
     private Connection m_connection;
-    private Session m_session;
+    //private Session m_session;
     private LinkedList<AbstractJMSTask> m_taskList = new LinkedList<>();
+
+    private LinkedList<AbstractJMSTask> m_taskFinishedList = new LinkedList<>();
     
     public static AccessJMSManagerThread getAccessJMSManagerThread() {
         if (m_instance == null) {
@@ -47,11 +49,27 @@ public class AccessJMSManagerThread extends Thread {
         super("AccessJMSManagerThread"); // useful for debugging
         initSession();
     }
-    
-    public Session getSession(){
-        return m_session;
+
+    public Connection getConnection() {
+        initSession();
+        return m_connection;
     }
 
+    /*public Session getSession(){
+
+        String curThread = Thread.currentThread().getName();
+        if (m_curThreadName == null) {
+            m_curThreadName = curThread;
+        } else if (!curThread.equals(m_curThreadName)) {
+            System.out.println("SESSION THREAD BUG "+curThread);
+        }
+
+        System.out.println("SESSION THREAD "+curThread);
+
+        return m_session;
+    }
+    private String m_curThreadName = null;
+*/
     /**
      * Main loop of the thread
      */
@@ -63,6 +81,12 @@ public class AccessJMSManagerThread extends Thread {
                 synchronized (this) {
 
                     while (true) {
+
+                        while (!m_taskFinishedList.isEmpty()) {
+                            task = m_taskFinishedList.poll();
+                            task.closeSession();
+                        }
+
 
                         // look for a task to be done
                         if (!m_taskList.isEmpty()) {
@@ -76,7 +100,9 @@ public class AccessJMSManagerThread extends Thread {
 
                 // init session if needed
                 initSession();
-                
+
+                LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" task.askJMS "+task.getClass());
+
                 // fetch data
                 task.askJMS();
 
@@ -95,8 +121,8 @@ public class AccessJMSManagerThread extends Thread {
             try {
                 // Get JMS Connection
                 m_connection = JMSConnectionManager.getJMSConnectionManager().getJMSConnection();
-                m_connection.start(); // Explicitely start connection to begin Consumer reception 
-                m_session = m_connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
+                JMSConnectionManager.getJMSConnectionManager().startJMSConnections();// Explicitly start connection to begin Consumer reception
+                //m_session = m_connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
             } catch (JMSException je) {
                 LoggerFactory.getLogger("ProlineStudio.DPM").error("Unexpected exception when initializing JMS Connection", je);
             } catch (Exception e) {
@@ -119,22 +145,32 @@ public class AccessJMSManagerThread extends Thread {
             notifyAll();
         }
     }
+
+    public final void taskFinished(AbstractJMSTask task) {
+        // task finished is queued
+        synchronized (this) {
+            m_taskFinishedList.add(task);
+            notifyAll();
+        }
+    }
+
+
     
     public void cleanup() {
-        if (m_session != null) {
+        //if (m_session != null) {
             synchronized (this) {
                 try {
-                    m_session.close();
+                    //m_session.close();
 
                     m_taskList.clear();
                 } catch (Exception e) {
 
                 } finally {
-                    m_session = null;
+                    //m_session = null;
                     m_connection = null;
                 }
             }
-        }
+       // }
         
     }
 }

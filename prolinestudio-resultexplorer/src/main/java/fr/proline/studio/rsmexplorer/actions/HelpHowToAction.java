@@ -20,20 +20,18 @@ import fr.proline.studio.utils.HelpUtils;
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import org.openide.awt.ActionRegistration;
-import org.openide.awt.ActionReference;
-import org.openide.awt.ActionReferences;
-import org.openide.awt.ActionID;
-import org.openide.util.NbBundle.Messages;
 import org.slf4j.LoggerFactory;
 
-@ActionID(category = "Help", id = "fr.proline.studio.rsmexplorer.actions.HelpHowToAction")
-@ActionRegistration(displayName = "#CTL_HelpHowToAction")
-@ActionReferences({
-    @ActionReference(path = "Menu/Help", position = 125)
-})
-@Messages("CTL_HelpHowToAction=How to")
-public final class HelpHowToAction implements ActionListener {
+import javax.swing.*;
+
+
+public final class HelpHowToAction extends AbstractAction implements ActionListener {
+
+    public HelpHowToAction() {
+        putValue(Action.NAME, "How to");
+        setEnabled(true);
+    }
+
 
     public void actionPerformed(ActionEvent e) {
 

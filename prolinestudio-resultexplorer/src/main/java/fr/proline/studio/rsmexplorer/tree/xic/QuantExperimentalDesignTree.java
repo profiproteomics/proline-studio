@@ -25,6 +25,7 @@ import fr.proline.core.orm.uds.GroupSetup;
 import fr.proline.core.orm.uds.SampleAnalysis;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.core.orm.uds.Run;
@@ -34,6 +35,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.DatabaseRunsTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dock.gui.InfoLabel;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.actions.xic.CreateAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DeleteAction;
@@ -43,7 +45,6 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
-import fr.proline.studio.utils.StudioExceptions;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -277,7 +278,7 @@ public class QuantExperimentalDesignTree extends AbstractTree {
                 }
 
             } catch (Exception e) {
-                StudioExceptions.notify("Unable to build aggregated datasets nodes", e);
+                WindowManager.getDefault().getMainWindow().alert(InfoLabel.INFO_LEVEL.ERROR, "Unable to build aggregated datasets nodes", e);
             }
         }
 

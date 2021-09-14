@@ -19,6 +19,8 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.core.orm.msi.MsiSearch;
 import fr.proline.core.orm.msi.Peaklist;
 import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.studio.Sheet;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -52,7 +54,7 @@ import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.pattern.DataboxGeneric;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.gui.model.properties.IdentificationPropertiesTableModel;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
@@ -76,8 +78,7 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
-import org.openide.nodes.Sheet;
-import org.openide.util.NbBundle;
+
 
 /**
  * Panel to display all Search Results (rset) imported
@@ -423,7 +424,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
     private class PropertiesFromTableAction extends AbstractTableAction {
 
         public PropertiesFromTableAction() {
-            super(NbBundle.getMessage(PropertiesAction.class, "CTL_PropertiesAction"));
+            super("Properties");
         }
 
         @Override
@@ -460,9 +461,9 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
             WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(dialogName, "Properties", IconManager.IconType.DOCUMENT_LIST, true);
             final IdentificationPropertiesTableModel _model = new IdentificationPropertiesTableModel();
             windowBox.setEntryData(-1L, _model);
-            DataBoxViewerTopComponent win2 = new DataBoxViewerTopComponent(windowBox);
-            win2.open();
-            win2.requestActive();
+            DataBoxViewerTopPanel win2 = new DataBoxViewerTopPanel(windowBox);
+            WindowManager.getDefault().getMainWindow().displayWindow(win2);
+
 
             //JPM.HACK ! Impossible to set the max number of lines differently in this case
             DataboxGeneric databoxGeneric = ((DataboxGeneric) windowBox.getEntryBox());

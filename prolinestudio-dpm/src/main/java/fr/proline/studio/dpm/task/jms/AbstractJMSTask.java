@@ -18,15 +18,15 @@ package fr.proline.studio.dpm.task.jms;
 
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 import fr.proline.core.orm.uds.UserAccount;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.taskinfo.AbstractLongTask;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import fr.proline.studio.dock.gui.InfoLabel;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.dpm.task.util.JMSMessageUtil;
-import fr.proline.studio.gui.InfoDialog;
-import fr.proline.studio.utils.StudioExceptions;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -65,6 +65,7 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
 
     public static final String TASK_LIST_INFO = "Services JMS";
 
+    protected Session m_session;
 
     /* To count received messages */
     public final AtomicInteger MESSAGE_COUNT_SEQUENCE = new AtomicInteger(0);
@@ -74,6 +75,12 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
 
         m_callback = callback;
         m_synchronous = false;
+
+        try {
+            m_session = AccessJMSManagerThread.getAccessJMSManagerThread().getConnection().createSession(false, Session.CLIENT_ACKNOWLEDGE);
+        } catch (JMSException exception) {
+            exception.printStackTrace();
+        }
     }
 
     public AbstractJMSTask(AbstractJMSCallback callback, boolean synchronous, TaskInfo taskInfo) {
@@ -81,6 +88,12 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
         m_taskInfo = taskInfo;
         m_callback = callback;
         m_synchronous = synchronous;
+
+        try {
+            m_session = AccessJMSManagerThread.getAccessJMSManagerThread().getConnection().createSession(false, Session.CLIENT_ACKNOWLEDGE);
+        } catch (JMSException exception) {
+            exception.printStackTrace();
+        }
     }
 
     /**
@@ -102,11 +115,13 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
     public void askJMS() throws JMSException {
         try {
 
+            LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" askJMS Start "+getClass());
+
+
             /*
              * Thread specific : Session, Producer, Consumer ...
              */
             // Get JMS Session (Session MUST be confined in current Thread)            
-            Session m_session = AccessJMSManagerThread.getAccessJMSManagerThread().getSession();
 
             // Step 6. Create a JMS Message Producer (Producer MUST be confined in current Thread)
             m_producer = m_session.createProducer(JMSConnectionManager.getJMSConnectionManager().getServiceQueue());
@@ -123,7 +138,14 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
                 Message responseMsg = m_responseConsumer.receive(responseTimeout);
                 onMessage(responseMsg);
             }
+
+            LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" askJMS end "+getClass());
+
         } catch (Exception ex) {
+
+            LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" askJMS error "+getClass());
+            ex.printStackTrace();
+
             m_loggerProline.error("Error sending JMS Message", ex);
             m_currentState = JMSState.STATE_FAILED;
             m_taskError = new TaskError(ex);
@@ -193,6 +215,10 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
     @Override
     public final void onMessage(final Message jmsMessage) {
 
+
+
+        LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage start "+getClass());
+
         long endRun = System.currentTimeMillis();
 //        this.m_taskInfo.setDuration(endRun-m_startRun);
         this.m_taskInfo.setDuration(endRun - m_taskInfo.getStartTimestamp());
@@ -202,7 +228,13 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
 
             try {
                 taskDone(jmsMessage);
+
+
             } catch (JSONRPC2Error jsonErr) {
+
+                LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage error "+getClass());
+                jsonErr.printStackTrace();
+
                 m_currentState = JMSState.STATE_FAILED;
                 m_loggerProline.error("Error handling JMS Message", jsonErr);
                 if (jsonErr.getCode() == JMSConnectionManager.JMS_CANCELLED_TASK_ERROR_CODE) {
@@ -210,19 +242,40 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
                 }
                 m_taskError = new TaskError(jsonErr);
             } catch (Exception e) {
+
+                LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage error2 "+getClass());
+                e.printStackTrace();
+
                 m_currentState = JMSState.STATE_FAILED;
                 m_loggerProline.error("Error handling JMS Message", e);
                 m_taskError = new TaskError(e);
             }
         } else {
             String msg = "Error receiving message n° " + MESSAGE_COUNT_SEQUENCE.incrementAndGet() + ": timeout should have occured ";
+
+            LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage error3 "+getClass());
+
+
             m_loggerProline.info(msg);
             m_currentState = JMSState.STATE_FAILED;
             m_taskError = new TaskError(new RuntimeException(msg));
         }
 
+
+        try {
+            if (jmsMessage != null) {
+                jmsMessage.acknowledge();
+            }
+        } catch (JMSException ex) {
+
+            LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage error4 "+getClass());
+            ex.printStackTrace();
+
+            m_loggerProline.error("Error running JMS Message acknowledge", ex);
+        }
+
         if (m_currentState == JMSState.STATE_FAILED) {
-            callback(false);
+             callback(false);
         } else if (m_currentState == JMSState.STATE_DONE) {
             callback(true);
         } else {
@@ -232,14 +285,16 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
             callback(false);
         }
 
-        try {
-            if (jmsMessage != null) {
-                jmsMessage.acknowledge();
-            }
-        } catch (JMSException ex) {
-            m_loggerProline.error("Error running JMS Message acknowledge", ex);
-        }
 
+
+    }
+
+    public final void closeSession() {
+        try {
+            m_session.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -248,6 +303,10 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
      * @param success boolean indicating if the fetch has succeeded
      */
     protected void callback(final boolean success) {
+
+
+        AccessJMSManagerThread.getAccessJMSManagerThread().taskFinished(this);
+
         if (m_callback == null) {
 
             getTaskInfo().setFinished(success, m_taskError, true);
@@ -281,7 +340,7 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
 
     protected void showError(TaskError taskErr) {
         if (taskErr != null) {
-            StudioExceptions.notify("JMS Task Error", new Exception(taskErr.getErrorTitle() + "\n" + taskErr.getErrorText()));
+            WindowManager.getDefault().getMainWindow().alert(InfoLabel.INFO_LEVEL.ERROR, new Exception(taskErr.getErrorTitle() + "\n" + taskErr.getErrorText()));
         }
     }
 

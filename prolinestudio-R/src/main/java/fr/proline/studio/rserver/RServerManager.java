@@ -16,8 +16,10 @@
  */
 package fr.proline.studio.rserver;
 
+import fr.proline.studio.NbPreferences;
+import fr.proline.studio.WindowManager;
+import fr.proline.studio.dock.gui.InfoLabel;
 import fr.proline.studio.python.math.StatsUtil;
-import fr.proline.studio.utils.StudioExceptions;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,7 +32,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.prefs.Preferences;
 import javax.swing.SwingUtilities;
-import org.openide.util.NbPreferences;
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPMismatchException;
 import org.rosuda.REngine.REngineException;
@@ -74,7 +75,7 @@ public class RServerManager {
     public synchronized boolean startRProcessWithRetry() throws Exception {
         
         LoggerFactory.getLogger("ProlineStudio.R").info("startRProcessWithRetry()");
-        
+
         boolean RStarted = false;
         
         try {
@@ -100,7 +101,7 @@ public class RServerManager {
         if (RStarted && !isConnected()) {
             // R has started, but we can not connect correctly
             LoggerFactory.getLogger("ProlineStudio.R").info("startRProcessWithRetry() : R has started, but we can not connect correctly");
-            
+
             stopRProcess();
             Thread.sleep(5000);
             RStarted = startRProcess();
@@ -119,14 +120,14 @@ public class RServerManager {
 
         if (m_RProcess != null) {
             LoggerFactory.getLogger("ProlineStudio.R").info("startRProcess() : Process already exists");
-            
+
             return true;
         }
         
         // process can have been created outside
         if (isConnected()) {
             LoggerFactory.getLogger("ProlineStudio.R").info("startRProcess() : Process created outside");
-            
+
             return true;
         }
         
@@ -146,7 +147,7 @@ public class RServerManager {
         File f = null;
         
         LoggerFactory.getLogger("ProlineStudio.R").info("startRProcess() : Try to find R.exe if the path is defined in the RServerExePath key of the preference file");
-        
+
         // try to read R.exe path potentially defined in Properties file (saved in key "RServerExePath" )
         Preferences preferences = NbPreferences.root();
         String pathToExe = preferences.get("RServerExePath", null);
@@ -165,13 +166,13 @@ public class RServerManager {
         // if R.exe path is not defined in Preferences file, we read it in default application path
         if (f == null) {
             LoggerFactory.getLogger("ProlineStudio.R").info("startRProcess() : Try to find R.exe in the path");
-        
+
             f = new File(".");
             pathToExe = f.getCanonicalPath() + File.separatorChar + "R" + File.separatorChar + "bin" + File.separatorChar + "R.exe";
             f = new File(pathToExe);
             if (!f.exists()) {
                 LoggerFactory.getLogger("ProlineStudio.R").error("R.exe not found: " + pathToExe);
-                StudioExceptions.notify("R.exe not found", new FileNotFoundException(pathToExe));
+                WindowManager.getDefault().getMainWindow().alert(InfoLabel.INFO_LEVEL.ERROR, "R.exe not found", new FileNotFoundException(pathToExe));
                 return false;
             }
         }
@@ -183,8 +184,8 @@ public class RServerManager {
         if (operatingSystem != null && operatingSystem.startsWith("Windows")) {
 
             LoggerFactory.getLogger("ProlineStudio.R").info("startRProcess() : Windows system, start R.exe");
-        
-            
+
+
             String[] cmds = {pathToExe, "-e", "\"library(Rserve);Rserve(TRUE,args='--no-save')\"", "--no-save"};
             //String[] cmds = {pathToExe, "-e", "\"library(Rserve);Rserve(TRUE,args='--no-save --slave')\"", "--no-save", "--slave"};
             m_RProcess = Runtime.getRuntime().exec(cmds);
@@ -204,7 +205,8 @@ public class RServerManager {
             // linux and MacIntosh ?
 
             LoggerFactory.getLogger("ProlineStudio.R").error("R Server not available for Linux or MacIntosh");
-            StudioExceptions.notify("R Server not available for Linux or MacIntosh", new FileNotFoundException());
+            WindowManager.getDefault().getMainWindow().alert(InfoLabel.INFO_LEVEL.ERROR, "R Server not available for Linux or MacIntosh", new FileNotFoundException());
+
             return false;
             // linux
             //command = "echo \"" + todo + "\"|" + cmd + " " + rargs;
@@ -300,12 +302,9 @@ public class RServerManager {
 
         } catch (RserveException e) {
             if (log) {
-                LoggerFactory.getLogger("ProlineStudio.R").error("connect() failed", e);
-            
-                StudioExceptions.notify(e.getMessage(), e);
-            } else {
-                LoggerFactory.getLogger("ProlineStudio.R").info("connect() , no existing R Server found to connect");
-            
+                LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed", e);
+                WindowManager.getDefault().getMainWindow().alert(InfoLabel.INFO_LEVEL.ERROR, e);
+
             }
             m_connection = null;
             throw new RServerException(e.getMessage());

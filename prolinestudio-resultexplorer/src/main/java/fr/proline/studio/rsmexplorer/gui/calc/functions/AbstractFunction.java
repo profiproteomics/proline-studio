@@ -22,7 +22,7 @@ import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.python.interpreter.CalcError;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
@@ -35,7 +35,7 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 
 /**
  * Abstract Parent Function for all functions of the data analyzer
@@ -197,9 +197,8 @@ public abstract class AbstractFunction implements CheckParameterInterface {
         ProjectId projectId = (ProjectId) m_globalTableModelInterface.get(resultIndex).getSingleValue(ProjectId.class);
         long id = (projectId!=null) ? projectId.getId() : -1L;
         windowBox.setEntryData(id, m_globalTableModelInterface.get(resultIndex));
-        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
-        win.open();
-        win.requestActive();
+        DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(windowBox);
+        WindowManager.getDefault().getMainWindow().displayWindow(win);
     }
     
     protected ArrayList<WindowBox> getDisplayWindowBoxList(String dataName, String functionName, int resultIndex) {

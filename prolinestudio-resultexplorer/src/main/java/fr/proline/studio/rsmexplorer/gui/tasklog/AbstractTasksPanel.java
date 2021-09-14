@@ -33,7 +33,7 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.event.ActionListener;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +58,7 @@ public abstract class AbstractTasksPanel extends HourglassPanel implements DataB
 
     public AbstractTasksPanel(){
         this.m_isConnected = false;
-        initListener();
+        initListener(); //calling it in constructor is incorrect: it calls overriden methods
     }
     
    
@@ -69,7 +69,7 @@ public abstract class AbstractTasksPanel extends HourglassPanel implements DataB
     /**
      * Listener of JMS Connection state change : to connect/disconnect from topic
      */
-    private void initListener(){
+    public void initListener(){
         JMSConnectionManager.getJMSConnectionManager().addConnectionListener(this);
         int currentState =  JMSConnectionManager.getJMSConnectionManager().getConnectionState();
         connectionStateChanged(currentState);
@@ -80,7 +80,7 @@ public abstract class AbstractTasksPanel extends HourglassPanel implements DataB
             m_serviceListener =  JMSConnectionManager.getJMSConnectionManager().getNotificationListener();
              if(m_serviceListener == null) {
                 JOptionPane.showMessageDialog( WindowManager.getDefault().getMainWindow(), "Unable to get Notification Listener (JMS Connection problem ?!). Try Later", "Server Tasks Logs error",JOptionPane.ERROR_MESSAGE);
-                return false;                 
+                return false;
              }
         }
         return true;
@@ -103,8 +103,8 @@ public abstract class AbstractTasksPanel extends HourglassPanel implements DataB
                     if (checkJMSVariables()){
                         final JMSNotificationMessage[] sysInfoResult = new JMSNotificationMessage[1];
                         m_notifierCallback = getServiceNotificationCallback(sysInfoResult);
-                        m_serviceListener.addServiceNotifierCallback(m_notifierCallback, sysInfoResult);  
-                        
+                        m_serviceListener.addServiceNotifierCallback(m_notifierCallback, sysInfoResult);
+
                         final JMSNotificationMessage[] purgerResult = new JMSNotificationMessage[1];
                         m_purgerCallback = getPurgeConsumerCallback(purgerResult);
                         if(m_purgerCallback != null){
@@ -126,7 +126,7 @@ public abstract class AbstractTasksPanel extends HourglassPanel implements DataB
                         PurgeConsumer.getPurgeConsumer().removeCallback(m_purgerCallback);
                     m_purgerCallback = null;
                     stopOtherDataCollecting();
-                }           
+                }
                 m_isConnected = false;
                 break;                        
         }        

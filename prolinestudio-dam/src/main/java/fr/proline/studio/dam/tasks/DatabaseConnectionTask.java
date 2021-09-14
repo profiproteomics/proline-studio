@@ -29,11 +29,11 @@ import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import org.netbeans.api.db.explorer.ConnectionManager;
+/*import org.netbeans.api.db.explorer.ConnectionManager;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.api.db.explorer.JDBCDriver;
 import org.netbeans.api.db.explorer.JDBCDriverManager;
-
+*/
 
 /**
  * Used to connect to a UDS DB, MSI DB
@@ -78,9 +78,14 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
     public void initConnectionToUDS(Map<Object, Object> databaseProperties, String projectUser) {
         setTaskInfo(new TaskInfo("Connection to UDS Database", false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         setPriority(Priority.TOP);
-        
+
+
         m_databaseProperties = databaseProperties;
-//        m_databaseProperties.put("hibernate.show_sql", Boolean.TRUE);
+//        m_databaseProperties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+//        //m_databaseProperties.put("connection_pool_size", 1);
+//        m_databaseProperties.put("hbm2ddl.auto", 2);
+//        m_databaseProperties.put("cache.provider_class", "org.hibernate.cache.internal.StandardQueryCache");
+//        m_databaseProperties.put("hibernate.show_sql", Boolean.TRUE); //TO TEST SQL query
 //        m_databaseProperties.put("hibernate.format_sql", Boolean.TRUE);
         
         m_projectUser = projectUser;
@@ -140,7 +145,9 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
 
                 // UDS Connection
                 try {
-                    
+
+
+
                     IDatabaseConnector udsConn = DatabaseConnectorFactory.createDatabaseConnectorInstance(ProlineDatabaseType.UDS, m_databaseProperties); //VD #16961,IDatabaseConnector.ConnectionPoolType.SIMPLE_POOL_MANAGEMENT);
                     DStoreCustomPoolConnectorFactory.getInstance().initialize(udsConn, "Proline STUDIO"); //VD #16961,IDatabaseConnector.ConnectionPoolType.SIMPLE_POOL_MANAGEMENT);
                 } catch (Exception e) {
@@ -192,13 +199,13 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                 String udsJdbcDriver = (String) m_databaseProperties.get("javax.persistence.jdbc.driver");
                 String udsJdbcUrl = (String) m_databaseProperties.get("javax.persistence.jdbc.url");
                 try {
-                    ConnectionManager cm = ConnectionManager.getDefault();
+                    //ConnectionManager cm = ConnectionManager.getDefault();
 
-                    JDBCDriver driver = JDBCDriverManager.getDefault().getDrivers(udsJdbcDriver)[0];
+                    //JDBCDriver driver = JDBCDriverManager.getDefault().getDrivers(udsJdbcDriver)[0];
 
-                    DatabaseConnection dbconn = DatabaseConnection.create(driver, udsJdbcUrl, (String) m_databaseProperties.get("javax.persistence.jdbc.user"), "public", (String) m_databaseProperties.get("javax.persistence.jdbc.password"), true);
+                    //DatabaseConnection dbconn = DatabaseConnection.create(driver, udsJdbcUrl, (String) m_databaseProperties.get("javax.persistence.jdbc.user"), "public", (String) m_databaseProperties.get("javax.persistence.jdbc.password"), true);
                  
-                    cm.addConnection(dbconn);
+                    //cm.addConnection(dbconn);
                 } catch (Exception e) {
                     
                     String message = e.getMessage();

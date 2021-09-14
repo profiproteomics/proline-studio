@@ -28,8 +28,8 @@ import java.util.prefs.Preferences;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import org.openide.util.NbPreferences;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.NbPreferences;
+import fr.proline.studio.WindowManager;
 
 /**
  *

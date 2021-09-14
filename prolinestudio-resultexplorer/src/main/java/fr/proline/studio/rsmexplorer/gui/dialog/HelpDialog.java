@@ -29,7 +29,7 @@ import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.tree.*;
 import org.slf4j.LoggerFactory;
-import org.openide.util.NbPreferences;
+import fr.proline.studio.NbPreferences;
 
 /**
  * Help Dialog with links to the how to sections

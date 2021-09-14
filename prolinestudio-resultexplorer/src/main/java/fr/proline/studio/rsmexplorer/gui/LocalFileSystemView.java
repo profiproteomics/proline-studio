@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.msfiles.ExportMgfDialog;
 import fr.proline.studio.msfiles.FileDeletionBatch;
 import fr.proline.mzscope.utils.IPopupMenuDelegate;
@@ -64,8 +65,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
-import org.openide.util.NbPreferences;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -329,7 +329,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
     }
     
     private void getSelectedFilesAndDirectories(ArrayList<FileToTransfer> files, ArrayList<FileToTransfer> directories, ArrayList<FileToTransfer> parentDirectory) {
- 
+
         TreePath[] paths = m_tree.getSelectionPaths();
         if (paths != null) {
             for (TreePath path : paths) {
@@ -348,7 +348,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
                 }
 
             }
-            
+
             // special case : if a file is selected and no directory
             // the parent directory is considerer as potential drop directory
             if (directories.isEmpty() && (files.size() == 1)) {
@@ -358,7 +358,7 @@ public class LocalFileSystemView extends JPanel implements IPopupMenuDelegate {
                     File f = (File) node.getUserObject();
 
                     if (f.isFile()) {
-                    
+
                         String url = f.getAbsolutePath().toLowerCase();
                         if (url.endsWith(".mzdb") || url.endsWith(".raw") || url.endsWith(".wiff") || url.endsWith(".dat")) {
                             TreePath parentPath = path.getParentPath();

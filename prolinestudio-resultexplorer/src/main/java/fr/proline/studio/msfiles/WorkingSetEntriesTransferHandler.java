@@ -16,6 +16,8 @@
  */
 package fr.proline.studio.msfiles;
 
+import fr.proline.studio.Exceptions;
+
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
@@ -25,7 +27,7 @@ import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
-import org.openide.util.Exceptions;
+
 
 /**
  *

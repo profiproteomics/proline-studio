@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.graphics.PlotScatter;
 import fr.proline.studio.gui.AbstractParameterListTree;
@@ -45,7 +46,6 @@ import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreePath;
-import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
 /**

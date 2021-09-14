@@ -36,8 +36,8 @@ import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +56,7 @@ public class SpectralCountAction extends AbstractRSMAction {
 
 
     public SpectralCountAction(AbstractTree tree) {
-        super(NbBundle.getMessage(SpectralCountAction.class, "CTL_CompareWithSCAction"), tree);
+        super("Spectral Counting...", tree);
 
     }
 

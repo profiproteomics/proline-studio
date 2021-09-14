@@ -56,7 +56,7 @@ import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import org.openide.util.NbPreferences;
+import fr.proline.studio.NbPreferences;
 
 /**
  *

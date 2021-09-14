@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.msfiles;
 
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.msfiles.WorkingSetEntry.Location;
 import fr.proline.studio.rsmexplorer.gui.dialog.ApplicationSettingsDialog;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.openide.util.NbPreferences;
+
 
 /**
  *

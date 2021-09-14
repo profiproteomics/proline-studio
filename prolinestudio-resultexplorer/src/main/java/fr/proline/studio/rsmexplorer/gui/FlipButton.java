@@ -26,7 +26,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 
 import org.jdesktop.swingx.JXTable;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 
 /**
  * Button to export data of a table or image of a JPanel

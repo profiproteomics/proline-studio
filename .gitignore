@@ -15,9 +15,10 @@
 /prolinestudio-resultexplorer/prolinestudio-resultexplorer.iml
 /prolinestudio-parent.iml
 /prolinestudio-logger/prolinestudio-logger.iml
+/prolinestudio-dam/target/
+/prolinestudio-corewrapper/target/
+/prolinestudio-commons/target/
+/prolinestudio-commons/src/main/java/fr/proline/studio/JavaVersion.java
 /branding/target/
 /builder/ProlineStudio.iml
-/prolinestudio-commons/target/
-/prolinestudio-corewrapper/target/
-/prolinestudio-dam/target/
 /prolinestudio-logger/target/

@@ -363,7 +363,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                     if (proteinMatch == null) {
                         lazyData.setData("");
                     } else {
-                        String geneName = proteinMatch.getGeneName(); 
+                        String geneName = proteinMatch.getGeneName();
                         if(geneName == null )
                             geneName = "";
                         lazyData.setData(geneName);
@@ -372,9 +372,9 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, row, col);
                 }
-                return lazyData; 
+                return lazyData;
             }
-            
+
             case COLTYPE_DESCRIPTION: {//Retrieve the description of the typical protein
                 LazyData lazyData = getLazyData(row, col);
 
@@ -613,7 +613,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
         filtersMap.put(COLTYPE_PROTEIN_SET_NAME, new StringDiffFilter(getColumnNameForFilter(COLTYPE_PROTEIN_SET_NAME), null, COLTYPE_PROTEIN_SET_NAME));
         filtersMap.put(COLTYPE_DESCRIPTION, new StringDiffFilter(getColumnNameForFilter(COLTYPE_DESCRIPTION), null, COLTYPE_DESCRIPTION));
-        filtersMap.put(COLTYPE_PROTEIN_SET_GENE_NAME, new StringDiffFilter(getColumnNameForFilter(COLTYPE_PROTEIN_SET_GENE_NAME), null, COLTYPE_PROTEIN_SET_GENE_NAME));        
+        filtersMap.put(COLTYPE_PROTEIN_SET_GENE_NAME, new StringDiffFilter(getColumnNameForFilter(COLTYPE_PROTEIN_SET_GENE_NAME), null, COLTYPE_PROTEIN_SET_GENE_NAME));
         filtersMap.put(COLTYPE_NB_PEPTIDE, new IntegerFilter(getColumnNameForFilter(COLTYPE_NB_PEPTIDE), null, COLTYPE_NB_PEPTIDE));
         filtersMap.put(COLTYPE_NB_QUANT_PEPTIDE, new IntegerFilter(getColumnNameForFilter(COLTYPE_NB_QUANT_PEPTIDE), null, COLTYPE_NB_QUANT_PEPTIDE));
         int nbCol = getColumnCount();
@@ -886,7 +886,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
 
             case COLTYPE_OVERVIEW:
                 return "";
-                
+
             case COLTYPE_DESCRIPTION: {
                 if (proteinSet.getProteinSet() != null) {
                     DProteinMatch proteinMatch = proteinSet.getProteinSet().getTypicalProteinMatch();
@@ -895,10 +895,10 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                     } else {
                         return proteinMatch.getDescription();
                     }
-                } 
+                }
                 return "";
-            }                            
-                
+            }
+
             case COLTYPE_PROTEIN_SET_GENE_NAME: {
                 if (proteinSet.getProteinSet() != null) {
                     DProteinMatch proteinMatch = proteinSet.getProteinSet().getTypicalProteinMatch();
@@ -907,9 +907,9 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                     } else {
                         return proteinMatch.getGeneName();
                     }
-                } 
+                }
                 return "";
-            }  
+            }
             case COLTYPE_NB_PEPTIDE: {
                 if (proteinSet.getProteinSet() != null) {
                     return "" + proteinSet.getNbPeptides();

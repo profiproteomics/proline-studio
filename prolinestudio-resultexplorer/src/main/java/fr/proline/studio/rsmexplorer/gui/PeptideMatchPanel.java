@@ -20,6 +20,7 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.studio.dock.AbstractTopPanel;
 import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -36,7 +37,7 @@ import fr.proline.studio.pattern.*;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.table.TableInfo;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideMatchTableModel;
 import fr.proline.studio.search.SearchToggleButton;
@@ -54,8 +55,7 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
 import org.jdesktop.swingx.JXTable;
-import org.openide.windows.TopComponent;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
@@ -163,12 +163,13 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     }
 
     private String getTopComponentName() {
+
         Container c = getParent();
-        while ((c != null) && !(c instanceof TopComponent)) {
+        while ((c != null) && !(c instanceof AbstractTopPanel)) {
             c = c.getParent();
         }
-        if ((c != null) && (c instanceof TopComponent)) {
-            return ((TopComponent) c).getName();
+        if ((c != null) && (c instanceof AbstractTopPanel)) {
+            return ((AbstractTopPanel) c).getTitle();
         }
         return "";
     }
@@ -284,9 +285,8 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                     }
 
                     // open a window to display the window box
-                    DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                    win.open();
-                    win.requestActive();
+                    DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+                    WindowManager.getDefault().getMainWindow().displayWindow(win);
                 }
             });
         }
@@ -347,9 +347,8 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                     WindowBox wbox = WindowBoxFactory.getGraphicsWindowBox("Graphic", m_dataBox, true);
 
                     // open a window to display the window box
-                    DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                    win.open();
-                    win.requestActive();
+                    DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+                    WindowManager.getDefault().getMainWindow().displayWindow(win);
                 }
             });
         }
@@ -461,7 +460,6 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         /**
          * Called whenever the value of the selection changes.
          *
-         * @param e the event that characterizes the change.
          */
         //ProteinSet proteinSetSelected = null;
         public PeptideMatchTable() {

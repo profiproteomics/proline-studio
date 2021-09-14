@@ -16,6 +16,8 @@
  */
 package fr.proline.studio.utils;
 
+import fr.proline.studio.ImageUtilities;
+
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -23,7 +25,6 @@ import java.io.File;
 import java.util.HashMap;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
-import org.openide.util.ImageUtilities;
 
 /**
  * Manage all icons needed by the application. Each icon is loaded only one time
@@ -71,6 +72,7 @@ public class IconManager {
         PLUS,
         CROSS_SMALL7,
         CROSS_SMALL16,
+        CROSS_SMALL12,
         CROSS_BLUE_SMALL16,
         DOCUMENT_LIST,
         WEB_LINK,
@@ -228,6 +230,9 @@ public class IconManager {
         VALIDATED_LOCALLY,
         CENTROID_SPECTRA,
         EXPORT_CENTROID,
+        SPLASH,
+        FRAME_ICON,
+        MINIFY,
         TIC,
         TIC_MS1,
         BPC,
@@ -357,7 +362,7 @@ public class IconManager {
             bGr.dispose();
 
             try {
-                File f = File.createTempFile("tmpicon", ".png", new File("."));
+                File f = File.createTempFile("tmpicon", ".png");
                 f.deleteOnExit();
                 ImageIO.write(bimage, "png", f);
 
@@ -441,6 +446,8 @@ public class IconManager {
                 return "fr/proline/studio/images/cross-small7x7.png";
             case CROSS_SMALL16:
                 return "fr/proline/studio/images/cross-small16x16.png";
+            case CROSS_SMALL12:
+                return "fr/proline/studio/images/cross-small12x16.png";
             case CROSS_BLUE_SMALL16:
                 return "fr/proline/studio/images/cross-smallblue16x16.png";
             case DOCUMENT_LIST:
@@ -751,6 +758,12 @@ public class IconManager {
                 return "fr/proline/studio/images/centroid.png";
             case EXPORT_CENTROID:
                 return "fr/proline/studio/images/export-centroid.png";
+            case SPLASH:
+                return "fr/proline/studio/images/splash.gif";
+            case FRAME_ICON:
+                return "fr/proline/studio/images/frame48.gif";
+            case MINIFY:
+                return "fr/proline/studio/images/minify.png";
             case TIC:
                 return "fr/proline/studio/images/tic.png";
             case TIC_MS1:

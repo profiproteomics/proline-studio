@@ -480,7 +480,7 @@ public class DefaultDialog extends javax.swing.JDialog {
         c.gridx++;
         buttonPanel.add(m_buttons[BUTTON_HELP], c);
 
-        m_buttons[BUTTON_SAVE].setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.saveButton.text"));
+        m_buttons[BUTTON_SAVE].setText("Save");
         setButtonVisible(BUTTON_SAVE, false);
         m_buttons[BUTTON_SAVE].addActionListener(new java.awt.event.ActionListener() {
             @Override
@@ -489,7 +489,7 @@ public class DefaultDialog extends javax.swing.JDialog {
             }
         });
 
-        m_buttons[BUTTON_LOAD].setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.loadButton.text"));
+        m_buttons[BUTTON_LOAD].setText("Load");
         setButtonVisible(BUTTON_LOAD, false);
         m_buttons[BUTTON_LOAD].addActionListener(new java.awt.event.ActionListener() {
             @Override
@@ -498,7 +498,7 @@ public class DefaultDialog extends javax.swing.JDialog {
             }
         });
 
-        m_buttons[BUTTON_OK].setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
+        m_buttons[BUTTON_OK].setText("OK");
         m_buttons[BUTTON_OK].addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -506,7 +506,7 @@ public class DefaultDialog extends javax.swing.JDialog {
             }
         });
 
-        m_buttons[BUTTON_CANCEL].setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.cancelButton.text"));
+        m_buttons[BUTTON_CANCEL].setText("Cancel");
         m_buttons[BUTTON_CANCEL].addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -514,7 +514,7 @@ public class DefaultDialog extends javax.swing.JDialog {
             }
         });
 
-        m_buttons[BUTTON_DEFAULT].setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.defaultButton.text"));
+        m_buttons[BUTTON_DEFAULT].setText("Default");
         setButtonVisible(BUTTON_DEFAULT, false);
         m_buttons[BUTTON_DEFAULT].addActionListener(new java.awt.event.ActionListener() {
             @Override
@@ -523,7 +523,7 @@ public class DefaultDialog extends javax.swing.JDialog {
             }
         });
 
-        m_buttons[BUTTON_BACK].setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.backButton.text"));
+        m_buttons[BUTTON_BACK].setText("Back");
         setButtonVisible(BUTTON_BACK, false);
         m_buttons[BUTTON_BACK].addActionListener(new java.awt.event.ActionListener() {
             @Override
@@ -532,7 +532,7 @@ public class DefaultDialog extends javax.swing.JDialog {
             }
         });
 
-        //m_helpButton.setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.helpButton.text"));
+
         m_buttons[BUTTON_HELP].addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {

@@ -17,6 +17,7 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.gui.InfoDialog;
@@ -27,27 +28,15 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.SwingUtilities;
-import org.openide.awt.ActionID;
-import org.openide.awt.ActionReference;
-import org.openide.awt.ActionReferences;
-import org.openide.awt.ActionRegistration;
-import org.openide.util.ContextAwareAction;
-import org.openide.util.Lookup;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
 
 /**
  * Action to connect or disconnect to a UDS database
  * @author jm235353
  */
 
-@ActionID(category = "File", id = "fr.proline.studio.rsmexplorer.actions.ConnectAction")
-@ActionRegistration(displayName = "#CTL_ConnectAction")
-@ActionReferences({
-    @ActionReference(path = "Menu/File", position = 100)
-})
-@NbBundle.Messages("CTL_ConnectAction=Connect...")
-public class ConnectAction  extends AbstractAction implements ContextAwareAction {
+
+public class ConnectAction  extends AbstractAction {
 
     private static ConnectAction m_action = null;
     
@@ -60,6 +49,13 @@ public class ConnectAction  extends AbstractAction implements ContextAwareAction
         setConnectionType(true, true);
     }
 
+    public static ConnectAction getAction() {
+        if (m_action == null) {
+            m_action = new ConnectAction();
+        }
+        return m_action;
+    }
+
     
     public final static void setConnectionType(boolean connectAction, boolean enabled) {
         m_connectAction = connectAction;
@@ -67,17 +63,13 @@ public class ConnectAction  extends AbstractAction implements ContextAwareAction
         if (m_action != null) {
             m_action.setEnabled(enabled);
             if (connectAction) {
-                m_action.putValue(Action.NAME, NbBundle.getMessage(ConnectAction.class, "CTL_ConnectAction"));
+                m_action.putValue(Action.NAME, "Connect...");
             } else {
                 m_action.putValue(Action.NAME, "Change User...");
             }
         }
     }
 
-    @Override
-    public Action createContextAwareInstance(Lookup lkp) {
-        return new ConnectAction();
-    }
     
     @Override
     public void actionPerformed(ActionEvent e) {

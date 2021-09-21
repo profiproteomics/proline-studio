@@ -20,6 +20,8 @@ import fr.proline.studio.WindowManager;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.rsmexplorer.gui.dialog.DataBoxChooserDialog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -33,6 +35,7 @@ public class AddDataBoxActionListener implements ActionListener {
 
     private final SplittedPanelContainer m_splittedPanel;
     private final AbstractDataBox m_previousDatabox;
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
     public AddDataBoxActionListener(SplittedPanelContainer splittedPanel, AbstractDataBox previousDatabox) {
         m_splittedPanel = splittedPanel;
@@ -48,20 +51,11 @@ public class AddDataBoxActionListener implements ActionListener {
             
             AbstractDataBox genericDatabox = dialog.getSelectedDataBox();
             try {
-                AbstractDataBox newGenericDatabox = (AbstractDataBox) genericDatabox.getClass().newInstance(); // copy the databox
-                
-                //Some databox must be specifically configured ...  
-                // FIXME VDS : To be more generic ?!
-                if(DataboxGraphics.class.isInstance(newGenericDatabox)) {
-                    ((DataboxGraphics)newGenericDatabox).setDefaultLocked(((DataboxGraphics)genericDatabox).isDefaultLocked());
-                } else if (DataboxMultiGraphics.class.isInstance(newGenericDatabox) ){                    
-                    newGenericDatabox = new DataboxMultiGraphics(false, false, ((DataboxMultiGraphics)genericDatabox).isDoubleYAxis());                    
-                } else if (DataBoxPTMPeptides.class.equals(newGenericDatabox.getClass())){                    
-                    newGenericDatabox = new DataBoxPTMPeptides(((DataBoxPTMPeptides)genericDatabox).isMS1LabelFreeQuantitation(), ((DataBoxPTMPeptides)genericDatabox).isAllPSMsDisplayed());
-                }
-                genericDatabox = newGenericDatabox;
+
+                genericDatabox = DataboxManager.getDataboxNewInstance(genericDatabox);
             } catch (InstantiationException | IllegalAccessException e) {
                 // should never happen
+                m_logger.error("Error creating new Databox ",e);
             }
 
             m_previousDatabox.addNextDataBox(genericDatabox);

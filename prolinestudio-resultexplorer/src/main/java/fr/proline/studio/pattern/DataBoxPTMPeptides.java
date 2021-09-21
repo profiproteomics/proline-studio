@@ -16,6 +16,8 @@
  */
 package fr.proline.studio.pattern;
 
+import fr.proline.core.orm.msi.Peptide;
+import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
@@ -71,6 +73,17 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                 return DataboxType.DataBoxPTMPeptides;
             }
         }
+    }
+
+    /**
+     * Create a DataBoxPTMPeptides : table view of PTMPeptideInstances. By
+     * default, this databox is displayed in a quantitation context and only
+     * best Peptide Match is displayed
+     * Warning:  Default Constructor should be defined for Custom view & "Diaplay" navigation
+     *
+     */
+    public DataBoxPTMPeptides() {
+        this(false, false);
     }
 
     /**

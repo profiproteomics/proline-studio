@@ -75,6 +75,23 @@ public class DataboxManager {
         
     };
 
+    public static AbstractDataBox getDataboxNewInstance(AbstractDataBox sourceDB) throws IllegalAccessException, InstantiationException {
+
+        AbstractDataBox newGenericDatabox = sourceDB.getClass().newInstance(); // copy the databox
+
+        //Some databox must be specifically configured ...
+        // FIXME VDS : To be more generic ?!
+        if(DataboxGraphics.class.isInstance(newGenericDatabox)) {
+            ((DataboxGraphics)newGenericDatabox).setDefaultLocked(((DataboxGraphics)sourceDB).isDefaultLocked());
+        } else if (DataboxMultiGraphics.class.isInstance(newGenericDatabox) ){
+            newGenericDatabox = new DataboxMultiGraphics(false, false, ((DataboxMultiGraphics)sourceDB).isDoubleYAxis());
+        } else if (DataBoxPTMPeptides.class.equals(newGenericDatabox.getClass())){
+            newGenericDatabox = new DataBoxPTMPeptides(((DataBoxPTMPeptides)sourceDB).isMS1LabelFreeQuantitation(), ((DataBoxPTMPeptides)sourceDB).isAllPSMsDisplayed());
+        }
+
+        return  newGenericDatabox;
+    }
+
     private DataboxManager() {
     }
 

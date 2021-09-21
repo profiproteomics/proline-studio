@@ -35,6 +35,8 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 
 import java.util.ArrayList;
 import fr.proline.studio.WindowManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Action to display the dialog to choose a view (databox) for a user window
@@ -43,7 +45,8 @@ import fr.proline.studio.WindowManager;
 public class DisplayUserWindowAction extends AbstractRSMAction {
     
     private final char m_windowType;
-    
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+
     public DisplayUserWindowAction(char windowType, AbstractTree tree) {
         super("New User Window...", tree);
         m_windowType = windowType;
@@ -82,8 +85,11 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
         dialog.setVisible(true);
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
             AbstractDataBox genericDatabox = dialog.getSelectedDataBox();
+            AbstractDataBox databox = null;
             try {
-                AbstractDataBox databox = (AbstractDataBox) genericDatabox.getClass().newInstance();
+
+                databox = DataboxManager.getDataboxNewInstance(genericDatabox);
+
 
                 final WindowBox wbox = WindowBoxFactory.getUserDefinedWindowBox(dataSet.getName(), dataSet.getName()+" "+dialog.getWndTitle(), databox, false, dataSetNode.isQuantitation() && !dataSetNode.isQuantSC(), m_windowType);
 
@@ -221,6 +227,7 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
 
             } catch (InstantiationException | IllegalAccessException e) {
                 // should never happen
+                m_logger.error("Error creating new Databox ",e);
             }
          }
 

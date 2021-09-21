@@ -16,8 +16,7 @@
  */
   package fr.proline.studio.pattern;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 /**
  *  Container for available parameters of a DataBox
@@ -27,19 +26,34 @@ import java.util.HashMap;
 public class AvailableParameters {
     
 
-    private HashMap<DataParameter, Integer> m_availableParametersMap;
+    private TreeMap<DataParameter, Integer> m_availableParametersMap;
     
     public AvailableParameters(AbstractDataBox box) {
         
         initAvailableParameters(box);
     }
     
-    public HashMap<DataParameter, Integer> getParametersMap() {
+    public Map<DataParameter, Integer> getParametersMap() {
         return m_availableParametersMap;
     }
     
     private void initAvailableParameters(AbstractDataBox box) {
-        m_availableParametersMap = new HashMap<>();
+        m_availableParametersMap = new TreeMap<>(new Comparator<DataParameter>() {
+            @Override
+            public int compare(DataParameter o1, DataParameter o2) {
+                if(o1 == null && o2 == null)
+                    return 0;
+                if(o1 == null)
+                    return  1;
+                if(o2 == null)
+                    return  1;
+                if (o1.equalsData(o2))
+                    return 0;
+                if(o1.equals(o2))
+                    return (o1.getSubtype().compareTo(o2.getSubtype()));
+                return (o1.getParameterClass().toString().compareTo(o2.getParameterClass().toString()));
+            }
+        });
         initAvailableParameters(box, 0);
     }
     private void initAvailableParameters(AbstractDataBox box, Integer depth) {

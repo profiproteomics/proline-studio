@@ -256,6 +256,15 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
         return m_dynamiqueColumnNamesByProtLoc.get(keyCol);
     }
 
+
+    public DMasterQuantPeptide getMasterQuantPeptideAt(int row) {
+        if (row < 0 || (row >= getRowCount())) {
+            return null;
+        }
+
+        return m_quantPeptidesByPepInsId.get(m_ptmPepInstancesAsRow.get(row).ptmPeptideInstance.getPeptideInstance().getId());
+    }
+
     public PTMPeptidesTableModel.Row getPTMPeptideInstanceAt(int row) {
         if (row < 0 || (row >= getRowCount())) {
             return null;

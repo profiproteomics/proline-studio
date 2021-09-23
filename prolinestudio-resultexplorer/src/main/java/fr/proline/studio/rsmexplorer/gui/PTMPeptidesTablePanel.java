@@ -134,6 +134,13 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
         return row != null ? row.peptideMatch : null;
     }
 
+    public DMasterQuantPeptide getSelectedMasterQuantPeptide() {
+        if (m_ptmPeptidesTableModel.getRowCount() <= 0) {
+            return null;
+        }
+        return m_ptmPeptidesTableModel.getMasterQuantPeptideAt(getSelectedRowInTableModel());
+    }
+
     public int getSelectedIndex() {
         if (m_ptmPeptidesTableModel.getRowCount() <= 0) {
             return -1;

@@ -37,6 +37,7 @@ import fr.proline.studio.rsmexplorer.gui.PTMPeptidesTablePanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XICComparePeptideTableModel;
 import fr.proline.studio.rsmexplorer.gui.xic.XicAbundanceProteinTableModel;
+import fr.proline.studio.types.XicMode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -168,6 +169,44 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
         }
     }
 
+    @Override
+    public Class[] getDataboxNavigationOutParameterClasses() {
+        if(isMS1LabelFreeQuantitation()) {
+            Class[] classList = {DMasterQuantPeptide.class, PTMPeptideInstance.class};
+            return classList;
+        } else {
+            Class[] classList = { PTMPeptideInstance.class};
+            return classList;
+        }
+    }
+
+    @Override
+    public String getDataboxNavigationDisplayValue() {
+        try {
+            Peptide peptide = null;
+            if (isMS1LabelFreeQuantitation()) {
+                DMasterQuantPeptide qPep = ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).getSelectedMasterQuantPeptide();
+                if (qPep != null)
+                     peptide = qPep.getPeptideInstance().getPeptide();
+            } else {
+                DPeptideMatch p = (DPeptideMatch) getData(DPeptideMatch.class);
+                if (p != null) {
+                    peptide = p.getPeptide();
+                }
+            }
+
+            if (peptide != null) {
+                return peptide.getSequence();
+            }
+
+            return null;
+        } catch (Exception e){
+            m_logger.error("Error getting (quant) peptide information ",e);
+            return null;
+        }
+
+    }
+
     private Long m_previousXICTaskId = null;
 
     @Override
@@ -293,8 +332,15 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                     protTableModel.setName("Protein");
                     return protTableModel;
                 }
-                if (parameterType.equals(DPeptideInstance.class)) {
-                    ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).getSelectedPTMPeptideInstance();
+//                if (parameterType.equals(DPeptideInstance.class)) {
+//                    return  ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).getSelectedPTMPeptideInstance();
+//                }
+
+                if (parameterType.equals(DMasterQuantPeptide.class)) {
+                    return  ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).getSelectedMasterQuantPeptide()    ;
+                }
+                if (parameterType.equals(XicMode.class)) {
+                    return new XicMode(m_isMS1LabelFreeQuantitation);
                 }
             }
             

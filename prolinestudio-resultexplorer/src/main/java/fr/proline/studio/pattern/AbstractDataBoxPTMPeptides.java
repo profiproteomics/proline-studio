@@ -16,11 +16,14 @@
  */
 package fr.proline.studio.pattern;
 
+import fr.proline.core.orm.msi.Peptide;
+import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
@@ -71,7 +74,7 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
         // One ResultSummary
         ParameterList inParameter = new ParameterList();
         inParameter.addParameter(PTMPeptideInstance.class, m_displayAllPepMatches ? ParameterSubtypeEnum.LEAF_PTMPeptideInstance : ParameterSubtypeEnum.PARENT_PTMPeptideInstance);
-        inParameter.addParameter(PTMPeptideInstance.class);
+        inParameter.addParameter(PTMDataset.class);
         
         inParameter.addParameter(PTMDataset.class);
         if (m_isMS1LabelFreeQuantitation) {
@@ -91,6 +94,7 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
         outParameter.addParameter(DPeptideInstance.class, ParameterSubtypeEnum.LIST_DATA);
         outParameter.addParameter(ResultSummary.class);
         outParameter.addParameter(PTMDataset.class);
+        outParameter.addParameter(DDataset.class);
         if (m_isMS1LabelFreeQuantitation) {
             outParameter.addParameter(ExtendedTableModelInterface.class);
             outParameter.addParameter(DMasterQuantPeptide.class);
@@ -125,6 +129,9 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
                     if (m_rsm != null) {
                         return m_rsm;
                     }
+                }
+                if (parameterType.equals(DDataset.class)) {
+                    return m_ptmDataset.getDataset();
                 }
 
                 if (parameterType.equals(PTMDataset.class)) {

@@ -60,7 +60,7 @@ public class DataBoxFrozenCopy extends AbstractDataBox {
             }
         }
         if (rset == null) {
-            ResultSummary rsm = (ResultSummary) srcDataBox.getData(specificClass, null);
+            ResultSummary rsm = (ResultSummary) srcDataBox.getData(ResultSummary.class, null);
             if (rsm != null) {
                 rset = rsm.getResultSet();
             }
@@ -69,9 +69,9 @@ public class DataBoxFrozenCopy extends AbstractDataBox {
             HashMap<ParameterSubtypeEnum, Object> map = m_frozenDataMap.get(specificClass);
             if (map == null) {
                 map = new HashMap<>();
+            }
                 map.put(null, rset);
                 m_frozenDataMap.put(specificClass, map);
-            }
         }
         
         specificClass =  ResultSummary.class;
@@ -86,9 +86,9 @@ public class DataBoxFrozenCopy extends AbstractDataBox {
             HashMap<ParameterSubtypeEnum, Object> map = m_frozenDataMap.get(specificClass);
             if (map == null) {
                 map = new HashMap<>();
-                map.put(null, rsm);
-                m_frozenDataMap.put(specificClass, map);
             }
+            map.put(null, rsm);
+            m_frozenDataMap.put(specificClass, map);
         }
         
         // register out parameters

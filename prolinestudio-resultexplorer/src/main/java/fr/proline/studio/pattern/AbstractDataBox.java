@@ -546,6 +546,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     public final Object getData(Class parameterType) {
         return getData(parameterType, ParameterSubtypeEnum.SINGLE_DATA);
     }
+
     public final Object getData(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
 
         // I remove this log, it generates too much logs
@@ -554,8 +555,11 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         
         // check if the box has the right to ask this data
         checkDataAsked(parameterType, parameterSubtype);
-        
-        
+
+        //If no specidic subtype assume it's SINGLE_DATA
+        if(parameterSubtype == null )
+            parameterSubtype = ParameterSubtypeEnum.SINGLE_DATA;
+
         return getDataImpl(parameterType, parameterSubtype);
     }
     
@@ -953,11 +957,11 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         return m_nextDataBoxArray;
     }
 
-    public Class[] getImportantInParameterClass() {
+    public Class[] getDataboxNavigationOutParameterClasses() {
         return null;
     }
 
-    public String getImportantOutParameterValue() {
+    public String getDataboxNavigationDisplayValue() {
         return null;
     }
 

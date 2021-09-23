@@ -64,7 +64,7 @@ public class DisplayViewInNewWindowAction extends AbstractAction {
         dataBoxFrozenCopy.addNextDataBox(m_destinationBox);
 
 
-        String dataName = m_sourceBox.getImportantOutParameterValue();
+        String dataName = m_sourceBox.getDataboxNavigationDisplayValue();
         if ((dataName !=null) && (dataName.length()>12)) {
             dataName = dataName.substring(0,10)+"...";
         }
@@ -75,7 +75,7 @@ public class DisplayViewInNewWindowAction extends AbstractAction {
         DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
         WindowManager.getDefault().getMainWindow().displayWindow(win);
         
-        Class[] classes = m_sourceBox.getImportantInParameterClass();
+        Class[] classes = m_sourceBox.getDataboxNavigationOutParameterClasses();
         if(classes != null) {
             for (int i = 0; i < classes.length; i++) {
                 dataBoxFrozenCopy.addDataChanged(classes[i], null);

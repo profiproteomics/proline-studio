@@ -148,13 +148,13 @@ public class DataBoxMSQueriesForRSM extends AbstractDataBox{
     }
     
     @Override
-    public Class[] getImportantInParameterClass() {
+    public Class[] getDataboxNavigationOutParameterClasses() {
         Class[] classList = { DMsQuery.class, MsQueryInfoRsm.class };
         return classList;
     }
 
     @Override
-    public String getImportantOutParameterValue() {
+    public String getDataboxNavigationDisplayValue() {
         DMsQuery q = (DMsQuery) getData(DMsQuery.class);
         if (q != null) {
             int id = q.getInitialId();

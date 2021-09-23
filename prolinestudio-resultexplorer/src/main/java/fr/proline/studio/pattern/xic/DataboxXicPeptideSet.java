@@ -385,13 +385,13 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     }
 
     @Override
-    public Class[] getImportantInParameterClass() {
+    public Class[] getDataboxNavigationOutParameterClasses() {
         Class[] classList = {DMasterQuantPeptide.class, DPeptideMatch.class};
         return classList;
     }
 
     @Override
-    public String getImportantOutParameterValue() {
+    public String getDataboxNavigationDisplayValue() {
         DMasterQuantPeptide mqp = (DMasterQuantPeptide) getData(DMasterQuantPeptide.class);
         if (mqp != null) {
             DPeptideInstance peptideInstance = mqp.getPeptideInstance();

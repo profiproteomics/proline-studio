@@ -142,13 +142,13 @@ public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
     }
  
     @Override
-    public Class[] getImportantInParameterClass() {
+    public Class[] getDataboxNavigationOutParameterClasses() {
         Class[] classList = {DPeptideMatch.class};
         return classList;
     }
 
     @Override
-    public String getImportantOutParameterValue() {
+    public String getDataboxNavigationDisplayValue() {
         DPeptideMatch p = (DPeptideMatch) getData(DPeptideMatch.class);
         if (p != null) {
             Peptide peptide = p.getPeptide();

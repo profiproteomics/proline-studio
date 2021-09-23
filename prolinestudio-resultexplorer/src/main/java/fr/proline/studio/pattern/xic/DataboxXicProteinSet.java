@@ -286,13 +286,13 @@ public class DataboxXicProteinSet extends AbstractDataBox {
     }
 
     @Override
-    public Class[] getImportantInParameterClass() {
+    public Class[] getDataboxNavigationOutParameterClasses() {
         Class[] classList = {DMasterQuantProteinSet.class, DProteinSet.class};
         return classList;
     }
 
     @Override
-    public String getImportantOutParameterValue() {
+    public String getDataboxNavigationDisplayValue() {
         DProteinSet p = (DProteinSet) getData(DProteinSet.class);
         if (p != null) {
             DProteinMatch pm = p.getTypicalProteinMatch();

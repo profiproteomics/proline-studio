@@ -174,13 +174,13 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
     private HashSet m_dataToBeSelected = null;
 
     @Override
-    public Class[] getImportantInParameterClass() {
+    public Class[] getDataboxNavigationOutParameterClasses() {
         Class[] classList = {DProteinSet.class};
         return classList;
     }
     
     @Override
-    public String getImportantOutParameterValue() {
+    public String getDataboxNavigationDisplayValue() {
         DProteinSet p = (DProteinSet) getData(DProteinSet.class);
         if (p != null) {
             DProteinMatch pm = p.getTypicalProteinMatch();

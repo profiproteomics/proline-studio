@@ -69,7 +69,7 @@ public class DisplayMenuAction extends AbstractTableAction {
         DataboxStyle previousStyle = null;
         for (DataboxStyle style : DataboxStyle.values()) {
 
-            TreeMap<ParameterDistance, AbstractDataBox> dataBoxMap = DataboxManager.getDataboxManager().findCompatibleDataboxList(dataBox, dataBox.getImportantInParameterClass());
+            TreeMap<ParameterDistance, AbstractDataBox> dataBoxMap = DataboxManager.getDataboxManager().findCompatibleDataboxList(dataBox, dataBox.getDataboxNavigationOutParameterClasses());
             Iterator<ParameterDistance> it = dataBoxMap.descendingKeySet().iterator();
             while (it.hasNext()) {
                 AbstractDataBox destDatabox = dataBoxMap.get(it.next());

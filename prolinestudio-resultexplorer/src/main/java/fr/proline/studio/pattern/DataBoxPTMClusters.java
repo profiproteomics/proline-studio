@@ -568,7 +568,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     }
 
     @Override
-    public Class[] getImportantInParameterClass() {
+    public Class[] getDataboxNavigationOutParameterClasses() {
         if(isXicResult()){
             Class[] classList = {DProteinMatch.class, DMasterQuantProteinSet.class};
             return classList;
@@ -579,7 +579,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     }
     
     @Override
-    public String getImportantOutParameterValue() {
+    public String getDataboxNavigationDisplayValue() {
         DProteinMatch p = (DProteinMatch) getData(DProteinMatch.class);
         if (p != null) {
             return p.getAccession();

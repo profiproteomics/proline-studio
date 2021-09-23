@@ -244,13 +244,13 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
     }
     
     @Override
-    public Class[] getImportantInParameterClass() {
+    public Class[] getDataboxNavigationOutParameterClasses() {
         Class[] classList = {DMasterQuantPeptideIon.class, DPeptideMatch.class};
         return classList;
     }
     
     @Override
-    public String getImportantOutParameterValue() {
+    public String getDataboxNavigationDisplayValue() {
         DMasterQuantPeptideIon peptideIon = (DMasterQuantPeptideIon) getData(DMasterQuantPeptideIon.class);
         if (peptideIon != null) {
             DPeptideInstance peptideInstance = peptideIon.getPeptideInstance();

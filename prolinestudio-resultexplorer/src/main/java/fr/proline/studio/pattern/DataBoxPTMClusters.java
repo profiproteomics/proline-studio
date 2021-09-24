@@ -277,7 +277,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     }
     
     public void loadXicData(int loadingId) {
-        List<DMasterQuantProteinSet> m_masterQuantProteinSetList = new ArrayList();
+        List<DMasterQuantProteinSet> m_masterQuantProteinSetList = new ArrayList<>();
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
             @Override
@@ -380,7 +380,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     
     private void startLoadingMasterQuantPeptides(final List<PTMCluster> proteinPTMClusters) {
         m_logger.debug("start loading MQPeptides from PTMCluster and compute PTMCluster expression values");
-        List<DMasterQuantPeptide> masterQuantPeptideList = new ArrayList();
+        List<DMasterQuantPeptide> masterQuantPeptideList = new ArrayList<>();
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -495,8 +495,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
 
             if (parameterSubtype == ParameterSubtypeEnum.LIST_DATA) {
                 if (parameterType.equals(PTMCluster.class)) {
-                    List<PTMCluster> clusters = ((PTMClustersPanel) getDataBoxPanelInterface()).getSelectedPTMClusters();
-                    return clusters;
+                    return ((PTMClustersPanel) getDataBoxPanelInterface()).getSelectedPTMClusters();
                 }
             }
             
@@ -570,11 +569,9 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     @Override
     public Class[] getDataboxNavigationOutParameterClasses() {
         if(isXicResult()){
-            Class[] classList = {DProteinMatch.class, DMasterQuantProteinSet.class};
-            return classList;
+            return new Class[]{DProteinMatch.class, DMasterQuantProteinSet.class};
         }else{
-            Class[] classList = {DProteinMatch.class};        
-            return classList;
+            return new Class[]{DProteinMatch.class};
         }
     }
     

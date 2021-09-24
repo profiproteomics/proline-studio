@@ -111,7 +111,7 @@ public class DataboxChildFeature extends AbstractDataBox {
         m_masterQuantPeptideIon = (DMasterQuantPeptideIon) getData(DMasterQuantPeptideIon.class);
         m_quantChannelInfo = (QuantChannelInfo) getData(QuantChannelInfo.class);
 
-        if (m_masterQuantPeptideIon != null && (oldIon != null && m_masterQuantPeptideIon.equals(oldIon))) {
+        if (m_masterQuantPeptideIon != null && (m_masterQuantPeptideIon.equals(oldIon))) {
             return;
         }
         if (m_masterQuantPeptideIon == null && oldIon == null) {
@@ -139,11 +139,11 @@ public class DataboxChildFeature extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                 if (success) {
-                    m_peakList = new ArrayList();
+                    m_peakList = new ArrayList<>();
                     if (m_childFeatureList != null) {
                         for (int i = 0; i < m_childFeatureList.size(); i++) {
                             boolean hasPeak = false;
-                            List<List<Peak>> list = new ArrayList();
+                            List<List<Peak>> list = new ArrayList<>();
                             if (m_peakelList.size() >= i + 1) {
                                 for (Peakel peakel : m_peakelList.get(i)) {
                                     List<Peak> listPeak = peakel.getPeakList();
@@ -162,10 +162,10 @@ public class DataboxChildFeature extends AbstractDataBox {
                     ((XicFeaturePanel) getDataBoxPanelInterface()).setData(taskId, m_childFeatureList, m_quantChannelInfo, m_featureHasPeak, finished);
                     
                 } else {
-                    m_childFeatureList = new ArrayList();
-                    m_featureHasPeak = new ArrayList();
-                    m_peakelList = new ArrayList();
-                    m_peakList = new ArrayList();
+                    m_childFeatureList = new ArrayList<>();
+                    m_featureHasPeak = new ArrayList<>();
+                    m_peakelList = new ArrayList<>();
+                    m_peakList = new ArrayList<>();
                     ((XicFeaturePanel) getDataBoxPanelInterface()).setData(taskId, m_childFeatureList, m_quantChannelInfo, m_featureHasPeak, finished);
                 }
 
@@ -185,10 +185,10 @@ public class DataboxChildFeature extends AbstractDataBox {
 
 
         // ask asynchronous loading of data
-        m_childFeatureList = new ArrayList();
-        m_featureHasPeak = new ArrayList();
-        m_peakelList = new ArrayList();
-        m_peakList = new ArrayList();
+        m_childFeatureList = new ArrayList<>();
+        m_featureHasPeak = new ArrayList<>();
+        m_peakelList = new ArrayList<>();
+        m_peakList = new ArrayList<>();
         DatabaseLoadLcMSTask task = new DatabaseLoadLcMSTask(callback);
 
 //        Long alnRefMapId = m_quantChannelInfo.getDataset().getAlnReferenceMapId();
@@ -204,7 +204,7 @@ public class DataboxChildFeature extends AbstractDataBox {
     }
 
     private List<XicPeakPanel> getPeakTableModelList() {
-        List<XicPeakPanel> list = new ArrayList();
+        List<XicPeakPanel> list = new ArrayList<>();
         int viewType = ((XicFeaturePanel) getDataBoxPanelInterface()).getGraphViewType();
         if (m_childFeatureList != null) {
             switch (viewType) {
@@ -376,8 +376,8 @@ public class DataboxChildFeature extends AbstractDataBox {
 
    /**
      * Return potential extra data available for the corresponding parameter of class type
-     * @param c
-     * @return 
+     * @param parameterType parameter class type
+     * @return data available for the corresponding parameter of class type
      */
     @Override
     public Object getExtraData(Class parameterType) {
@@ -397,7 +397,7 @@ public class DataboxChildFeature extends AbstractDataBox {
     }
 
     private List<ExtendedTableModelInterface> getCompareDataInterfaceList() {
-        List<ExtendedTableModelInterface> listCDI = new ArrayList();
+        List<ExtendedTableModelInterface> listCDI = new ArrayList<>();
         List<XicPeakPanel> listPeakPanel = getPeakTableModelList();  //JPM : use of XicPeakPanel is a nonsense
         for (XicPeakPanel peakPanel : listPeakPanel) {
             listCDI.add(peakPanel.getGlobalTableModelInterface());
@@ -414,7 +414,7 @@ public class DataboxChildFeature extends AbstractDataBox {
 
     
     private List<CrossSelectionInterface> getCrossSelectionInterfaceList() {
-        List<CrossSelectionInterface> listCSI = new ArrayList();
+        List<CrossSelectionInterface> listCSI = new ArrayList<>();
         List<XicPeakPanel> listPeakPanel = getPeakTableModelList();
         for (XicPeakPanel peakPanel : listPeakPanel) {
             listCSI.add(peakPanel.getCrossSelectionInterface());

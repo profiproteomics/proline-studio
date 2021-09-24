@@ -87,8 +87,8 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
         } else if (selectedPeptide != null) {
 
             boolean foundPeptide = false;
-            for (int i = 0; i < peptideInstances.length; i++) {
-                if (peptideInstances[i].getId() == selectedPeptide.getId()) {
+            for (DPeptideInstance peptideInstance : peptideInstances) {
+                if (peptideInstance.getId() == selectedPeptide.getId()) {
                     foundPeptide = true;
                     break;
                 }

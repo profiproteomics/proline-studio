@@ -126,8 +126,6 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
 
     public void loadAnnotations(final DPeptideMatch peptideMatch) {
 
-        final DataBoxRsetPeptideSpectrum _databox = this;
-
         final ObjectTree[] objectTreeResult = new ObjectTree[1];
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 

@@ -175,8 +175,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
     
     @Override
     public Class[] getDataboxNavigationOutParameterClasses() {
-        Class[] classList = {PeptideInstance.class, DPeptideMatch.class};
-        return classList;
+        return new Class[]{PeptideInstance.class, DPeptideMatch.class};
     }
 
     @Override

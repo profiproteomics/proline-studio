@@ -175,8 +175,7 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
 
     @Override
     public Class[] getDataboxNavigationOutParameterClasses() {
-        Class[] classList = {DProteinSet.class};
-        return classList;
+        return new Class[]{DProteinSet.class};
     }
     
     @Override

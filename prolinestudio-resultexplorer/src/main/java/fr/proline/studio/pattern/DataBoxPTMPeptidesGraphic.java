@@ -95,7 +95,6 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
                 setLoaded(loadingId);
                 if (success) {
                     ((PTMGraphicCtrlPanel) getDataBoxPanelInterface()).setSelectedProtein(proteinMatch);
-                } else {
                 }
                 if (finished) {
                     unregisterTask(taskId);

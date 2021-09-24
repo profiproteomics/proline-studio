@@ -162,7 +162,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         };
 
         // ask asynchronous loading of data
-        m_masterQuantProteinSetList = new ArrayList();
+        m_masterQuantProteinSetList = new ArrayList<>();
         DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
         task.initLoadProteinSets(getProjectId(), m_dataset, m_masterQuantProteinSetList);
         //Long taskId = task.getId();

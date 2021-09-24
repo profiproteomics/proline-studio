@@ -46,7 +46,7 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
 
          // Name of this databox
         m_typeName = "Protein Set";
-        m_description = "All Protein Sets coresponding to a Peptide Instance";
+        m_description = "All Protein Sets corresponding to a Peptide Instance";
 
         // Register in parameters
 
@@ -175,8 +175,7 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
 
     @Override
     public Class[] getDataboxNavigationOutParameterClasses() {
-        Class[] classList = {DProteinSet.class};
-        return classList;
+        return new Class[]{DProteinSet.class};
     }
 
     @Override

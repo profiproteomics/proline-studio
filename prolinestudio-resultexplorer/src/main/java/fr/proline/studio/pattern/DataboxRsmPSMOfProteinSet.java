@@ -143,8 +143,7 @@ public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
  
     @Override
     public Class[] getDataboxNavigationOutParameterClasses() {
-        Class[] classList = {DPeptideMatch.class};
-        return classList;
+        return new Class[]{DPeptideMatch.class};
     }
 
     @Override

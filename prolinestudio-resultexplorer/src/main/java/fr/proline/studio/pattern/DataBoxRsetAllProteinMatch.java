@@ -159,8 +159,7 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
     
     @Override
     public Class[] getDataboxNavigationOutParameterClasses() {
-        Class[] classList = {DProteinMatch.class};
-        return classList;
+        return new Class[]{DProteinMatch.class};
     }
 
     @Override

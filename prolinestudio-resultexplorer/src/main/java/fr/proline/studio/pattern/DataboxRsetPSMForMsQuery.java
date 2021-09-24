@@ -86,7 +86,7 @@ public class DataboxRsetPSMForMsQuery extends AbstractDataBox{
     public void dataChanged() {
         long oldMsQId = m_msQuery == null? -1: m_msQuery.getId();
         final MsQueryInfoRset _msqI = (MsQueryInfoRset) getData(MsQueryInfoRset.class);
-        if ((_msqI == null) || (_msqI != null && _msqI.getMsQuery() != null && oldMsQId == _msqI.getMsQuery().getId())){
+        if (_msqI == null || (_msqI.getMsQuery() != null && oldMsQId == _msqI.getMsQuery().getId()) ){
             return ;
         }
         
@@ -129,7 +129,7 @@ public class DataboxRsetPSMForMsQuery extends AbstractDataBox{
         
 
         // ask asynchronous loading of data
-        m_peptideMatches = new ArrayList();
+        m_peptideMatches = new ArrayList<>();
         if (m_msQuery != null){
             registerTask(new DatabaseLoadPeptideMatchTask(callback, getProjectId(), m_msQuery, null, m_rset, m_peptideMatches));
         }
@@ -172,8 +172,7 @@ public class DataboxRsetPSMForMsQuery extends AbstractDataBox{
     
     @Override
     public Class[] getDataboxNavigationOutParameterClasses() {
-        Class[] classList = {DPeptideMatch.class};
-        return classList;
+        return new Class[]{DPeptideMatch.class};
     }
 
     @Override

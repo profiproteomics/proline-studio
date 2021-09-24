@@ -32,10 +32,10 @@ import fr.proline.studio.pattern.ParameterList;
 import fr.proline.studio.pattern.ParameterSubtypeEnum;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XicParentPeptideIonPanel;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -218,15 +218,7 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
                     }
                     return pi.getBestPeptideMatch();
                 }
-                /*if (parameterType.equals(DDataset.class)) {
-                    return m_dataset;
-                }
-                if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
-                }
-                if (parameterType.equals(CrossSelectionInterface.class)) {
-                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
-                }*/
+
                 if (parameterType.equals(QuantChannelInfo.class)) {
                     return ((XicParentPeptideIonPanel) getDataBoxPanelInterface()).getSelectedQuantChannelInfo();
                 }
@@ -245,8 +237,7 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
     
     @Override
     public Class[] getDataboxNavigationOutParameterClasses() {
-        Class[] classList = {DMasterQuantPeptideIon.class, DPeptideMatch.class};
-        return classList;
+        return new Class[]{DMasterQuantPeptideIon.class, DPeptideMatch.class};
     }
     
     @Override

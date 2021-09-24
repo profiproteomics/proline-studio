@@ -17,10 +17,8 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.Peptide;
-import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
-import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -172,11 +170,9 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
     @Override
     public Class[] getDataboxNavigationOutParameterClasses() {
         if(isMS1LabelFreeQuantitation()) {
-            Class[] classList = {DMasterQuantPeptide.class, PTMPeptideInstance.class};
-            return classList;
+            return new Class[]{DMasterQuantPeptide.class, PTMPeptideInstance.class};
         } else {
-            Class[] classList = { PTMPeptideInstance.class};
-            return classList;
+            return new Class[]{ PTMPeptideInstance.class};
         }
     }
 
@@ -285,7 +281,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
         };
 
         // ask asynchronous loading of data
-        m_masterQuantPeptideList = new ArrayList();
+        m_masterQuantPeptideList = new ArrayList<>();
         if (m_previousXICTaskId != null) {
             // old task is suppressed if it has not been already done
             AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousXICTaskId);
@@ -303,7 +299,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
     @Override
     protected ArrayList<Integer> getSelectedIndex() {
         ArrayList<Long> selection = ((PTMPeptidesTablePanel) this.m_panel).getCrossSelectionInterface().getSelection();
-        ArrayList<Integer> result = new ArrayList();
+        ArrayList<Integer> result = new ArrayList<>();
         for (Long l : selection) {
             result.add(l.intValue());
         }
@@ -354,7 +350,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
             if (parameterSubtype == ParameterSubtypeEnum.PEPTIDES_SELECTION_LIST) {
                 if (parameterType.equals(Integer.class)) {
                     CrossSelectionInterface crossSelectionInterface = ((PTMPeptidesTablePanel) this.m_panel).getCrossSelectionInterface();
-                    ArrayList<Integer> result = new ArrayList();
+                    ArrayList<Integer> result = new ArrayList<>();
                     if (crossSelectionInterface != null) {
                         ArrayList<Long> selection = null;
                         try {
@@ -377,7 +373,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
     }
 
     private List<XICComparePeptideTableModel> getTableModelInterfaceList() {
-        List<XICComparePeptideTableModel> list = new ArrayList();
+        List<XICComparePeptideTableModel> list = new ArrayList<>();
         if (m_quantChannelInfo == null && m_previousDataBox != null) {
             m_quantChannelInfo = (QuantChannelInfo) getData(QuantChannelInfo.class);
         }

@@ -71,7 +71,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
         m_typeName = "Map Alignment Plot";
         m_description = "Graphical display of XIC Map Alignment.";
 
-        m_ionsRTBySourceMapId = new HashMap<Long, IonsRTTableModel>();
+        m_ionsRTBySourceMapId = new HashMap<>();
         // Register in parameters
         ParameterList inParameter = new ParameterList();
         inParameter.addParameter(DDataset.class);
@@ -103,9 +103,8 @@ public class DataboxMapAlignment extends AbstractDataBox {
      * m_previousDataBox.getData, his m_previousDataBox is this
      * DataboxMapAlignment used by DataboxMultiGraphics.dataChanged
      *
-     * @param getArray
      * @param parameterType
-     * @param isList
+     * @param parameterSubtype
      * @return
      */
     @Override
@@ -126,7 +125,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
     }
 
     private List<ExtendedTableModelInterface> getCompareDataInterfaceList() {
-        List<ExtendedTableModelInterface> listCDI = new ArrayList();
+        List<ExtendedTableModelInterface> listCDI = new ArrayList<>();
         for (MapAlignment mapAlignment : m_dataset.getMapAlignmentsFromMap(m_dataset.getAlnReferenceMapId())) {
             String fromMap = m_quantChannelInfo.getMapTitle(mapAlignment.getSourceMap().getId());
             String toMap = m_quantChannelInfo.getMapTitle(mapAlignment.getDestinationMap().getId());
@@ -215,11 +214,11 @@ public class DataboxMapAlignment extends AbstractDataBox {
      */
     public void loadCloud() {
         
-        if (m_isCloudLoaded == true) {
+        if (m_isCloudLoaded) {
             ((MapAlignmentPanel) super.getDataBoxPanelInterface()).setAlignmentCloud();
         } else {
             //avoid multiple call when the cloud is not loaded
-            if (this.m_isCloudTaskAsked == true) {
+            if (this.m_isCloudTaskAsked) {
                 return;
             }
 
@@ -257,7 +256,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
 
             };
 
-            m_masterQuantPeptideIonList = new ArrayList();
+            m_masterQuantPeptideIonList = new ArrayList<>();
             DatabaseLoadXicMasterQuantTask taskPeptideCloud = new DatabaseLoadXicMasterQuantTask(callback);
             taskPeptideCloud.initLoadPeptideIons(this.getProjectId(), m_dataset, m_masterQuantPeptideIonList);
             m_logCloudStartTime = System.currentTimeMillis();
@@ -270,7 +269,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
     /**
      * from the m_dataset, extact the RT tolerance
      *
-     * @return the cross assignment time tolerance
+     *  the cross assignment time tolerance
      */
     private void extractTimeToleranceParameters() {
         Double time;
@@ -340,8 +339,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
             }
         }
 
-        IonsRTTableModel cloud = new IonsRTTableModel(m_masterQuantPeptideIonList, rsmIdByMapId, mapTitleByRsmId, rsmIdArray);
-        return cloud;
+        return new IonsRTTableModel(m_masterQuantPeptideIonList, rsmIdByMapId, mapTitleByRsmId, rsmIdArray);
     }
 
 }

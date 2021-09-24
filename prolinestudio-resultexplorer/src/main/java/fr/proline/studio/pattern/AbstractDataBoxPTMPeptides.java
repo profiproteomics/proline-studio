@@ -75,8 +75,7 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
         ParameterList inParameter = new ParameterList();
         inParameter.addParameter(PTMPeptideInstance.class, m_displayAllPepMatches ? ParameterSubtypeEnum.LEAF_PTMPeptideInstance : ParameterSubtypeEnum.PARENT_PTMPeptideInstance);
         inParameter.addParameter(PTMDataset.class);
-        
-        inParameter.addParameter(PTMDataset.class);
+
         if (m_isMS1LabelFreeQuantitation) {
             inParameter.addParameter(QuantChannelInfo.class);
             inParameter.addParameter(DMasterQuantProteinSet.class);

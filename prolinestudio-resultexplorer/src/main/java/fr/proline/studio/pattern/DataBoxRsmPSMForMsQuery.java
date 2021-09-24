@@ -95,7 +95,7 @@ public class DataBoxRsmPSMForMsQuery extends AbstractDataBox{
           ((PeptideMatchPanel)getDataBoxPanelInterface()).setData(-1L, null, null, true);
           return;
         }
-        if (_msqI != null && _msqI.getMsQuery() != null && oldMsQId == _msqI.getMsQuery().getId()){
+        if (_msqI.getMsQuery() != null && oldMsQId == _msqI.getMsQuery().getId()){
             return ;
         }
 
@@ -141,7 +141,7 @@ public class DataBoxRsmPSMForMsQuery extends AbstractDataBox{
         
 
         // ask asynchronous loading of data
-        m_peptideMatches = new ArrayList();
+        m_peptideMatches = new ArrayList<>();
         if (m_msQuery != null){
             registerTask(new DatabaseLoadPeptideMatchTask(callback, getProjectId(), m_msQuery, m_rsm, m_rset, m_peptideMatches));
         }
@@ -185,8 +185,7 @@ public class DataBoxRsmPSMForMsQuery extends AbstractDataBox{
     
     @Override
     public Class[] getDataboxNavigationOutParameterClasses() {
-        Class[] classList = {DPeptideMatch.class};
-        return classList;
+        return new Class[]{DPeptideMatch.class};
     }
 
     @Override

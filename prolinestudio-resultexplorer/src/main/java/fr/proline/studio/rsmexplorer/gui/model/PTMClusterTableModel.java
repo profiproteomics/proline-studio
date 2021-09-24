@@ -351,7 +351,7 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
         if (quantPeptideByQchIds == null) {
             switch (id) {
                 case COLTYPE_RAW_ABUNDANCE:
-                    lazyData.setData(Integer.valueOf(0));
+                    lazyData.setData(Float.valueOf(0));
                     break;
                 case COLTYPE_ABUNDANCE:
                     lazyData.setData(Float.valueOf(0));
@@ -363,7 +363,7 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
             if (quantPeptide == null) {
                 switch (id) {
                     case COLTYPE_RAW_ABUNDANCE:
-                        lazyData.setData(Integer.valueOf(0));
+                        lazyData.setData(Float.valueOf(0));
                         break;
                     case COLTYPE_ABUNDANCE:
                         lazyData.setData(Float.valueOf(0));
@@ -589,7 +589,23 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
     filtersMap.put(COLTYPE_PTMSITE_COUNT, new IntegerFilter(getColumnName(COLTYPE_PTMSITE_COUNT), null, COLTYPE_PTMSITE_COUNT));
 //    filtersMap.put(COLTYPE_MODIFICATION_PROBA, new DoubleFilter(getColumnName(COLTYPE_MODIFICATION_PROBA), null, COLTYPE_MODIFICATION_PROBA));
     filtersMap.put(COLTYPE_SPECTRUM_TITLE, new StringDiffFilter(getColumnName(COLTYPE_SPECTRUM_TITLE), null, COLTYPE_SPECTRUM_TITLE));
+    filtersMap.put(COLTYPE_ABUNDANCE, new StringDiffFilter(getColumnName(COLTYPE_SPECTRUM_TITLE), null, COLTYPE_SPECTRUM_TITLE));
 
+    int nbCol = getColumnCount();
+    for (int i = LAST_STATIC_COLUMN + 1; i < nbCol; i++) {
+      int dynQchIndex = i - (COLTYPE_START_QUANT_INDEX);
+      int nbQc = dynQchIndex / m_columnNamesQC.length;
+      int id = dynQchIndex - (nbQc * m_columnNamesQC.length);
+
+      switch (id) {
+        case COLTYPE_ABUNDANCE:
+          filtersMap.put(i, new DoubleFilter(getColumnName(i), null, i));
+          break;
+        case COLTYPE_RAW_ABUNDANCE:
+          filtersMap.put(i, new DoubleFilter(getColumnName(i), null, i));
+          break;
+      }
+    }
   }
 
   @Override

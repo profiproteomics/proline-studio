@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,23 +16,13 @@
  */
 package fr.proline.studio.dam;
 
-import fr.proline.core.orm.uds.Aggregation;
-import fr.proline.core.orm.uds.FragmentationRule;
-import fr.proline.core.orm.uds.FragmentationRuleSet;
-import fr.proline.core.orm.uds.InstrumentConfiguration;
-import fr.proline.core.orm.uds.PeaklistSoftware;
-import fr.proline.core.orm.uds.Project;
-import fr.proline.core.orm.uds.SpectrumTitleParsingRule;
-import fr.proline.core.orm.uds.UserAccount;
+import fr.proline.core.orm.uds.*;
 import fr.proline.module.seq.DatabaseAccess;
 import fr.proline.repository.IDatabaseConnector;
 import fr.proline.studio.Exceptions;
+import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Static reference of the several UDS values : project, instruments ....
@@ -52,10 +42,15 @@ public class DatabaseDataManager  {
     private String m_jdbcDriver;
     private HashMap<Object, Object> m_serverConnectionProperties;
     private Project m_currentProject;
+
+    private HashMap<Long, PTMDataset> m_clusterPTMDatasetPerDatasetId;
+    private HashMap<Long, PTMDataset> m_sitePTMDatasetPerDatasetId;
     
     private HashMap<Aggregation.ChildNature, Aggregation> m_aggregationMap = null;
     
     private DatabaseDataManager() {
+        m_clusterPTMDatasetPerDatasetId = new HashMap<>();
+        m_sitePTMDatasetPerDatasetId = new HashMap<>();
     }
     
     public static DatabaseDataManager getDatabaseDataManager() {
@@ -209,17 +204,40 @@ public class DatabaseDataManager  {
     }
 
     public void setCurrentProject(Project currentProject){
-        m_currentProject = currentProject;
+        if(currentProject == null || !currentProject.equals(m_currentProject)) {
+            m_currentProject = currentProject;
+            m_clusterPTMDatasetPerDatasetId.clear();
+            m_sitePTMDatasetPerDatasetId.clear();
+        }
     }
 
     public Project getCurrentProject(){
         return m_currentProject;
     }
 
+    //VDS TODO: See haw to be able to free memory without changing Project
+    public void addLoadedClustersPTMDataset(PTMDataset ptmDS){
+        m_clusterPTMDatasetPerDatasetId.put(ptmDS.getDataset().getId(), ptmDS);
+    }
+
+    public PTMDataset getClustersPTMDatasetForDS(Long dsId){
+        return m_clusterPTMDatasetPerDatasetId.get(dsId);
+    }
+
+    public void addLoadedSitesPTMDataset(PTMDataset ptmDS){
+        m_sitePTMDatasetPerDatasetId.put(ptmDS.getDataset().getId(), ptmDS);
+    }
+
+    public PTMDataset getSitesPTMDatasetForDS(Long dsId){
+        return m_sitePTMDatasetPerDatasetId.get(dsId);
+    }
+
+
+
+
     public void setLoggedUser(UserAccount loggedUser) {
         m_loggedUser = loggedUser;
     }
-    
     public UserAccount getLoggedUser() {
         return m_loggedUser;
     }

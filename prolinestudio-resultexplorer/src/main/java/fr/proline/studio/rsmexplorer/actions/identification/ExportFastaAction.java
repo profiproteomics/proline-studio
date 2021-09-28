@@ -84,9 +84,6 @@ public class ExportFastaAction extends AbstractRSMAction {
         super("Sequence Fasta", tree);
     }
 
-    public ExportFastaAction(AbstractTree tree, boolean exportTitle) {
-        super("Export Sequence Fasta", tree);
-    }
 
     /**
      * open a dialog to define de export file location
@@ -97,9 +94,6 @@ public class ExportFastaAction extends AbstractRSMAction {
      */
     @Override
     public void actionPerformed(final AbstractNode[] selectedNodes, final int x, final int y) {
-        String waitingTxt = "Please wait while loading template to configure export";
-
-        final DataSetNode dataSetNode = (DataSetNode) selectedNodes[0];
         FastaExportMulitipleDialog exportMultipleDialog = new FastaExportMulitipleDialog(WindowManager.getDefault().getMainWindow(), selectedNodes);
 
         ExportFastaProgressTask exportFastaProgressTask = new ExportFastaProgressTask(selectedNodes, exportMultipleDialog);

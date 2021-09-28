@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -102,7 +102,11 @@ public class PTMDataset {
     public void addInfoPTM(DInfoPTM ptm){
         m_ptmOfInterest.add(ptm);
     }
-    
+
+    public List<DInfoPTM> getInfoPTMs(){
+        return  m_ptmOfInterest;
+    }
+
     public List<PTMSite> getPTMSites() {
         return m_proteinPTMSites;
     }

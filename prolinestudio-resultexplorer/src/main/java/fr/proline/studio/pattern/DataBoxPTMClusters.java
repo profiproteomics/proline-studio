@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -27,6 +27,7 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -45,13 +46,8 @@ import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.PTMClustersPanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.types.XicMode;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -163,6 +159,8 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         setDataBoxPanelInterface(p);
     }
 
+
+    //VDS TODO: Allow real inParameter: Actually this view works only as Top View ! Data set using setEntryData
     @Override
     public void dataChanged() {
 
@@ -188,7 +186,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                         m_ptmDataset = ptmDS.get(0);
                         m_logger.debug("  -- created "+m_ptmDataset.getPTMClusters().size()+" PTMCluster.");
                         m_loadPepMatchOnGoing=true;
-                        ((PTMClustersPanel) getDataBoxPanelInterface()).setData(taskId, (ArrayList) m_ptmDataset.getPTMClusters(), finished);
+                        ((PTMClustersPanel) getDataBoxPanelInterface()).setData(taskId, (ArrayList<PTMCluster>) m_ptmDataset.getPTMClusters(), finished);
                         loadPeptideMatches();
 
                     }
@@ -199,6 +197,10 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                 if (finished) {
                     setLoaded(loadingId);
                     unregisterTask(taskId);
+                    if(m_loadSitesAsClusters)
+                        DatabaseDataManager.getDatabaseDataManager().addLoadedSitesPTMDataset(m_ptmDataset);
+                    else
+                        DatabaseDataManager.getDatabaseDataManager().addLoadedClustersPTMDataset(m_ptmDataset);
                     m_logger.debug(" Task "+taskId+" DONE. Should propagate changes ");
                     addDataChanged(ExtendedTableModelInterface.class);
                     propagateDataChanged();
@@ -255,6 +257,12 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                     m_loadPepMatchOnGoing = false;
                     m_logger.debug(" Task "+taskId+" DONE. Should propagate changes or get Xic DATA ");
                     m_ptmDataset.updateParentPTMPeptideInstanceClusters();
+                    unregisterTask(taskId);
+                    if(m_loadSitesAsClusters)
+                        DatabaseDataManager.getDatabaseDataManager().addLoadedSitesPTMDataset(m_ptmDataset);
+                    else
+                        DatabaseDataManager.getDatabaseDataManager().addLoadedClustersPTMDataset(m_ptmDataset);
+
                     if(isXicResult()){
                         loadXicData(loadingId);
                     } else {
@@ -395,7 +403,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                     unregisterTask(taskId);
                     m_logger.info("MQPeptides loaded !! ");
                     DMasterQuantitationChannel masterQC = proteinPTMClusters.get(0).getPTMDataset().getDataset().getMasterQuantitationChannels().get(0);
-                    Map<Long, DMasterQuantPeptide> mqPepById = masterQuantPeptideList.stream().collect(Collectors.toMap(x -> x.getPeptideInstanceId(), x -> x));
+                    Map<Long, DMasterQuantPeptide> mqPepById = masterQuantPeptideList.stream().collect(Collectors.toMap(DMasterQuantPeptide::getPeptideInstanceId, x -> x));
 
                     for (PTMCluster currentCluster : proteinPTMClusters) {
                         if (currentCluster.getMasterQuantProteinSet() != null) {
@@ -417,7 +425,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                             //
                             // Sum of peptides
                             //
-                            List<DMasterQuantPeptide> mqPeps = parentPeptideInstances.stream().map(parentPepI -> mqPepById.get(parentPepI.getId())).filter(mqp -> mqp != null).collect(Collectors.toList());
+                            List<DMasterQuantPeptide> mqPeps = parentPeptideInstances.stream().map(parentPepI -> mqPepById.get(parentPepI.getId())).filter(Objects::nonNull).collect(Collectors.toList());
                             currentCluster.setRepresentativeMQPepMatch(new AggregatedMasterQuantPeptide(mqPeps, masterQC));
                         }
                     }
@@ -429,9 +437,9 @@ public class DataBoxPTMClusters extends AbstractDataBox {
 
 
         DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
-        List<Long> parentPepInstanceIds = proteinPTMClusters.stream().flatMap(cluster -> cluster.getParentPeptideInstances().stream()).map(pepInstance -> pepInstance.getId()).distinct().collect(Collectors.toList());
+        List<Long> parentPepInstanceIds = proteinPTMClusters.stream().flatMap(cluster -> cluster.getParentPeptideInstances().stream()).map(DPeptideInstance::getId).distinct().collect(Collectors.toList());
         m_logger.info("Loading {} peptideInstances XIC data", parentPepInstanceIds.size());
-        task.initLoadPeptides(getProjectId(), m_ptmDataset.getDataset(), parentPepInstanceIds.toArray(new Long[parentPepInstanceIds.size()]), masterQuantPeptideList, true);
+        task.initLoadPeptides(getProjectId(), m_ptmDataset.getDataset(), parentPepInstanceIds.toArray(new Long[0]), masterQuantPeptideList, true);
         registerTask(task);
     }
     
@@ -527,41 +535,71 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     public void setEntryData(Object data) {
         
         getDataBoxPanelInterface().addSingleValue(data);
-        if(DDataset.class.isInstance(data)){
-            m_ptmDataset = new PTMDataset((DDataset)data);
-            //Test if rsm is loaded
-            if(m_ptmDataset.getDataset().getResultSummary() == null ){
-                // we have to load the RSM/RS
-                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+        if(data instanceof DDataset){
+            //Test if PTMDataset already loaded
+            if(m_loadSitesAsClusters)
+                m_ptmDataset = DatabaseDataManager.getDatabaseDataManager().getSitesPTMDatasetForDS( ((DDataset)data).getId() );
+            else
+                m_ptmDataset = DatabaseDataManager.getDatabaseDataManager().getClustersPTMDatasetForDS( ((DDataset)data).getId() );
 
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return true;
-                    }
+            if( m_ptmDataset == null){
+                //Load PTMDataset
+                m_ptmDataset = new PTMDataset((DDataset) data);
+                //Test if rsm is loaded
+                if (m_ptmDataset.getDataset().getResultSummary() == null) {
+                    // we have to load the RSM/RS
+                    AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
-                    @Override
-                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                        m_rsm = m_ptmDataset.getDataset().getResultSummary(); //facilitation === PTM Ident
-                        dataChanged();
-                    }
-                };
+                        @Override
+                        public boolean mustBeCalledInAWT() {
+                            return true;
+                        }
 
-                // ask asynchronous loading of data
-                DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-                task.initLoadRsetAndRsm((DDataset)data);
-                AccessDatabaseThread.getAccessDatabaseThread().addTask(task);            
+                        @Override
+                        public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                            m_rsm = m_ptmDataset.getDataset().getResultSummary(); //facilitation === PTM Ident
+                            dataChanged();
+                        }
+                    };
+
+                    // ask asynchronous loading of data
+                    DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+                    task.initLoadRsetAndRsm((DDataset) data);
+                    AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+                } else {
+                    m_rsm = m_ptmDataset.getDataset().getResultSummary(); //facilitation === PTM Ident
+                    dataChanged();
+                }
             } else {
-                m_rsm = m_ptmDataset.getDataset().getResultSummary(); //facilitation === PTM Ident
-                dataChanged();
+                //Just view data
+                ((PTMClustersPanel) getDataBoxPanelInterface()).setData(-1L, (ArrayList<PTMCluster>) m_ptmDataset.getPTMClusters(), true);
             }
-        } else if(PTMDataset.class.isInstance(data)){
+        } else if(data instanceof PTMDataset){
             m_ptmDataset = (PTMDataset) data;
-            if(m_ptmDataset.getDataset().getResultSummary() == null ){
-                throw new IllegalArgumentException("PTMDataset not associated to a valid DDataset (empty RSM).");
+            if( m_ptmDataset.getPTMClusters() == null &&  m_ptmDataset.getPTMSites() == null){
+                //Not Loaded yet; Test if PTMDataset already loaded
+                PTMDataset ptmDS;
+                if(m_loadSitesAsClusters)
+                    ptmDS = DatabaseDataManager.getDatabaseDataManager().getSitesPTMDatasetForDS( m_ptmDataset.getDataset().getId() );
+                else
+                    ptmDS = DatabaseDataManager.getDatabaseDataManager().getClustersPTMDatasetForDS( m_ptmDataset.getDataset().getId() );
+
+                if( ptmDS == null) {
+                    //Load PTMDataset
+                    if(m_ptmDataset.getDataset().getResultSummary() == null ){
+                        throw new IllegalArgumentException("PTMDataset not associated to a valid DDataset (empty RSM).");
+                    }
+                    m_rsm = m_ptmDataset.getDataset().getResultSummary(); //facilitation === PTM Ident
+                    dataChanged();
+
+                } else { //Use already loaded
+                    m_ptmDataset = ptmDS;
+                }
+            } else {
+                //Else suppose specified m_ptmDataset is correctly loaded. Just view data
+                ((PTMClustersPanel) getDataBoxPanelInterface()).setData(-1L, (ArrayList<PTMCluster>) m_ptmDataset.getPTMClusters(), true);
             }
-            m_rsm = m_ptmDataset.getDataset().getResultSummary(); //facilitation === PTM Ident
-            
-            dataChanged();
+
         } else 
             throw new IllegalArgumentException("Unsupported type "+data.getClass()+": DDataset or PTMDataset expected.");               
     }

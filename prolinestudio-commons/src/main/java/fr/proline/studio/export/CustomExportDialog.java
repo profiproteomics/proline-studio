@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -896,7 +896,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
 
     /**
      * EXPORT ACTION
-     * generate configle file and export data
+     * generate config file and export data
      *
      * @return
      */

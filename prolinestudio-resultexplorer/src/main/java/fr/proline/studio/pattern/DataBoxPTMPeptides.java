@@ -148,9 +148,9 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                 m_masterQuantProteinSet = (DMasterQuantProteinSet) getData(DMasterQuantProteinSet.class);
             }
 
-            final List<PTMSite> notLoadedPtmSite = getNotLoadedPTMSite();
-
-            if (notLoadedPtmSite.isEmpty()) {
+//            final List<PTMSite> notLoadedPtmSite = getNotLoadedPTMSite();
+//
+//            if (notLoadedPtmSite.isEmpty()) {
                 resetPrevPTMTaskId();
                 if (m_isMS1LabelFreeQuantitation) {
                     loadXicAndPropagate();
@@ -161,9 +161,9 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                     addDataChanged(ExtendedTableModelInterface.class);
                     propagateDataChanged();
                 }
-            } else {
-                loadPtmSite(notLoadedPtmSite);
-            }
+//            } else {
+//                loadPtmSite(notLoadedPtmSite);
+//            }
         }
     }
 

@@ -122,18 +122,18 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
             return;
         }
         loadPeptidesInstances();
-        final List<PTMSite> notLoadedPtmSite = getNotLoadedPTMSite();
-
-        if (notLoadedPtmSite.isEmpty()) {
+//        final List<PTMSite> notLoadedPtmSite = getNotLoadedPTMSite();
+//
+//        if (notLoadedPtmSite.isEmpty()) {
             resetPrevPTMTaskId();
             graphicView.setData(m_ptmPepInstances);
             addDataChanged(PTMPeptideInstance.class, null);  //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
             propagateDataChanged();
 
-        } else {
-
-            loadPtmSite(notLoadedPtmSite);
-        }
+//        } else {
+//
+//            loadPtmSite(notLoadedPtmSite);
+//        }
 
     }
 

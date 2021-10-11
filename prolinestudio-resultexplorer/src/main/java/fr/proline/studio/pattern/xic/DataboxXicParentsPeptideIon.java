@@ -56,7 +56,7 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
     //private boolean m_isXICMode = true;
     
     public DataboxXicParentsPeptideIon() {
-        super(AbstractDataBox.DataboxType.DataboxXicPeptideIon, AbstractDataBox.DataboxStyle.STYLE_XIC);
+        super(DataboxType.DataboxXicParentsPeptideIon, AbstractDataBox.DataboxStyle.STYLE_XIC);
 
         // Name of this databox
         m_typeName = "Source Quanti. Peptides Ions";

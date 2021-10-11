@@ -310,9 +310,9 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
     private void fetchPTMData(EntityManager entityManagerMSI, SubTask subTask) {
 
         List<Long> sliceOfPeptideMatchIds = subTask.getSubList(m_peptideIds);
-      
-        DatabasePTMSitesTask.fetchReadablePTMData(entityManagerMSI, m_rsm.getResultSet().getId(), m_peptideMap, sliceOfPeptideMatchIds);
-        DatabasePTMSitesTask.fetchPTMDataForPeptides(entityManagerMSI, m_peptideMap, sliceOfPeptideMatchIds);
+
+        DatabasePTMsTask.fillReadablePTMDataForPeptides(entityManagerMSI, m_rsm.getResultSet().getId(), m_peptideMap, sliceOfPeptideMatchIds);
+        DatabasePTMsTask.fillPeptidePTMForPeptides(entityManagerMSI, m_peptideMap, sliceOfPeptideMatchIds);
 
     }
     
@@ -394,8 +394,8 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
 
                 fetchPeptideDataForProteinMatch(entityManagerMSI, rsm, pm, peptideMap);
             }
-            
-            DatabasePTMSitesTask.fetchPTMDataForPeptides(entityManagerMSI, peptideMap, null);
+
+            DatabasePTMsTask.fillPeptidePTMForPeptides(entityManagerMSI, peptideMap, null);
             
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
@@ -490,7 +490,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
             peptideInstanceList.add(dpi);
         }
 
-        DatabasePTMSitesTask.fetchReadablePTMData(entityManagerMSI, rsm.getResultSet().getId(), peptideMapForPtm, null);
+        DatabasePTMsTask.fillReadablePTMDataForPeptides(entityManagerMSI, rsm.getResultSet().getId(), peptideMapForPtm, null);
 
         int nbPeptides = peptideInstanceList.size();
         DPeptideInstance[] peptideInstances = peptideInstanceList.toArray(new DPeptideInstance[nbPeptides]);

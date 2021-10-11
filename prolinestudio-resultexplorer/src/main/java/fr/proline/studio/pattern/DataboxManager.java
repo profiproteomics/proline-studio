@@ -16,12 +16,8 @@
  */
 package fr.proline.studio.pattern;
 
-import fr.proline.studio.pattern.xic.DataboxChildFeature;
-import fr.proline.studio.pattern.xic.DataboxMapAlignment;
-import fr.proline.studio.pattern.xic.DataboxPSMOfMasterQuantPeptide;
-import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
-import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
-import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
+import fr.proline.studio.pattern.xic.*;
+
 import java.util.ArrayList;
 import java.util.TreeMap;
 
@@ -71,7 +67,8 @@ public class DataboxManager {
         new DataBoxPTMPeptides(true, false),  // Quanti PTMs Peptides
         new DataBoxPTMPeptides(false, true),  // Ident PTMs Peptides Matches
         new DataBoxPTMPeptides(true, true),    // Quanti PTMs Peptides Matches
-        new DataBoxPTMPeptidesGraphic()        
+        new DataBoxPTMPeptidesGraphic(),
+        new DataboxXicParentsPeptideIon()
         
     };
 

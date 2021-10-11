@@ -205,7 +205,7 @@ public class ExportPTMDatasetAction extends AbstractRSMAction {
   private JSONPTMDataset createJSONPTMDataset(PTMDataset ptmDataset) {
     JSONPTMDataset ptmDS = new JSONPTMDataset();
 
-    List<DInfoPTM> ptmInfos =ptmDataset.getInfoPTMs();
+    List<DInfoPTM> ptmInfos = ptmDataset.getInfoPTMs();
     Long[] ptmInfoIds = new Long[ptmInfos.size()];
     for(int i=0 ; i<ptmInfos.size();i++){
         ptmInfoIds[i] = ptmInfos.get(i).getIdPtmSpecificity();
@@ -258,6 +258,7 @@ public class ExportPTMDatasetAction extends AbstractRSMAction {
         }
       }
       newtPTMCluster.ptmSiteLocations = clusterJSONSites;
+      newtPTMCluster.peptideIds = nextCluster.getPeptideIds().toArray(new Long[0]);
       allJSONClusters[i] = newtPTMCluster;
     }
     ptmDS.ptmClusters =allJSONClusters;

@@ -18,6 +18,7 @@ package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.core.orm.msi.PtmSpecificity;
 import fr.proline.studio.Exceptions;
+import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.dock.gui.InfoLabel;
 import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
 import fr.proline.core.orm.uds.Project;
@@ -30,12 +31,6 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.dam.data.RunInfoData.Status;
-import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
-import fr.proline.studio.dam.tasks.DatabasePeaklistTask;
-import fr.proline.studio.dam.tasks.DatabaseRunsTask;
-import fr.proline.studio.dam.tasks.DatabaseVerifySpectrumFromResultSets;
-import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.gui.DefaultDialog;
@@ -268,7 +263,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
                     }
                 };
 
-                DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback);
+                DatabasePTMsTask task = new DatabasePTMsTask(callback);
                 if (m_refIdentDataset == null) {
                     //get information from leaf rsm
                     Long projectId = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();

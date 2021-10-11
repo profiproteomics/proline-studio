@@ -20,8 +20,9 @@ import fr.proline.core.orm.msi.Ptm;
 import fr.proline.core.orm.msi.PtmSpecificity;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.DatabaseDataManager;
-import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
+import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.IdentifyPtmSitesTask;
@@ -31,14 +32,10 @@ import fr.proline.studio.rsmexplorer.gui.dialog.IdentifyPtmSitesDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
-
-import javax.swing.tree.DefaultTreeModel;
-
-
-import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.tree.DefaultTreeModel;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -70,7 +67,7 @@ public class IdentifyPtmSitesJMSAction extends AbstractRSMAction {
       for (int i = 0; i < nbNodes; i++) {
         ArrayList<PtmSpecificity> ptmSpecificities = new ArrayList<>();
         DataSetNode node = (DataSetNode) selectedNodes[i];
-        DatabasePTMSitesTask ptmTask = new DatabasePTMSitesTask(null);
+        DatabasePTMsTask ptmTask = new DatabasePTMsTask(null);
         ptmTask.initLoadUsedPTMs(node.getDataset().getProject().getId(), node.getDataset().getResultSummaryId(), ptmSpecificities);
         ptmTask.fetchData();
         ptms.addAll(ptmSpecificities.stream().map(s -> s.getPtm()).distinct().collect(Collectors.toList()));

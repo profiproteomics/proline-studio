@@ -594,9 +594,11 @@ public class DataBoxPTMClusters extends AbstractDataBox {
 
                 } else { //Use already loaded
                     m_ptmDataset = ptmDS;
+                    //Just view data
+                    ((PTMClustersPanel) getDataBoxPanelInterface()).setData(-1L, (ArrayList<PTMCluster>) m_ptmDataset.getPTMClusters(), true);
+
                 }
             } else {
-                //Else suppose specified m_ptmDataset is correctly loaded. Just view data
                 ((PTMClustersPanel) getDataBoxPanelInterface()).setData(-1L, (ArrayList<PTMCluster>) m_ptmDataset.getPTMClusters(), true);
             }
 

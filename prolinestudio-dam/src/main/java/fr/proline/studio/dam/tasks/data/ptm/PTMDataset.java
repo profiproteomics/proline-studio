@@ -17,19 +17,11 @@
 package fr.proline.studio.dam.tasks.data.ptm;
 
 import fr.proline.core.orm.msi.SequenceMatch;
-import fr.proline.core.orm.msi.dto.DInfoPTM;
-import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
-import fr.proline.core.orm.msi.dto.DPeptideInstance;
-import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.core.orm.msi.dto.*;
 import fr.proline.core.orm.uds.dto.DDataset;
-import java.util.ArrayList;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,26 +38,23 @@ public class PTMDataset {
     private DDataset m_dataset;
 
     private List<PTMSite> m_proteinPTMSites;
-    
-    //data for v2
+
     private List<Long> m_leafRSMIds; // Ids of the Leaf RSM where PTM info are read
     private List<DInfoPTM> m_ptmOfInterest; // Specified PTM to consider 
-    private List<PTMCluster> m_ptmClusters; 
-    
+    private List<PTMCluster> m_ptmClusters;
+
     //Lists of all PTMPeptideInstance for a specific Peptide and Protein Match : For parent RSM and leaf RSM
     private final Map<Long, Map<Long, List<PTMPeptideInstance>>> m_parentPtmPepInstByPepIdByProtMatchId = new HashMap<>();
     private final Map<Long, Map<Long, List<PTMPeptideInstance>>> m_leafPtmPepInstByPepInstIdByProtMatchId = new HashMap<>();
         
     //VDS: to overcome a missing information in ORM : Link between Protein Matches in merged RSM and child RSM
     private Map<String, List<Long>> m_allLeafProtMatchesIdPerAccession;
-    private Boolean m_isVersion2;
-    
+
     public PTMDataset(DDataset dataset) {
         
         if (dataset == null) throw new IllegalArgumentException("dataset from which PTM sites are extracted cannot be null");
         
         this.m_dataset = dataset;
-        m_isVersion2 = false;
         m_ptmOfInterest = new ArrayList<>();
     }
     
@@ -74,22 +63,15 @@ public class PTMDataset {
     }
     
     public List<Long> getLeafResultSummaryIds(){
-        if(!isVersion2() || m_leafRSMIds == null)
-            return Collections.<Long>emptyList();
-        return new ArrayList(m_leafRSMIds);
+        if(m_leafRSMIds == null)
+            return Collections.emptyList();
+        return new ArrayList<>(m_leafRSMIds);
     }
     
     public void setLeafResultSummaryIds(List<Long> l){
         m_leafRSMIds = new ArrayList<>(l);
     }
-    
-    public boolean isVersion2(){
-        return m_isVersion2;
-    } 
 
-    public void setIsVersion2(boolean isV2){
-        m_isVersion2 = isV2;
-    }    
     
     public boolean isIdentification() {
       return m_dataset.isIdentification();
@@ -112,7 +94,7 @@ public class PTMDataset {
     }
 
     public void setPTMSites(List<PTMSite> proteinPTMSites) {        
-        proteinPTMSites.stream().forEach(site -> site.setDataset(this));
+        proteinPTMSites.forEach(site -> site.setDataset(this));
         this.m_proteinPTMSites = proteinPTMSites;
     }
 
@@ -120,17 +102,64 @@ public class PTMDataset {
         return m_ptmClusters;
     }
 
+//
+//    public List<PTMCluster> getSiteAsPTMClusters() {
+//        Map<PTMSite, List<PTMCluster>> clustersPerSite = new HashMap<>();
+//        for(PTMCluster c : m_ptmClusters){
+//            for(PTMSite site : c.getPTMSites() ){
+//                List<PTMCluster> clusters = clustersPerSite.computeIfAbsent(site, k -> new ArrayList<>());
+//                clusters.add(c);
+//            }
+//        }
+//
+//        if(m_ptmSiteAsClusters == null){
+//            m_ptmSiteAsClusters = new ArrayList<>();
+//            for (PTMSite site: m_proteinPTMSites) {
+//                PTMCluster ptmCluster = new PTMCluster(site.getId(), site.getLocalisationConfidence(), Collections.singletonList(site.getId()), site.getPeptideIds() , this);
+//                if (ptmCluster.getPTMSites() == null || ptmCluster.getPTMSites().isEmpty()) {
+//                    continue;
+//                }
+//                DPeptideMatch bestPepMatch = site.getMostConfidentPepMatch();
+//                ptmCluster.setRepresentativePepMatch(bestPepMatch);
+//
+//                if(isQuantitation()) {
+//                    ptmCluster.setQuantProteinSet(site.getMasterQuantProteinSet());
+//
+//                    Long bestPepMatchPepId = bestPepMatch.getPeptide().getId();
+//                    if(clustersPerSite.containsKey(site)) {
+//                        for (PTMCluster cl : clustersPerSite.get(site)) {
+//                            Long clPepId = null;
+//                            if (cl.getRepresentativeMQPepMatch() != null && cl.getRepresentativeMQPepMatch().getPeptideInstance() != null) {
+//                                clPepId = cl.getRepresentativeMQPepMatch().getPeptideInstance().getPeptideId();
+//                            } else if (cl.getRepresentativeMQPepMatch() != null && cl.getRepresentativeMQPepMatch().getRepresentativePepMatch() != null && cl.getRepresentativeMQPepMatch().getRepresentativePepMatch().getPeptide() != null) {
+//                                clPepId = cl.getRepresentativeMQPepMatch().getRepresentativePepMatch().getPeptide().getId();
+//                            }
+//
+//                            if (clPepId != null && clPepId.equals(bestPepMatchPepId)) {
+//                                DMasterQuantPeptide mqPep = cl.getRepresentativeMQPepMatch();
+//                                ptmCluster.setRepresentativeMQPepMatch(mqPep);
+//                                break;
+//                            }
+//                        }
+//                    }
+//                    if(ptmCluster.getRepresentativeMQPepMatch() == null){
+//                        LOG.warn(" In QUANT Dataset did not found getRepresentativeMQPepMatch for siteAscluster id "+ptmCluster.getId());
+//                    }
+//
+//                }
+//                m_ptmSiteAsClusters.add(ptmCluster);
+//            }
+//        }
+//        return m_ptmSiteAsClusters;
+//    }
+
     public void setPTMClusters(List<PTMCluster> ptmClusters) {        
         this.m_ptmClusters = ptmClusters;
     }
    
     public PTMSite getPTMSite(Long id){
-        if(!isVersion2())
-            return null;
-        else {
-            Optional<PTMSite> ptmSite = m_proteinPTMSites.stream().filter(site -> site.getId().equals(id)).findFirst();
-            return ptmSite.orElse(null);            
-        }
+        Optional<PTMSite> ptmSite = m_proteinPTMSites.stream().filter(site -> site.getId().equals(id)).findFirst();
+        return ptmSite.orElse(null);
     }
     
     public void setQuantProteinSets(List<DMasterQuantProteinSet> masterQuantProteinSetList, Map<Long, Long> typicalProteinMatchIdByProteinMatchId) {
@@ -171,7 +200,7 @@ public class PTMDataset {
         if(m != null)
             return m.get(pepInstId);
         else
-           return Collections.EMPTY_LIST;
+           return Collections.emptyList();
     }
     
     public void addLeafPTMPeptideInstance(PTMPeptideInstance pepInst, Long proteinMatchId){
@@ -204,9 +233,9 @@ public class PTMDataset {
     public Collection<PTMPeptideInstance> getPTMPeptideInstances(Long proteinMatchId) {
         Map<Long, List<PTMPeptideInstance>> m =  m_parentPtmPepInstByPepIdByProtMatchId.get(proteinMatchId);
         if(m != null)
-            return m.values().stream().flatMap(entry -> entry.stream()).collect(Collectors.toList());           
+            return m.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
         else
-           return Collections.EMPTY_LIST;
+           return Collections.emptyList();
     }
 
 
@@ -241,7 +270,7 @@ public class PTMDataset {
             
             //Get correct start position           
             if(peptideInstance.getPeptideMatches() != null){
-                List<SequenceMatch> pepInsSequenceMatches = peptideInstance.getPeptideMatches().stream().map(pepM -> pepM.getSequenceMatch()).collect(Collectors.toList());
+                List<SequenceMatch> pepInsSequenceMatches = peptideInstance.getPeptideMatches().stream().map(DPeptideMatch::getSequenceMatch).collect(Collectors.toList());
                 for(SequenceMatch sm : pepInsSequenceMatches){
                     if(protPosition >= sm.getId().getStart() && protPosition <= sm.getId().getStop()){
                         //found correct sm

@@ -14,14 +14,30 @@ public class AggregatedMasterQuantPeptide extends DMasterQuantPeptide {
   private final DMasterQuantitationChannel m_masterQC;
 
   public AggregatedMasterQuantPeptide(List<DMasterQuantPeptide> mqPeptides, DMasterQuantitationChannel masterQC) {
+    //super(mqPeptides.get(0).getId(), mqPeptides.get(0).getSelectionLevel(), mqPeptides.get(0).getObjectTreeId(), mqPeptides.get(0).getSerializedProperties(), mqPeptides.get(0).getQuantResultSummaryId());
     m_mqPeptides = mqPeptides;
     m_masterQC = masterQC;
-    for(DQuantitationChannel qc : m_masterQC.getQuantitationChannels()) {
+    for (DQuantitationChannel qc : m_masterQC.getQuantitationChannels()) {
       List<DQuantPeptide> qPeps = mqPeptides.stream().map(mqp -> mqp.getQuantPeptideByQchIds().get(qc.getId())).filter(qp -> qp != null).collect(Collectors.toList());
       if (qPeps != null && !qPeps.isEmpty())
         m_quantPeptideByQchIds.put(qc.getId(), new AggregatedQuantPeptide(qPeps));
     }
   }
+//
+//  @Override
+//  public DPeptideInstance getPeptideInstance() {
+//    return this.m_mqPeptides.get(0).getPeptideInstance();
+//  }
+//
+//  @Override
+//  public long getPeptideInstanceId() {
+//    return this.m_mqPeptides.get(0).getPeptideInstanceId();
+//  }
+//
+//  @Override
+//  public DPeptideMatch getRepresentativePepMatch() {
+//    return this.m_mqPeptides.get(0).getRepresentativePepMatch();
+//  }
 }
 
 class AggregatedQuantPeptide extends DQuantPeptide {

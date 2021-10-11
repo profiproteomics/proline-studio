@@ -67,7 +67,7 @@ public class PTMCluster implements Comparable<PTMCluster>{
         m_id = id;
 
         if(!m_sites.isEmpty()) {
-            //Get ProteinMatch from one of the PTMSite : all should have same. VDS TODO To test ?
+            //Get ProteinMatch from one of the PTMSite : all should have same.
             m_proteinMatch = m_sites.get(0).getProteinMatch();
             m_masterQuantProteinSet = m_sites.get(0).getMasterQuantProteinSet();
         }
@@ -220,7 +220,12 @@ public class PTMCluster implements Comparable<PTMCluster>{
     public Integer getPeptideCount() {
         return m_peptideIds.size();
     }
-     
+
+
+    public List<Long> getPeptideIds() {
+        return m_peptideIds;
+    }
+
     public void setQuantProteinSet(DMasterQuantProteinSet mqps) {
         m_masterQuantProteinSet = mqps;
     }
@@ -228,7 +233,19 @@ public class PTMCluster implements Comparable<PTMCluster>{
     public DMasterQuantProteinSet getMasterQuantProteinSet() {
         return m_masterQuantProteinSet;
     }
-   
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null)
+            return false;
+
+        if(! (obj instanceof PTMCluster ))
+            return false;
+
+        PTMCluster objCluster= (PTMCluster) obj;
+        return  objCluster.m_id.equals(m_id) && objCluster.m_proteinMatch.equals(m_proteinMatch) &&  objCluster.m_sites.equals(m_sites);
+    }
+
     @Override
     public int compareTo(PTMCluster o) {                                 
         if(o == null)

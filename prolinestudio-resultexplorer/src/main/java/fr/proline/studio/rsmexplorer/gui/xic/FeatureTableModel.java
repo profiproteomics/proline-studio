@@ -123,7 +123,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
 
     @Override
     public int getSubTaskId(int col) {
-        return DatabaseLoadLcMSTask.SUB_TASK_FEATURE;
+        return DatabaseLoadLcMSTask.SUB_TASK_PEAKEL_FOR_FEATURE;
     }
 
     @Override

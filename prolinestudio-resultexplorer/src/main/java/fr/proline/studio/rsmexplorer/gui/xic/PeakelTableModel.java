@@ -116,7 +116,7 @@ public class PeakelTableModel extends LazyTableModel implements GlobalTableModel
 
     @Override
     public int getSubTaskId(int col) {
-        return DatabaseLoadLcMSTask.SUB_TASK_PEAKEL;
+        return DatabaseLoadLcMSTask.SUB_TASK_PEAKEL_FOR_FEATURE;
     }
 
     @Override

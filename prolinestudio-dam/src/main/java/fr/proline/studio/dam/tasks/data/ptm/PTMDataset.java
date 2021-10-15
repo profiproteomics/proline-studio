@@ -186,7 +186,12 @@ public class PTMDataset {
         }
     }
 
-    
+    public boolean isQuantDataLoaded(){
+        if(m_ptmClusters == null || m_ptmClusters.isEmpty())
+            return false;
+        return  (m_ptmClusters.get(0).getMasterQuantProteinSet() != null);
+    }
+
     /**
      * Get all PTMPeptideInstance defined for specified protein match Id and peptide instance.
      * The returned PTMPeptideInstance correspond to parent PTMPeptideInstance

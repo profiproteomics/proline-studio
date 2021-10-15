@@ -234,18 +234,18 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
         updateData();
     }
 
-    protected List<PTMSite> getNotLoadedPTMSite() {
-
-        final List<PTMSite> notLoadedPtmSite = new ArrayList<>();
-        for (PTMPeptideInstance ptmPepInst : m_ptmPepInstances) {
-            ptmPepInst.getPTMSites().stream().forEach(ptmSite -> {
-                if (!ptmSite.isLoaded()) {
-                    notLoadedPtmSite.add(ptmSite);
-                }
-            });
-        }
-        return notLoadedPtmSite;
-    }
+//    protected List<PTMSite> getNotLoadedPTMSite() {
+//
+//        final List<PTMSite> notLoadedPtmSite = new ArrayList<>();
+//        for (PTMPeptideInstance ptmPepInst : m_ptmPepInstances) {
+//            ptmPepInst.getPTMSites().stream().forEach(ptmSite -> {
+//                if (!ptmSite.isLoaded()) {
+//                    notLoadedPtmSite.add(ptmSite);
+//                }
+//            });
+//        }
+//        return notLoadedPtmSite;
+//    }
 
     protected void resetPrevPTMTaskId() {
         m_previousPTMTaskId = null;

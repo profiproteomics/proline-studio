@@ -109,20 +109,20 @@ public class PTMSite {
     public DInfoPTM getPTMSpecificity() {
         return m_ptmSpecificity;
     }
-    
-    /**
-     * With leafInstances, we can create a map of leafPepInstanceByPepId
-     * For each peptide found in parentPeptideInstances, we instantiate a PTMPeptideInstance, set it's start postion.
-     * With the peptideId, we can find all of it's leafPeptide, so that a new PTMSitePeptideInstance is create. 
-     * at last, we put this PTMSitePeptideInstance in the m_ptmSitePeptideInstanceByPepId.
-     * @param parentPeptideInstances
-     * @param leafInstances 
-     */
-    public void setPeptideInstances(List<DPeptideInstance> parentPeptideInstances, List<DPeptideInstance> leafInstances) {
-        m_parentPeptideInstances = parentPeptideInstances;
-        m_ptmSitePeptideInstanceByPepId = new HashMap<>();
-        linkPeptideInstances(parentPeptideInstances, leafInstances);
-    }
+//
+//    /**
+//     * With leafInstances, we can create a map of leafPepInstanceByPepId
+//     * For each peptide found in parentPeptideInstances, we instantiate a PTMPeptideInstance, set it's start postion.
+//     * With the peptideId, we can find all of it's leafPeptide, so that a new PTMSitePeptideInstance is create.
+//     * at last, we put this PTMSitePeptideInstance in the m_ptmSitePeptideInstanceByPepId.
+//     * @param parentPeptideInstances
+//     * @param leafInstances
+//     */
+//    public void setPeptideInstances(List<DPeptideInstance> parentPeptideInstances, List<DPeptideInstance> leafInstances) {
+//        m_parentPeptideInstances = parentPeptideInstances;
+//        m_ptmSitePeptideInstanceByPepId = new HashMap<>();
+//        linkPeptideInstances(parentPeptideInstances, leafInstances);
+//    }
     
     public void addPeptideInstances(List<DPeptideInstance> parentPeptideInstances, List<DPeptideInstance> leafInstances) {
         if(m_parentPeptideInstances ==null)

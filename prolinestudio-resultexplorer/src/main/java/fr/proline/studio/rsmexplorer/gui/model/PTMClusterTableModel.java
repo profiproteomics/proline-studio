@@ -19,6 +19,7 @@ package fr.proline.studio.rsmexplorer.gui.model;
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.dto.*;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.dam.tasks.DatabaseDatasetPTMsTask;
 import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dam.tasks.data.ptm.ComparableList;
 import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
@@ -211,7 +212,7 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
       case COLTYPE_PTM_PROBA:    
       case COLTYPE_DELTA_MASS_PTM:
       case COLTYPE_PEPTIDE_SCORE:          
-        return DatabasePTMsTask.SUB_TASK_PTMCLUSTER_PEPTIDES;
+        return DatabaseDatasetPTMsTask.SUB_TASK_PTMCLUSTER_PEPTIDES;
     }
     return -1;
   }
@@ -496,8 +497,10 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
           case COLTYPE_PTM_PROBA:          
           case COLTYPE_PEPTIDE_SCORE:  
             return Float.class;
-          default: 
-            return getColumnClass(columnIndex);
+          default:
+            if(columnIndex <= LAST_STATIC_COLUMN)
+              return getColumnClass(columnIndex);
+            return Float.class; //Quanti specific col : (raw)abundances
       }    
   }
 
@@ -589,7 +592,7 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
     filtersMap.put(COLTYPE_PTMSITE_COUNT, new IntegerFilter(getColumnName(COLTYPE_PTMSITE_COUNT), null, COLTYPE_PTMSITE_COUNT));
 //    filtersMap.put(COLTYPE_MODIFICATION_PROBA, new DoubleFilter(getColumnName(COLTYPE_MODIFICATION_PROBA), null, COLTYPE_MODIFICATION_PROBA));
     filtersMap.put(COLTYPE_SPECTRUM_TITLE, new StringDiffFilter(getColumnName(COLTYPE_SPECTRUM_TITLE), null, COLTYPE_SPECTRUM_TITLE));
-    filtersMap.put(COLTYPE_ABUNDANCE, new StringDiffFilter(getColumnName(COLTYPE_SPECTRUM_TITLE), null, COLTYPE_SPECTRUM_TITLE));
+//    filtersMap.put(COLTYPE_ABUNDANCE, new StringDiffFilter(getColumnName(COLTYPE_SPECTRUM_TITLE), null, COLTYPE_SPECTRUM_TITLE));
 
     int nbCol = getColumnCount();
     for (int i = LAST_STATIC_COLUMN + 1; i < nbCol; i++) {
@@ -692,6 +695,13 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
         renderer = new CollectionRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
         break;
       }
+
+      case COLTYPE_PROTEIN_ID :
+      case COLTYPE_PTM_CLUSTER_ID:
+      case COLTYPE_PEPTIDE_COUNT:
+      case COLTYPE_PTMSITE_COUNT:
+        //Return explicitly null to don't go in default case
+        break;
 
       default: {
         if (m_isQuantitationDS) {

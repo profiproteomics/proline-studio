@@ -21,6 +21,7 @@ import fr.proline.module.seq.DatabaseAccess;
 import fr.proline.repository.IDatabaseConnector;
 import fr.proline.studio.Exceptions;
 import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
+import fr.proline.studio.dam.tasks.data.ptm.PTMDatasetPair;
 
 import java.util.*;
 
@@ -43,14 +44,12 @@ public class DatabaseDataManager  {
     private HashMap<Object, Object> m_serverConnectionProperties;
     private Project m_currentProject;
 
-    private HashMap<Long, PTMDataset> m_clusterPTMDatasetPerDatasetId;
-    private HashMap<Long, PTMDataset> m_sitePTMDatasetPerDatasetId;
-    
+    private HashMap<Long, PTMDatasetPair> m_ptmDatasetSetPerDatasetId;
+
     private HashMap<Aggregation.ChildNature, Aggregation> m_aggregationMap = null;
     
     private DatabaseDataManager() {
-        m_clusterPTMDatasetPerDatasetId = new HashMap<>();
-        m_sitePTMDatasetPerDatasetId = new HashMap<>();
+        m_ptmDatasetSetPerDatasetId = new HashMap<>();
     }
     
     public static DatabaseDataManager getDatabaseDataManager() {
@@ -65,7 +64,7 @@ public class DatabaseDataManager  {
     }
     
     public void setIntruments(List<InstrumentConfiguration> l) {
-        m_instruments = l.toArray(new InstrumentConfiguration[l.size()]);
+        m_instruments = l.toArray(new InstrumentConfiguration[0]);
     }
     
     public InstrumentConfiguration[] getInstrumentsArray() {
@@ -82,7 +81,7 @@ public class DatabaseDataManager  {
     }
     
     public void setPeaklistSofwares(List<PeaklistSoftware> l) {
-        m_peaklistSoftwares = l.toArray(new PeaklistSoftware[l.size()]);
+        m_peaklistSoftwares = l.toArray(new PeaklistSoftware[0]);
     }
     
     public PeaklistSoftware[] getPeaklistSoftwaresArray() {
@@ -146,7 +145,7 @@ public class DatabaseDataManager  {
     }
     
     public void setFragmentationRules(List<FragmentationRule> l) {
-        m_fragmentationRules = l.toArray(new FragmentationRule[l.size()]);
+        m_fragmentationRules = l.toArray(new FragmentationRule[0]);
     }
     
     public FragmentationRule[] getFragmentationRulesArray() {
@@ -154,7 +153,7 @@ public class DatabaseDataManager  {
     }
       
     public void setFragmentationRuleSets(List<FragmentationRuleSet> l) {
-        m_fragmentationRuleSets = l.toArray(new FragmentationRuleSet[l.size()]);
+        m_fragmentationRuleSets = l.toArray(new FragmentationRuleSet[0]);
     }
     
     public FragmentationRuleSet[] getFragmentationRuleSetsArray() {
@@ -196,7 +195,7 @@ public class DatabaseDataManager  {
     
     
     public void setProjectUsers(List<UserAccount> l) {
-        m_projectUsers = l.toArray(new UserAccount[l.size()]);
+        m_projectUsers = l.toArray(new UserAccount[0]);
     }
     
     public UserAccount[] getProjectUsersArray() {
@@ -206,8 +205,7 @@ public class DatabaseDataManager  {
     public void setCurrentProject(Project currentProject){
         if(currentProject == null || !currentProject.equals(m_currentProject)) {
             m_currentProject = currentProject;
-            m_clusterPTMDatasetPerDatasetId.clear();
-            m_sitePTMDatasetPerDatasetId.clear();
+            m_ptmDatasetSetPerDatasetId.clear();
         }
     }
 
@@ -215,25 +213,28 @@ public class DatabaseDataManager  {
         return m_currentProject;
     }
 
-    //VDS TODO: See haw to be able to free memory without changing Project
-    public void addLoadedClustersPTMDataset(PTMDataset ptmDS){
-        m_clusterPTMDatasetPerDatasetId.put(ptmDS.getDataset().getId(), ptmDS);
+    //VDS TODO: See how to be able to free memory without changing Project
+    public void addLoadedPTMDatasetSet(PTMDatasetPair ptmDSSet){
+        m_ptmDatasetSetPerDatasetId.put(ptmDSSet.getDataset().getId(), ptmDSSet);
     }
 
     public PTMDataset getClustersPTMDatasetForDS(Long dsId){
-        return m_clusterPTMDatasetPerDatasetId.get(dsId);
+        if (m_ptmDatasetSetPerDatasetId.containsKey(dsId))
+            return m_ptmDatasetSetPerDatasetId.get(dsId).getClusterPTMDataset();
+        return null;
     }
 
-    public void addLoadedSitesPTMDataset(PTMDataset ptmDS){
-        m_sitePTMDatasetPerDatasetId.put(ptmDS.getDataset().getId(), ptmDS);
-    }
 
     public PTMDataset getSitesPTMDatasetForDS(Long dsId){
-        return m_sitePTMDatasetPerDatasetId.get(dsId);
+        if (m_ptmDatasetSetPerDatasetId.containsKey(dsId))
+            return m_ptmDatasetSetPerDatasetId.get(dsId).getSitePTMDataset();
+        return null;
     }
 
 
-
+    public PTMDatasetPair getPTMDatasetSetForDS(Long dsId){
+        return m_ptmDatasetSetPerDatasetId.get(dsId);
+    }
 
     public void setLoggedUser(UserAccount loggedUser) {
         m_loggedUser = loggedUser;

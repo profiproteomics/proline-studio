@@ -110,6 +110,19 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <skip>false</skip>
+                            <!-- TEMP def until get jdk 11 branch -->
+                            <file>${version.path}/JavaVersion.java.template</file>
+                            <outputFile>${version.path}/JavaVersion.java</outputFile>
+                            <replacements>
+                                <replacement>
+                                    <token>_moduleName_</token>
+                                    <value>${project.name}</value>
+                                </replacement>
+                                <replacement>
+                                    <token>_version_</token>
+                                    <value>${project.version}_${maven.build.timestamp}_${user.name}</value>
+                                </replacement>
+                            </replacements>
                         </configuration>
                     </execution>
                 </executions>

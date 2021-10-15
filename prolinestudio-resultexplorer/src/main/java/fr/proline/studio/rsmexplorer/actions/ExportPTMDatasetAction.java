@@ -24,6 +24,7 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.DataSetData;
+import fr.proline.studio.dam.tasks.DatabaseDatasetPTMsTask;
 import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dam.tasks.data.ptm.*;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
@@ -81,7 +82,7 @@ public class ExportPTMDatasetAction extends AbstractRSMAction {
       exportPTMDataset(ptmDataset);
 
     } else {
-      JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "PTM Dataset not loaded yet ! Display it to load data...", DatabasePTMsTask.ERROR_PTM_CLUSTER_LOADING, JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "PTM Dataset not loaded yet ! Display it to load data...", DatabaseDatasetPTMsTask.ERROR_PTM_CLUSTER_LOADING, JOptionPane.ERROR_MESSAGE);
     }
     //
 //    --- VDS Get loaded PTMDataset
@@ -199,7 +200,7 @@ public class ExportPTMDatasetAction extends AbstractRSMAction {
     }
 
 
-    JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "Export PTM DS with "+ptmDataset.getPTMClusters().size()+" clusters ", DatabasePTMsTask.ERROR_PTM_CLUSTER_LOADING, JOptionPane.ERROR_MESSAGE);
+    JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "Export PTM DS with "+ptmDataset.getPTMClusters().size()+" clusters ", DatabaseDatasetPTMsTask.ERROR_PTM_CLUSTER_LOADING, JOptionPane.ERROR_MESSAGE);
   }
 
   private JSONPTMDataset createJSONPTMDataset(PTMDataset ptmDataset) {
@@ -228,7 +229,7 @@ public class ExportPTMDatasetAction extends AbstractRSMAction {
       if(newtPTMSite instanceof JSONPTMSite2)
         allJSONSites[i] =(JSONPTMSite2) newtPTMSite;
       else {
-          JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "Can't Export old PTM Site informations ", DatabasePTMsTask.ERROR_PTM_CLUSTER_LOADING, JOptionPane.ERROR_MESSAGE);
+          JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "Can't Export old PTM Site informations ", DatabaseDatasetPTMsTask.ERROR_PTM_CLUSTER_LOADING, JOptionPane.ERROR_MESSAGE);
           return null;
       }
     }
@@ -253,7 +254,7 @@ public class ExportPTMDatasetAction extends AbstractRSMAction {
         if(newtPTMSite instanceof JSONPTMSite2)
           clusterJSONSites[index] =((JSONPTMSite2) newtPTMSite).id;
         else {
-          JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "Can't Export old PTM Site informations ", DatabasePTMsTask.ERROR_PTM_CLUSTER_LOADING, JOptionPane.ERROR_MESSAGE);
+          JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "Can't Export old PTM Site informations ", DatabaseDatasetPTMsTask.ERROR_PTM_CLUSTER_LOADING, JOptionPane.ERROR_MESSAGE);
           return null;
         }
       }

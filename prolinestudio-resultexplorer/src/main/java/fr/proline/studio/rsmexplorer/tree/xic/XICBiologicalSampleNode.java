@@ -16,7 +16,6 @@
  */
 package fr.proline.studio.rsmexplorer.tree.xic;
 
-import fr.proline.studio.Sheet;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.utils.IconManager;
@@ -38,17 +37,8 @@ public class XICBiologicalSampleNode extends AbstractNode {
     }
 
     @Override
-    public Sheet createSheet() {
-        return null;
-    }
-
-    @Override
     public AbstractNode copyNode() {
         return null;
-    }
-
-    @Override
-    public void loadDataForProperties(Runnable callback) {
     }
     
     @Override

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -26,7 +26,6 @@ import fr.proline.studio.pattern.DataboxDataAnalyzer;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.MzdbFilesTopPanel;
-import fr.proline.studio.rsmexplorer.PropertiesTopPanel;
 import fr.proline.studio.rsmexplorer.TaskLogTopPanel;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.TreeUtils;
@@ -92,7 +91,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
             Iterator<AbstractTopPanel> itTop = tcs.iterator();
             while (itTop.hasNext()) {
                 AbstractTopPanel topComponent = itTop.next();
-                if (((topComponent instanceof DataBoxViewerTopPanel) || (topComponent instanceof PropertiesTopPanel)) && !(topComponent instanceof TaskLogTopPanel)) {
+                if ( (topComponent instanceof DataBoxViewerTopPanel)  && !(topComponent instanceof TaskLogTopPanel)) {
 
                     if (topComponent instanceof DataBoxViewerTopPanel) {
                         DataBoxViewerTopPanel databoxComponent = (DataBoxViewerTopPanel) topComponent;

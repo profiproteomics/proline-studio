@@ -16,21 +16,19 @@
  */
 package fr.proline.studio.rsmexplorer.tree;
 
-import fr.proline.studio.Sheet;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.utils.IconManager;
-import fr.proline.studio.utils.PropertiesProviderInterface;
-import javax.swing.Action;
-import javax.swing.ImageIcon;
-import javax.swing.tree.DefaultMutableTreeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  * Super class for all nodes
  * @author JM235353
  */
-public abstract class AbstractNode extends DefaultMutableTreeNode implements Cloneable, PropertiesProviderInterface {
+public abstract class AbstractNode extends DefaultMutableTreeNode implements Cloneable {
 
     public enum NodeTypes {
         TREE_PARENT,
@@ -141,11 +139,21 @@ public abstract class AbstractNode extends DefaultMutableTreeNode implements Clo
     public String getToolTipText() {
         return null;
     }
-    
-    @Override
-    public abstract Sheet createSheet();
-    
-    
+
+    //Default implementation.
+
+    /**
+     * Load all Data needed by the Properties view.
+     * Callback should the be called to display the information.
+     *
+     * Default implementation just call callback Runnable
+     * @param callback
+     */
+    public void loadDataForProperties(Runnable callback) {
+        // nothing to do
+        callback.run();
+    }
+
     public abstract AbstractNode copyNode();
     
     public void copyChildren(AbstractNode copyParent) {

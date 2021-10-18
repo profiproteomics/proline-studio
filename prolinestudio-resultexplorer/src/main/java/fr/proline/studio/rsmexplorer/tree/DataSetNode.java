@@ -22,7 +22,6 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.core.orm.uds.dto.DDatasetType.AggregationInformation;
 import fr.proline.core.orm.uds.dto.DDatasetType.QuantitationMethodInfo;
-import fr.proline.studio.Sheet;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
@@ -456,11 +455,6 @@ public class DataSetNode extends AbstractNode {
         } else {
             return null;
         }
-    }
-
-    @Override
-    public Sheet createSheet() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public void setIsReference() {

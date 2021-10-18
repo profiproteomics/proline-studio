@@ -16,9 +16,6 @@
  */
 package fr.proline.studio.rsmexplorer.tree.identification;
 
-import fr.proline.studio.Property;
-import fr.proline.studio.Sheet;
-import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.AbstractData;
@@ -101,35 +98,7 @@ public class IdProjectIdentificationNode extends AbstractNode {
         }
     }
 
-    @Override
-    public void loadDataForProperties(Runnable callback) {
-        // nothing to do
-        callback.run();
-    }
-    
-    @Override
-    public Sheet createSheet() {
-        Project p = getProject();
-        
-        Sheet sheet = Sheet.createDefault();
 
-
-            Sheet.Set propGroup = Sheet.createPropertiesSet();
-            
-         
-            Property prop = new Property("id", "id", Long.class, p.getId());
-            propGroup.put(prop);
-
-            prop = new Property("name", "name", String.class, p.getName());
-            propGroup.put(prop);
-
-            prop = new Property("description", "description", String.class, p.getDescription());
-            propGroup.put(prop);
-            
-            sheet.put(propGroup);
-
-        return sheet;
-    }
     
     @Override
     public AbstractNode copyNode() {

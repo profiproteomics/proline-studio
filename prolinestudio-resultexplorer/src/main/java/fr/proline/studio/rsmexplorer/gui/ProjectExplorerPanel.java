@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -23,9 +23,8 @@ import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.UserAccount;
-import fr.proline.studio.Property;
-import fr.proline.studio.PropertySupport;
-import fr.proline.studio.Sheet;
+import fr.proline.studio.NbPreferences;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.AbstractData;
@@ -42,31 +41,25 @@ import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.ClearProjectTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.InfoDialog;
-import fr.proline.studio.pattern.DataParameter;
-import fr.proline.studio.pattern.ParameterList;
-import fr.proline.studio.pattern.ParameterSubtypeEnum;
+import fr.proline.studio.pattern.*;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
-import fr.proline.studio.rsmexplorer.PropertiesTopPanel;
 import fr.proline.studio.rsmexplorer.actions.ConnectAction;
 import fr.proline.studio.rsmexplorer.gui.dialog.AddProjectDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.ClearProjectDialog;
+import fr.proline.studio.rsmexplorer.gui.model.properties.ProjectPropertiesTableModel;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
+import fr.proline.studio.table.PropertiesTableModel;
 import fr.proline.studio.utils.IconManager;
-import fr.proline.studio.utils.PropertiesProviderInterface;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.*;
-import java.util.prefs.Preferences;
+
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
-import fr.proline.studio.NbPreferences;
-import fr.proline.studio.WindowManager;
-import org.slf4j.LoggerFactory;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.prefs.Preferences;
 
 /**
  *
@@ -80,9 +73,9 @@ public class ProjectExplorerPanel extends JPanel {
     private JButton m_editProjectButton;
     private JButton m_propertiesProjectButton;
     private JButton m_clearProjectButton;
-    private JComboBox<ProjectItem> m_projectsComboBox = null;
-    private JScrollPane m_identificationTreeScrollPane = null;
-    private JScrollPane m_quantitationTreeScrollPane = null;
+    private JComboBox<ProjectItem> m_projectsComboBox;
+    private JScrollPane m_identificationTreeScrollPane;
+    private JScrollPane m_quantitationTreeScrollPane;
 
     public static ProjectExplorerPanel getProjectExplorerPanel() {
         if (m_singleton == null) {
@@ -138,7 +131,7 @@ public class ProjectExplorerPanel extends JPanel {
 
         ProjectItem pi = (ProjectItem) m_projectsComboBox.getSelectedItem();
 
-        if (pi.m_projectIdentificationData == null) {
+        if (pi == null || pi.m_projectIdentificationData == null) {
             return null;
         } else {
             return pi.m_projectIdentificationData.getProject();
@@ -201,39 +194,13 @@ public class ProjectExplorerPanel extends JPanel {
         //buttonsPanel.add(m_clearProjectButton, c);
 
         // Interactions
-        m_addProjectButton.addActionListener(new ActionListener() {
+        m_addProjectButton.addActionListener(e -> addProjectActionPerformed());
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                addProjectActionPerformed();
-                
-            }
-        });
+        m_editProjectButton.addActionListener(e -> editProjectActionPerformed());
 
-        m_editProjectButton.addActionListener(new ActionListener() {
+        m_propertiesProjectButton.addActionListener(e -> showPropertiesProjectActionPerformed());
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                editProjectActionPerformed();
-
-            }
-        });
-
-        m_propertiesProjectButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showPropertiesProjectActionPerformed();
-            }
-        });
-
-        m_clearProjectButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                clearProjectActionPerformed();
-            }
-        });
+        m_clearProjectButton.addActionListener(e -> clearProjectActionPerformed());
 
         return buttonsPanel;
     }
@@ -317,6 +284,8 @@ public class ProjectExplorerPanel extends JPanel {
     
     private void editProjectActionPerformed() {
         final ProjectItem projectItem = (ProjectItem) m_projectsComboBox.getSelectedItem();
+        if(projectItem == null)
+            return;
         ProjectIdentificationData projectData = projectItem.getProjectIdentificationData();
         final Project project = projectData.getProject();
         final String oldName = project.getName();
@@ -370,24 +339,32 @@ public class ProjectExplorerPanel extends JPanel {
 
     private void showPropertiesProjectActionPerformed() {
         ProjectItem projectItem = (ProjectItem) m_projectsComboBox.getSelectedItem();
+        if(projectItem == null)
+            return;
+
         ProjectIdentificationData projectData = projectItem.getProjectIdentificationData();
         String projectName = projectData.getName();
 
-        String dialogName = "Properties : " + projectName;
 
-        final PropertiesTopPanel win = new PropertiesTopPanel(dialogName);
-        ProjectItem[] projectItemArray = new ProjectItem[1];
-        projectItemArray[0] = projectItem;
-        win.setProperties(projectItemArray);
-        WindowManager.getDefault().getMainWindow().displayWindow(win);
+        Project project = projectItem.getProjectIdentificationData().getProject();
+
+        WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(projectName, "Properties", IconManager.IconType.DOCUMENT_LIST, true);
+        PropertiesTableModel model = new ProjectPropertiesTableModel(project);
+
+        windowBox.setEntryData(-1L, model);
+        DataBoxViewerTopPanel win2 = new DataBoxViewerTopPanel(windowBox);
+        WindowManager.getDefault().getMainWindow().displayWindow(win2);
 
     }
 
     private void clearProjectActionPerformed() {
         ProjectItem projectItem = (ProjectItem) m_projectsComboBox.getSelectedItem();
+        if(projectItem == null)
+            return;
+
         ProjectIdentificationData projectData = projectItem.getProjectIdentificationData();
         final Project project = projectData.getProject();
-        List<ClearProjectData> data = new ArrayList();
+        List<ClearProjectData> data = new ArrayList<>();
         List<ClearProjectData> openedData = ProjectExplorerPanel.getOpenedData(project);
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -413,7 +390,7 @@ public class ProjectExplorerPanel extends JPanel {
      * @return 
      */
     public static  List<ClearProjectData> getOpenedData(Project project) {
-        List<ClearProjectData> openedData = new ArrayList();
+        List<ClearProjectData> openedData = new ArrayList<>();
         long projectId = project.getId();
         String allImportedWindowsName = project.getName()+" : All Imported";
         
@@ -479,9 +456,9 @@ public class ProjectExplorerPanel extends JPanel {
                 if ((clearProjectDialog.canModifyValues())) {
                     List<ClearProjectData> dataToClear = clearProjectDialog.getSelectedData();
 
-                    List<Long> rsmIds = new ArrayList();
-                    List<Long> rsIds = new ArrayList();
-                    dataToClear.stream().forEach((d) -> {
+                    List<Long> rsmIds = new ArrayList<>();
+                    List<Long> rsIds = new ArrayList<>();
+                    dataToClear.forEach((d) -> {
                         if (d.isResultSet()) {
                             rsIds.add(d.getResultSet().getId());
                         } else if (d.isResultSummary()) {
@@ -548,36 +525,32 @@ public class ProjectExplorerPanel extends JPanel {
                         if (nbProjects > 0) {
                             m_projectsComboBox.addItem(new ProjectItem(null, null)); // Null Project corresponds to Select a Project Item
                         }
-                        for (int i = 0; i < nbProjects; i++) {
-                            ProjectIdentificationData identificationData = (ProjectIdentificationData) projectList.get(i);
+                        for (AbstractData abstractData : projectList) {
+                            ProjectIdentificationData identificationData = (ProjectIdentificationData) abstractData;
                             m_projectsComboBox.addItem(new ProjectItem(identificationData, new ProjectQuantitationData(identificationData.getProject())));
                         }
 
                         m_addProjectButton.setEnabled(true);
 
-                        m_projectsComboBox.addActionListener(new ActionListener() {
+                        m_projectsComboBox.addActionListener(e -> {
+                            ProjectItem item = (ProjectItem) m_projectsComboBox.getSelectedItem();
+                            getProjectExplorerPanel().selectProject(item);
 
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
-                                ProjectItem item = (ProjectItem) m_projectsComboBox.getSelectedItem();
-                                getProjectExplorerPanel().selectProject(item);
+                            if ((item != null) && (item.getProjectIdentificationData() != null) && (!item.isChanging())) {
+                                DatabaseDataManager.getDatabaseDataManager().setCurrentProject(item.getProjectIdentificationData().getProject());
+                                m_editProjectButton.setEnabled(true);
+                                m_propertiesProjectButton.setEnabled(true);
+                                m_clearProjectButton.setEnabled(true);
 
-                                if ((item != null) && (item.getProjectIdentificationData() != null) && (!item.isChanging())) {
-                                    DatabaseDataManager.getDatabaseDataManager().setCurrentProject(item.getProjectIdentificationData().getProject());
-                                    m_editProjectButton.setEnabled(true);
-                                    m_propertiesProjectButton.setEnabled(true);
-                                    m_clearProjectButton.setEnabled(true);
-
-                                    Preferences preferences = NbPreferences.root();
-                                    preferences.put("DefaultSelectedProject", item.getProjectIdentificationData().getName());
-                                } else {
-                                    DatabaseDataManager.getDatabaseDataManager().setCurrentProject(null);
-                                    m_editProjectButton.setEnabled(false);
-                                    m_propertiesProjectButton.setEnabled(false);
-                                    m_clearProjectButton.setEnabled(false);
-                                }
-
+                                Preferences preferences = NbPreferences.root();
+                                preferences.put("DefaultSelectedProject", item.getProjectIdentificationData().getName());
+                            } else {
+                                DatabaseDataManager.getDatabaseDataManager().setCurrentProject(null);
+                                m_editProjectButton.setEnabled(false);
+                                m_propertiesProjectButton.setEnabled(false);
+                                m_clearProjectButton.setEnabled(false);
                             }
+
                         });
 
                         Preferences preferences = NbPreferences.root();
@@ -606,19 +579,16 @@ public class ProjectExplorerPanel extends JPanel {
 
     public void selectProject(ProjectItem projectItem) {
 
-        if ((projectItem == null) || (!projectItem.isActive())) {
+        if ((projectItem == null) || (projectItem.isInactive())) {
             m_identificationTreeScrollPane.setViewportView(null);
             m_quantitationTreeScrollPane.setViewportView(null);
             
-            if ((projectItem != null) && (!projectItem.isActive())) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        InfoDialog infoDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Project Deleted", "Databases corresponding to this project have been deleted.\nAsk to your Administrator to restore them.");
-                        infoDialog.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
-                        infoDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
-                        infoDialog.setVisible(true);
-                    }
+            if ((projectItem != null) && (projectItem.isInactive())) {
+                SwingUtilities.invokeLater(() -> {
+                    InfoDialog infoDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Project Deleted", "Databases corresponding to this project have been deleted.\nAsk to your Administrator to restore them.");
+                    infoDialog.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
+                    infoDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
+                    infoDialog.setVisible(true);
                 });
 
             }
@@ -642,7 +612,7 @@ public class ProjectExplorerPanel extends JPanel {
         }
     }
 
-    public class ProjectComboboxRenderer extends BasicComboBoxRenderer {
+    public static class ProjectComboboxRenderer extends BasicComboBoxRenderer {
 
         public ProjectComboboxRenderer() {
         }
@@ -698,7 +668,7 @@ public class ProjectExplorerPanel extends JPanel {
         }
     }
 
-    public static class ProjectItem implements PropertiesProviderInterface {
+    public static class ProjectItem {
 
         private ProjectIdentificationData m_projectIdentificationData;
         private ProjectQuantitationData m_projectQuantitationData;
@@ -738,42 +708,9 @@ public class ProjectExplorerPanel extends JPanel {
             m_active = v;
         }
 
-        public boolean isActive() {
-            return m_active;
-        }
-        
-        
-        @Override
-        public Sheet createSheet() {
-            Project p = m_projectIdentificationData.getProject();
-
-            Sheet sheet = Sheet.createDefault();
-
-            //try {
-
-                Sheet.Set propGroup = Sheet.createPropertiesSet();
-
-                Property prop = new Property("id", "id", Long.class, p.getId());
-                propGroup.put(prop);
-
-                prop = new Property("name", "name", String.class, p.getName());
-                propGroup.put(prop);
-
-                prop = new Property("description", "description", String.class, p.getDescription());
-                propGroup.put(prop);
-
-                sheet.put(propGroup);
-
-            /*} catch (NoSuchMethodException e) {
-                LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(getClass().getSimpleName() + " properties error ", e);
-            }*/
-
-            return sheet;
+        public boolean isInactive() {
+            return !m_active;
         }
 
-        @Override
-        public void loadDataForProperties(Runnable callback) {
-            // nothing to do
-        }
     }
 }

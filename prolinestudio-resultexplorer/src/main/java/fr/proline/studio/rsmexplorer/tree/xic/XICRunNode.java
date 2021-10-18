@@ -20,7 +20,6 @@ import fr.proline.core.orm.msi.Peaklist;
 import fr.proline.core.orm.uds.RawFile;
 import fr.proline.core.orm.uds.Run;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.studio.Sheet;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.RunInfoData;
@@ -336,18 +335,10 @@ public class XICRunNode extends AbstractNode {
         return getIcon(IconManager.IconType.FILE); //JPM.TODO : to be changed
     }
 
-    @Override
-    public Sheet createSheet() {
-        return null;
-    }
 
     @Override
     public AbstractNode copyNode() {
         return null;
-    }
-
-    @Override
-    public void loadDataForProperties(Runnable callback) {
     }
 
     public void setRawFile(final File selectedFile, ActionListener doneCallback) {

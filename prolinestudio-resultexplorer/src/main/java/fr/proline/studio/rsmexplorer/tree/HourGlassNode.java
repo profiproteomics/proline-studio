@@ -17,7 +17,6 @@
 package fr.proline.studio.rsmexplorer.tree;
 
 
-import fr.proline.studio.Sheet;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
@@ -47,16 +46,6 @@ public class HourGlassNode extends AbstractNode {
         return getIcon(IconManager.IconType.HOUR_GLASS);
     }
 
-    @Override
-    public void loadDataForProperties(Runnable callback) {
-        // nothing to do
-        callback.run();
-    }
-    
-    @Override
-    public Sheet createSheet() {
-        return null; // should never be called
-    }
 
     @Override
     public AbstractNode copyNode() {

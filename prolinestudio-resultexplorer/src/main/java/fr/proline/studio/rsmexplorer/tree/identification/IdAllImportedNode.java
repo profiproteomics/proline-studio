@@ -16,7 +16,6 @@
  */
 package fr.proline.studio.rsmexplorer.tree.identification;
 
-import fr.proline.studio.Sheet;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.utils.IconManager;
@@ -39,15 +38,6 @@ public class IdAllImportedNode extends AbstractNode {
         return getIcon(IconManager.IconType.ALL_IMPORTED);
     }
 
-    @Override
-    public Sheet createSheet() {
-       return null;
-    }
-
-    @Override
-    public void loadDataForProperties(Runnable callback) {
-    }
-    
     @Override
     public AbstractNode copyNode() {
         return null;

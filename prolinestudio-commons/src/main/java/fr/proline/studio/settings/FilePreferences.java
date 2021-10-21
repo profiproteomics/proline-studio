@@ -234,9 +234,9 @@ public class FilePreferences extends AbstractPreferences {
             if (propKey.startsWith(path)) {
               String subKey = propKey.substring(path.length());
               // Only do immediate descendants
-              if (subKey.indexOf('.') == -1) {
+              //if (subKey.indexOf('.') == -1) { //JPM : we do want to supress Validation.PSM_PRETTY_RANK for example : we don't use the parent mechanism
                 toRemove.add(propKey);
-              }
+              //}
             }
           }
  

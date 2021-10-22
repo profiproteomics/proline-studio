@@ -23,8 +23,7 @@ import fr.proline.studio.dam.DatabaseDataManager;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
+import javax.swing.*;
 
 
 public final class AdminAction extends AbstractAction implements ActionListener {
@@ -40,6 +39,8 @@ public final class AdminAction extends AbstractAction implements ActionListener 
         Frame f = WindowManager.getDefault().getMainWindow();
         Boolean  isUser = true;
         UserAccount user = DatabaseDataManager.getDatabaseDataManager().getLoggedUser();
+        if(user == null)
+          JOptionPane.showMessageDialog(f,"You must be logged to access this view ", "Admin View Error",JOptionPane.ERROR_MESSAGE);
         if (user != null) {
            isUser = !DatabaseDataManager.isAdmin(user);
         }
@@ -57,10 +58,10 @@ public final class AdminAction extends AbstractAction implements ActionListener 
     @Override
      public boolean isEnabled() {
          
-        UserAccount user = DatabaseDataManager.getDatabaseDataManager().getLoggedUser();
-        if (user == null) {
-            return false;
-        }
+//        UserAccount user = DatabaseDataManager.getDatabaseDataManager().getLoggedUser();
+//        if (user == null) {
+//            return false;
+//        }
         return true;
     }
      

@@ -353,6 +353,8 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
                     File f = new File(m_converterFilePath.getStringValue());
                     if (!f.exists() || !f.getAbsolutePath().endsWith("raw2mzDB.exe")) {
                         ParameterError error = new ParameterError("The selected raw2mzDB.exe is not valid.", m_converterFilePath.getComponent());
+                        CardLayout cl = (CardLayout) (m_cards.getLayout());
+                        cl.show(m_cards, key);
                         return error;
                     }
                 }

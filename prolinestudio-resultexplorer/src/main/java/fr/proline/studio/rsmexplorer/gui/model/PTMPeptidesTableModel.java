@@ -30,10 +30,7 @@ import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.export.ExportModelUtilities;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
-import fr.proline.studio.filter.ConvertValueInterface;
-import fr.proline.studio.filter.DoubleFilter;
-import fr.proline.studio.filter.Filter;
-import fr.proline.studio.filter.StringDiffFilter;
+import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
@@ -71,14 +68,16 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     public static final int COLTYPE_PEPTIDE_ID = 0;
     public static final int COLTYPE_PEPTIDE_NAME = 1;
     public static final int COLTYPE_PEPTIDE_SCORE = 2;
-    public static final int COLTYPE_PEPTIDE_PTM = 3;    
-    public static final int COLTYPE_DELTA_MASS_PTM = 4;
-    public static final int COLTYPE_PTM_PROBA = 5;
-    public static final int COLTYPE_SPECTRUM_TITLE = 6;   
+    public static final int COLTYPE_PEPTIDE_EXP_MOZ = 3;
+    public static final int COLTYPE_PEPTIDE_CHARGE = 4;
+    public static final int COLTYPE_PEPTIDE_PTM = 5;
+    public static final int COLTYPE_DELTA_MASS_PTM =6;
+    public static final int COLTYPE_PTM_PROBA = 7;
+    public static final int COLTYPE_SPECTRUM_TITLE = 8;
     public static final int LAST_STATIC_COLUMN = COLTYPE_SPECTRUM_TITLE;
     
-    private static final String[] m_columnNames = {"Id", "Peptide", "Score", "PTMs", "PTMs D.Mass", "PTMs Confid.(%)", "Spectrum title"};
-    private static final String[] m_columnTooltips = {"Peptide match Id", "Peptide Sequence", "Score of the peptide match", "PTMs associated with this peptide", "PTMs delta mass", "PTMs localisation confidence", "Peptide match query title"};
+    private static final String[] m_columnNames = {"Id", "Peptide", "Score", "Exp. MoZ", "Charge", "PTMs", "PTMs D.Mass", "PTMs Confid.(%)", "Spectrum title"};
+    private static final String[] m_columnTooltips = {"Peptide match Id", "Peptide Sequence", "Score of the peptide match", "Experimental Mass to Charge Ratio","Charge", "PTMs associated with this peptide", "PTMs delta mass", "PTMs localisation confidence", "Peptide match query title"};
 
     // Dynamic columns list 1 : PTM Probability related
     private static final String COLTYPE_SITE_PROBA_SUFFIX = "Probability";
@@ -347,7 +346,13 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
             }
             case COLTYPE_PEPTIDE_SCORE:{
                 return (pepMatch==null) ? Float.valueOf(0) : pepMatch.getScore();                        
-            }                    
+            }
+            case COLTYPE_PEPTIDE_CHARGE:{
+                return (pepMatch==null) ? 0 : pepMatch.getCharge();
+            }
+            case COLTYPE_PEPTIDE_EXP_MOZ:{
+                return (pepMatch==null) ? Double.NaN : pepMatch.getExperimentalMoz();
+            }
             case COLTYPE_PEPTIDE_PTM: {
                 if(pepMatch == null)
                     return "UNKNOWN";
@@ -530,6 +535,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
                 renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
                 break;
             }
+            case COLTYPE_PEPTIDE_CHARGE:
             case COLTYPE_PEPTIDE_ID: {
                 renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
                 break;
@@ -538,6 +544,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
                 renderer =  new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
                 break;
             }
+            case COLTYPE_PEPTIDE_EXP_MOZ:
             case COLTYPE_DELTA_MASS_PTM: {
                 renderer = new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4);
                 break;
@@ -598,6 +605,8 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     @Override
     public Class getDataColumnClass(int columnIndex) {
         switch (columnIndex) {
+            case  COLTYPE_PEPTIDE_CHARGE:
+                return Integer.class;
             case COLTYPE_PEPTIDE_ID:
                 return Long.class;
             case COLTYPE_PEPTIDE_NAME:
@@ -605,6 +614,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
             case COLTYPE_SPECTRUM_TITLE:
                 return String.class;            
             case COLTYPE_DELTA_MASS_PTM:
+            case COLTYPE_PEPTIDE_EXP_MOZ:
                 return Double.class;
             case COLTYPE_PEPTIDE_SCORE:
             case COLTYPE_PTM_PROBA:
@@ -640,6 +650,8 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     public Class getColumnClass(int col) {
 
         switch (col) {
+            case  COLTYPE_PEPTIDE_CHARGE:
+                return Integer.class;
             case COLTYPE_PEPTIDE_ID:
                 return Long.class;
             case COLTYPE_PEPTIDE_NAME:
@@ -647,6 +659,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
             case COLTYPE_PEPTIDE_PTM:
             case COLTYPE_SPECTRUM_TITLE:
                 return String.class;
+            case COLTYPE_PEPTIDE_EXP_MOZ:
             case COLTYPE_DELTA_MASS_PTM:
                 return Double.class;
             case COLTYPE_PTM_PROBA:                
@@ -753,6 +766,8 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
 
         filtersMap.put(COLTYPE_PEPTIDE_NAME, new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_NAME), peptideConverter, COLTYPE_PEPTIDE_NAME));
         filtersMap.put(COLTYPE_PEPTIDE_SCORE, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_SCORE), null, COLTYPE_PEPTIDE_SCORE));
+        filtersMap.put(COLTYPE_PEPTIDE_EXP_MOZ, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_EXP_MOZ), null, COLTYPE_PEPTIDE_EXP_MOZ));
+        filtersMap.put(COLTYPE_PEPTIDE_CHARGE, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_CHARGE), null, COLTYPE_PEPTIDE_CHARGE));
 
 
         filtersMap.put(COLTYPE_PEPTIDE_PTM, new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_PTM), null, COLTYPE_PEPTIDE_PTM));

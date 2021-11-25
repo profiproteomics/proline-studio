@@ -311,5 +311,34 @@ public class PTMDataset {
     public List<Long> getProtMatchesIdForAccession(String protMatcherAccession){
         return m_allLeafProtMatchesIdPerAccession.getOrDefault(protMatcherAccession, new ArrayList<>());
     }
+
+    public List<PTMCluster> getColocatedClusters(PTMCluster cluster){
+
+        ArrayList<PTMCluster> colocatedClusters = new ArrayList();
+        DProteinMatch pmatch = cluster.getProteinMatch();
+
+        int minStart = -1;
+        int maxEnd = -1;
+        try {
+            minStart = cluster.getParentPTMPeptideInstances().stream().map(pi -> pi.getStartPosition()).min(Comparator.naturalOrder()).get();
+            maxEnd = cluster.getParentPTMPeptideInstances().stream().map(pi -> pi.getStopPosition()).max(Comparator.naturalOrder()).get();
+        }catch (NoSuchElementException e){
+            LOG.error("Errpr getting peptides min/max bounds for cluster",e );
+            return  colocatedClusters;
+        }
+
+        for(PTMCluster c : this.m_ptmClusters){
+            if(c.getProteinMatch().equals(pmatch)) {
+                if(c.getParentPTMPeptideInstances() != null) {
+                    int clMinStart = c.getParentPTMPeptideInstances().stream().map(pi -> pi.getStartPosition()).min(Comparator.naturalOrder()).get();
+                    int clMaxEnd = c.getParentPTMPeptideInstances().stream().map(pi -> pi.getStopPosition()).max(Comparator.naturalOrder()).get();
+                    if( ( minStart <= clMinStart && clMinStart < maxEnd ) ||  ( minStart <= clMaxEnd && clMaxEnd < maxEnd ))
+                        colocatedClusters.add(c);
+                }
+            }
+        }
+        return  colocatedClusters;
+    }
+
     
 }

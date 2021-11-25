@@ -38,6 +38,7 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataAnalyzerWindowBoxManager;
 import fr.proline.studio.progress.ProgressInterface;
+import fr.proline.studio.rsmexplorer.actions.ViewColocalizedPTMClustersAction;
 import fr.proline.studio.rsmexplorer.gui.model.PTMClusterTableModel;
 import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
@@ -593,6 +594,7 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
         @Override
         public TablePopupMenu initPopupMenu() {
             m_popupMenu = new DisplayTablePopupMenu(PTMClustersPanel.this);
+            m_popupMenu.addAction(new ViewColocalizedPTMClustersAction());
             return m_popupMenu;
         }
 

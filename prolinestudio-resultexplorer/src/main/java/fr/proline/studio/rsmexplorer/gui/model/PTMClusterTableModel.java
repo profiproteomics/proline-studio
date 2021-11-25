@@ -772,4 +772,8 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
     return null;
   }
 
+  public int getModelIndexFor(PTMCluster cluster){
+    return m_ptmClusters.indexOf(cluster);
+  }
+
 }

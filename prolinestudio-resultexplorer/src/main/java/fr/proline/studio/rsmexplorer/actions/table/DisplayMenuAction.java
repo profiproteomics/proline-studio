@@ -67,9 +67,13 @@ public class DisplayMenuAction extends AbstractTableAction {
         boolean hasSubActions = false;
             
         DataboxStyle previousStyle = null;
-        for (DataboxStyle style : DataboxStyle.values()) {
+        TreeMap<ParameterDistance, AbstractDataBox> dataBoxMap = DataboxManager.getDataboxManager().findCompatibleDataboxList(dataBox, dataBox.getDataboxNavigationOutParameterClasses());
+        if(!dataBox.isLoaded()){
+            m_menu.setEnabled(hasSubActions);
+            return;
+        }
 
-            TreeMap<ParameterDistance, AbstractDataBox> dataBoxMap = DataboxManager.getDataboxManager().findCompatibleDataboxList(dataBox, dataBox.getDataboxNavigationOutParameterClasses());
+        for (DataboxStyle style : DataboxStyle.values()) {
             Iterator<ParameterDistance> it = dataBoxMap.descendingKeySet().iterator();
             while (it.hasNext()) {
                 AbstractDataBox destDatabox = dataBoxMap.get(it.next());
@@ -87,7 +91,6 @@ public class DisplayMenuAction extends AbstractTableAction {
                 m_menu.add(displayOptionMenuItem);
                 hasSubActions = true;
             }
-
         }
         
         m_menu.setEnabled(hasSubActions);

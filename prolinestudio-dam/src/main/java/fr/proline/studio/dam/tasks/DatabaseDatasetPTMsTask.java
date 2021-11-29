@@ -758,7 +758,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
 
                 if (pi.getBestPeptideMatchId() == dpm.getId()) {
                     parentPeptideInstancesByPepId.get(p.getId()).setBestPeptideMatch(dpm);
-    }
+                }
                 parentPeptideInstancesByPepId.get(p.getId()).getPeptideMatches().add(dpm);
 
             }

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -156,11 +156,14 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxXicPTMPeptidesMatches(51),
         DataBoxPTMSitePeptidesGraphic(52),
         DataboxMultiGraphicsDoubleYAxis(53),
-        DataBoxPTMPeptides(54),        
+        DataBoxPTMPeptides(54),
         DataBoxPTMClusters(55),
         DataBoxPTMPeptidesMatches(56),
         DataBoxPTMPeptidesGraphic(57),
-        DataboxXicParentsPeptideIon(58)
+        DataboxXicParentsPeptideIon(58),
+        DataBoxPTMSiteAsClusters(59),
+        DataBoxPTMClustersSites(60),
+        DataBoxXicPTMClustersSites(61)
         ;
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -275,6 +278,13 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataBoxPTMPeptidesGraphic();  
                 case DataboxXicParentsPeptideIon:
                     return new DataboxXicParentsPeptideIon();
+                case DataBoxPTMSiteAsClusters:
+                    return new DataBoxPTMClusters(true);
+                case DataBoxPTMClustersSites:
+                    return new DataBoxPTMClustersSites();
+                case DataBoxXicPTMClustersSites:
+                    return new DataBoxPTMClustersSites(true);
+
             }
             return null; // should not happen
         }

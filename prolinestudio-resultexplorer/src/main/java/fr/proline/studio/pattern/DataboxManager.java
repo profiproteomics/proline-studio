@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -33,7 +33,7 @@ public class DataboxManager {
     private final AbstractDataBox[] m_dataBoxStartingArray = {new DataBoxRsetAll(), new DataBoxRsetPSM(), new DataBoxRsetAllProteinMatch(),
         new DataBoxRsmPSM(), new DataBoxRsmPeptideInstances(), new DataBoxAdjacencyMatrixChoice(),
         new DataBoxRsmAllProteinSet(), new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxXicProteinSet(),
-        new DataBoxMSQueriesForRSM(), new DataBoxMSQueriesForRset(), new DataBoxPTMClusters()};
+        new DataBoxMSQueriesForRSM(), new DataBoxMSQueriesForRset(), new DataBoxPTMClusters(), new DataBoxPTMClusters(true)};
 
     //VDS : If some databox takes parameter in constructor : config will be lost when adding the databox : newInstance called in AddDataBoxActionListener
     // Added specific code in AddDataBoxActionListener to configure these specific databox !
@@ -68,8 +68,9 @@ public class DataboxManager {
         new DataBoxPTMPeptides(false, true),  // Ident PTMs Peptides Matches
         new DataBoxPTMPeptides(true, true),    // Quanti PTMs Peptides Matches
         new DataBoxPTMPeptidesGraphic(),
-        new DataboxXicParentsPeptideIon()
-        
+        new DataboxXicParentsPeptideIon(),
+        new DataBoxPTMClustersSites(),
+        new DataBoxPTMClustersSites(true)
     };
 
     public static AbstractDataBox getDataboxNewInstance(AbstractDataBox sourceDB) throws IllegalAccessException, InstantiationException {
@@ -82,8 +83,12 @@ public class DataboxManager {
             ((DataboxGraphics)newGenericDatabox).setDefaultLocked(((DataboxGraphics)sourceDB).isDefaultLocked());
         } else if (DataboxMultiGraphics.class.isInstance(newGenericDatabox) ){
             newGenericDatabox = new DataboxMultiGraphics(false, false, ((DataboxMultiGraphics)sourceDB).isDoubleYAxis());
-        } else if (DataBoxPTMPeptides.class.equals(newGenericDatabox.getClass())){
-            newGenericDatabox = new DataBoxPTMPeptides(((DataBoxPTMPeptides)sourceDB).isMS1LabelFreeQuantitation(), ((DataBoxPTMPeptides)sourceDB).isAllPSMsDisplayed());
+        } else if (DataBoxPTMPeptides.class.equals(newGenericDatabox.getClass())) {
+            newGenericDatabox = new DataBoxPTMPeptides(((DataBoxPTMPeptides) sourceDB).isMS1LabelFreeQuantitation(), ((DataBoxPTMPeptides) sourceDB).isAllPSMsDisplayed());
+        } else  if(DataBoxPTMClusters.class.equals(newGenericDatabox.getClass())) {
+            newGenericDatabox = new DataBoxPTMClusters( ((DataBoxPTMClusters)sourceDB).m_type.equals(AbstractDataBox.DataboxType.DataBoxPTMSiteAsClusters) );
+        } else  if(DataBoxPTMClustersSites.class.equals(newGenericDatabox.getClass())) {
+            newGenericDatabox = new DataBoxPTMClustersSites( ((DataBoxPTMClustersSites)sourceDB).m_type.equals(AbstractDataBox.DataboxType.DataBoxXicPTMClustersSites) );
         }
 
         return  newGenericDatabox;

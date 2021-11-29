@@ -68,10 +68,14 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     private boolean m_isXicResult = false; //If false: display Ident result PTM Clusters
 
     public DataBoxPTMClusters() {
-        super(AbstractDataBox.DataboxType.DataBoxPTMClusters, AbstractDataBox.DataboxStyle.STYLE_RSM);
-        
+        this(false);
+    }
+    public DataBoxPTMClusters(boolean viewSitesAsClusters) {
+        super(viewSitesAsClusters ? DataboxType.DataBoxPTMSiteAsClusters : DataboxType.DataBoxPTMClusters, AbstractDataBox.DataboxStyle.STYLE_RSM);
+        m_loadSitesAsClusters = viewSitesAsClusters;
+
        // Name of this databox
-        m_typeName = "Dataset PTMs Clusters"; //May be Quant PTM Protein Sites... 
+        m_typeName = viewSitesAsClusters ?  "Dataset PTMs Sites" :  "Dataset PTMs Clusters"; //May be Quant PTM Protein Sites...
         m_description = "Clusters of Modification Sites of a Dataset";//May be Ident or Quant dataset...
         
         // Register in parameters
@@ -89,6 +93,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         outParameter.addParameter(PTMPeptideInstance.class, ParameterSubtypeEnum.LEAF_PTMPeptideInstance);
         outParameter.addParameter(PTMPeptideInstance.class, ParameterSubtypeEnum.PARENT_PTMPeptideInstance);
         outParameter.addParameter(PTMDataset.class);
+        outParameter.addParameter(PTMDatasetPair.class);
 
         outParameter.addParameter(DProteinMatch.class); 
         outParameter.addParameter(DPeptideMatch.class);
@@ -102,11 +107,6 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                         
     }
 
-    public void setViewSitesOnly(boolean viewSitesAsClusters) {
-        m_loadSitesAsClusters = viewSitesAsClusters;
-        if (m_loadSitesAsClusters)
-            m_typeName = "Dataset PTMs Sites";
-    }
 
     private boolean isXicResult() {
         return m_isXicResult;
@@ -114,7 +114,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     
     public void setXicResult(boolean isXICResult) {
         m_isXicResult = isXICResult;
-        m_style = (m_isXicResult) ? DataboxStyle.STYLE_XIC : DataboxStyle.STYLE_SC;
+        m_style = (m_isXicResult) ? DataboxStyle.STYLE_XIC : DataboxStyle.STYLE_RSM;
         if (m_isXicResult) {
             registerXicOutParameter();
         }
@@ -184,6 +184,8 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                         m_loadPepMatchOnGoing=true;
                         ((PTMClustersPanel) getDataBoxPanelInterface()).setData(taskId, (ArrayList<PTMCluster>) getPTMDatasetToView().getPTMClusters(), finished);
                         loadPeptideMatches();
+                    } else {
+                        ((PTMClustersPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                     }
                 } else{
                     displayLoadError(taskId, finished);
@@ -467,6 +469,10 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                 if (parameterType.equals(DDataset.class)) {
                     return m_datasetSet;
                 }
+                if(parameterType.equals(PTMDatasetPair.class)){
+                    return m_ptmDatasetPair;
+                }
+
                 //XIC Specific ---- 
                 if (parameterType.equals(DMasterQuantProteinSet.class) && isXicResult()) {
                     PTMCluster cluster = ((PTMClustersPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster();
@@ -638,19 +644,27 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     @Override
     public Class[] getDataboxNavigationOutParameterClasses() {
         if(isXicResult()){
-            return new Class[]{DProteinMatch.class, DMasterQuantProteinSet.class};
+            return new Class[]{DProteinMatch.class, PTMDatasetPair.class, DMasterQuantProteinSet.class};
         }else{
-            return new Class[]{DProteinMatch.class};
+            return new Class[]{DProteinMatch.class, PTMDatasetPair.class};
         }
     }
     
     @Override
     public String getDataboxNavigationDisplayValue() {
-        DProteinMatch p = (DProteinMatch) getData(DProteinMatch.class);
-        if (p != null) {
+        List<PTMCluster> selectedCl = ((PTMClustersPanel) getDataBoxPanelInterface()).getSelectedPTMClusters();
+        if(selectedCl == null || selectedCl.isEmpty())
+            return null;
+
+        DProteinMatch p = selectedCl.get(0).getProteinMatch();
+
+        int nbrPM = selectedCl.stream().collect( Collectors.groupingBy(PTMCluster::getProteinMatch)).size();
+
+        if(nbrPM>1)
+            return p.getAccession()+"+ "+(nbrPM-1);
+        else
             return p.getAccession();
-        }
-        return null;
+
     }
     
     

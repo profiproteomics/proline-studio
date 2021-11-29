@@ -102,6 +102,15 @@ public class PTMDataset {
         return m_ptmClusters;
     }
 
+    public PTMCluster getPTMCluster(Long clusterId) {
+        Optional<PTMCluster> clusterOp =  m_ptmClusters.stream().filter(c -> c.getId().equals(clusterId)).findFirst();
+        if(clusterOp.isPresent())
+            return  clusterOp.get();
+        else
+            return null;
+    }
+
+
 //
 //    public List<PTMCluster> getSiteAsPTMClusters() {
 //        Map<PTMSite, List<PTMCluster>> clustersPerSite = new HashMap<>();

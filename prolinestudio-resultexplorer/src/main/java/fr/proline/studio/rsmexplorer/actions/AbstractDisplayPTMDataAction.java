@@ -33,9 +33,16 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 public abstract class AbstractDisplayPTMDataAction extends AbstractRSMAction  {
 
   private boolean m_dataIsPTMSite;
+  private boolean m_isAnnotatedPTMs;
+
   public AbstractDisplayPTMDataAction(boolean isSite, AbstractTree tree) {
-    super(isSite ? "Modification Sites": "Modification Clusters", tree);
+    this(isSite, false, tree);
+  }
+
+  public AbstractDisplayPTMDataAction(boolean isSite,boolean isAnnotatedPTMDs, AbstractTree tree) {
+    super(isSite ? (isAnnotatedPTMDs ? "Annotated Sites" : "Sites" ): (isAnnotatedPTMDs ? "Annotated Clusters" : "Clusters" ), tree);
     m_dataIsPTMSite = isSite;
+    m_isAnnotatedPTMs = isAnnotatedPTMDs;
   }
 
   @Override
@@ -45,6 +52,10 @@ public abstract class AbstractDisplayPTMDataAction extends AbstractRSMAction  {
       DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
       actionImpl(dataSetNode);
     }
+  }
+
+  protected  boolean isAnnotatedPTMsAction(){
+    return m_isAnnotatedPTMs;
   }
 
   protected  abstract void loadWindowBox(DDataset dataSet, Object data);
@@ -58,7 +69,12 @@ public abstract class AbstractDisplayPTMDataAction extends AbstractRSMAction  {
     }
 
     //Test if PTMDataset already loaded
-    PTMDataset ptmDataset = m_dataIsPTMSite ?  DatabaseDataManager.getDatabaseDataManager().getSitesPTMDatasetForDS(dataSet.getId()) :  DatabaseDataManager.getDatabaseDataManager().getClustersPTMDatasetForDS(dataSet.getId());
+    PTMDataset ptmDataset = null;
+    if(m_isAnnotatedPTMs)
+      ptmDataset = m_dataIsPTMSite ?  DatabaseDataManager.getDatabaseDataManager().getAnnotatedSitesPTMDatasetForDS(dataSet.getId()) :  DatabaseDataManager.getDatabaseDataManager().getAnnotatedClustersPTMDatasetForDS(dataSet.getId());
+    else
+      ptmDataset = m_dataIsPTMSite ?  DatabaseDataManager.getDatabaseDataManager().getSitesPTMDatasetForDS(dataSet.getId()) :  DatabaseDataManager.getDatabaseDataManager().getClustersPTMDatasetForDS(dataSet.getId());
+
     if(ptmDataset != null){
       loadWindowBox(dataSet, ptmDataset);
 

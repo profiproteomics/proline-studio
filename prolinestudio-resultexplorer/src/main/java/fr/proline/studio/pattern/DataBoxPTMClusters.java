@@ -59,6 +59,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     private final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.ptm");
 
     private boolean m_loadSitesAsClusters;
+    private boolean m_isAnnotatedData;
     private long logStartTime;
 
     private PTMDatasetPair m_ptmDatasetPair;
@@ -68,11 +69,17 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     private boolean m_isXicResult = false; //If false: display Ident result PTM Clusters
 
     public DataBoxPTMClusters() {
-        this(false);
+        this(false, false);
     }
+
     public DataBoxPTMClusters(boolean viewSitesAsClusters) {
+        this(viewSitesAsClusters, false);
+    }
+
+    public DataBoxPTMClusters(boolean viewSitesAsClusters, boolean isAnnotatedData) {
         super(viewSitesAsClusters ? DataboxType.DataBoxPTMSiteAsClusters : DataboxType.DataBoxPTMClusters, AbstractDataBox.DataboxStyle.STYLE_RSM);
         m_loadSitesAsClusters = viewSitesAsClusters;
+        m_isAnnotatedData = isAnnotatedData;
 
        // Name of this databox
         m_typeName = viewSitesAsClusters ?  "Dataset PTMs Sites" :  "Dataset PTMs Clusters"; //May be Quant PTM Protein Sites...
@@ -194,7 +201,10 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                 if (finished) {
                     setLoaded(loadingId);
                     unregisterTask(taskId);
-                    DatabaseDataManager.getDatabaseDataManager().addLoadedPTMDatasetSet(ptmDSSet.get(0));
+                    if(m_isAnnotatedData)
+                        DatabaseDataManager.getDatabaseDataManager().addLoadedAnnotatedPTMDatasetSet(ptmDSSet.get(0));
+                    else
+                        DatabaseDataManager.getDatabaseDataManager().addLoadedPTMDatasetSet(ptmDSSet.get(0));
                     m_logger.debug(" Task "+taskId+" DONE. Should propagate changes ");
                     addDataChanged(ExtendedTableModelInterface.class);
                     propagateDataChanged();
@@ -206,7 +216,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         // ask asynchronous loading of data
 
         DatabaseDatasetPTMsTask task = new DatabaseDatasetPTMsTask(callback);
-        task.initLoadPTMDataset(getProjectId(), m_datasetSet, ptmDSSet);
+        task.initLoadPTMDataset(getProjectId(), m_datasetSet, ptmDSSet, m_isAnnotatedData);
         m_logger.debug("DataBoxPTMClusters : **** Register task DatabasePTMsTask.initLoadPTMDataset. ID= "+task.getId());
         registerTask(task);
           
@@ -397,33 +407,12 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                 if(finished) {
                     unregisterTask(taskId);
                     m_logger.info("MQPeptides loaded !! ");
-                    DMasterQuantitationChannel masterQC = m_datasetSet.getMasterQuantitationChannels().get(0);
                     Map<Long, DMasterQuantPeptide> mqPepByPepInstId = masterQuantPeptideList.stream().collect(Collectors.toMap(DMasterQuantPeptide::getPeptideInstanceId, x -> x));
 
                     for (PTMCluster currentCluster : proteinPTMClusters) {
-                        if (currentCluster.getMasterQuantProteinSet() != null) {
-
-                            // Update DMasterQuantPeptide for bestPtm
-                            // Get BestPepMatch Parent DPeptideInstance
-                            List<DPeptideInstance> parentPeptideInstances = currentCluster.getParentPeptideInstances();
-
-                            //
-                            // Best peptide match quantification
-                            //
-                            Long bestPepMatchPepId = currentCluster.getRepresentativePepMatch().getPeptide().getId();
-                            Optional<DPeptideInstance> parentBestPepI = parentPeptideInstances.stream().filter(peI ->bestPepMatchPepId.equals(peI.getPeptideId())).findFirst();
-                            if(parentBestPepI.isPresent()) {
-                                DMasterQuantPeptide mqPep = mqPepByPepInstId.get(parentBestPepI.get().getId());
-                                currentCluster.setRepresentativeMQPepMatch(mqPep);
-                            }
-
-                            //
-                            // Sum of peptides
-                            // VDS ==> CBy replace preceding code ?!
-                            List<DMasterQuantPeptide> mqPeps = parentPeptideInstances.stream().map(parentPepI -> mqPepByPepInstId.get(parentPepI.getId())).filter(Objects::nonNull).collect(Collectors.toList());
-                            currentCluster.setRepresentativeMQPepMatch(new AggregatedMasterQuantPeptide(mqPeps, masterQC));
-                        }
+                        currentCluster.setRepresentativeMQPepMatch(getPTMDatasetToView().getRepresentativeMQPeptideForCluster(currentCluster, mqPepByPepInstId));
                     }
+
                     //Update Cluster Panel
                     ((PTMClustersPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                 }
@@ -545,7 +534,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         if(data instanceof DDataset){
             //Test if PTMDataset already loaded
             m_datasetSet = (DDataset)data;
-            m_ptmDatasetPair = DatabaseDataManager.getDatabaseDataManager().getPTMDatasetSetForDS( m_datasetSet.getId() );
+            m_ptmDatasetPair = m_isAnnotatedData ?  DatabaseDataManager.getDatabaseDataManager().getAnnotatedPTMDatasetSetForDS(m_datasetSet.getId() ) :  DatabaseDataManager.getDatabaseDataManager().getPTMDatasetSetForDS( m_datasetSet.getId() );
 
             //Not yet loaded. Init dataset if needed before loading all data =>  dataChanged();
             if( m_ptmDatasetPair == null){
@@ -608,7 +597,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         } else if(data instanceof PTMDataset){ //specified data is not DDataset, check if it is a PTMDataset
 
             // If PTMDataset is specified it should be initialized ...
-            m_ptmDatasetPair = DatabaseDataManager.getDatabaseDataManager().getPTMDatasetSetForDS( ((PTMDataset) data).getDataset().getId() );
+            m_ptmDatasetPair = m_isAnnotatedData ?   DatabaseDataManager.getDatabaseDataManager().getAnnotatedPTMDatasetSetForDS( ((PTMDataset) data).getDataset().getId() ) : DatabaseDataManager.getDatabaseDataManager().getPTMDatasetSetForDS( ((PTMDataset) data).getDataset().getId() );
             if(m_ptmDatasetPair == null || (!m_ptmDatasetPair.getClusterPTMDataset().equals(data) && !m_ptmDatasetPair.getSitePTMDataset().equals(data)))
                 throw new IllegalArgumentException("Invalid specified PTMDataset.");
 

@@ -20,8 +20,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.msi.dto.*;
+import fr.proline.core.orm.msi.repository.ObjectTreeSchemaRepository;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.Exceptions;
@@ -50,10 +54,13 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
     private PTMDataset m_clusterPtmDataset = null;
     private PTMDataset m_sitePtmDataset = null;
 
+    private boolean m_loadAnnotatedDataset;
+
     //attributes to initialize when data is retrieve
     private List<PTMDatasetPair> m_ptmDatasetPairOutput = null;
     private List<PTMSite> m_ptmSitesOutput = null;
 
+    public static final int NO_SUB_TASK_COUNT = 0;
 
     public static final int SUB_TASK_PTMSITE_PEPTIDES = 0;
     public static final int SUB_TASK_PTMCLUSTER_PEPTIDES = 1;
@@ -75,8 +82,10 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
     private int m_action;
     private final static int LOAD_PTMDATASETPAIR = 0;
     private final static int FILL_ALL_PTM_SITES_PEPINFO = 1;
+    private final static int SAVE_PTMDATASET = 2;
 
     public final static String ERROR_PTM_CLUSTER_LOADING = "PTM Cluster Loading Error";
+    public final static String ERROR_PTM_CLUSTER_SAVING = "Error Saving Annotated PTM Dataset";
 
     public DatabaseDatasetPTMsTask(AbstractDatabaseCallback callback) {
         super(callback);
@@ -89,11 +98,12 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
      * @param dataset : dataset to get PTMDatasets for
      * @param ptmDatasetset output list where to store created data
      */
-    public void initLoadPTMDataset(Long projectId, DDataset dataset, List<PTMDatasetPair> ptmDatasetset) {
+    public void initLoadPTMDataset(Long projectId, DDataset dataset, List<PTMDatasetPair> ptmDatasetset, boolean loadAnnotatedDataset) {
         init(SUB_TASK_COUNT_PTMDATASET, new TaskInfo("Load PTM Dataset for " + dataset.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
         m_ptmDatasetPairOutput = ptmDatasetset;
         m_dataset = dataset;
+        m_loadAnnotatedDataset = loadAnnotatedDataset;
         m_action = LOAD_PTMDATASETPAIR;
     }
 
@@ -112,6 +122,20 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         m_action = FILL_ALL_PTM_SITES_PEPINFO;
     }
 
+    /**
+     * Add annotated PTMDataset information in datastore : create new property object to resultsummary
+     * @param projectId : Id of the project the dataset belongs to
+
+     * @param ptmDataset PTMDataset to save
+     */
+    public void initAddAnnotatedPTMDataset(Long projectId, PTMDataset ptmDataset) {
+        init(NO_SUB_TASK_COUNT, new TaskInfo("Save PTM Dataset for " + ptmDataset.getDataset().getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
+        m_projectId = projectId;
+        m_clusterPtmDataset = ptmDataset;
+        m_dataset = ptmDataset.getDataset();
+        m_action = SAVE_PTMDATASET;
+    }
+
     @Override
     public boolean needToFetch() {
         switch (m_action) {
@@ -120,6 +144,8 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
             case LOAD_PTMDATASETPAIR: {
                 return (m_ptmDatasetPairOutput == null || m_ptmDatasetPairOutput.isEmpty() );
             }
+            case SAVE_PTMDATASET:
+                return  true;
        }
         return false; // should not be called 
     }
@@ -143,9 +169,11 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
                 } else // fetch data of SubTasks
                 {
                     return fetchDataSubTaskFor(FILL_ALL_PTM_SITES_PEPINFO);
+                }
             }
+            case SAVE_PTMDATASET:{
+                return savePTMDataset();
             }
-
         }
         } finally {
             PerformanceTest.displayTimeAllThreads();
@@ -227,8 +255,13 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
             createPTMDatasetPTMSites(jsonDS, entityManagerMSI);
 
             for (Long i : jsonDS.ptmIds) {
-                m_clusterPtmDataset.addInfoPTM(DInfoPTM.getInfoPTMMap().get(i));
-                m_sitePtmDataset.addInfoPTM(DInfoPTM.getInfoPTMMap().get(i));
+                List<DInfoPTM> ptmSpecificities = DInfoPTM.getInfoPTMForPTM(i);
+                if(ptmSpecificities.size()>0){
+                    ptmSpecificities.forEach(dInfoPTM -> {
+                        m_clusterPtmDataset.addInfoPTM(dInfoPTM);
+                        m_sitePtmDataset.addInfoPTM(dInfoPTM);
+                    });
+                }
             }
             createPTMDatasetPTMClusters(jsonDS, entityManagerMSI);
 
@@ -295,14 +328,70 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         return true;
     }
 
+    //ENTRY POINT for SAVE_PTMDATASET action
+    private boolean savePTMDataset(){
+        EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
+
+        try {
+
+            ResultSummary rsm = entityManagerMSI.find(ResultSummary.class, m_dataset.getResultSummaryId());
+            if(rsm ==null){
+                m_taskError = new TaskError(ERROR_PTM_CLUSTER_SAVING," Unable to save PTMDataset for dataset "+m_clusterPtmDataset.getDataset().getName()+", No identification Summary attached");
+                return  false;
+            }
+            entityManagerMSI.getTransaction().begin();
+            if (rsm.getObjectTreeIdByName() != null && rsm.getObjectTreeIdByName().get("result_summary.ptm_dataset_annotated") != null) {
+                //remove previous object tree
+                Long obId = rsm.getObjectTreeIdByName().get("result_summary.ptm_dataset_annotated");
+                rsm.removeObject("result_summary.ptm_dataset_annotated");
+//                entityManagerMSI.createNativeQuery("ALTER TABLE object_tree DISABLE TRIGGER ALL;").executeUpdate();
+                entityManagerMSI.createNativeQuery("DELETE FROM result_summary_object_tree_map WHERE object_tree_id = " + obId + " AND schema_name = 'result_summary.ptm_dataset_annotated'; ").executeUpdate();
+                entityManagerMSI.createNativeQuery("DELETE FROM object_tree WHERE id = " + obId +"; ").executeUpdate();
+//                entityManagerMSI.createNativeQuery("ALTER TABLE object_tree ENABLE TRIGGER ALL;").executeUpdate();
+            }
+
+
+
+            JSONPTMDataset jsonPTMDataset = m_clusterPtmDataset.createJSONPTMDataset();
+            Gson gson = new GsonBuilder().serializeNulls().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+            String jsonString = gson.toJson(jsonPTMDataset);
+
+            ObjectTree newPTMDataset = new ObjectTree() ;
+            newPTMDataset.setSchema(ObjectTreeSchemaRepository.loadOrCreateObjectTreeSchema(entityManagerMSI, ObjectTreeSchema.SchemaName.PTM_DATASET_ANNOTATED.toString()));
+            newPTMDataset.setClobData(jsonString);
+            entityManagerMSI.persist(newPTMDataset);
+
+            rsm.putObject("result_summary.ptm_dataset_annotated", newPTMDataset.getId());
+            entityManagerMSI.merge(rsm);
+            entityManagerMSI.getTransaction().commit();
+
+        }catch (Exception e){
+            m_logger.error(getClass().getSimpleName() + " failed", e);
+            m_taskError = new TaskError(e);
+            try {
+                entityManagerMSI.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
+            return false;
+        } finally {
+            entityManagerMSI.close();
+        }
+
+        return true;
+    }
+
+
+
     private JSONPTMDataset readJSONPTMDataset(EntityManager entityManagerMSI) throws JsonProcessingException {
         //--- Read PTM data in object tree associated to rsm
         ResultSummary rsm = entityManagerMSI.find(ResultSummary.class, m_dataset.getResultSummaryId());
-        if (rsm.getObjectTreeIdByName().isEmpty() || rsm.getObjectTreeIdByName().get("result_summary.ptm_dataset") == null) {
+        String schemaName =  m_loadAnnotatedDataset ? "result_summary.ptm_dataset_annotated" : "result_summary.ptm_dataset";
+        if (rsm.getObjectTreeIdByName().isEmpty() || rsm.getObjectTreeIdByName().get(schemaName) == null) {
             m_taskError = new TaskError(ERROR_PTM_CLUSTER_LOADING, "\"Identification Modification Sites\"  has not been run on this dataset.");
             throw new RuntimeException("\"Identification Modification Sites\"  has not been run on this dataset.");
         }
-        ObjectTree ot = entityManagerMSI.find(ObjectTree.class, rsm.getObjectTreeIdByName().get("result_summary.ptm_dataset"));
+        ObjectTree ot = entityManagerMSI.find(ObjectTree.class, rsm.getObjectTreeIdByName().get(schemaName));
         ObjectMapper mapper = new ObjectMapper();
         mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
 
@@ -414,6 +503,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         m_ptmClustersByBestPepMatchId.get(bestPepMatchID).add(ptmCluster);
         return true;
     }
+
     private void createPTMDatasetPTMClusters(JSONPTMDataset jsonDataset,  EntityManager entityManagerMSI) {
 
         PerformanceTest.startTime("createPTMDatasetPTMClusters");
@@ -424,10 +514,11 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         //Create PTMCluster for SitePTMDataset
         List<PTMCluster> allClusters = new ArrayList<>();
         for (PTMSite site : m_sitePtmDataset.getPTMSites()) {
-            PTMCluster ptmCluster = new PTMCluster(site.getId(), site.getLocalisationConfidence(), Collections.singletonList(site.getId()), site.getPeptideIds(), m_sitePtmDataset);
+            PTMCluster ptmCluster = new PTMCluster(site.getId(), site.getLocalisationConfidence(), 2/*SELECTED AUTO*/,  Collections.singletonList(site.getId()), site.getPeptideIds(), m_sitePtmDataset);
             Long bestPepMatchID = site.getBestProbabilityPepMatchId();
             if(fillClusterPeptidesMaps(ptmCluster, bestPepMatchID))
                 allClusters.add(ptmCluster);
+            ptmCluster.setPTMSitesCount(1); //Only One PTMSite per Cluster.
         }
         m_sitePtmDataset.setPTMClusters(allClusters);
 

@@ -236,7 +236,8 @@ public class IconManager {
         TIC,
         TIC_MS1,
         BPC,
-        MS2;
+        MS2,
+        MERGE_PTM;
     }
     
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -772,6 +773,8 @@ public class IconManager {
                 return "fr/proline/studio/images/bpc.png";
             case MS2:
                 return "fr/proline/studio/images/ms2.png";
+            case MERGE_PTM:
+                return "fr/proline/studio/images/merge_ptm.png";
         }
 
         return null; // can not happen

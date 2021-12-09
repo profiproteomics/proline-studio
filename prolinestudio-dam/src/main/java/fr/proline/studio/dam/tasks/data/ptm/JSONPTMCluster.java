@@ -27,6 +27,8 @@ public class JSONPTMCluster {
 
     public Long id;
 
+    public Integer selectionLevel;
+
     // Array of PTM site locations Ids
     public Long[] ptmSiteLocations;
     

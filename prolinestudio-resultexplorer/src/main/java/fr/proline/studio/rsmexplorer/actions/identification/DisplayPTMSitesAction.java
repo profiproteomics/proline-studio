@@ -30,13 +30,17 @@ import fr.proline.studio.rsmexplorer.tree.AbstractTree;
  */
 public class DisplayPTMSitesAction  extends AbstractDisplayPTMDataAction {
 
+    public DisplayPTMSitesAction(boolean isAnnotated, AbstractTree tree) {
+        super(true, isAnnotated, tree);
+    }
+
     public DisplayPTMSitesAction(AbstractTree tree) {
        super(true, tree);
     }
 
 
     protected void loadWindowBox(DDataset ds, Object data){
-        WindowBox wbox = WindowBoxFactory.getPTMDataWindowBox(ds.getName(), true);
+        WindowBox wbox = WindowBoxFactory.getPTMDataWindowBox(ds.getName(), true, isAnnotatedPTMsAction());
 
         // open a window to display the window box
         DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
@@ -45,6 +49,5 @@ public class DisplayPTMSitesAction  extends AbstractDisplayPTMDataAction {
         // prepare window box
         wbox.setEntryData(ds.getProject().getId(), data);
     }
-
 
 }

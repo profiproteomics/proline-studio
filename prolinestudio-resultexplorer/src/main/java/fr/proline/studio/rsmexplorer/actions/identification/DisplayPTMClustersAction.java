@@ -31,12 +31,16 @@ import fr.proline.studio.rsmexplorer.tree.AbstractTree;
  */
 public class DisplayPTMClustersAction  extends AbstractDisplayPTMDataAction {
 
+    public DisplayPTMClustersAction(boolean isAnnotated, AbstractTree tree) {
+        super(false, isAnnotated, tree);
+    }
+
     public DisplayPTMClustersAction(AbstractTree tree) {
        super(false, tree);
     }
 
     protected void loadWindowBox(DDataset dataSet, Object data){
-        WindowBox wbox = WindowBoxFactory.getPTMDataWindowBox(dataSet.getName(), false);
+        WindowBox wbox = WindowBoxFactory.getPTMDataWindowBox(dataSet.getName(), false, isAnnotatedPTMsAction());
         wbox.setEntryData(dataSet.getProject().getId(), data);
 
         // open a window to display the window box

@@ -45,11 +45,13 @@ public class DatabaseDataManager  {
     private Project m_currentProject;
 
     private HashMap<Long, PTMDatasetPair> m_ptmDatasetSetPerDatasetId;
+    private HashMap<Long, PTMDatasetPair> m_ptmAnnotatedDatasetSetPerDatasetId;
 
     private HashMap<Aggregation.ChildNature, Aggregation> m_aggregationMap = null;
     
     private DatabaseDataManager() {
         m_ptmDatasetSetPerDatasetId = new HashMap<>();
+        m_ptmAnnotatedDatasetSetPerDatasetId  = new HashMap<>();
     }
     
     public static DatabaseDataManager getDatabaseDataManager() {
@@ -235,6 +237,31 @@ public class DatabaseDataManager  {
     public PTMDatasetPair getPTMDatasetSetForDS(Long dsId){
         return m_ptmDatasetSetPerDatasetId.get(dsId);
     }
+
+
+    //Annotated PTM Datasets
+    public void addLoadedAnnotatedPTMDatasetSet(PTMDatasetPair ptmDSSet){
+        m_ptmAnnotatedDatasetSetPerDatasetId.put(ptmDSSet.getDataset().getId(), ptmDSSet);
+    }
+
+    public PTMDataset getAnnotatedClustersPTMDatasetForDS(Long dsId){
+        if (m_ptmAnnotatedDatasetSetPerDatasetId.containsKey(dsId))
+            return m_ptmAnnotatedDatasetSetPerDatasetId.get(dsId).getClusterPTMDataset();
+        return null;
+    }
+
+
+    public PTMDataset getAnnotatedSitesPTMDatasetForDS(Long dsId){
+        if (m_ptmAnnotatedDatasetSetPerDatasetId.containsKey(dsId))
+            return m_ptmAnnotatedDatasetSetPerDatasetId.get(dsId).getSitePTMDataset();
+        return null;
+    }
+
+
+    public PTMDatasetPair getAnnotatedPTMDatasetSetForDS(Long dsId){
+        return m_ptmAnnotatedDatasetSetPerDatasetId.get(dsId);
+    }
+
 
     public void setLoggedUser(UserAccount loggedUser) {
         m_loggedUser = loggedUser;

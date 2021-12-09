@@ -19,12 +19,13 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
-import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
-import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
+import fr.proline.studio.dam.tasks.DatabaseDatasetPTMsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
+import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.extendedtablemodel.*;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
@@ -35,54 +36,46 @@ import fr.proline.studio.markerbar.BookmarkMarker;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataAnalyzerWindowBoxManager;
+import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.rsmexplorer.actions.ViewColocalizedPTMClustersAction;
-import fr.proline.studio.rsmexplorer.gui.model.PTMClusterTableModel;
-import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
+import fr.proline.studio.rsmexplorer.gui.model.PTMClusterTableModel;
 import fr.proline.studio.search.SearchToggleButton;
-import fr.proline.studio.extendedtablemodel.CompoundTableModel;
-import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.ImportTableSelectionInterface;
 import fr.proline.studio.table.LazyTable;
+import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.table.TablePopupMenu;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Image;
+import fr.proline.studio.utils.IconManager;
+import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.table.TableColumnExt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.ArrayList;
 import java.util.HashSet;
-import javax.swing.ImageIcon;
-import javax.swing.JLayeredPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.JToolBar;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
-import org.jdesktop.swingx.JXTable;
-import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
-
 import java.util.List;
-import javax.swing.table.TableColumn;
-import org.jdesktop.swingx.table.TableColumnExt;
 
 /**
  *
  * @author JM235353
  */
 public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
-    
+
+    private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+
     private AbstractDataBox m_dataBox;
     
     private JScrollPane m_scrollPane;
@@ -99,6 +92,7 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
+
 
     /**
      * Creates new form PTMProteinSitePanel
@@ -326,9 +320,40 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
 
         m_exportButton = new ExportButton(((CompoundTableModel) m_ptmClusterTable.getModel()), "Protein Sets", m_ptmClusterTable);
 
+        JButton saveButton = new JButton();
+        saveButton.setIcon(IconManager.getIcon(IconManager.IconType.SAVE_SETTINGS));
+        saveButton.setToolTipText("Save Annotated Modifications Clusters");
+        saveButton.addActionListener(e -> {
+            PTMDataset ptmDataset = (PTMDataset) m_dataBox.getData(PTMDataset.class);
+            DatabaseDatasetPTMsTask task = new  DatabaseDatasetPTMsTask(null);
+            task.initAddAnnotatedPTMDataset(m_dataBox.getProjectId(),  ptmDataset);
+            task.fetchData();
+
+            m_infoToggleButton.updateInfo();
+        });
+
+        JButton mergeButton = new JButton();
+        mergeButton.setIcon(IconManager.getIcon(IconManager.IconType.MERGE_PTM));
+        mergeButton.setToolTipText("Merge selected clusters");
+        mergeButton.addActionListener(e -> {
+            PTMClusterTableModel m = (PTMClusterTableModel) ((CompoundTableModel)m_ptmClusterTable.getModel()).getBaseModel();
+            if(m.getRowCount() > 0 && m_ptmClusterTable.getSelectedRowCount() > 1) {
+                List<PTMCluster> clusters = getSelectedPTMClusters();
+                m_logger.debug(" Merge "+ clusters.size()+" clusters  ");
+                PTMDataset ptmDS = clusters.get(0).getPTMDataset();
+                ptmDS.mergeClusters(clusters);
+
+                m_ptmClusterTable.dataUpdated(null, true);
+                m_dataBox.propagateDataChanged();
+                m_infoToggleButton.updateInfo();
+            }
+        });
+
         toolbar.add(m_filterButton);
         toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
+        toolbar.add(saveButton);
+        toolbar.add(mergeButton);
 
         m_addCompareDataButton = new AddDataAnalyzerButton(((CompoundTableModel) m_ptmClusterTable.getModel())) {
            

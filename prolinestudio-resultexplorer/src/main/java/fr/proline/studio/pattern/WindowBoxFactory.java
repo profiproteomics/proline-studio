@@ -303,9 +303,9 @@ public class WindowBoxFactory {
      * @param dataName
      * @return 
      */
-    public static WindowBox getPTMDataWindowBox(String dataName, boolean viewSites) {
+    public static WindowBox getPTMDataWindowBox(String dataName, boolean viewSites, boolean isAnnotated) {
         AbstractDataBox[] boxes = new AbstractDataBox[4];
-        boxes[0] = new DataBoxPTMClusters(viewSites);
+        boxes[0] = new DataBoxPTMClusters(viewSites, isAnnotated);
         boxes[0].setDataName(dataName);
         ((DataBoxPTMClusters) boxes[0]).setXicResult(false);
         boxes[1] = new DataBoxPTMPeptidesGraphic();

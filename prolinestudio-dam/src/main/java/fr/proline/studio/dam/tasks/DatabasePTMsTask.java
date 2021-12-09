@@ -236,7 +236,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
             return; // already loaded
         }
 
-        TypedQuery<DInfoPTM> ptmInfoQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DInfoPTM(spec.id, spec.residue, spec.location, ptm.shortName, evidence.composition, evidence.monoMass) \n"
+        TypedQuery<DInfoPTM> ptmInfoQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DInfoPTM(spec.id, ptm.id, spec.residue, spec.location, ptm.shortName, evidence.composition, evidence.monoMass) \n"
                 + "FROM fr.proline.core.orm.msi.PtmSpecificity as spec, fr.proline.core.orm.msi.Ptm as ptm, fr.proline.core.orm.msi.PtmEvidence as evidence \n"
                 + "WHERE spec.ptm=ptm AND ptm=evidence.ptm AND evidence.type='Precursor' ", DInfoPTM.class);
         List<DInfoPTM> ptmInfoList = ptmInfoQuery.getResultList();

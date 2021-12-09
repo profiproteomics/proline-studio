@@ -19,6 +19,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.dam.data.SelectLevelEnum;
 import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -806,10 +807,10 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
             actionStarted();
             String command = m_globalButtonGroup.getSelection().getActionCommand();
             if (command.equals(CMD_VALIDATED)) {
-                ArrayList<DMasterQuantPeptide> listToModify = m_quantPeptideTableModel.listToModifyForValidateModifications(m_selectedRows, XicStatusRenderer.SelectLevelEnum.SELECTED_MANUAL);
+                ArrayList<DMasterQuantPeptide> listToModify = m_quantPeptideTableModel.listToModifyForValidateModifications(m_selectedRows, SelectLevelEnum.SELECTED_MANUAL);
                 m_quantPeptideTableModel.validateModifications(XicPeptidePanel.this, listToModify);
             } else if (command.equals(CMD_INVALIDATED)) {
-                ArrayList<DMasterQuantPeptide> listToModify = m_quantPeptideTableModel.listToModifyForValidateModifications(m_selectedRows, XicStatusRenderer.SelectLevelEnum.DESELECTED_MANUAL);
+                ArrayList<DMasterQuantPeptide> listToModify = m_quantPeptideTableModel.listToModifyForValidateModifications(m_selectedRows, SelectLevelEnum.DESELECTED_MANUAL);
                 m_quantPeptideTableModel.validateModifications(XicPeptidePanel.this, listToModify);
             }
             super.m_buttonClicked = BUTTON_OK;
@@ -820,7 +821,7 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
             ActionListener resetAction = new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    ArrayList<DMasterQuantPeptide> listToModify = m_quantPeptideTableModel.listToModifyForValidateModifications(m_selectedRows, XicStatusRenderer.SelectLevelEnum.RESET_AUTO);
+                    ArrayList<DMasterQuantPeptide> listToModify = m_quantPeptideTableModel.listToModifyForValidateModifications(m_selectedRows, SelectLevelEnum.RESET_AUTO);
 
                     m_quantPeptideTableModel.validateModifications(XicPeptidePanel.this, listToModify);
                 }
@@ -848,7 +849,7 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
             m_internalPanel.setLoading(1, true);
         }
 
-        /**
+        /*
          * single selected, trigger by mouse clic on column
          * QuantPeptideTableModel.COLTYPE_MQPEPTIDE_SELECTION_LEVEL
          *
@@ -880,7 +881,7 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
         }*/
 
 
-        private void updateRadioButton(ButtonGroup buttonGroup, boolean selectLevelHomogenous, XicStatusRenderer.SelectLevelEnum selectLevel, XRadioButtonGroup validPane, XRadioButtonGroup invalidPane) {
+        private void updateRadioButton(ButtonGroup buttonGroup, boolean selectLevelHomogenous, SelectLevelEnum selectLevel, XRadioButtonGroup validPane, XRadioButtonGroup invalidPane) {
 
             if (selectLevelHomogenous) {
                 switch (selectLevel) {
@@ -909,10 +910,10 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
             }
         }
 
-        private void updateLocal(boolean localSelectLevelHomogenous, XicStatusRenderer.SelectLevelEnum selectLevel, LocalStatusPanel statusPanel) {
+        private void updateLocal(boolean localSelectLevelHomogenous, SelectLevelEnum selectLevel, LocalStatusPanel statusPanel) {
 
-            boolean automatic = (selectLevel == XicStatusRenderer.SelectLevelEnum.DESELECTED_AUTO) || (selectLevel == XicStatusRenderer.SelectLevelEnum.SELECTED_AUTO);
-            boolean validated = (selectLevel == XicStatusRenderer.SelectLevelEnum.SELECTED_AUTO) || (selectLevel == XicStatusRenderer.SelectLevelEnum.SELECTED_MANUAL);
+            boolean automatic = (selectLevel == SelectLevelEnum.DESELECTED_AUTO) || (selectLevel == SelectLevelEnum.SELECTED_AUTO);
+            boolean validated = (selectLevel == SelectLevelEnum.SELECTED_AUTO) || (selectLevel == SelectLevelEnum.SELECTED_MANUAL);
 
             statusPanel.setValues(localSelectLevelHomogenous, validated, automatic);
 
@@ -921,7 +922,7 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
         /**
          * multi select, trigger by m_modifyStatusButton
          *
-         * @param selectedRows: non empty array, table row orignal index, not
+         * @param selectedViewRows: non empty array, table row orignal index, not
          * model index
          */
         /*private void setSelectedRowsOLD(int[] selectedViewRows) {
@@ -965,7 +966,7 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
                     break;
                 }
             }
-            updateRadioButton(m_globalButtonGroup, globalSelectLevelHomogenous, XicStatusRenderer.SelectLevelEnum.valueOf(globalSelectLevelRef), m_globalValidButtonPane, m_globalInvalidButtonPane);
+            updateRadioButton(m_globalButtonGroup, globalSelectLevelHomogenous, SelectLevelEnum.valueOf(globalSelectLevelRef), m_globalValidButtonPane, m_globalInvalidButtonPane);
 
             boolean localSelectLevelHomogenous = true;
             int localSelectLevelRef = m_quantPeptideTableModel.getSelectionLevelFor(firstSelectedPeptide).m_status.getIntValue();
@@ -983,7 +984,7 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
 
 
 
-            ArrayList<DMasterQuantPeptide> listToModify = m_quantPeptideTableModel.listToModifyForValidateModifications(m_selectedRows, XicStatusRenderer.SelectLevelEnum.RESET_AUTO);
+            ArrayList<DMasterQuantPeptide> listToModify = m_quantPeptideTableModel.listToModifyForValidateModifications(m_selectedRows, SelectLevelEnum.RESET_AUTO);
             m_resetButton.setEnabled(listToModify != null);
         }
 

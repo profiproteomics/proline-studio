@@ -38,9 +38,11 @@ public class PTMCluster implements Comparable<PTMCluster>{
     private final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ptm");
 
     private final List<PTMSite> m_sites;
+    private int m_sitesCount;
     private final List<Long> m_peptideIds;
     private final Long m_id;
-    private final Float m_localizationConfidence;
+    private Float m_localizationConfidence;
+    private int m_selectionLevel;
 
     private List<Integer> m_positionsOnProtein;
     private List<Float> m_probabilities;
@@ -56,15 +58,18 @@ public class PTMCluster implements Comparable<PTMCluster>{
     private final PTMDataset m_ptmDataset;
 
     public PTMCluster(JSONPTMCluster jsonValue, PTMDataset ptmds) {
-        this(jsonValue.id, jsonValue.localizationConfidence, Arrays.asList(jsonValue.ptmSiteLocations), Arrays.asList(jsonValue.peptideIds), ptmds);
+        this(jsonValue.id, jsonValue.localizationConfidence, jsonValue.selectionLevel, Arrays.asList(jsonValue.ptmSiteLocations), Arrays.asList(jsonValue.peptideIds), ptmds);
     }
 
-    public PTMCluster(Long id, Float confidence, List<Long> ptmSiteIds, List<Long> peptideIds, PTMDataset ptmds) {
+    public PTMCluster(Long id, Float confidence, Integer selectionLevel, List<Long> ptmSiteIds, List<Long> peptideIds, PTMDataset ptmds) {
         m_ptmDataset = ptmds;
-        m_peptideIds = peptideIds;
+        m_peptideIds = new ArrayList<>();
+        m_peptideIds.addAll(peptideIds);
         m_localizationConfidence = confidence;
         m_sites = m_ptmDataset.getPTMSites().stream().filter(site -> ptmSiteIds.contains(site.getId())).sorted(Comparator.comparing(PTMSite::getPositionOnProtein)).collect(Collectors.toList());
+        m_sitesCount = -1;
         m_id = id;
+        m_selectionLevel = selectionLevel != null ? selectionLevel : 2;
 
         if(!m_sites.isEmpty()) {
             //Get ProteinMatch from one of the PTMSite : all should have same.
@@ -74,6 +79,44 @@ public class PTMCluster implements Comparable<PTMCluster>{
 
     }
 
+    public int getSelectionLevel(){
+        return  m_selectionLevel;
+    }
+
+    public void setSelectionLevel(int selectionLevel){
+        if(selectionLevel < 0  || selectionLevel >3)
+            throw new IllegalArgumentException("Invalid selection level specified");
+
+        m_selectionLevel = selectionLevel;
+    }
+
+
+    protected void addSites(List<PTMSite> newSites){
+        boolean listChanged = false;
+        for(PTMSite s : newSites){
+            if(!m_sites.contains(s)) {
+                m_sites.add(s);
+                listChanged = true;
+            }
+        }
+        if(listChanged){
+            m_positionsOnProtein = null;
+            m_probabilities = null;
+            m_parentPTMPeptideInstances = null;
+            m_leafPTMPeptideInstances = null;
+        }
+    }
+
+    protected void addPeptideIds(List<Long> newPepIds){
+        for(Long s : newPepIds){
+            if(!m_peptideIds.contains(s))
+                m_peptideIds.add(s);
+        }
+    }
+
+    protected void setLocalizationConfidence(Float localizationConfidence){
+        m_localizationConfidence = localizationConfidence;
+    }
     public Long getId() {
         return m_id;
     }
@@ -216,6 +259,16 @@ public class PTMCluster implements Comparable<PTMCluster>{
     public List<PTMSite> getPTMSites(){
         return m_sites;
     }
+
+    public Integer getPTMSitesCount(){
+        return  m_sitesCount;
+    }
+
+    public void setPTMSitesCount(Integer sitesCount){
+         m_sitesCount = sitesCount;
+    }
+
+
     
     public Integer getPeptideCount() {
         return m_peptideIds.size();
@@ -243,7 +296,7 @@ public class PTMCluster implements Comparable<PTMCluster>{
             return false;
 
         PTMCluster objCluster= (PTMCluster) obj;
-        return  objCluster.m_id.equals(m_id) && objCluster.m_proteinMatch.equals(m_proteinMatch) &&  objCluster.m_sites.equals(m_sites);
+        return  objCluster.m_id.equals(m_id); //ID Should be enough ! && objCluster.m_proteinMatch.equals(m_proteinMatch) &&  objCluster.m_sites.equals(m_sites);
     }
 
     @Override

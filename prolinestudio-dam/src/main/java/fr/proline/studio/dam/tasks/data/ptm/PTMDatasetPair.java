@@ -6,13 +6,23 @@ public class PTMDatasetPair {
 
   private PTMDataset m_sitePTMDataset;
   private PTMDataset m_clusterPTMDataset;
+  private int m_ptmDatasetType;
+
+  public static int RAW_PTM_DATASET= 0;
+  public static int ANNOTATED_PTM_DATASET= 1;
 
   public PTMDatasetPair(PTMDataset sitePTMDataset, PTMDataset clusterPTMDataset) {
+    this(sitePTMDataset, clusterPTMDataset, false);
+  }
+
+  public PTMDatasetPair(PTMDataset sitePTMDataset, PTMDataset clusterPTMDataset, boolean isAnnotated) {
     if(sitePTMDataset == null || clusterPTMDataset == null)
       throw  new IllegalArgumentException("PTMDatasets should not be null");
     m_sitePTMDataset =  sitePTMDataset;
     m_clusterPTMDataset = clusterPTMDataset;
+    m_ptmDatasetType = isAnnotated ? ANNOTATED_PTM_DATASET : RAW_PTM_DATASET;
   }
+
 
   public DDataset getDataset() {
       return m_clusterPTMDataset.getDataset();
@@ -27,7 +37,13 @@ public class PTMDatasetPair {
   }
 
   public void updateParentPTMPeptideInstanceClusters(){
-      m_sitePTMDataset.updateParentPTMPeptideInstanceClusters();
-      m_clusterPTMDataset.updateParentPTMPeptideInstanceClusters();
+      m_sitePTMDataset.updateParentPTMPeptideInstanceClusters(false);
+      m_clusterPTMDataset.updateParentPTMPeptideInstanceClusters(true);
  }
+
+  public int getPTMDatasetType() {
+    return m_ptmDatasetType;
+  }
+
+
 }

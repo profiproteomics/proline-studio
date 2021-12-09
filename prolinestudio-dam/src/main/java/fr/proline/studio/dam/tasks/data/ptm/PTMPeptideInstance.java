@@ -81,7 +81,11 @@ public class PTMPeptideInstance {
   public void addCluster(PTMCluster cluster){
       m_clusters.add(cluster);
   }
-   
+
+  public void removeCluster(PTMCluster cluster){
+    m_clusters.remove(cluster);
+  }
+
   public List<PTMCluster> getClusters(){
       return m_clusters;
   }

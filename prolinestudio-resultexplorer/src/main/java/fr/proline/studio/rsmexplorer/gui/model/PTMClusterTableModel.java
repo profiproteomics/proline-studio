@@ -19,6 +19,7 @@ package fr.proline.studio.rsmexplorer.gui.model;
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.dto.*;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.dam.data.SelectLevelEnum;
 import fr.proline.studio.dam.tasks.DatabaseDatasetPTMsTask;
 import fr.proline.studio.dam.tasks.data.ptm.ComparableList;
 import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
@@ -33,6 +34,7 @@ import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PercentageRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.SelectLevelRenderer;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.table.*;
 import fr.proline.studio.table.renderer.*;
@@ -54,26 +56,27 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
   private final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ptm");
 
   public static final int COLTYPE_PTM_CLUSTER_ID = 0;
-  public static final int COLTYPE_PROTEIN_ID = 1;
-  public static final int COLTYPE_PROTEIN_NAME = 2;
-  public static final int COLTYPE_PEPTIDE_NAME = 3;
-  public static final int COLTYPE_PEPTIDE_PTM = 4;
-  public static final int COLTYPE_PTM_PROBA = 5;
+  public static final int COLTYPE_PTM_CLUSTER_SELECTION_LEVEL = COLTYPE_PTM_CLUSTER_ID+ 1;
+  public static final int COLTYPE_PROTEIN_ID = COLTYPE_PTM_CLUSTER_SELECTION_LEVEL+1;
+  public static final int COLTYPE_PROTEIN_NAME = COLTYPE_PROTEIN_ID+1;
+  public static final int COLTYPE_PEPTIDE_NAME = COLTYPE_PROTEIN_NAME+1;
+  public static final int COLTYPE_PEPTIDE_PTM = COLTYPE_PEPTIDE_NAME+1;
+  public static final int COLTYPE_PTM_PROBA = COLTYPE_PEPTIDE_PTM+1;
 
 
-  public static final int COLTYPE_PEPTIDE_SCORE = 6;
-  public static final int COLTYPE_PEPTIDE_COUNT = 7;
-  public static final int COLTYPE_PTMSITE_COUNT = 8;
-  public static final int COLTYPE_PTMSITE_POSITIONS = 9;
-  public static final int COLTYPE_PTM_CLUSTER_CONFIDENCE = 10;
-  public static final int COLTYPE_PTMSITE_CONFIDENCES = 11;
+  public static final int COLTYPE_PEPTIDE_SCORE = COLTYPE_PTM_PROBA+1;
+  public static final int COLTYPE_PEPTIDE_COUNT = COLTYPE_PEPTIDE_SCORE+1;
+  public static final int COLTYPE_PTMSITE_COUNT = COLTYPE_PEPTIDE_COUNT+1;
+  public static final int COLTYPE_PTMSITE_POSITIONS = COLTYPE_PTMSITE_COUNT+1;
+  public static final int COLTYPE_PTM_CLUSTER_CONFIDENCE = COLTYPE_PTMSITE_POSITIONS+1;
+  public static final int COLTYPE_PTMSITE_CONFIDENCES = COLTYPE_PTM_CLUSTER_CONFIDENCE+1;
 
-  public static final int COLTYPE_DELTA_MASS_PTM = 12;
-  public static final int COLTYPE_SPECTRUM_TITLE = 13;
+  public static final int COLTYPE_DELTA_MASS_PTM = COLTYPE_PTMSITE_CONFIDENCES+1;
+  public static final int COLTYPE_SPECTRUM_TITLE = COLTYPE_DELTA_MASS_PTM+1;
   public static final int LAST_STATIC_COLUMN = COLTYPE_SPECTRUM_TITLE;
   
-  private static final String[] m_columnNames = {"Id", "Protein Id", "Protein", "Peptide", "PTMs", "PTMs Confid.(MDScore, %)", "Score", "Peptide count",  "Site count", "Sites Loc.", "Confidence" ,"Sites Confid.(%)", "PTM D.Mass", "Spectrum title"};
-  private static final String[] m_columnTooltips = {"PTM cluster Id", "Protein match Id", "Protein", "Peptide", "Peptide's PTMs", "PTMs localisation confidence (%)", "Score of the peptide match", "Number of peptides matching the modification site", "Number of modification sites grouped into the cluster", "Sites localisation on the protein", "Sites combined confidence", "Sites localisation confidence (%)", "PTMs delta mass", "Peptide match spectrum title"};
+  private static final String[] m_columnNames = {"Id", "Status", "Protein Id", "Protein", "Peptide", "PTMs", "PTMs Confid.(MDScore, %)", "Score", "Peptide count",  "Site count", "Sites Loc.", "Confidence" ,"Sites Confid.(%)", "PTM D.Mass", "Spectrum title"};
+  private static final String[] m_columnTooltips = {"PTM cluster Id", "Cluster Status: Validated or Invalidated ", "Protein match Id", "Protein", "Peptide", "Peptide's PTMs", "PTMs localisation confidence (%)", "Score of the peptide match", "Number of peptides matching the modification site", "Number of modification sites grouped into the cluster", "Sites localisation on the protein \nMay be greater than site count in case of merged clusters. ", "Sites combined confidence", "Sites localisation confidence (%) \nMay be greater than site count in case of merged clusters. ", "PTMs delta mass", "Peptide match spectrum title"};
      
   //Dynamique columns
 
@@ -176,6 +179,8 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
   public Class getColumnClass(int col) {
 
     switch (col) {
+      case COLTYPE_PTM_CLUSTER_SELECTION_LEVEL:
+        return SelectLevelEnum.class;
       case COLTYPE_PTM_CLUSTER_ID:
       case COLTYPE_PROTEIN_ID:
         return Long.class;      
@@ -184,11 +189,12 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
       case COLTYPE_PTM_CLUSTER_CONFIDENCE:
         return Float.class;
       case COLTYPE_PEPTIDE_COUNT: 
-      case COLTYPE_PTMSITE_COUNT:
+//      case COLTYPE_PTMSITE_COUNT:
         return Integer.class;
       case COLTYPE_PTMSITE_POSITIONS:
       case COLTYPE_PTMSITE_CONFIDENCES:
         return ComparableList.class;
+      case COLTYPE_PTMSITE_COUNT:
       case COLTYPE_PEPTIDE_NAME:
       case COLTYPE_PEPTIDE_PTM:
       case COLTYPE_SPECTRUM_TITLE:
@@ -205,6 +211,7 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
   @Override
   public int getSubTaskId(int col) {
     switch (col) {
+      case COLTYPE_PTMSITE_COUNT:
       case COLTYPE_PEPTIDE_NAME:
       case COLTYPE_PEPTIDE_PTM:
       case COLTYPE_SPECTRUM_TITLE:
@@ -237,6 +244,13 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
     switch (col) {
       case COLTYPE_PTM_CLUSTER_ID:
         return ptmCluster.getId();
+
+      case COLTYPE_PTM_CLUSTER_SELECTION_LEVEL:
+        SelectLevelEnum level = SelectLevelEnum.valueOf(ptmCluster.getSelectionLevel());
+        if (level == null) {
+            level = SelectLevelEnum.SELECTED_AUTO;
+        }
+        return  level;
 
       case COLTYPE_PROTEIN_ID:
         return proteinMatch.getId();
@@ -323,8 +337,15 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
         return ptmCluster.getPeptideCount();
 
       case COLTYPE_PTMSITE_COUNT:
-        return ptmCluster.getPTMSites().size();
-                
+        Integer siteSize = ptmCluster.getPTMSitesCount();
+        if (siteSize < 0) {
+          lazyData.setData(null);
+          givePriorityTo(m_taskId, row, col);
+          return lazyData;
+        }
+        lazyData.setData(siteSize);
+        return lazyData;
+
       case COLTYPE_SPECTRUM_TITLE: {
         if (peptideMatch == null) {            
             lazyData.setData(null);
@@ -496,6 +517,8 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
           case COLTYPE_PTM_PROBA:          
           case COLTYPE_PEPTIDE_SCORE:  
             return Float.class;
+        case COLTYPE_PTMSITE_COUNT:
+          return  Integer.class;
           default:
             if(columnIndex <= LAST_STATIC_COLUMN)
               return getColumnClass(columnIndex);
@@ -507,7 +530,10 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
   public Object getDataValueAt(int rowIndex, int columnIndex) {
     if (columnIndex == COLTYPE_PEPTIDE_NAME) {
       return ((DPeptideMatch)((LazyData) getValueAt(rowIndex, columnIndex)).getData()).getPeptide().getSequence();
+    } else if (columnIndex == COLTYPE_PTM_CLUSTER_SELECTION_LEVEL){
+      return ((SelectLevelEnum)getValueAt(rowIndex, columnIndex)).getIntValue();
     }
+
     return getValueAt(rowIndex, columnIndex);
   }
 
@@ -695,6 +721,9 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
         break;
       }
 
+      case COLTYPE_PTM_CLUSTER_SELECTION_LEVEL: {
+          renderer = new SelectLevelRenderer(null, COLTYPE_PTM_CLUSTER_SELECTION_LEVEL);
+      }
       case COLTYPE_PROTEIN_ID :
       case COLTYPE_PTM_CLUSTER_ID:
       case COLTYPE_PEPTIDE_COUNT:

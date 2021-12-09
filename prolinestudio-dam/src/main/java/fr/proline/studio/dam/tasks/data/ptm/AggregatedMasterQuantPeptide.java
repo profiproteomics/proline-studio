@@ -23,6 +23,10 @@ public class AggregatedMasterQuantPeptide extends DMasterQuantPeptide {
         m_quantPeptideByQchIds.put(qc.getId(), new AggregatedQuantPeptide(qPeps));
     }
   }
+
+  public List<DMasterQuantPeptide> getAggregatedMQPeptides(){
+    return m_mqPeptides;
+  }
 //
 //  @Override
 //  public DPeptideInstance getPeptideInstance() {

@@ -493,7 +493,7 @@ public class PTMDataset {
         List<DInfoPTM> ptmInfos = getInfoPTMs();
         Long[] ptmInfoIds = new Long[ptmInfos.size()];
         for(int i=0 ; i<ptmInfos.size();i++){
-            ptmInfoIds[i] = ptmInfos.get(i).getIdPtmSpecificity();
+            ptmInfoIds[i] = ptmInfos.get(i).getIdPtm();
         }
         ptmDS.ptmIds = ptmInfoIds;
 

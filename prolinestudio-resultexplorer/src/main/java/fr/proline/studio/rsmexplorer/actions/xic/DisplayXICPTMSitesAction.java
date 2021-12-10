@@ -32,15 +32,20 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
  */
 public class DisplayXICPTMSitesAction extends AbstractDisplayPTMDataAction {
 
+    public DisplayXICPTMSitesAction( boolean isAnnotatedPTMDs, AbstractTree tree) {
+        super(true, isAnnotatedPTMDs, tree,"Modification");
+
+    }
+
     public DisplayXICPTMSitesAction(AbstractTree tree) {
-       super(true, tree);
+       this( false, tree);
     }
 
 
     protected void loadWindowBox(DDataset dataSet, Object data) {
 
         // prepare window box
-        WindowBox wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName(), true);
+        WindowBox wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName(), true, isAnnotatedPTMsAction());
         wbox.setEntryData(dataSet.getProject().getId(), data);
 
         // open a window to display the window box

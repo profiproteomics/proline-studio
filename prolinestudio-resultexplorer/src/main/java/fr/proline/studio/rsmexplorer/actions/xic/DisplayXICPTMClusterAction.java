@@ -33,12 +33,14 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
  */
 public class DisplayXICPTMClusterAction extends AbstractDisplayPTMDataAction {
 
-    public DisplayXICPTMClusterAction(AbstractTree tree)
-    {
-       super(false, tree);
+    public DisplayXICPTMClusterAction(boolean isAnnotatedPTMDs, AbstractTree tree) {
+        super(false, isAnnotatedPTMDs, tree, "Modification");
     }
 
-
+    public DisplayXICPTMClusterAction(AbstractTree tree)
+    {
+        this( false, tree);
+    }
     
 
     @Override
@@ -74,7 +76,7 @@ public class DisplayXICPTMClusterAction extends AbstractDisplayPTMDataAction {
     }
 
     protected void loadWindowBox(DDataset dataSet, Object data) {
-        WindowBox wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName(), false);
+        WindowBox wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName(), false, isAnnotatedPTMsAction());
         wbox.setEntryData(dataSet.getProject().getId(), data);
 
         // open a window to display the window box

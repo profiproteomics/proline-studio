@@ -45,6 +45,13 @@ public abstract class AbstractDisplayPTMDataAction extends AbstractRSMAction  {
     m_isAnnotatedPTMs = isAnnotatedPTMDs;
   }
 
+  public AbstractDisplayPTMDataAction(boolean isSite,boolean isAnnotatedPTMDs, AbstractTree tree, String prefix) {
+    super(isSite ? (isAnnotatedPTMDs ? prefix+" Annotated Sites" : prefix+" Sites" ): (isAnnotatedPTMDs ? prefix+" Annotated Clusters" : prefix+" Clusters" ), tree);
+    m_dataIsPTMSite = isSite;
+    m_isAnnotatedPTMs = isAnnotatedPTMDs;
+  }
+
+
   @Override
   public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
     int nbNodes = selectedNodes.length;

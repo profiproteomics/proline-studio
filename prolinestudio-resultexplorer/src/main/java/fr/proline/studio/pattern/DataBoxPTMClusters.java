@@ -24,7 +24,6 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
@@ -37,6 +36,7 @@ import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
+import fr.proline.studio.rsmexplorer.DataBoxViewerManager;
 import fr.proline.studio.rsmexplorer.gui.PTMClustersPanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.types.XicMode;
@@ -68,6 +68,8 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     private QuantChannelInfo m_quantChannelInfo; //Xic Specific
     private boolean m_isXicResult = false; //If false: display Ident result PTM Clusters
 
+    private  boolean m_shouldBeSaved = false; //Indicates data of this Databox are not saved in datastore;
+
     public DataBoxPTMClusters() {
         this(false, false);
     }
@@ -82,7 +84,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         m_isAnnotatedData = isAnnotatedData;
 
        // Name of this databox
-        m_typeName = viewSitesAsClusters ?  "Dataset PTMs Sites" :  "Dataset PTMs Clusters"; //May be Quant PTM Protein Sites...
+        m_typeName = viewSitesAsClusters ?  (isAnnotatedData ? "Annotated PTMs Sites" : "Dataset PTMs Sites") :  (isAnnotatedData ? "Annotated PTMs Clusters" : "Dataset PTMs Clusters"); //May be Quant PTM Protein Sites...
         m_description = "Clusters of Modification Sites of a Dataset";//May be Ident or Quant dataset...
         
         // Register in parameters
@@ -161,6 +163,39 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         setDataBoxPanelInterface(p);
     }
 
+
+    @Override
+    public void dataMustBeRecalculated(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, int reason) {
+        if (m_datasetSet.getResultSetId() != rsetId) {
+            return;
+        }
+        if (m_datasetSet.getResultSummaryId() != rsmId) {
+            return;
+        }
+        if (dataType.equals(PTMCluster.class) ){
+            switch (reason){
+                case DataBoxViewerManager.REASON_PTMCLUSTER_MERGED :
+                case DataBoxViewerManager.REASON_PTMCLUSTER_MODIFIED:
+                    m_shouldBeSaved = true;
+                    break;
+
+                case DataBoxViewerManager.REASON_PTMDATASET_SAVED:
+                    m_shouldBeSaved = false;
+                    break;
+
+            }
+        }
+    }
+
+    public boolean isClosable(){
+        return !m_shouldBeSaved;
+    }
+
+    public String getClosingWarningMessage(){
+        if(m_shouldBeSaved)
+            return "Annotated PTM Dataset has not been saved....";
+        return "";
+    }
 
     //VDS TODO: Allow real inParameter: Actually this view works only as Top View ! Data set using setEntryData
     @Override

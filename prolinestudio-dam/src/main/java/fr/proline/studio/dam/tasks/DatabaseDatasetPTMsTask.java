@@ -347,7 +347,6 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
 //                entityManagerMSI.createNativeQuery("ALTER TABLE object_tree DISABLE TRIGGER ALL;").executeUpdate();
                 entityManagerMSI.createNativeQuery("DELETE FROM result_summary_object_tree_map WHERE object_tree_id = " + obId + " AND schema_name = 'result_summary.ptm_dataset_annotated'; ").executeUpdate();
                 entityManagerMSI.createNativeQuery("DELETE FROM object_tree WHERE id = " + obId +"; ").executeUpdate();
-//                entityManagerMSI.createNativeQuery("ALTER TABLE object_tree ENABLE TRIGGER ALL;").executeUpdate();
             }
 
 
@@ -514,7 +513,8 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         //Create PTMCluster for SitePTMDataset
         List<PTMCluster> allClusters = new ArrayList<>();
         for (PTMSite site : m_sitePtmDataset.getPTMSites()) {
-            PTMCluster ptmCluster = new PTMCluster(site.getId(), site.getLocalisationConfidence(), 2/*SELECTED AUTO*/,  Collections.singletonList(site.getId()), site.getPeptideIds(), m_sitePtmDataset);
+            PTMCluster ptmCluster = new PTMCluster(site.getId(), site.getLocalisationConfidence(), 2/*SELECTED AUTO*/,null, null,
+                    Collections.singletonList(site.getId()), site.getPeptideIds(), m_sitePtmDataset);
             Long bestPepMatchID = site.getBestProbabilityPepMatchId();
             if(fillClusterPeptidesMaps(ptmCluster, bestPepMatchID))
                 allClusters.add(ptmCluster);

@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.dam.tasks.data.ptm;
 
+import fr.profi.util.StringUtils;
 import fr.proline.core.orm.msi.SequenceMatch;
 import fr.proline.core.orm.msi.dto.*;
 import fr.proline.core.orm.uds.dto.DDataset;
@@ -399,7 +400,8 @@ public class PTMDataset {
 
         PTMCluster firstCluster = finalClusters2Merge.get(0);
         List<Long> siteIds = firstCluster.getPTMSites().stream().map(PTMSite::getId).collect(Collectors.toList());
-        PTMCluster mergedCluster = new PTMCluster(firstCluster.getId(), firstCluster.getLocalizationConfidence(),  firstCluster.getSelectionLevel(), siteIds, firstCluster.getPeptideIds(), this);
+        PTMCluster mergedCluster = new PTMCluster(firstCluster.getId(), firstCluster.getLocalizationConfidence(), firstCluster.getSelectionLevel(),
+                firstCluster.getSelectionNotation(), firstCluster.getSelectionInfo(), siteIds, firstCluster.getPeptideIds(), this);
         mergedCluster.setRepresentativePepMatch(firstCluster.getRepresentativePepMatch());
 
         //If Quant Data, Get data to calculate MqPeptide for merged
@@ -491,12 +493,12 @@ public class PTMDataset {
         JSONPTMDataset ptmDS = new JSONPTMDataset();
 
         List<DInfoPTM> ptmInfos = getInfoPTMs();
-        Long[] ptmInfoIds = new Long[ptmInfos.size()];
+        List<Long> ptmInfoIds = new ArrayList<>();
         for(int i=0 ; i<ptmInfos.size();i++){
-            ptmInfoIds[i] = ptmInfos.get(i).getIdPtm();
+            if(!ptmInfoIds.contains(ptmInfos.get(i).getIdPtm()))
+                ptmInfoIds.add(ptmInfos.get(i).getIdPtm());
         }
-        ptmDS.ptmIds = ptmInfoIds;
-
+        ptmDS.ptmIds = ptmInfoIds.toArray(new Long[0]);
 
         List<Long> leafRsmIds =getLeafResultSummaryIds();
         Long[] rsmIds = new Long[leafRsmIds.size()];
@@ -527,6 +529,10 @@ public class PTMDataset {
             JSONPTMCluster newtPTMCluster  = new JSONPTMCluster();
             newtPTMCluster.id = nextCluster.getId();
             newtPTMCluster.selectionLevel = nextCluster.getSelectionLevel();
+            if(nextCluster.getSelectionNotation() != null)
+                newtPTMCluster.selectionConfidence = nextCluster.getSelectionNotation();
+            if(StringUtils.isNotEmpty(nextCluster.getSelectionInfo()))
+                newtPTMCluster.selectionInformation = nextCluster.getSelectionInfo();
             newtPTMCluster.bestPeptideMatchId = nextCluster.getRepresentativePepMatch().getId();
             newtPTMCluster.localizationConfidence = nextCluster.getLocalizationConfidence();
             newtPTMCluster.isomericPeptideIds = new Long[0];

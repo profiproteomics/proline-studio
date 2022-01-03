@@ -425,6 +425,22 @@ public class MainFrame extends AbstractDockFrame implements WindowListener {
 
         }
 
+        // check if action are to be done on some windows ...
+        HashSet<AbstractTopPanel> topPanels = getTopPanels();
+        for(AbstractTopPanel topPanel : topPanels ){
+            if(topPanel.warnBeforeClosing()) {
+                InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "You should not exit. A window need an action : "+topPanel.getWarnClosingMessage()+"\nAre you sure you want to exit ?");
+                exitDialog.setButtonName(OptionDialog.BUTTON_OK, "Yes");
+                exitDialog.setButtonName(OptionDialog.BUTTON_CANCEL, "No");
+                exitDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
+                exitDialog.setVisible(true);
+                if (exitDialog.getButtonClicked() == OptionDialog.BUTTON_CANCEL) {
+                    // No clicked
+                    return;
+                }
+            }
+        }
+
         // Close connection to R Server and kill it if needed
         RServerManager.getRServerManager().stopRProcess();
 

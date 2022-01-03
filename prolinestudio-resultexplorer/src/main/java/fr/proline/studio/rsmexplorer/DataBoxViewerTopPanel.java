@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -35,7 +35,7 @@ import java.util.List;
 
 public class DataBoxViewerTopPanel extends AbstractTopPanel {
 
-    private WindowBox m_windowBox = null;
+    private WindowBox m_windowBox;
 
     public DataBoxViewerTopPanel(WindowBox windowBox) {
 
@@ -112,6 +112,14 @@ public class DataBoxViewerTopPanel extends AbstractTopPanel {
         m_windowBox.windowOpened();
     }
 
+    public boolean warnBeforeClosing(){
+        return !m_windowBox.getEntryBox().isClosable();
+    }
+
+    public String getWarnClosingMessage(){
+        return m_windowBox.getEntryBox().getClosingWarningMessage();
+    }
+
     @Override
     public void componentClosed() {
 
@@ -160,7 +168,9 @@ public class DataBoxViewerTopPanel extends AbstractTopPanel {
     }
 
     public void loadedDataModified(Long rsetId, Long rsmId, Class c, ArrayList modificationsList, int reason) {
+        this.setName("Modifed "+getName());
         m_windowBox.getEntryBox().loadedDataModified(rsetId, rsmId, c, modificationsList, reason);
+        repaint();
     }
 
 

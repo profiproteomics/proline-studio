@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -31,6 +31,9 @@ public class DataBoxViewerManager {
 
     public static final int REASON_PEPTIDE_SUPPRESSED = 0;
     public static final int REASON_PROTEINS_REFINED = 1;
+    public static final int REASON_PTMCLUSTER_MERGED = 2;
+    public static final int REASON_PTMCLUSTER_MODIFIED = 3;
+    public static final int REASON_PTMDATASET_SAVED = 4;
     
     public static void loadedDataModified(long projectId, Long rsetId, Long rsmId, Class c, ArrayList modificationsList, int reason) {
 

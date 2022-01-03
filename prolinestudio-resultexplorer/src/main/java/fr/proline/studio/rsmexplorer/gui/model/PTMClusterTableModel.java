@@ -31,10 +31,7 @@ import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.PercentageRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.SelectLevelRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.*;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.table.*;
 import fr.proline.studio.table.renderer.*;
@@ -60,7 +57,9 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
   public static final int COLTYPE_PROTEIN_ID = COLTYPE_PTM_CLUSTER_SELECTION_LEVEL+1;
   public static final int COLTYPE_PROTEIN_NAME = COLTYPE_PROTEIN_ID+1;
   public static final int COLTYPE_PEPTIDE_NAME = COLTYPE_PROTEIN_NAME+1;
-  public static final int COLTYPE_PEPTIDE_PTM = COLTYPE_PEPTIDE_NAME+1;
+  public static final int COLTYPE_CLUSTER_NOTATION= COLTYPE_PEPTIDE_NAME+1;
+  public static final int COLTYPE_CLUSTER_INFO = COLTYPE_CLUSTER_NOTATION+1;
+  public static final int COLTYPE_PEPTIDE_PTM = COLTYPE_CLUSTER_INFO+1;
   public static final int COLTYPE_PTM_PROBA = COLTYPE_PEPTIDE_PTM+1;
 
 
@@ -75,8 +74,8 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
   public static final int COLTYPE_SPECTRUM_TITLE = COLTYPE_DELTA_MASS_PTM+1;
   public static final int LAST_STATIC_COLUMN = COLTYPE_SPECTRUM_TITLE;
   
-  private static final String[] m_columnNames = {"Id", "Status", "Protein Id", "Protein", "Peptide", "PTMs", "PTMs Confid.(MDScore, %)", "Score", "Peptide count",  "Site count", "Sites Loc.", "Confidence" ,"Sites Confid.(%)", "PTM D.Mass", "Spectrum title"};
-  private static final String[] m_columnTooltips = {"PTM cluster Id", "Cluster Status: Validated or Invalidated ", "Protein match Id", "Protein", "Peptide", "Peptide's PTMs", "PTMs localisation confidence (%)", "Score of the peptide match", "Number of peptides matching the modification site", "Number of modification sites grouped into the cluster", "Sites localisation on the protein \nMay be greater than site count in case of merged clusters. ", "Sites combined confidence", "Sites localisation confidence (%) \nMay be greater than site count in case of merged clusters. ", "PTMs delta mass", "Peptide match spectrum title"};
+  private static final String[] m_columnNames = {"Id", "Status", "Protein Id", "Protein", "Peptide", "Status confidence","Status description" ,"PTMs", "PTMs Confid.(MDScore, %)", "Score", "Peptide count",  "Site count", "Sites Loc.", "Confidence" ,"Sites Confid.(%)", "PTM D.Mass", "Spectrum title"};
+  private static final String[] m_columnTooltips = {"PTM cluster Id", "Cluster Status: Validated or Invalidated ", "Protein match Id", "Protein", "Peptide","Value illustrating the confidence in the Cluster Status", "Comment to outline Cluster Status", "Peptide's PTMs", "PTMs localisation confidence (%)", "Score of the peptide match", "Number of peptides matching the modification site", "Number of modification sites grouped into the cluster", "Sites localisation on the protein \nMay be greater than site count in case of merged clusters. ", "Sites combined confidence", "Sites localisation confidence (%) \nMay be greater than site count in case of merged clusters. ", "PTMs delta mass", "Peptide match spectrum title"};
      
   //Dynamique columns
 
@@ -99,9 +98,11 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
   private String m_modificationInfo = "";
   
   private final ScoreRenderer m_scoreRenderer = new ScoreRenderer();
+  private RendererMouseCallback m_selectLevelRendererCallback; // To be called by renderer  whenmouse action
 
-  public PTMClusterTableModel(LazyTable table) {
+  public PTMClusterTableModel(LazyTable table, RendererMouseCallback callback) {
     super(table);
+    m_selectLevelRendererCallback = callback;
   }
 
   @Override
@@ -167,6 +168,8 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
     List<Integer> listIds = new ArrayList();
     listIds.add(COLTYPE_PROTEIN_ID);
     listIds.add(COLTYPE_PTM_CLUSTER_CONFIDENCE);
+    listIds.add(COLTYPE_CLUSTER_NOTATION);
+    listIds.add(COLTYPE_CLUSTER_INFO);
     if(m_isQuantitationDS){
         for (int i = m_quantChannels.length - 1; i >= 0; i--) {
             listIds.add(COLTYPE_START_QUANT_INDEX + COLTYPE_RAW_ABUNDANCE + (i * m_columnNamesQC.length));            
@@ -185,11 +188,12 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
       case COLTYPE_PROTEIN_ID:
         return Long.class;      
       case COLTYPE_PROTEIN_NAME:
+      case COLTYPE_CLUSTER_INFO:
         return String.class;
       case COLTYPE_PTM_CLUSTER_CONFIDENCE:
         return Float.class;
-      case COLTYPE_PEPTIDE_COUNT: 
-//      case COLTYPE_PTMSITE_COUNT:
+      case COLTYPE_PEPTIDE_COUNT:
+      case COLTYPE_CLUSTER_NOTATION:
         return Integer.class;
       case COLTYPE_PTMSITE_POSITIONS:
       case COLTYPE_PTMSITE_CONFIDENCES:
@@ -251,6 +255,12 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
             level = SelectLevelEnum.SELECTED_AUTO;
         }
         return  level;
+
+      case COLTYPE_CLUSTER_INFO:
+        return  ptmCluster.getSelectionInfo();
+
+      case COLTYPE_CLUSTER_NOTATION:
+        return ptmCluster.getSelectionNotation();
 
       case COLTYPE_PROTEIN_ID:
         return proteinMatch.getId();
@@ -485,6 +495,10 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
     }
   }
 
+  public boolean isRowEditable(int rowIndex) {
+    return true;
+  }
+
   public PTMCluster getProteinPTMCluster(int i) {
     return m_ptmClusters.get(i);
   }
@@ -517,8 +531,8 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
           case COLTYPE_PTM_PROBA:          
           case COLTYPE_PEPTIDE_SCORE:  
             return Float.class;
-        case COLTYPE_PTMSITE_COUNT:
-          return  Integer.class;
+          case COLTYPE_PTMSITE_COUNT:
+            return  Integer.class;
           default:
             if(columnIndex <= LAST_STATIC_COLUMN)
               return getColumnClass(columnIndex);
@@ -722,12 +736,14 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
       }
 
       case COLTYPE_PTM_CLUSTER_SELECTION_LEVEL: {
-          renderer = new SelectLevelRenderer(null, COLTYPE_PTM_CLUSTER_SELECTION_LEVEL);
+          renderer = new SelectLevelRenderer(m_selectLevelRendererCallback, COLTYPE_PTM_CLUSTER_SELECTION_LEVEL);
       }
       case COLTYPE_PROTEIN_ID :
       case COLTYPE_PTM_CLUSTER_ID:
       case COLTYPE_PEPTIDE_COUNT:
       case COLTYPE_PTMSITE_COUNT:
+      case COLTYPE_CLUSTER_INFO:
+      case COLTYPE_CLUSTER_NOTATION:
         //Return explicitly null to don't go in default case
         break;
 
@@ -748,8 +764,13 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
     m_rendererMap.put(col, renderer);
     return renderer;
   }
-  
-  private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
+
+  @Override
+  public boolean isCellEditable(int rowIndex, int columnIndex) {
+    return columnIndex == COLTYPE_PTM_CLUSTER_SELECTION_LEVEL;
+  }
+
+    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
 
   @Override
   public GlobalTableModelInterface getFrozzenModel() {

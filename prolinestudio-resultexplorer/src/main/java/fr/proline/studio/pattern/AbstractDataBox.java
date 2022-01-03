@@ -490,6 +490,15 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         return (m_outParameters.isDataDependant(dataType, subtype));
     }
 
+    public boolean isClosable(){
+        return true;
+    }
+
+    public String getClosingWarningMessage(){
+        return "";
+    }
+
+
     public void loadedDataModified(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, int reason) {
         if (isDataProvider(dataType, null)) {
             dataMustBeRecalculated(rsetId, rsmId, dataType, modificationsList, reason);

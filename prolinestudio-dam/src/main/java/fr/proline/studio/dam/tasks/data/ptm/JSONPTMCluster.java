@@ -27,7 +27,14 @@ public class JSONPTMCluster {
 
     public Long id;
 
+    //
+    //**** Annotation specific entry
+    // Idem as for Quanti/Ident: DESELECTED_MANUAL(0) DESELECTED_AUTO(1) SELECTED_AUTO(2) SELECTED_MANUAL(3)
     public Integer selectionLevel;
+    //Notation for selection_level confidence
+    public Integer selectionConfidence;
+    //Description for selection_level reason or precision
+    public String selectionInformation;
 
     // Array of PTM site locations Ids
     public Long[] ptmSiteLocations;

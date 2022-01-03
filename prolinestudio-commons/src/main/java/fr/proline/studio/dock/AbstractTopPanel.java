@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -49,5 +49,12 @@ public abstract class AbstractTopPanel extends JPanel {
 
     public abstract void componentClosed();
 
+    public boolean warnBeforeClosing(){
+        return false;
+    }
 
+    public String getWarnClosingMessage(){
+        return "";
+    }
+    
 }

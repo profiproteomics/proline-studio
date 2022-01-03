@@ -42,7 +42,11 @@ public class PTMCluster implements Comparable<PTMCluster>{
     private final List<Long> m_peptideIds;
     private final Long m_id;
     private Float m_localizationConfidence;
+
     private int m_selectionLevel;
+    private Integer m_selectionNotation;
+    private String m_selectionInfo;
+
 
     private List<Integer> m_positionsOnProtein;
     private List<Float> m_probabilities;
@@ -58,10 +62,10 @@ public class PTMCluster implements Comparable<PTMCluster>{
     private final PTMDataset m_ptmDataset;
 
     public PTMCluster(JSONPTMCluster jsonValue, PTMDataset ptmds) {
-        this(jsonValue.id, jsonValue.localizationConfidence, jsonValue.selectionLevel, Arrays.asList(jsonValue.ptmSiteLocations), Arrays.asList(jsonValue.peptideIds), ptmds);
+        this(jsonValue.id, jsonValue.localizationConfidence, jsonValue.selectionLevel,jsonValue.selectionConfidence, jsonValue.selectionInformation, Arrays.asList(jsonValue.ptmSiteLocations), Arrays.asList(jsonValue.peptideIds), ptmds);
     }
 
-    public PTMCluster(Long id, Float confidence, Integer selectionLevel, List<Long> ptmSiteIds, List<Long> peptideIds, PTMDataset ptmds) {
+    public PTMCluster(Long id, Float confidence, Integer selectionLevel, Integer selectionNotation, String selectionInfo, List<Long> ptmSiteIds, List<Long> peptideIds, PTMDataset ptmds) {
         m_ptmDataset = ptmds;
         m_peptideIds = new ArrayList<>();
         m_peptideIds.addAll(peptideIds);
@@ -69,7 +73,10 @@ public class PTMCluster implements Comparable<PTMCluster>{
         m_sites = m_ptmDataset.getPTMSites().stream().filter(site -> ptmSiteIds.contains(site.getId())).sorted(Comparator.comparing(PTMSite::getPositionOnProtein)).collect(Collectors.toList());
         m_sitesCount = -1;
         m_id = id;
+
         m_selectionLevel = selectionLevel != null ? selectionLevel : 2;
+        m_selectionNotation = selectionNotation;
+        m_selectionInfo = selectionInfo != null ? selectionInfo : "";
 
         if(!m_sites.isEmpty()) {
             //Get ProteinMatch from one of the PTMSite : all should have same.
@@ -90,6 +97,28 @@ public class PTMCluster implements Comparable<PTMCluster>{
         m_selectionLevel = selectionLevel;
     }
 
+    /**
+     *
+     * @return PTLCluster status confidence as a positive number. Negative number indicates no notation has been done.
+     */
+    public Integer getSelectionNotation() {
+        return m_selectionNotation;
+    }
+
+    public void setSelectionNotation(Integer selectionNotation) {
+        this.m_selectionNotation = selectionNotation;
+    }
+
+    /**
+     * @return Return description of PTMCluster status or empty String if none is defined
+     */
+    public String getSelectionInfo() {
+        return m_selectionInfo;
+    }
+
+    public void setSelectionInfo(String selectionInfo) {
+        this.m_selectionInfo = selectionInfo;
+    }
 
     protected void addSites(List<PTMSite> newSites){
         boolean listChanged = false;

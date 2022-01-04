@@ -18,6 +18,7 @@
 package fr.proline.studio.rsmexplorer;
 
 import fr.proline.studio.dock.AbstractTopPanel;
+import fr.proline.studio.dock.TopPanelListener;
 import fr.proline.studio.dock.container.DockComponent;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.OptionDialog;
@@ -168,7 +169,24 @@ public class DataBoxViewerTopPanel extends AbstractTopPanel {
     }
 
     public void loadedDataModified(Long rsetId, Long rsmId, Class c, ArrayList modificationsList, int reason) {
-        this.setName("Modifed "+getName());
+        //Test if information is pertinent for thos view
+        if(m_windowBox.getEntryBox().isDataProvider(c,null )) {
+            if (DataBoxViewerManager.REASON_MODIF_TO_SAVE.contains(reason)) {
+                //Set title as modified
+                String title = getName();
+                if (!title.endsWith(DataBoxViewerManager.MODIFIED_TITLE_SUFFIX))
+                    title = title + " " + DataBoxViewerManager.MODIFIED_TITLE_SUFFIX;
+                this.setName(title);
+                fireTopPanelPropertyChange(TopPanelListener.TITLE_PROPERTY);
+            } else if (reason == DataBoxViewerManager.REASON_PTMDATASET_SAVED || reason == DataBoxViewerManager.REASON_PROTEINS_REFINED) {
+                //remove title modified
+                String title = getName();
+                if (title.endsWith(DataBoxViewerManager.MODIFIED_TITLE_SUFFIX))
+                    title = title.substring(0, title.lastIndexOf(DataBoxViewerManager.MODIFIED_TITLE_SUFFIX) - 1);
+                this.setName(title);
+                fireTopPanelPropertyChange(TopPanelListener.TITLE_PROPERTY);
+            }
+        }
         m_windowBox.getEntryBox().loadedDataModified(rsetId, rsmId, c, modificationsList, reason);
         repaint();
     }

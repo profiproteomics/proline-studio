@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -216,6 +216,10 @@ public class DockContainerTab extends DockContainerMulti {
         JTabbedPane tabbedPane = ((JTabbedPane)m_component);
 
         int index = tabbedPane.indexOfComponent(container.getComponent());
+        if(container instanceof DockComponent) { //Remove TabbedPaneLabel from DockComponent
+            ((DockComponent) container).removeDockComponentListener();
+        }
+
         tabbedPane.remove(index);
         container.setParent(null);
 

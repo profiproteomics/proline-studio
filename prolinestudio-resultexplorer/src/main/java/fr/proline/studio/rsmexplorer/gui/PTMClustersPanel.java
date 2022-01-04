@@ -388,8 +388,6 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
         toolbar.add(m_filterButton);
         toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
-        toolbar.add(saveButton);
-        toolbar.add(mergeButton);
 
         m_addCompareDataButton = new AddDataAnalyzerButton(((CompoundTableModel) m_ptmClusterTable.getModel())) {
            
@@ -409,7 +407,10 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
         m_infoToggleButton = new InfoToggleButton(m_ptmClusterTable, m_ptmClusterTable);
         
         toolbar.add(m_infoToggleButton);
-        
+        toolbar.addSeparator();
+        toolbar.add(mergeButton);
+        toolbar.add(saveButton);
+
         return toolbar;
     }
     

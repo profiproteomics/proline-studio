@@ -19,9 +19,7 @@ package fr.proline.studio.rsmexplorer;
 import fr.proline.studio.WindowManager;
 import fr.proline.studio.dock.AbstractTopPanel;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 /**
  *
@@ -29,12 +27,21 @@ import java.util.Set;
  */
 public class DataBoxViewerManager {
 
+    public static final String MODIFIED_TITLE_SUFFIX ="***";
+
     public static final int REASON_PEPTIDE_SUPPRESSED = 0;
     public static final int REASON_PROTEINS_REFINED = 1;
     public static final int REASON_PTMCLUSTER_MERGED = 2;
     public static final int REASON_PTMCLUSTER_MODIFIED = 3;
     public static final int REASON_PTMDATASET_SAVED = 4;
-    
+
+    public static final List<Integer> REASON_MODIF_TO_SAVE = new ArrayList<>();
+    static {
+        REASON_MODIF_TO_SAVE.add(REASON_PTMCLUSTER_MERGED);
+        REASON_MODIF_TO_SAVE.add(REASON_PTMCLUSTER_MODIFIED);
+        REASON_MODIF_TO_SAVE.add(REASON_PEPTIDE_SUPPRESSED);
+    }
+
     public static void loadedDataModified(long projectId, Long rsetId, Long rsmId, Class c, ArrayList modificationsList, int reason) {
 
         Set<AbstractTopPanel> tcs = WindowManager.getDefault().getMainWindow().getTopPanels();

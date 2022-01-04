@@ -19,6 +19,7 @@ package fr.proline.studio.dock.container;
 
 
 import fr.proline.studio.dock.AbstractTopPanel;
+import fr.proline.studio.dock.TopPanelListener;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ public class DockComponent extends DockContainer {
 
     public DockComponent(AbstractTopPanel topPanel, int properties) {
         this(topPanel.getTopPanelIdentifierKey(), topPanel.getTitle(), (topPanel.getIcon() != null) ? new ImageIcon(topPanel.getIcon()) : null, topPanel, properties);
+        topPanel.addTopPanelListener(this);
     }
 
     public DockComponent(String windowKey, String title, Icon icon, JComponent component, int properties) {
@@ -58,12 +60,24 @@ public class DockComponent extends DockContainer {
         m_componentListener = listener;
     }
 
+    public void removeDockComponentListener() {
+        m_componentListener = null;
+    }
+
     public void getTopPanels(HashSet<AbstractTopPanel> set) {
 
         if (m_component instanceof AbstractTopPanel) {
             set.add((AbstractTopPanel) m_component);
         }
 
+    }
+
+    // TopPanelListener
+    @Override
+    public void propertyChanged(String property) {
+        if(property.equals(TopPanelListener.TITLE_PROPERTY) && (m_component instanceof AbstractTopPanel) ){
+            setTitle(((AbstractTopPanel) m_component).getTitle());
+        }
     }
 
     @Override

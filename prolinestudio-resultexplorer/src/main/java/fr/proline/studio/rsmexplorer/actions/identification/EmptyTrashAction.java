@@ -25,8 +25,8 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseClearProjectTask;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.InfoDialog;
-import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -110,12 +110,12 @@ public class EmptyTrashAction extends AbstractRSMAction {
 
         // check if user also wants to erase locally
         InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Confirm Erasing of Recycle Bin", "Are you sure you want to erase the contents of the Recycle Bin?");
-        exitDialog.setButtonName(OptionDialog.BUTTON_OK, "Yes");
-        exitDialog.setButtonName(OptionDialog.BUTTON_CANCEL, "No");
+        exitDialog.setButtonName(DefaultDialog.BUTTON_OK, "Yes");
+        exitDialog.setButtonName(DefaultDialog.BUTTON_CANCEL, "No");
         exitDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
         exitDialog.setVisible(true);
 
-        if (exitDialog.getButtonClicked() == OptionDialog.BUTTON_CANCEL) {
+        if (exitDialog.getButtonClicked() == DefaultDialog.BUTTON_CANCEL) {
             // No clicked
             return;
         }

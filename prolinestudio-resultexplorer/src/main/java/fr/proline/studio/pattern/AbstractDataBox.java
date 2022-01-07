@@ -490,6 +490,11 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         return (m_outParameters.isDataDependant(dataType, subtype));
     }
 
+    public boolean isDataOfInterest(Long rsetId, Long rsmId, Class dataType) {
+        return ( rsetId.equals(getRsetId()) && rsmId.equals(getRsmId()) && isDataProvider(dataType, null));
+    }
+
+
     public boolean isClosable(){
         return true;
     }

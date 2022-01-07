@@ -170,7 +170,7 @@ public class DataBoxViewerTopPanel extends AbstractTopPanel {
 
     public void loadedDataModified(Long rsetId, Long rsmId, Class c, ArrayList modificationsList, int reason) {
         //Test if information is pertinent for thos view
-        if(m_windowBox.getEntryBox().isDataProvider(c,null )) {
+        if(m_windowBox.getEntryBox().isDataOfInterest(rsetId,rsmId, c )) {
             if (DataBoxViewerManager.REASON_MODIF_TO_SAVE.contains(reason)) {
                 //Set title as modified
                 String title = getName();

@@ -27,6 +27,7 @@ import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.IdentifyPtmSitesTask;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.IdentifyPtmSitesDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -81,6 +82,12 @@ public class IdentifyPtmSitesJMSAction extends AbstractRSMAction {
       dialog.setVisible(true);
       if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
 
+        //Alert user : previous modification view (Site/Cluster) should be closed in order to load new data
+        InfoDialog id = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.INFO,"Close Modification View","Be sure to close all previous Modification Site/Cluster view.");
+        id.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
+        id.centerToWindow(WindowManager.getDefault().getMainWindow());
+        id.setVisible(true);
+
         for (int i = 0; i < nbNodes; i++) {
 
           final DataSetNode node = (DataSetNode) selectedNodes[i];
@@ -94,6 +101,10 @@ public class IdentifyPtmSitesJMSAction extends AbstractRSMAction {
             public void run(boolean success) {
               node.setIsChanging(false);
               treeModel.nodeChanged(node);
+              if(success){
+                //remove previous Modificatio data to force reload
+                DatabaseDataManager.getDatabaseDataManager().removeAllPTMDatasetsForDS( node.getDataset().getId());
+              }
             }
           };
 

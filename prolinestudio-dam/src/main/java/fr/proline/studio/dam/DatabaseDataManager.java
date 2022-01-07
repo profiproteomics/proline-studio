@@ -233,6 +233,12 @@ public class DatabaseDataManager  {
         return null;
     }
 
+    public void removeAllPTMDatasetsForDS(Long dsId){
+        if (m_ptmDatasetSetPerDatasetId.containsKey(dsId))
+            m_ptmDatasetSetPerDatasetId.remove(dsId);
+        if (m_ptmAnnotatedDatasetSetPerDatasetId.containsKey(dsId))
+            m_ptmAnnotatedDatasetSetPerDatasetId.remove(dsId);
+    }
 
     public PTMDatasetPair getPTMDatasetSetForDS(Long dsId){
         return m_ptmDatasetSetPerDatasetId.get(dsId);

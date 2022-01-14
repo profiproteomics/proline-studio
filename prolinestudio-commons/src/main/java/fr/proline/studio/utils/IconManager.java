@@ -106,6 +106,7 @@ public class IconManager {
         COLUMNS_VISIBILITY,
         PLUS_SMALL_10X10,
         PROPERTY_SMALL_10X10,
+        EDIT,
         EDIT_SMALL_10X10,
         IDENTIFICATION,
         ARROW_8X7,
@@ -513,6 +514,8 @@ public class IconManager {
                 return "fr/proline/studio/images/plus-small10x10.png";
             case PROPERTY_SMALL_10X10:
                 return "fr/proline/studio/images/property-small10x10.png";
+            case EDIT:
+                return "fr/proline/studio/images/edit.png";
             case EDIT_SMALL_10X10:
                 return "fr/proline/studio/images/edit-small10x10.png";
             case IDENTIFICATION:

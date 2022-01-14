@@ -44,8 +44,17 @@ public class DataBoxViewerManager {
             m_shouldSave = shouldSave;
         }
 
-        public byte getReasonValye(){
+        public byte getReasonValue(){
             return m_reasonValue;
+        }
+
+        public static  REASON_MODIF getReasonModifFor(byte value){
+            REASON_MODIF[]  allVals = REASON_MODIF.values();
+            for (REASON_MODIF allVal : allVals) {
+                if (isReasonDefine(allVal, value))
+                    return allVal;
+            }
+            return null;
         }
 
         public boolean shouldBeSaved(){
@@ -53,12 +62,12 @@ public class DataBoxViewerManager {
         }
 
         public static boolean isReasonDefine(REASON_MODIF reason, byte value){
-            return ( (reason.getReasonValye() & value) == reason.getReasonValye());
+            return ( (reason.getReasonValue() & value) == reason.getReasonValue());
         }
 
     }
 
-    public static void loadedDataModified(long projectId, Long rsetId, Long rsmId, Class c, ArrayList modificationsList, REASON_MODIF reason) {
+    public static void loadedDataModified(long projectId, Long rsetId, Long rsmId, Class c, ArrayList modificationsList, byte reason) {
 
         Set<AbstractTopPanel> tcs = WindowManager.getDefault().getMainWindow().getTopPanels();
         Iterator<AbstractTopPanel> itTop = tcs.iterator();

@@ -133,6 +133,7 @@ public class PTMCluster implements Comparable<PTMCluster>{
             m_probabilities = null;
             m_parentPTMPeptideInstances = null;
             m_leafPTMPeptideInstances = null;
+            m_parentPeptideInstances = null;
         }
     }
 
@@ -140,6 +141,33 @@ public class PTMCluster implements Comparable<PTMCluster>{
         for(Long s : newPepIds){
             if(!m_peptideIds.contains(s))
                 m_peptideIds.add(s);
+        }
+    }
+
+    public void removePeptide(PTMPeptideInstance pep){
+        if(pep == null)
+            return;
+        Long pepId = pep.getPeptideInstance().getPeptideId();
+        if(m_peptideIds.contains(pepId)){
+            m_peptideIds.remove(pepId);
+
+            //Recalculated MQPep if needed
+            DMasterQuantPeptide finalClusterMQpep = getRepresentativeMQPepMatch();
+            if (finalClusterMQpep != null && finalClusterMQpep instanceof AggregatedMasterQuantPeptide) {
+                Map<Long, DMasterQuantPeptide> mqPepByPepInstId = new HashMap<>();
+                ((AggregatedMasterQuantPeptide) finalClusterMQpep).getAggregatedMQPeptides().forEach(mqPep -> {
+                    if(m_peptideIds.contains(mqPep.getPeptideInstance().getPeptideId()))
+                        mqPepByPepInstId.put(mqPep.getPeptideInstanceId(), mqPep);
+                });
+                setRepresentativeMQPepMatch(m_ptmDataset.getRepresentativeMQPeptideForCluster(this, mqPepByPepInstId));
+            } else if(finalClusterMQpep != null ) {
+                //Should not occur
+                m_logger.warn(" ERROR. PTM Cluster in Quantitation do not used AggregatedMasterQuantPeptide. Unable to create new quantiation values ");
+            }
+
+            m_parentPTMPeptideInstances = null;
+            m_leafPTMPeptideInstances = null;
+            m_parentPeptideInstances = null;
         }
     }
 

@@ -744,7 +744,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
                 // propagate modifications to the previous views
                 DataBoxViewerManager.loadedDataModified(m_projectId, m_databox.getRsetId(), m_databox.getRsmId(), DMasterQuantProteinSet.class,
-                        masterQuantProteinSetModified, REASON_MODIF.REASON_PEPTIDE_SUPPRESSED);
+                        masterQuantProteinSetModified, REASON_MODIF.REASON_PEPTIDE_SUPPRESSED.getReasonValue());
 
                 fireTableDataChanged();
 

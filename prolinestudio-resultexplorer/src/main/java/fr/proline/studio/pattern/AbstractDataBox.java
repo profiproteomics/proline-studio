@@ -17,39 +17,28 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.util.TransientDataInterface;
-import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.memory.TransientMemoryClientInterface;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
+import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.id.ProjectId;
-import fr.proline.studio.pattern.xic.DataboxChildFeature;
-import fr.proline.studio.pattern.xic.DataboxExperimentalDesign;
-import fr.proline.studio.pattern.xic.DataboxMapAlignment;
-import fr.proline.studio.pattern.xic.DataboxPSMOfMasterQuantPeptide;
-import fr.proline.studio.pattern.xic.DataboxXicParentsPeptideIon;
-import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
-import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
-import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
+import fr.proline.studio.pattern.xic.*;
 import fr.proline.studio.progress.ProgressInterface;
-import fr.proline.studio.rsmexplorer.DataBoxViewerManager;
 import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.utils.IconManager;
-import java.awt.Image;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import org.jdesktop.swingx.JXTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.event.ActionListener;
+import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -507,7 +496,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     }
 
 
-    public void loadedDataModified(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, DataBoxViewerManager.REASON_MODIF reason) {
+    public void loadedDataModified(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, byte reason) {
         if (isDataProvider(dataType, null)) {
             dataMustBeRecalculated(rsetId, rsmId, dataType, modificationsList, reason);
         }
@@ -564,9 +553,13 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
      * modificiation of the data of the current databox. (for instance,
      * disabling peptides -> modifications of protein set in the XIC View
      *
-     * @param dataType
+     * @param rsetId : Result Set Id the modified data belongs to. May be null
+     * @param rsmId : Result Summary Id the modified data belongs to. May be null
+     * @param modificationsList :modified data list
+     * @param dataType : dataType type of data that may be impacted by modification
+     * @param reason: Combination of DataBoxViewerManager.REASON_MODIF Flags. Combination is done using REASON_MODIF.getReasonValue
      */
-    public void dataMustBeRecalculated(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, DataBoxViewerManager.REASON_MODIF reason) {
+    public void dataMustBeRecalculated(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, byte reason) {
 
     }
 

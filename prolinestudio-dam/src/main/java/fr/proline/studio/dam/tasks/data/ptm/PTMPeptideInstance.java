@@ -100,7 +100,7 @@ public class PTMPeptideInstance {
     return matchingClusters.isEmpty() ? null : _getRepresentativePepMatch(matchingClusters);
   }
 
-  public DPeptideMatch _getRepresentativePepMatch(List<PTMCluster> clusters) {
+  private DPeptideMatch _getRepresentativePepMatch(List<PTMCluster> clusters) {
 
     //TODO: to be improved in case of searching the representative PSM for multiple clusters simultaneously
     if (clusters.size() > 1) {

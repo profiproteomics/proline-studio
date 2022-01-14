@@ -32,7 +32,6 @@ import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.dam.tasks.data.ptm.*;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
-import fr.proline.studio.rsmexplorer.DataBoxViewerManager.REASON_MODIF;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
@@ -166,33 +165,30 @@ public class DataBoxPTMClusters extends AbstractDataBox {
 
 
     @Override
-    public void dataMustBeRecalculated(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, REASON_MODIF reason) {
-        if (m_datasetSet.getResultSetId() != rsetId) {
+    public void dataMustBeRecalculated(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, byte reason) {
+        if(! ( isDataOfInterest(rsetId, rsmId, dataType) && dataType.equals(PTMCluster.class)))
             return;
-        }
-        if (m_datasetSet.getResultSummaryId() != rsmId) {
+
+        DataBoxViewerManager.REASON_MODIF reasonModif = DataBoxViewerManager.REASON_MODIF.getReasonModifFor(reason);
+        if(reasonModif == null)
             return;
-        }
-        if (dataType.equals(PTMCluster.class) ){
-            switch (reason){
-                case REASON_PTMCLUSTER_MERGED :
-                case REASON_PTMCLUSTER_MODIFIED:
-                    m_shouldBeSaved = true;
-                    break;
+        switch (reasonModif){
+            case REASON_PTMCLUSTER_MERGED :
+            case REASON_PTMCLUSTER_MODIFIED:
+                m_shouldBeSaved = true;
+                break;
 
-                case REASON_PTMDATASET_SAVED:
-                    m_shouldBeSaved = false;
-                    break;
+            case REASON_PTMDATASET_SAVED:
+                m_shouldBeSaved = false;
+                break;
 
-                case REASON_PEPTIDE_SUPPRESSED:
-                    m_shouldBeSaved = true;
-                    addDataChanged(PTMPeptideInstance.class, null);
-                    propagateDataChanged();
-                    break;
-//                    ((PTMClustersPanel) getDataBoxPanelInterface()).dataModified(modificationsList, reason);
-            }
-            m_ptmDatasetPair.setShouldSavePTMDataset(m_shouldBeSaved);
+            case REASON_PEPTIDE_SUPPRESSED:
+                m_shouldBeSaved = true;
+                addDataChanged(PTMPeptideInstance.class, null);
+                propagateDataChanged();
+                break;
         }
+        m_ptmDatasetPair.setShouldSavePTMDataset(m_shouldBeSaved);
     }
 
     public boolean isClosable(){

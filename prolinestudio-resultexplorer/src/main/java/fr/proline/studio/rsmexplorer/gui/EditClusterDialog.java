@@ -43,7 +43,7 @@ public class EditClusterDialog extends DefaultDialog {
   public EditClusterDialog(PTMCluster cluster) {
     super(WindowManager.getDefault().getMainWindow(), Dialog.ModalityType.APPLICATION_MODAL);
     setTitle("Edit Cluster "+cluster.getId()+" ["+cluster.getProteinMatch().getAccession()+" / "+cluster.getRepresentativePepMatch().getPeptide().getSequence()+"]");
-    setResizable(true);
+//    setResizable(true);
 
     m_editedCluster = cluster;
     m_ptmPeptideInstances = cluster.getParentPTMPeptideInstances();
@@ -59,10 +59,11 @@ public class EditClusterDialog extends DefaultDialog {
 
     GridBagConstraints c = new GridBagConstraints();
     c.anchor = GridBagConstraints.NORTH;
-    c.insets = new java.awt.Insets(10, 10, 2, 5);
+    c.insets = new java.awt.Insets(2, 2, 2, 2);
     c.fill = GridBagConstraints.BOTH;
     c.gridx = 0;
     c.gridy = 0;
+    c.weightx=1;
     m_statusPanel = new ModifyClusterStatusPanel();
     m_statusPanel.setBorder(new TitledBorder("Cluster Status "));
     editPanel.add(m_statusPanel,c);
@@ -110,13 +111,14 @@ public class EditClusterDialog extends DefaultDialog {
     m_ptmPeptidesTable.setViewport(m_ptmPeptidesScrollPane.getViewport());
     ptmPeptidesPanel.add(m_ptmPeptidesScrollPane, BorderLayout.CENTER);
 
-    c1.insets = new java.awt.Insets(2, 10, 2, 5);
+    c1.insets = new java.awt.Insets(2, 2, 2, 2);
     c1.gridwidth=1;
     c1.gridx++;
     c1.weightx=0.8;
     peptidePanel.add(ptmPeptidesPanel, c1);
 
     c.gridy++;
+    c.weighty=1;
     editPanel.add(peptidePanel, c);
 
     setInternalComponent(editPanel);
@@ -136,6 +138,7 @@ public class EditClusterDialog extends DefaultDialog {
       id.setVisible(true);
       return;
     }
+    m_editedCluster.removePeptide(ptmPep);
     m_ptmPeptideInstances.remove(ptmPep);
     m_peptidesDeleted = true;
     m_ptmPeptidesTable.setData(m_ptmPeptideInstances);

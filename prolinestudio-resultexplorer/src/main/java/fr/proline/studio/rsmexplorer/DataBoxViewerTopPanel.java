@@ -168,10 +168,11 @@ public class DataBoxViewerTopPanel extends AbstractTopPanel {
         return m_windowBox.getEntryBox().getProjectId();
     }
 
-    public void loadedDataModified(Long rsetId, Long rsmId, Class c, ArrayList modificationsList, DataBoxViewerManager.REASON_MODIF reason) {
+    public void loadedDataModified(Long rsetId, Long rsmId, Class c, ArrayList modificationsList, byte reason) {
         //Test if information is pertinent for thos view
         if(m_windowBox.getEntryBox().isDataOfInterest(rsetId,rsmId, c )) {
-            if (reason.shouldBeSaved()) {
+            DataBoxViewerManager.REASON_MODIF reasonModif = DataBoxViewerManager.REASON_MODIF.getReasonModifFor(reason);
+            if (reasonModif!=null && reasonModif.shouldBeSaved()) {
                 //Set title as modified
                 String title = getName();
                 if (!title.endsWith(DataBoxViewerManager.MODIFIED_TITLE_SUFFIX))

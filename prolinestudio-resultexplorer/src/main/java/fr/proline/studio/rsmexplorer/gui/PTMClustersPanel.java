@@ -385,7 +385,7 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
             m_infoToggleButton.updateInfo();
 
             DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class,
-                    new ArrayList(), REASON_MODIF.REASON_PTMDATASET_SAVED);
+                    new ArrayList(), REASON_MODIF.REASON_PTMDATASET_SAVED.getReasonValue());
         });
 
         JButton mergeButton = new JButton();
@@ -404,7 +404,7 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
                 m_infoToggleButton.updateInfo();
                 // propagate modifications to the previous views
                 DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class,
-                        new ArrayList(clusters), REASON_MODIF.REASON_PTMCLUSTER_MERGED);
+                        new ArrayList(clusters), REASON_MODIF.REASON_PTMCLUSTER_MERGED.getReasonValue());
             }
         });
 
@@ -423,19 +423,14 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
                     ArrayList<PTMCluster> clustersToModify = new ArrayList<>();
                     clustersToModify.add(cluster);
 
-                    REASON_MODIF reason = null;
+                    byte reason = -1;
                     if (editClusterDialog.isPeptideDeleted()) {
                         m_logger.debug(" PEPTIDE CHANGED DONE !!!  ");
-                        reason = REASON_MODIF.REASON_PEPTIDE_SUPPRESSED;
-                    } else
-                        m_logger.debug(" NO PEPTIDE CHANGE DONE !!!  ");
-
+                        reason = REASON_MODIF.REASON_PEPTIDE_SUPPRESSED.getReasonValue();
+                    }
                     if (editClusterDialog.isStatusModified()) {
                         m_logger.debug(" Cluster Status  CHANGE DONE !!!  ");
-                        reason = REASON_MODIF.REASON_PTMCLUSTER_MODIFIED;
-//                        ArrayList<PTMCluster> clustersToModify = new ArrayList<>();
-//                        clustersToModify.add(cluster);
-//                        DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class, clustersToModify, DataBoxViewerManager.REASON_PTMCLUSTER_MODIFIED);
+                        reason = (reason == -1) ? REASON_MODIF.REASON_PTMCLUSTER_MODIFIED.getReasonValue() : (byte) (reason | REASON_MODIF.REASON_PTMCLUSTER_MODIFIED.getReasonValue());
                     } else
                         m_logger.debug(" Cluster Status NOT CHANGED !!!  ");
 
@@ -746,7 +741,7 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
             ArrayList<PTMCluster> clustersToModify = new ArrayList<>();
             clustersToModify.add(m_currentCluster);
             if(m_panel.applyModifiedStatus())
-                DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class, clustersToModify, REASON_MODIF.REASON_PTMCLUSTER_MODIFIED);
+                DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class, clustersToModify, REASON_MODIF.REASON_PTMCLUSTER_MODIFIED.getReasonValue());
             return true;
         }
 

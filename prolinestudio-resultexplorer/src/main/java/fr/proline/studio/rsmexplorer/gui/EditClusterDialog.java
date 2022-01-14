@@ -31,6 +31,7 @@ public class EditClusterDialog extends DefaultDialog {
 
   protected PTMCluster m_editedCluster;
   protected List<PTMPeptideInstance> m_ptmPeptideInstances;
+  protected List<PTMPeptideInstance> m_removedPeptideInstances;
 
   private ModifyClusterStatusPanel m_statusPanel;
   JScrollPane m_ptmPeptidesScrollPane;
@@ -46,11 +47,12 @@ public class EditClusterDialog extends DefaultDialog {
 //    setResizable(true);
 
     m_editedCluster = cluster;
-    m_ptmPeptideInstances = cluster.getParentPTMPeptideInstances();
+    m_ptmPeptideInstances = new ArrayList<>(cluster.getParentPTMPeptideInstances());
     initComponent();
 
     m_statusPanel.setData(m_editedCluster);
     m_ptmPeptidesTable.setData(m_ptmPeptideInstances);
+    m_removedPeptideInstances = new ArrayList<>();
   }
 
   private void initComponent(){
@@ -138,7 +140,8 @@ public class EditClusterDialog extends DefaultDialog {
       id.setVisible(true);
       return;
     }
-    m_editedCluster.removePeptide(ptmPep);
+//    m_editedCluster.removePeptide(ptmPep);
+    m_removedPeptideInstances.add(ptmPep);
     m_ptmPeptideInstances.remove(ptmPep);
     m_peptidesDeleted = true;
     m_ptmPeptidesTable.setData(m_ptmPeptideInstances);
@@ -190,6 +193,10 @@ public class EditClusterDialog extends DefaultDialog {
     return  m_peptidesDeleted;
   }
 
+  protected List<PTMPeptideInstance> getRemovedPeptideInstances(){
+    return m_removedPeptideInstances;
+  }
+
   private class PTMPeptidesTable extends LazyTable  {
 
     public PTMPeptidesTable() {
@@ -234,7 +241,8 @@ public class EditClusterDialog extends DefaultDialog {
     public void setData(List<PTMPeptideInstance> m_ptmPeptideInstances) {
       List<PTMCluster> clusters = new ArrayList<>();
       clusters.add(m_editedCluster);
-      ((PTMPeptidesTableModel) (((CompoundTableModel) getModel()).getBaseModel())).setData(null, m_ptmPeptideInstances,clusters,null);
+      ((PTMPeptidesTableModel) (((CompoundTableModel) getModel()).getBaseModel())).setData(null, new ArrayList<>(m_ptmPeptideInstances),clusters,null);
+      //fireTableDataChanged();
     }
   }
 

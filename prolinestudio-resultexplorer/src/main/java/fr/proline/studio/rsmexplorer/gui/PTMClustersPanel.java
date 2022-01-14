@@ -426,6 +426,7 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
                     byte reason = -1;
                     if (editClusterDialog.isPeptideDeleted()) {
                         m_logger.debug(" PEPTIDE CHANGED DONE !!!  ");
+                        editClusterDialog.getRemovedPeptideInstances().forEach( ptmPeptide -> cluster.removePeptide(ptmPeptide));
                         reason = REASON_MODIF.REASON_PEPTIDE_SUPPRESSED.getReasonValue();
                     }
                     if (editClusterDialog.isStatusModified()) {

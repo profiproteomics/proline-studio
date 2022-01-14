@@ -185,15 +185,10 @@ public class DataboxXicProteinSet extends AbstractDataBox {
      */
     @Override
     public void dataMustBeRecalculated(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, byte reason) {
-        if (m_dataset.getResultSetId() != rsetId) {
+        if(! ( isDataOfInterest(rsetId, rsmId, dataType) && dataType.equals(DMasterQuantProteinSet.class)))
             return;
-        }
-        if (m_dataset.getResultSummaryId() != rsmId) {
-            return;
-        }
-        if (dataType.equals(DMasterQuantProteinSet.class)) {
-            ((XicProteinSetPanel) getDataBoxPanelInterface()).dataModified(modificationsList, reason);
-        }
+
+        ((XicProteinSetPanel) getDataBoxPanelInterface()).dataModified(modificationsList, reason);
     }
 
     @Override

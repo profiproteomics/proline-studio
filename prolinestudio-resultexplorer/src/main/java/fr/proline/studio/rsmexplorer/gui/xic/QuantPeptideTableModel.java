@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -45,6 +45,7 @@ import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.rsmexplorer.DataBoxViewerManager;
+import fr.proline.studio.rsmexplorer.DataBoxViewerManager.REASON_MODIF;
 import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
@@ -743,7 +744,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
                 // propagate modifications to the previous views
                 DataBoxViewerManager.loadedDataModified(m_projectId, m_databox.getRsetId(), m_databox.getRsmId(), DMasterQuantProteinSet.class,
-                        masterQuantProteinSetModified, DataBoxViewerManager.REASON_PEPTIDE_SUPPRESSED);
+                        masterQuantProteinSetModified, REASON_MODIF.REASON_PEPTIDE_SUPPRESSED);
 
                 fireTableDataChanged();
 

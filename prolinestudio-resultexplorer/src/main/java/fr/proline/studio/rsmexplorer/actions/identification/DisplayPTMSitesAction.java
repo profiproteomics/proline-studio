@@ -39,8 +39,8 @@ public class DisplayPTMSitesAction  extends AbstractDisplayPTMDataAction {
     }
 
 
-    protected void loadWindowBox(DDataset ds, Object data){
-        WindowBox wbox = WindowBoxFactory.getPTMDataWindowBox(ds.getName(), true, isAnnotatedPTMsAction());
+    protected void loadWindowBox(DDataset ds, Object data, boolean unsaved){
+        WindowBox wbox = WindowBoxFactory.getPTMDataWindowBox(ds.getName(), true, isAnnotatedPTMsAction(),unsaved);
 
         // open a window to display the window box
         DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);

@@ -32,6 +32,7 @@ import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.dam.tasks.data.ptm.*;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
+import fr.proline.studio.rsmexplorer.DataBoxViewerManager.REASON_MODIF;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
@@ -165,7 +166,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
 
 
     @Override
-    public void dataMustBeRecalculated(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, int reason) {
+    public void dataMustBeRecalculated(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, REASON_MODIF reason) {
         if (m_datasetSet.getResultSetId() != rsetId) {
             return;
         }
@@ -174,16 +175,23 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         }
         if (dataType.equals(PTMCluster.class) ){
             switch (reason){
-                case DataBoxViewerManager.REASON_PTMCLUSTER_MERGED :
-                case DataBoxViewerManager.REASON_PTMCLUSTER_MODIFIED:
+                case REASON_PTMCLUSTER_MERGED :
+                case REASON_PTMCLUSTER_MODIFIED:
                     m_shouldBeSaved = true;
                     break;
 
-                case DataBoxViewerManager.REASON_PTMDATASET_SAVED:
+                case REASON_PTMDATASET_SAVED:
                     m_shouldBeSaved = false;
                     break;
 
+                case REASON_PEPTIDE_SUPPRESSED:
+                    m_shouldBeSaved = true;
+                    addDataChanged(PTMPeptideInstance.class, null);
+                    propagateDataChanged();
+                    break;
+//                    ((PTMClustersPanel) getDataBoxPanelInterface()).dataModified(modificationsList, reason);
             }
+            m_ptmDatasetPair.setShouldSavePTMDataset(m_shouldBeSaved);
         }
     }
 
@@ -222,6 +230,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                         //Main task callback!
 
                         m_ptmDatasetPair = ptmDSSet.get(0);
+                        m_shouldBeSaved = false;
                         m_logger.debug("  -- created "+getPTMDatasetToView().getPTMClusters().size()+" PTMCluster.");
                         m_loadPepMatchOnGoing=true;
                         ((PTMClustersPanel) getDataBoxPanelInterface()).setData(taskId, (ArrayList<PTMCluster>) getPTMDatasetToView().getPTMClusters(), finished);
@@ -544,7 +553,9 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                     Collections.sort(clusters);                    
                     //get First Selected Cluster, and consider only PTMCluster on same protein match
                     Long protMatchId = ((PTMClustersPanel) getDataBoxPanelInterface()).getSelectedProteinPTMCluster().getProteinMatch().getId();
-                    clusters.stream().filter(cluster -> protMatchId.equals(cluster.getProteinMatch().getId())).forEach(cluster -> {ptmPeptideInstances.addAll(parentPTMPeptideInstance ? cluster.getParentPTMPeptideInstances() : cluster.getLeafPTMPeptideInstances()); });                    
+                    clusters.stream().filter(cluster -> protMatchId.equals(cluster.getProteinMatch().getId())).forEach(cluster -> {
+                        ptmPeptideInstances.addAll(parentPTMPeptideInstance ? cluster.getParentPTMPeptideInstances() : cluster.getLeafPTMPeptideInstances());
+                    });
                 }
                 return ptmPeptideInstances;
             }
@@ -606,6 +617,9 @@ public class DataBoxPTMClusters extends AbstractDataBox {
             } else {
                 //PTMDataset exist.
                 m_rsm = m_datasetSet.getResultSummary();
+                if(m_ptmDatasetPair.shouldSavePTMDataset())
+                    m_shouldBeSaved = true;
+
                 // Verfiy if PTMDataset has quantitation data (if needed)
                 if(isXicResult()) {
                     boolean allDataLoaded = getPTMDatasetToView().isQuantDataLoaded();

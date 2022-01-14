@@ -83,10 +83,16 @@ public class IdentifyPtmSitesJMSAction extends AbstractRSMAction {
       if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
 
         //Alert user : previous modification view (Site/Cluster) should be closed in order to load new data
-        InfoDialog id = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.INFO,"Close Modification View","Be sure to close all previous Modification Site/Cluster view.");
-        id.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
+        InfoDialog id = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.NO_ICON,"Run Identify Modification Sites","Be sure to close all previous Modification Site/Cluster view !" +
+                "\n\nWarning: If you have previously saved annotated information on this dataset, it will be deleted!\nAre you sure you want to run \"Identify Modification Sites \" ?", true);
+        id.setButtonName(DefaultDialog.BUTTON_OK, "Yes");
+        id.setButtonName(DefaultDialog.BUTTON_CANCEL, "No");
         id.centerToWindow(WindowManager.getDefault().getMainWindow());
         id.setVisible(true);
+        if (id.getButtonClicked() == DefaultDialog.BUTTON_CANCEL) {
+          // No clicked
+          return;
+        }
 
         for (int i = 0; i < nbNodes; i++) {
 

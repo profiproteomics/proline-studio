@@ -20,7 +20,6 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.WindowManager;
-import fr.proline.studio.dam.data.SelectLevelEnum;
 import fr.proline.studio.dam.tasks.DatabaseDatasetPTMsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
@@ -41,10 +40,12 @@ import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataAnalyzerWindowBoxManager;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import  fr.proline.studio.rsmexplorer.DataBoxViewerManager.REASON_MODIF;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.rsmexplorer.DataBoxViewerManager;
 import fr.proline.studio.rsmexplorer.actions.ViewColocalizedPTMClustersAction;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
+import fr.proline.studio.rsmexplorer.gui.dialog.ModifyClusterStatusPanel;
 import fr.proline.studio.rsmexplorer.gui.model.PTMClusterTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.RendererMouseCallback;
 import fr.proline.studio.rsmexplorer.gui.renderer.SelectLevelRenderer;
@@ -65,8 +66,6 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import javax.swing.text.DefaultFormatterFactory;
-import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -240,9 +239,9 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
                     if (m_modifyStatusDialog == null) {
                         m_modifyStatusDialog = new ModifyStatusDialog();
                     }
-                    int[] selectedViewRows = new int[1];
-                    selectedViewRows[0] = row;
-                    m_modifyStatusDialog.setSelectedRows(selectedViewRows);
+
+                    PTMCluster cluster = getSelectedProteinPTMCluster();
+                    m_modifyStatusDialog.setData(cluster);
                     m_modifyStatusDialog.setLocation(e.getLocationOnScreen().x, e.getLocationOnScreen().y);
                     m_modifyStatusDialog.setVisible(true);
                 }
@@ -335,7 +334,6 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
         
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_ptmClusterTable, m_ptmClusterTable, ((CompoundTableModel) m_ptmClusterTable.getModel()));
-        toolbar.add(m_searchToggleButton);
         
         m_filterButton = new FilterButton(((CompoundTableModel) m_ptmClusterTable.getModel())) {
 
@@ -350,6 +348,31 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
 
         m_exportButton = new ExportButton(((CompoundTableModel) m_ptmClusterTable.getModel()), "Protein Sets", m_ptmClusterTable);
 
+        toolbar.add(m_searchToggleButton);
+        toolbar.add(m_filterButton);
+        toolbar.add(m_settingsButton);
+        toolbar.add(m_exportButton);
+
+        m_addCompareDataButton = new AddDataAnalyzerButton(((CompoundTableModel) m_ptmClusterTable.getModel())) {
+           
+            @Override
+            public void actionPerformed() {
+                JXTable table = getGlobalAssociatedTable();
+                TableInfo tableInfo = new TableInfo(m_dataBox.getId(), m_dataBox.getUserName(), m_dataBox.getDataName(), m_dataBox.getTypeName(), table);
+                Image i = m_dataBox.getIcon();
+                if (i!=null) {
+                    tableInfo.setIcon(new ImageIcon(i));
+                }
+                DataAnalyzerWindowBoxManager.addTableInfo(tableInfo);
+            }
+        };
+        
+        m_infoToggleButton = new InfoToggleButton(m_ptmClusterTable, m_ptmClusterTable);
+
+        toolbar.add(m_addCompareDataButton);
+        toolbar.add(m_infoToggleButton);
+        toolbar.addSeparator();
+
         JButton saveButton = new JButton();
         saveButton.setIcon(IconManager.getIcon(IconManager.IconType.SAVE_SETTINGS));
         saveButton.setToolTipText("Save Annotated Modifications Clusters");
@@ -362,7 +385,7 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
             m_infoToggleButton.updateInfo();
 
             DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class,
-                    new ArrayList(), DataBoxViewerManager.REASON_PTMDATASET_SAVED);
+                    new ArrayList(), REASON_MODIF.REASON_PTMDATASET_SAVED);
         });
 
         JButton mergeButton = new JButton();
@@ -381,34 +404,50 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
                 m_infoToggleButton.updateInfo();
                 // propagate modifications to the previous views
                 DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class,
-                       new ArrayList(clusters), DataBoxViewerManager.REASON_PTMCLUSTER_MERGED);
+                        new ArrayList(clusters), REASON_MODIF.REASON_PTMCLUSTER_MERGED);
             }
         });
 
-        toolbar.add(m_filterButton);
-        toolbar.add(m_settingsButton);
-        toolbar.add(m_exportButton);
 
-        m_addCompareDataButton = new AddDataAnalyzerButton(((CompoundTableModel) m_ptmClusterTable.getModel())) {
-           
-            @Override
-            public void actionPerformed() {
-                JXTable table = getGlobalAssociatedTable();
-                TableInfo tableInfo = new TableInfo(m_dataBox.getId(), m_dataBox.getUserName(), m_dataBox.getDataName(), m_dataBox.getTypeName(), table);
-                Image i = m_dataBox.getIcon();
-                if (i!=null) {
-                    tableInfo.setIcon(new ImageIcon(i));
+        JButton editButton = new JButton();
+        editButton.setIcon(IconManager.getIcon(IconManager.IconType.EDIT));
+        editButton.setToolTipText("Edit selected cluster");
+        editButton.addActionListener(e -> {
+            if(m_ptmClusterTableModel.getRowCount() > 0 && m_ptmClusterTable.getSelectedRowCount() == 1) {
+                PTMCluster cluster = getSelectedProteinPTMCluster();
+                m_logger.debug(" Edit clusters id "+cluster.getId()+" ("+cluster.getProteinMatch().getAccession()+"_"+cluster.getRepresentativePepMatch().getPeptide().getSequence()+")");
+                EditClusterDialog editClusterDialog = new EditClusterDialog(cluster);
+                editClusterDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
+                editClusterDialog.setVisible(true);
+                if(editClusterDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+                    ArrayList<PTMCluster> clustersToModify = new ArrayList<>();
+                    clustersToModify.add(cluster);
+
+                    REASON_MODIF reason = null;
+                    if (editClusterDialog.isPeptideDeleted()) {
+                        m_logger.debug(" PEPTIDE CHANGED DONE !!!  ");
+                        reason = REASON_MODIF.REASON_PEPTIDE_SUPPRESSED;
+                    } else
+                        m_logger.debug(" NO PEPTIDE CHANGE DONE !!!  ");
+
+                    if (editClusterDialog.isStatusModified()) {
+                        m_logger.debug(" Cluster Status  CHANGE DONE !!!  ");
+                        reason = REASON_MODIF.REASON_PTMCLUSTER_MODIFIED;
+//                        ArrayList<PTMCluster> clustersToModify = new ArrayList<>();
+//                        clustersToModify.add(cluster);
+//                        DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class, clustersToModify, DataBoxViewerManager.REASON_PTMCLUSTER_MODIFIED);
+                    } else
+                        m_logger.debug(" Cluster Status NOT CHANGED !!!  ");
+
+                    if(editClusterDialog.isClusterModified())
+                        DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class, clustersToModify, reason);
+
                 }
-                DataAnalyzerWindowBoxManager.addTableInfo(tableInfo);
             }
-        };
-        toolbar.add(m_addCompareDataButton);
-        
-        m_infoToggleButton = new InfoToggleButton(m_ptmClusterTable, m_ptmClusterTable);
-        
-        toolbar.add(m_infoToggleButton);
-        toolbar.addSeparator();
+        });
+
         toolbar.add(mergeButton);
+        toolbar.add(editButton);
         toolbar.add(saveButton);
 
         return toolbar;
@@ -681,16 +720,8 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
 
     private class ModifyStatusDialog extends DefaultDialog {
 
-        private final String CMD_VALIDATED = "Validated";
-        private final String CMD_INVALIDATED = "Invalidated";
-
-
-        private SelectLevelRadioButtonGroup m_validRButton;
-        private SelectLevelRadioButtonGroup m_invalidRButton;
-        private ButtonGroup m_statusButtonGroup;
-        private JFormattedTextField m_statusConfidenceLevelTF;
-        private JTextField m_statusConfidenceInfoTF;
-        private ArrayList<Integer> m_selectedRows = new ArrayList<>();
+        private ModifyClusterStatusPanel m_panel;
+        private PTMCluster m_currentCluster;
 
         public ModifyStatusDialog() {
             super(WindowManager.getDefault().getMainWindow(), Dialog.ModalityType.APPLICATION_MODAL);
@@ -703,179 +734,25 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
                     + "\t* the Status confidence : a positive number indicating the confidence you have in the current status.<br>"
                     + "\t* a free comment on current cluster status.";
             setHelpHeader("",help_text);
-            setInternalComponent(createInternalPanel());
+            m_panel = new ModifyClusterStatusPanel();
+            setInternalComponent(m_panel);
             setResizable(true);
 
             setButtonVisible(BUTTON_HELP, false);//use only cancel, ok button
         }
 
-        private JPanel createInternalPanel(){
-            JPanel p = new JPanel(new GridBagLayout());
-
-            GridBagConstraints c = new GridBagConstraints();
-            c.anchor = GridBagConstraints.NORTHWEST;
-            c.insets = new java.awt.Insets(10, 10, 2, 5);
-            c.fill = GridBagConstraints.BOTH;
-            c.gridx = 0;
-            c.gridy = 0;
-
-            JLabel statusTextLabel = new JLabel("Modification Cluster Status:");
-            p.add(statusTextLabel, c);
-
-            c.gridy++;
-            c.gridx++;
-            c.fill = GridBagConstraints.NONE;
-            c.insets = new java.awt.Insets(2, 2, 2, 2);
-            m_validRButton = new SelectLevelRadioButtonGroup(p, c, CMD_VALIDATED,IconManager.getIcon(IconManager.IconType.VALIDATED));
-            m_validRButton.getRadioButton().setActionCommand(CMD_VALIDATED);
-
-            c.gridy++;
-            c.gridx = 1;
-            m_invalidRButton = new SelectLevelRadioButtonGroup(p, c, CMD_INVALIDATED,IconManager.getIcon(IconManager.IconType.INVALIDATED));
-            m_invalidRButton.getRadioButton().setActionCommand(CMD_INVALIDATED);
-
-            m_statusButtonGroup = new ButtonGroup();
-            m_statusButtonGroup.add(m_validRButton.getRadioButton());
-            m_statusButtonGroup.add(m_invalidRButton.getRadioButton());
-            c.fill = GridBagConstraints.BOTH;
-            c.gridy++;
-            c.gridx = 0;
-            c.weightx=0.2;
-            c.insets = new java.awt.Insets(5, 10, 2, 5);
-            JLabel statConfidenceLabel = new JLabel("Status Confidence level:");
-            p.add(statConfidenceLabel, c);
-
-            c.gridx++;
-            c.gridwidth = 2;
-            c.weightx=0.8;
-            m_statusConfidenceLevelTF = new JFormattedTextField();
-            m_statusConfidenceLevelTF.setFormatterFactory(new DefaultFormatterFactory(new NumberFormatter()));
-            m_statusConfidenceLevelTF.setColumns(10);
-            p.add(m_statusConfidenceLevelTF, c);
-
-            c.gridy++;
-            c.gridx = 0;
-            c.weightx=0.2;
-            JLabel statConfidenceInfo = new JLabel("Status Confidence description:");
-            p.add(statConfidenceInfo, c);
-
-            c.gridx++;
-            c.weightx=0.8;
-            m_statusConfidenceInfoTF = new JTextField();
-            p.add(m_statusConfidenceInfoTF, c);
-
-
-            return p;
-        }
-
         @Override
         protected boolean okCalled() {
-            String command = m_statusButtonGroup.getSelection().getActionCommand();
             ArrayList<PTMCluster> clustersToModify = new ArrayList<>();
-            m_selectedRows.forEach(r -> clustersToModify.add(m_ptmClusterTableModel.getProteinPTMCluster(r)));
-            final boolean[] changedDone = new boolean[1];
-            changedDone[0] = false;
-            clustersToModify.forEach( cluster -> {
-                if( command.equals(CMD_VALIDATED) && cluster.getSelectionLevel()<2) {
-                    cluster.setSelectionLevel(3);
-                    changedDone[0] = true;
-                }
-
-                if( command.equals(CMD_INVALIDATED) && cluster.getSelectionLevel()>=2) {
-                  cluster.setSelectionLevel(0);
-                    changedDone[0] = true;
-                }
-
-                //get confidence parameters values
-                String confidenceDesc = m_statusConfidenceInfoTF.getText();
-                Integer confidenceNotation = (m_statusConfidenceLevelTF.getValue() == null || (m_statusConfidenceLevelTF.getValue().toString().isEmpty()) ) ? null : new Integer(m_statusConfidenceLevelTF.getValue().toString());
-
-                if( (confidenceDesc != null && !confidenceDesc.equals(cluster.getSelectionInfo())) || (confidenceDesc == null &&  cluster.getSelectionInfo() !=null))  {
-                    cluster.setSelectionInfo(confidenceDesc);
-                    changedDone[0] = true;
-                }
-
-                if( (confidenceNotation != null && !confidenceNotation.equals(cluster.getSelectionNotation())) || (confidenceNotation == null &&  cluster.getSelectionNotation() !=null)) {
-                    cluster.setSelectionNotation(confidenceNotation);
-                    changedDone[0] = true;
-                }
-            });
-
-            if(changedDone[0])
-                DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class, new ArrayList(clustersToModify), DataBoxViewerManager.REASON_PTMCLUSTER_MODIFIED);
+            clustersToModify.add(m_currentCluster);
+            if(m_panel.applyModifiedStatus())
+                DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class, clustersToModify, REASON_MODIF.REASON_PTMCLUSTER_MODIFIED);
             return true;
         }
 
-        private void setSelectedRows(int[] selectedViewRows) {
-
-            Integer commonNotation = null;
-            boolean diffNotation = false;
-
-            String commonDescription = null;
-            boolean diffDescr = false;
-
-            int commonStatus = SelectLevelEnum.RESET_AUTO.getIntValue(); // Use this value for not set yet !!
-            m_selectedRows.clear();
-
-            for (int i=0; i< selectedViewRows.length; i++) {
-                int row = selectedViewRows[i];
-                int modelIndex = m_ptmClusterTable.convertRowIndexToModel(row);
-                PTMCluster nextCluster =m_ptmClusterTableModel.getProteinPTMCluster(modelIndex);
-                if(i==0){
-                    commonStatus = nextCluster.getSelectionLevel();
-                    commonNotation = nextCluster.getSelectionNotation();
-                    commonDescription= nextCluster.getSelectionInfo();
-                } else {
-                    //*** Test if same selection level
-                    if (commonStatus != nextCluster.getSelectionLevel()) //  not same as previous value, set to Unknown
-                        commonStatus = SelectLevelEnum.UNKNOWN.getIntValue();
-
-                    //*** Test if same selection notation. If one is null, use other one
-                    if(!diffNotation) {
-                        if (commonNotation == null) // previous was nulll
-                            commonNotation = nextCluster.getSelectionNotation();
-                        else if (nextCluster.getSelectionNotation() != null && !commonNotation.equals(nextCluster.getSelectionNotation())) { // none null but different
-                            commonNotation = null;
-                            diffNotation = true;
-                        }
-                    }
-
-                    //*** Test if same selection notation. If one is null, use other one
-                    if(!diffDescr) {
-                        if (commonDescription == null) // previous was nulll
-                            commonDescription = nextCluster.getSelectionInfo();
-                        else if (nextCluster.getSelectionInfo() != null && !commonDescription.equals(nextCluster.getSelectionInfo())) { // none null but different
-                            commonDescription = null;
-                            diffDescr = true;
-                        }
-                    }
-                }
-                m_selectedRows.add(modelIndex);
-            }
-            //Set selection level in Panel
-            SelectLevelEnum val =SelectLevelEnum.valueOf(commonStatus);
-            switch (val){
-                case RESET_AUTO:
-                case UNKNOWN:
-                    break;
-                case DESELECTED_AUTO:
-                case DESELECTED_MANUAL:
-                    m_invalidRButton.getRadioButton().setSelected( true);
-                    break;
-
-                case SELECTED_AUTO:
-                case SELECTED_MANUAL:
-                    m_validRButton.getRadioButton().setSelected( true);
-                    break;
-            }
-
-            //Set description if common exist
-            if(!diffDescr && commonDescription != null)
-                m_statusConfidenceInfoTF.setText(commonDescription);
-
-            //Set confidence notation if common exist
-            if(!diffNotation && commonNotation != null)
-                m_statusConfidenceLevelTF.setValue(commonNotation);
+        public void setData(PTMCluster clusterToModify) {
+            m_currentCluster =clusterToModify;
+            m_panel.setData(clusterToModify);
 
         }
 

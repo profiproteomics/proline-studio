@@ -75,8 +75,8 @@ public class DisplayXICPTMClusterAction extends AbstractDisplayPTMDataAction {
         setEnabled(true);
     }
 
-    protected void loadWindowBox(DDataset dataSet, Object data) {
-        WindowBox wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName(), false, isAnnotatedPTMsAction());
+    protected void loadWindowBox(DDataset dataSet, Object data, boolean unsaved) {
+        WindowBox wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName(), false, isAnnotatedPTMsAction(),unsaved);
         wbox.setEntryData(dataSet.getProject().getId(), data);
 
         // open a window to display the window box

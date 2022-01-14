@@ -34,6 +34,7 @@ import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
 import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
 import fr.proline.studio.progress.ProgressInterface;
+import fr.proline.studio.rsmexplorer.DataBoxViewerManager;
 import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Image;
@@ -491,7 +492,9 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     }
 
     public boolean isDataOfInterest(Long rsetId, Long rsmId, Class dataType) {
-        return ( rsetId.equals(getRsetId()) && rsmId.equals(getRsmId()) && isDataProvider(dataType, null));
+        boolean isOfInterest = rsetId == null || rsetId.equals(getRsetId());
+        isOfInterest =  rsmId!=null ? (isOfInterest && rsmId.equals(getRsmId()) ) : isOfInterest;
+        return (isOfInterest && isDataProvider(dataType, null));
     }
 
 
@@ -504,7 +507,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     }
 
 
-    public void loadedDataModified(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, int reason) {
+    public void loadedDataModified(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, DataBoxViewerManager.REASON_MODIF reason) {
         if (isDataProvider(dataType, null)) {
             dataMustBeRecalculated(rsetId, rsmId, dataType, modificationsList, reason);
         }
@@ -563,7 +566,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
      *
      * @param dataType
      */
-    public void dataMustBeRecalculated(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, int reason) {
+    public void dataMustBeRecalculated(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, DataBoxViewerManager.REASON_MODIF reason) {
 
     }
 

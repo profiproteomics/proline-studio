@@ -53,25 +53,25 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
   private final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ptm");
 
   public static final int COLTYPE_PTM_CLUSTER_ID = 0;
-  public static final int COLTYPE_PTM_CLUSTER_SELECTION_LEVEL = COLTYPE_PTM_CLUSTER_ID+ 1;
-  public static final int COLTYPE_PROTEIN_ID = COLTYPE_PTM_CLUSTER_SELECTION_LEVEL+1;
-  public static final int COLTYPE_PROTEIN_NAME = COLTYPE_PROTEIN_ID+1;
-  public static final int COLTYPE_PEPTIDE_NAME = COLTYPE_PROTEIN_NAME+1;
-  public static final int COLTYPE_CLUSTER_NOTATION= COLTYPE_PEPTIDE_NAME+1;
-  public static final int COLTYPE_CLUSTER_INFO = COLTYPE_CLUSTER_NOTATION+1;
-  public static final int COLTYPE_PEPTIDE_PTM = COLTYPE_CLUSTER_INFO+1;
-  public static final int COLTYPE_PTM_PROBA = COLTYPE_PEPTIDE_PTM+1;
+  public static final int COLTYPE_PTM_CLUSTER_SELECTION_LEVEL = 1;
+  public static final int COLTYPE_PROTEIN_ID = 2;
+  public static final int COLTYPE_PROTEIN_NAME = 3;
+  public static final int COLTYPE_PEPTIDE_NAME = 4;
+  public static final int COLTYPE_CLUSTER_NOTATION= 5;
+  public static final int COLTYPE_CLUSTER_INFO = 6;
+  public static final int COLTYPE_PEPTIDE_PTM = 7;
+  public static final int COLTYPE_PTM_PROBA = 8;
 
 
-  public static final int COLTYPE_PEPTIDE_SCORE = COLTYPE_PTM_PROBA+1;
-  public static final int COLTYPE_PEPTIDE_COUNT = COLTYPE_PEPTIDE_SCORE+1;
-  public static final int COLTYPE_PTMSITE_COUNT = COLTYPE_PEPTIDE_COUNT+1;
-  public static final int COLTYPE_PTMSITE_POSITIONS = COLTYPE_PTMSITE_COUNT+1;
-  public static final int COLTYPE_PTM_CLUSTER_CONFIDENCE = COLTYPE_PTMSITE_POSITIONS+1;
-  public static final int COLTYPE_PTMSITE_CONFIDENCES = COLTYPE_PTM_CLUSTER_CONFIDENCE+1;
+  public static final int COLTYPE_PEPTIDE_SCORE = 9;
+  public static final int COLTYPE_PEPTIDE_COUNT = 10;
+  public static final int COLTYPE_PTMSITE_COUNT = 11;
+  public static final int COLTYPE_PTMSITE_POSITIONS = 12;
+  public static final int COLTYPE_PTM_CLUSTER_CONFIDENCE = 13;
+  public static final int COLTYPE_PTMSITE_CONFIDENCES = 14;
 
-  public static final int COLTYPE_DELTA_MASS_PTM = COLTYPE_PTMSITE_CONFIDENCES+1;
-  public static final int COLTYPE_SPECTRUM_TITLE = COLTYPE_DELTA_MASS_PTM+1;
+  public static final int COLTYPE_DELTA_MASS_PTM = 15;
+  public static final int COLTYPE_SPECTRUM_TITLE = 16;
   public static final int LAST_STATIC_COLUMN = COLTYPE_SPECTRUM_TITLE;
   
   private static final String[] m_columnNames = {"Id", "Status", "Protein Id", "Protein", "Peptide", "Status confidence","Status description" ,"PTMs", "PTMs Confid.(MDScore, %)", "Score", "Peptide count",  "Site count", "Sites Loc.", "Confidence" ,"Sites Confid.(%)", "PTM D.Mass", "Spectrum title"};

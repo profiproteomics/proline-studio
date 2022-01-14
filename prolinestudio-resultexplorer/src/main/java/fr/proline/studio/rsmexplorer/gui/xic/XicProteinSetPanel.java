@@ -208,7 +208,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
                             }
 
-                            DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), DMasterQuantProteinSet.class, masterQuantProteinSetModified, DataBoxViewerManager.REASON_PROTEINS_REFINED);
+                            DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), DMasterQuantProteinSet.class, masterQuantProteinSetModified, DataBoxViewerManager.REASON_MODIF.REASON_PROTEINS_REFINED);
                         }
                     };
 
@@ -430,12 +430,12 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     }
     private boolean m_hideFirstTime = true;
 
-    public void dataModified(ArrayList modificationsList, int reason) {
+    public void dataModified(ArrayList modificationsList, DataBoxViewerManager.REASON_MODIF reason) {
 
         boolean modification = m_quantProteinSetTable.dataModified(modificationsList);
 
         if (modification) {
-            if (reason == DataBoxViewerManager.REASON_PEPTIDE_SUPPRESSED) {
+            if (reason.equals(DataBoxViewerManager.REASON_MODIF.REASON_PEPTIDE_SUPPRESSED)) {
                 m_refineProteinsPanel.setLocation(getX() + 20, getY() + 20);
                 m_refineProteinsPanel.setVisible(true);
             }

@@ -30,6 +30,7 @@ import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.ParameterList;
 import fr.proline.studio.pattern.ParameterSubtypeEnum;
+import fr.proline.studio.rsmexplorer.DataBoxViewerManager;
 import fr.proline.studio.rsmexplorer.gui.xic.ProteinQuantPanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XicProteinSetPanel;
@@ -184,7 +185,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
      * @param dataType
      */
     @Override
-    public void dataMustBeRecalculated(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, int reason) {
+    public void dataMustBeRecalculated(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, DataBoxViewerManager.REASON_MODIF reason) {
         if (m_dataset.getResultSetId() != rsetId) {
             return;
         }

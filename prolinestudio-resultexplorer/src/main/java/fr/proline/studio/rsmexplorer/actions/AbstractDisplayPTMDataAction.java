@@ -65,7 +65,7 @@ public abstract class AbstractDisplayPTMDataAction extends AbstractRSMAction  {
     return m_isAnnotatedPTMs;
   }
 
-  protected  abstract void loadWindowBox(DDataset dataSet, Object data);
+  protected  abstract void loadWindowBox(DDataset dataSet, Object data, boolean unsaved);
 
   protected void actionImpl(DataSetNode dataSetNode) {
 
@@ -77,20 +77,24 @@ public abstract class AbstractDisplayPTMDataAction extends AbstractRSMAction  {
 
     //Test if PTMDataset already loaded
     PTMDataset ptmDataset = null;
-    if(m_isAnnotatedPTMs)
-      ptmDataset = m_dataIsPTMSite ?  DatabaseDataManager.getDatabaseDataManager().getAnnotatedSitesPTMDatasetForDS(dataSet.getId()) :  DatabaseDataManager.getDatabaseDataManager().getAnnotatedClustersPTMDatasetForDS(dataSet.getId());
-    else
+    boolean unsaved = false;
+    if(m_isAnnotatedPTMs) {
+      if(DatabaseDataManager.getDatabaseDataManager().getAnnotatedPTMDatasetSetForDS(dataSet.getId())!=null)
+        unsaved = DatabaseDataManager.getDatabaseDataManager().getAnnotatedPTMDatasetSetForDS(dataSet.getId()).shouldSavePTMDataset();
+      ptmDataset = m_dataIsPTMSite ? DatabaseDataManager.getDatabaseDataManager().getAnnotatedSitesPTMDatasetForDS(dataSet.getId()) : DatabaseDataManager.getDatabaseDataManager().getAnnotatedClustersPTMDatasetForDS(dataSet.getId());
+
+    } else
       ptmDataset = m_dataIsPTMSite ?  DatabaseDataManager.getDatabaseDataManager().getSitesPTMDatasetForDS(dataSet.getId()) :  DatabaseDataManager.getDatabaseDataManager().getClustersPTMDatasetForDS(dataSet.getId());
 
     if(ptmDataset != null){
-      loadWindowBox(dataSet, ptmDataset);
+      loadWindowBox(dataSet, ptmDataset,unsaved);
 
     } else {
       //Not loaded yet
 
       ResultSummary rsm = dataSetNode.getResultSummary();
       if (rsm != null) {
-        loadWindowBox(dataSet, dataSet);
+        loadWindowBox(dataSet, dataSet, unsaved);
 
       } else {
 
@@ -105,7 +109,7 @@ public abstract class AbstractDisplayPTMDataAction extends AbstractRSMAction  {
 
           @Override
           public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-            loadWindowBox(dataSet, dataSet);
+            loadWindowBox(dataSet, dataSet, false);
           }
         };
 

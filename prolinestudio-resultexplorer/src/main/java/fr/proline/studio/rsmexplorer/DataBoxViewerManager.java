@@ -29,20 +29,36 @@ public class DataBoxViewerManager {
 
     public static final String MODIFIED_TITLE_SUFFIX ="***";
 
-    public static final int REASON_PEPTIDE_SUPPRESSED = 0;
-    public static final int REASON_PROTEINS_REFINED = 1;
-    public static final int REASON_PTMCLUSTER_MERGED = 2;
-    public static final int REASON_PTMCLUSTER_MODIFIED = 3;
-    public static final int REASON_PTMDATASET_SAVED = 4;
+    public enum REASON_MODIF{
+        REASON_PEPTIDE_SUPPRESSED((byte) 1,true),
+        REASON_PROTEINS_REFINED((byte)2,false),
+        REASON_PTMCLUSTER_MERGED((byte)4, true),
+        REASON_PTMCLUSTER_MODIFIED((byte)8,true),
+        REASON_PTMDATASET_SAVED((byte)16, false);
 
-    public static final List<Integer> REASON_MODIF_TO_SAVE = new ArrayList<>();
-    static {
-        REASON_MODIF_TO_SAVE.add(REASON_PTMCLUSTER_MERGED);
-        REASON_MODIF_TO_SAVE.add(REASON_PTMCLUSTER_MODIFIED);
-        REASON_MODIF_TO_SAVE.add(REASON_PEPTIDE_SUPPRESSED);
+        private byte m_reasonValue;
+        private boolean m_shouldSave;
+
+        REASON_MODIF(byte reasonValue, boolean shouldSave){
+            m_reasonValue = reasonValue;
+            m_shouldSave = shouldSave;
+        }
+
+        public byte getReasonValye(){
+            return m_reasonValue;
+        }
+
+        public boolean shouldBeSaved(){
+            return m_shouldSave;
+        }
+
+        public static boolean isReasonDefine(REASON_MODIF reason, byte value){
+            return ( (reason.getReasonValye() & value) == reason.getReasonValye());
+        }
+
     }
 
-    public static void loadedDataModified(long projectId, Long rsetId, Long rsmId, Class c, ArrayList modificationsList, int reason) {
+    public static void loadedDataModified(long projectId, Long rsetId, Long rsmId, Class c, ArrayList modificationsList, REASON_MODIF reason) {
 
         Set<AbstractTopPanel> tcs = WindowManager.getDefault().getMainWindow().getTopPanels();
         Iterator<AbstractTopPanel> itTop = tcs.iterator();

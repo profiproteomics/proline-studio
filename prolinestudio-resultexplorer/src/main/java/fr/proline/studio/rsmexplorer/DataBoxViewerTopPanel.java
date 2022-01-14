@@ -168,17 +168,17 @@ public class DataBoxViewerTopPanel extends AbstractTopPanel {
         return m_windowBox.getEntryBox().getProjectId();
     }
 
-    public void loadedDataModified(Long rsetId, Long rsmId, Class c, ArrayList modificationsList, int reason) {
+    public void loadedDataModified(Long rsetId, Long rsmId, Class c, ArrayList modificationsList, DataBoxViewerManager.REASON_MODIF reason) {
         //Test if information is pertinent for thos view
         if(m_windowBox.getEntryBox().isDataOfInterest(rsetId,rsmId, c )) {
-            if (DataBoxViewerManager.REASON_MODIF_TO_SAVE.contains(reason)) {
+            if (reason.shouldBeSaved()) {
                 //Set title as modified
                 String title = getName();
                 if (!title.endsWith(DataBoxViewerManager.MODIFIED_TITLE_SUFFIX))
                     title = title + " " + DataBoxViewerManager.MODIFIED_TITLE_SUFFIX;
                 this.setName(title);
                 fireTopPanelPropertyChange(TopPanelListener.TITLE_PROPERTY);
-            } else if (reason == DataBoxViewerManager.REASON_PTMDATASET_SAVED || reason == DataBoxViewerManager.REASON_PROTEINS_REFINED) {
+            } else { //Warning should add hasSaved property ?
                 //remove title modified
                 String title = getName();
                 if (title.endsWith(DataBoxViewerManager.MODIFIED_TITLE_SUFFIX))

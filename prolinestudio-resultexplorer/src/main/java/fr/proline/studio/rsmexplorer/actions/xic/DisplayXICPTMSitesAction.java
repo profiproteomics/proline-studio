@@ -42,10 +42,10 @@ public class DisplayXICPTMSitesAction extends AbstractDisplayPTMDataAction {
     }
 
 
-    protected void loadWindowBox(DDataset dataSet, Object data) {
+    protected void loadWindowBox(DDataset dataSet, Object data, boolean unsaved) {
 
         // prepare window box
-        WindowBox wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName(), true, isAnnotatedPTMsAction());
+        WindowBox wbox = WindowBoxFactory.getXicPTMDataWindowBox(dataSet.getName(), true, isAnnotatedPTMsAction(),unsaved);
         wbox.setEntryData(dataSet.getProject().getId(), data);
 
         // open a window to display the window box

@@ -7,6 +7,7 @@ public class PTMDatasetPair {
   private PTMDataset m_sitePTMDataset;
   private PTMDataset m_clusterPTMDataset;
   private int m_ptmDatasetType;
+  private boolean m_shouldSave = false;
 
   public static int RAW_PTM_DATASET= 0;
   public static int ANNOTATED_PTM_DATASET= 1;
@@ -21,6 +22,15 @@ public class PTMDatasetPair {
     m_sitePTMDataset =  sitePTMDataset;
     m_clusterPTMDataset = clusterPTMDataset;
     m_ptmDatasetType = isAnnotated ? ANNOTATED_PTM_DATASET : RAW_PTM_DATASET;
+  }
+
+
+  public  boolean shouldSavePTMDataset(){
+    return m_shouldSave;
+  }
+
+  public void setShouldSavePTMDataset(boolean shouldSave){
+    m_shouldSave = shouldSave;
   }
 
 

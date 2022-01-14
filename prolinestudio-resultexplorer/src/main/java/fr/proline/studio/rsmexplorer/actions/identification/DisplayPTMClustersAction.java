@@ -39,8 +39,8 @@ public class DisplayPTMClustersAction  extends AbstractDisplayPTMDataAction {
        super(false, tree);
     }
 
-    protected void loadWindowBox(DDataset dataSet, Object data){
-        WindowBox wbox = WindowBoxFactory.getPTMDataWindowBox(dataSet.getName(), false, isAnnotatedPTMsAction());
+    protected void loadWindowBox(DDataset dataSet, Object data, boolean unsaved){
+        WindowBox wbox = WindowBoxFactory.getPTMDataWindowBox(dataSet.getName(), false, isAnnotatedPTMsAction(), unsaved);
         wbox.setEntryData(dataSet.getProject().getId(), data);
 
         // open a window to display the window box

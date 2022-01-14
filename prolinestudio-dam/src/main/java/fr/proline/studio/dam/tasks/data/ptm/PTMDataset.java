@@ -498,7 +498,7 @@ public class PTMDataset {
             if(!ptmInfoIds.contains(ptmInfos.get(i).getIdPtm()))
                 ptmInfoIds.add(ptmInfos.get(i).getIdPtm());
         }
-        ptmDS.ptmIds = ptmInfoIds.toArray(new Long[0]);
+        ptmDS.ptmIds = ptmInfoIds.toArray(new Long[ptmInfoIds.size()]);
 
         List<Long> leafRsmIds =getLeafResultSummaryIds();
         Long[] rsmIds = new Long[leafRsmIds.size()];

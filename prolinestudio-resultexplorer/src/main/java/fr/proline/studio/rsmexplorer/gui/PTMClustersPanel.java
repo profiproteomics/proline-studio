@@ -55,6 +55,7 @@ import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.IconManager;
+import fr.proline.studio.utils.StudioResourceBundle;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.slf4j.Logger;
@@ -724,12 +725,8 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
 
             setTitle("Modify Modification Cluster Status");
 
-            String help_text = "Change the status of selected modification Cluster. <br>" +
-                    "Three status properties can be modified : <br>"
-                    + "\t* the Status it-self : validated or invalidated<br> "
-                    + "\t* the Status confidence : a positive number indicating the confidence you have in the current status.<br>"
-                    + "\t* a free comment on current cluster status.";
-            setHelpHeader("",help_text);
+            String helpText = StudioResourceBundle.getMessage(PTMClustersPanel.class, "EditCluster.status.modif.html.help");
+            setHelpHeaderText(helpText);
             m_panel = new ModifyClusterStatusPanel();
             setInternalComponent(m_panel);
             setResizable(true);

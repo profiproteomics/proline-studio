@@ -12,6 +12,7 @@ import fr.proline.studio.rsmexplorer.gui.model.PTMPeptidesTableModel;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.IconManager;
+import fr.proline.studio.utils.StudioResourceBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +46,10 @@ public class EditClusterDialog extends DefaultDialog {
     super(WindowManager.getDefault().getMainWindow(), Dialog.ModalityType.APPLICATION_MODAL);
     setTitle("Edit Cluster "+cluster.getId()+" ["+cluster.getProteinMatch().getAccession()+" / "+cluster.getRepresentativePepMatch().getPeptide().getSequence()+"]");
 //    setResizable(true);
+
+    StringBuilder helpTextBuilder = new StringBuilder(StudioResourceBundle.getMessage(PTMClustersPanel.class, "EditCluster.status.modif.html.help"));
+    helpTextBuilder.append("<br><br>").append(StudioResourceBundle.getMessage(PTMClustersPanel.class, "EditCluster.peptide.remove.html.help"));
+    setHelpHeader(IconManager.getIcon(IconManager.IconType.INFORMATION),"Edit Cluster",helpTextBuilder.toString());
 
     m_editedCluster = cluster;
     m_ptmPeptideInstances = new ArrayList<>(cluster.getParentPTMPeptideInstances());

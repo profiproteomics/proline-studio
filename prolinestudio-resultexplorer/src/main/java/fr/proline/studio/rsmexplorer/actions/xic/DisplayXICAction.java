@@ -98,8 +98,8 @@ public class DisplayXICAction extends AbstractRSMAction {
         m_menu.add(displayXICProteinSetItem);
         m_menu.addSeparator();
         m_menu.add(displayXICPtmSiteProteinItem);
-        m_menu.add(displayXICAnnotatedPtmSiteProteinItem);
         m_menu.add(displayXICPtmClusterProteinItem);
+        m_menu.add(displayXICAnnotatedPtmSiteProteinItem);
         m_menu.add(displayXICAnnotatedPtmClusterProteinItem);
         m_menu.addSeparator();
         m_menu.add(displayUserWindowItem);

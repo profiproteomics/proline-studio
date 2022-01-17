@@ -173,7 +173,6 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         if(reasonModif == null)
             return;
         switch (reasonModif){
-            case REASON_PTMCLUSTER_MERGED :
             case REASON_PTMCLUSTER_MODIFIED:
                 m_shouldBeSaved = true;
                 break;
@@ -182,6 +181,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                 m_shouldBeSaved = false;
                 break;
 
+            case REASON_PTMCLUSTER_MERGED :
             case REASON_PEPTIDE_SUPPRESSED:
                 m_shouldBeSaved = true;
                 addDataChanged(PTMPeptideInstance.class, null);

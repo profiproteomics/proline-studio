@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -124,7 +124,8 @@ public class PTMPeptideInstance {
 
   public List<DPeptideMatch> getPepMatchesOnProteinMatch(DProteinMatch proteinMatch) {
     List<DPeptideMatch> pepMatches = new ArrayList<>();
-    List<Long> allowedProtMatchIds = m_sites.get(0).getPTMdataset().getProtMatchesIdForAccession(proteinMatch.getAccession());
+    String accession = proteinMatch==null ? null : proteinMatch.getAccession();
+    List<Long> allowedProtMatchIds = m_sites.get(0).getPTMdataset().getProtMatchesIdForAccession(accession);
     pepMatches.addAll(m_peptideInstance.getPeptideMatches().stream().filter(dpm -> allowedProtMatchIds.contains(dpm.getSequenceMatch().getId().getProteinMatchId())).collect(Collectors.toList()));
     return pepMatches;
   }

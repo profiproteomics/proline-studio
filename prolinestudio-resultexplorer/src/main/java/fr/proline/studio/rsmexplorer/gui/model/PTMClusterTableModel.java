@@ -67,15 +67,17 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
   public static final int COLTYPE_PEPTIDE_COUNT = 10;
   public static final int COLTYPE_PTMSITE_COUNT = 11;
   public static final int COLTYPE_PTMSITE_POSITIONS = 12;
-  public static final int COLTYPE_PTM_CLUSTER_CONFIDENCE = 13;
-  public static final int COLTYPE_PTMSITE_CONFIDENCES = 14;
+  public static final int COLTYPE_PTMSITE_PEP_POSITIONS = 13;
+  public static final int COLTYPE_PTM_CLUSTER_CONFIDENCE = 14;
+  public static final int COLTYPE_PTMSITE_CONFIDENCES = 15;
 
-  public static final int COLTYPE_DELTA_MASS_PTM = 15;
-  public static final int COLTYPE_SPECTRUM_TITLE = 16;
+  public static final int COLTYPE_DELTA_MASS_PTM = 16;
+  public static final int COLTYPE_SPECTRUM_TITLE = 17;
+
   public static final int LAST_STATIC_COLUMN = COLTYPE_SPECTRUM_TITLE;
   
-  private static final String[] m_columnNames = {"Id", "Status", "Protein Id", "Protein", "Peptide", "Status confidence","Status description" ,"PTMs", "PTMs Confid.(MDScore, %)", "Score", "Peptide count",  "Site count", "Sites Loc.", "Confidence" ,"Sites Confid.(%)", "PTM D.Mass", "Spectrum title"};
-  private static final String[] m_columnTooltips = {"PTM cluster Id", "Cluster Status: Validated or Invalidated ", "Protein match Id", "Protein", "Peptide","Value illustrating the confidence in the Cluster Status", "Comment to outline Cluster Status", "Peptide's PTMs", "PTMs localisation confidence (%)", "Score of the peptide match", "Number of peptides matching the modification site", "Number of modification sites grouped into the cluster", "Sites localisation on the protein \nMay be greater than site count in case of merged clusters. ", "Sites combined confidence", "Sites localisation confidence (%) \nMay be greater than site count in case of merged clusters. ", "PTMs delta mass", "Peptide match spectrum title"};
+  private static final String[] m_columnNames = {"Id", "Status", "Protein Id", "Protein", "Peptide", "Status confidence","Status description" ,"PTMs", "PTMs Confid.(MDScore, %)", "Score", "Peptide count",  "Site count", "Sites Loc.","Sites Modif. on peptide", "Confidence" ,"Sites Confid.(%)", "PTM D.Mass", "Spectrum title"};
+  private static final String[] m_columnTooltips = {"PTM cluster Id", "Cluster Status: Validated or Invalidated ", "Protein match Id", "Protein", "Peptide","Value illustrating the confidence in the Cluster Status", "Comment to outline Cluster Status", "Peptide's PTMs", "PTMs localisation confidence (%)", "Score of the peptide match", "Number of peptides matching the modification site", "Number of modification sites grouped into the cluster", "Sites localisation on the protein \nMay be greater than site count in case of merged clusters. ", "Sites modification and localisation on the representative peptide", "Sites combined confidence", "Sites localisation confidence (%) \nMay be greater than site count in case of merged clusters. ", "PTMs delta mass", "Peptide match spectrum title"};
      
   //Dynamique columns
 
@@ -170,6 +172,7 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
     listIds.add(COLTYPE_PTM_CLUSTER_CONFIDENCE);
     listIds.add(COLTYPE_CLUSTER_NOTATION);
     listIds.add(COLTYPE_CLUSTER_INFO);
+    listIds.add(COLTYPE_PTMSITE_PEP_POSITIONS);
     if(m_isQuantitationDS){
         for (int i = m_quantChannels.length - 1; i >= 0; i--) {
             listIds.add(COLTYPE_START_QUANT_INDEX + COLTYPE_RAW_ABUNDANCE + (i * m_columnNamesQC.length));            
@@ -197,6 +200,7 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
         return Integer.class;
       case COLTYPE_PTMSITE_POSITIONS:
       case COLTYPE_PTMSITE_CONFIDENCES:
+      case COLTYPE_PTMSITE_PEP_POSITIONS:
         return ComparableList.class;
       case COLTYPE_PTMSITE_COUNT:
       case COLTYPE_PEPTIDE_NAME:
@@ -336,6 +340,9 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
 
       case COLTYPE_PTMSITE_POSITIONS:
         return ptmCluster.getPositionsOnProtein();
+
+      case COLTYPE_PTMSITE_PEP_POSITIONS:
+        return  ptmCluster.getPTMSites().stream().map(s -> s.peptideSpecificReadablePtmString(peptideMatch.getPeptide().getId())).collect(ComparableList::new, ComparableList::add, ComparableList::addAll);
 
       case COLTYPE_PTMSITE_CONFIDENCES:
         return ptmCluster.getSiteConfidences();
@@ -730,6 +737,7 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
         renderer = new CollectionRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
         break;
       }
+      case COLTYPE_PTMSITE_PEP_POSITIONS:
       case COLTYPE_PTMSITE_POSITIONS: {
         renderer = new CollectionRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
         break;

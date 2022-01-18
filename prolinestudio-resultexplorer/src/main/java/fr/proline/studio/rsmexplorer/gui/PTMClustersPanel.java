@@ -103,11 +103,13 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
     private ExportButton m_exportButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
 
+    private boolean m_areClustersEditable;
 
     /**
      * Creates new form PTMProteinSitePanel
      */
-    public PTMClustersPanel() {
+    public PTMClustersPanel(boolean editable) {
+        m_areClustersEditable = editable;
         initComponents();
     }
 
@@ -232,7 +234,7 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
     public void mouseAction(MouseEvent e) {
         int col = m_ptmClusterTable.columnAtPoint(e.getPoint());
         int row = m_ptmClusterTable.rowAtPoint(e.getPoint());
-        if (row != -1) {
+        if (row != -1 && m_areClustersEditable) {
             int rowModelIndex = m_ptmClusterTable.convertRowIndexToModel(row);
             if (m_ptmClusterTable.convertColumnIndexToModel(col) == PTMClusterTableModel.COLTYPE_PTM_CLUSTER_SELECTION_LEVEL) {
                 m_ptmClusterTable.getSelectionModel().setSelectionInterval(row, row);
@@ -377,6 +379,7 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
         JButton saveButton = new JButton();
         saveButton.setIcon(IconManager.getIcon(IconManager.IconType.SAVE_SETTINGS));
         saveButton.setToolTipText("Save Annotated Modifications Clusters");
+        saveButton.setEnabled(m_areClustersEditable);
         saveButton.addActionListener(e -> {
             PTMDataset ptmDataset = (PTMDataset) m_dataBox.getData(PTMDataset.class);
             DatabaseDatasetPTMsTask task = new  DatabaseDatasetPTMsTask(null);
@@ -392,6 +395,7 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
         JButton mergeButton = new JButton();
         mergeButton.setIcon(IconManager.getIcon(IconManager.IconType.MERGE_PTM));
         mergeButton.setToolTipText("Merge selected clusters");
+        mergeButton.setEnabled(m_areClustersEditable);
         mergeButton.addActionListener(e -> {
 //            PTMClusterTableModel m = (PTMClusterTableModel) ((CompoundTableModel)m_ptmClusterTable.getModel()).getBaseModel();
             if(m_ptmClusterTableModel.getRowCount() > 0 && m_ptmClusterTable.getSelectedRowCount() > 1) {
@@ -413,6 +417,7 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
         JButton editButton = new JButton();
         editButton.setIcon(IconManager.getIcon(IconManager.IconType.EDIT));
         editButton.setToolTipText("Edit selected cluster");
+        editButton.setEnabled(m_areClustersEditable);
         editButton.addActionListener(e -> {
             if(m_ptmClusterTableModel.getRowCount() > 0 && m_ptmClusterTable.getSelectedRowCount() == 1) {
                 PTMCluster cluster = getSelectedProteinPTMCluster();

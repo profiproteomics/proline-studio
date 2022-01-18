@@ -106,7 +106,7 @@ public class PTMPeptideInstance {
     if (clusters.size() > 1) {
       m_logger.debug("searching a representative PSM for multiple clusters simultaneously not yet implemented: use only the first cluster");
     }
-    PTMCluster cluster = m_clusters.get(0);
+    PTMCluster cluster = clusters.get(0);
     DPeptideMatch pepMatch = null;
 
     //Try using ptmSite PTMSitePeptideInstance

@@ -107,7 +107,7 @@ public class DataBoxPTMClustersSites extends AbstractDataBox {
 
     @Override
     public void createPanel() {
-        PTMClustersPanel p = new PTMClustersPanel();
+        PTMClustersPanel p = new PTMClustersPanel(false);
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);

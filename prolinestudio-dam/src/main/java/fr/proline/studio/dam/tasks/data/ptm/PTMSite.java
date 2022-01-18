@@ -232,6 +232,23 @@ public class PTMSite {
         return builder.toString();
     }
 
+    public String peptideSpecificReadablePtmString(Long peptideId) {
+
+        Integer pepPosition = getPositionOnPeptide(peptideId);
+        StringBuilder builder = new StringBuilder();
+        if (m_ptmSpecificity != null) {
+            builder.append(m_ptmSpecificity.getPtmShortName()).append("(");
+            if (m_ptmSpecificity.getLocationSpecificity().equals("Anywhere")) {
+                builder.append(m_ptmSpecificity.getResidueAASpecificity());
+            } else {
+                builder.append(m_ptmSpecificity.getLocationSpecificity());
+            }
+            builder.append(pepPosition).append(")");
+        } else {
+            builder.append("PTM ID").append(m_site.ptmDefinitionId).append("-").append(pepPosition);
+        }
+        return builder.toString();
+    }
     
     public String toReadablePtmString(Long peptideId) {
         return m_ptmSpecificity.toReadablePtmString(getPositionOnPeptide(peptideId));

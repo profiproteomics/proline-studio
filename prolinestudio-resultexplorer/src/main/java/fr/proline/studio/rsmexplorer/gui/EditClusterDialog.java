@@ -47,8 +47,8 @@ public class EditClusterDialog extends DefaultDialog {
     setTitle("Edit Cluster "+cluster.getId()+" ["+cluster.getProteinMatch().getAccession()+" / "+cluster.getRepresentativePepMatch().getPeptide().getSequence()+"]");
 //    setResizable(true);
 
-    StringBuilder helpTextBuilder = new StringBuilder(StudioResourceBundle.getMessage(PTMClustersPanel.class, "EditCluster.status.modif.html.help"));
-    helpTextBuilder.append("<br><br>").append(StudioResourceBundle.getMessage(PTMClustersPanel.class, "EditCluster.peptide.remove.html.help"));
+    StringBuilder helpTextBuilder = new StringBuilder(StudioResourceBundle.getMessage(EditClusterDialog.class, "EditCluster.status.modif.html.help"));
+    helpTextBuilder.append("<br><br>").append(StudioResourceBundle.getMessage(EditClusterDialog.class, "EditCluster.peptide.remove.html.help"));
     setHelpHeader(IconManager.getIcon(IconManager.IconType.INFORMATION),"Edit Cluster",helpTextBuilder.toString());
 
     m_editedCluster = cluster;

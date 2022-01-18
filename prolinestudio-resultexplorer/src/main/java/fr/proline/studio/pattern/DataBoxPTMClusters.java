@@ -157,7 +157,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
     
     @Override
     public void createPanel() {
-        PTMClustersPanel p = new PTMClustersPanel();
+        PTMClustersPanel p = new PTMClustersPanel(!m_loadSitesAsClusters);
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);
@@ -226,6 +226,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                         //Main task callback!
 
                         m_ptmDatasetPair = ptmDSSet.get(0);
+                        getDataBoxPanelInterface().addSingleValue(m_ptmDatasetPair);
                         m_shouldBeSaved = false;
                         m_logger.debug("  -- created "+getPTMDatasetToView().getPTMClusters().size()+" PTMCluster.");
                         m_loadPepMatchOnGoing=true;
@@ -406,7 +407,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
             proteinMatchQuery.setParameter("rsmId", m_datasetSet.getResultSummaryId());
             List<Object[]> resultList = proteinMatchQuery.getResultList();
             Iterator<Object[]> iterator = resultList.iterator();
-            
+
             while (iterator.hasNext()) {
                 Object[] cur = iterator.next();
                 Long proteinMatchId = (Long) cur[0];
@@ -613,6 +614,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
             } else {
                 //PTMDataset exist.
                 m_rsm = m_datasetSet.getResultSummary();
+                getDataBoxPanelInterface().addSingleValue(m_ptmDatasetPair);
                 if(m_ptmDatasetPair.shouldSavePTMDataset())
                     m_shouldBeSaved = true;
 
@@ -623,7 +625,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                         //data already loaded. init param and load associated panel
                         m_quantChannelInfo = new QuantChannelInfo(m_datasetSet);
                         getDataBoxPanelInterface().addSingleValue(m_quantChannelInfo);
-                        ((PTMClustersPanel) getDataBoxPanelInterface()).setData(-1L, (ArrayList<PTMCluster>) ((PTMDataset) data).getPTMClusters(), false);
+                        ((PTMClustersPanel) getDataBoxPanelInterface()).setData(-1L, (ArrayList<PTMCluster>) getPTMDatasetToView().getPTMClusters(), false);
                         ((PTMClustersPanel) getDataBoxPanelInterface()).dataUpdated(null, true);
                     } else {
                         //load XIC data
@@ -633,7 +635,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                 }  else {
                     //Identification PTMDataset
                     //load associated panel
-                    ((PTMClustersPanel) getDataBoxPanelInterface()).setData(-1L, (ArrayList<PTMCluster>) ((PTMDataset) data).getPTMClusters(), false);
+                    ((PTMClustersPanel) getDataBoxPanelInterface()).setData(-1L, (ArrayList<PTMCluster>) getPTMDatasetToView().getPTMClusters(), false);
                     ((PTMClustersPanel) getDataBoxPanelInterface()).dataUpdated(null, true);
                 }
 
@@ -645,7 +647,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
             m_ptmDatasetPair = m_isAnnotatedData ?   DatabaseDataManager.getDatabaseDataManager().getAnnotatedPTMDatasetSetForDS( ((PTMDataset) data).getDataset().getId() ) : DatabaseDataManager.getDatabaseDataManager().getPTMDatasetSetForDS( ((PTMDataset) data).getDataset().getId() );
             if(m_ptmDatasetPair == null || (!m_ptmDatasetPair.getClusterPTMDataset().equals(data) && !m_ptmDatasetPair.getSitePTMDataset().equals(data)))
                 throw new IllegalArgumentException("Invalid specified PTMDataset.");
-
+            getDataBoxPanelInterface().addSingleValue(m_ptmDatasetPair);
             //set parameter before loading associated panel
             m_datasetSet = m_ptmDatasetPair.getDataset();
             m_rsm = m_datasetSet.getResultSummary();

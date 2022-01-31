@@ -101,8 +101,6 @@ public class JMSConnectionManager {
     private Session m_mainSession = null;
 
     //Topic objects
-    private TopicConnection m_topicConnection = null;
-    private TopicSession m_topicSession = null;
     private Topic m_notificationTopic = null;
     private ServiceNotificationListener m_notifListener = null;
     private MessageConsumer m_topicSuscriber;
@@ -131,11 +129,9 @@ public class JMSConnectionManager {
 
     private void resetConnObjects() {
         m_connection = null;
-        m_topicConnection = null;
         m_serviceQueue = null;
         m_notificationTopic = null;
         m_mainSession = null;
-        m_topicSession = null;
         m_browser = null;
         m_notifListener = null;
         m_topicSuscriber = null;
@@ -196,10 +192,6 @@ public class JMSConnectionManager {
         return m_serviceQueue;
     }
 
-    public  void  startJMSConnections() throws Exception {
-        getJMSConnection().start();
-        m_topicConnection.start();
-    }
 
     private void createConnection() throws JMSException {
         try {
@@ -241,30 +233,24 @@ public class JMSConnectionManager {
             
             // Step 4.Create a JMS Connection
             m_connection = cf.createConnection();
-            m_topicConnection = cf.createTopicConnection();
 
             // Step 5. Create a JMS Session (Session MUST be confined in current Thread)
             // Not transacted, AUTO_ACKNOWLEDGE
             m_mainSession = m_connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            m_topicSession = m_topicConnection.createTopicSession(false,Session.AUTO_ACKNOWLEDGE);
 
             // Step 6. Create the subscription and the subscriber.//TODO : create & listen only when asked !?
-            m_topicSuscriber = m_topicSession.createConsumer(m_notificationTopic);
+            m_topicSuscriber = m_mainSession.createConsumer(m_notificationTopic);
             m_notifListener = new ServiceNotificationListener();
             m_topicSuscriber.setMessageListener(m_notifListener);
             m_connectionState = ConnectionListener.CONNECTION_DONE;
             fireConnectionStateChanged(ConnectionListener.CONNECTION_DONE);
         } catch (RuntimeException | JMSException je) {
-            if (m_connection != null || m_topicConnection != null) {
+            if (m_connection != null ){
                 try {
-                    if(m_connection != null)
-                        m_connection.close();
+                    m_connection.close();
                     m_loggerProline.info("JMS Connection closed on error " + je.getMessage());
-                    if(m_topicConnection != null)
-                        m_topicConnection.close();
-                    m_loggerProline.info("JMS Topic Connection closed on error " + je.getMessage());
                 } catch (Exception exClose) {
-                    m_loggerProline.error("Error closing JMS [Topic] Connection", exClose);
+                    m_loggerProline.error("Error closing JMS Connection", exClose);
                 } finally {
                     resetConnObjects();
                 }
@@ -311,15 +297,11 @@ public class JMSConnectionManager {
 
                 // need to cleanup jms thread
                 AccessJMSManagerThread.getAccessJMSManagerThread().cleanup();
+                m_topicSuscriber.close();
                 m_mainSession.close();
                 m_connection.close();
 
                 m_loggerProline.info("JMS Connection closed");
-                if(m_topicConnection != null) {
-                    m_topicSuscriber.close();
-                    m_topicSession.close();
-                    m_topicConnection.close();
-                }
 
             } catch (Exception exClose) {
                 m_loggerProline.error("Error closing JMS Connection", exClose);

@@ -76,12 +76,6 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
 
         m_callback = callback;
         m_synchronous = false;
-
-        try {
-            m_session = AccessJMSManagerThread.getAccessJMSManagerThread().getConnection().createSession(false, Session.CLIENT_ACKNOWLEDGE);
-        } catch (JMSException exception) {
-            exception.printStackTrace();
-        }
     }
 
     public AbstractJMSTask(AbstractJMSCallback callback, boolean synchronous, TaskInfo taskInfo) {
@@ -90,11 +84,6 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
         m_callback = callback;
         m_synchronous = synchronous;
 
-        try {
-            m_session = AccessJMSManagerThread.getAccessJMSManagerThread().getConnection().createSession(false, Session.CLIENT_ACKNOWLEDGE);
-        } catch (JMSException exception) {
-            exception.printStackTrace();
-        }
     }
 
     /**
@@ -122,7 +111,8 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
             /*
              * Thread specific : Session, Producer, Consumer ...
              */
-            // Get JMS Session (Session MUST be confined in current Thread)            
+            // Get JMS Session (Session MUST be confined in current Thread)
+            m_session = AccessJMSManagerThread.getAccessJMSManagerThread().getSession();
 
             // Step 6. Create a JMS Message Producer (Producer MUST be confined in current Thread)
             m_producer = m_session.createProducer(JMSConnectionManager.getJMSConnectionManager().getServiceQueue());
@@ -305,14 +295,6 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
 
     }
 
-    public final void closeSession() {
-        try {
-            m_session.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     /**
      * Method called after the service has been done
      *
@@ -321,7 +303,6 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
     protected void callback(final boolean success) {
 
 
-        AccessJMSManagerThread.getAccessJMSManagerThread().taskFinished(this);
 
         if (m_callback == null) {
 

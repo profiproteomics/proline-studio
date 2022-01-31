@@ -389,16 +389,21 @@ public class PTMDataset {
         return false;
     }
 
-    public void mergeClusters(List<PTMCluster> clusters2Merge){
+    public boolean mergeClusters(List<PTMCluster> clusters2Merge){
 
         if(clusters2Merge == null  || clusters2Merge.size() <= 1)
-            return;
+            return false;
 
         List<PTMCluster> finalClusters2Merge =  clusters2Merge.stream().filter( c -> c.getSelectionLevel()>=2).collect(Collectors.toList());
         if(finalClusters2Merge.size() <= 1)
-            return;
+            return false;
 
         PTMCluster firstCluster = finalClusters2Merge.get(0);
+        finalClusters2Merge =  finalClusters2Merge.stream().filter( c -> areColocalized(firstCluster, c)).collect(Collectors.toList());
+
+        if(finalClusters2Merge.size() <= 1)
+            return false;
+
         List<Long> siteIds = firstCluster.getPTMSites().stream().map(PTMSite::getId).collect(Collectors.toList());
         PTMCluster mergedCluster = new PTMCluster(firstCluster.getId(), firstCluster.getLocalizationConfidence(), firstCluster.getSelectionLevel(),
                 firstCluster.getSelectionNotation(), firstCluster.getSelectionInfo(), siteIds, firstCluster.getPeptideIds(), this);
@@ -486,6 +491,7 @@ public class PTMDataset {
 
         m_ptmClusters.removeAll(finalClusters2Merge);
         m_ptmClusters.add(mergedCluster);
+        return true;
 
     }
 

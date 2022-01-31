@@ -171,24 +171,32 @@ public class DataBoxViewerTopPanel extends AbstractTopPanel {
     public void loadedDataModified(Long rsetId, Long rsmId, Class c, ArrayList modificationsList, byte reason) {
         //Test if information is pertinent for thos view
         if(m_windowBox.getEntryBox().isDataOfInterest(rsetId,rsmId, c )) {
-            DataBoxViewerManager.REASON_MODIF reasonModif = DataBoxViewerManager.REASON_MODIF.getReasonModifFor(reason);
-            if (reasonModif!=null && reasonModif.shouldBeSaved()) {
-                //Set title as modified
-                String title = getName();
-                if (!title.endsWith(DataBoxViewerManager.MODIFIED_TITLE_SUFFIX))
-                    title = title + " " + DataBoxViewerManager.MODIFIED_TITLE_SUFFIX;
+
+            if(reason == DataBoxViewerManager.REASON_MODIF.REASON_CHANGE_TITLE.getReasonValue()){
+                //VDS: modificationsList shound have 1 entry = new name.
+                String title = (String) modificationsList.get(0);
                 this.setName(title);
                 fireTopPanelPropertyChange(TopPanelListener.TITLE_PROPERTY);
-            } else { //Warning should add hasSaved property ?
-                //remove title modified
-                String title = getName();
-                if (title.endsWith(DataBoxViewerManager.MODIFIED_TITLE_SUFFIX))
-                    title = title.substring(0, title.lastIndexOf(DataBoxViewerManager.MODIFIED_TITLE_SUFFIX) - 1);
-                this.setName(title);
-                fireTopPanelPropertyChange(TopPanelListener.TITLE_PROPERTY);
+            } else {
+                DataBoxViewerManager.REASON_MODIF reasonModif = DataBoxViewerManager.REASON_MODIF.getReasonModifFor(reason);
+                if (reasonModif != null && reasonModif.shouldBeSaved()) {
+                    //Set title as modified
+                    String title = getName();
+                    if (!title.endsWith(DataBoxViewerManager.MODIFIED_TITLE_SUFFIX))
+                        title = title + " " + DataBoxViewerManager.MODIFIED_TITLE_SUFFIX;
+                    this.setName(title);
+                    fireTopPanelPropertyChange(TopPanelListener.TITLE_PROPERTY);
+                } else { //Warning should add hasSaved property ?
+                    //remove title modified
+                    String title = getName();
+                    if (title.endsWith(DataBoxViewerManager.MODIFIED_TITLE_SUFFIX))
+                        title = title.substring(0, title.lastIndexOf(DataBoxViewerManager.MODIFIED_TITLE_SUFFIX) - 1);
+                    this.setName(title);
+                    fireTopPanelPropertyChange(TopPanelListener.TITLE_PROPERTY);
+                }
+                m_windowBox.getEntryBox().loadedDataModified(rsetId, rsmId, c, modificationsList, reason);
             }
         }
-        m_windowBox.getEntryBox().loadedDataModified(rsetId, rsmId, c, modificationsList, reason);
         repaint();
     }
 

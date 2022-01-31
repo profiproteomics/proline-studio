@@ -30,11 +30,13 @@ public class DataBoxViewerManager {
     public static final String MODIFIED_TITLE_SUFFIX ="***";
 
     public enum REASON_MODIF{
+        REASON_CHANGE_TITLE((byte)0, false), // special entry, can't be combined with other. To Change title
         REASON_PEPTIDE_SUPPRESSED((byte) 1,true),
         REASON_PROTEINS_REFINED((byte)2,false),
         REASON_PTMCLUSTER_MERGED((byte)4, true),
         REASON_PTMCLUSTER_MODIFIED((byte)8,true),
         REASON_PTMDATASET_SAVED((byte)16, false);
+
 
         private byte m_reasonValue;
         private boolean m_shouldSave;
@@ -51,7 +53,7 @@ public class DataBoxViewerManager {
         public static  REASON_MODIF getReasonModifFor(byte value){
             REASON_MODIF[]  allVals = REASON_MODIF.values();
             for (REASON_MODIF allVal : allVals) {
-                if (isReasonDefine(allVal, value))
+                if ( allVal != REASON_CHANGE_TITLE && isReasonDefine(allVal, value))
                     return allVal;
             }
             return null;

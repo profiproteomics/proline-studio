@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fr.proline</groupId>
     <artifactId>ProlineStudio</artifactId>
-    <version>2.2.0ptm-SNAPSHOT</version>
+    <version>2.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -134,7 +134,6 @@
                             <groupId>${project.groupId}</groupId>
                             <artifactId>${project.artifactId}</artifactId>
                             <version>${project.version}</version>
-                            <type>zip</type>
                             <classifier>${os.classifier}</classifier>							
                             <packaging>zip</packaging>
                         </configuration>

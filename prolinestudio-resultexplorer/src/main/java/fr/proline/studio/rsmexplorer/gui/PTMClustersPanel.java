@@ -20,10 +20,12 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.WindowManager;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.tasks.DatabaseDatasetPTMsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
 import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
+import fr.proline.studio.dam.tasks.data.ptm.PTMDatasetPair;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.extendedtablemodel.*;
@@ -39,7 +41,9 @@ import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataAnalyzerWindowBoxManager;
+import fr.proline.studio.pattern.DataBoxPTMClusters;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.progress.ProgressBarDialog;
 import  fr.proline.studio.rsmexplorer.DataBoxViewerManager.REASON_MODIF;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.rsmexplorer.DataBoxViewerManager;
@@ -238,6 +242,27 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
             int rowModelIndex = m_ptmClusterTable.convertRowIndexToModel(row);
             if (m_ptmClusterTable.convertColumnIndexToModel(col) == PTMClusterTableModel.COLTYPE_PTM_CLUSTER_SELECTION_LEVEL) {
                 m_ptmClusterTable.getSelectionModel().setSelectionInterval(row, row);
+                if (!m_ptmClusterTable.isLoaded()) {
+                    ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), m_ptmClusterTable, "Data loading", "Edit is not available while data is loading. Please Wait.");
+                    dialog.setLocation(e.getPoint());
+                    dialog.setVisible(true);
+
+                    if (!dialog.isWaitingFinished()) {
+                        return;
+                    }
+                }
+
+                //Verify which dataset is loaded : if Annotated PTMDataset,nothing to do otherwise should switch to annotated dataset !
+                //VDS FIXME : For test only to remove
+                PTMDatasetPair ptmDatasetpair = (PTMDatasetPair) m_dataBox.getData(PTMDatasetPair.class);
+                if (ptmDatasetpair.getPTMDatasetType() == PTMDatasetPair.ANNOTATED_PTM_DATASET) {
+                    m_logger.debug(" ==> EDIT IN ANNOTATED DATA OK !!! ");
+                } else {
+                    PTMDatasetPair annPtmDatasetpair = DatabaseDataManager.getDatabaseDataManager().getAnnotatedPTMDatasetSetForDS(ptmDatasetpair.getDataset().getId());
+                    String existMsg = (annPtmDatasetpair != null) ? " Annotated PTM Exist " : " Annotated do NOT Exist !";
+                    m_logger.debug("  ==> EDIT IN NOT ANNOTATED DATA NOO OK !!! " + existMsg);
+                }
+
                 if (m_ptmClusterTableModel.isRowEditable(rowModelIndex)) {
                     if (m_modifyStatusDialog == null) {
                         m_modifyStatusDialog = new ModifyStatusDialog();
@@ -376,77 +401,9 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
         toolbar.add(m_infoToggleButton);
         toolbar.addSeparator();
 
-        JButton saveButton = new JButton();
-        saveButton.setIcon(IconManager.getIcon(IconManager.IconType.SAVE_SETTINGS));
-        saveButton.setToolTipText("Save Annotated Modifications Clusters");
-        saveButton.setEnabled(m_areClustersEditable);
-        saveButton.addActionListener(e -> {
-            PTMDataset ptmDataset = (PTMDataset) m_dataBox.getData(PTMDataset.class);
-            DatabaseDatasetPTMsTask task = new  DatabaseDatasetPTMsTask(null);
-            task.initAddAnnotatedPTMDataset(m_dataBox.getProjectId(),  ptmDataset);
-            task.fetchData();
-
-            m_infoToggleButton.updateInfo();
-
-            DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class,
-                    new ArrayList(), REASON_MODIF.REASON_PTMDATASET_SAVED.getReasonValue());
-        });
-
-        JButton mergeButton = new JButton();
-        mergeButton.setIcon(IconManager.getIcon(IconManager.IconType.MERGE_PTM));
-        mergeButton.setToolTipText("Merge selected clusters");
-        mergeButton.setEnabled(m_areClustersEditable);
-        mergeButton.addActionListener(e -> {
-//            PTMClusterTableModel m = (PTMClusterTableModel) ((CompoundTableModel)m_ptmClusterTable.getModel()).getBaseModel();
-            if(m_ptmClusterTableModel.getRowCount() > 0 && m_ptmClusterTable.getSelectedRowCount() > 1) {
-                List<PTMCluster> clusters = getSelectedPTMClusters();
-                m_logger.debug(" Merge "+ clusters.size()+" clusters  ");
-                PTMDataset ptmDS = clusters.get(0).getPTMDataset();
-                ptmDS.mergeClusters(clusters);
-
-                m_ptmClusterTable.dataUpdated(null, true);
-                m_dataBox.propagateDataChanged();
-                m_infoToggleButton.updateInfo();
-                // propagate modifications to the previous views
-                DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class,
-                        new ArrayList(clusters), REASON_MODIF.REASON_PTMCLUSTER_MERGED.getReasonValue());
-            }
-        });
-
-
-        JButton editButton = new JButton();
-        editButton.setIcon(IconManager.getIcon(IconManager.IconType.EDIT));
-        editButton.setToolTipText("Edit selected cluster");
-        editButton.setEnabled(m_areClustersEditable);
-        editButton.addActionListener(e -> {
-            if(m_ptmClusterTableModel.getRowCount() > 0 && m_ptmClusterTable.getSelectedRowCount() == 1) {
-                PTMCluster cluster = getSelectedProteinPTMCluster();
-                m_logger.debug(" Edit clusters id "+cluster.getId()+" ("+cluster.getProteinMatch().getAccession()+"_"+cluster.getRepresentativePepMatch().getPeptide().getSequence()+")");
-                EditClusterDialog editClusterDialog = new EditClusterDialog(cluster);
-                editClusterDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
-                editClusterDialog.setVisible(true);
-                if(editClusterDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
-                    ArrayList<PTMCluster> clustersToModify = new ArrayList<>();
-                    clustersToModify.add(cluster);
-
-                    byte reason = -1;
-                    if (editClusterDialog.isPeptideDeleted()) {
-                        m_logger.debug(" PEPTIDE CHANGED DONE !!!  ");
-                        editClusterDialog.getRemovedPeptideInstances().forEach( ptmPeptide -> cluster.removePeptide(ptmPeptide));
-                        reason = REASON_MODIF.REASON_PEPTIDE_SUPPRESSED.getReasonValue();
-                    }
-                    if (editClusterDialog.isStatusModified()) {
-                        m_logger.debug(" Cluster Status  CHANGE DONE !!!  ");
-                        reason = (reason == -1) ? REASON_MODIF.REASON_PTMCLUSTER_MODIFIED.getReasonValue() : (byte) (reason | REASON_MODIF.REASON_PTMCLUSTER_MODIFIED.getReasonValue());
-                    } else
-                        m_logger.debug(" Cluster Status NOT CHANGED !!!  ");
-
-                    if(editClusterDialog.isClusterModified())
-                        DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class, clustersToModify, reason);
-
-                }
-            }
-        });
+        SaveToggleButton saveButton = new SaveToggleButton(m_ptmClusterTable);
+        MergeToggleButton mergeButton = new MergeToggleButton(m_ptmClusterTable);
+        EditToggleButton editButton = new EditToggleButton(m_ptmClusterTable);
 
         toolbar.add(mergeButton);
         toolbar.add(editButton);
@@ -756,4 +713,201 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
 
     }
 
+    private class SaveToggleButton extends JToggleButton {
+
+        private ProgressInterface m_progressInterface = null;
+
+        public SaveToggleButton(ProgressInterface progressInterface) {
+            setIcon(IconManager.getIcon(IconManager.IconType.SAVE_SETTINGS));
+            m_progressInterface = progressInterface;
+            setEnabled(m_areClustersEditable);
+            init();
+        }
+
+        private void init() {
+            setToolTipText("Save Annotated Modifications Clusters");
+
+            addActionListener(e -> {
+
+                //Verfify all data is load before allowing editing
+                if ((m_progressInterface != null) && (!m_progressInterface.isLoaded())) {
+
+                    ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), m_progressInterface, "Data loading", "Save is not available while data is loading. Please Wait.");
+                    dialog.setLocation(getLocationOnScreen().x + getWidth() + 5, getLocationOnScreen().y + getHeight() + 5);
+                    dialog.setVisible(true);
+
+                    if (!dialog.isWaitingFinished()) {
+                        setSelected(false);
+                        return;
+                    }
+                }
+
+                //Verify which dataset is loaded : if Annotated PTMDataset,nothing to do otherwise should switch to annotated dataset !
+                PTMDatasetPair ptmDatasetpair = (PTMDatasetPair) m_dataBox.getData(PTMDatasetPair.class);
+                boolean changeToAnnotated = false;
+                if (ptmDatasetpair.getPTMDatasetType() == PTMDatasetPair.ANNOTATED_PTM_DATASET) {
+                    m_logger.debug(" ==> MERGE IN ANNOTATED DATA OK !!! ");
+                } else {
+                    PTMDatasetPair annPtmDatasetpair = DatabaseDataManager.getDatabaseDataManager().getAnnotatedPTMDatasetSetForDS(ptmDatasetpair.getDataset().getId());
+                    String existMsg = (annPtmDatasetpair != null) ? " Annotated PTM Exist " : " Annotated do NOT Exist !";
+                    m_logger.debug("  ==> MERGE IN NOT ANNOTATED DATA NOO OK !!! " + existMsg+". Remove data of exist");
+                    DatabaseDataManager.getDatabaseDataManager().removeAllPTMDatasetsForDS(ptmDatasetpair.getDataset().getId());
+                    ptmDatasetpair.changePTMDatasetType(PTMDatasetPair.ANNOTATED_PTM_DATASET);
+                    DatabaseDataManager.getDatabaseDataManager().addLoadedAnnotatedPTMDatasetSet(ptmDatasetpair);
+                    changeToAnnotated = true;
+                }
+
+                PTMDataset ptmDataset = (PTMDataset) m_dataBox.getData(PTMDataset.class);
+
+                DatabaseDatasetPTMsTask task = new DatabaseDatasetPTMsTask(null);
+                task.initAddAnnotatedPTMDataset(m_dataBox.getProjectId(), ptmDataset);
+                task.fetchData();
+
+                m_infoToggleButton.updateInfo();
+
+                DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class,
+                        new ArrayList(), REASON_MODIF.REASON_PTMDATASET_SAVED.getReasonValue());
+
+                if(changeToAnnotated) {
+                    String newTitle = m_dataBox.getFullName();
+                    if(!newTitle.contains("Annotated PTMs")){
+                        newTitle =  newTitle.replace("Dataset PTMs", "Annotated PTMs");
+                    }
+                    ArrayList modifData = new ArrayList();
+                    modifData.add(newTitle);
+
+                    DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class,
+                            modifData, REASON_MODIF.REASON_CHANGE_TITLE.getReasonValue());
+                }
+
+
+            });
+
+        }
+    }
+
+    private class MergeToggleButton extends JToggleButton {
+
+        private ProgressInterface m_progressInterface;
+
+        public MergeToggleButton(ProgressInterface progressInterface){
+            m_progressInterface = progressInterface;
+            setIcon(IconManager.getIcon(IconManager.IconType.MERGE_PTM));
+            setEnabled(m_areClustersEditable);
+            init();
+        }
+
+        private void init() {
+            setToolTipText("Merge selected clusters");
+
+            addActionListener(e -> {
+                if ((m_progressInterface != null) && (!m_progressInterface.isLoaded())) {
+
+                    ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), m_progressInterface, "Data loading", "Merge is not available while data is loading. Please Wait.");
+                    dialog.setLocation(getLocationOnScreen().x + getWidth() + 5, getLocationOnScreen().y + getHeight() + 5);
+                    dialog.setVisible(true);
+
+                    if (!dialog.isWaitingFinished()) {
+                        setSelected(false);
+                        return;
+                    }
+                }
+
+                if (m_ptmClusterTableModel.getRowCount() > 0 && m_ptmClusterTable.getSelectedRowCount() > 1) {
+                    List<PTMCluster> clusters = getSelectedPTMClusters();
+                    PTMDataset ptmDataset = (PTMDataset) m_dataBox.getData(PTMDataset.class);
+                    PTMDatasetPair ptmDatasetpair = (PTMDatasetPair) m_dataBox.getData(PTMDatasetPair.class);
+                    //VDS FIXME : For test only to remove
+                    if (ptmDatasetpair.getPTMDatasetType() == PTMDatasetPair.ANNOTATED_PTM_DATASET) {
+                        m_logger.debug(" MERGE IN  ANNOTATED DATA OK !!! ");
+                    } else {
+                        PTMDatasetPair annPtmDatasetpair = DatabaseDataManager.getDatabaseDataManager().getAnnotatedPTMDatasetSetForDS(ptmDataset.getDataset().getId());
+                        String existMsg = (annPtmDatasetpair != null) ? " Annotated PTM Exist " : " Annotated do NOT Exist !";
+                        m_logger.debug(" MERGE IN NOT ANNOTATED DATA NOO OK !!! " + existMsg);
+                    }
+                    m_logger.debug(" Merge " + clusters.size() + " clusters  in ");
+
+                    PTMDataset ptmDS = clusters.get(0).getPTMDataset();
+                    boolean merged = ptmDS.mergeClusters(clusters);
+                    if (merged) {
+                        m_ptmClusterTable.dataUpdated(null, true);
+                        m_dataBox.propagateDataChanged();
+                        m_infoToggleButton.updateInfo();
+                        // propagate modifications to the previous views
+                        DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class,
+                                new ArrayList(clusters), REASON_MODIF.REASON_PTMCLUSTER_MERGED.getReasonValue());
+                    }
+                }
+            });
+        }
+    }
+
+    private class EditToggleButton extends JToggleButton {
+
+        private ProgressInterface m_progressInterface;
+
+        public EditToggleButton(ProgressInterface progressInterface){
+            m_progressInterface = progressInterface;
+            setIcon(IconManager.getIcon(IconManager.IconType.EDIT));
+            setEnabled(m_areClustersEditable);
+            init();
+        }
+
+        private void init() {
+            setToolTipText("Edit selected cluster");
+
+            addActionListener(e -> {
+
+                //Verfify all data is load before allowing editing
+                if ((m_progressInterface != null) && (!m_progressInterface.isLoaded())) {
+
+                    ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), m_progressInterface, "Data loading", "Edit is not available while data is loading. Please Wait.");
+                    dialog.setLocation(getLocationOnScreen().x + getWidth() + 5, getLocationOnScreen().y + getHeight() + 5);
+                    dialog.setVisible(true);
+
+                    if (!dialog.isWaitingFinished()) {
+                        setSelected(false);
+                        return;
+                    }
+                }
+
+                //Verify which dataset is loaded : if Annotated PTMDataset,nothing to do otherwise should switch to annotated dataset !
+                //VDS FIXME : For test only to remove
+                PTMDatasetPair ptmDatasetpair = (PTMDatasetPair) m_dataBox.getData(PTMDatasetPair.class);
+                if (ptmDatasetpair.getPTMDatasetType() == PTMDatasetPair.ANNOTATED_PTM_DATASET) {
+                    m_logger.debug(" ==> EDIT IN ANNOTATED DATA OK !!! ");
+                } else {
+                    PTMDatasetPair annPtmDatasetpair = DatabaseDataManager.getDatabaseDataManager().getAnnotatedPTMDatasetSetForDS(ptmDatasetpair.getDataset().getId());
+                    String existMsg = (annPtmDatasetpair != null) ? " Annotated PTM Exist " : " Annotated do NOT Exist !";
+                    m_logger.debug("  ==> EDIT IN NOT ANNOTATED DATA NOO OK !!! " + existMsg);
+                }
+
+                if(m_ptmClusterTableModel.getRowCount() > 0 && m_ptmClusterTable.getSelectedRowCount() == 1) {
+                    PTMCluster cluster = getSelectedProteinPTMCluster();
+                    m_logger.debug(" Edit clusters id "+cluster.getId()+" ("+cluster.getProteinMatch().getAccession()+"_"+cluster.getRepresentativePepMatch().getPeptide().getSequence()+")");
+                    EditClusterDialog editClusterDialog = new EditClusterDialog(cluster);
+                    editClusterDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
+                    editClusterDialog.setVisible(true);
+                    if(editClusterDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+                        ArrayList<PTMCluster> clustersToModify = new ArrayList<>();
+                        clustersToModify.add(cluster);
+
+                        byte reason = -1;
+                        if (editClusterDialog.isPeptideDeleted()) {
+                            editClusterDialog.getRemovedPeptideInstances().forEach( ptmPeptide -> cluster.removePeptide(ptmPeptide));
+                            reason = REASON_MODIF.REASON_PEPTIDE_SUPPRESSED.getReasonValue();
+                        }
+                        if (editClusterDialog.isStatusModified()) {
+                            reason = (reason == -1) ? REASON_MODIF.REASON_PTMCLUSTER_MODIFIED.getReasonValue() : (byte) (reason | REASON_MODIF.REASON_PTMCLUSTER_MODIFIED.getReasonValue());
+                        }
+
+                        if(editClusterDialog.isClusterModified())
+                            DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class, clustersToModify, reason);
+
+                    }
+                }
+            });
+
+        }
+    }
 }

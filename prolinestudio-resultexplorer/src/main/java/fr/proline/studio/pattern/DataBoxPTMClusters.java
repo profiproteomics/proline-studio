@@ -178,6 +178,8 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                 break;
 
             case REASON_PTMDATASET_SAVED:
+                //If saved done this is now an annotated dataset cluster
+                m_isAnnotatedData = true;
                 m_shouldBeSaved = false;
                 break;
 

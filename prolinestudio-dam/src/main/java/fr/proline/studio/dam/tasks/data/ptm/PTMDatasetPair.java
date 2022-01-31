@@ -55,5 +55,8 @@ public class PTMDatasetPair {
     return m_ptmDatasetType;
   }
 
-
+  public void changePTMDatasetType(int datasetType) {
+    if(datasetType == ANNOTATED_PTM_DATASET || datasetType == RAW_PTM_DATASET )
+      m_ptmDatasetType = datasetType;
+  }
 }

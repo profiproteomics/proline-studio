@@ -240,6 +240,11 @@ public class DatabaseDataManager  {
             m_ptmAnnotatedDatasetSetPerDatasetId.remove(dsId);
     }
 
+    public void removeAnnotatedPTMDatasetsForDS(Long dsId){
+        if (m_ptmAnnotatedDatasetSetPerDatasetId.containsKey(dsId))
+            m_ptmAnnotatedDatasetSetPerDatasetId.remove(dsId);
+    }
+
     public PTMDatasetPair getPTMDatasetSetForDS(Long dsId){
         return m_ptmDatasetSetPerDatasetId.get(dsId);
     }

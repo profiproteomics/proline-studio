@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -63,7 +63,11 @@ public class PTMSite {
     public Long getId(){
         return m_id;
     }
-    
+
+    public AbstractJSONPTMSite getJSONPtmSite(){
+        return m_site;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -105,20 +109,20 @@ public class PTMSite {
     public DInfoPTM getPTMSpecificity() {
         return m_ptmSpecificity;
     }
-    
-    /**
-     * With leafInstances, we can create a map of leafPepInstanceByPepId
-     * For each peptide found in parentPeptideInstances, we instantiate a PTMPeptideInstance, set it's start postion.
-     * With the peptideId, we can find all of it's leafPeptide, so that a new PTMSitePeptideInstance is create. 
-     * at last, we put this PTMSitePeptideInstance in the m_ptmSitePeptideInstanceByPepId.
-     * @param parentPeptideInstances
-     * @param leafInstances 
-     */
-    public void setPeptideInstances(List<DPeptideInstance> parentPeptideInstances, List<DPeptideInstance> leafInstances) {
-        m_parentPeptideInstances = parentPeptideInstances;
-        m_ptmSitePeptideInstanceByPepId = new HashMap<>();
-        linkPeptideInstances(parentPeptideInstances, leafInstances);
-    }
+//
+//    /**
+//     * With leafInstances, we can create a map of leafPepInstanceByPepId
+//     * For each peptide found in parentPeptideInstances, we instantiate a PTMPeptideInstance, set it's start postion.
+//     * With the peptideId, we can find all of it's leafPeptide, so that a new PTMSitePeptideInstance is create.
+//     * at last, we put this PTMSitePeptideInstance in the m_ptmSitePeptideInstanceByPepId.
+//     * @param parentPeptideInstances
+//     * @param leafInstances
+//     */
+//    public void setPeptideInstances(List<DPeptideInstance> parentPeptideInstances, List<DPeptideInstance> leafInstances) {
+//        m_parentPeptideInstances = parentPeptideInstances;
+//        m_ptmSitePeptideInstanceByPepId = new HashMap<>();
+//        linkPeptideInstances(parentPeptideInstances, leafInstances);
+//    }
     
     public void addPeptideInstances(List<DPeptideInstance> parentPeptideInstances, List<DPeptideInstance> leafInstances) {
         if(m_parentPeptideInstances ==null)
@@ -228,6 +232,23 @@ public class PTMSite {
         return builder.toString();
     }
 
+    public String peptideSpecificReadablePtmString(Long peptideId) {
+
+        Integer pepPosition = getPositionOnPeptide(peptideId);
+        StringBuilder builder = new StringBuilder();
+        if (m_ptmSpecificity != null) {
+            builder.append(m_ptmSpecificity.getPtmShortName()).append("(");
+            if (m_ptmSpecificity.getLocationSpecificity().equals("Anywhere")) {
+                builder.append(m_ptmSpecificity.getResidueAASpecificity());
+            } else {
+                builder.append(m_ptmSpecificity.getLocationSpecificity());
+            }
+            builder.append(pepPosition).append(")");
+        } else {
+            builder.append("PTM ID").append(m_site.ptmDefinitionId).append("-").append(pepPosition);
+        }
+        return builder.toString();
+    }
     
     public String toReadablePtmString(Long peptideId) {
         return m_ptmSpecificity.toReadablePtmString(getPositionOnPeptide(peptideId));

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,8 +16,8 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
+import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.InfoDialog;
-import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -89,7 +89,7 @@ public class LabelFreeMSParamsPanel extends JPanel {
                 exitDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
                 exitDialog.setVisible(true);
 
-                if (exitDialog.getButtonClicked() == OptionDialog.BUTTON_OK) {
+                if (exitDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
                     setIsSimplifiedPanel(m_completePanel); //if current is complete, switch to simplified panel.
                 }
             }

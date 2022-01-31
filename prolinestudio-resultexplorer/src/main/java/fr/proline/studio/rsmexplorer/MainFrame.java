@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -17,6 +17,7 @@
 
 package fr.proline.studio.rsmexplorer;
 
+import fr.proline.studio.JavaVersion;
 import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dock.AbstractDockFrame;
@@ -25,22 +26,19 @@ import fr.proline.studio.dock.container.*;
 import fr.proline.studio.dock.gui.InfoLabel;
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
+import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.InfoDialog;
-import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rserver.RServerManager;
 import fr.proline.studio.rsmexplorer.actions.*;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.ServerConnectionDialog;
-import fr.proline.studio.rsmexplorer.gui.tasklog.SystemTasksPanel;
 import fr.proline.studio.utils.IconManager;
-import fr.proline.studio.JavaVersion;
 
 import javax.swing.*;
-
-
-
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -413,16 +411,32 @@ public class MainFrame extends AbstractDockFrame implements WindowListener {
         // check if there is tasks being done which ask not to close the application
         if (TaskInfoManager.getTaskInfoManager().askBeforeExitingApp()) {
             InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "You should not exit. Important tasks are being done.\nAre you sure you want to exit ?");
-            exitDialog.setButtonName(OptionDialog.BUTTON_OK, "Yes");
-            exitDialog.setButtonName(OptionDialog.BUTTON_CANCEL, "No");
+            exitDialog.setButtonName(DefaultDialog.BUTTON_OK, "Yes");
+            exitDialog.setButtonName(DefaultDialog.BUTTON_CANCEL, "No");
             exitDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
             exitDialog.setVisible(true);
 
-            if (exitDialog.getButtonClicked() == OptionDialog.BUTTON_CANCEL) {
+            if (exitDialog.getButtonClicked() == DefaultDialog.BUTTON_CANCEL) {
                 // No clicked
                 return;
             }
 
+        }
+
+        // check if action are to be done on some windows ...
+        HashSet<AbstractTopPanel> topPanels = getTopPanels();
+        for(AbstractTopPanel topPanel : topPanels ){
+            if(topPanel.warnBeforeClosing()) {
+                InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "You should not exit. A window need an action : "+topPanel.getWarnClosingMessage()+"\nAre you sure you want to exit ?");
+                exitDialog.setButtonName(DefaultDialog.BUTTON_OK, "Yes");
+                exitDialog.setButtonName(DefaultDialog.BUTTON_CANCEL, "No");
+                exitDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
+                exitDialog.setVisible(true);
+                if (exitDialog.getButtonClicked() == DefaultDialog.BUTTON_CANCEL) {
+                    // No clicked
+                    return;
+                }
+            }
         }
 
         // Close connection to R Server and kill it if needed

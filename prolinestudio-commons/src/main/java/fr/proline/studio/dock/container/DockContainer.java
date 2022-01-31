@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -19,14 +19,15 @@ package fr.proline.studio.dock.container;
 
 
 import fr.proline.studio.dock.AbstractTopPanel;
+import fr.proline.studio.dock.TopPanelListener;
 
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-public abstract class DockContainer {
+public abstract class DockContainer implements TopPanelListener {
 
-    protected JComponent m_component = null;
+    protected JComponent m_component = null; //correspond to graphical component associated to this DockContainer
     private DockContainer m_parent;
 
 
@@ -118,4 +119,9 @@ public abstract class DockContainer {
         return "";
     }
 
+    // TopPanelListener
+    @Override
+    public void propertyChanged(String property) {
+        //Default  behaviour : Nothing to do
+    }
 }

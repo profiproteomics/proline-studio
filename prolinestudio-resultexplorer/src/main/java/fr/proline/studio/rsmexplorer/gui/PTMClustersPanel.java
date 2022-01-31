@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -19,14 +19,17 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
-import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
-import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
+import fr.proline.studio.WindowManager;
+import fr.proline.studio.dam.tasks.DatabaseDatasetPTMsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
+import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.extendedtablemodel.*;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.graphics.CrossSelectionInterface;
+import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.info.InfoInterface;
@@ -35,61 +38,62 @@ import fr.proline.studio.markerbar.BookmarkMarker;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataAnalyzerWindowBoxManager;
+import fr.proline.studio.pattern.DataBoxPanelInterface;
+import  fr.proline.studio.rsmexplorer.DataBoxViewerManager.REASON_MODIF;
 import fr.proline.studio.progress.ProgressInterface;
-import fr.proline.studio.rsmexplorer.gui.model.PTMClusterTableModel;
-import fr.proline.studio.table.TableInfo;
+import fr.proline.studio.rsmexplorer.DataBoxViewerManager;
+import fr.proline.studio.rsmexplorer.actions.ViewColocalizedPTMClustersAction;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
+import fr.proline.studio.rsmexplorer.gui.dialog.ModifyClusterStatusPanel;
+import fr.proline.studio.rsmexplorer.gui.model.PTMClusterTableModel;
+import fr.proline.studio.rsmexplorer.gui.renderer.RendererMouseCallback;
+import fr.proline.studio.rsmexplorer.gui.renderer.SelectLevelRenderer;
 import fr.proline.studio.search.SearchToggleButton;
-import fr.proline.studio.extendedtablemodel.CompoundTableModel;
-import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.ImportTableSelectionInterface;
 import fr.proline.studio.table.LazyTable;
+import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.table.TablePopupMenu;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Image;
+import fr.proline.studio.utils.IconManager;
+import fr.proline.studio.utils.StudioResourceBundle;
+import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.table.TableColumnExt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashSet;
-import javax.swing.ImageIcon;
-import javax.swing.JLayeredPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.JToolBar;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
-import org.jdesktop.swingx.JXTable;
-import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
-
 import java.util.List;
-import javax.swing.table.TableColumn;
-import org.jdesktop.swingx.table.TableColumnExt;
 
 /**
  *
  * @author JM235353
  */
-public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
-    
+public class PTMClustersPanel extends HourglassPanel implements RendererMouseCallback, DataBoxPanelInterface, GlobalTabelModelProviderInterface {
+
+    private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+
     private AbstractDataBox m_dataBox;
     
     private JScrollPane m_scrollPane;
     private PTMClusterTable m_ptmClusterTable;
+    private PTMClusterTableModel m_ptmClusterTableModel;
     
     private JTextField m_countModificationTextField;
 
     private MarkerContainerPanel m_markerContainerPanel;
+    private ModifyStatusDialog m_modifyStatusDialog;
 
     private SearchToggleButton m_searchToggleButton;
     private InfoToggleButton m_infoToggleButton;
@@ -99,10 +103,13 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
     private ExportButton m_exportButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
 
+    private boolean m_areClustersEditable;
+
     /**
      * Creates new form PTMProteinSitePanel
      */
-    public PTMClustersPanel() {
+    public PTMClustersPanel(boolean editable) {
+        m_areClustersEditable = editable;
         initComponents();
     }
 
@@ -111,8 +118,7 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
 
     public void setData(Long taskId, ArrayList<PTMCluster> ptmClusters, boolean finished) {
 
-        PTMClusterTableModel model = ((PTMClusterTableModel) ((CompoundTableModel) m_ptmClusterTable.getModel()).getBaseModel());
-        model.setData(taskId,ptmClusters);
+        m_ptmClusterTableModel.setData(taskId,ptmClusters);
 
         // select the first row
         if ((ptmClusters != null) && (ptmClusters.size() > 0)) {
@@ -126,7 +132,7 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
         }
         
         m_infoToggleButton.updateInfo();
-        m_countModificationTextField.setText(model.getModificationsInfo());
+        m_countModificationTextField.setText(m_ptmClusterTableModel.getModificationsInfo());
         
         if (finished) {
             m_ptmClusterTable.setSortable(true);
@@ -136,8 +142,7 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
 
     public void dataUpdated(SubTask subTask, boolean finished) {
         m_ptmClusterTable.dataUpdated(subTask, finished);
-        PTMClusterTableModel model = ((PTMClusterTableModel) ((CompoundTableModel) m_ptmClusterTable.getModel()).getBaseModel());
-        m_countModificationTextField.setText(model.getModificationsInfo());
+        m_countModificationTextField.setText(m_ptmClusterTableModel.getModificationsInfo());
     }
 
 
@@ -178,13 +183,13 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
        
         // convert according to the sorting
         CompoundTableModel compoundTableModel = ((CompoundTableModel) m_ptmClusterTable.getModel());
-        PTMClusterTableModel tableModel = (PTMClusterTableModel) compoundTableModel.getBaseModel();
+
         for(int i=0; i<nbSelectedRows; i++){
             int rowModelIndex  = m_ptmClusterTable.convertRowIndexToModel(selectedRows[i]);
             int convertedSelectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(rowModelIndex);
             
             // Retrieve ProteinPTMSite selected
-            selectedPtmClusters.add(tableModel.getProteinPTMCluster(convertedSelectedRow));
+            selectedPtmClusters.add(m_ptmClusterTableModel.getProteinPTMCluster(convertedSelectedRow));
         }
         
         return selectedPtmClusters;
@@ -223,6 +228,28 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
     @Override
     public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getRemoveAction(splittedPanel);
+    }
+
+    @Override
+    public void mouseAction(MouseEvent e) {
+        int col = m_ptmClusterTable.columnAtPoint(e.getPoint());
+        int row = m_ptmClusterTable.rowAtPoint(e.getPoint());
+        if (row != -1 && m_areClustersEditable) {
+            int rowModelIndex = m_ptmClusterTable.convertRowIndexToModel(row);
+            if (m_ptmClusterTable.convertColumnIndexToModel(col) == PTMClusterTableModel.COLTYPE_PTM_CLUSTER_SELECTION_LEVEL) {
+                m_ptmClusterTable.getSelectionModel().setSelectionInterval(row, row);
+                if (m_ptmClusterTableModel.isRowEditable(rowModelIndex)) {
+                    if (m_modifyStatusDialog == null) {
+                        m_modifyStatusDialog = new ModifyStatusDialog();
+                    }
+
+                    PTMCluster cluster = getSelectedProteinPTMCluster();
+                    m_modifyStatusDialog.setData(cluster);
+                    m_modifyStatusDialog.setLocation(e.getLocationOnScreen().x, e.getLocationOnScreen().y);
+                    m_modifyStatusDialog.setVisible(true);
+                }
+            }
+        }
     }
 
     @Override
@@ -276,7 +303,7 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
     
     private void setColumnsVisibility() {
         // hide the rawAbundance  and selectionLevel columns
-        List<Integer> listIdsToHide = ((PTMClusterTableModel) ((CompoundTableModel) m_ptmClusterTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
+        List<Integer> listIdsToHide =m_ptmClusterTableModel.getDefaultColumnsToHide();
         List<TableColumn> columns = m_ptmClusterTable.getColumns(true);
         for (Integer id : listIdsToHide) {
             boolean columnVisible = ((TableColumnExt) columns.get(id)).isVisible();
@@ -310,7 +337,6 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
         
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_ptmClusterTable, m_ptmClusterTable, ((CompoundTableModel) m_ptmClusterTable.getModel()));
-        toolbar.add(m_searchToggleButton);
         
         m_filterButton = new FilterButton(((CompoundTableModel) m_ptmClusterTable.getModel())) {
 
@@ -325,6 +351,7 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
 
         m_exportButton = new ExportButton(((CompoundTableModel) m_ptmClusterTable.getModel()), "Protein Sets", m_ptmClusterTable);
 
+        toolbar.add(m_searchToggleButton);
         toolbar.add(m_filterButton);
         toolbar.add(m_settingsButton);
         toolbar.add(m_exportButton);
@@ -342,12 +369,89 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
                 DataAnalyzerWindowBoxManager.addTableInfo(tableInfo);
             }
         };
-        toolbar.add(m_addCompareDataButton);
         
         m_infoToggleButton = new InfoToggleButton(m_ptmClusterTable, m_ptmClusterTable);
-        
+
+        toolbar.add(m_addCompareDataButton);
         toolbar.add(m_infoToggleButton);
-        
+        toolbar.addSeparator();
+
+        JButton saveButton = new JButton();
+        saveButton.setIcon(IconManager.getIcon(IconManager.IconType.SAVE_SETTINGS));
+        saveButton.setToolTipText("Save Annotated Modifications Clusters");
+        saveButton.setEnabled(m_areClustersEditable);
+        saveButton.addActionListener(e -> {
+            PTMDataset ptmDataset = (PTMDataset) m_dataBox.getData(PTMDataset.class);
+            DatabaseDatasetPTMsTask task = new  DatabaseDatasetPTMsTask(null);
+            task.initAddAnnotatedPTMDataset(m_dataBox.getProjectId(),  ptmDataset);
+            task.fetchData();
+
+            m_infoToggleButton.updateInfo();
+
+            DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class,
+                    new ArrayList(), REASON_MODIF.REASON_PTMDATASET_SAVED.getReasonValue());
+        });
+
+        JButton mergeButton = new JButton();
+        mergeButton.setIcon(IconManager.getIcon(IconManager.IconType.MERGE_PTM));
+        mergeButton.setToolTipText("Merge selected clusters");
+        mergeButton.setEnabled(m_areClustersEditable);
+        mergeButton.addActionListener(e -> {
+//            PTMClusterTableModel m = (PTMClusterTableModel) ((CompoundTableModel)m_ptmClusterTable.getModel()).getBaseModel();
+            if(m_ptmClusterTableModel.getRowCount() > 0 && m_ptmClusterTable.getSelectedRowCount() > 1) {
+                List<PTMCluster> clusters = getSelectedPTMClusters();
+                m_logger.debug(" Merge "+ clusters.size()+" clusters  ");
+                PTMDataset ptmDS = clusters.get(0).getPTMDataset();
+                ptmDS.mergeClusters(clusters);
+
+                m_ptmClusterTable.dataUpdated(null, true);
+                m_dataBox.propagateDataChanged();
+                m_infoToggleButton.updateInfo();
+                // propagate modifications to the previous views
+                DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class,
+                        new ArrayList(clusters), REASON_MODIF.REASON_PTMCLUSTER_MERGED.getReasonValue());
+            }
+        });
+
+
+        JButton editButton = new JButton();
+        editButton.setIcon(IconManager.getIcon(IconManager.IconType.EDIT));
+        editButton.setToolTipText("Edit selected cluster");
+        editButton.setEnabled(m_areClustersEditable);
+        editButton.addActionListener(e -> {
+            if(m_ptmClusterTableModel.getRowCount() > 0 && m_ptmClusterTable.getSelectedRowCount() == 1) {
+                PTMCluster cluster = getSelectedProteinPTMCluster();
+                m_logger.debug(" Edit clusters id "+cluster.getId()+" ("+cluster.getProteinMatch().getAccession()+"_"+cluster.getRepresentativePepMatch().getPeptide().getSequence()+")");
+                EditClusterDialog editClusterDialog = new EditClusterDialog(cluster);
+                editClusterDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
+                editClusterDialog.setVisible(true);
+                if(editClusterDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+                    ArrayList<PTMCluster> clustersToModify = new ArrayList<>();
+                    clustersToModify.add(cluster);
+
+                    byte reason = -1;
+                    if (editClusterDialog.isPeptideDeleted()) {
+                        m_logger.debug(" PEPTIDE CHANGED DONE !!!  ");
+                        editClusterDialog.getRemovedPeptideInstances().forEach( ptmPeptide -> cluster.removePeptide(ptmPeptide));
+                        reason = REASON_MODIF.REASON_PEPTIDE_SUPPRESSED.getReasonValue();
+                    }
+                    if (editClusterDialog.isStatusModified()) {
+                        m_logger.debug(" Cluster Status  CHANGE DONE !!!  ");
+                        reason = (reason == -1) ? REASON_MODIF.REASON_PTMCLUSTER_MODIFIED.getReasonValue() : (byte) (reason | REASON_MODIF.REASON_PTMCLUSTER_MODIFIED.getReasonValue());
+                    } else
+                        m_logger.debug(" Cluster Status NOT CHANGED !!!  ");
+
+                    if(editClusterDialog.isClusterModified())
+                        DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class, clustersToModify, reason);
+
+                }
+            }
+        });
+
+        toolbar.add(mergeButton);
+        toolbar.add(editButton);
+        toolbar.add(saveButton);
+
         return toolbar;
     }
     
@@ -365,9 +469,13 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
         m_scrollPane = new JScrollPane();
         
         m_ptmClusterTable = new PTMClusterTable();
-        PTMClusterTableModel model = new PTMClusterTableModel((LazyTable) m_ptmClusterTable);
-        m_ptmClusterTable.setModel(new CompoundTableModel(model, true));
-        
+        m_ptmClusterTableModel = new PTMClusterTableModel(m_ptmClusterTable, this);
+        m_ptmClusterTable.setModel(new CompoundTableModel(m_ptmClusterTableModel, true));
+
+        SelectLevelRenderer renderer = (SelectLevelRenderer) m_ptmClusterTableModel.getRenderer(0, PTMClusterTableModel.COLTYPE_PTM_CLUSTER_SELECTION_LEVEL);
+        m_ptmClusterTable.addMouseListener(renderer);
+        m_ptmClusterTable.addMouseMotionListener(renderer);
+
         // hide the id column
         m_ptmClusterTable.getColumnExt(m_ptmClusterTable.convertColumnIndexToView(PTMClusterTableModel.COLTYPE_PROTEIN_ID)).setVisible(false);
         //m_ptmProteinSiteTable.displayColumnAsPercentage(PTMProteinSiteTableModel.COLTYPE_PEPTIDE_SCORE);
@@ -410,7 +518,7 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
 //        });
         
 
-        m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane, (PTMClusterTable) m_ptmClusterTable);
+        m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane, m_ptmClusterTable);
         
         m_scrollPane.setViewportView(m_ptmClusterTable);
         m_ptmClusterTable.setFillsViewportHeight(true);
@@ -449,26 +557,26 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
             super(m_scrollPane.getVerticalScrollBar() );
         }
         
-        @Override
-        public void tableChanged(TableModelEvent e) {
-            super.tableChanged(e);
-           
-            if ((m_ptmClusterTable != null) && (m_countModificationTextField != null)) {
-
-                CompoundTableModel model = (CompoundTableModel) m_ptmClusterTable.getModel();
-                if (model != null) {
-
-                    // prepare a lost of current filtered ProteinPTMSite with no redundancy
-
-                    ArrayList<PTMCluster> proteinPTMCluster = new ArrayList<>();
-
-                    int nbRows = model.getRowCount(); // loop through filtered DProteinPTMSite
-                    for (int i = 0; i < nbRows; i++) {
-                        proteinPTMCluster.add((PTMCluster) model.getRowValue(PTMCluster.class, i));
-                    }  
-                }
-            }
-        }
+//        @Override
+//        public void tableChanged(TableModelEvent e) {
+//            super.tableChanged(e);
+//
+//            if ((m_ptmClusterTable != null) && (m_countModificationTextField != null)) {
+//
+//                CompoundTableModel model = (CompoundTableModel) m_ptmClusterTable.getModel();
+//                if (model != null) {
+//
+//                    // prepare a lost of current filtered ProteinPTMSite with no redundancy
+//
+//                    ArrayList<PTMCluster> proteinPTMCluster = new ArrayList<>();
+//
+//                    int nbRows = model.getRowCount(); // loop through filtered DProteinPTMSite
+//                    for (int i = 0; i < nbRows; i++) {
+//                        proteinPTMCluster.add((PTMCluster) model.getRowValue(PTMCluster.class, i));
+//                    }
+//                }
+//            }
+//        }
         
         @Override
         public void addTableModelListener(TableModelListener l) {
@@ -564,11 +672,11 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
             selectionTableModel.clearSelection();
             
             int firstRow = -1;
-            PTMClusterTableModel model = (PTMClusterTableModel) ((CompoundTableModel) m_ptmClusterTable.getModel()).getBaseModel();
+//            PTMClusterTableModel model = (PTMClusterTableModel) ((CompoundTableModel) m_ptmClusterTable.getModel()).getBaseModel();
             
-            int rowCount = model.getRowCount();
+            int rowCount = m_ptmClusterTableModel.getRowCount();
             for (int i=0;i<rowCount;i++) {
-                Object v = model.getValueAt(i, PTMClusterTableModel.COLTYPE_PROTEIN_ID);
+                Object v = m_ptmClusterTableModel.getValueAt(i, PTMClusterTableModel.COLTYPE_PROTEIN_ID);
                 if (selectedData.remove(v)) {
                     if (firstRow == -1) {
                         firstRow = i;
@@ -584,8 +692,7 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
             
             // scroll to the first row
             if (firstRow != -1) {
-                final int row = firstRow;
-                scrollToVisible(row);
+                scrollToVisible(firstRow);
             }
             
         }
@@ -593,6 +700,7 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
         @Override
         public TablePopupMenu initPopupMenu() {
             m_popupMenu = new DisplayTablePopupMenu(PTMClustersPanel.this);
+            m_popupMenu.addAction(new ViewColocalizedPTMClustersAction());
             return m_popupMenu;
         }
 
@@ -605,11 +713,47 @@ public class PTMClustersPanel extends HourglassPanel implements DataBoxPanelInte
         @Override
         public String getInfo() {
             int count = getModel().getRowCount();
-            PTMClusterTableModel model = (PTMClusterTableModel) ((CompoundTableModel) m_ptmClusterTable.getModel()).getBaseModel();
-            String modifInfo = model.getModificationsInfo();
+//            PTMClusterTableModel model = (PTMClusterTableModel) ((CompoundTableModel) m_ptmClusterTable.getModel()).getBaseModel();
+            String modifInfo = m_ptmClusterTableModel.getModificationsInfo();
             return count+((count>1) ? " PTM Clusters" : " PTM Cluster")+" \n "+modifInfo;
         }
         
+    }
+
+    private class ModifyStatusDialog extends DefaultDialog {
+
+        private ModifyClusterStatusPanel m_panel;
+        private PTMCluster m_currentCluster;
+
+        public ModifyStatusDialog() {
+            super(WindowManager.getDefault().getMainWindow(), Dialog.ModalityType.APPLICATION_MODAL);
+
+            setTitle("Modify Modification Cluster Status");
+
+            String helpText = StudioResourceBundle.getMessage(PTMClustersPanel.class, "EditCluster.status.modif.html.help");
+            setHelpHeaderText(helpText);
+            m_panel = new ModifyClusterStatusPanel();
+            setInternalComponent(m_panel);
+            setResizable(true);
+
+            setButtonVisible(BUTTON_HELP, false);//use only cancel, ok button
+        }
+
+        @Override
+        protected boolean okCalled() {
+            ArrayList<PTMCluster> clustersToModify = new ArrayList<>();
+            clustersToModify.add(m_currentCluster);
+            if(m_panel.applyModifiedStatus())
+                DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class, clustersToModify, REASON_MODIF.REASON_PTMCLUSTER_MODIFIED.getReasonValue());
+            return true;
+        }
+
+        public void setData(PTMCluster clusterToModify) {
+            m_currentCluster =clusterToModify;
+            m_panel.setData(clusterToModify);
+
+        }
+
     }
 
 }

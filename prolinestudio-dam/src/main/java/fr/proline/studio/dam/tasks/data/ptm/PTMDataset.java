@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,23 +16,15 @@
  */
 package fr.proline.studio.dam.tasks.data.ptm;
 
+import fr.profi.util.StringUtils;
 import fr.proline.core.orm.msi.SequenceMatch;
-import fr.proline.core.orm.msi.dto.DInfoPTM;
-import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
-import fr.proline.core.orm.msi.dto.DPeptideInstance;
-import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.core.orm.msi.dto.*;
 import fr.proline.core.orm.uds.dto.DDataset;
-import java.util.ArrayList;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Represents a set of PTM sites, displayed from a quantification dataset or from an identification dataset.
@@ -46,26 +38,23 @@ public class PTMDataset {
     private DDataset m_dataset;
 
     private List<PTMSite> m_proteinPTMSites;
-    
-    //data for v2
+
     private List<Long> m_leafRSMIds; // Ids of the Leaf RSM where PTM info are read
     private List<DInfoPTM> m_ptmOfInterest; // Specified PTM to consider 
-    private List<PTMCluster> m_ptmClusters; 
-    
+    private List<PTMCluster> m_ptmClusters;
+
     //Lists of all PTMPeptideInstance for a specific Peptide and Protein Match : For parent RSM and leaf RSM
     private final Map<Long, Map<Long, List<PTMPeptideInstance>>> m_parentPtmPepInstByPepIdByProtMatchId = new HashMap<>();
     private final Map<Long, Map<Long, List<PTMPeptideInstance>>> m_leafPtmPepInstByPepInstIdByProtMatchId = new HashMap<>();
         
     //VDS: to overcome a missing information in ORM : Link between Protein Matches in merged RSM and child RSM
     private Map<String, List<Long>> m_allLeafProtMatchesIdPerAccession;
-    private Boolean m_isVersion2;
-    
+
     public PTMDataset(DDataset dataset) {
         
         if (dataset == null) throw new IllegalArgumentException("dataset from which PTM sites are extracted cannot be null");
         
         this.m_dataset = dataset;
-        m_isVersion2 = false;
         m_ptmOfInterest = new ArrayList<>();
     }
     
@@ -74,22 +63,15 @@ public class PTMDataset {
     }
     
     public List<Long> getLeafResultSummaryIds(){
-        if(!isVersion2() || m_leafRSMIds == null)
-            return Collections.<Long>emptyList();
-        return new ArrayList(m_leafRSMIds);
+        if(m_leafRSMIds == null)
+            return Collections.emptyList();
+        return new ArrayList<>(m_leafRSMIds);
     }
     
     public void setLeafResultSummaryIds(List<Long> l){
         m_leafRSMIds = new ArrayList<>(l);
     }
-    
-    public boolean isVersion2(){
-        return m_isVersion2;
-    } 
 
-    public void setIsVersion2(boolean isV2){
-        m_isVersion2 = isV2;
-    }    
     
     public boolean isIdentification() {
       return m_dataset.isIdentification();
@@ -102,13 +84,17 @@ public class PTMDataset {
     public void addInfoPTM(DInfoPTM ptm){
         m_ptmOfInterest.add(ptm);
     }
-    
+
+    public List<DInfoPTM> getInfoPTMs(){
+        return  m_ptmOfInterest;
+    }
+
     public List<PTMSite> getPTMSites() {
         return m_proteinPTMSites;
     }
 
     public void setPTMSites(List<PTMSite> proteinPTMSites) {        
-        proteinPTMSites.stream().forEach(site -> site.setDataset(this));
+        proteinPTMSites.forEach(site -> site.setDataset(this));
         this.m_proteinPTMSites = proteinPTMSites;
     }
 
@@ -116,17 +102,73 @@ public class PTMDataset {
         return m_ptmClusters;
     }
 
-    public void setPTMClusters(List<PTMCluster> ptmClusters) {        
+    public PTMCluster getPTMCluster(Long clusterId) {
+        Optional<PTMCluster> clusterOp =  m_ptmClusters.stream().filter(c -> c.getId().equals(clusterId)).findFirst();
+        if(clusterOp.isPresent())
+            return  clusterOp.get();
+        else
+            return null;
+    }
+
+
+//
+//    public List<PTMCluster> getSiteAsPTMClusters() {
+//        Map<PTMSite, List<PTMCluster>> clustersPerSite = new HashMap<>();
+//        for(PTMCluster c : m_ptmClusters){
+//            for(PTMSite site : c.getPTMSites() ){
+//                List<PTMCluster> clusters = clustersPerSite.computeIfAbsent(site, k -> new ArrayList<>());
+//                clusters.add(c);
+//            }
+//        }
+//
+//        if(m_ptmSiteAsClusters == null){
+//            m_ptmSiteAsClusters = new ArrayList<>();
+//            for (PTMSite site: m_proteinPTMSites) {
+//                PTMCluster ptmCluster = new PTMCluster(site.getId(), site.getLocalisationConfidence(), Collections.singletonList(site.getId()), site.getPeptideIds() , this);
+//                if (ptmCluster.getPTMSites() == null || ptmCluster.getPTMSites().isEmpty()) {
+//                    continue;
+//                }
+//                DPeptideMatch bestPepMatch = site.getMostConfidentPepMatch();
+//                ptmCluster.setRepresentativePepMatch(bestPepMatch);
+//
+//                if(isQuantitation()) {
+//                    ptmCluster.setQuantProteinSet(site.getMasterQuantProteinSet());
+//
+//                    Long bestPepMatchPepId = bestPepMatch.getPeptide().getId();
+//                    if(clustersPerSite.containsKey(site)) {
+//                        for (PTMCluster cl : clustersPerSite.get(site)) {
+//                            Long clPepId = null;
+//                            if (cl.getRepresentativeMQPepMatch() != null && cl.getRepresentativeMQPepMatch().getPeptideInstance() != null) {
+//                                clPepId = cl.getRepresentativeMQPepMatch().getPeptideInstance().getPeptideId();
+//                            } else if (cl.getRepresentativeMQPepMatch() != null && cl.getRepresentativeMQPepMatch().getRepresentativePepMatch() != null && cl.getRepresentativeMQPepMatch().getRepresentativePepMatch().getPeptide() != null) {
+//                                clPepId = cl.getRepresentativeMQPepMatch().getRepresentativePepMatch().getPeptide().getId();
+//                            }
+//
+//                            if (clPepId != null && clPepId.equals(bestPepMatchPepId)) {
+//                                DMasterQuantPeptide mqPep = cl.getRepresentativeMQPepMatch();
+//                                ptmCluster.setRepresentativeMQPepMatch(mqPep);
+//                                break;
+//                            }
+//                        }
+//                    }
+//                    if(ptmCluster.getRepresentativeMQPepMatch() == null){
+//                        LOG.warn(" In QUANT Dataset did not found getRepresentativeMQPepMatch for siteAscluster id "+ptmCluster.getId());
+//                    }
+//
+//                }
+//                m_ptmSiteAsClusters.add(ptmCluster);
+//            }
+//        }
+//        return m_ptmSiteAsClusters;
+//    }
+
+    public void setPTMClusters(List<PTMCluster> ptmClusters) {
         this.m_ptmClusters = ptmClusters;
     }
    
     public PTMSite getPTMSite(Long id){
-        if(!isVersion2())
-            return null;
-        else {
-            Optional<PTMSite> ptmSite = m_proteinPTMSites.stream().filter(site -> site.getId().equals(id)).findFirst();
-            return ptmSite.orElse(null);            
-        }
+        Optional<PTMSite> ptmSite = m_proteinPTMSites.stream().filter(site -> site.getId().equals(id)).findFirst();
+        return ptmSite.orElse(null);
     }
     
     public void setQuantProteinSets(List<DMasterQuantProteinSet> masterQuantProteinSetList, Map<Long, Long> typicalProteinMatchIdByProteinMatchId) {
@@ -153,7 +195,12 @@ public class PTMDataset {
         }
     }
 
-    
+    public boolean isQuantDataLoaded(){
+        if(m_ptmClusters == null || m_ptmClusters.isEmpty())
+            return false;
+        return  (m_ptmClusters.get(0).getMasterQuantProteinSet() != null);
+    }
+
     /**
      * Get all PTMPeptideInstance defined for specified protein match Id and peptide instance.
      * The returned PTMPeptideInstance correspond to parent PTMPeptideInstance
@@ -167,7 +214,7 @@ public class PTMDataset {
         if(m != null)
             return m.get(pepInstId);
         else
-           return Collections.EMPTY_LIST;
+           return Collections.emptyList();
     }
     
     public void addLeafPTMPeptideInstance(PTMPeptideInstance pepInst, Long proteinMatchId){
@@ -200,9 +247,9 @@ public class PTMDataset {
     public Collection<PTMPeptideInstance> getPTMPeptideInstances(Long proteinMatchId) {
         Map<Long, List<PTMPeptideInstance>> m =  m_parentPtmPepInstByPepIdByProtMatchId.get(proteinMatchId);
         if(m != null)
-            return m.values().stream().flatMap(entry -> entry.stream()).collect(Collectors.toList());           
+            return m.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
         else
-           return Collections.EMPTY_LIST;
+           return Collections.emptyList();
     }
 
 
@@ -237,7 +284,7 @@ public class PTMDataset {
             
             //Get correct start position           
             if(peptideInstance.getPeptideMatches() != null){
-                List<SequenceMatch> pepInsSequenceMatches = peptideInstance.getPeptideMatches().stream().map(pepM -> pepM.getSequenceMatch()).collect(Collectors.toList());
+                List<SequenceMatch> pepInsSequenceMatches = peptideInstance.getPeptideMatches().stream().map(DPeptideMatch::getSequenceMatch).collect(Collectors.toList());
                 for(SequenceMatch sm : pepInsSequenceMatches){
                     if(protPosition >= sm.getId().getStart() && protPosition <= sm.getId().getStop()){
                         //found correct sm
@@ -256,11 +303,21 @@ public class PTMDataset {
         return foundPtmPepIns;
     }
     
-    public void updateParentPTMPeptideInstanceClusters(){
+    protected void updateParentPTMPeptideInstanceClusters(boolean updateSiteCount){
         if(m_ptmClusters != null && !m_ptmClusters.isEmpty()){
             m_ptmClusters.forEach( ptmC -> {
+                final Integer[] siteCount = {ptmC.getPTMSitesCount()};
                 List<PTMPeptideInstance> ptmPepInsForCluster = ptmC.getParentPTMPeptideInstances();
-                ptmPepInsForCluster.forEach( peI -> peI.addCluster(ptmC));
+                ptmPepInsForCluster.forEach(
+                        peI -> {
+                            peI.addCluster(ptmC);
+                            if(updateSiteCount) {
+                                Long peISiteCount = peI.getPTMSites().stream().filter(ptmSite -> m_ptmOfInterest.contains(ptmSite.getPTMSpecificity())).count();
+                                if (siteCount[0] < peISiteCount)
+                                    siteCount[0] = peISiteCount.intValue();
+                            }
+                    });
+                    ptmC.setPTMSitesCount(siteCount[0]);
             } );
             
         }                
@@ -273,5 +330,244 @@ public class PTMDataset {
     public List<Long> getProtMatchesIdForAccession(String protMatcherAccession){
         return m_allLeafProtMatchesIdPerAccession.getOrDefault(protMatcherAccession, new ArrayList<>());
     }
-    
+
+    public List<PTMCluster> getColocatedClusters(PTMCluster cluster){
+
+        ArrayList<PTMCluster> colocatedClusters = new ArrayList();
+        DProteinMatch pmatch = cluster.getProteinMatch();
+
+        int minStart = -1;
+        int maxEnd = -1;
+        try {
+            minStart = cluster.getParentPTMPeptideInstances().stream().map(pi -> pi.getStartPosition()).min(Comparator.naturalOrder()).get();
+            maxEnd = cluster.getParentPTMPeptideInstances().stream().map(pi -> pi.getStopPosition()).max(Comparator.naturalOrder()).get();
+        }catch (NoSuchElementException e){
+            LOG.error("Errpr getting peptides min/max bounds for cluster",e );
+            return  colocatedClusters;
+        }
+
+        for(PTMCluster c : this.m_ptmClusters){
+            if(c.getProteinMatch().equals(pmatch)) {
+                if(c.getParentPTMPeptideInstances() != null) {
+                    int clMinStart = c.getParentPTMPeptideInstances().stream().map(pi -> pi.getStartPosition()).min(Comparator.naturalOrder()).get();
+                    int clMaxEnd = c.getParentPTMPeptideInstances().stream().map(pi -> pi.getStopPosition()).max(Comparator.naturalOrder()).get();
+                    if( ( minStart <= clMinStart && clMinStart < maxEnd ) ||  ( minStart <= clMaxEnd && clMaxEnd <= maxEnd ) || ( clMinStart <= minStart && minStart < clMaxEnd ))
+                        colocatedClusters.add(c);
+                }
+            }
+        }
+        return  colocatedClusters;
+    }
+
+    private boolean areColocalized(PTMCluster firstCluster, PTMCluster secondCluster){
+        if(firstCluster == null || secondCluster == null)
+            return false;
+
+        DProteinMatch pmatch = firstCluster.getProteinMatch();
+        if(!pmatch.equals(secondCluster.getProteinMatch()))
+            return false;
+
+        //Get first cluster bounds
+        int minStart = -1;
+        int maxEnd = -1;
+        try {
+            minStart = firstCluster.getParentPTMPeptideInstances().stream().map(pi -> pi.getStartPosition()).min(Comparator.naturalOrder()).get();
+            maxEnd = firstCluster.getParentPTMPeptideInstances().stream().map(pi -> pi.getStopPosition()).max(Comparator.naturalOrder()).get();
+        }catch (NoSuchElementException e){
+            LOG.error("Error getting peptides min/max bounds for cluster",e );
+            return  false;
+        }
+
+        if(secondCluster.getParentPTMPeptideInstances() != null) {
+            int clMinStart = secondCluster.getParentPTMPeptideInstances().stream().map(pi -> pi.getStartPosition()).min(Comparator.naturalOrder()).get();
+            int clMaxEnd = secondCluster.getParentPTMPeptideInstances().stream().map(pi -> pi.getStopPosition()).max(Comparator.naturalOrder()).get();
+            if( ( minStart <= clMinStart && clMinStart < maxEnd ) ||  ( minStart <= clMaxEnd && clMaxEnd <= maxEnd ) || ( clMinStart <= minStart && minStart < clMaxEnd ))
+                return  true;
+        }
+
+
+        return false;
+    }
+
+    public void mergeClusters(List<PTMCluster> clusters2Merge){
+
+        if(clusters2Merge == null  || clusters2Merge.size() <= 1)
+            return;
+
+        List<PTMCluster> finalClusters2Merge =  clusters2Merge.stream().filter( c -> c.getSelectionLevel()>=2).collect(Collectors.toList());
+        if(finalClusters2Merge.size() <= 1)
+            return;
+
+        PTMCluster firstCluster = finalClusters2Merge.get(0);
+        List<Long> siteIds = firstCluster.getPTMSites().stream().map(PTMSite::getId).collect(Collectors.toList());
+        PTMCluster mergedCluster = new PTMCluster(firstCluster.getId(), firstCluster.getLocalizationConfidence(), firstCluster.getSelectionLevel(),
+                firstCluster.getSelectionNotation(), firstCluster.getSelectionInfo(), siteIds, firstCluster.getPeptideIds(), this);
+        mergedCluster.setRepresentativePepMatch(firstCluster.getRepresentativePepMatch());
+
+        //If Quant Data, Get data to calculate MqPeptide for merged
+        //Warning : assume cluster representative MQPepMatch is an AggregatedMasterQuantPeptide !
+        Map<Long, DMasterQuantPeptide> mqPepByPepInstId = new HashMap<>();
+        if(isQuantitation()) {
+            DMasterQuantPeptide finalClusterMQpep = firstCluster.getRepresentativeMQPepMatch();
+            if (finalClusterMQpep instanceof AggregatedMasterQuantPeptide) {
+                ((AggregatedMasterQuantPeptide) finalClusterMQpep).getAggregatedMQPeptides().forEach(mqPep -> {
+                    mqPepByPepInstId.put(mqPep.getPeptideInstanceId(), mqPep);
+                });
+            } else {
+                //Should not occur
+                mqPepByPepInstId.put(finalClusterMQpep.getPeptideInstanceId(), finalClusterMQpep);
+            }
+        }
+
+        // Go through Clusters and merge data into 'mergedCluster', if next cluster is colocated with first one !
+        for(int i=1; i<finalClusters2Merge.size(); i++){
+            PTMCluster nextCluster = finalClusters2Merge.get(i);
+
+            if(areColocalized(mergedCluster, nextCluster)){
+
+                //Site count correspond to the max site count of all merged cluster, not the sum of sites
+                if(mergedCluster.getPTMSitesCount() < nextCluster.getPTMSitesCount())
+                    mergedCluster.setPTMSitesCount(nextCluster.getPTMSitesCount());
+
+                //Add next cluster data to merged cluster
+                mergedCluster.addSites(nextCluster.getPTMSites());
+                mergedCluster.addPeptideIds(nextCluster.getPeptideIds());
+
+                // set max LocalizationConfidence() as merged cluster LocalizationConfidence()
+                if(mergedCluster.getLocalizationConfidence() < nextCluster.getLocalizationConfidence())
+                    mergedCluster.setLocalizationConfidence(nextCluster.getLocalizationConfidence());
+
+                //Set best Peptide match considering all clusters as representative for merged cluster. Best = greater  mascot delta score
+                DPeptideMatch currentPepM = mergedCluster.getRepresentativePepMatch();
+                DPeptideMatch nextPepM = nextCluster.getRepresentativePepMatch();
+                if(currentPepM.getPtmSiteProperties() != null && currentPepM.getPtmSiteProperties().getMascotDeltaScore() != null){
+                    if( (nextPepM.getPtmSiteProperties() !=null && nextPepM.getPtmSiteProperties().getMascotDeltaScore() != null)
+                            && nextPepM.getPtmSiteProperties().getMascotDeltaScore() > currentPepM.getPtmSiteProperties().getMascotDeltaScore()){
+                        mergedCluster.setRepresentativePepMatch(nextPepM);
+                    }
+
+                } else {
+                    if(nextPepM.getPtmSiteProperties() !=null && nextPepM.getPtmSiteProperties().getMascotDeltaScore() != null){
+                        mergedCluster.setRepresentativePepMatch(nextPepM);
+                    }
+                }
+
+                //For all cluster ptmPeptideInstance, change associated cluster to merged one
+                nextCluster.getParentPTMPeptideInstances().forEach(ptmPepI -> {
+                    ptmPepI.addCluster(mergedCluster);
+                    ptmPepI.removeCluster(nextCluster);
+                });
+
+                nextCluster.getLeafPTMPeptideInstances().forEach(ptmPepI -> {
+                    ptmPepI.addCluster(mergedCluster);
+                    ptmPepI.removeCluster(nextCluster);
+                });
+
+
+                // If Quanti data get quant information to calculated new adundance
+                if(isQuantitation()) {
+                    DMasterQuantPeptide nextClusterMQpep = nextCluster.getRepresentativeMQPepMatch();
+                    if (nextClusterMQpep instanceof AggregatedMasterQuantPeptide) {
+                        ((AggregatedMasterQuantPeptide) nextClusterMQpep).getAggregatedMQPeptides().forEach(mqPep -> {
+                            if (!mqPepByPepInstId.containsKey(mqPep.getPeptideInstance().getPeptideId()))
+                                mqPepByPepInstId.put(mqPep.getPeptideInstanceId(), mqPep);
+                        });
+                    } else {
+                        //Should not occur
+                        mqPepByPepInstId.put(nextClusterMQpep.getPeptideInstanceId(), nextClusterMQpep);
+                    }
+                }
+
+            } //End clusters are colocalized
+        } //End go through clusters
+
+        if(isQuantitation())
+            mergedCluster.setRepresentativeMQPepMatch(getRepresentativeMQPeptideForCluster(mergedCluster, mqPepByPepInstId));
+
+        m_ptmClusters.removeAll(finalClusters2Merge);
+        m_ptmClusters.add(mergedCluster);
+
+    }
+
+    public JSONPTMDataset createJSONPTMDataset() throws IllegalAccessException {
+        JSONPTMDataset ptmDS = new JSONPTMDataset();
+
+        List<DInfoPTM> ptmInfos = getInfoPTMs();
+        List<Long> ptmInfoIds = new ArrayList<>();
+        for(int i=0 ; i<ptmInfos.size();i++){
+            if(!ptmInfoIds.contains(ptmInfos.get(i).getIdPtm()))
+                ptmInfoIds.add(ptmInfos.get(i).getIdPtm());
+        }
+        ptmDS.ptmIds = ptmInfoIds.toArray(new Long[ptmInfoIds.size()]);
+
+        List<Long> leafRsmIds =getLeafResultSummaryIds();
+        Long[] rsmIds = new Long[leafRsmIds.size()];
+        for(int i=0 ; i<leafRsmIds.size();i++){
+            rsmIds[i] = leafRsmIds.get(i);
+        }
+        ptmDS.leafResultSummaryIds =rsmIds;
+
+        //--- Read Sites
+        List<PTMSite> allSites = getPTMSites();
+        JSONPTMSite2[] allJSONSites = new JSONPTMSite2[allSites.size()];
+        for(int i=0 ; i<allSites.size();i++){
+            AbstractJSONPTMSite newtPTMSite =  allSites.get(i).getJSONPtmSite();
+            if(newtPTMSite instanceof JSONPTMSite2)
+                allJSONSites[i] =(JSONPTMSite2) newtPTMSite;
+            else {
+                throw new IllegalAccessException("Can't Export old PTM Site informations ");
+            }
+        }
+        ptmDS.ptmSites =allJSONSites;
+
+        //--- Read Clustes
+        List<PTMCluster> allClusters = getPTMClusters();
+        JSONPTMCluster[] allJSONClusters = new JSONPTMCluster[allClusters.size()];
+        for(int i=0 ; i<allClusters.size();i++){
+
+            PTMCluster nextCluster = allClusters.get(i);
+            JSONPTMCluster newtPTMCluster  = new JSONPTMCluster();
+            newtPTMCluster.id = nextCluster.getId();
+            newtPTMCluster.selectionLevel = nextCluster.getSelectionLevel();
+            if(nextCluster.getSelectionNotation() != null)
+                newtPTMCluster.selectionConfidence = nextCluster.getSelectionNotation();
+            if(StringUtils.isNotEmpty(nextCluster.getSelectionInfo()))
+                newtPTMCluster.selectionInformation = nextCluster.getSelectionInfo();
+            newtPTMCluster.bestPeptideMatchId = nextCluster.getRepresentativePepMatch().getId();
+            newtPTMCluster.localizationConfidence = nextCluster.getLocalizationConfidence();
+            newtPTMCluster.isomericPeptideIds = new Long[0];
+
+            allSites = nextCluster.getPTMSites();
+            Long[] clusterJSONSites = new Long[allSites.size()];
+            for(int index =0 ; index<allSites.size();index++){
+                AbstractJSONPTMSite newtPTMSite =  allSites.get(index).getJSONPtmSite();
+                if(newtPTMSite instanceof JSONPTMSite2)
+                    clusterJSONSites[index] =((JSONPTMSite2) newtPTMSite).id;
+                else {
+                    throw new IllegalAccessException("Can't Export old PTM Site informations ");
+                }
+            }
+            newtPTMCluster.ptmSiteLocations = clusterJSONSites;
+            newtPTMCluster.peptideIds = nextCluster.getPeptideIds().toArray(new Long[0]);
+            allJSONClusters[i] = newtPTMCluster;
+        }
+        ptmDS.ptmClusters =allJSONClusters;
+        return ptmDS;
+    }
+
+    public DMasterQuantPeptide getRepresentativeMQPeptideForCluster(PTMCluster cluster, Map<Long, DMasterQuantPeptide> mqPepByPepInstId ){
+        DMasterQuantPeptide bestMQPep = null;
+
+        if (cluster.getMasterQuantProteinSet() != null) {
+
+            // Get  Parent DPeptideInstance
+            List<DPeptideInstance> parentPeptideInstances = cluster.getParentPeptideInstances();
+
+            //
+            // Sum of peptides
+            List<DMasterQuantPeptide> mqPeps = parentPeptideInstances.stream().map(parentPepI -> mqPepByPepInstId.get(parentPepI.getId())).filter(Objects::nonNull).collect(Collectors.toList());
+            bestMQPep = new AggregatedMasterQuantPeptide(mqPeps, m_dataset.getMasterQuantitationChannels().get(0));
+        }
+        return bestMQPep;
+    }
 }

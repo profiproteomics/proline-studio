@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -26,6 +26,7 @@ import fr.proline.studio.pattern.xic.DataboxMapAlignment;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
 import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
+import fr.proline.studio.rsmexplorer.DataBoxViewerManager;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Image;
 
@@ -303,12 +304,11 @@ public class WindowBoxFactory {
      * @param dataName
      * @return 
      */
-    public static WindowBox getPTMDataWindowBox(String dataName, boolean viewSites) {
+    public static WindowBox getPTMDataWindowBox(String dataName, boolean viewSites, boolean isAnnotated, boolean unsaved) {
         AbstractDataBox[] boxes = new AbstractDataBox[4];
-        boxes[0] = new DataBoxPTMClusters();
+        boxes[0] = new DataBoxPTMClusters(viewSites, isAnnotated);
         boxes[0].setDataName(dataName);
         ((DataBoxPTMClusters) boxes[0]).setXicResult(false);
-        ((DataBoxPTMClusters) boxes[0]).setViewSitesOnly(viewSites);
         boxes[1] = new DataBoxPTMPeptidesGraphic();
         boxes[2] = new DataBoxPTMPeptides(false, false);
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
@@ -316,7 +316,10 @@ public class WindowBoxFactory {
         boxes[3].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
       //  boxes[4] = new DataboxRsetPSMForMsQuery();
         IconManager.IconType iconType = IconManager.IconType.DATASET_RSM;
-        return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+        String title = boxes[0].getFullName();
+        if(unsaved && !title.endsWith(DataBoxViewerManager.MODIFIED_TITLE_SUFFIX))
+            title = title + " " + DataBoxViewerManager.MODIFIED_TITLE_SUFFIX;
+        return new WindowBox(title, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
         
     }
     
@@ -325,12 +328,11 @@ public class WindowBoxFactory {
      * @param dataName
      * @return 
      */
-    public static WindowBox getXicPTMDataWindowBox(String dataName, boolean viewSites) {
+    public static WindowBox getXicPTMDataWindowBox(String dataName, boolean viewSites, boolean isAnnotated , boolean unsaved) {
         AbstractDataBox[] boxes = new AbstractDataBox[7];
-        boxes[0] = new DataBoxPTMClusters();
+        boxes[0] = new DataBoxPTMClusters(viewSites, isAnnotated);
         boxes[0].setDataName(dataName);
         ((DataBoxPTMClusters) boxes[0]).setXicResult(true);
-        ((DataBoxPTMClusters) boxes[0]).setViewSitesOnly(viewSites);
         boxes[1] = new DataBoxPTMPeptides(true, false);
         boxes[2] = new DataBoxPTMPeptides(false,true);
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);        
@@ -344,7 +346,10 @@ public class WindowBoxFactory {
         boxes[6].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);     
 
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
-        return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));        
+        String title = boxes[0].getFullName();
+        if(unsaved && !title.endsWith(DataBoxViewerManager.MODIFIED_TITLE_SUFFIX))
+            title = title + " " + DataBoxViewerManager.MODIFIED_TITLE_SUFFIX;
+        return new WindowBox(title, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
     
 //    public static WindowBox getXicPTMSitesWindowBoxV2(String dataName) {

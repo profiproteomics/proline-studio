@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -19,6 +19,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.dam.data.SelectLevelEnum;
 import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -42,6 +43,7 @@ import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.progress.ProgressInterface;
+import fr.proline.studio.rsmexplorer.gui.SelectLevelRadioButtonGroup;
 import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
@@ -774,8 +776,8 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
         //XRadioButtonPanel _localInvalidButtonPane; //JPM.LOCAL : put back if we can modify local values
         private LocalStatusPanel m_localStatusPanel;
 
-        private XRadioButtonGroup m_globalValidButtonPane;
-        private XRadioButtonGroup m_globalInvalidButtonPane;
+        private SelectLevelRadioButtonGroup m_globalValidButtonPane;
+        private SelectLevelRadioButtonGroup m_globalInvalidButtonPane;
         private ButtonGroup m_globalButtonGroup;
 
         private JButton m_resetButton;
@@ -806,10 +808,10 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
             actionStarted();
             String command = m_globalButtonGroup.getSelection().getActionCommand();
             if (command.equals(CMD_VALIDATED)) {
-                ArrayList<DMasterQuantPeptide> listToModify = m_quantPeptideTableModel.listToModifyForValidateModifications(m_selectedRows, XicStatusRenderer.SelectLevelEnum.SELECTED_MANUAL);
+                ArrayList<DMasterQuantPeptide> listToModify = m_quantPeptideTableModel.listToModifyForValidateModifications(m_selectedRows, SelectLevelEnum.SELECTED_MANUAL);
                 m_quantPeptideTableModel.validateModifications(XicPeptidePanel.this, listToModify);
             } else if (command.equals(CMD_INVALIDATED)) {
-                ArrayList<DMasterQuantPeptide> listToModify = m_quantPeptideTableModel.listToModifyForValidateModifications(m_selectedRows, XicStatusRenderer.SelectLevelEnum.DESELECTED_MANUAL);
+                ArrayList<DMasterQuantPeptide> listToModify = m_quantPeptideTableModel.listToModifyForValidateModifications(m_selectedRows, SelectLevelEnum.DESELECTED_MANUAL);
                 m_quantPeptideTableModel.validateModifications(XicPeptidePanel.this, listToModify);
             }
             super.m_buttonClicked = BUTTON_OK;
@@ -820,7 +822,7 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
             ActionListener resetAction = new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    ArrayList<DMasterQuantPeptide> listToModify = m_quantPeptideTableModel.listToModifyForValidateModifications(m_selectedRows, XicStatusRenderer.SelectLevelEnum.RESET_AUTO);
+                    ArrayList<DMasterQuantPeptide> listToModify = m_quantPeptideTableModel.listToModifyForValidateModifications(m_selectedRows, SelectLevelEnum.RESET_AUTO);
 
                     m_quantPeptideTableModel.validateModifications(XicPeptidePanel.this, listToModify);
                 }
@@ -848,7 +850,7 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
             m_internalPanel.setLoading(1, true);
         }
 
-        /**
+        /*
          * single selected, trigger by mouse clic on column
          * QuantPeptideTableModel.COLTYPE_MQPEPTIDE_SELECTION_LEVEL
          *
@@ -880,7 +882,7 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
         }*/
 
 
-        private void updateRadioButton(ButtonGroup buttonGroup, boolean selectLevelHomogenous, XicStatusRenderer.SelectLevelEnum selectLevel, XRadioButtonGroup validPane, XRadioButtonGroup invalidPane) {
+        private void updateRadioButton(ButtonGroup buttonGroup, boolean selectLevelHomogenous, SelectLevelEnum selectLevel, SelectLevelRadioButtonGroup validPane, SelectLevelRadioButtonGroup invalidPane) {
 
             if (selectLevelHomogenous) {
                 switch (selectLevel) {
@@ -909,10 +911,10 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
             }
         }
 
-        private void updateLocal(boolean localSelectLevelHomogenous, XicStatusRenderer.SelectLevelEnum selectLevel, LocalStatusPanel statusPanel) {
+        private void updateLocal(boolean localSelectLevelHomogenous, SelectLevelEnum selectLevel, LocalStatusPanel statusPanel) {
 
-            boolean automatic = (selectLevel == XicStatusRenderer.SelectLevelEnum.DESELECTED_AUTO) || (selectLevel == XicStatusRenderer.SelectLevelEnum.SELECTED_AUTO);
-            boolean validated = (selectLevel == XicStatusRenderer.SelectLevelEnum.SELECTED_AUTO) || (selectLevel == XicStatusRenderer.SelectLevelEnum.SELECTED_MANUAL);
+            boolean automatic = (selectLevel == SelectLevelEnum.DESELECTED_AUTO) || (selectLevel == SelectLevelEnum.SELECTED_AUTO);
+            boolean validated = (selectLevel == SelectLevelEnum.SELECTED_AUTO) || (selectLevel == SelectLevelEnum.SELECTED_MANUAL);
 
             statusPanel.setValues(localSelectLevelHomogenous, validated, automatic);
 
@@ -921,7 +923,7 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
         /**
          * multi select, trigger by m_modifyStatusButton
          *
-         * @param selectedRows: non empty array, table row orignal index, not
+         * @param selectedViewRows: non empty array, table row orignal index, not
          * model index
          */
         /*private void setSelectedRowsOLD(int[] selectedViewRows) {
@@ -965,7 +967,7 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
                     break;
                 }
             }
-            updateRadioButton(m_globalButtonGroup, globalSelectLevelHomogenous, XicStatusRenderer.SelectLevelEnum.valueOf(globalSelectLevelRef), m_globalValidButtonPane, m_globalInvalidButtonPane);
+            updateRadioButton(m_globalButtonGroup, globalSelectLevelHomogenous, SelectLevelEnum.valueOf(globalSelectLevelRef), m_globalValidButtonPane, m_globalInvalidButtonPane);
 
             boolean localSelectLevelHomogenous = true;
             int localSelectLevelRef = m_quantPeptideTableModel.getSelectionLevelFor(firstSelectedPeptide).m_status.getIntValue();
@@ -983,7 +985,7 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
 
 
 
-            ArrayList<DMasterQuantPeptide> listToModify = m_quantPeptideTableModel.listToModifyForValidateModifications(m_selectedRows, XicStatusRenderer.SelectLevelEnum.RESET_AUTO);
+            ArrayList<DMasterQuantPeptide> listToModify = m_quantPeptideTableModel.listToModifyForValidateModifications(m_selectedRows, SelectLevelEnum.RESET_AUTO);
             m_resetButton.setEnabled(listToModify != null);
         }
 
@@ -1083,11 +1085,11 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
 
             int anchor = c.gridx + 1;
             c.gridx = anchor;
-            m_globalValidButtonPane = new XRadioButtonGroup(globalPane, c, CMD_VALIDATED, IconManager.getIcon(IconManager.IconType.VALIDATED));
+            m_globalValidButtonPane = new SelectLevelRadioButtonGroup(globalPane, c, CMD_VALIDATED, IconManager.getIcon(IconManager.IconType.VALIDATED));
 
             c.gridy++;
             c.gridx = anchor;
-            m_globalInvalidButtonPane = new XRadioButtonGroup(globalPane, c, CMD_INVALIDATED, IconManager.getIcon(IconManager.IconType.INVALIDATED));
+            m_globalInvalidButtonPane = new SelectLevelRadioButtonGroup(globalPane, c, CMD_INVALIDATED, IconManager.getIcon(IconManager.IconType.INVALIDATED));
             m_globalValidButtonPane.getRadioButton().setActionCommand(CMD_VALIDATED);
             m_globalInvalidButtonPane.getRadioButton().setActionCommand(CMD_INVALIDATED);
 
@@ -1201,87 +1203,4 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
 
     }
 
-    /**
-     * Utility which show one JRadioButton with 2 icon after text
-     */
-    private class XRadioButtonGroup {
-
-        private final JRadioButton m_radioButton;
-        private final JLabel m_validationLabel;
-        private final JLabel m_automaticLabel;
-
-        public XRadioButtonGroup(JPanel p, GridBagConstraints c, String text, ImageIcon icon) {
-
-            m_radioButton = new JRadioButton(text);
-
-            m_validationLabel = new JLabel(icon){
-                @Override
-                public Dimension getPreferredSize() {
-                    return new Dimension(16,16);
-                }
-            };
-            m_validationLabel.setHorizontalTextPosition(JLabel.LEFT);
-            m_validationLabel.setVerticalTextPosition(JLabel.BOTTOM);
-            m_validationLabel.setToolTipText(text);
-
-            m_automaticLabel = new JLabel("") {
-                @Override
-                public Dimension getPreferredSize() {
-                    return new Dimension(16,16);
-                }
-            };
-
-            p.add(m_radioButton, c);
-
-
-            c.gridx++;
-            p.add(m_validationLabel, c);
-
-            c.gridx++;
-            p.add(m_automaticLabel, c);
-
-            c.gridx++;
-            c.weightx = 1;
-            p.add(Box.createHorizontalGlue(), c);
-            c.weightx = 0;
-
-
-
-        }
-
-
-        public JRadioButton getRadioButton() {
-            return m_radioButton;
-        }
-
-        public void addIcon(int selectLevel) {
-            boolean isManual = false;
-            switch (selectLevel) {
-                case 0:
-                case 3:
-                    isManual = true;
-                    break;
-                case 1:
-                case 2:
-                    isManual = false;
-            }
-
-            ImageIcon icon = null;
-            String tooltips;
-            if (isManual) {
-                icon = new ImageIcon(IconManager.getIcon(IconManager.IconType.HAND_OPEN).getImage().getScaledInstance(16, 16, Image.SCALE_DEFAULT));
-                tooltips = "Manual";
-            } else {
-                icon = new ImageIcon(IconManager.getIcon(IconManager.IconType.GEAR).getImage().getScaledInstance(16, 16, Image.SCALE_DEFAULT));
-                tooltips = "Automatic";
-            }
-            m_automaticLabel.setIcon(icon);
-            m_automaticLabel.setToolTipText(tooltips);
-        }
-
-        private void removeOptionIcon() {
-            m_automaticLabel.setIcon(null);
-        }
-
-    }
 }

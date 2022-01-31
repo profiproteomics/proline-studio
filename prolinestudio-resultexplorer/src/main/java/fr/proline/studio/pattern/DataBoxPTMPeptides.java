@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -97,7 +97,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
         m_displayAllPepMatches = showAllPepMatches;
         m_isMS1LabelFreeQuantitation = xicResult;
         StringBuilder stb = (m_isMS1LabelFreeQuantitation) ? new StringBuilder("Quanti. ") : new StringBuilder();
-        m_typeName = m_displayAllPepMatches ? stb.append("PSMs of modification site").toString() : stb.append("Peptides of modification site").toString();
+        m_typeName = m_displayAllPepMatches ? stb.append("Site PSMs").toString() : stb.append("Site Peptides").toString();
         stb = (m_isMS1LabelFreeQuantitation) ? new StringBuilder("Quantified ") : new StringBuilder();
         m_description = m_displayAllPepMatches ? stb.append("PSMs matching a modification site or cluster").toString() : stb.append("Peptides matching of modification site or cluster").toString();
 
@@ -148,9 +148,9 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                 m_masterQuantProteinSet = (DMasterQuantProteinSet) getData(DMasterQuantProteinSet.class);
             }
 
-            final List<PTMSite> notLoadedPtmSite = getNotLoadedPTMSite();
-
-            if (notLoadedPtmSite.isEmpty()) {
+//            final List<PTMSite> notLoadedPtmSite = getNotLoadedPTMSite();
+//
+//            if (notLoadedPtmSite.isEmpty()) {
                 resetPrevPTMTaskId();
                 if (m_isMS1LabelFreeQuantitation) {
                     loadXicAndPropagate();
@@ -161,9 +161,9 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                     addDataChanged(ExtendedTableModelInterface.class);
                     propagateDataChanged();
                 }
-            } else {
-                loadPtmSite(notLoadedPtmSite);
-            }
+//            } else {
+//                loadPtmSite(notLoadedPtmSite);
+//            }
         }
     }
 

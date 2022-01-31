@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -20,8 +20,8 @@ package fr.proline.studio.rsmexplorer.actions;
 import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dpm.ServerConnectionManager;
+import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.InfoDialog;
-import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.ServerConnectionDialog;
 import java.awt.event.ActionEvent;
@@ -114,12 +114,12 @@ public class ConnectAction  extends AbstractAction {
             // check if there is tasks being done which ask not to disconnect/close the application
             if (TaskInfoManager.getTaskInfoManager().askBeforeExitingApp()) {
                 InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "You should not disconnect. Important tasks are being done.\nAre you sure you want to disconnect ?");
-                exitDialog.setButtonName(OptionDialog.BUTTON_OK, "Yes");
-                exitDialog.setButtonName(OptionDialog.BUTTON_CANCEL, "No");
+                exitDialog.setButtonName(DefaultDialog.BUTTON_OK, "Yes");
+                exitDialog.setButtonName(DefaultDialog.BUTTON_CANCEL, "No");
                 exitDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
                 exitDialog.setVisible(true);
 
-                if (exitDialog.getButtonClicked() == OptionDialog.BUTTON_CANCEL) {
+                if (exitDialog.getButtonClicked() == DefaultDialog.BUTTON_CANCEL) {
                     // No clicked
                     return;
                 }

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -56,7 +56,7 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
     //private boolean m_isXICMode = true;
     
     public DataboxXicParentsPeptideIon() {
-        super(AbstractDataBox.DataboxType.DataboxXicPeptideIon, AbstractDataBox.DataboxStyle.STYLE_XIC);
+        super(DataboxType.DataboxXicParentsPeptideIon, AbstractDataBox.DataboxStyle.STYLE_XIC);
 
         // Name of this databox
         m_typeName = "Source Quanti. Peptides Ions";

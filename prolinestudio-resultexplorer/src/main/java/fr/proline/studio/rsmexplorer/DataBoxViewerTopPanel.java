@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -18,6 +18,7 @@
 package fr.proline.studio.rsmexplorer;
 
 import fr.proline.studio.dock.AbstractTopPanel;
+import fr.proline.studio.dock.TopPanelListener;
 import fr.proline.studio.dock.container.DockComponent;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.OptionDialog;
@@ -35,7 +36,7 @@ import java.util.List;
 
 public class DataBoxViewerTopPanel extends AbstractTopPanel {
 
-    private WindowBox m_windowBox = null;
+    private WindowBox m_windowBox;
 
     public DataBoxViewerTopPanel(WindowBox windowBox) {
 
@@ -112,6 +113,14 @@ public class DataBoxViewerTopPanel extends AbstractTopPanel {
         m_windowBox.windowOpened();
     }
 
+    public boolean warnBeforeClosing(){
+        return !m_windowBox.getEntryBox().isClosable();
+    }
+
+    public String getWarnClosingMessage(){
+        return m_windowBox.getEntryBox().getClosingWarningMessage();
+    }
+
     @Override
     public void componentClosed() {
 
@@ -159,8 +168,28 @@ public class DataBoxViewerTopPanel extends AbstractTopPanel {
         return m_windowBox.getEntryBox().getProjectId();
     }
 
-    public void loadedDataModified(Long rsetId, Long rsmId, Class c, ArrayList modificationsList, int reason) {
+    public void loadedDataModified(Long rsetId, Long rsmId, Class c, ArrayList modificationsList, byte reason) {
+        //Test if information is pertinent for thos view
+        if(m_windowBox.getEntryBox().isDataOfInterest(rsetId,rsmId, c )) {
+            DataBoxViewerManager.REASON_MODIF reasonModif = DataBoxViewerManager.REASON_MODIF.getReasonModifFor(reason);
+            if (reasonModif!=null && reasonModif.shouldBeSaved()) {
+                //Set title as modified
+                String title = getName();
+                if (!title.endsWith(DataBoxViewerManager.MODIFIED_TITLE_SUFFIX))
+                    title = title + " " + DataBoxViewerManager.MODIFIED_TITLE_SUFFIX;
+                this.setName(title);
+                fireTopPanelPropertyChange(TopPanelListener.TITLE_PROPERTY);
+            } else { //Warning should add hasSaved property ?
+                //remove title modified
+                String title = getName();
+                if (title.endsWith(DataBoxViewerManager.MODIFIED_TITLE_SUFFIX))
+                    title = title.substring(0, title.lastIndexOf(DataBoxViewerManager.MODIFIED_TITLE_SUFFIX) - 1);
+                this.setName(title);
+                fireTopPanelPropertyChange(TopPanelListener.TITLE_PROPERTY);
+            }
+        }
         m_windowBox.getEntryBox().loadedDataModified(rsetId, rsmId, c, modificationsList, reason);
+        repaint();
     }
 
 

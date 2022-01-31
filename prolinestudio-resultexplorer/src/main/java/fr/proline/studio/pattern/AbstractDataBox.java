@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -17,38 +17,28 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.util.TransientDataInterface;
-import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.memory.TransientMemoryClientInterface;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
+import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.id.ProjectId;
-import fr.proline.studio.pattern.xic.DataboxChildFeature;
-import fr.proline.studio.pattern.xic.DataboxExperimentalDesign;
-import fr.proline.studio.pattern.xic.DataboxMapAlignment;
-import fr.proline.studio.pattern.xic.DataboxPSMOfMasterQuantPeptide;
-import fr.proline.studio.pattern.xic.DataboxXicParentsPeptideIon;
-import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
-import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
-import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
+import fr.proline.studio.pattern.xic.*;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.table.TableInfo;
 import fr.proline.studio.utils.IconManager;
-import java.awt.Image;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import org.jdesktop.swingx.JXTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.event.ActionListener;
+import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -156,11 +146,14 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxXicPTMPeptidesMatches(51),
         DataBoxPTMSitePeptidesGraphic(52),
         DataboxMultiGraphicsDoubleYAxis(53),
-        DataBoxPTMPeptides(54),        
+        DataBoxPTMPeptides(54),
         DataBoxPTMClusters(55),
         DataBoxPTMPeptidesMatches(56),
         DataBoxPTMPeptidesGraphic(57),
-        DataboxXicParentsPeptideIon(58)
+        DataboxXicParentsPeptideIon(58),
+        DataBoxPTMSiteAsClusters(59),
+        DataBoxPTMClustersSites(60),
+        DataBoxXicPTMClustersSites(61)
         ;
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -275,6 +268,13 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataBoxPTMPeptidesGraphic();  
                 case DataboxXicParentsPeptideIon:
                     return new DataboxXicParentsPeptideIon();
+                case DataBoxPTMSiteAsClusters:
+                    return new DataBoxPTMClusters(true);
+                case DataBoxPTMClustersSites:
+                    return new DataBoxPTMClustersSites();
+                case DataBoxXicPTMClustersSites:
+                    return new DataBoxPTMClustersSites(true);
+
             }
             return null; // should not happen
         }
@@ -480,7 +480,23 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         return (m_outParameters.isDataDependant(dataType, subtype));
     }
 
-    public void loadedDataModified(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, int reason) {
+    public boolean isDataOfInterest(Long rsetId, Long rsmId, Class dataType) {
+        boolean isOfInterest = rsetId == null || rsetId.equals(getRsetId());
+        isOfInterest =  rsmId!=null ? (isOfInterest && rsmId.equals(getRsmId()) ) : isOfInterest;
+        return (isOfInterest && isDataProvider(dataType, null));
+    }
+
+
+    public boolean isClosable(){
+        return true;
+    }
+
+    public String getClosingWarningMessage(){
+        return "";
+    }
+
+
+    public void loadedDataModified(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, byte reason) {
         if (isDataProvider(dataType, null)) {
             dataMustBeRecalculated(rsetId, rsmId, dataType, modificationsList, reason);
         }
@@ -537,9 +553,13 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
      * modificiation of the data of the current databox. (for instance,
      * disabling peptides -> modifications of protein set in the XIC View
      *
-     * @param dataType
+     * @param rsetId : Result Set Id the modified data belongs to. May be null
+     * @param rsmId : Result Summary Id the modified data belongs to. May be null
+     * @param modificationsList :modified data list
+     * @param dataType : dataType type of data that may be impacted by modification
+     * @param reason: Combination of DataBoxViewerManager.REASON_MODIF Flags. Combination is done using REASON_MODIF.getReasonValue
      */
-    public void dataMustBeRecalculated(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, int reason) {
+    public void dataMustBeRecalculated(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, byte reason) {
 
     }
 

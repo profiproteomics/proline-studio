@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,7 +16,6 @@
  */
 package fr.proline.studio.rsmexplorer.tree;
 
-import fr.proline.studio.Sheet;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
@@ -40,18 +39,7 @@ public class TreeParentNode extends AbstractNode {
     public ImageIcon getIcon(boolean expanded) {
         return getIcon(IconManager.IconType.USER);
     }
-    
-    @Override
-    public void loadDataForProperties(Runnable callback) {
-        // nothing to do
-        callback.run();
-    }
-    
-    @Override
-    public Sheet createSheet() {
-        return null; // should never be called
-    }
-    
+
         @Override
     public AbstractNode copyNode() {
         return null;

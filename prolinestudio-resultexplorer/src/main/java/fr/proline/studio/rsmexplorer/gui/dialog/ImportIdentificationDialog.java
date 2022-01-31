@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -27,7 +27,6 @@ import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.DefaultStorableDialog;
 import fr.proline.studio.gui.InfoDialog;
-import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.parameter.*;
 import fr.proline.studio.utils.IconManager;
 import org.slf4j.LoggerFactory;
@@ -349,7 +348,7 @@ public class ImportIdentificationDialog extends DefaultStorableDialog {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Server has returned no Root Path for Result Files. There is a problem with the server installation, please contact your administrator.");
 
                     InfoDialog errorDialog = new InfoDialog(m_singletonDialog, InfoDialog.InfoType.WARNING, "Root Path Error", "Server has returned no Root Path for Result Files.\nThere is a problem with the server installation, please contact your administrator.");
-                    errorDialog.setButtonVisible(OptionDialog.BUTTON_CANCEL, false);
+                    errorDialog.setButtonVisible(DefaultDialog.BUTTON_CANCEL, false);
                     errorDialog.setLocationRelativeTo(m_singletonDialog);
                     errorDialog.setVisible(true);
                     return;

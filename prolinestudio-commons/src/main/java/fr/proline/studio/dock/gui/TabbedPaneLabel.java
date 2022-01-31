@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -26,8 +26,6 @@ import fr.proline.studio.dock.dragdrop.DockingExportTransferHandler;
 import fr.proline.studio.utils.IconManager;
 
 import javax.swing.*;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
@@ -105,6 +103,13 @@ public class TabbedPaneLabel extends JPanel implements DockComponentListener {
             m_closeButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
             m_closeButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    if (m_dockComponent.getComponent() instanceof AbstractTopPanel) {
+                            if(((AbstractTopPanel) m_dockComponent.getComponent()).warnBeforeClosing()) {
+                                int closeTab = JOptionPane.showConfirmDialog(null, "Are you sure tou want to close this Windows ? " + ((AbstractTopPanel) m_dockComponent.getComponent()).getWarnClosingMessage(), "Close Warning",JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                                if (closeTab == JOptionPane.NO_OPTION)
+                                    return;
+                            }
+                    }
                     m_dockContainerTab.remove(m_dockComponent);
                     if (m_dockComponent.getComponent() instanceof AbstractTopPanel) {
                         ((AbstractTopPanel) m_dockComponent.getComponent()).componentClosed();

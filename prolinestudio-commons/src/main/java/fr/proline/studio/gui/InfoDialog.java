@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -43,9 +43,18 @@ public class InfoDialog extends DefaultDialog {
     private String m_showAtStartKey = null;
     
     public InfoDialog(Window parent, InfoType type, String title, String message) {
-        this(parent, type, title, message, null);
+        this(parent, type, title, message, null, false);
     }
+
+    public InfoDialog(Window parent, InfoType type, String title, String message, boolean forceUseLabel) {
+        this(parent, type, title, message, null, forceUseLabel);
+    }
+
     public InfoDialog(Window parent, InfoType type, String title, String message, String showAtStartKey) {
+        this(parent, type, title, message, showAtStartKey, false);
+    }
+
+    public InfoDialog(Window parent, InfoType type, String title, String message, String showAtStartKey, boolean forceUseLabel) {
 
         super(parent);
 
@@ -81,7 +90,7 @@ public class InfoDialog extends DefaultDialog {
         leftImageLabel.setBackground(Color.white);
 
         // info panel
-        JPanel infoPanel = getInfoPanel();
+        JPanel infoPanel = getInfoPanel(forceUseLabel);
 
         
         JPanel internalPanel = new JPanel(new GridBagLayout());
@@ -127,7 +136,7 @@ public class InfoDialog extends DefaultDialog {
 
     }
 
-    private JPanel getInfoPanel() {
+    private JPanel getInfoPanel(boolean forceUseLabel) {
         JPanel infoPanel = new JPanel();
         infoPanel.setBackground(Color.white);
         
@@ -146,7 +155,7 @@ public class InfoDialog extends DefaultDialog {
         if (m_message != null) {
             
             c.gridwidth = 2;
-            if (m_message.length() < 200) {
+            if (m_message.length() < 200 || forceUseLabel) {
                 
                 String messageArray[] = m_message.split("\n");
                 Font font = null;

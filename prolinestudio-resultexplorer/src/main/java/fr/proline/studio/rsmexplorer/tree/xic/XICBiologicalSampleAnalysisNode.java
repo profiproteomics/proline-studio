@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -17,7 +17,6 @@
 package fr.proline.studio.rsmexplorer.tree.xic;
 
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.studio.Sheet;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -115,11 +114,6 @@ public class XICBiologicalSampleAnalysisNode extends DataSetNode {
     @Override
     public ImageIcon getIcon(boolean expanded) {
         return getIcon(IconManager.IconType.DATASET_RSM);
-    }
-
-    @Override
-    public Sheet createSheet() {
-        return super.createSheet();
     }
 
     @Override

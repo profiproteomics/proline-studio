@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,18 +16,12 @@
  */
 package fr.proline.studio.pattern;
 
-import fr.proline.core.orm.msi.Peptide;
-import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
-import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
 import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
@@ -35,7 +29,6 @@ import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.gui.SplittedPanelContainer;
-import fr.proline.studio.rsmexplorer.gui.PTMPeptidesTablePanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.types.XicMode;
 import org.slf4j.Logger;
@@ -241,65 +234,65 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
         updateData();
     }
 
-    protected List<PTMSite> getNotLoadedPTMSite() {
-
-        final List<PTMSite> notLoadedPtmSite = new ArrayList<>();
-        for (PTMPeptideInstance ptmPepInst : m_ptmPepInstances) {
-            ptmPepInst.getPTMSites().stream().forEach(ptmSite -> {
-                if (!ptmSite.isLoaded()) {
-                    notLoadedPtmSite.add(ptmSite);
-                }
-            });
-        }
-        return notLoadedPtmSite;
-    }
+//    protected List<PTMSite> getNotLoadedPTMSite() {
+//
+//        final List<PTMSite> notLoadedPtmSite = new ArrayList<>();
+//        for (PTMPeptideInstance ptmPepInst : m_ptmPepInstances) {
+//            ptmPepInst.getPTMSites().stream().forEach(ptmSite -> {
+//                if (!ptmSite.isLoaded()) {
+//                    notLoadedPtmSite.add(ptmSite);
+//                }
+//            });
+//        }
+//        return notLoadedPtmSite;
+//    }
 
     protected void resetPrevPTMTaskId() {
         m_previousPTMTaskId = null;
     }
 
-    protected void loadPtmSite(List<PTMSite> notLoadedPtmSite) {
-
-        //Load PTMSite not yet loaded !
-        final int loadingId = setLoading();
-
-        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
-
-            @Override
-            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                setLoaded(loadingId);
-                if (!success) {
-                    ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, null, null, null, finished);
-                } else {
-                    m_previousPTMTaskId = null;
-                    unregisterTask(taskId);
-                    if (m_isMS1LabelFreeQuantitation) {
-                        loadXicAndPropagate();
-                    } else {
-                        ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, m_ptmPepInstances, m_ptmClusters, null, finished);
-                        addDataChanged(PTMPeptideInstance.class, null); //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
-                        addDataChanged(ExtendedTableModelInterface.class);
-                        propagateDataChanged();
-                    }
-                }
-            }
-        };
-
-        DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback);
-        task.initFillPTMSites(getProjectId(), m_rsm, notLoadedPtmSite);
-        Long taskId = task.getId();
-        if (m_previousPTMTaskId != null) {
-            // old task is suppressed if it has not been already done
-            AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousPTMTaskId);
-        }
-        m_previousPTMTaskId = taskId;
-        registerTask(task);
-    }
+//    protected void loadPtmSite(List<PTMSite> notLoadedPtmSite) {
+//
+//        //Load PTMSite not yet loaded !
+//        final int loadingId = setLoading();
+//
+//        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+//
+//            @Override
+//            public boolean mustBeCalledInAWT() {
+//                return true;
+//            }
+//
+//            @Override
+//            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+//                setLoaded(loadingId);
+//                if (!success) {
+//                    ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, null, null, null, finished);
+//                } else {
+//                    m_previousPTMTaskId = null;
+//                    unregisterTask(taskId);
+//                    if (m_isMS1LabelFreeQuantitation) {
+//                        loadXicAndPropagate();
+//                    } else {
+//                        ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, m_ptmPepInstances, m_ptmClusters, null, finished);
+//                        addDataChanged(PTMPeptideInstance.class, null); //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
+//                        addDataChanged(ExtendedTableModelInterface.class);
+//                        propagateDataChanged();
+//                    }
+//                }
+//            }
+//        };
+//
+//        DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback);
+//        task.initFillPTMSites(getProjectId(), m_rsm, notLoadedPtmSite);
+//        Long taskId = task.getId();
+//        if (m_previousPTMTaskId != null) {
+//            // old task is suppressed if it has not been already done
+//            AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousPTMTaskId);
+//        }
+//        m_previousPTMTaskId = taskId;
+//        registerTask(task);
+//    }
 
     abstract protected DPeptideMatch getSelectedPeptideMatch();
 

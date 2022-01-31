@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,23 +16,14 @@
  */
 package fr.proline.studio.dam;
 
-import fr.proline.core.orm.uds.Aggregation;
-import fr.proline.core.orm.uds.FragmentationRule;
-import fr.proline.core.orm.uds.FragmentationRuleSet;
-import fr.proline.core.orm.uds.InstrumentConfiguration;
-import fr.proline.core.orm.uds.PeaklistSoftware;
-import fr.proline.core.orm.uds.Project;
-import fr.proline.core.orm.uds.SpectrumTitleParsingRule;
-import fr.proline.core.orm.uds.UserAccount;
+import fr.proline.core.orm.uds.*;
 import fr.proline.module.seq.DatabaseAccess;
 import fr.proline.repository.IDatabaseConnector;
 import fr.proline.studio.Exceptions;
+import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
+import fr.proline.studio.dam.tasks.data.ptm.PTMDatasetPair;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Static reference of the several UDS values : project, instruments ....
@@ -52,10 +43,15 @@ public class DatabaseDataManager  {
     private String m_jdbcDriver;
     private HashMap<Object, Object> m_serverConnectionProperties;
     private Project m_currentProject;
-    
+
+    private HashMap<Long, PTMDatasetPair> m_ptmDatasetSetPerDatasetId;
+    private HashMap<Long, PTMDatasetPair> m_ptmAnnotatedDatasetSetPerDatasetId;
+
     private HashMap<Aggregation.ChildNature, Aggregation> m_aggregationMap = null;
     
     private DatabaseDataManager() {
+        m_ptmDatasetSetPerDatasetId = new HashMap<>();
+        m_ptmAnnotatedDatasetSetPerDatasetId  = new HashMap<>();
     }
     
     public static DatabaseDataManager getDatabaseDataManager() {
@@ -70,7 +66,7 @@ public class DatabaseDataManager  {
     }
     
     public void setIntruments(List<InstrumentConfiguration> l) {
-        m_instruments = l.toArray(new InstrumentConfiguration[l.size()]);
+        m_instruments = l.toArray(new InstrumentConfiguration[0]);
     }
     
     public InstrumentConfiguration[] getInstrumentsArray() {
@@ -87,7 +83,7 @@ public class DatabaseDataManager  {
     }
     
     public void setPeaklistSofwares(List<PeaklistSoftware> l) {
-        m_peaklistSoftwares = l.toArray(new PeaklistSoftware[l.size()]);
+        m_peaklistSoftwares = l.toArray(new PeaklistSoftware[0]);
     }
     
     public PeaklistSoftware[] getPeaklistSoftwaresArray() {
@@ -151,7 +147,7 @@ public class DatabaseDataManager  {
     }
     
     public void setFragmentationRules(List<FragmentationRule> l) {
-        m_fragmentationRules = l.toArray(new FragmentationRule[l.size()]);
+        m_fragmentationRules = l.toArray(new FragmentationRule[0]);
     }
     
     public FragmentationRule[] getFragmentationRulesArray() {
@@ -159,7 +155,7 @@ public class DatabaseDataManager  {
     }
       
     public void setFragmentationRuleSets(List<FragmentationRuleSet> l) {
-        m_fragmentationRuleSets = l.toArray(new FragmentationRuleSet[l.size()]);
+        m_fragmentationRuleSets = l.toArray(new FragmentationRuleSet[0]);
     }
     
     public FragmentationRuleSet[] getFragmentationRuleSetsArray() {
@@ -201,7 +197,7 @@ public class DatabaseDataManager  {
     
     
     public void setProjectUsers(List<UserAccount> l) {
-        m_projectUsers = l.toArray(new UserAccount[l.size()]);
+        m_projectUsers = l.toArray(new UserAccount[0]);
     }
     
     public UserAccount[] getProjectUsersArray() {
@@ -209,17 +205,73 @@ public class DatabaseDataManager  {
     }
 
     public void setCurrentProject(Project currentProject){
-        m_currentProject = currentProject;
+        if(currentProject == null || !currentProject.equals(m_currentProject)) {
+            m_currentProject = currentProject;
+            m_ptmDatasetSetPerDatasetId.clear();
+        }
     }
 
     public Project getCurrentProject(){
         return m_currentProject;
     }
 
+    //VDS TODO: See how to be able to free memory without changing Project
+    public void addLoadedPTMDatasetSet(PTMDatasetPair ptmDSSet){
+        m_ptmDatasetSetPerDatasetId.put(ptmDSSet.getDataset().getId(), ptmDSSet);
+    }
+
+    public PTMDataset getClustersPTMDatasetForDS(Long dsId){
+        if (m_ptmDatasetSetPerDatasetId.containsKey(dsId))
+            return m_ptmDatasetSetPerDatasetId.get(dsId).getClusterPTMDataset();
+        return null;
+    }
+
+
+    public PTMDataset getSitesPTMDatasetForDS(Long dsId){
+        if (m_ptmDatasetSetPerDatasetId.containsKey(dsId))
+            return m_ptmDatasetSetPerDatasetId.get(dsId).getSitePTMDataset();
+        return null;
+    }
+
+    public void removeAllPTMDatasetsForDS(Long dsId){
+        if (m_ptmDatasetSetPerDatasetId.containsKey(dsId))
+            m_ptmDatasetSetPerDatasetId.remove(dsId);
+        if (m_ptmAnnotatedDatasetSetPerDatasetId.containsKey(dsId))
+            m_ptmAnnotatedDatasetSetPerDatasetId.remove(dsId);
+    }
+
+    public PTMDatasetPair getPTMDatasetSetForDS(Long dsId){
+        return m_ptmDatasetSetPerDatasetId.get(dsId);
+    }
+
+
+    //Annotated PTM Datasets
+    public void addLoadedAnnotatedPTMDatasetSet(PTMDatasetPair ptmDSSet){
+        m_ptmAnnotatedDatasetSetPerDatasetId.put(ptmDSSet.getDataset().getId(), ptmDSSet);
+    }
+
+    public PTMDataset getAnnotatedClustersPTMDatasetForDS(Long dsId){
+        if (m_ptmAnnotatedDatasetSetPerDatasetId.containsKey(dsId))
+            return m_ptmAnnotatedDatasetSetPerDatasetId.get(dsId).getClusterPTMDataset();
+        return null;
+    }
+
+
+    public PTMDataset getAnnotatedSitesPTMDatasetForDS(Long dsId){
+        if (m_ptmAnnotatedDatasetSetPerDatasetId.containsKey(dsId))
+            return m_ptmAnnotatedDatasetSetPerDatasetId.get(dsId).getSitePTMDataset();
+        return null;
+    }
+
+
+    public PTMDatasetPair getAnnotatedPTMDatasetSetForDS(Long dsId){
+        return m_ptmAnnotatedDatasetSetPerDatasetId.get(dsId);
+    }
+
+
     public void setLoggedUser(UserAccount loggedUser) {
         m_loggedUser = loggedUser;
     }
-    
     public UserAccount getLoggedUser() {
         return m_loggedUser;
     }

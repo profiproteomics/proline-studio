@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -20,25 +20,23 @@ import fr.proline.core.orm.msi.Ptm;
 import fr.proline.core.orm.msi.PtmSpecificity;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.DatabaseDataManager;
-import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
+import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.IdentifyPtmSitesTask;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.IdentifyPtmSitesDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
-
-import javax.swing.tree.DefaultTreeModel;
-
-
-import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.tree.DefaultTreeModel;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -70,7 +68,7 @@ public class IdentifyPtmSitesJMSAction extends AbstractRSMAction {
       for (int i = 0; i < nbNodes; i++) {
         ArrayList<PtmSpecificity> ptmSpecificities = new ArrayList<>();
         DataSetNode node = (DataSetNode) selectedNodes[i];
-        DatabasePTMSitesTask ptmTask = new DatabasePTMSitesTask(null);
+        DatabasePTMsTask ptmTask = new DatabasePTMsTask(null);
         ptmTask.initLoadUsedPTMs(node.getDataset().getProject().getId(), node.getDataset().getResultSummaryId(), ptmSpecificities);
         ptmTask.fetchData();
         ptms.addAll(ptmSpecificities.stream().map(s -> s.getPtm()).distinct().collect(Collectors.toList()));
@@ -83,6 +81,18 @@ public class IdentifyPtmSitesJMSAction extends AbstractRSMAction {
       dialog.setLocation(x, y);
       dialog.setVisible(true);
       if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+
+        //Alert user : previous modification view (Site/Cluster) should be closed in order to load new data
+        InfoDialog id = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.NO_ICON,"Run Identify Modification Sites","Be sure to close all previous Modification Site/Cluster view !" +
+                "\n\nWarning: If you have previously saved annotated information on this dataset, it will be deleted!\nAre you sure you want to run \"Identify Modification Sites \" ?", true);
+        id.setButtonName(DefaultDialog.BUTTON_OK, "Yes");
+        id.setButtonName(DefaultDialog.BUTTON_CANCEL, "No");
+        id.centerToWindow(WindowManager.getDefault().getMainWindow());
+        id.setVisible(true);
+        if (id.getButtonClicked() == DefaultDialog.BUTTON_CANCEL) {
+          // No clicked
+          return;
+        }
 
         for (int i = 0; i < nbNodes; i++) {
 
@@ -97,6 +107,10 @@ public class IdentifyPtmSitesJMSAction extends AbstractRSMAction {
             public void run(boolean success) {
               node.setIsChanging(false);
               treeModel.nodeChanged(node);
+              if(success){
+                //remove previous Modificatio data to force reload
+                DatabaseDataManager.getDatabaseDataManager().removeAllPTMDatasetsForDS( node.getDataset().getId());
+              }
             }
           };
 

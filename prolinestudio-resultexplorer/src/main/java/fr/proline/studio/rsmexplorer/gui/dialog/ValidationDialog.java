@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -28,9 +28,9 @@ import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.data.ChangeTypicalRule;
 import fr.proline.studio.dpm.task.jms.ValidationTask;
+import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.DefaultStorableDialog;
 import fr.proline.studio.gui.InfoDialog;
-import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.parameter.*;
 
 import javax.swing.Timer;
@@ -1068,12 +1068,12 @@ public class ValidationDialog extends DefaultStorableDialog implements Component
         if (getArguments().isEmpty() && !m_psmFdrCheckbox.isSelected() && !m_proteinFdrCheckbox.isSelected()) {
 
             InfoDialog emptyArgumentsDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "You should not validate. Important arguments are not set.\nAre you sure you want to validate?");
-            emptyArgumentsDialog.setButtonName(OptionDialog.BUTTON_OK, "Yes");
-            emptyArgumentsDialog.setButtonName(OptionDialog.BUTTON_CANCEL, "No");
+            emptyArgumentsDialog.setButtonName(DefaultDialog.BUTTON_OK, "Yes");
+            emptyArgumentsDialog.setButtonName(DefaultDialog.BUTTON_CANCEL, "No");
             emptyArgumentsDialog.centerToWindow(m_singletonDialog);
             emptyArgumentsDialog.setVisible(true);
 
-            if (emptyArgumentsDialog.getButtonClicked() == OptionDialog.BUTTON_CANCEL) {
+            if (emptyArgumentsDialog.getButtonClicked() == DefaultDialog.BUTTON_CANCEL) {
                 return false;
             }
 

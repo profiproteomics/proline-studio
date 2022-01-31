@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -21,11 +21,14 @@ import fr.proline.studio.dock.container.DockComponent;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class AbstractTopPanel extends JPanel {
 
     private boolean m_openedOnce = false;
 
+    private List<TopPanelListener> m_panelListeners;
 
     public abstract String getTopPanelIdentifierKey();
 
@@ -49,5 +52,33 @@ public abstract class AbstractTopPanel extends JPanel {
 
     public abstract void componentClosed();
 
+    public boolean warnBeforeClosing(){
+        return false;
+    }
 
+    public String getWarnClosingMessage(){
+        return "";
+    }
+
+    public void addTopPanelListener(TopPanelListener listener){
+        if(m_panelListeners == null)
+            m_panelListeners = new ArrayList<>();
+        m_panelListeners.add(listener);
+    }
+
+    public void removeTopPanelListener(TopPanelListener listener){
+        if(m_panelListeners == null)
+            return;
+        m_panelListeners.remove(listener);
+    }
+
+    public void clearTopPanelListener(){
+        m_panelListeners = null;
+    }
+
+    protected void fireTopPanelPropertyChange(String property){
+        if(m_panelListeners != null && !m_panelListeners.isEmpty()){
+            m_panelListeners.forEach( listener -> listener.propertyChanged(property));
+        }
+    }
 }

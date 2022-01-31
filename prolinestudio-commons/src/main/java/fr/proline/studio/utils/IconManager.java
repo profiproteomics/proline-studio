@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -106,6 +106,7 @@ public class IconManager {
         COLUMNS_VISIBILITY,
         PLUS_SMALL_10X10,
         PROPERTY_SMALL_10X10,
+        EDIT,
         EDIT_SMALL_10X10,
         IDENTIFICATION,
         ARROW_8X7,
@@ -236,7 +237,8 @@ public class IconManager {
         TIC,
         TIC_MS1,
         BPC,
-        MS2;
+        MS2,
+        MERGE_PTM;
     }
     
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -512,6 +514,8 @@ public class IconManager {
                 return "fr/proline/studio/images/plus-small10x10.png";
             case PROPERTY_SMALL_10X10:
                 return "fr/proline/studio/images/property-small10x10.png";
+            case EDIT:
+                return "fr/proline/studio/images/edit.png";
             case EDIT_SMALL_10X10:
                 return "fr/proline/studio/images/edit-small10x10.png";
             case IDENTIFICATION:
@@ -772,6 +776,8 @@ public class IconManager {
                 return "fr/proline/studio/images/bpc.png";
             case MS2:
                 return "fr/proline/studio/images/ms2.png";
+            case MERGE_PTM:
+                return "fr/proline/studio/images/merge_ptm.png";
         }
 
         return null; // can not happen

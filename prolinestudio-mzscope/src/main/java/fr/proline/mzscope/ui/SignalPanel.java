@@ -5,8 +5,6 @@
  */
 package fr.proline.mzscope.ui;
 
-import fr.profi.mzdb.algo.signal.detection.SmartPeakelFinder;
-import fr.profi.mzdb.algo.signal.filtering.BaselineRemover;
 import fr.proline.mzscope.model.Signal;
 import fr.proline.mzscope.ui.model.ScanTableModel;
 import fr.proline.studio.graphics.BasePlotPanel;
@@ -14,22 +12,13 @@ import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.graphics.PlotPanel;
 import fr.proline.studio.graphics.PlotStick;
 import fr.proline.studio.graphics.PlotXYAbstract;
-import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.Tuple2;
 
 /**
  *
@@ -45,7 +34,7 @@ public class SignalPanel extends JPanel {
 
     public SignalPanel(Signal signal) {
       m_signal = signal;
-      m_plotPanel = new PlotPanel(false);
+      m_plotPanel = new PlotPanel();
       
       BasePlotPanel basePlot = m_plotPanel.getBasePlotPanel();
       basePlot.setPlotTitle("2d signal");

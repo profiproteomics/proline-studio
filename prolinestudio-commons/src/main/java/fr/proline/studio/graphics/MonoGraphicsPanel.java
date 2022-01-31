@@ -42,7 +42,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
-import fr.proline.studio.WindowManager;
+
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
@@ -94,7 +94,7 @@ public class MonoGraphicsPanel extends GraphicsToolbarPanel {
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(0, 5, 0, 5);
 
-        PlotPanel panel = new PlotPanel(false);
+        PlotPanel panel = new PlotPanel();
         m_plotPanel = panel.getBasePlotPanel();
         m_plotPanel.setPlotToolbarListener(this);
         JPanel selectPanel = createSelectPanel();

@@ -21,15 +21,8 @@ import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.graphics.PlotPanel;
 import fr.proline.studio.graphics.PlotScatter;
-import fr.proline.studio.graphics.marker.IntervalMarker;
-import fr.proline.studio.graphics.marker.LineMarker;
-import fr.proline.studio.graphics.marker.PointMarker;
-import fr.proline.studio.graphics.marker.XDeltaMarker;
-import fr.proline.studio.graphics.marker.coordinates.DataCoordinates;
 import fr.proline.studio.sampledata.Sample;
 import java.awt.BorderLayout;
-import java.awt.Color;
-import javax.swing.JApplet;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -46,7 +39,7 @@ public class MultiPlotDemo extends JFrame {
      
      public MultiPlotDemo() {
       super("MultiPlot demo");
-      plotPanel = new PlotPanel(false);
+      plotPanel = new PlotPanel();
       final BasePlotPanel basePlot = plotPanel.getBasePlotPanel();
       basePlot.setPlotTitle("MultiPlot title");
       

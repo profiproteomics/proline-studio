@@ -43,7 +43,7 @@ public class VennPlotDemo extends JFrame {
 
    public VennPlotDemo() {
       super("LinearPlot demo");
-      plotPanel = new PlotPanel(false);
+      plotPanel = new PlotPanel();
       final BasePlotPanel basePlot = plotPanel.getBasePlotPanel();
       basePlot.setPlotTitle("graph title");
       basePlot.setDrawCursor(true);

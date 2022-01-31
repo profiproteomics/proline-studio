@@ -28,9 +28,6 @@ import fr.proline.studio.graphics.marker.coordinates.DataCoordinates;
 import fr.proline.studio.sampledata.Sample;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Insets;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -47,7 +44,7 @@ public class LinearPlotDemo extends JFrame {
 
    public LinearPlotDemo() {
       super("LinearPlot demo");
-      plotPanel = new PlotPanel(false);
+      plotPanel = new PlotPanel();
       final BasePlotPanel basePlot = plotPanel.getBasePlotPanel();
       basePlot.setPlotTitle("graph title");
       basePlot.setDrawCursor(true);

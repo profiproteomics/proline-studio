@@ -24,9 +24,6 @@ import fr.proline.studio.sampledata.Sample;
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.TablePopupMenu;
 import java.awt.BorderLayout;
-import java.awt.Insets;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -48,7 +45,7 @@ public class ScatterPlotDemo extends JFrame {
       super("ScatterPlot demo");
       JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
       split.setDividerLocation(150);
-      plotPanel = new PlotPanel(false);
+      plotPanel = new PlotPanel();
       Sample sample = new Sample(3000);
       final BasePlotPanel basePlot = plotPanel.getBasePlotPanel();
       PlotScatter scatter = new PlotScatter(basePlot, sample, null, 0, 3);

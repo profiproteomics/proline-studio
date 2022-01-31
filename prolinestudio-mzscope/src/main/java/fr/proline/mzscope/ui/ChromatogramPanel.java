@@ -73,7 +73,7 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
 
    private void initComponents() {
       this.setLayout(new BorderLayout());
-      PlotPanel plotPanel = new PlotPanel(false);
+      PlotPanel plotPanel = new PlotPanel();
       chromatogramPlotPanel = plotPanel.getBasePlotPanel();
       chromatogramPlotPanel.addListener(this);
       chromatogramPlotPanel.setDrawCursor(true);

@@ -57,7 +57,7 @@ public class SignalMultipleEditorPanel extends JPanel {
     
    public SignalMultipleEditorPanel(List<Signal> signals) {
       m_signals = signals;
-      m_plotPanel = new PlotPanel(false);
+      m_plotPanel = new PlotPanel();
       m_plots = new ArrayList<>();
       BasePlotPanel basePlot = m_plotPanel.getBasePlotPanel();
       basePlot.setPlotTitle("2d signal");

@@ -183,7 +183,7 @@ public class CyclicColorPalette {
      * @param colorIndex
      * @return
      */
-    public static String getHTMLColor(int colorIndex) {
+    public static  String getHTMLColor(int colorIndex) {
         Color c = getColor(colorIndex);
         return getHTMLColor(c);
     }

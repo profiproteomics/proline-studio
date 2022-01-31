@@ -147,7 +147,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
 
    public void initComponents() {
       // Create Scan Charts
-      PlotPanel plotPanel = new PlotPanel(false);
+      PlotPanel plotPanel = new PlotPanel();
       spectrumPlotPanel = plotPanel.getBasePlotPanel();
       spectrumPlotPanel.addListener(this);
       spectrumPlotPanel.setDrawCursor(true);

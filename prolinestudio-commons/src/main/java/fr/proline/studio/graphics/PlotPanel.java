@@ -32,7 +32,7 @@ public class PlotPanel extends JPanel {
    private BasePlotPanel m_basePlotPanel;
    private JLayeredPane m_layeredPane;
    
-   public PlotPanel(boolean isDoubleYAxis) {
+   public PlotPanel() {
 
       m_basePlotPanel = new BasePlotPanel();
 

@@ -41,7 +41,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-import fr.proline.studio.WindowManager;
+
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.SecondAxisTableModelInterface;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_X_ID;
@@ -110,7 +110,7 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(0, 5, 0, 5);
         
-        PlotPanel panel = new PlotPanel(m_isDoubleYAxis);
+        PlotPanel panel = new PlotPanel();
         m_plotPanel = panel.getBasePlotPanel();
         m_plotPanel.setPlotToolbarListener(this);
         JPanel selectPanel = createSelectPanel();

@@ -28,33 +28,65 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * map alignment table model
+ * map RT alignment on delta of value table model
  *
  * @author CB205360
  */
 public class MapTimeTableModel implements ExtendedTableModelInterface {
 
-    public static final int COLTYPE_TIME = 0;
-    public static final int COLTYPE_DELTA_TIME = 1;
 
-    private String[] m_columnNames = {"Time in Reference Map (min)", "Delta time (s)"};;
-    private static final String[] m_toolTipColumns = {"Time (min)", "Delta time (s)"};
+    protected List<MapTime> m_mapValues = null;
+    public static final int COLTYPE_VALUE = 0;
+    public static final int COLTYPE_DELTA_VALUE = 1;
 
-    private List<MapTime> m_mapTimes = null;
-    private Color m_color = null;
-    private String m_title = null;
+    protected String[] m_columnNames = {"Value in Map", "Delta value"};
 
-    public MapTimeTableModel(List<MapTime> mapTimes, Color color, String title, String fromMapName, String toMapName) {
-        m_mapTimes = mapTimes;
+    protected Color m_color;
+    protected String m_title;
+
+    private boolean m_inverseDeltaSign = false;//VDS WART: To have delta ppm from moz calibration and peptide delta moz with same "sign"
+
+    /**
+     * Create a MapTableModel for a single map.
+     * This is called when delta value to display are moz
+     *
+     * @param mapTimes : value to represent as MapTime list
+     * @param color : color to use for plot representation
+     * @param title : plot title
+     * @param mapName : name of represented map
+     */
+    public MapTimeTableModel(List<MapTime> mapTimes, Color color, String title, String mapName) {
+        m_mapValues = mapTimes;
         m_color = color;
         m_title = title;
+        m_inverseDeltaSign = true;
+        m_columnNames[0] = "Time in Map " + mapName + " (min)";
+        m_columnNames[1] = "Delta moz in Map " + mapName;
+    }
+
+    /**
+     * Create a MapTableModel with 2 different maps
+     * This is called when delta value to display are time
+     *
+     * @param mapTimes : value to represent as MapTime list
+     * @param color : color to use for plot representation
+     * @param title : plot title
+     * @param fromMapName : first map name
+     * @param toMapName : compared map name
+     */
+    public MapTimeTableModel(List<MapTime> mapTimes, Color color, String title, String fromMapName, String toMapName) {
+        m_mapValues = mapTimes;
+        m_color = color;
+        m_title = title;
+
         m_columnNames[0] = "Time in Map " + fromMapName + " (min)";
         m_columnNames[1] = "Delta time in Map " + toMapName + " (s)";
     }
 
+
     @Override
     public int getRowCount() {
-        return m_mapTimes == null ? 0 : m_mapTimes.size();
+        return m_mapValues == null ? 0 : m_mapValues.size();
     }
 
     @Override
@@ -71,8 +103,8 @@ public class MapTimeTableModel implements ExtendedTableModelInterface {
     @Override
     public Class getDataColumnClass(int columnIndex) {
         switch (columnIndex) {
-            case COLTYPE_TIME:
-            case COLTYPE_DELTA_TIME:
+            case COLTYPE_VALUE:
+            case COLTYPE_DELTA_VALUE:
                 return Double.class;
         }
         return null; // should not happen
@@ -81,15 +113,17 @@ public class MapTimeTableModel implements ExtendedTableModelInterface {
     @Override
     public Object getDataValueAt(int rowIndex, int columnIndex) {
         // Retrieve MapTime
-        MapTime mapTime = m_mapTimes.get(rowIndex);
+        MapTime mapTime = m_mapValues.get(rowIndex);
 
         switch (columnIndex) {
-            case COLTYPE_TIME: {
+            case COLTYPE_VALUE: {
                 return mapTime.getTime() / 60;
 
             }
-            case COLTYPE_DELTA_TIME: {
-                return mapTime.getDeltaTime();
+            case COLTYPE_DELTA_VALUE: {
+                if(m_inverseDeltaSign)
+                    return -mapTime.getDeltaValue();
+                return mapTime.getDeltaValue();
 
             }
         }
@@ -97,14 +131,21 @@ public class MapTimeTableModel implements ExtendedTableModelInterface {
     }
 
     @Override
+    public Object getRowValue(Class c, int row) {
+        if (c.equals(MapTime.class)) {
+            return m_mapValues.get(row);
+        }
+        return null;
+    }
+
+    @Override
     public int[] getKeysColumn() {
-        int[] keys = {COLTYPE_TIME};
-        return keys;
+        return new int[]{ COLTYPE_VALUE };
     }
 
     @Override
     public int getInfoColumn() {
-        return COLTYPE_TIME;
+        return COLTYPE_VALUE;
     }
 
     @Override
@@ -122,6 +163,7 @@ public class MapTimeTableModel implements ExtendedTableModelInterface {
         return null;
     }
 
+
     @Override
     public PlotInformation getPlotInformation() {
         PlotInformation plotInformation = new PlotInformation();
@@ -131,7 +173,6 @@ public class MapTimeTableModel implements ExtendedTableModelInterface {
         plotInformation.setDrawGap(true);
         return plotInformation;
     }
-
     @Override
     public ArrayList<ExtraDataType> getExtraDataTypes() {
         return null;
@@ -140,14 +181,6 @@ public class MapTimeTableModel implements ExtendedTableModelInterface {
     @Override
     public Object getValue(Class c) {
         return getSingleValue(c);
-    }
-
-    @Override
-    public Object getRowValue(Class c, int row) {
-        if (c.equals(MapTime.class)) {
-            return m_mapTimes.get(row);
-        }
-        return null;
     }
 
     @Override
@@ -165,7 +198,6 @@ public class MapTimeTableModel implements ExtendedTableModelInterface {
         return null;
     }
 
-
     @Override
     public long row2UniqueId(int rowIndex) {
         return rowIndex;
@@ -180,4 +212,6 @@ public class MapTimeTableModel implements ExtendedTableModelInterface {
     public PlotDataSpec getDataSpecAt(int i) {
         return null;
     }
+
+
 }

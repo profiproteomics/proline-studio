@@ -108,7 +108,7 @@ public class MapAlignmentConverter {
         int i = 0;
         for(MapTime mapTime: mapTimeList){
             times[i] = mapTime.getTime();
-            deltaTimes[i] = mapTime.getDeltaTime();
+            deltaTimes[i] = mapTime.getDeltaValue();
             i++;
         }
         return refTime + linearInterpolation(refTime, times, deltaTimes);

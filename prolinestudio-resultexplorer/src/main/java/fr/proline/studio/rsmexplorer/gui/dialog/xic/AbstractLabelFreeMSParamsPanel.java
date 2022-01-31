@@ -148,6 +148,7 @@ public abstract class AbstractLabelFreeMSParamsPanel extends AbstractParamsPanel
     public final static String XIC_PARAMS_VERSION_KEY = XIC_PARAMS_PREFIX + ".parametersVersion";
     public final static String ALIGNMENT_CONFIG = "alignment_config";
     public final static String ALIGNMENT_METHOD_NAME = "method_name";
+    public final static String ALIGNMENT_SMOOTHING_METHOD_NAME = "smoothing_method_name";
 
     protected final boolean m_readOnly;
     protected JScrollPane m_scrollPane;

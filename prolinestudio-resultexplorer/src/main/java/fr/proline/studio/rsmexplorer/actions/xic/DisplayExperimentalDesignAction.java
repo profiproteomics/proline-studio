@@ -33,6 +33,7 @@ public class DisplayExperimentalDesignAction extends AbstractRSMAction {
 
     private AbstractRSMAction m_xicParamAction;
     private AbstractRSMAction m_mapAlignmentAction;
+    private AbstractRSMAction m_mapMozAlignmentAction;
 
     private JMenu m_menu;
 
@@ -46,12 +47,15 @@ public class DisplayExperimentalDesignAction extends AbstractRSMAction {
     
         m_xicParamAction = new DisplayXicParamAction(getTree());
         m_mapAlignmentAction = new DisplayMapAlignmentAction(getTree());
+        m_mapMozAlignmentAction = new DisplayMapMoZAlignmentAction(getTree());
 
         JMenuItem xicParamItem = new JMenuItem(m_xicParamAction);
         JMenuItem mapAlignItem = new JMenuItem(m_mapAlignmentAction);
-        
+        JMenuItem mapMoZAlignItem = new JMenuItem(m_mapMozAlignmentAction);
+
         m_menu.add(xicParamItem);
         m_menu.add(mapAlignItem);
+        m_menu.add(mapMoZAlignItem);
 
         return m_menu;
     }
@@ -61,9 +65,9 @@ public class DisplayExperimentalDesignAction extends AbstractRSMAction {
 
         m_xicParamAction.updateEnabled(selectedNodes);
         m_mapAlignmentAction.updateEnabled(selectedNodes);
+        m_mapMozAlignmentAction.updateEnabled(selectedNodes);
         
-        
-        boolean isEnabled = m_xicParamAction.isEnabled() ||  m_mapAlignmentAction.isEnabled();
+        boolean isEnabled = m_xicParamAction.isEnabled() ||  m_mapAlignmentAction.isEnabled() ||m_mapMozAlignmentAction.isEnabled();
         setEnabled(isEnabled);
         m_menu.setEnabled(isEnabled);
     }

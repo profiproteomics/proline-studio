@@ -18,6 +18,7 @@ package fr.proline.studio.pattern.xic;
 
 import fr.proline.core.orm.lcms.MapAlignment;
 import fr.proline.core.orm.lcms.ProcessedMap;
+import fr.proline.core.orm.lcms.ProcessedMapMozCalibration;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -25,14 +26,11 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
-import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.ParameterList;
 import fr.proline.studio.pattern.ParameterSubtypeEnum;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.AbstractLabelFreeMSParamsPanel;
-import fr.proline.studio.rsmexplorer.gui.xic.MapAlignmentPanel;
-import fr.proline.studio.rsmexplorer.gui.xic.MapTimeTableModel;
-import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
+import fr.proline.studio.rsmexplorer.gui.xic.*;
 import fr.proline.studio.rsmexplorer.gui.xic.alignment.IonsRTTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,13 +61,19 @@ public class DataboxMapAlignment extends AbstractDataBox {
     private Long m_paramTaskId;
     private boolean m_isCloudLoaded;
     private boolean m_isCloudTaskAsked;
-    
+    private boolean m_isMoZAlignment;
+
     public DataboxMapAlignment() {
+        this(false);
+    }
+
+    public DataboxMapAlignment(boolean isMoZAlignment) {
         super(DataboxType.DataBoxMapAlignment, DataboxStyle.STYLE_XIC);
+        m_isMoZAlignment = isMoZAlignment;
 
         // Name of this databox
-        m_typeName = "Map Alignment Plot";
-        m_description = "Graphical display of XIC Map Alignment.";
+        m_typeName = m_isMoZAlignment ?  "Map moz Alignment Plot" : "Map Alignment Plot";
+        m_description = m_isMoZAlignment ? "Graphical display of XIC Map moz Alignment." : "Graphical display of XIC Map Alignment.";
 
         m_ionsRTBySourceMapId = new HashMap<>();
         // Register in parameters
@@ -81,7 +85,6 @@ public class DataboxMapAlignment extends AbstractDataBox {
         ParameterList outParameter = new ParameterList();
 
         outParameter.addParameter(ExtendedTableModelInterface.class, ParameterSubtypeEnum.LIST_DATA);
-        outParameter.addParameter(CrossSelectionInterface.class, ParameterSubtypeEnum.LIST_DATA);
 
         registerOutParameter(outParameter);
         
@@ -116,9 +119,6 @@ public class DataboxMapAlignment extends AbstractDataBox {
                 if (parameterType.equals(ExtendedTableModelInterface.class)) {
                     return getCompareDataInterfaceList();
                 }
-                if (parameterType.equals(CrossSelectionInterface.class)) {
-                    return getCrossSelectionInterfaceList();
-                }
             }
         }
         return super.getDataImpl(parameterType, parameterSubtype);
@@ -126,28 +126,46 @@ public class DataboxMapAlignment extends AbstractDataBox {
 
     private List<ExtendedTableModelInterface> getCompareDataInterfaceList() {
         List<ExtendedTableModelInterface> listCDI = new ArrayList<>();
-        for (MapAlignment mapAlignment : m_dataset.getMapAlignmentsFromMap(m_dataset.getAlnReferenceMapId())) {
-            String fromMap = m_quantChannelInfo.getMapTitle(mapAlignment.getSourceMap().getId());
-            String toMap = m_quantChannelInfo.getMapTitle(mapAlignment.getDestinationMap().getId());
-            String title = "Map Alignment from " + fromMap + " (to " + toMap + ")";
-            Color color = m_quantChannelInfo.getMapColor(mapAlignment.getDestinationMap().getId());
-            MapTimeTableModel model = new MapTimeTableModel(mapAlignment.getMapTimeList(), color, title, fromMap, toMap);  //set mapAlignemnt curve data with its AxisX
-            listCDI.add(model);
+
+        if(m_isMoZAlignment){
+            for(ProcessedMap map : m_dataset.getMaps()) {
+                List<ProcessedMapMozCalibration> allMozCalib = new ArrayList<>(map.getProcessedMapMozCalibration());
+
+                String mapTitle = m_quantChannelInfo.getMapTitle(map.getId());
+                String title = "moz Alignment for "+ mapTitle;
+
+                for (ProcessedMapMozCalibration mapMozAlignment : allMozCalib) {
+                    Color color = m_quantChannelInfo.getMapColor(map.getId());
+                    MapTimeTableModel model = new MapTimeTableModel(mapMozAlignment.getProcessedMapMozList(), color, title, mapTitle);
+                    listCDI.add(model);
+                }
+            }
+        } else {
+            for (MapAlignment mapAlignment : m_dataset.getMapAlignmentsFromMap(m_dataset.getAlnReferenceMapId())) {
+                String fromMap = m_quantChannelInfo.getMapTitle(mapAlignment.getSourceMap().getId());
+                String toMap = m_quantChannelInfo.getMapTitle(mapAlignment.getDestinationMap().getId());
+                String title = "Map Alignment from " + fromMap + " (to " + toMap + ")";
+                Color color = m_quantChannelInfo.getMapColor(mapAlignment.getDestinationMap().getId());
+                MapTimeTableModel model = new MapTimeTableModel(mapAlignment.getMapTimeList(), color, title, fromMap, toMap);  //set mapAlignemnt curve data with its AxisX
+                listCDI.add(model);
+            }
         }
         return listCDI;
-    }
-
-    private List<CrossSelectionInterface> getCrossSelectionInterfaceList() {
-        // cross selection of map alignment data is not allowed however DataboxMultiGraphics request this output parameter
-        return null;
     }
 
 
     @Override
     public void createPanel() {
-        MapAlignmentPanel p = new MapAlignmentPanel(this);
-        p.setName(m_typeName);
-        setDataBoxPanelInterface(p);
+        if(m_isMoZAlignment){
+            MapMozAlignmentPanel p = new MapMozAlignmentPanel(this);
+            p.setName(m_typeName);
+            setDataBoxPanelInterface(p);
+
+        } else {
+            MapAlignmentPanel p = new MapAlignmentPanel(this);
+            p.setName(m_typeName);
+            setDataBoxPanelInterface(p);
+        }
     }
 
     @Override
@@ -185,7 +203,10 @@ public class DataboxMapAlignment extends AbstractDataBox {
                 // do nothing, if only de paramTask finished
                 if (taskId != m_paramTaskId) {
                     m_quantChannelInfo = new QuantChannelInfo(m_dataset);
-                    ((MapAlignmentPanel) getDataBoxPanelInterface()).setData(m_quantChannelInfo, getCompareDataInterfaceList(), getCrossSelectionInterfaceList());
+                    if(m_isMoZAlignment)
+                        ((MapMozAlignmentPanel) getDataBoxPanelInterface()).setData(m_quantChannelInfo, getCompareDataInterfaceList());
+                    else
+                        ((MapAlignmentPanel) getDataBoxPanelInterface()).setData(m_quantChannelInfo, getCompareDataInterfaceList());
 
                     if (finished) {
                         addDataChanged(ExtendedTableModelInterface.class, ParameterSubtypeEnum.LIST_DATA);
@@ -215,7 +236,10 @@ public class DataboxMapAlignment extends AbstractDataBox {
     public void loadCloud() {
         
         if (m_isCloudLoaded) {
-            ((MapAlignmentPanel) super.getDataBoxPanelInterface()).setAlignmentCloud();
+            if(m_isMoZAlignment)
+                ((MapMozAlignmentPanel) getDataBoxPanelInterface()).setAlignmentCloud();
+            else
+                ((MapAlignmentPanel) getDataBoxPanelInterface()).setAlignmentCloud();
         } else {
             //avoid multiple call when the cloud is not loaded
             if (this.m_isCloudTaskAsked) {
@@ -248,7 +272,10 @@ public class DataboxMapAlignment extends AbstractDataBox {
                             if (DataboxMapAlignment.this.isLoaded()) {
                                 m_isCloudLoaded = true;
                                 extractTimeToleranceParameters();
-                                ((MapAlignmentPanel) DataboxMapAlignment.this.getPanel()).setAlignmentCloud();
+                                if(m_isMoZAlignment)
+                                    ((MapMozAlignmentPanel) getDataBoxPanelInterface()).setAlignmentCloud();
+                                else
+                                    ((MapAlignmentPanel) getDataBoxPanelInterface()).setAlignmentCloud();
                             }
                         }
                     }

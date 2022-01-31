@@ -1081,6 +1081,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                             for (ProcessedMap pm : rs3) {
                                 // force initialization of raw map collection
                                 Hibernate.initialize(pm.getRawMaps());
+                                Hibernate.initialize(pm.getProcessedMapMozCalibration());
                                 allMaps.add(pm);
                             }
                             dataset.setMaps(allMaps);

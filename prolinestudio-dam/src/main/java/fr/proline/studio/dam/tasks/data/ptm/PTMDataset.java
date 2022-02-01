@@ -428,7 +428,7 @@ public class PTMDataset {
         for(int i=1; i<finalClusters2Merge.size(); i++){
             PTMCluster nextCluster = finalClusters2Merge.get(i);
 
-            if(areColocalized(mergedCluster, nextCluster)){
+            if(areColocalized(firstCluster, nextCluster)){
 
                 //Site count correspond to the max site count of all merged cluster, not the sum of sites
                 if(mergedCluster.getPTMSitesCount() < nextCluster.getPTMSitesCount())

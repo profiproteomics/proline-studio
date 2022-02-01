@@ -71,7 +71,7 @@ public class PTMCluster implements Comparable<PTMCluster>{
         m_peptideIds.addAll(peptideIds);
         m_localizationConfidence = confidence;
         m_sites = m_ptmDataset.getPTMSites().stream().filter(site -> ptmSiteIds.contains(site.getId())).sorted(Comparator.comparing(PTMSite::getPositionOnProtein)).collect(Collectors.toList());
-        m_sitesCount = -1;
+        m_sitesCount = m_sites.size();
         m_id = id;
 
         m_selectionLevel = selectionLevel != null ? selectionLevel : 2;
@@ -138,9 +138,19 @@ public class PTMCluster implements Comparable<PTMCluster>{
     }
 
     protected void addPeptideIds(List<Long> newPepIds){
+        boolean listChanged = false;
         for(Long s : newPepIds){
-            if(!m_peptideIds.contains(s))
+            if(!m_peptideIds.contains(s)) {
                 m_peptideIds.add(s);
+                listChanged = true;
+            }
+        }
+        if(listChanged){
+            m_positionsOnProtein = null;
+            m_probabilities = null;
+            m_parentPTMPeptideInstances = null;
+            m_leafPTMPeptideInstances = null;
+            m_parentPeptideInstances = null;
         }
     }
 

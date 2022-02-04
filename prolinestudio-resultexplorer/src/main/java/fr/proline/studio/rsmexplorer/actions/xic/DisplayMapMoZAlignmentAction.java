@@ -36,7 +36,7 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 public class DisplayMapMoZAlignmentAction extends AbstractRSMAction {
 
     public DisplayMapMoZAlignmentAction(AbstractTree tree) {
-        super("Map MoZ Alignment", tree);
+        super("Map moz Alignment", tree);
     }
 
     @Override

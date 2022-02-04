@@ -428,71 +428,68 @@ public class PTMDataset {
         for(int i=1; i<finalClusters2Merge.size(); i++){
             PTMCluster nextCluster = finalClusters2Merge.get(i);
 
-            if(areColocalized(firstCluster, nextCluster)){
+            //Site count correspond to the max site count of all merged cluster, not the sum of sites
+            if(mergedCluster.getPTMSitesCount() < nextCluster.getPTMSitesCount())
+                mergedCluster.setPTMSitesCount(nextCluster.getPTMSitesCount());
 
-                //Site count correspond to the max site count of all merged cluster, not the sum of sites
-                if(mergedCluster.getPTMSitesCount() < nextCluster.getPTMSitesCount())
-                    mergedCluster.setPTMSitesCount(nextCluster.getPTMSitesCount());
+            //Add next cluster data to merged cluster
+            mergedCluster.addSites(nextCluster.getPTMSites());
+            mergedCluster.addPeptideIds(nextCluster.getPeptideIds());
 
-                //Add next cluster data to merged cluster
-                mergedCluster.addSites(nextCluster.getPTMSites());
-                mergedCluster.addPeptideIds(nextCluster.getPeptideIds());
+            // set max LocalizationConfidence() as merged cluster LocalizationConfidence()
+            if(mergedCluster.getLocalizationConfidence() < nextCluster.getLocalizationConfidence())
+                mergedCluster.setLocalizationConfidence(nextCluster.getLocalizationConfidence());
 
-                // set max LocalizationConfidence() as merged cluster LocalizationConfidence()
-                if(mergedCluster.getLocalizationConfidence() < nextCluster.getLocalizationConfidence())
-                    mergedCluster.setLocalizationConfidence(nextCluster.getLocalizationConfidence());
+            //Set best Peptide match considering all clusters as representative for merged cluster. Best = greater  mascot delta score
+            DPeptideMatch currentPepM = mergedCluster.getRepresentativePepMatch();
+            DPeptideMatch nextPepM = nextCluster.getRepresentativePepMatch();
+            if(currentPepM.getPtmSiteProperties() != null && currentPepM.getPtmSiteProperties().getMascotDeltaScore() != null){
+                if( (nextPepM.getPtmSiteProperties() !=null && nextPepM.getPtmSiteProperties().getMascotDeltaScore() != null)
+                        && nextPepM.getPtmSiteProperties().getMascotDeltaScore() > currentPepM.getPtmSiteProperties().getMascotDeltaScore()){
+                    mergedCluster.setRepresentativePepMatch(nextPepM);
+                }
 
-                //Set best Peptide match considering all clusters as representative for merged cluster. Best = greater  mascot delta score
-                DPeptideMatch currentPepM = mergedCluster.getRepresentativePepMatch();
-                DPeptideMatch nextPepM = nextCluster.getRepresentativePepMatch();
-                if(currentPepM.getPtmSiteProperties() != null && currentPepM.getPtmSiteProperties().getMascotDeltaScore() != null){
-                    if( (nextPepM.getPtmSiteProperties() !=null && nextPepM.getPtmSiteProperties().getMascotDeltaScore() != null)
-                            && nextPepM.getPtmSiteProperties().getMascotDeltaScore() > currentPepM.getPtmSiteProperties().getMascotDeltaScore()){
-                        mergedCluster.setRepresentativePepMatch(nextPepM);
-                    }
+            } else {
+                if(nextPepM.getPtmSiteProperties() !=null && nextPepM.getPtmSiteProperties().getMascotDeltaScore() != null){
+                    mergedCluster.setRepresentativePepMatch(nextPepM);
+                }
+            }
 
+            //For all cluster ptmPeptideInstance, change associated cluster to merged one
+            nextCluster.getParentPTMPeptideInstances().forEach(ptmPepI -> {
+                ptmPepI.addCluster(mergedCluster);
+                ptmPepI.removeCluster(nextCluster);
+            });
+
+            nextCluster.getLeafPTMPeptideInstances().forEach(ptmPepI -> {
+                ptmPepI.addCluster(mergedCluster);
+                ptmPepI.removeCluster(nextCluster);
+            });
+
+
+            // If Quanti data get quant information to calculated new adundance
+            if(isQuantitation()) {
+                DMasterQuantPeptide nextClusterMQpep = nextCluster.getRepresentativeMQPepMatch();
+                if (nextClusterMQpep instanceof AggregatedMasterQuantPeptide) {
+                    ((AggregatedMasterQuantPeptide) nextClusterMQpep).getAggregatedMQPeptides().forEach(mqPep -> {
+                        if (!mqPepByPepInstId.containsKey(mqPep.getPeptideInstance().getPeptideId()))
+                            mqPepByPepInstId.put(mqPep.getPeptideInstanceId(), mqPep);
+                    });
                 } else {
-                    if(nextPepM.getPtmSiteProperties() !=null && nextPepM.getPtmSiteProperties().getMascotDeltaScore() != null){
-                        mergedCluster.setRepresentativePepMatch(nextPepM);
-                    }
+                    //Should not occur
+                    mqPepByPepInstId.put(nextClusterMQpep.getPeptideInstanceId(), nextClusterMQpep);
                 }
+            }
 
-                //For all cluster ptmPeptideInstance, change associated cluster to merged one
-                nextCluster.getParentPTMPeptideInstances().forEach(ptmPepI -> {
-                    ptmPepI.addCluster(mergedCluster);
-                    ptmPepI.removeCluster(nextCluster);
-                });
-
-                nextCluster.getLeafPTMPeptideInstances().forEach(ptmPepI -> {
-                    ptmPepI.addCluster(mergedCluster);
-                    ptmPepI.removeCluster(nextCluster);
-                });
-
-
-                // If Quanti data get quant information to calculated new adundance
-                if(isQuantitation()) {
-                    DMasterQuantPeptide nextClusterMQpep = nextCluster.getRepresentativeMQPepMatch();
-                    if (nextClusterMQpep instanceof AggregatedMasterQuantPeptide) {
-                        ((AggregatedMasterQuantPeptide) nextClusterMQpep).getAggregatedMQPeptides().forEach(mqPep -> {
-                            if (!mqPepByPepInstId.containsKey(mqPep.getPeptideInstance().getPeptideId()))
-                                mqPepByPepInstId.put(mqPep.getPeptideInstanceId(), mqPep);
-                        });
-                    } else {
-                        //Should not occur
-                        mqPepByPepInstId.put(nextClusterMQpep.getPeptideInstanceId(), nextClusterMQpep);
-                    }
-                }
-
-            } //End clusters are colocalized
         } //End go through clusters
 
         if(isQuantitation())
             mergedCluster.setRepresentativeMQPepMatch(getRepresentativeMQPeptideForCluster(mergedCluster, mqPepByPepInstId));
 
+        int index = m_ptmClusters.indexOf(firstCluster);
         m_ptmClusters.removeAll(finalClusters2Merge);
-        m_ptmClusters.add(mergedCluster);
+        m_ptmClusters.add(index, mergedCluster);
         return true;
-
     }
 
     public JSONPTMDataset createJSONPTMDataset() throws IllegalAccessException {

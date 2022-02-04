@@ -66,7 +66,8 @@ public class MapMozAlignmentPanel extends AbstractMapAlignmentPanel {
         moz2DeltaPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 
         moz2DeltaPanel.add(m_srcTimeValueTF);
-        moz2DeltaPanel.add(new JLabel(" moz in "));
+        m_srcTimeValueTF.setEditable(false);
+        moz2DeltaPanel.add(new JLabel("(min) in "));
         m_sourceMapsCB.setName("cbSourceMaps");
         moz2DeltaPanel.add(m_sourceMapsCB);
         moz2DeltaPanel.add(new JLabel(" correspond to"));
@@ -143,14 +144,16 @@ public class MapMozAlignmentPanel extends AbstractMapAlignmentPanel {
 
     @Override
     protected Double getCorrespondingData(Double time, Long mapId) {
-        logger.debug("calculate delta moz at RT " + time + " for mapId=" + mapId);
+        Double timeInSeconds = time*60;
+        logger.debug("calculate delta moz at RT " + timeInSeconds + " for mapId=" + mapId);
         Double calcDeltaMoz = Double.NaN;
         try {
             ProcessedMap pMap =  m_pMapById.get(mapId);
             if(pMap.getProcessedMapMozCalibration() != null && pMap.getProcessedMapMozCalibration().size()>0) {
                 List<MapTime> mapMozs = pMap.getProcessedMapMozCalibration().get(0).getProcessedMapMozList();
                 for(MapTime mapMoz : mapMozs){
-                    if (Math.abs(mapMoz.getTime() - time) < THRESHOLD){
+                    // VOIR pour regression ou avoir info !
+                    if (Math.abs(mapMoz.getTime() - timeInSeconds) < 0.1){
                         calcDeltaMoz = mapMoz.getDeltaValue();
                         break;
                     }

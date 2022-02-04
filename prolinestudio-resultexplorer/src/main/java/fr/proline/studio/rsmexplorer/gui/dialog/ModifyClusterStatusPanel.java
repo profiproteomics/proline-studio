@@ -20,7 +20,7 @@ public class ModifyClusterStatusPanel extends JPanel {
   private SelectLevelRadioButtonGroup m_invalidRButton;
   private ButtonGroup m_statusButtonGroup;
   private JFormattedTextField m_statusConfidenceLevelTF;
-  private JTextField m_statusConfidenceInfoTF;
+  private JTextArea m_statusConfidenceInfoTF;
   private PTMCluster m_editedCluster;
 
   public ModifyClusterStatusPanel() {
@@ -81,7 +81,7 @@ public class ModifyClusterStatusPanel extends JPanel {
 
     c.gridx++;
     c.weightx=0.8;
-    m_statusConfidenceInfoTF = new JTextField();
+    m_statusConfidenceInfoTF = new JTextArea(5,20);
     p.add(m_statusConfidenceInfoTF, c);
     add(p, BorderLayout.CENTER);
   }

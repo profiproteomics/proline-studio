@@ -45,7 +45,7 @@ public class EditClusterDialog extends DefaultDialog {
   public EditClusterDialog(PTMCluster cluster) {
     super(WindowManager.getDefault().getMainWindow(), Dialog.ModalityType.APPLICATION_MODAL);
     setTitle("Edit Cluster "+cluster.getId()+" ["+cluster.getProteinMatch().getAccession()+" / "+cluster.getRepresentativePepMatch().getPeptide().getSequence()+"]");
-//    setResizable(true);
+    setResizable(true);
 
     StringBuilder helpTextBuilder = new StringBuilder(StudioResourceBundle.getMessage(EditClusterDialog.class, "EditCluster.status.modif.html.help"));
     helpTextBuilder.append("<br><br>").append(StudioResourceBundle.getMessage(EditClusterDialog.class, "EditCluster.peptide.remove.html.help"));
@@ -62,6 +62,9 @@ public class EditClusterDialog extends DefaultDialog {
 
   private void initComponent(){
     JPanel editPanel = new JPanel();
+    JSplitPane sp = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+    sp.setResizeWeight(0.5);
+    sp.setOneTouchExpandable(true);
     editPanel.setLayout(new GridBagLayout());
 
     GridBagConstraints c = new GridBagConstraints();
@@ -73,7 +76,7 @@ public class EditClusterDialog extends DefaultDialog {
     c.weightx=1;
     m_statusPanel = new ModifyClusterStatusPanel();
     m_statusPanel.setBorder(new TitledBorder("Cluster Status "));
-    editPanel.add(m_statusPanel,c);
+    sp.setTopComponent(m_statusPanel);
 
     JPanel peptidePanel = new JPanel();
     peptidePanel.setBorder(new TitledBorder("Cluster Peptides "));
@@ -114,19 +117,20 @@ public class EditClusterDialog extends DefaultDialog {
 
     m_ptmPeptidesScrollPane.setViewportView(m_ptmPeptidesTable);
 
-    m_ptmPeptidesTable.setFillsViewportHeight(true);
+//    m_ptmPeptidesTable.setFillsViewportHeight(true);
     m_ptmPeptidesTable.setViewport(m_ptmPeptidesScrollPane.getViewport());
     ptmPeptidesPanel.add(m_ptmPeptidesScrollPane, BorderLayout.CENTER);
 
     c1.insets = new java.awt.Insets(2, 2, 2, 2);
-    c1.gridwidth=1;
+//    c1.gridwidth=1;
     c1.gridx++;
     c1.weightx=0.8;
     peptidePanel.add(ptmPeptidesPanel, c1);
 
     c.gridy++;
     c.weighty=1;
-    editPanel.add(peptidePanel, c);
+    sp.setBottomComponent(peptidePanel);
+    editPanel.add(sp, c);
 
     setInternalComponent(editPanel);
   }

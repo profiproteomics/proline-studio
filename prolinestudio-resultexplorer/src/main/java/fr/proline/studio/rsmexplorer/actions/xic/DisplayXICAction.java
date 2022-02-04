@@ -42,7 +42,6 @@ public class DisplayXICAction extends AbstractRSMAction {
 
     private DisplayXICPTMSitesAction m_displayXICPtmSiteProteinAction;
     private DisplayXICPTMClusterAction m_displayXICPtmClusterProteinAction;
-    private DisplayXICPTMSitesAction m_displayyAnnotatedXICPtmSiteProteinAction;
     private DisplayXICPTMClusterAction m_displayyAnnotatedXICPtmClusterProteinAction;
 
     private DisplayUserWindowAction m_displayUserWindowAction;
@@ -63,7 +62,6 @@ public class DisplayXICAction extends AbstractRSMAction {
 
         m_displayXICPtmSiteProteinAction = new DisplayXICPTMSitesAction(getTree());
         m_displayXICPtmClusterProteinAction = new DisplayXICPTMClusterAction(getTree());
-        m_displayyAnnotatedXICPtmSiteProteinAction = new DisplayXICPTMSitesAction(true, getTree());
         m_displayyAnnotatedXICPtmClusterProteinAction = new DisplayXICPTMClusterAction(true, getTree());
 
         m_manageUserWindowsAction = new ManageUserWindowsAction(WindowSavedManager.SAVE_WINDOW_FOR_QUANTI, getTree());
@@ -87,7 +85,6 @@ public class DisplayXICAction extends AbstractRSMAction {
         JMenuItem displayXICPeptideIonItem = new JMenuItem(m_displayXICPeptideIonAction);
         JMenuItem displayXICPtmSiteProteinItem = new JMenuItem(m_displayXICPtmSiteProteinAction);
         JMenuItem displayXICPtmClusterProteinItem = new JMenuItem(m_displayXICPtmClusterProteinAction);
-        JMenuItem displayXICAnnotatedPtmSiteProteinItem = new JMenuItem(m_displayyAnnotatedXICPtmSiteProteinAction);
         JMenuItem displayXICAnnotatedPtmClusterProteinItem = new JMenuItem(m_displayyAnnotatedXICPtmClusterProteinAction);
 
         JMenuItem displayUserWindowItem = new JMenuItem(m_displayUserWindowAction);
@@ -99,7 +96,6 @@ public class DisplayXICAction extends AbstractRSMAction {
         m_menu.addSeparator();
         m_menu.add(displayXICPtmSiteProteinItem);
         m_menu.add(displayXICPtmClusterProteinItem);
-        m_menu.add(displayXICAnnotatedPtmSiteProteinItem);
         m_menu.add(displayXICAnnotatedPtmClusterProteinItem);
         m_menu.addSeparator();
         m_menu.add(displayUserWindowItem);
@@ -124,7 +120,6 @@ public class DisplayXICAction extends AbstractRSMAction {
         m_displayXICPeptideIonAction.updateEnabled(selectedNodes);
         m_displayXICPtmSiteProteinAction.updateEnabled(selectedNodes);
         m_displayXICPtmClusterProteinAction.updateEnabled(selectedNodes);
-        m_displayyAnnotatedXICPtmSiteProteinAction.updateEnabled(selectedNodes);
         m_displayyAnnotatedXICPtmClusterProteinAction.updateEnabled(selectedNodes);
         m_displayUserWindowAction.updateEnabled(selectedNodes);
         m_manageUserWindowsAction.updateEnabled(selectedNodes);
@@ -136,7 +131,7 @@ public class DisplayXICAction extends AbstractRSMAction {
         }
         
         boolean isEnabled = m_displayXICProteinSetAction.isEnabled() || m_displayXICPtmSiteProteinAction.isEnabled() || m_displayXICPtmClusterProteinAction.isEnabled()
-                || m_displayyAnnotatedXICPtmClusterProteinAction.isEnabled() || m_displayyAnnotatedXICPtmSiteProteinAction.isEnabled()  || m_displayXICPeptideSetAction.isEnabled() || m_displayXICPeptideIonAction.isEnabled() || m_displayUserWindowAction.isEnabled() || m_manageUserWindowsAction.isEnabled() || listEnabled;
+                || m_displayyAnnotatedXICPtmClusterProteinAction.isEnabled()  || m_displayXICPeptideSetAction.isEnabled() || m_displayXICPeptideIonAction.isEnabled() || m_displayUserWindowAction.isEnabled() || m_manageUserWindowsAction.isEnabled() || listEnabled;
         setEnabled(isEnabled);
         m_menu.setEnabled(isEnabled);
     }

@@ -32,7 +32,6 @@ public class DisplayPTMRsmAction extends AbstractRSMAction {
     private DisplayPTMSitesAction m_displayPtmSiteProtein;
     private DisplayPTMClustersAction m_displayPtmClusterProtein;
 
-    private DisplayPTMSitesAction m_displayAnnotatedPtmSiteProtein;
     private DisplayPTMClustersAction m_displayAnnotatedPtmClusterProtein;
 
 
@@ -48,18 +47,15 @@ public class DisplayPTMRsmAction extends AbstractRSMAction {
         m_menu = new JMenu((String) getValue(NAME));
         m_displayPtmSiteProtein = new DisplayPTMSitesAction(getTree());
         m_displayPtmClusterProtein = new DisplayPTMClustersAction(getTree());
-        m_displayAnnotatedPtmSiteProtein = new DisplayPTMSitesAction(true, getTree());
         m_displayAnnotatedPtmClusterProtein = new DisplayPTMClustersAction(true , getTree());
 
         JMenuItem displayPtmSiteProteinItem = new JMenuItem(m_displayPtmSiteProtein);
         JMenuItem displayPtmClusterProteinItem = new JMenuItem(m_displayPtmClusterProtein);
-        JMenuItem displayAnnotatedPtmSiteProteinItem = new JMenuItem(m_displayAnnotatedPtmSiteProtein);
         JMenuItem displayAnnotatedPtmClusterProteinItem = new JMenuItem(m_displayAnnotatedPtmClusterProtein);
 
         m_menu.add(displayPtmSiteProteinItem);
         m_menu.add(displayPtmClusterProteinItem);
         m_menu.addSeparator();
-        m_menu.add(displayAnnotatedPtmSiteProteinItem);
         m_menu.add(displayAnnotatedPtmClusterProteinItem);
 
         return m_menu;
@@ -70,7 +66,6 @@ public class DisplayPTMRsmAction extends AbstractRSMAction {
         m_displayPtmSiteProtein.updateEnabled(selectedNodes);
         m_displayPtmClusterProtein.updateEnabled(selectedNodes);
         m_displayAnnotatedPtmClusterProtein.updateEnabled(selectedNodes);
-        m_displayAnnotatedPtmSiteProtein.updateEnabled(selectedNodes);
 
         boolean isEnabled =  m_displayPtmClusterProtein.isEnabled() ||  m_displayAnnotatedPtmClusterProtein.isEnabled() || m_displayPtmSiteProtein.isEnabled();
         setEnabled(isEnabled);

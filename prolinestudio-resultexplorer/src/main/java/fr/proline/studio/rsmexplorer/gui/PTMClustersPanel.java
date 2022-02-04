@@ -746,11 +746,11 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
                 PTMDatasetPair ptmDatasetpair = (PTMDatasetPair) m_dataBox.getData(PTMDatasetPair.class);
                 boolean changeToAnnotated = false;
                 if (ptmDatasetpair.getPTMDatasetType() == PTMDatasetPair.ANNOTATED_PTM_DATASET) {
-                    m_logger.debug(" ==> MERGE IN ANNOTATED DATA OK !!! ");
+                    m_logger.debug(" ==> SAVE IN ANNOTATED DATA OK !!! ");
                 } else {
                     PTMDatasetPair annPtmDatasetpair = DatabaseDataManager.getDatabaseDataManager().getAnnotatedPTMDatasetSetForDS(ptmDatasetpair.getDataset().getId());
                     String existMsg = (annPtmDatasetpair != null) ? " Annotated PTM Exist " : " Annotated do NOT Exist !";
-                    m_logger.debug("  ==> MERGE IN NOT ANNOTATED DATA NOO OK !!! " + existMsg+". Remove data of exist");
+                    m_logger.debug("  ==> SAVE IN NOT ANNOTATED DATA NOO OK !!! " + existMsg+". Remove data of exist");
                     DatabaseDataManager.getDatabaseDataManager().removeAllPTMDatasetsForDS(ptmDatasetpair.getDataset().getId());
                     ptmDatasetpair.changePTMDatasetType(PTMDatasetPair.ANNOTATED_PTM_DATASET);
                     DatabaseDataManager.getDatabaseDataManager().addLoadedAnnotatedPTMDatasetSet(ptmDatasetpair);

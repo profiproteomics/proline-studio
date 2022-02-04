@@ -17,16 +17,19 @@
 package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.model.*;
-import fr.proline.mzscope.utils.MzScopeCallback;
 import fr.proline.mzscope.ui.model.MzScopePreferences;
 import fr.proline.mzscope.utils.Display;
 import fr.proline.mzscope.utils.KeyEventDispatcherDecorator;
+import fr.proline.mzscope.utils.MzScopeCallback;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.graphics.ExtendableButtonPanel;
 import fr.proline.studio.graphics.marker.IntervalMarker;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
@@ -35,10 +38,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import javax.swing.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * base for raw file panel. The panel could be a SingleRawFilePanel or MultiRawFilePanel composed by 2 main components: ChromatogramPanel and
@@ -437,8 +436,13 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
     }
 
     @Override
-    public void setReferenceSpectrum(Spectrum spectrum) {
-        spectrumContainerPanel.displayReferenceSpectrum(spectrum);
+    public void setReferenceSpectrum(Spectrum spectrum, Float scaleFactor) {
+        spectrumContainerPanel.setReferenceSpectrum(spectrum, scaleFactor);
+    }
+
+    @Override
+    public Spectrum getCurrentSpectrum() {
+        return currentScan;
     }
 
     @Override

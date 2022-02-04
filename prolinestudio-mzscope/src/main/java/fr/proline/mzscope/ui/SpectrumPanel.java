@@ -16,66 +16,49 @@
  */
   package fr.proline.mzscope.ui;
 
-import fr.proline.mzscope.ui.dialog.IsotopicPredictionParamDialog;
-import fr.proline.mzscope.ui.model.ScanTableModel;
 import fr.profi.ms.model.TheoreticalIsotopePattern;
-import fr.profi.mzdb.algo.DotProductPatternScorer;
 import fr.profi.mzdb.algo.signal.filtering.ISignalSmoother;
 import fr.profi.mzdb.algo.signal.filtering.PartialSavitzkyGolaySmoother;
 import fr.profi.mzdb.algo.signal.filtering.SavitzkyGolaySmoother;
 import fr.profi.mzdb.algo.signal.filtering.SavitzkyGolaySmoothingConfig;
+import fr.profi.mzdb.model.SpectrumData;
 import fr.profi.mzdb.util.math.DerivativeAnalysis;
 import fr.proline.mzscope.model.MsnExtractionRequest;
-import fr.proline.mzscope.ui.model.MzScopePreferences;
-import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.model.Signal;
-import fr.proline.mzscope.ui.event.ScanHeaderListener;
+import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.processing.IsotopicPatternUtils;
 import fr.proline.mzscope.processing.SpectrumUtils;
+import fr.proline.mzscope.ui.dialog.IsotopicPredictionParamDialog;
 import fr.proline.mzscope.ui.dialog.SmoothingParamDialog;
+import fr.proline.mzscope.ui.event.ScanHeaderListener;
+import fr.proline.mzscope.ui.model.MzScopePreferences;
+import fr.proline.mzscope.ui.model.ScanTableModel;
 import fr.proline.mzscope.utils.Display;
 import fr.proline.studio.WindowManager;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.graphics.PlotXYAbstract;
-import fr.proline.studio.graphics.PlotLinear;
-import fr.proline.studio.graphics.BasePlotPanel;
-import fr.proline.studio.graphics.PlotPanel;
-import fr.proline.studio.graphics.PlotPanelListener;
-import fr.proline.studio.graphics.PlotStick;
-import fr.proline.studio.graphics.marker.AbstractMarker;
-import fr.proline.studio.graphics.marker.IntervalMarker;
-import fr.proline.studio.graphics.marker.LabelMarker;
-import static fr.proline.studio.graphics.marker.LabelMarker.ORIENTATION_XY_MIDDLE;
-import fr.proline.studio.graphics.marker.LineMarker;
-import fr.proline.studio.graphics.marker.PointMarker;
+import fr.proline.studio.graphics.*;
+import fr.proline.studio.graphics.marker.*;
 import fr.proline.studio.graphics.marker.coordinates.DataCoordinates;
 import fr.proline.studio.graphics.measurement.IntegralMeasurement;
 import fr.proline.studio.graphics.measurement.WidthMeasurement;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.IconManager;
-import java.awt.BorderLayout;
-import java.awt.Color;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import scala.Tuple2;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import javax.swing.AbstractSpinnerModel;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
-import javax.swing.SwingUtilities;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import scala.Tuple2;
+import java.util.*;
+
+import static fr.proline.studio.graphics.marker.LabelMarker.ORIENTATION_XY_MIDDLE;
 
 /**
  * contains the scan panel
@@ -83,6 +66,16 @@ import scala.Tuple2;
  * @author MB243701
  */
 public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPanelListener {
+
+   private class ReferenceSpectrum {
+      public final Spectrum spectrum;
+      public final Float scaleFactor;
+
+      protected ReferenceSpectrum(Spectrum spectrum, Float scaleFactor) {
+        this.spectrum = spectrum;
+        this.scaleFactor = scaleFactor;
+      }
+   }
 
    private static final Logger logger = LoggerFactory.getLogger(SpectrumPanel.class);
    private static final int OVERLAY_KEY = KeyEvent.CTRL_MASK;
@@ -96,7 +89,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
    protected LineMarker positionMarker;
 
    protected Spectrum currentScan;   
-   protected Spectrum referenceSpectrum;
+   protected ReferenceSpectrum referenceSpectrum;
 
    private boolean keepSameMsLevel = true;
    private boolean autoZoom = false;
@@ -186,7 +179,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
           public void actionPerformed(ActionEvent e) {
               JToggleButton tBtn = (JToggleButton)e.getSource();
             if (tBtn.isSelected()) {
-               _displayReferenceSpectrum(currentScan);
+              setReferenceSpectrum(currentScan, 1.0f);
             } else {
                clearReferenceSpectrumData();
             }
@@ -240,11 +233,102 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
       headerSpectrumPanel.addScanHeaderListener(this);
       spectrumToolbar.add(headerSpectrumPanel);
 
-      return spectrumToolbar;
+     spectrumToolbar.addSeparator();
+     JButton testBtn = new JButton("MS2");
+     testBtn.setToolTipText("process MS2 Spectrum");
+     testBtn.addActionListener(new ActionListener() {
+       @Override
+       public void actionPerformed(ActionEvent e) {
+         processMS2Spectrum();
+       }
+     });
+     spectrumToolbar.add(testBtn);
+
+     return spectrumToolbar;
    }
 
-    
-   protected void updateToolbar() {
+  private void processMS2Spectrum() {
+    if (currentScan.getDataType() == Spectrum.ScanType.CENTROID) {
+      double tolPpm = 20.0;
+      double[] masses = currentScan.getMasses();
+      float[] intensities = currentScan.getIntensities();
+      final SpectrumData spectrumData = currentScan.getSpectrumData();
+      List<Peak> peaks = new ArrayList<>(spectrumData.getPeaksCount());
+      List<Peak> result = new ArrayList<>(spectrumData.getPeaksCount());
+      Map<Integer, Peak> peaksByIndex = new HashMap<>();
+      for (int k = 0; k < masses.length; k++) {
+        Peak p = new Peak(masses[k], intensities[k], k);
+        peaks.add(p);
+        peaksByIndex.put(p.index, p);
+      }
+
+      peaks.sort((o1, o2) -> Float.compare(o2.intensity, o1.intensity));
+
+      for (int k = 0; k < peaks.size(); k++) {
+        Peak p = peaks.get(k);
+        if (!p.used) {
+          Tuple2<Object, TheoreticalIsotopePattern> prediction = IsotopicPatternUtils.predictIsotopicPattern(spectrumData, p.mass, tolPpm);
+          if ( (1e6*(prediction._2.monoMz() - p.mass)/p.mass) <= tolPpm ) {
+            float intensity = 0;
+            int charge = prediction._2.charge();
+            for (Tuple2 t : prediction._2.mzAbundancePairs()) {
+              Double mz = (Double) t._1;
+              Float ab = (Float) t._2;
+              int peakIdx = SpectrumUtils.getPeakIndex(spectrumData.getMzList(), mz, tolPpm);
+              if ((peakIdx != -1) && (spectrumData.getIntensityList()[peakIdx] <= p.intensity)) {
+                  intensity+= spectrumData.getIntensityList()[peakIdx];
+                  peaksByIndex.get(peakIdx).used = true;
+              } else {
+                break;
+              }
+            }
+            if ( (charge == 1) || (intensity == p.intensity) ) {
+              Peak newPeak = new Peak(p.mass, intensity, p.index);
+              result.add(newPeak);
+            } else {
+              Peak newPeak = new Peak(p.mass*charge - (charge-1)*1.00728, intensity, p.index);
+              logger.info("Move peak ({},{}) to ({},{})", p.mass, p.intensity, newPeak.mass, newPeak.intensity);
+              result.add(newPeak);
+            }
+          } else {
+            p.used = true;
+            result.add(new Peak(p));
+          }
+        }
+      }
+
+      result.sort(Comparator.comparingDouble(o -> o.mass));
+      masses = new double[result.size()];
+      intensities = new float[result.size()];
+      int k = 0;
+      for (Peak p : result) {
+        masses[k] = p.mass;
+        intensities[k++] = p.intensity;
+      }
+      Spectrum newSpectrum = new Spectrum(-1, currentScan.getRetentionTime() , masses, intensities, currentScan.getMsLevel(), Spectrum.ScanType.CENTROID);
+      setReferenceSpectrum(newSpectrum, -1.0f);
+    }
+  }
+
+  class Peak {
+
+    final double mass;
+    final float intensity;
+    final int index;
+    boolean used = false;
+
+    public Peak(Peak peak) {
+      this(peak.mass, peak.intensity, peak.index);
+    }
+
+    public Peak(double mass, float intensity, int index) {
+      this.mass = mass;
+      this.intensity = intensity;
+      this.index = index;
+    }
+  }
+
+  protected void updateToolbar() {
        m_editSignalBtn.setEnabled(true);
        m_showCentroidBtn.setEnabled(true);
     }
@@ -279,7 +363,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
                     break;                    
             }
             
-            //Call specified smoother using specieifed nbr points.
+            //Call specified smoother using specified nbr points.
             List<Tuple2> input = signal.toScalaArrayTuple(false);
             Tuple2[] param = input.toArray(new Tuple2[input.size()]);
             long step1a = System.currentTimeMillis();  //VDS time calc
@@ -322,8 +406,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
             Spectrum newSpectrum = new Spectrum(-1, currentScan.getRetentionTime() , Arrays.copyOfRange(newSpMasses, 0, realLenght), Arrays.copyOfRange(newSpIntensities, 0, realLenght), currentScan.getMsLevel(), Spectrum.ScanType.CENTROID);
             long step4 = System.currentTimeMillis();
             logger.debug("Create CentroidSignal values + display markers.Nbr real points = "+realLenght+". TIME: "+(step4-step3)+ "TOTAL == "+(step4-start));
-            referenceSpectrum = newSpectrum;
-            _displayReferenceSpectrum(newSpectrum);
+            setReferenceSpectrum(newSpectrum, 1.0f);
             m_freezeSpectrumBtn.setSelected(true);
 
         }
@@ -359,7 +442,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
       dialog.pack();
       dialog.setVisible(true);
       if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
-        spectrum = (dialog.getSpectrum() == IsotopicPredictionParamDialog.CURRENT_SPECTRUM) ? currentScan : referenceSpectrum;
+        spectrum = (dialog.getSpectrum() == IsotopicPredictionParamDialog.CURRENT_SPECTRUM) ? currentScan : referenceSpectrum.spectrum;
       }
     }
 
@@ -408,7 +491,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
         ipMarkers.add(m);
         scanPlot.addMarker(m);
         int peakIdx = SpectrumUtils.getPeakIndex(spectrum.getSpectrumData().getMzList(), mz, ppmTol);
-        if ((peakIdx != -1) && (spectrum.getSpectrumData().getIntensityList()[peakIdx] < 2.0 * ab * abundance / normAbundance)) {
+        if ((peakIdx != -1)) {
           logger.info("Peak found mz= " + mz + " expected= " + (ab * abundance / normAbundance) + " observed= " + spectrum.getSpectrumData().getIntensityList()[peakIdx]);
           PointMarker pm = new PointMarker(spectrumPlotPanel, new DataCoordinates(spectrum.getSpectrumData().getMzList()[peakIdx], spectrum.getSpectrumData().getIntensityList()[peakIdx]), CyclicColorPalette.getColor(colorIndex));
           ipMarkers.add(pm);
@@ -491,11 +574,11 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
 
       if (scan != null && scan.getMasses().length > 0) {    
         
-//         logger.info("display scan id = {}, masses length = {} ", scan.getIndex(), scan.getMasses().length);
+//       logger.info("display scan id = {}, masses length = {} ", scan.getIndex(), scan.getMasses().length);
          Color plotColor = rawFilePanel.getPlotColor(rawFilePanel.getCurrentRawfile().getName());
          ScanTableModel scanModel = new ScanTableModel(scan);
          scanModel.setColor(plotColor);
-         scanPlot = buildPlot(scan, plotColor);
+         scanPlot = buildPlot(scan, plotColor, 1.0f);
          spectrumPlotPanel.setPlot(scanPlot);
          spectrumPlotPanel.lockMinXValue();
          spectrumPlotPanel.lockMinYValue();
@@ -514,7 +597,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
          }
          
          scanPlot.addMarker(positionMarker);
-         _displayReferenceSpectrum(referenceSpectrum);
+         _displayReferenceSpectrum();
          spectrumPlotPanel.repaint();
          headerSpectrumPanel.setMzdbFileName(rawFilePanel.getCurrentRawfile().getName());
          currentScan = scan;
@@ -531,8 +614,8 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
       }
    }
 
-    private void _displayReferenceSpectrum(Spectrum spectrum) {
-        if (spectrum != null) {
+    private void _displayReferenceSpectrum() {
+        if (referenceSpectrum != null) {
             
             double xMin = 0.0, xMax = 0.0, yMin = 0.0, yMax = 0.0;
             
@@ -543,22 +626,23 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
                yMax = spectrumPlotPanel.getYAxis().getMaxValue();
             }
 
-            PlotXYAbstract plot = buildPlot(spectrum, CyclicColorPalette.getColor(5));                        
+            PlotXYAbstract plot = buildPlot(referenceSpectrum.spectrum, CyclicColorPalette.getColor(5), referenceSpectrum.scaleFactor);
             spectrumPlotPanel.addPlot(plot, true);
-            
-            if (currentScan != null) {
+            spectrumPlotPanel.lockMinYValue();
+
+          if (currentScan != null) {
+                double[] minMaxY = spectrumPlotPanel.getMinMaxPlots(spectrumPlotPanel.getYAxis());
                 spectrumPlotPanel.getXAxis().setRange(xMin, xMax);
-                spectrumPlotPanel.getYAxis().setRange(yMin, yMax);
+                spectrumPlotPanel.getYAxis().setRange(Math.min(yMin, minMaxY[0]), yMax);
             } 
             
-            referenceSpectrum = spectrum;
             spectrumPlotPanel.repaint();
         }
     }
 
     
-    private PlotXYAbstract buildPlot(Spectrum scan, Color plotColor) {
-        ScanTableModel scanModel = new ScanTableModel(scan);
+    private PlotXYAbstract buildPlot(Spectrum scan, Color plotColor, float scaleFactor) {
+        ScanTableModel scanModel = new ScanTableModel(scan, scaleFactor);
         PlotXYAbstract plot = null;
         scanModel.setColor(plotColor);
         if (scan.getDataType() == Spectrum.ScanType.CENTROID) {
@@ -584,8 +668,8 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
         }
     }
 
-    public void displayReferenceSpectrum(Spectrum spectrum) {
-      referenceSpectrum = spectrum;
+    public void setReferenceSpectrum(Spectrum spectrum, Float scaleFactor) {
+      referenceSpectrum = new ReferenceSpectrum(spectrum, scaleFactor);
       displayScan(currentScan);
     }
 

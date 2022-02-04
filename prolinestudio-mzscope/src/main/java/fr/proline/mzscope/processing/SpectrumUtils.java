@@ -16,24 +16,23 @@
  */
 package fr.proline.mzscope.processing;
 
+import com.google.common.primitives.Doubles;
+import com.google.common.primitives.Floats;
 import fr.profi.mzdb.algo.signal.filtering.SavitzkyGolaySmoother;
 import fr.profi.mzdb.algo.signal.filtering.SavitzkyGolaySmoothingConfig;
+import fr.profi.mzdb.model.DataMode;
 import fr.profi.mzdb.model.Peakel;
 import fr.profi.mzdb.model.SpectrumHeader;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.IntStream;
-
 import fr.profi.mzdb.peakeldb.PeakelDbHelper;
-import fr.proline.mzscope.model.Signal;
+import fr.proline.mzscope.model.Spectrum;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.Tuple2;
+
+import java.util.*;
+import java.util.stream.IntStream;
 
 /**
  *
@@ -262,6 +261,73 @@ public class SpectrumUtils {
             }
         }
         return new ImmutablePair(a1, a2);
+    }
+
+
+    public static Spectrum buildSpectrum(double[] mzList, float[] intensityList, double fwhm, DataMode mode) {
+
+        List<Float> xAxisData = new ArrayList<>(mzList.length);
+        List<Float> yAxisData = new ArrayList<>(mzList.length);
+        double[] leftSigma = new double[mzList.length];
+        double[] rightSigma = new double[mzList.length];
+
+        for (int count = 0; count < mzList.length; count++) {
+            if (fwhm > 0 && !mode.equals(DataMode.PROFILE)) {
+                leftSigma[count] = 2.0 * fwhm / 2.35482;
+                double x = mzList[count] - 4.0 * leftSigma[count];
+                //search for the first left value less than x
+                if (!xAxisData.isEmpty()) {
+                    int k = xAxisData.size() - 1;
+                    while (k >= 0 && xAxisData.get(k) >= x) {
+                        k--;
+                    }
+                    k++;
+                    for (; k < xAxisData.size(); k++) {
+                        x = xAxisData.get(k);
+                        double y = getGaussianPoint(x, mzList[count], intensityList[count], leftSigma[count]);
+                        yAxisData.set(k, yAxisData.get(k) + (float) y);
+                    }
+                }
+                for (; x < mzList[count]; x += leftSigma[count] / 2.0) {
+                    double y = getGaussianPoint(x, mzList[count], intensityList[count], leftSigma[count]);
+                    xAxisData.add((float) x);
+                    yAxisData.add((float) y);
+                }
+            }
+            xAxisData.add((float) mzList[count]);
+            yAxisData.add(intensityList[count]);
+            if (fwhm > 0 && !mode.equals(DataMode.PROFILE)) {
+                rightSigma[count] = 2.0 * fwhm / 2.35482;
+                double x = mzList[count] + rightSigma[count] / 2.0;
+                if (!xAxisData.isEmpty()) {
+                    int k = xAxisData.size() - 1;
+                    while (k >= 0 && xAxisData.get(k) > x) {
+                        k--;
+                    }
+                    k++;
+                    for (; k < xAxisData.size(); k++) {
+                        x = xAxisData.get(k);
+                        double y = getGaussianPoint(x, mzList[count], intensityList[count], rightSigma[count]);
+                        yAxisData.set(k, yAxisData.get(k) + (float) y);
+                    }
+                }
+                for (; x < mzList[count] + 4.0 * rightSigma[count]; x += rightSigma[count] / 2.0) {
+                    double y = getGaussianPoint(x, mzList[count], intensityList[count], rightSigma[count]);
+                    xAxisData.add((float) x);
+                    yAxisData.add((float) y);
+                }
+            }
+        }
+        Spectrum.ScanType scanType = (mode.equals(DataMode.CENTROID)) ?  Spectrum.ScanType.CENTROID : Spectrum.ScanType.PROFILE;
+        Spectrum spectrum = new Spectrum(0, 0.0f, Doubles.toArray(xAxisData), Floats.toArray(yAxisData), 1, scanType);
+        spectrum.setPrecursorMz(null);
+        spectrum.setPrecursorCharge(null);
+
+        return spectrum;
+    }
+
+    private static double getGaussianPoint(double mz, double peakMz, double intensity, double sigma) {
+        return intensity * Math.exp(-((mz - peakMz) * (mz - peakMz)) / (2.0 * sigma * sigma));
     }
 
 }

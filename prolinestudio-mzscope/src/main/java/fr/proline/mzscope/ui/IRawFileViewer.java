@@ -19,7 +19,8 @@ package fr.proline.mzscope.ui;
 import fr.proline.mzscope.model.*;
 import fr.proline.mzscope.utils.Display;
 import fr.proline.mzscope.utils.MzScopeCallback;
-import java.awt.Color;
+
+import java.awt.*;
 import java.util.Map;
 
 /**
@@ -79,8 +80,9 @@ public interface IRawFileViewer {
     *
     *
     * @param spectrum
+    * @param scaleFactor
     */
-   public void setReferenceSpectrum(Spectrum spectrum);
+   public void setReferenceSpectrum(Spectrum spectrum, Float scaleFactor);
 
    /**
     * Returns the active IChromatogram ie the chromatogram that will be used to select or iterate over scans.
@@ -105,10 +107,17 @@ public interface IRawFileViewer {
    public Color getPlotColor(String rawFilename);
    
    /**
-    * Returns the mode used by this component to display XIC
+    * Returns the mode used by this component to display XIC.
     * 
     *  @return the mode used by this component to display XIC.
     */
    public Display.Mode getChromatogramDisplayMode();
-   
+
+   /**
+    * Returns the Spectrum currently represented by this viewer.
+    *
+    * @return the Spectrum currently represented by this viewer.
+    */
+   public Spectrum getCurrentSpectrum();
+
 }

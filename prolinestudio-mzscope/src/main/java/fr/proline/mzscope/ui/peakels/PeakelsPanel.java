@@ -367,7 +367,7 @@ public class PeakelsPanel extends AbstractPeakelsPanel  {
       logger.info(Arrays.toString(spectrumData.getIntensityList()));
 
       Spectrum spectrum = new Spectrum(-1, peakel.getElutionTime(), spectrumData.getMzList(), spectrumData.getIntensityList(), 1, Spectrum.ScanType.CENTROID);
-      m_viewersController.getRawFileViewer(peakels.get(0).getRawFile(), true).setReferenceSpectrum(spectrum);
+      m_viewersController.getRawFileViewer(peakels.get(0).getRawFile(), true).setReferenceSpectrum(spectrum, 1.0f);
     }
   }
   

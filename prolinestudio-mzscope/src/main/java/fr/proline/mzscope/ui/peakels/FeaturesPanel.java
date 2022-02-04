@@ -29,17 +29,17 @@ import fr.proline.mzscope.ui.model.MzScopePreferences;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.extendedtablemodel.ImportedDataTableModel;
 import fr.proline.studio.gui.DefaultDialog;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.swing.*;
-
 import fr.proline.studio.utils.IconManager;
-import java.awt.Window;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * panel that contains the features/peaks table
@@ -103,7 +103,7 @@ public class FeaturesPanel extends AbstractPeakelsPanel {
              peakel.getLastElutionTime() + dialog.getRTTolerance());
       SpectrumData spectrumData = helper.buildSpectrumFromPeakels(coelutingPeakels, peakel);
       Spectrum spectrum = new Spectrum(-1, peakel.getElutionTime(), spectrumData.getMzList(), spectrumData.getIntensityList(), 1, Spectrum.ScanType.CENTROID);
-      m_viewersController.getRawFileViewer(peakels.get(0).getRawFile(), true).setReferenceSpectrum(spectrum);
+      m_viewersController.getRawFileViewer(peakels.get(0).getRawFile(), true).setReferenceSpectrum(spectrum, 1.0f);
     }
   }
 

@@ -21,19 +21,12 @@ import fr.profi.ms.model.TheoreticalIsotopePattern;
 import fr.profi.mzdb.algo.DotProductPatternScorer;
 import fr.profi.mzdb.algo.LegacyIsotopicPatternScorer;
 import fr.profi.mzdb.model.SpectrumData;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.StringJoiner;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Tuple2;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -128,30 +121,18 @@ public class IsotopicPatternUtils {
     }
     
     public static Tuple2<Object, TheoreticalIsotopePattern> predictIsotopicPattern(SpectrumData spectrum, double mz, double ppmTol) {
-//        long start = System.currentTimeMillis();
         double fittedPpmTol = ppmTol;
         
-//        int nearestPeakIdx = SpectrumUtils.getNearestPeakIndex(spectrum.getMzList(), mz);
-//        if (SpectrumUtils.isInRange(spectrum.getMzList()[nearestPeakIdx], mz, ppmTol) && (spectrum.getLeftHwhmList() != null)) {
-//            if (spectrum.getLeftHwhmList()[nearestPeakIdx] > 0.0f) {
-//                fittedPpmTol = (float) (1e6 * spectrum.getLeftHwhmList()[nearestPeakIdx] / spectrum.getMzList()[nearestPeakIdx]);
-//            }
-//        }
 
         Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = DotProductPatternScorer.calcIsotopicPatternHypotheses(spectrum, mz, fittedPpmTol);
         Tuple2<Object, TheoreticalIsotopePattern> bestPatternHypothese = DotProductPatternScorer.selectBestPatternHypothese(putativePatterns, 0.1);
 
-//        if (bestPatternHypothese != putativePatterns[0]) {
-//          logger.info("isotopic pattern hypothesis have been re-ranked");
-//        }
-
-        //Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = _calcIsotopicPatternHypotheses(spectrum, mz, fittedPpmTol, new WeightedDotProductScorer());
-        // AAAARRRRRRGGGG : CBy rule : if two DotProduct predictions are close, prefer higher charge state or lower mono MZ
-        //selectBestHypothesis(putativePatterns, 0.1);
-        //return putativePatterns[0];
-
-//        Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = calcIsotopicPatternHypotheses(spectrum, mz, fittedPpmTol, new ProlineLikeScorer());
-//        logger.info("Prediction took {} ms", (System.currentTimeMillis() - start));
+        double targetMz = mz;
+        while (Math.abs(1e6*(targetMz - bestPatternHypothese._2.monoMz())/targetMz) > ppmTol) {
+          targetMz = bestPatternHypothese._2.monoMz();
+          putativePatterns = DotProductPatternScorer.calcIsotopicPatternHypothesesFromCharge(spectrum, targetMz, bestPatternHypothese._2.charge(), fittedPpmTol);
+          bestPatternHypothese = DotProductPatternScorer.selectBestPatternHypothese(putativePatterns, 0.1);
+        }
 
       return bestPatternHypothese;
     }

@@ -943,7 +943,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private void setDDatasetQuantProperties(DDataset ddataset, Map<String, Long> objectTreeIdByName, EntityManager entityManagerUDS){
         if (objectTreeIdByName != null){
             for (Map.Entry<String, Long> entry: objectTreeIdByName.entrySet()) {
-                if (entry.getKey().startsWith("quantitation")) {
+                if (entry.getKey().startsWith("quantitation")|| entry.getKey().equals("proline.low_level_config")) {
                     Long objectId = entry.getValue();
                     fr.proline.core.orm.uds.ObjectTree objectTree = entityManagerUDS.find(fr.proline.core.orm.uds.ObjectTree.class, objectId);
                     ddataset.setObjectTree(objectTree);

@@ -569,7 +569,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             // load ObjectTree linked to the dataset
             if (objectTreeIdByName != null) {
                 for (Map.Entry<String, Long> entry : objectTreeIdByName.entrySet()) {
-                    if (entry.getKey().startsWith("quantitation")) {
+                    if (entry.getKey().startsWith("quantitation") || entry.getKey().equals("proline.low_level_config")) {
                         Long objectId = entry.getValue();
                         fr.proline.core.orm.uds.ObjectTree objectTree = entityManagerUDS.find(fr.proline.core.orm.uds.ObjectTree.class, objectId);
                         dataset.setObjectTree(objectTree);

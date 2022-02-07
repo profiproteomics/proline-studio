@@ -78,7 +78,7 @@ public class IonsRTTableModel implements ExtendedTableModelInterface {
         m_columnName[PEPTIDE_SEQUENCE] = "Peptide Sequence";
         m_columnName[CHARGE] = "Charge";
         m_columnName[MOZ] = "moz";
-        m_columnName[DELTA_MOZ] = "Delta moz";
+        m_columnName[DELTA_MOZ] = "Delta moz (experimental - theorical)";
         m_columnName[ELUTION_TIME_FROM] = "Time in Map " + m_mapTitleByRsmId.get(rsmIdArray[0]) + " (min)";
         for (int i = START_ELUTION_TO; i < rsmIdArray.length + ELUTION_TIME_FROM; i++) {
             m_columnName[i] = "Delta time in Map " + m_mapTitleByRsmId.get(rsmIdArray[i - ELUTION_TIME_FROM]) + " (s)";

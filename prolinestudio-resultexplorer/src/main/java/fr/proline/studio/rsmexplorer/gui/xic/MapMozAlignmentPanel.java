@@ -28,10 +28,8 @@ import fr.proline.studio.rsmexplorer.gui.xic.alignment.IonsRTTableModel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -66,7 +64,7 @@ public class MapMozAlignmentPanel extends AbstractMapAlignmentPanel {
         moz2DeltaPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 
         moz2DeltaPanel.add(m_srcTimeValueTF);
-        m_srcTimeValueTF.setEditable(false);
+//        m_srcTimeValueTF.setEditable(false);
         moz2DeltaPanel.add(new JLabel("(min) in "));
         m_sourceMapsCB.setName("cbSourceMaps");
         moz2DeltaPanel.add(m_sourceMapsCB);
@@ -151,28 +149,31 @@ public class MapMozAlignmentPanel extends AbstractMapAlignmentPanel {
             ProcessedMap pMap =  m_pMapById.get(mapId);
             if(pMap.getProcessedMapMozCalibration() != null && pMap.getProcessedMapMozCalibration().size()>0) {
                 List<MapTime> mapMozs = pMap.getProcessedMapMozCalibration().get(0).getProcessedMapMozList();
-                for(MapTime mapMoz : mapMozs){
-                    // VOIR pour regression ou avoir info !
-                    if (Math.abs(mapMoz.getTime() - timeInSeconds) < 0.1){
-                        calcDeltaMoz = mapMoz.getDeltaValue();
+                mapMozs.sort(Comparator.comparing(MapTime::getTime));
+                int index;
+
+                for(index = 0; index < mapMozs.size(); index++){
+                    if (mapMozs.get(index).getTime()> timeInSeconds){
                         break;
                     }
                 }
+
+                if(index < mapMozs.size())
+                    calcDeltaMoz = mapMozs.get(index).getDeltaValue();// VOIR pour regression lineaire
             }
             logger.debug("...result= " + calcDeltaMoz);
         } catch (Exception e) {
-            logger.error("Error while retrieving time in map alignment: " + e);
+            logger.error("Error while retrieving time in map calibration: " + e);
         }
         return calcDeltaMoz;
     }
-
 
     protected void setDataGraphic() {
         long mapIdSrc = getSelectedMapId(m_sourceMapsCB);
         ProcessedMap pMap = m_pMapById.get(mapIdSrc);
 
         String mapTitle = m_quantChannelInfo.getMapTitle(mapIdSrc);
-        String title = "Map moz Alignment for " + mapTitle;
+        String title = "MoZ calibration for " + mapTitle;
         Color color = m_quantChannelInfo.getMapColor(mapIdSrc);
 
         double crossAssignmentTimeTolerance = ((DataboxMapAlignment) this.m_dataBox).getCrossAssignmentTimeTolerance();

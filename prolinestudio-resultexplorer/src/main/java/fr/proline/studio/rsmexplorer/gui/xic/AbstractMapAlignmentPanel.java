@@ -99,6 +99,7 @@ public abstract  class AbstractMapAlignmentPanel extends HourglassPanel implemen
   protected boolean m_isInitialized = false;
 
 
+  //TODO Change typeAlignement usage ==> change to panelTitle
   public AbstractMapAlignmentPanel(AbstractDataBox dataBox, String typeAlignement) {
     this.m_dataBox = dataBox;
     m_typeAlignement = typeAlignement;
@@ -142,7 +143,7 @@ public abstract  class AbstractMapAlignmentPanel extends HourglassPanel implemen
     m_splitPane.setResizeWeight(0.5); //half half for each graphic panel
     m_splitPane.setBorder(BorderFactory.createRaisedBevelBorder());
 
-    mainPanel.add(m_alignmentGraphicPanel, BorderLayout.CENTER);
+    mainPanel.add(m_splitPane, BorderLayout.CENTER);
     return mainPanel;
   }
 
@@ -325,7 +326,7 @@ public abstract  class AbstractMapAlignmentPanel extends HourglassPanel implemen
       Double time = Double.parseDouble(m_srcTimeValueTF.getText());
       Double calcMoz = getCorrespondingData(time, getSelectedMapId(m_sourceMapsCB));
       if (calcMoz.isNaN()) {
-        m_destValueTF.setText("");
+        m_destValueTF.setText("Not Found");
       } else {
         m_destValueTF.setText(format2.format(calcMoz));
       }

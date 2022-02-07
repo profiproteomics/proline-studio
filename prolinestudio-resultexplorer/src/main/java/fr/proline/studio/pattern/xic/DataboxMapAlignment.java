@@ -72,8 +72,8 @@ public class DataboxMapAlignment extends AbstractDataBox {
         m_isMoZAlignment = isMoZAlignment;
 
         // Name of this databox
-        m_typeName = m_isMoZAlignment ?  "Map moz Alignment Plot" : "Map Alignment Plot";
-        m_description = m_isMoZAlignment ? "Graphical display of XIC Map moz Alignment." : "Graphical display of XIC Map Alignment.";
+        m_typeName = m_isMoZAlignment ?  "Moz Calibration Plot" : "Map Alignment Plot";
+        m_description = m_isMoZAlignment ? "Graphical display of XIC MoZ Calibration." : "Graphical display of XIC Map Alignment.";
 
         m_ionsRTBySourceMapId = new HashMap<>();
         // Register in parameters
@@ -132,7 +132,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
                 List<ProcessedMapMozCalibration> allMozCalib = new ArrayList<>(map.getProcessedMapMozCalibration());
 
                 String mapTitle = m_quantChannelInfo.getMapTitle(map.getId());
-                String title = "moz Alignment for "+ mapTitle;
+                String title = "MoZ calibration for "+ mapTitle;
 
                 for (ProcessedMapMozCalibration mapMozAlignment : allMozCalib) {
                     Color color = m_quantChannelInfo.getMapColor(map.getId());

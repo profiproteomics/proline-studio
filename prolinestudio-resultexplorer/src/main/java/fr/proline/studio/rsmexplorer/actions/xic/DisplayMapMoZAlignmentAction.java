@@ -36,7 +36,7 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 public class DisplayMapMoZAlignmentAction extends AbstractRSMAction {
 
     public DisplayMapMoZAlignmentAction(AbstractTree tree) {
-        super("Map moz Alignment", tree);
+        super("MoZ Calibration", tree);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class DisplayMapMoZAlignmentAction extends AbstractRSMAction {
 
         final DDataset dataset = ((DataSetData) dataSetNode.getData()).getDataset();
 
-        WindowBox wbox = WindowBoxFactory.getMapMozCalibrationWindowBox(dataset.getName(), dataset.getName() + " Map Moz Alignment");
+        WindowBox wbox = WindowBoxFactory.getMapMozCalibrationWindowBox(dataset.getName(), dataset.getName() + " Moz calibration");
         wbox.setEntryData(dataset.getProject().getId(), dataset);
 
         // open a window to display the window box

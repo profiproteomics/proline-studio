@@ -1,5 +1,8 @@
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.core.orm.msi.Peptide;
+import fr.proline.core.orm.msi.PeptideInstance;
+import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
@@ -28,22 +31,23 @@ import java.util.List;
 
 public class EditClusterDialog extends DefaultDialog {
 
-  protected static final Logger LOG = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.ptm");
+  private static final Logger LOG = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.ptm");
 
-  protected PTMCluster m_editedCluster;
-  protected List<PTMPeptideInstance> m_ptmPeptideInstances;
-  protected List<PTMPeptideInstance> m_removedPeptideInstances;
+  private PTMCluster m_editedCluster;
+  private List<PTMPeptideInstance> m_ptmPeptideInstances;
+  private List<PTMPeptideInstance> m_removedPeptideInstances;
 
   private ModifyClusterStatusPanel m_statusPanel;
-  JScrollPane m_ptmPeptidesScrollPane;
-  protected PTMPeptidesTable m_ptmPeptidesTable;
-  protected PTMPeptidesTableModel m_ptmPeptidesTableModel;
+  private JScrollPane m_ptmPeptidesScrollPane;
+  private PTMPeptidesTable m_ptmPeptidesTable;
+  private PTMPeptidesTableModel m_ptmPeptidesTableModel;
 
   private boolean m_peptidesDeleted;
   private boolean m_statusModified;
 
   public EditClusterDialog(PTMCluster cluster) {
-    super(WindowManager.getDefault().getMainWindow(), Dialog.ModalityType.APPLICATION_MODAL);
+    super(WindowManager.getDefault().getMainWindow());
+
     setTitle("Edit Cluster "+cluster.getId()+" ["+cluster.getProteinMatch().getAccession()+" / "+cluster.getRepresentativePepMatch().getPeptide().getSequence()+"]");
     setResizable(true);
 
@@ -61,10 +65,8 @@ public class EditClusterDialog extends DefaultDialog {
   }
 
   private void initComponent(){
+
     JPanel editPanel = new JPanel();
-    JSplitPane sp = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-    sp.setResizeWeight(0.5);
-    sp.setOneTouchExpandable(true);
     editPanel.setLayout(new GridBagLayout());
 
     GridBagConstraints c = new GridBagConstraints();
@@ -73,37 +75,72 @@ public class EditClusterDialog extends DefaultDialog {
     c.fill = GridBagConstraints.BOTH;
     c.gridx = 0;
     c.gridy = 0;
-    c.weightx=1;
+
+
+    JSplitPane sp = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+    sp.setResizeWeight(0.5);
+
     m_statusPanel = new ModifyClusterStatusPanel();
-    m_statusPanel.setBorder(new TitledBorder("Cluster Status "));
+    m_statusPanel.setBorder(new TitledBorder(" Cluster Status "));
     sp.setTopComponent(m_statusPanel);
 
+    JPanel peptidePanel = createCLusterPeptidesPanel();
+    sp.setBottomComponent(peptidePanel);
+
+    c.weightx = 1;
+    c.weighty = 1;
+
+    editPanel.add(sp, c);
+
+    setInternalComponent(editPanel);
+  }
+
+  private JPanel createCLusterPeptidesPanel() {
     JPanel peptidePanel = new JPanel();
-    peptidePanel.setBorder(new TitledBorder("Cluster Peptides "));
+    peptidePanel.setBorder(new TitledBorder(" Cluster Peptides "));
     peptidePanel.setLayout(new GridBagLayout());
-    GridBagConstraints c1 = new GridBagConstraints();
-    c1.anchor = GridBagConstraints.NORTHWEST;
-    c1.insets = new java.awt.Insets(5, 5, 5, 5);
-    c1.fill = GridBagConstraints.BOTH;
-    c1.gridx = 0;
-    c1.gridy = 0;
-    c1.weightx=0.2;
+    GridBagConstraints c = new GridBagConstraints();
+    c.anchor = GridBagConstraints.NORTHWEST;
+    c.fill = GridBagConstraints.BOTH;
+    c.gridx = 0;
+    c.gridy = 0;
+
     JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
     toolbar.setFloatable(false);
     JButton removePeptideButton = new JButton();
     removePeptideButton.setIcon(IconManager.getIcon(IconManager.IconType.CANCEL));
     removePeptideButton.setToolTipText("Remove selected Peptides from Cluster");
     removePeptideButton.addActionListener(e -> {
-      if(m_ptmPeptidesTable.getSelectedRowCount() == 1) {
+      if (m_ptmPeptidesTable.getSelectedRowCount() == 1) {
         removeSelectedPeptide();
       }
     });
     toolbar.add(removePeptideButton);
-    peptidePanel.add(toolbar, c1);
 
+    JPanel ptmPeptidesPanel = createPtmPeptidesPanel();
+
+    peptidePanel.add(toolbar, c);
+
+    c.gridx++;
+    c.weightx = 1;
+    c.weighty = 1;
+    peptidePanel.add(ptmPeptidesPanel, c);
+
+    return peptidePanel;
+  }
+
+  private JPanel createPtmPeptidesPanel() {
     JPanel ptmPeptidesPanel = new JPanel();
-    ptmPeptidesPanel.setBounds(0, 0, 500, 400);
-    ptmPeptidesPanel.setLayout(new BorderLayout());
+    ptmPeptidesPanel.setLayout(new GridBagLayout());
+
+    GridBagConstraints c = new GridBagConstraints();
+    c.anchor = GridBagConstraints.NORTH;
+    //c.insets = new java.awt.Insets(2, 2, 2, 2);
+    c.fill = GridBagConstraints.BOTH;
+    c.gridx = 0;
+    c.gridy = 0;
+    c.weightx = 1;
+    c.weighty = 1;
 
     // create objects
     m_ptmPeptidesScrollPane = new JScrollPane();
@@ -116,23 +153,13 @@ public class EditClusterDialog extends DefaultDialog {
     m_ptmPeptidesTable.setRowSorter(sorter);
 
     m_ptmPeptidesScrollPane.setViewportView(m_ptmPeptidesTable);
-
-//    m_ptmPeptidesTable.setFillsViewportHeight(true);
+    m_ptmPeptidesTable.setFillsViewportHeight(true);
     m_ptmPeptidesTable.setViewport(m_ptmPeptidesScrollPane.getViewport());
-    ptmPeptidesPanel.add(m_ptmPeptidesScrollPane, BorderLayout.CENTER);
 
-    c1.insets = new java.awt.Insets(2, 2, 2, 2);
-//    c1.gridwidth=1;
-    c1.gridx++;
-    c1.weightx=0.8;
-    peptidePanel.add(ptmPeptidesPanel, c1);
 
-    c.gridy++;
-    c.weighty=1;
-    sp.setBottomComponent(peptidePanel);
-    editPanel.add(sp, c);
+    ptmPeptidesPanel.add(m_ptmPeptidesScrollPane, c);
 
-    setInternalComponent(editPanel);
+    return ptmPeptidesPanel;
   }
 
   private void removeSelectedPeptide(){
@@ -248,6 +275,7 @@ public class EditClusterDialog extends DefaultDialog {
     }
 
     public void setData(List<PTMPeptideInstance> m_ptmPeptideInstances) {
+
       List<PTMCluster> clusters = new ArrayList<>();
       clusters.add(m_editedCluster);
       ((PTMPeptidesTableModel) (((CompoundTableModel) getModel()).getBaseModel())).setData(null, new ArrayList<>(m_ptmPeptideInstances),clusters,null);

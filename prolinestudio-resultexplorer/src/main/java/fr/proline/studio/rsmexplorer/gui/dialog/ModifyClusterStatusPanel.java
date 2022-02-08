@@ -20,20 +20,24 @@ public class ModifyClusterStatusPanel extends JPanel {
   private SelectLevelRadioButtonGroup m_invalidRButton;
   private ButtonGroup m_statusButtonGroup;
   private JFormattedTextField m_statusConfidenceLevelTF;
-  private JTextArea m_statusConfidenceInfoTF;
+  private JTextArea m_statusConfidenceInfoTA;
   private PTMCluster m_editedCluster;
 
   public ModifyClusterStatusPanel() {
-    initComponent();
+    setLayout(new BorderLayout());
+
+    JPanel internalPanel = createInternalPanel();
+
+    add(internalPanel, BorderLayout.CENTER);
   }
 
-  private void initComponent() {
-    setLayout(new BorderLayout());
+  private JPanel createInternalPanel() {
+
     JPanel p = new JPanel(new GridBagLayout());
 
     GridBagConstraints c = new GridBagConstraints();
     c.anchor = GridBagConstraints.NORTHWEST;
-    c.insets = new java.awt.Insets(10, 10, 2, 5);
+    c.insets = new java.awt.Insets(5, 5, 5, 5);
     c.fill = GridBagConstraints.BOTH;
     c.gridx = 0;
     c.gridy = 0;
@@ -41,12 +45,10 @@ public class ModifyClusterStatusPanel extends JPanel {
     JLabel statusTextLabel = new JLabel("Modification Cluster Status:");
     p.add(statusTextLabel, c);
 
-    c.gridy++;
     c.gridx++;
-    c.fill = GridBagConstraints.NONE;
-    c.insets = new java.awt.Insets(2, 2, 2, 2);
     m_validRButton = new SelectLevelRadioButtonGroup(p, c, CMD_VALIDATED, IconManager.getIcon(IconManager.IconType.VALIDATED));
     m_validRButton.getRadioButton().setActionCommand(CMD_VALIDATED);
+
 
     c.gridy++;
     c.gridx = 1;
@@ -56,17 +58,15 @@ public class ModifyClusterStatusPanel extends JPanel {
     m_statusButtonGroup = new ButtonGroup();
     m_statusButtonGroup.add(m_validRButton.getRadioButton());
     m_statusButtonGroup.add(m_invalidRButton.getRadioButton());
+
     c.fill = GridBagConstraints.BOTH;
     c.gridy++;
     c.gridx = 0;
-    c.weightx=0.2;
-    c.insets = new java.awt.Insets(5, 10, 2, 5);
     JLabel statConfidenceLabel = new JLabel("Status Confidence level:");
     p.add(statConfidenceLabel, c);
 
     c.gridx++;
-    c.gridwidth = 2;
-    c.weightx=0.8;
+    c.gridwidth = 4;
 
     m_statusConfidenceLevelTF = new JFormattedTextField();
     m_statusConfidenceLevelTF.setFormatterFactory(new DefaultFormatterFactory(new NumberAndNullFormatter()));
@@ -75,15 +75,20 @@ public class ModifyClusterStatusPanel extends JPanel {
 
     c.gridy++;
     c.gridx = 0;
-    c.weightx=0.2;
+    c.gridwidth = 1;
     JLabel statConfidenceInfo = new JLabel("Status Confidence description:");
     p.add(statConfidenceInfo, c);
 
     c.gridx++;
-    c.weightx=0.8;
-    m_statusConfidenceInfoTF = new JTextArea(5,20);
-    p.add(m_statusConfidenceInfoTF, c);
-    add(p, BorderLayout.CENTER);
+    c.gridwidth = 4;
+    c.weighty = 1;
+    JScrollPane scrollPane = new JScrollPane();
+    m_statusConfidenceInfoTA = new JTextArea(5,20);
+    scrollPane.setViewportView(m_statusConfidenceInfoTA);
+    p.add(scrollPane, c);
+
+
+    return p;
   }
 
   /**
@@ -107,7 +112,7 @@ public class ModifyClusterStatusPanel extends JPanel {
     }
 
     //get confidence parameters values
-    String confidenceDesc = m_statusConfidenceInfoTF.getText();
+    String confidenceDesc = m_statusConfidenceInfoTA.getText();
     Integer confidenceNotation = (m_statusConfidenceLevelTF.getValue() == null || (m_statusConfidenceLevelTF.getValue().toString().isEmpty()) ) ? null : new Integer(m_statusConfidenceLevelTF.getValue().toString());
 
     if( (confidenceDesc != null && !confidenceDesc.equals(m_editedCluster.getSelectionInfo())) || (confidenceDesc == null &&  m_editedCluster.getSelectionInfo() !=null))  {
@@ -148,7 +153,7 @@ public class ModifyClusterStatusPanel extends JPanel {
     }
 
     //Set description if common exist
-      m_statusConfidenceInfoTF.setText(clusterDescription);
+      m_statusConfidenceInfoTA.setText(clusterDescription);
 
     //Set confidence notation if common exist
       m_statusConfidenceLevelTF.setValue(clusterNotation);

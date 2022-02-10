@@ -33,6 +33,7 @@ import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.HourglassPanel;
+import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.info.InfoInterface;
 import fr.proline.studio.info.InfoToggleButton;
@@ -744,13 +745,24 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
 
                 //Verify which dataset is loaded : if Annotated PTMDataset,nothing to do otherwise should switch to annotated dataset !
                 PTMDatasetPair ptmDatasetpair = (PTMDatasetPair) m_dataBox.getData(PTMDatasetPair.class);
+                if(!ptmDatasetpair.shouldSavePTMDataset()){
+                    InfoDialog err = new InfoDialog(WindowManager.getDefault().getMainWindow(),InfoDialog.InfoType.INFO, "Save Information" ,"No modification to save...");
+                    err.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
+                    err.setButtonName(InfoDialog.BUTTON_OK, "OK");
+                    err.centerToWindow(WindowManager.getDefault().getMainWindow());
+                    err.setVisible(true);
+                    return;
+                }
+
                 boolean changeToAnnotated = false;
-                if (ptmDatasetpair.getPTMDatasetType() == PTMDatasetPair.ANNOTATED_PTM_DATASET) {
-                    m_logger.debug(" ==> SAVE IN ANNOTATED DATA OK !!! ");
-                } else {
-                    PTMDatasetPair annPtmDatasetpair = DatabaseDataManager.getDatabaseDataManager().getAnnotatedPTMDatasetSetForDS(ptmDatasetpair.getDataset().getId());
-                    String existMsg = (annPtmDatasetpair != null) ? " Annotated PTM Exist " : " Annotated do NOT Exist !";
-                    m_logger.debug("  ==> SAVE IN NOT ANNOTATED DATA NOO OK !!! " + existMsg+". Remove data of exist");
+                if (ptmDatasetpair.getPTMDatasetType() == PTMDatasetPair.RAW_PTM_DATASET) {
+                    InfoDialog err = new InfoDialog(WindowManager.getDefault().getMainWindow(),InfoDialog.InfoType.INFO, "Save Warning" ,"If annotated modification clusters already exist, it will be replace by new modification. Are you sure ? ");
+                    err.centerToWindow(WindowManager.getDefault().getMainWindow());
+                    err.setVisible(true);
+                    int choice = err.getButtonClicked();
+                    if(choice == InfoDialog.BUTTON_CANCEL)
+                        return;
+
                     DatabaseDataManager.getDatabaseDataManager().removeAllPTMDatasetsForDS(ptmDatasetpair.getDataset().getId());
                     ptmDatasetpair.changePTMDatasetType(PTMDatasetPair.ANNOTATED_PTM_DATASET);
                     DatabaseDataManager.getDatabaseDataManager().addLoadedAnnotatedPTMDatasetSet(ptmDatasetpair);
@@ -817,15 +829,6 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
                     List<PTMCluster> clusters = getSelectedPTMClusters();
                     PTMDataset ptmDataset = (PTMDataset) m_dataBox.getData(PTMDataset.class);
                     PTMDatasetPair ptmDatasetpair = (PTMDatasetPair) m_dataBox.getData(PTMDatasetPair.class);
-                    //VDS FIXME : For test only to remove
-                    if (ptmDatasetpair.getPTMDatasetType() == PTMDatasetPair.ANNOTATED_PTM_DATASET) {
-                        m_logger.debug(" MERGE IN  ANNOTATED DATA OK !!! ");
-                    } else {
-                        PTMDatasetPair annPtmDatasetpair = DatabaseDataManager.getDatabaseDataManager().getAnnotatedPTMDatasetSetForDS(ptmDataset.getDataset().getId());
-                        String existMsg = (annPtmDatasetpair != null) ? " Annotated PTM Exist " : " Annotated do NOT Exist !";
-                        m_logger.debug(" MERGE IN NOT ANNOTATED DATA NOO OK !!! " + existMsg);
-                    }
-                    m_logger.debug(" Merge " + clusters.size() + " clusters  in ");
 
                     PTMDataset ptmDS = clusters.get(0).getPTMDataset();
                     boolean merged = ptmDS.mergeClusters(clusters);
@@ -836,9 +839,22 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
                         // propagate modifications to the previous views
                         DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class,
                                 new ArrayList(clusters), REASON_MODIF.REASON_PTMCLUSTER_MERGED.getReasonValue());
+                    } else {
+                        InfoDialog err = new InfoDialog(WindowManager.getDefault().getMainWindow(),InfoDialog.InfoType.WARNING, "Merge Error" ,"Merge has not be done. Be sure selected clusters are co-localized.");
+                        err.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
+                        err.setButtonName(InfoDialog.BUTTON_OK, "OK");
+                        err.centerToWindow(WindowManager.getDefault().getMainWindow());
+                        err.setVisible(true);
                     }
+                } else {
+                    InfoDialog err = new InfoDialog(WindowManager.getDefault().getMainWindow(),InfoDialog.InfoType.INFO, "Merge Information" ,"Select more than one co-localized modification clusters.");
+                    err.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
+                    err.setButtonName(InfoDialog.BUTTON_OK, "OK");
+                    err.centerToWindow(WindowManager.getDefault().getMainWindow());
+                    err.setVisible(true);
                 }
-            });
+
+        });
         }
     }
 
@@ -871,16 +887,6 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
                     }
                 }
 
-                //Verify which dataset is loaded : if Annotated PTMDataset,nothing to do otherwise should switch to annotated dataset !
-                //VDS FIXME : For test only to remove
-                PTMDatasetPair ptmDatasetpair = (PTMDatasetPair) m_dataBox.getData(PTMDatasetPair.class);
-                if (ptmDatasetpair.getPTMDatasetType() == PTMDatasetPair.ANNOTATED_PTM_DATASET) {
-                    m_logger.debug(" ==> EDIT IN ANNOTATED DATA OK !!! ");
-                } else {
-                    PTMDatasetPair annPtmDatasetpair = DatabaseDataManager.getDatabaseDataManager().getAnnotatedPTMDatasetSetForDS(ptmDatasetpair.getDataset().getId());
-                    String existMsg = (annPtmDatasetpair != null) ? " Annotated PTM Exist " : " Annotated do NOT Exist !";
-                    m_logger.debug("  ==> EDIT IN NOT ANNOTATED DATA NOO OK !!! " + existMsg);
-                }
 
                 if(m_ptmClusterTableModel.getRowCount() > 0 && m_ptmClusterTable.getSelectedRowCount() == 1) {
                     PTMCluster cluster = getSelectedProteinPTMCluster();
@@ -905,6 +911,12 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
                             DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class, clustersToModify, reason);
 
                     }
+                } else {
+                    InfoDialog err = new InfoDialog(WindowManager.getDefault().getMainWindow(),InfoDialog.InfoType.INFO, "Edition Information" ,"Can't edit more than one modification cluster at the time. ");
+                    err.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
+                    err.setButtonName(InfoDialog.BUTTON_OK, "OK");
+                    err.centerToWindow(WindowManager.getDefault().getMainWindow());
+                    err.setVisible(true);
                 }
             });
 

@@ -165,7 +165,8 @@ public class MapMozAlignmentPanel extends AbstractMapAlignmentPanel {
         } catch (Exception e) {
             logger.error("Error while retrieving time in map calibration: " + e);
         }
-        return calcDeltaMoz;
+        //Displayed deltaMoz is inverted compare to store deltaMoz !
+        return -calcDeltaMoz;
     }
 
     protected void setDataGraphic() {

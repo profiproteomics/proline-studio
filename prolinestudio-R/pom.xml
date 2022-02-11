@@ -9,7 +9,7 @@
 
 
     <artifactId>prolinestudio-R</artifactId>
-    <packaging>nbm</packaging>
+    <packaging>jar</packaging>
 
     <name>ProlineStudio-R</name>
 
@@ -44,12 +44,7 @@
     </repositories>
 
     <dependencies>
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-netbeans-modules-settings</artifactId>
-            <version>${netbeans.version}</version>
-            <type>jar</type>
-        </dependency> 
+
         
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -73,35 +68,15 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>prolinestudio-logger</artifactId>
             <version>${project.version}</version>
+            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>prolinestudio-commons</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-util</artifactId>
-            <version>${netbeans.version}</version>
-            <type>nbm</type>
-        </dependency>
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-netbeans-api-annotations-common</artifactId>
-            <version>${netbeans.version}</version>
-            <type>nbm</type>
-        </dependency>       
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-awt</artifactId>
-            <version>${netbeans.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-windows</artifactId>
-            <version>${netbeans.version}</version>
-            <type>nbm</type>
-        </dependency>
+
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>prolinestudio-dpm</artifactId>
@@ -112,12 +87,7 @@
             <artifactId>prolinestudio-dam</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-modules</artifactId>
-            <version>${netbeans.version}</version>
-            <type>nbm</type>
-        </dependency>
+
         
         <dependency> 
             <groupId>org.slf4j</groupId>
@@ -165,30 +135,22 @@
     </dependencies>
 
 
-
-
     <build>
+
         <plugins>
+
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>nbm-maven-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <publicPackages>
-                        <publicPackage>fr.proline.studio.calc</publicPackage>
-                        <publicPackage>fr.proline.studio.python.data</publicPackage>
-                        <publicPackage>fr.proline.studio.python.interpreter</publicPackage>
-                        <publicPackage>fr.proline.studio.python.math</publicPackage>
-                        <publicPackage>fr.proline.studio.python.model</publicPackage>
-                        <publicPackage>fr.proline.studio.python.util</publicPackage>
-                        <publicPackage>fr.proline.studio.rserver</publicPackage>
-                        <publicPackage>fr.proline.studio.rserver.dialog</publicPackage>
-                        <publicPackage>fr.proline.studio.types</publicPackage>
-                        <publicPackage>org.python.core</publicPackage>
-                    </publicPackages>
-                </configuration>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <!-- Version inherited from ProFI-Pom -->
+
+
+
             </plugin>
 
         </plugins>
+
     </build>
+
+
 </project>

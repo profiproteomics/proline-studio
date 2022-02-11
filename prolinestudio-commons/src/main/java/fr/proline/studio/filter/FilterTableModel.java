@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,6 +16,8 @@
  */
 package fr.proline.studio.filter;
 
+import fr.proline.studio.WindowManager;
+import fr.proline.studio.dock.gui.InfoLabel;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.graphics.PlotInformation;
@@ -25,7 +27,6 @@ import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.DecoratedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
-import fr.proline.studio.utils.StudioExceptions;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -35,6 +36,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import org.jdesktop.swingx.JXTable;
+import org.slf4j.LoggerFactory;
 
 /**
  * Model use to filter data and/or restrain rows of another model
@@ -251,7 +253,8 @@ public class FilterTableModel extends DecoratedTableModel implements FilterTable
             }
             fireTableDataChanged();
         } catch (Exception e) {
-            StudioExceptions.logAndNotify("ProlineStudio.Commons", "Error during table filtering", e);
+            LoggerFactory.getLogger("ProlineStudio.Commons").error("Error during table filtering", e);
+            WindowManager.getDefault().getMainWindow().alert(InfoLabel.INFO_LEVEL.ERROR, "Error during table filtering", e);
         }
         
         return true;

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,13 +16,14 @@
  */
 package fr.proline.studio.rsmexplorer.actions.identification;
 
+import fr.proline.studio.rsmexplorer.actions.ExportPTMDatasetAction;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
-import org.openide.util.NbBundle;
+
 
 /**
  * Add Action (menu for sub-actions identification and aggregation)
@@ -33,7 +34,7 @@ public class ExportAction extends AbstractRSMAction {
 
     // Could be ExportXXXAction or ExportXXXJMSAction
     private AbstractRSMAction m_exportDatasetAction;
-//    private AbstractRSMAction m_exportPrideAction;
+    private AbstractRSMAction m_exportPTMDatasetAction;
     private AbstractRSMAction m_exportPeakViewSpectraAction;
     private AbstractRSMAction m_exportSpectronautSpectraAction;
     private AbstractRSMAction m_exportMzIdentMLAction;
@@ -42,7 +43,7 @@ public class ExportAction extends AbstractRSMAction {
     private JMenu m_menu;
 
     public ExportAction(AbstractTree tree) {
-        super(NbBundle.getMessage(ExportAction.class, "CTL_ExportAction"), tree);
+        super("Export", tree);
     }
 
     @Override
@@ -52,26 +53,19 @@ public class ExportAction extends AbstractRSMAction {
         m_exportDatasetAction = new ExportDatasetJMSAction(getTree());
 
         if (getTree() == IdentificationTree.getCurrentTree()) {
-//            m_exportPrideAction = new ExportRSM2PrideJMSAction(getTree());
             m_exportMzIdentMLAction = new ExportMzIdentMLAction(getTree());
         } else {
-//            m_exportPrideAction = null;
             m_exportMzIdentMLAction = null;
         }
 
         JMenuItem exportDatasetItem = new JMenuItem(m_exportDatasetAction);
         m_menu.add(exportDatasetItem);
-//        if (m_exportPrideAction != null) {
-//            JMenuItem exportPrideItem = new JMenuItem(m_exportPrideAction);
-//            m_menu.add(exportPrideItem);
-//        }
-
         if (m_exportMzIdentMLAction != null) {
             JMenuItem exportMzIdentMLItem = new JMenuItem(m_exportMzIdentMLAction);
             m_menu.add(exportMzIdentMLItem);
         }
 
-        JMenu exportMenu = new JMenu(NbBundle.getMessage(ExportAction.class, "CTL_ExportSpectraListAction"));
+        JMenu exportMenu = new JMenu("Spectra List");
         m_exportPeakViewSpectraAction = new ExportSpectraListJMSAction(getTree(), ExportSpectraListJMSAction.FormatCompatibility.PeakView);
         m_exportSpectronautSpectraAction = new ExportSpectraListJMSAction(getTree(), ExportSpectraListJMSAction.FormatCompatibility.Spectronaut);
 
@@ -84,6 +78,9 @@ public class ExportAction extends AbstractRSMAction {
         JMenuItem exportFastaItem = new JMenuItem(m_exporFastaAction);
         m_menu.add(exportFastaItem);
 
+        m_exportPTMDatasetAction = new ExportPTMDatasetAction(getTree());
+        JMenuItem exportPTMDatasetItem = new JMenuItem(m_exportPTMDatasetAction);
+        m_menu.add(exportPTMDatasetItem);
         return m_menu;
     }
 
@@ -91,9 +88,6 @@ public class ExportAction extends AbstractRSMAction {
     public void updateEnabled(AbstractNode[] selectedNodes) {
 
         m_exportDatasetAction.updateEnabled(selectedNodes);
-//        if (m_exportPrideAction != null) {
-//            m_exportPrideAction.updateEnabled(selectedNodes);
-//        }
         if (m_exportMzIdentMLAction != null) {
             m_exportMzIdentMLAction.updateEnabled(selectedNodes);
         }
@@ -102,7 +96,7 @@ public class ExportAction extends AbstractRSMAction {
         m_exportPeakViewSpectraAction.updateEnabled(selectedNodes);
 
         boolean isEnabled = m_exportDatasetAction.isEnabled()
-//                || (m_exportPrideAction != null && m_exportPrideAction.isEnabled())
+                || m_exportPTMDatasetAction.isEnabled()
                 || m_exportSpectronautSpectraAction.isEnabled()
                 || m_exportPeakViewSpectraAction.isEnabled()
                 || (m_exportMzIdentMLAction != null && m_exportMzIdentMLAction.isEnabled());

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.parameter;
 
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.gui.DefaultDialog;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -30,7 +31,6 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import org.openide.util.NbPreferences;
 
 /**
  * List of Parameters; possibility to generate a panel from this list
@@ -73,7 +73,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             return m_parametersPanel;
         }
 
-        Preferences preferences = NbPreferences.root();       
+        Preferences preferences = NbPreferences.root();
 
         m_parametersPanel = new ParametersPanel();
         m_parametersPanel.setLayout(new GridBagLayout());

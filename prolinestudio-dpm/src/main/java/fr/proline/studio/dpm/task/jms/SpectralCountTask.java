@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -75,16 +75,15 @@ public class SpectralCountTask extends AbstractJMSTask {
         final JSONRPC2Request jsonRequest = new JSONRPC2Request(JMSConnectionManager.PROLINE_PROCESS_METHOD_NAME, Integer.valueOf(m_taskInfo.getId()));
         jsonRequest.setNamedParams(createParams());
 
-        final TextMessage message = AccessJMSManagerThread.getAccessJMSManagerThread().getSession().createTextMessage(jsonRequest.toJSONString());
+        final TextMessage message = m_session.createTextMessage(jsonRequest.toJSONString());
 
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, m_serviceName);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_VERSION_KEY, m_version_2_0);
-    
-        addSourceToMessage(message);  
-        addDescriptionToMessage(message);
-        
+
+        addSupplementaryInfo(message);
+
         setTaskInfoRequest(message.getText());
 
         //  Send the Message

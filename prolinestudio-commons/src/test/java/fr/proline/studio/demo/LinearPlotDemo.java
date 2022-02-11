@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.demo;
 
+import fr.proline.studio.Exceptions;
 import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotPanel;
@@ -27,15 +28,11 @@ import fr.proline.studio.graphics.marker.coordinates.DataCoordinates;
 import fr.proline.studio.sampledata.Sample;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Insets;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -47,7 +44,7 @@ public class LinearPlotDemo extends JFrame {
 
    public LinearPlotDemo() {
       super("LinearPlot demo");
-      plotPanel = new PlotPanel(false);
+      plotPanel = new PlotPanel();
       final BasePlotPanel basePlot = plotPanel.getBasePlotPanel();
       basePlot.setPlotTitle("graph title");
       basePlot.setDrawCursor(true);

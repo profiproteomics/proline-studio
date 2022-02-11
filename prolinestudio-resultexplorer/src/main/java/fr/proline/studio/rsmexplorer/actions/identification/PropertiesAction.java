@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -17,12 +17,13 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.pattern.DataboxGeneric;
 import fr.proline.studio.rsmexplorer.gui.model.properties.IdentificationPropertiesTableModel;
 import java.util.*;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.gui.GenericPanel;
 import fr.proline.studio.rsmexplorer.gui.model.properties.AbstractPropertiesTableModel;
 import fr.proline.studio.rsmexplorer.gui.model.properties.XICPropertiesTableModel;
@@ -31,7 +32,7 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.utils.IconManager;
-import org.openide.util.NbBundle;
+
 
 /**
  * Display of the properties of a rset and rsm
@@ -43,7 +44,7 @@ import org.openide.util.NbBundle;
 public class PropertiesAction extends AbstractRSMAction {
 
     public PropertiesAction(AbstractTree tree) {
-        super(NbBundle.getMessage(PropertiesAction.class, "CTL_PropertiesAction"), tree);
+        super("Properties", tree);
     }
 
     @Override
@@ -74,9 +75,9 @@ public class PropertiesAction extends AbstractRSMAction {
         WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(name, "Properties", IconManager.IconType.DOCUMENT_LIST, true);
         model = identificationProperties ? new IdentificationPropertiesTableModel() : new XICPropertiesTableModel();
         windowBox.setEntryData(-1L, model);
-        DataBoxViewerTopComponent win2 = new DataBoxViewerTopComponent(windowBox);
-        win2.open();
-        win2.requestActive();
+        DataBoxViewerTopPanel win2 = new DataBoxViewerTopPanel(windowBox);
+        WindowManager.getDefault().getMainWindow().displayWindow(win2);
+
 
         //JPM.HACK ! Impossible to set the max number of lines differently in this case
         DataboxGeneric databoxGeneric = ((DataboxGeneric) windowBox.getEntryBox());

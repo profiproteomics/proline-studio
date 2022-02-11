@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -86,6 +86,7 @@ public class DataBoxAdjacencyMatrixChoice extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
+        //VDS : Si change de RSM ?
         final ResultSummary _rsm = (m_rsm != null) ? m_rsm : (ResultSummary) getData( ResultSummary.class);
         // register the link to the Transient Data
         linkCache(_rsm);

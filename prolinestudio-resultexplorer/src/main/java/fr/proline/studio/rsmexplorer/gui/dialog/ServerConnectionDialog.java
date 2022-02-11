@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -19,14 +19,14 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 import fr.proline.core.orm.uds.UserAccount;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.taskinfo.TaskError;
+import fr.proline.studio.dock.AbstractTopPanel;
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.gui.ConnectionDialog;
 import fr.proline.studio.pattern.DataboxDataAnalyzer;
 import fr.proline.studio.pattern.WindowBox;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
-import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
-import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
-import fr.proline.studio.rsmexplorer.TaskLogTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
+import fr.proline.studio.rsmexplorer.MzdbFilesTopPanel;
+import fr.proline.studio.rsmexplorer.TaskLogTopPanel;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.TreeUtils;
 import fr.proline.studio.rsmexplorer.gui.calc.DataAnalyzerPanel;
@@ -34,8 +34,7 @@ import java.awt.Window;
 import java.util.Iterator;
 import java.util.Set;
 import javax.swing.*;
-import org.openide.windows.TopComponent;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 
 /**
  * Dialog to Connect to the server
@@ -88,14 +87,14 @@ public class ServerConnectionDialog extends ConnectionDialog {
 
         if (m_changingUser) {
             // close all specific windows
-            Set<TopComponent> tcs = TopComponent.getRegistry().getOpened();
-            Iterator<TopComponent> itTop = tcs.iterator();
+            Set<AbstractTopPanel> tcs = WindowManager.getDefault().getMainWindow().getTopPanels();
+            Iterator<AbstractTopPanel> itTop = tcs.iterator();
             while (itTop.hasNext()) {
-                TopComponent topComponent = itTop.next();
-                if (((topComponent instanceof DataBoxViewerTopComponent) || (topComponent instanceof PropertiesTopComponent)) && !(topComponent instanceof TaskLogTopComponent)) {
+                AbstractTopPanel topComponent = itTop.next();
+                if ( (topComponent instanceof DataBoxViewerTopPanel)  && !(topComponent instanceof TaskLogTopPanel)) {
 
-                    if (topComponent instanceof DataBoxViewerTopComponent) {
-                        DataBoxViewerTopComponent databoxComponent = (DataBoxViewerTopComponent) topComponent;
+                    if (topComponent instanceof DataBoxViewerTopPanel) {
+                        DataBoxViewerTopPanel databoxComponent = (DataBoxViewerTopPanel) topComponent;
                         WindowBox winBox = databoxComponent.getWindowBox();
                         if (winBox.getEntryBox() instanceof DataboxDataAnalyzer) {
                             DataboxDataAnalyzer analyzer = (DataboxDataAnalyzer) winBox.getEntryBox();
@@ -106,7 +105,8 @@ public class ServerConnectionDialog extends ConnectionDialog {
                         }
                     }
 
-                    topComponent.close();
+                    WindowManager.getDefault().getMainWindow().closeWindow(topComponent);
+
 
                 }
             }
@@ -212,9 +212,9 @@ public class ServerConnectionDialog extends ConnectionDialog {
 
                     if (m_serverURLTextField != null && m_serverURLTextField.isEnabled()) {
 
-                        if (MzdbFilesTopComponent.getExplorer() != null) {
-                            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().initTree();
-                            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().restoreTree(TreeUtils.TreeType.SERVER);
+                        if (MzdbFilesTopPanel.getExplorer() != null) {
+                            MzdbFilesTopPanel.getExplorer().getTreeFileChooserPanel().initTree();
+                            MzdbFilesTopPanel.getExplorer().getTreeFileChooserPanel().restoreTree(TreeUtils.TreeType.SERVER);
                         }
                         
                     }

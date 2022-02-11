@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -21,7 +21,7 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import org.openide.util.NbBundle;
+
 
 /**
  * Action to display the experimental design: menu with exp. design parameters
@@ -33,11 +33,12 @@ public class DisplayExperimentalDesignAction extends AbstractRSMAction {
 
     private AbstractRSMAction m_xicParamAction;
     private AbstractRSMAction m_mapAlignmentAction;
+    private AbstractRSMAction m_mapMozAlignmentAction;
 
     private JMenu m_menu;
 
     public DisplayExperimentalDesignAction(AbstractTree tree) {
-        super(NbBundle.getMessage(DisplayExperimentalDesignAction.class, "CTL_DisplayExperimentalDesignAction"), tree);
+        super("Display Exp. Design", tree);
     }
 
     @Override
@@ -46,12 +47,15 @@ public class DisplayExperimentalDesignAction extends AbstractRSMAction {
     
         m_xicParamAction = new DisplayXicParamAction(getTree());
         m_mapAlignmentAction = new DisplayMapAlignmentAction(getTree());
+        m_mapMozAlignmentAction = new DisplayMapMoZAlignmentAction(getTree());
 
         JMenuItem xicParamItem = new JMenuItem(m_xicParamAction);
         JMenuItem mapAlignItem = new JMenuItem(m_mapAlignmentAction);
-        
+        JMenuItem mapMoZAlignItem = new JMenuItem(m_mapMozAlignmentAction);
+
         m_menu.add(xicParamItem);
         m_menu.add(mapAlignItem);
+        m_menu.add(mapMoZAlignItem);
 
         return m_menu;
     }
@@ -61,9 +65,9 @@ public class DisplayExperimentalDesignAction extends AbstractRSMAction {
 
         m_xicParamAction.updateEnabled(selectedNodes);
         m_mapAlignmentAction.updateEnabled(selectedNodes);
+        m_mapMozAlignmentAction.updateEnabled(selectedNodes);
         
-        
-        boolean isEnabled = m_xicParamAction.isEnabled() ||  m_mapAlignmentAction.isEnabled();
+        boolean isEnabled = m_xicParamAction.isEnabled() ||  m_mapAlignmentAction.isEnabled() ||m_mapMozAlignmentAction.isEnabled();
         setEnabled(isEnabled);
         m_menu.setEnabled(isEnabled);
     }

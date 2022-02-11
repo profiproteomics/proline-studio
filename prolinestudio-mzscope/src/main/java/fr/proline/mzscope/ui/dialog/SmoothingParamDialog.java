@@ -30,6 +30,7 @@ public class SmoothingParamDialog extends DefaultDialog{
         public final static String SG_SMOOTHER = "Savitzky-Golay Smoother";
         public final static String BOTH_SMOOTHER = "All Smoothers";
         String[] methods = {PARTIAL_SG_SMOOTHER, SG_SMOOTHER, BOTH_SMOOTHER};
+
         public SmoothingParamDialog(Window parent) {
             super(parent, Dialog.ModalityType.APPLICATION_MODAL);
             setTitle("Smooting parameters ");

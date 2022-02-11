@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,44 +16,28 @@
  */
 package fr.proline.studio.rsmexplorer.actions;
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.ChangePasswordDialog;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.JOptionPane;
-import org.openide.awt.ActionID;
-import org.openide.awt.ActionReference;
-import org.openide.awt.ActionReferences;
-import org.openide.awt.ActionRegistration;
-import org.openide.util.ContextAwareAction;
-import org.openide.util.Lookup;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
 
 /**
- * Action to connect or disconnect to a UDS database
+ * Action to connect change password
  *
  * @author jm235353
  */
-@ActionID(category = "File", id = "fr.proline.studio.rsmexplorer.actions.ChangePasswordAction")
-@ActionRegistration(displayName = "#CTL_ChangePasswordAction")
-@ActionReferences({
-    @ActionReference(path = "Menu/File", position = 200)
-})
-@NbBundle.Messages("CTL_ChangePasswordAction=Change password")
-public class ChangePasswordAction extends AbstractAction implements ContextAwareAction {
+
+public class ChangePasswordAction extends AbstractAction {
 
     public ChangePasswordAction() {
-        super(NbBundle.getMessage(ChangePasswordAction.class, "CTL_ChangePasswordAction"));
+        super("Change Password");
     }
 
-    @Override
-    public Action createContextAwareInstance(Lookup lkp) {
-        return new ChangePasswordAction();
-    }
 
     @Override
     public void actionPerformed(ActionEvent e) {

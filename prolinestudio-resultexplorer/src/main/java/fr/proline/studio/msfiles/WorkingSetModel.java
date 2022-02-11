@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.msfiles;
 
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.msfiles.WorkingSetEntry.Location;
 import fr.proline.studio.rsmexplorer.gui.dialog.ApplicationSettingsDialog;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.openide.util.NbPreferences;
+
 
 /**
  *

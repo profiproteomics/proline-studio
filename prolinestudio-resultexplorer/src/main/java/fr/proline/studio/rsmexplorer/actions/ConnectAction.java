@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -17,37 +17,26 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dpm.ServerConnectionManager;
+import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.InfoDialog;
-import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.ServerConnectionDialog;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.SwingUtilities;
-import org.openide.awt.ActionID;
-import org.openide.awt.ActionReference;
-import org.openide.awt.ActionReferences;
-import org.openide.awt.ActionRegistration;
-import org.openide.util.ContextAwareAction;
-import org.openide.util.Lookup;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
 
 /**
  * Action to connect or disconnect to a UDS database
  * @author jm235353
  */
 
-@ActionID(category = "File", id = "fr.proline.studio.rsmexplorer.actions.ConnectAction")
-@ActionRegistration(displayName = "#CTL_ConnectAction")
-@ActionReferences({
-    @ActionReference(path = "Menu/File", position = 100)
-})
-@NbBundle.Messages("CTL_ConnectAction=Connect...")
-public class ConnectAction  extends AbstractAction implements ContextAwareAction {
+
+public class ConnectAction  extends AbstractAction {
 
     private static ConnectAction m_action = null;
     
@@ -60,6 +49,13 @@ public class ConnectAction  extends AbstractAction implements ContextAwareAction
         setConnectionType(true, true);
     }
 
+    public static ConnectAction getAction() {
+        if (m_action == null) {
+            m_action = new ConnectAction();
+        }
+        return m_action;
+    }
+
     
     public final static void setConnectionType(boolean connectAction, boolean enabled) {
         m_connectAction = connectAction;
@@ -67,17 +63,13 @@ public class ConnectAction  extends AbstractAction implements ContextAwareAction
         if (m_action != null) {
             m_action.setEnabled(enabled);
             if (connectAction) {
-                m_action.putValue(Action.NAME, NbBundle.getMessage(ConnectAction.class, "CTL_ConnectAction"));
+                m_action.putValue(Action.NAME, "Connect...");
             } else {
                 m_action.putValue(Action.NAME, "Change User...");
             }
         }
     }
 
-    @Override
-    public Action createContextAwareInstance(Lookup lkp) {
-        return new ConnectAction();
-    }
     
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -122,12 +114,12 @@ public class ConnectAction  extends AbstractAction implements ContextAwareAction
             // check if there is tasks being done which ask not to disconnect/close the application
             if (TaskInfoManager.getTaskInfoManager().askBeforeExitingApp()) {
                 InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "You should not disconnect. Important tasks are being done.\nAre you sure you want to disconnect ?");
-                exitDialog.setButtonName(OptionDialog.BUTTON_OK, "Yes");
-                exitDialog.setButtonName(OptionDialog.BUTTON_CANCEL, "No");
+                exitDialog.setButtonName(DefaultDialog.BUTTON_OK, "Yes");
+                exitDialog.setButtonName(DefaultDialog.BUTTON_CANCEL, "No");
                 exitDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
                 exitDialog.setVisible(true);
 
-                if (exitDialog.getButtonClicked() == OptionDialog.BUTTON_CANCEL) {
+                if (exitDialog.getButtonClicked() == DefaultDialog.BUTTON_CANCEL) {
                     // No clicked
                     return;
                 }

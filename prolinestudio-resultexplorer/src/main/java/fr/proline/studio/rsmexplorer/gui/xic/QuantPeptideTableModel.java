@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -27,6 +27,7 @@ import fr.proline.core.orm.msi.dto.DQuantPeptide;
 import fr.proline.core.orm.msi.dto.MasterQuantProteinSetProperties;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.dam.data.SelectLevelEnum;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -44,6 +45,7 @@ import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.rsmexplorer.DataBoxViewerManager;
+import fr.proline.studio.rsmexplorer.DataBoxViewerManager.REASON_MODIF;
 import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
@@ -672,8 +674,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         return (f != null); // a peptide with an elutime is linked to a PeptideIon and MasterQuantComponent
     }
 
-    
-    public ArrayList<DMasterQuantPeptide> listToModifyForValidateModifications(ArrayList selectedRows, XicStatusRenderer.SelectLevelEnum cmdSelectLevel) {
+
+    public ArrayList<DMasterQuantPeptide> listToModifyForValidateModifications(ArrayList selectedRows, SelectLevelEnum cmdSelectLevel) {
         if (selectedRows.isEmpty()) {
             return null;
         }
@@ -700,10 +702,10 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                         break;
                     case RESET_AUTO:
                         if (thisSelectLevel == 0) {//DESELECTED_MANUAL
-                            masterQuantPeptide.setSelectionLevel(XicStatusRenderer.SelectLevelEnum.DESELECTED_AUTO.getIntValue());//DESELECTED_AUTO
+                            masterQuantPeptide.setSelectionLevel(SelectLevelEnum.DESELECTED_AUTO.getIntValue());//DESELECTED_AUTO
                             listToModify.add(masterQuantPeptide);
                         } else if (thisSelectLevel == 3) {//SELECTED_MANUAL
-                            masterQuantPeptide.setSelectionLevel(XicStatusRenderer.SelectLevelEnum.SELECTED_AUTO.getIntValue());//SELECTED_AUTO
+                            masterQuantPeptide.setSelectionLevel(SelectLevelEnum.SELECTED_AUTO.getIntValue());//SELECTED_AUTO
                             listToModify.add(masterQuantPeptide);
                         }
                         break;
@@ -716,9 +718,9 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         }
         return listToModify;
     }
-    
+
     public void validateModifications(final XicPeptidePanel panel,  ArrayList<DMasterQuantPeptide> listToModify) {
-        
+
         if (listToModify == null) {
             panel.modifyStatusActionFinished(true, null);
             return;
@@ -742,7 +744,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
                 // propagate modifications to the previous views
                 DataBoxViewerManager.loadedDataModified(m_projectId, m_databox.getRsetId(), m_databox.getRsmId(), DMasterQuantProteinSet.class,
-                        masterQuantProteinSetModified, DataBoxViewerManager.REASON_PEPTIDE_SUPPRESSED);
+                        masterQuantProteinSetModified, REASON_MODIF.REASON_PEPTIDE_SUPPRESSED.getReasonValue());
 
                 fireTableDataChanged();
 
@@ -758,22 +760,22 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     }
 
     public XicStatusRenderer.SelectLevel getSelectionLevelFor(DMasterQuantPeptide peptide) {
-        XicStatusRenderer.SelectLevelEnum level = XicStatusRenderer.SelectLevelEnum.UNKNOWN;
+        SelectLevelEnum level = SelectLevelEnum.UNKNOWN;
 
         if (m_mqProtSetContext != null && !m_selectionLevelInContext.isEmpty()) {
             Integer value = m_selectionLevelInContext.get(peptide.getId());
             if (value != null) {
-                level = XicStatusRenderer.SelectLevelEnum.valueOf(m_selectionLevelInContext.get(peptide.getId()));
+                level = SelectLevelEnum.valueOf(m_selectionLevelInContext.get(peptide.getId()));
 //                logger.debug(" use masterQuantProtein specific selection for peptide " + peptide.getId() + ": " + level.toString());
             }
 
         }
-        if (level == null || level.equals(XicStatusRenderer.SelectLevelEnum.UNKNOWN)) {
-            level = XicStatusRenderer.SelectLevelEnum.valueOf(peptide.getSelectionLevel());
+        if (level == null || level.equals(SelectLevelEnum.UNKNOWN)) {
+            level = SelectLevelEnum.valueOf(peptide.getSelectionLevel());
         }
 
-        return new XicStatusRenderer.SelectLevel(level, XicStatusRenderer.SelectLevelEnum.valueOf(peptide.getSelectionLevel()));
- 
+        return new XicStatusRenderer.SelectLevel(level, SelectLevelEnum.valueOf(peptide.getSelectionLevel()));
+
     }
 
     @Override
@@ -1145,9 +1147,9 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 if (selectLevelByMqPeps != null) {
                     for (DMasterQuantPeptide mqPep : m_quantPeptides) {
                         int globalSelectLevel = mqPep.getSelectionLevel();
-                        m_selectionLevelInContext.put(mqPep.getId(), selectLevelByMqPeps.getOrDefault(mqPep.getId(), XicStatusRenderer.SelectLevelEnum.UNKNOWN.getIntValue()));
+                        m_selectionLevelInContext.put(mqPep.getId(), selectLevelByMqPeps.getOrDefault(mqPep.getId(), SelectLevelEnum.UNKNOWN.getIntValue()));
                         m_globalLevel.put(mqPep.getId(), globalSelectLevel);
-                    
+
                     }
                 }
             }

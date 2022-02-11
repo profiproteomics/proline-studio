@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -44,6 +44,15 @@ public class MemoryReference implements Comparable<MemoryReference> {
         if (cmp != 0) {
             return cmp;
         }
+
+        if (m_clientName == null && o.m_clientName == null){
+            return 0;
+        } else if(m_clientName == null){
+            return 1;
+        } else if(o.m_clientName == null){
+            return -1;
+        }
+
         return m_clientName.compareTo(o.m_clientName);
     }
 

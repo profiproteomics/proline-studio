@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.demo;
 
+import fr.proline.studio.Exceptions;
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotPanel;
 import fr.proline.studio.graphics.PlotScatter;
@@ -23,9 +24,6 @@ import fr.proline.studio.sampledata.Sample;
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.TablePopupMenu;
 import java.awt.BorderLayout;
-import java.awt.Insets;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -34,7 +32,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -48,7 +45,7 @@ public class ScatterPlotDemo extends JFrame {
       super("ScatterPlot demo");
       JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
       split.setDividerLocation(150);
-      plotPanel = new PlotPanel(false);
+      plotPanel = new PlotPanel();
       Sample sample = new Sample(3000);
       final BasePlotPanel basePlot = plotPanel.getBasePlotPanel();
       PlotScatter scatter = new PlotScatter(basePlot, sample, null, 0, 3);

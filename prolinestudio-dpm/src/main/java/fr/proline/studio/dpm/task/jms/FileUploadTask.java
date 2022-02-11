@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -20,6 +20,7 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Message;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
+import fr.proline.studio.Exceptions;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
@@ -39,7 +40,6 @@ import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
-import org.openide.util.Exceptions;
 
 /**
  * Upload Files for MaxQuant Result : Specific for MAxQuant by searching opnly
@@ -89,7 +89,7 @@ public class FileUploadTask extends AbstractJMSTask {
 
         InputStream in = null;
         try {
-            final BytesMessage message = AccessJMSManagerThread.getAccessJMSManagerThread().getSession().createBytesMessage();
+            final BytesMessage message = m_session.createBytesMessage();
 
             File uploadFile = null;
 
@@ -119,8 +119,7 @@ public class FileUploadTask extends AbstractJMSTask {
                 message.setStringProperty("dest_folder_path", m_mountLabel + m_destinationPath);
             }
 
-            addSourceToMessage(message);
-            addDescriptionToMessage(message);
+            addSupplementaryInfo(message);
 
             in = new FileInputStream(uploadFile);
             BufferedInputStream inBuf = new BufferedInputStream(in);

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -72,7 +72,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.TableColumnExt;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.rsmexplorer.actions.xic.*;
 import fr.proline.studio.pattern.xic.*;
 import fr.proline.core.orm.uds.dto.DDataset;
@@ -97,7 +97,6 @@ import javax.swing.table.TableCellRenderer;
  */
 public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
 
-    public final static int NB_MAX_COLUMN_CONTROL = 20;
     private AbstractDataBox m_dataBox;
 
     private JScrollPane m_proteinSetScrollPane;
@@ -208,7 +207,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
                             }
 
-                            DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), DMasterQuantProteinSet.class, masterQuantProteinSetModified, DataBoxViewerManager.REASON_PROTEINS_REFINED);
+                            DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), DMasterQuantProteinSet.class, masterQuantProteinSetModified, DataBoxViewerManager.REASON_MODIF.REASON_PROTEINS_REFINED.getReasonValue());
                         }
                     };
 
@@ -354,7 +353,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         m_proteinSetScrollPane = new JScrollPane();
 
         m_quantProteinSetTable = new QuantProteinSetTable();
-        m_quantProteinSetTable.setModel(new CompoundTableModel(new QuantProteinSetTableModel((LazyTable) m_quantProteinSetTable), true));
+        m_quantProteinSetTable.setModel(new CompoundTableModel(new QuantProteinSetTableModel(m_quantProteinSetTable), true));
         CustomColumnControlButton customColumnControl = new CustomColumnControlButton(m_quantProteinSetTable);
         m_quantProteinSetTable.setColumnControl(customColumnControl);
         // hide the id column
@@ -430,12 +429,12 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     }
     private boolean m_hideFirstTime = true;
 
-    public void dataModified(ArrayList modificationsList, int reason) {
+    public void dataModified(ArrayList modificationsList, byte reason) {
 
         boolean modification = m_quantProteinSetTable.dataModified(modificationsList);
 
         if (modification) {
-            if (reason == DataBoxViewerManager.REASON_PEPTIDE_SUPPRESSED) {
+            if (DataBoxViewerManager.REASON_MODIF.isReasonDefine(DataBoxViewerManager.REASON_MODIF.REASON_PEPTIDE_SUPPRESSED, reason)) {
                 m_refineProteinsPanel.setLocation(getX() + 20, getY() + 20);
                 m_refineProteinsPanel.setVisible(true);
             }
@@ -544,9 +543,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
             int defaultIndex = 0;
 
-            if (!overviewColumnVisible) {
-                defaultIndex = 0;
-            } else {
+            if (overviewColumnVisible) {
                 switch (overviewType) {
                     case QuantProteinSetTableModel.COLTYPE_ABUNDANCE:
                         defaultIndex = 2;

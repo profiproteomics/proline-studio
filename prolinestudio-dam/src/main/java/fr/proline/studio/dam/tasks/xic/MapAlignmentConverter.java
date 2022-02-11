@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -108,7 +108,7 @@ public class MapAlignmentConverter {
         int i = 0;
         for(MapTime mapTime: mapTimeList){
             times[i] = mapTime.getTime();
-            deltaTimes[i] = mapTime.getDeltaTime();
+            deltaTimes[i] = mapTime.getDeltaValue();
             i++;
         }
         return refTime + linearInterpolation(refTime, times, deltaTimes);

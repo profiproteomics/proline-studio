@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -237,7 +237,7 @@ class MetricsDetailsPanel extends JPanel {
         
         toolbar.add(Box.createHorizontalGlue());
         this.add(toolbar, BorderLayout.NORTH);
-        PlotPanel panel = new PlotPanel(false);
+        PlotPanel panel = new PlotPanel();
         m_plotPanel = panel.getBasePlotPanel();
         this.add(panel, BorderLayout.CENTER);
     }

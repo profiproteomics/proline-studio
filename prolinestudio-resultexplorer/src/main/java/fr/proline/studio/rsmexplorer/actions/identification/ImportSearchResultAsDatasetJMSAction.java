@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -42,8 +42,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 
 /**
  *
@@ -58,7 +58,7 @@ public class ImportSearchResultAsDatasetJMSAction extends AbstractRSMAction {
     private static final String GENERAL_APPLICATION_SETTINGS = "General Application Settings";
 
     public ImportSearchResultAsDatasetJMSAction(AbstractTree tree) {
-        super(NbBundle.getMessage(ImportSearchResultAsDatasetJMSAction.class, "CTL_AddSearchResult"), tree);
+        super("Import Search Result...", tree);
     }
 
     @Override

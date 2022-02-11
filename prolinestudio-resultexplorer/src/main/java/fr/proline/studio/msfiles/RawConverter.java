@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -19,7 +19,8 @@ package fr.proline.studio.msfiles;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
+import fr.proline.studio.rsmexplorer.MzdbFilesTopPanel;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
@@ -99,8 +100,8 @@ public class RawConverter implements Runnable {
                                             outputDirectory = outputDirectory.getParentFile();
                                         }
                                        
-                                        MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandMultipleTreePath(directories);
-                                        MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
+                                        MzdbFilesTopPanel.getExplorer().getLocalFileSystemView().expandMultipleTreePath(directories);
+                                        MzdbFilesTopPanel.getExplorer().getLocalFileSystemView().updateTree();
                                         
                                     } catch (NoSuchFileException ex) {
                                         ;

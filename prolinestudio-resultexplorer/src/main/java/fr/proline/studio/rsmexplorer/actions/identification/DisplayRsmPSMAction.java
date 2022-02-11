@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -21,6 +21,7 @@ package fr.proline.studio.rsmexplorer.actions.identification;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -28,11 +29,11 @@ import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import org.openide.util.NbBundle;
+
 
 /**
  * Display PSM of Identification Summary (Rsm)
@@ -41,7 +42,7 @@ import org.openide.util.NbBundle;
 public class DisplayRsmPSMAction extends AbstractRSMAction {
 
    public DisplayRsmPSMAction(AbstractTree tree) {
-       super(NbBundle.getMessage(DisplayRsmPeptidesAction.class, "CTL_DisplayRsmPSMAction"), tree);
+       super("PSMs", tree);
    }
 
     @Override
@@ -78,9 +79,8 @@ public class DisplayRsmPSMAction extends AbstractRSMAction {
             wbox.setEntryData(dataSet.getProject().getId(), rsm);
 
             // open a window to display the window box
-            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-            win.open();
-            win.requestActive();
+            DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+            WindowManager.getDefault().getMainWindow().displayWindow(win);
         } else {
             
 
@@ -104,9 +104,8 @@ public class DisplayRsmPSMAction extends AbstractRSMAction {
                     
                     final WindowBox wbox = WindowBoxFactory.getRsmPSMWindowBox(dataSet.getName(), false, mergedData);
                     // open a window to display the window box
-                    DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                    win.open();
-                    win.requestActive();
+                    DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+                    WindowManager.getDefault().getMainWindow().displayWindow(win);
                     
                     // prepare window box
                     wbox.setEntryData(dataSet.getProject().getId(), rsm);

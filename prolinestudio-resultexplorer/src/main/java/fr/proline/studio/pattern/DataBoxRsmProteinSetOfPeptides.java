@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -46,7 +46,7 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
 
          // Name of this databox
         m_typeName = "Protein Set";
-        m_description = "All Protein Sets coresponding to a Peptide Instance";
+        m_description = "All Protein Sets corresponding to a Peptide Instance";
 
         // Register in parameters
 
@@ -174,13 +174,12 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
     }
 
     @Override
-    public Class[] getImportantInParameterClass() {
-        Class[] classList = {DProteinSet.class};
-        return classList;
+    public Class[] getDataboxNavigationOutParameterClasses() {
+        return new Class[]{DProteinSet.class};
     }
 
     @Override
-    public String getImportantOutParameterValue() {
+    public String getDataboxNavigationDisplayValue() {
         DProteinSet p = (DProteinSet) getData(DProteinSet.class);
         if (p != null) {
             DProteinMatch pm = p.getTypicalProteinMatch();

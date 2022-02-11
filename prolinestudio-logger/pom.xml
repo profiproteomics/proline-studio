@@ -10,7 +10,7 @@
 
     <groupId>fr.proline</groupId>
     <artifactId>prolinestudio-logger</artifactId>
-    <packaging>nbm</packaging>
+    <packaging>pom</packaging>
 
     <name>ProlineStudio-Logger</name>
 
@@ -36,26 +36,4 @@
         </dependency> 
     </dependencies>
 
-    <build>
-        <plugins>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>nbm-maven-plugin</artifactId>
-                <!-- Version inherited from ProlineStudio-parent -->
-                <extensions>true</extensions>
-                <configuration>
-                    <publicPackages>
-                        <publicPackage>org.slf4j</publicPackage>
-                        <publicPackage>org.slf4j.helpers</publicPackage>
-                        <publicPackage>org.slf4j.spi</publicPackage>
-                        <publicPackage>org.slf4j.impl</publicPackage>
-                        <publicPackage>ch.qos.logback.core.*</publicPackage>
-                        <publicPackage>ch.qos.logback.classic.*</publicPackage>
-                    </publicPackages>
-                </configuration>
-            </plugin>
-
-        </plugins>
-    </build>
 </project>

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -80,7 +80,10 @@ public class PurgeConsumer {
     public void clearMessage(String msgIdToRemove) {
         
         final String selectorString = "JMSMessageID = \'" +msgIdToRemove+"\'";        
-                
+
+        //JPM.DOCK
+
+        /*
         new Thread() {
 
             @Override
@@ -108,7 +111,7 @@ public class PurgeConsumer {
                         if (replyDestination == null) {
                             m_logger.warn("Message has no JMSReplyTo Destination : Cannot send JSON Response to Client");
                         } else {
-                            /* Try to send a JSON-RPC Error to client Producer */
+                            // Try to send a JSON-RPC Error to client Producer
                             final JSONRPC2Error jsonError = new JSONRPC2Error(JMSConnectionManager.JMS_CANCELLED_TASK_ERROR_CODE, "JMS message was cancelled ");
                             final JSONRPC2Response jsonResponse = new JSONRPC2Response(jsonError, null);
                             // Step 7. Create a Text Message
@@ -165,6 +168,6 @@ public class PurgeConsumer {
                 }
             } //End Run
         }.start();
-        
+            */
     }
 }

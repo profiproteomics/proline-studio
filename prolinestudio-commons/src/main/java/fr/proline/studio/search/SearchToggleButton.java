@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.search;
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterMapInterface;
 import fr.proline.studio.filter.FilterTableModelInterface;
@@ -28,7 +29,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.JToggleButton;
 import org.jdesktop.swingx.JXTable;
-import org.openide.windows.WindowManager;
 
 /**
  * Button to add to start a search.

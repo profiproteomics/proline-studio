@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.graphics;
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.graphics.core.GraphicsToolbarPanel;
 import fr.proline.studio.extendedtablemodel.LockedDataModel;
 import fr.proline.studio.export.ExportButton;
@@ -41,7 +42,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
-import org.openide.windows.WindowManager;
+
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
@@ -93,7 +94,7 @@ public class MonoGraphicsPanel extends GraphicsToolbarPanel {
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(0, 5, 0, 5);
 
-        PlotPanel panel = new PlotPanel(false);
+        PlotPanel panel = new PlotPanel();
         m_plotPanel = panel.getBasePlotPanel();
         m_plotPanel.setPlotToolbarListener(this);
         JPanel selectPanel = createSelectPanel();

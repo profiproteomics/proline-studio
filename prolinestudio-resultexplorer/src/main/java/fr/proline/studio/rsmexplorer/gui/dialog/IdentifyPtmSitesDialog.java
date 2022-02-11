@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -23,15 +23,16 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 
 public class IdentifyPtmSitesDialog extends DefaultDialog {
 
-  private List<Ptm> m_ptms;
+  private final List<Ptm> m_ptms;
   private List<Ptm> m_selectedPtms;
-
+  private HashMap<String, Ptm> m_ptmsByFullName;
   private JLabel m_clusteringMethod;
   private JRadioButton m_clusterizePartiallyIsomorph;
   private JRadioButton m_clusterizeIsomorphOnly;
@@ -46,14 +47,22 @@ public class IdentifyPtmSitesDialog extends DefaultDialog {
     setHelpHeaderText("Select the list of modifications of interest <br>" +
             "(other modifications will be ignored during clustering) and set <br>" +
             "the method's parameters that will be used to clusterize modification sites.</li></ul>");
+
+    initPTMsList();
     initInternalPanel();
-    pack();
+    //pack();
+    setResizable(true);
+  }
+
+  private void initPTMsList(){
+    m_selectedPtms = new ArrayList<>(m_ptms);
+    m_ptmsByFullName = new HashMap<>();
+    m_ptms.forEach((nextPtm) -> {
+        m_ptmsByFullName.put(nextPtm.getFullName(),nextPtm);
+      });
   }
 
   private void initInternalPanel() {
-
-    JPanel parametersPanel = new JPanel();
-    parametersPanel.setLayout(new java.awt.GridBagLayout());
 
     JPanel clusteringMethodPanel = new JPanel(new GridBagLayout());
     clusteringMethodPanel.setBorder(BorderFactory.createTitledBorder("Clustering method"));
@@ -85,8 +94,11 @@ public class IdentifyPtmSitesDialog extends DefaultDialog {
 
     m_clusterizePartiallyIsomorph.setSelected(true);
 
+    JPanel parametersPanel = new JPanel();
+    parametersPanel.setLayout(new java.awt.GridBagLayout());
+
     JPanel ptmOIPanel = new JPanel(new GridBagLayout());
-    ptmOIPanel.setBorder(BorderFactory.createTitledBorder("PTMs of interest"));
+    //ptmOIPanel.setBorder(BorderFactory.createTitledBorder("PTMs of interest"));
     c = new GridBagConstraints();
     c.gridx = 0;
     c.gridy = 0;
@@ -94,18 +106,38 @@ public class IdentifyPtmSitesDialog extends DefaultDialog {
     c.anchor = GridBagConstraints.NORTHWEST;
     c.fill = GridBagConstraints.HORIZONTAL;
     c.insets = new java.awt.Insets(5, 15, 5, 5);
+
+    final JCheckBox allSelectedChkBox = new JCheckBox("select/unselect all",true);
+    allSelectedChkBox.addActionListener(evt -> {
+        boolean isSelectAll = ((JCheckBox) evt.getSource()).isSelected();
+        if (ptmOIPanel.getComponentCount() > 0) {
+            Component[] allCompo = ptmOIPanel.getComponents();
+            for (int i = 0; i < allCompo.length; i++) {
+                if (JCheckBox.class.isInstance(allCompo[i])) {
+                    String fullName = ((JCheckBox) allCompo[i]).getText();
+                    ((JCheckBox) allCompo[i]).setSelected(isSelectAll);
+                    Ptm ptm = m_ptmsByFullName.get(fullName);
+                    setPTMSelectStatus(ptm, isSelectAll);
+                }
+            }
+        }
+    });
+    ptmOIPanel.add(allSelectedChkBox, c);
+    c.gridx++;
+
     for (Ptm ptm : m_ptms) {
       JCheckBox checkbox = new JCheckBox(ptm.getFullName(), true);
       checkbox.addActionListener(evt -> {
-        if (((JCheckBox)evt.getSource()).isSelected()) {
-          m_selectedPtms.add(ptm);
-        } else {
-          m_selectedPtms.remove(ptm);
-        }
+        setPTMSelectStatus(ptm, ((JCheckBox)evt.getSource()).isSelected());
       });
       ptmOIPanel.add(checkbox, c);
       c.gridy++;
     }
+
+    JScrollPane m_scrollPane = new JScrollPane();
+    m_scrollPane.setBorder(BorderFactory.createTitledBorder("PTMs of interest"));
+    m_scrollPane.setViewportView(ptmOIPanel);
+    m_scrollPane.createVerticalScrollBar();
 
     c = new GridBagConstraints();
     c.anchor = GridBagConstraints.NORTHWEST;
@@ -116,11 +148,19 @@ public class IdentifyPtmSitesDialog extends DefaultDialog {
 
     parametersPanel.add(clusteringMethodPanel, c);
     c.gridy++;
-    parametersPanel.add(ptmOIPanel, c);
+    c.weighty=1;
+    c.fill = GridBagConstraints.BOTH;
+    parametersPanel.add(m_scrollPane, c);
 
-    JPanel internalPanel = new JPanel(new BorderLayout());
-    internalPanel.add(parametersPanel, BorderLayout.CENTER);
-    setInternalComponent(internalPanel);
+     setInternalComponent(parametersPanel);
+  }
+
+  private void setPTMSelectStatus(Ptm ptm, boolean selectStatus){
+    if (selectStatus) {
+        m_selectedPtms.add(ptm);
+    } else {
+        m_selectedPtms.remove(ptm);
+    }
   }
 
   public List<Long> getPtms() {

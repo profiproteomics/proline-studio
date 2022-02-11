@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -213,7 +213,7 @@ public class PerformanceTestData {
         }
         
         public void display() {
-            
+
             try {
                 m_logger.debug(m_fullKey + " Total:" + m_totalTime + "ms" + "   **** NbCalls:" + m_callNumbers + "  Average:" + m_totalTime / m_callNumbers + "ms  Min:" + m_minTime + "ms  Max:" + m_maxTime + "ms");
             } catch (Exception e) {

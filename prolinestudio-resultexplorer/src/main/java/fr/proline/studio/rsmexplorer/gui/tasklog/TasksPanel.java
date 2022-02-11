@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -61,7 +61,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.*;
 import org.jdesktop.swingx.renderer.DefaultTableRenderer;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 
 /**
  * Panel used to display all logged tasks
@@ -445,7 +445,8 @@ public class TasksPanel extends AbstractTasksPanel {
 
             TaskInfo taskInfo = m_taskInfoList.get(rowIndex);
             switch (columnIndex) {
-                case COLTYPE_STEP: {
+                case COLTYPE_STEP:
+                case COLTYPE_TASKINFO_CRITICALITY: {
                     return taskInfo;
                 }
                 case COLTYPE_TASKINFO_ID: {
@@ -453,9 +454,6 @@ public class TasksPanel extends AbstractTasksPanel {
                 }
                 case COLTYPE_TASKINFO_CATEGORY: {
                     return taskInfo.getIdList();
-                }
-                case COLTYPE_TASKINFO_CRITICALITY: {
-                    return taskInfo;
                 }
                 case COLTYPE_DESCRIPTION: {
                     return taskInfo.getTaskDescription();

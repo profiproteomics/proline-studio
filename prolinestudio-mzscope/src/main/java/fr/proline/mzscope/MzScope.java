@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -81,14 +81,14 @@ public class MzScope implements IMzScope{
     @Override
     public void detectPeakels(File file) {
         logger.debug("detectPeakel on "+file.getName());
-        mzScopePanel.detectPeakels(Collections.singletonList(RawFileManager.getInstance().getFile(file.getName())));
+        mzScopePanel.detectPeakels(Collections.singletonList(RawFileManager.getInstance().getFile(file.getAbsolutePath())));
     }
 
     @Override
     public void detectPeakels(List<File> fileList) {
         List<IRawFile> listRawFile = new ArrayList();
         for (File file : fileList) {
-            IRawFile rawFile = RawFileManager.getInstance().getFile(file.getName());
+            IRawFile rawFile = RawFileManager.getInstance().getFile(file.getAbsolutePath());
             listRawFile.add(rawFile);
         }
         mzScopePanel.detectPeakels(listRawFile);

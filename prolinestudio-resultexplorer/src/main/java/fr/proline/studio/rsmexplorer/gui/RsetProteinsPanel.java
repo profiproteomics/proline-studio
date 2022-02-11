@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -19,6 +19,8 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.studio.WindowManager;
+import fr.proline.studio.dock.AbstractTopPanel;
 import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.gui.HourglassPanel;
@@ -46,7 +48,7 @@ import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.*;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.table.TableInfo;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayTablePopupMenu;
 import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
@@ -58,7 +60,6 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.TableModelListener;
 import org.jdesktop.swingx.JXTable;
-import org.openide.windows.TopComponent;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 /**
@@ -177,9 +178,8 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
                     wbox.setEntryData(m_dataBox.getProjectId(), decoyRset);
 
                     // open a window to display the window box
-                    DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                    win.open();
-                    win.requestActive();
+                    DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+                    WindowManager.getDefault().getMainWindow().displayWindow(win);
                 }
             });
         }
@@ -232,12 +232,13 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
     }
 
     private String getTopComponentName() {
+
         Container c = getParent();
-        while ((c != null) && !(c instanceof TopComponent)) {
+        while ((c != null) && !(c instanceof AbstractTopPanel)) {
             c = c.getParent();
         }
-        if ((c != null) && (c instanceof TopComponent)) {
-            return ((TopComponent) c).getName();
+        if ((c != null) && (c instanceof AbstractTopPanel)) {
+            return ((AbstractTopPanel) c).getTitle();
         }
         return "";
     }

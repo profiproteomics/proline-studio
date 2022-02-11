@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -23,10 +23,7 @@ import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.DataSetData;
-import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
-import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
-import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.gui.DefaultDialog;
@@ -47,8 +44,8 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 
 /**
  * key word: Refine = Compute Quan Post Processing
@@ -60,7 +57,7 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
     private int m_nbLoadedQuanti;
 
     public ComputeQuantPostProcessingAction(AbstractTree tree) {
-        super(NbBundle.getMessage(ComputeQuantPostProcessingAction.class, "CTL_ComputeQuantPostProcessingAction"), tree);
+        super("Compute Post Processing on Abundances...", tree);
     }
 
     @Override
@@ -76,7 +73,7 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
         final int posX = x;
         final int posY = y;
 
-        ArrayList<DataSetNode> computedList = new ArrayList();
+        ArrayList<DataSetNode> computedList = new ArrayList<>();
         ArrayList<DataSetNode> selectedDatasetNodeList = new ArrayList<>();
         m_nbLoadedQuanti = 0;
         for (AbstractNode n : selectedNodes) {
@@ -211,15 +208,15 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
     }
 
     public static boolean quantificationProfile(final ResultCallback resultCallback, int posx, int posy, Long pID, DDataset paramsFromdataSet) {
-        ArrayList<DataSetNode> nodeList = new ArrayList();
+        ArrayList<DataSetNode> nodeList = new ArrayList<>();
         nodeList.add(new DataSetNode(new DataSetData(paramsFromdataSet)));
         return quantificationProfile(resultCallback, posx, posy, pID, nodeList, paramsFromdataSet);
     }
 
     private static ArrayList<PtmSpecificity> fetchPtmsFromDAM(ArrayList<DataSetNode> nodeList) {
-        ArrayList<PtmSpecificity> ptms = new ArrayList();
-        DatabasePTMSitesTask task = new DatabasePTMSitesTask(null);
-        ArrayList<Long> rsmIdList = new ArrayList();
+        ArrayList<PtmSpecificity> ptms = new ArrayList<>();
+        DatabasePTMsTask task = new DatabasePTMsTask(null);
+        ArrayList<Long> rsmIdList = new ArrayList<>();
         DDataset dataset;
         long projectId = nodeList.get(0).getDataset().getProject().getId();
         for (int i = 0; i < nodeList.size(); i++) {

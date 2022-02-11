@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -151,13 +151,13 @@ public class DataBoxMSQueriesForRset extends AbstractDataBox{
     }
     
     @Override
-    public Class[] getImportantInParameterClass() {
+    public Class[] getDataboxNavigationOutParameterClasses() {
         Class[] classList = { DMsQuery.class, MsQueryInfoRset.class };
         return classList;
     }
 
     @Override
-    public String getImportantOutParameterValue() {
+    public String getDataboxNavigationDisplayValue() {
         DMsQuery q = (DMsQuery) getData(DMsQuery.class);
         if (q != null) {
             int id = q.getInitialId();

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -22,30 +22,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import org.openide.awt.ActionRegistration;
-import org.openide.awt.ActionID;
-import org.openide.util.ContextAwareAction;
-import org.openide.util.Lookup;
-import org.openide.util.NbBundle;
-import org.openide.util.NbBundle.Messages;
-import org.openide.windows.WindowManager;
 
-@ActionID(category = "File", id = "fr.proline.studio.rsmexplorer.actions.UploadMzdbAction")
-@ActionRegistration(displayName = "#CTL_UploadMzdbAction")
 
-/*
-@ActionReferences({
-    @ActionReference(path = "Menu/File", position = 500)
-})
-*/
+import fr.proline.studio.WindowManager;
 
-@Messages("CTL_UploadMzdbAction=Upload mzDB File(s)")
-public final class UploadMzdbAction extends AbstractAction implements ActionListener, ContextAwareAction {
+
+public final class UploadMzdbAction extends AbstractAction implements ActionListener {
 
     private static UploadMzdbAction m_action = null;
 
     public UploadMzdbAction() {
-        putValue(Action.NAME, NbBundle.getMessage(UploadMzdbAction.class, "CTL_UploadMzdbAction"));
+        putValue(Action.NAME, "Upload mzDB File(s)");
         m_action = this;
         setEnabled(true);
     }
@@ -65,8 +52,4 @@ public final class UploadMzdbAction extends AbstractAction implements ActionList
 
     }
 
-    @Override
-    public Action createContextAwareInstance(Lookup lkp) {
-        return new UploadMzdbAction();
-    }
 }

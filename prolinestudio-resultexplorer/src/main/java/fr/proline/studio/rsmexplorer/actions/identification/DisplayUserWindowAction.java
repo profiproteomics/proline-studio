@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -27,15 +27,16 @@ import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.pattern.*;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.DataBoxChooserDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 
 import java.util.ArrayList;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Action to display the dialog to choose a view (databox) for a user window
@@ -44,9 +45,10 @@ import org.openide.windows.WindowManager;
 public class DisplayUserWindowAction extends AbstractRSMAction {
     
     private final char m_windowType;
-    
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+
     public DisplayUserWindowAction(char windowType, AbstractTree tree) {
-        super(NbBundle.getMessage(DisplayRsmProteinSetsAction.class, "CTL_DisplayUserWindowAction"), tree);
+        super("New User Window...", tree);
         m_windowType = windowType;
     }
     
@@ -83,8 +85,11 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
         dialog.setVisible(true);
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
             AbstractDataBox genericDatabox = dialog.getSelectedDataBox();
+            AbstractDataBox databox = null;
             try {
-                AbstractDataBox databox = (AbstractDataBox) genericDatabox.getClass().newInstance();
+
+                databox = DataboxManager.getDataboxNewInstance(genericDatabox);
+
 
                 final WindowBox wbox = WindowBoxFactory.getUserDefinedWindowBox(dataSet.getName(), dataSet.getName()+" "+dialog.getWndTitle(), databox, false, dataSetNode.isQuantitation() && !dataSetNode.isQuantSC(), m_windowType);
 
@@ -102,15 +107,14 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
                         wbox.setEntryData(dataSet.getProject().getId(), rsm);
 
                         // open a window to display the window box
-                        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                        win.open();
-                        win.requestActive();
+                        DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+                        WindowManager.getDefault().getMainWindow().displayWindow(win);
+
                     } else {
 
                         // open a window to display the window box
-                        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                        win.open();
-                        win.requestActive();
+                        DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+                        WindowManager.getDefault().getMainWindow().displayWindow(win);
 
                         // we have to load the result set
                         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -148,14 +152,12 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
 
 
                         // open a window to display the window box
-                        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                        win.open();
-                        win.requestActive();
+                        DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+                        WindowManager.getDefault().getMainWindow().displayWindow(win);
                     } else {
 
-                        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                        win.open();
-                        win.requestActive();
+                        DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+                        WindowManager.getDefault().getMainWindow().displayWindow(win);
 
                         // we have to load the result set
                         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -191,14 +193,12 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
 
 
                         // open a window to display the window box
-                        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                        win.open();
-                        win.requestActive();
+                        DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+                        WindowManager.getDefault().getMainWindow().displayWindow(win);
                     } else {
 
-                        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                        win.open();
-                        win.requestActive();
+                        DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+                        WindowManager.getDefault().getMainWindow().displayWindow(win);
 
                         // we have to load the result set
                         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -227,6 +227,7 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
 
             } catch (InstantiationException | IllegalAccessException e) {
                 // should never happen
+                m_logger.error("Error creating new Databox ",e);
             }
          }
 

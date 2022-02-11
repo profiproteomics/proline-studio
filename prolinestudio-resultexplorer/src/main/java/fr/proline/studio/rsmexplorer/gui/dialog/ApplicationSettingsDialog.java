@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.graphics.PlotScatter;
 import fr.proline.studio.gui.AbstractParameterListTree;
@@ -45,7 +46,6 @@ import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreePath;
-import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -353,6 +353,8 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
                     File f = new File(m_converterFilePath.getStringValue());
                     if (!f.exists() || !f.getAbsolutePath().endsWith("raw2mzDB.exe")) {
                         ParameterError error = new ParameterError("The selected raw2mzDB.exe is not valid.", m_converterFilePath.getComponent());
+                        CardLayout cl = (CardLayout) (m_cards.getLayout());
+                        cl.show(m_cards, key);
                         return error;
                     }
                 }

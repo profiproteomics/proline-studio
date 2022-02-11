@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -19,65 +19,45 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.core.orm.msi.MsiSearch;
 import fr.proline.core.orm.msi.Peaklist;
 import fr.proline.core.orm.msi.ResultSet;
-import fr.proline.studio.extendedtablemodel.ExtraDataType;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.DatabaseRsetProperties;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.export.ExportModelUtilities;
 import fr.proline.studio.export.ExportFontData;
-import fr.proline.studio.filter.ConvertValueInterface;
-import fr.proline.studio.filter.Filter;
-import fr.proline.studio.filter.FilterButton;
-import fr.proline.studio.filter.IntegerFilter;
+import fr.proline.studio.export.ExportModelUtilities;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
-import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.pattern.*;
 import fr.proline.studio.progress.ProgressInterface;
-import fr.proline.studio.rsmexplorer.actions.identification.PropertiesAction;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
+import fr.proline.studio.rsmexplorer.gui.model.properties.IdentificationPropertiesTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.TimestampRenderer;
 import fr.proline.studio.rsmexplorer.tree.identification.IdTransferable;
 import fr.proline.studio.search.SearchToggleButton;
-import fr.proline.studio.table.AbstractTableAction;
-import fr.proline.studio.extendedtablemodel.CompoundTableModel;
-import fr.proline.studio.table.DecoratedTableModel;
-import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
-import fr.proline.studio.filter.StringDiffFilter;
-import fr.proline.studio.pattern.DataboxGeneric;
-import fr.proline.studio.pattern.WindowBox;
-import fr.proline.studio.pattern.WindowBoxFactory;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
-import fr.proline.studio.rsmexplorer.gui.model.properties.IdentificationPropertiesTableModel;
-import fr.proline.studio.table.LazyData;
-import fr.proline.studio.table.LazyTable;
-import fr.proline.studio.table.TablePopupMenu;
+import fr.proline.studio.table.*;
 import fr.proline.studio.utils.IconManager;
-import fr.proline.studio.utils.PropertiesProviderInterface;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.datatransfer.Transferable;
-import java.awt.event.*;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
+
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
-import org.openide.nodes.Sheet;
-import org.openide.util.NbBundle;
+import java.awt.*;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.*;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
 
 /**
  * Panel to display all Search Results (rset) imported
@@ -191,13 +171,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
         JButton refreshButton = new JButton(IconManager.getIcon(IconManager.IconType.REFRESH));
         refreshButton.setToolTipText("Refresh");
-        refreshButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                m_dataBox.dataChanged();
-            }
-        });
+        refreshButton.addActionListener(e -> m_dataBox.dataChanged());
 
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_resultSetTable, m_resultSetTable, ((CompoundTableModel) m_resultSetTable.getModel()));
@@ -213,7 +187,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
         };
 
         // Export Button
-        m_exportButton = new ExportButton(((ProgressInterface) m_resultSetTable), "All Imported Sets", m_resultSetTable);
+        m_exportButton = new ExportButton( m_resultSetTable, "All Imported Sets", m_resultSetTable);
 
         toolbar.add(refreshButton);
         toolbar.add(m_searchToggleButton);
@@ -423,7 +397,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
     private class PropertiesFromTableAction extends AbstractTableAction {
 
         public PropertiesFromTableAction() {
-            super(NbBundle.getMessage(PropertiesAction.class, "CTL_PropertiesAction"));
+            super("Properties");
         }
 
         @Override
@@ -460,15 +434,13 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
             WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(dialogName, "Properties", IconManager.IconType.DOCUMENT_LIST, true);
             final IdentificationPropertiesTableModel _model = new IdentificationPropertiesTableModel();
             windowBox.setEntryData(-1L, _model);
-            DataBoxViewerTopComponent win2 = new DataBoxViewerTopComponent(windowBox);
-            win2.open();
-            win2.requestActive();
+            DataBoxViewerTopPanel win2 = new DataBoxViewerTopPanel(windowBox);
+            WindowManager.getDefault().getMainWindow().displayWindow(win2);
+
 
             //JPM.HACK ! Impossible to set the max number of lines differently in this case
             DataboxGeneric databoxGeneric = ((DataboxGeneric) windowBox.getEntryBox());
-            GenericPanel genericPanel = (GenericPanel) databoxGeneric.getPanel();
-
-            final GenericPanel _genericPanel = genericPanel;
+            final GenericPanel genericPanel = (GenericPanel) databoxGeneric.getPanel();
 
             final int loadingId = databoxGeneric.setLoading();
 
@@ -482,10 +454,8 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
                         databoxGeneric.setLoaded(loadingId);
 
-                        if (_model != null) {
-                            _model.setData(projectId, resultSetList);
-                            _genericPanel.setMaxLineNumber(_model.getRowCount());
-                        }
+                        _model.setData(projectId, resultSetList);
+                        genericPanel.setMaxLineNumber(_model.getRowCount());
 
                     }
                 }
@@ -520,7 +490,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
 
 
-    public abstract class RsetCallback extends AbstractDatabaseCallback {
+    public abstract static class RsetCallback extends AbstractDatabaseCallback {
 
         protected int m_nbDataToLoad;
         
@@ -528,57 +498,8 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
             m_nbDataToLoad = nbDataToLoad;
         }
 
-
-
     };
     
-    public class ResultsetPropertiesProvider implements PropertiesProviderInterface {
-
-        private ResultSet m_rset = null;
-        private String m_name = null;
-        private long m_projectId = -1;
-
-        public ResultsetPropertiesProvider(ResultSet rset, long projectId, String name) {
-            m_rset = rset;
-            m_name = name;
-            m_projectId = projectId;
-        }
-
-        @Override
-        public void loadDataForProperties(final Runnable callback) {
-
-            AbstractDatabaseCallback taskCallback = new AbstractDatabaseCallback() {
-
-                @Override
-                public boolean mustBeCalledInAWT() {
-                    return true;
-                }
-
-                @Override
-                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
-                    callback.run();
-
-                }
-            };
-
-            //Load ResultSet Extra Data
-            DatabaseRsetProperties task = new DatabaseRsetProperties(taskCallback, m_projectId, m_rset, m_name);
-            task.setPriority(AbstractDatabaseTask.Priority.HIGH_3); // highest priority
-
-            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-        }
-
-        public ResultSet getResultset() {
-            return m_rset;
-        }
-
-        @Override
-        public Sheet createSheet() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-    }
-
     private static class ResultSetTableModel extends DecoratedTableModel implements GlobalTableModelInterface {
 
         public static final int COLTYPE_RSET_ID = 0;
@@ -903,7 +824,6 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
             ArrayList<ResultSet> resultSetList = new ArrayList<>(nbRows);
 
             for (int i = 0; i < nbRows; i++) {
-//                int row = table.convertRowIndexToModel(rows[i]);
                 int row = table.convertRowIndexToNonFilteredModel(rows[i]);
                 ResultSet rset = model.getResultSet(row);
                 resultSetList.add(rset);

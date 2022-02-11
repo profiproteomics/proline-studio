@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -125,8 +125,6 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
     private Long m_previousTaskId = null;
 
     public void loadAnnotations(final DPeptideMatch peptideMatch) {
-
-        final DataBoxRsetPeptideSpectrum _databox = this;
 
         final ObjectTree[] objectTreeResult = new ObjectTree[1];
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {

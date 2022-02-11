@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -34,7 +34,7 @@ public class AccessJMSManagerThread extends Thread {
     private Connection m_connection;
     private Session m_session;
     private LinkedList<AbstractJMSTask> m_taskList = new LinkedList<>();
-    
+
     public static AccessJMSManagerThread getAccessJMSManagerThread() {
         if (m_instance == null) {
             m_instance = new AccessJMSManagerThread();
@@ -47,8 +47,10 @@ public class AccessJMSManagerThread extends Thread {
         super("AccessJMSManagerThread"); // useful for debugging
         initSession();
     }
-    
+
+
     public Session getSession(){
+
         return m_session;
     }
 
@@ -76,7 +78,10 @@ public class AccessJMSManagerThread extends Thread {
 
                 // init session if needed
                 initSession();
-                
+
+                //VD TEST : To remove
+                LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" task.askJMS "+task.getClass());
+
                 // fetch data
                 task.askJMS();
 
@@ -95,7 +100,7 @@ public class AccessJMSManagerThread extends Thread {
             try {
                 // Get JMS Connection
                 m_connection = JMSConnectionManager.getJMSConnectionManager().getJMSConnection();
-                m_connection.start(); // Explicitely start connection to begin Consumer reception 
+                m_connection.start();// Explicitly start connection to begin Consumer reception
                 m_session = m_connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
             } catch (JMSException je) {
                 LoggerFactory.getLogger("ProlineStudio.DPM").error("Unexpected exception when initializing JMS Connection", je);
@@ -119,6 +124,7 @@ public class AccessJMSManagerThread extends Thread {
             notifyAll();
         }
     }
+
     
     public void cleanup() {
         if (m_session != null) {

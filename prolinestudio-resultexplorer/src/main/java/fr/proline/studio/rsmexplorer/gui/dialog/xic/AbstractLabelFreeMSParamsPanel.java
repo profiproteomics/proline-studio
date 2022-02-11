@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,16 +16,16 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.settings.FilePreferences;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
-import javax.swing.BorderFactory;
-import javax.swing.JScrollPane;
-import javax.swing.border.TitledBorder;
-import org.openide.util.NbPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 /**
  *
@@ -125,7 +125,7 @@ public abstract class AbstractLabelFreeMSParamsPanel extends AbstractParamsPanel
     protected final static String DEFAULT_CLUSTER_INTENSITYCOMPUT_VALUE = "MOST_INTENSE";
 
     protected final static Boolean DEFAULT_ALIGN_VALUE = Boolean.TRUE;
-    protected final static Double DEFAULT_ALIGN_FEATMAP_TIMETOL_VALUE = 600.0;
+    public final static Double DEFAULT_ALIGN_FEATMAP_TIMETOL_VALUE = 600.0;
     protected final static Double DEFAULT_ALIGN_FEATMAP_MOZTOL_VALUE = 5.0;
     protected final static Integer DEFAULT_ALIGN_MAXITE_VALUE = 3;
     protected final static Integer DEFAULT_ALIGN_MASSINTERVAL_VALUE = 20000;
@@ -148,6 +148,7 @@ public abstract class AbstractLabelFreeMSParamsPanel extends AbstractParamsPanel
     public final static String XIC_PARAMS_VERSION_KEY = XIC_PARAMS_PREFIX + ".parametersVersion";
     public final static String ALIGNMENT_CONFIG = "alignment_config";
     public final static String ALIGNMENT_METHOD_NAME = "method_name";
+    public final static String ALIGNMENT_SMOOTHING_METHOD_NAME = "smoothing_method_name";
 
     protected final boolean m_readOnly;
     protected JScrollPane m_scrollPane;

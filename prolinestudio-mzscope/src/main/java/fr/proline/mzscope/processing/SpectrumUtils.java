@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,6 +16,8 @@
  */
 package fr.proline.mzscope.processing;
 
+import fr.profi.mzdb.algo.signal.filtering.SavitzkyGolaySmoother;
+import fr.profi.mzdb.algo.signal.filtering.SavitzkyGolaySmoothingConfig;
 import fr.profi.mzdb.model.Peakel;
 import fr.profi.mzdb.model.SpectrumHeader;
 import java.util.Arrays;
@@ -23,11 +25,15 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.IntStream;
+
+import fr.profi.mzdb.peakeldb.PeakelDbHelper;
+import fr.proline.mzscope.model.Signal;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.Tuple2;
 
 /**
  *
@@ -119,7 +125,7 @@ public class SpectrumUtils {
         for (int i = lowerIdx; i <= upperIdx; i++) {
             int k = peakelIndexesByMz[i].getRight();
             if ((1e6 * Math.abs(peakels[k].getMz() - moz) / moz < mzTolPPM)
-                    && ((Math.abs(peakels[k].getApexElutionTime() - referencePeakel.getApexElutionTime()) / referencePeakel.calcDuration()) < 0.25)
+                    && ((Math.abs(peakels[k].getElutionTime() - referencePeakel.getElutionTime()) / referencePeakel.calcDuration()) < 0.25)
                     && (Math.abs(peakels[k].getMz() - moz) < min)) {
                 min = Math.abs(peakels[k].getMz() - moz);
                 resultIdx = k;
@@ -146,8 +152,8 @@ public class SpectrumUtils {
         for (int i = lowerIdx; i <= upperIdx; i++) {
             int k = peakelIndexesByMz[i].getRight();
             if ((1e6 * Math.abs(peakels[k].getMz() - moz) / moz < mzTolPPM)
-                    && (peakels[k].getApexElutionTime() >= referencePeakel.getFirstElutionTime())
-                    && (peakels[k].getApexElutionTime() <= referencePeakel.getLastElutionTime())) {
+                    && (peakels[k].getElutionTime() >= referencePeakel.getFirstElutionTime())
+                    && (peakels[k].getElutionTime() <= referencePeakel.getLastElutionTime())) {
                 double corr = correlation(referencePeakel, peakels[k]);
                 //logger.debug("correlation "+referencePeakel.getMz()+ " with "+peakels[k].getMz()+" = "+corr);
                 if (corr > MIN_CORRELATION_SCORE && (corr > maxCorr)) {
@@ -164,7 +170,30 @@ public class SpectrumUtils {
     * Returns the absolute value of the correlation between 2 peakels
      */
     public static double correlation(Peakel p1, Peakel p2) {
-        return correlation(p1.getElutionTimes(), p1.getIntensityValues(), p2.getElutionTimes(), p2.getIntensityValues());
+      
+      // not the most efficient solution to get smoothed intensities ... 
+      int nbrPoints = Math.min(p1.peaksCount() / 4, 9);
+      SavitzkyGolaySmoother smoother = new SavitzkyGolaySmoother(new SavitzkyGolaySmoothingConfig(nbrPoints, 2, 1));
+      Peakel sp1 = (nbrPoints > 0) ? smoother.smoothPeakel(p1) : p1;
+      nbrPoints = Math.min(p2.peaksCount() / 4, 9);
+      smoother = new SavitzkyGolaySmoother(new SavitzkyGolaySmoothingConfig(nbrPoints, 2, 1));
+      Peakel sp2 = (nbrPoints > 0) ? smoother.smoothPeakel(p2) : p2;            
+       
+      return correlation(sp1.getElutionTimes(), sp1.getIntensityValues(), sp2.getElutionTimes(), sp2.getIntensityValues());
+    }
+
+    public static double correlationOMP(Peakel p1, Peakel p2, boolean smooth) {
+        if (smooth) {
+            int nbrPoints = Math.min(p1.peaksCount() / 4, 9);
+            SavitzkyGolaySmoother smoother = new SavitzkyGolaySmoother(new SavitzkyGolaySmoothingConfig(nbrPoints, 2, 1));
+            Peakel sp1 = smoother.smoothPeakel(p1);
+            nbrPoints = Math.min(p2.peaksCount() / 4, 9);
+            smoother = new SavitzkyGolaySmoother(new SavitzkyGolaySmoothingConfig(nbrPoints, 2, 1));
+            Peakel sp2 = smoother.smoothPeakel(p2);
+            return PeakelDbHelper.computeCorrelation(sp1, sp2);
+        } else {
+            return PeakelDbHelper.computeCorrelation(p1, p2);
+        }
     }
 
     public static double correlation(float[] x1, float[] y1, float[] x2, float[] y2) {
@@ -180,7 +209,7 @@ public class SpectrumUtils {
         double corr = pearson.correlation(values.getLeft(), values.getRight());
         return corr;
     }
-       
+
     public static Pair<double[], double[]> zipValues(double[] x1, double[] y1, double[] x2, double[] y2) {
         int offset1 = 0;
         int offset2 = 0;

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -26,6 +26,15 @@ public class JSONPTMCluster {
     //@todo : try to make them private instead of public
 
     public Long id;
+
+    //
+    //**** Annotation specific entry
+    // Idem as for Quanti/Ident: DESELECTED_MANUAL(0) DESELECTED_AUTO(1) SELECTED_AUTO(2) SELECTED_MANUAL(3)
+    public Integer selectionLevel;
+    //Notation for selection_level confidence
+    public Integer selectionConfidence;
+    //Description for selection_level reason or precision
+    public String selectionInformation;
 
     // Array of PTM site locations Ids
     public Long[] ptmSiteLocations;

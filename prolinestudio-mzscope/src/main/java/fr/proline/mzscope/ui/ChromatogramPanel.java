@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -21,6 +21,7 @@ import fr.proline.mzscope.model.IPeakel;
 import fr.proline.mzscope.ui.event.AxisRangeChromatogramListener;
 import fr.proline.mzscope.ui.model.ChromatogramTableModel;
 import fr.proline.mzscope.utils.Display;
+import fr.proline.studio.Exceptions;
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotBaseAbstract;
 import fr.proline.studio.graphics.PlotLinear;
@@ -38,7 +39,6 @@ import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JPanel;
-import org.openide.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +73,7 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
 
    private void initComponents() {
       this.setLayout(new BorderLayout());
-      PlotPanel plotPanel = new PlotPanel(false);
+      PlotPanel plotPanel = new PlotPanel();
       chromatogramPlotPanel = plotPanel.getBasePlotPanel();
       chromatogramPlotPanel.addListener(this);
       chromatogramPlotPanel.setDrawCursor(true);

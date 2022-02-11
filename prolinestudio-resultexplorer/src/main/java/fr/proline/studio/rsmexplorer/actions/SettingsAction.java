@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,34 +16,22 @@
  */
 package fr.proline.studio.rsmexplorer.actions;
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.rsmexplorer.gui.dialog.ApplicationSettingsDialog;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import org.openide.awt.ActionRegistration;
-import org.openide.awt.ActionReference;
-import org.openide.awt.ActionReferences;
-import org.openide.awt.ActionID;
-import org.openide.util.ContextAwareAction;
-import org.openide.util.Lookup;
-import org.openide.util.NbBundle;
-import org.openide.util.NbBundle.Messages;
-import org.openide.windows.WindowManager;
 
-@ActionID(category = "File", id = "fr.proline.studio.rsmexplorer.actions.SettingsAction")
-@ActionRegistration(displayName = "#CTL_SettingsAction")
-@ActionReferences({
-    @ActionReference(path = "Menu/File", position = 400)
-})
-@Messages("CTL_SettingsAction=General Settings")
-public final class SettingsAction extends AbstractAction implements ActionListener, ContextAwareAction {
+
+
+public final class SettingsAction extends AbstractAction implements ActionListener {
 
     private static SettingsAction m_action = null;
 
     public SettingsAction() {
-        putValue(Action.NAME, NbBundle.getMessage(SettingsAction.class, "CTL_SettingsAction"));
+        putValue(Action.NAME, "General Settings");
         m_action = this;
         setEnabled(true);
     }
@@ -63,8 +51,4 @@ public final class SettingsAction extends AbstractAction implements ActionListen
 
     }
 
-    @Override
-    public Action createContextAwareInstance(Lookup lkp) {
-        return new SettingsAction();
-    }
 }

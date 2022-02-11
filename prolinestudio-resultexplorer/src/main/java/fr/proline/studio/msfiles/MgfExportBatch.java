@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -19,7 +19,8 @@ package fr.proline.studio.msfiles;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
+import fr.proline.studio.rsmexplorer.MzdbFilesTopPanel;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,8 +59,8 @@ public class MgfExportBatch implements Runnable {
                 outputDirectory = outputDirectory.getParentFile();
             }
 
-            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().expandMultipleTreePath(m_parentDirectories);
-            MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
+            MzdbFilesTopPanel.getExplorer().getLocalFileSystemView().expandMultipleTreePath(m_parentDirectories);
+            MzdbFilesTopPanel.getExplorer().getLocalFileSystemView().updateTree();
 
         }
 
@@ -106,7 +107,7 @@ public class MgfExportBatch implements Runnable {
                                         @Override
                                         public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                                             if (success) {
-                                                MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
+                                                MzdbFilesTopPanel.getExplorer().getLocalFileSystemView().updateTree();
                                             }
                                         }
 

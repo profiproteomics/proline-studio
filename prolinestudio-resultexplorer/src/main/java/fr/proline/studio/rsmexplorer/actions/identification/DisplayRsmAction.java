@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -23,7 +23,7 @@ import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import java.util.ArrayList;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import org.openide.util.NbBundle;
+
 
 /**
  * Action for the menu to display data for Identification Summary
@@ -34,8 +34,8 @@ public class DisplayRsmAction extends AbstractRSMAction {
     private DisplayRsmPSMAction m_displayRsmPSMAction;
     private DisplayRsmPeptidesAction m_displayRsmPeptidesAction;
     private DisplayRsmProteinSetsAction m_displayRsmProteinSetsAction;
-    private DisplayPTMSitesAction m_displayPtmSiteProtein;
-    private DisplayPTMClustersAction m_displayPtmClusterProtein;
+//    private DisplayPTMSitesAction m_displayPtmSiteProtein;
+//    private DisplayPTMClustersAction m_displayPtmClusterProtein;
     
 
     private DisplayAdjacencyMatrixAction m_displayAdjacencyMatrixAction;
@@ -48,7 +48,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
     private JMenu m_menu;
 
     public DisplayRsmAction(AbstractTree tree) {
-        super(NbBundle.getMessage(DisplayRsmAction.class, "CTL_DisplayRsmAction"), tree);
+        super("Display Identification Summary", tree);
     }
 
     @Override
@@ -59,8 +59,8 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_displayRsmPSMAction = new DisplayRsmPSMAction(getTree());
         m_displayRsmPeptidesAction = new DisplayRsmPeptidesAction(getTree());
         m_displayRsmProteinSetsAction = new DisplayRsmProteinSetsAction(getTree());
-        m_displayPtmSiteProtein = new DisplayPTMSitesAction(getTree());
-        m_displayPtmClusterProtein = new DisplayPTMClustersAction(getTree());
+//        m_displayPtmSiteProtein = new DisplayPTMSitesAction(getTree());
+//        m_displayPtmClusterProtein = new DisplayPTMClustersAction(getTree());
         m_displayAdjacencyMatrixAction = new DisplayAdjacencyMatrixAction(getTree());
         
         
@@ -84,8 +84,8 @@ public class DisplayRsmAction extends AbstractRSMAction {
         JMenuItem displayRsmPSMItem = new JMenuItem(m_displayRsmPSMAction);
         JMenuItem displayRsmPeptidesItem = new JMenuItem(m_displayRsmPeptidesAction);
         JMenuItem displayRsmProteinSetsItem = new JMenuItem(m_displayRsmProteinSetsAction);
-        JMenuItem displayPtmSiteProteinItem = new JMenuItem(m_displayPtmSiteProtein);
-        JMenuItem displayPtmClusterProteinItem = new JMenuItem(m_displayPtmClusterProtein);
+//        JMenuItem displayPtmSiteProteinItem = new JMenuItem(m_displayPtmSiteProtein);
+//        JMenuItem displayPtmClusterProteinItem = new JMenuItem(m_displayPtmClusterProtein);
         JMenuItem displayAdjacencyMatrixItem = new JMenuItem(m_displayAdjacencyMatrixAction);
         JMenuItem displayUserWindowItem = new JMenuItem(m_displayUserWindowAction);
         JMenuItem manageUserWindowsItem = new JMenuItem(m_manageUserWindowsAction);
@@ -96,9 +96,9 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_menu.add(displayRsmProteinSetsItem);        
         m_menu.add(displayAdjacencyMatrixItem);
         m_menu.addSeparator();
-        m_menu.add(displayPtmSiteProteinItem);        
-        m_menu.add(displayPtmClusterProteinItem);        
-        m_menu.addSeparator();
+//        m_menu.add(displayPtmSiteProteinItem);
+//        m_menu.add(displayPtmClusterProteinItem);
+//        m_menu.addSeparator();
         m_menu.add(displayUserWindowItem);
         m_menu.add(manageUserWindowsItem);
         int nbUserWindows = m_displaySavedWindowActionList.size();
@@ -118,8 +118,8 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_displayRsmPSMAction.updateEnabled(selectedNodes);
         m_displayRsmPeptidesAction.updateEnabled(selectedNodes);
         m_displayRsmProteinSetsAction.updateEnabled(selectedNodes);
-        m_displayPtmSiteProtein.updateEnabled(selectedNodes);
-        m_displayPtmClusterProtein.updateEnabled(selectedNodes);
+//        m_displayPtmSiteProtein.updateEnabled(selectedNodes);
+//        m_displayPtmClusterProtein.updateEnabled(selectedNodes);
         m_displayAdjacencyMatrixAction.updateEnabled(selectedNodes);
         m_displayUserWindowAction.updateEnabled(selectedNodes);
         m_manageUserWindowsAction.updateEnabled(selectedNodes);
@@ -131,7 +131,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
             listEnabled |= m_displaySavedWindowActionList.get(i).isEnabled();
         }
 
-        boolean isEnabled = m_displayRsmPSMAction.isEnabled() || m_displayRsmPeptidesAction.isEnabled() || m_displayPtmClusterProtein.isEnabled() || m_displayRsmProteinSetsAction.isEnabled()|| m_displayPtmSiteProtein.isEnabled() || m_displayMSQueryAction.isEnabled() || m_displayUserWindowAction.isEnabled()|| m_manageUserWindowsAction.isEnabled() || listEnabled;
+        boolean isEnabled = m_displayRsmPSMAction.isEnabled() || m_displayRsmPeptidesAction.isEnabled() ||/* m_displayPtmClusterProtein.isEnabled() || */m_displayRsmProteinSetsAction.isEnabled()|| /*m_displayPtmSiteProtein.isEnabled() || */m_displayMSQueryAction.isEnabled() || m_displayUserWindowAction.isEnabled()|| m_manageUserWindowsAction.isEnabled() || listEnabled;
         setEnabled(isEnabled);
         m_menu.setEnabled(isEnabled);
 

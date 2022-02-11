@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -59,7 +59,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
     // ---------------------------------------------------
     public static final int COLTYPE_PROTEIN_SET_ID = 0;
     public static final int COLTYPE_PROTEIN_SET_NAME = 1;
-    public static final int COLTYPE_PROTEIN_SET_DESCRIPTION = 2;    
+    public static final int COLTYPE_PROTEIN_SET_DESCRIPTION = 2;
     public static final int COLTYPE_PROTEIN_SCORE = 3;
     public static final int COLTYPE_PROTEINS_COUNT = 4;
     public static final int COLTYPE_PEPTIDES_COUNT = 5;
@@ -95,9 +95,9 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
             m_colUsed = colUsed;
         }
     }
-    
+
     /**
-     * by default the geneName is hidden 
+     * by default the geneName is hidden
      *
      * @return the list of columns ids of these columns
      */
@@ -242,12 +242,12 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, row, col);
                 } else {
-                    String geneName = proteinMatch.getGeneName(); 
+                    String geneName = proteinMatch.getGeneName();
                     if(geneName == null )
                         geneName = "";
                     lazyData.setData(geneName);
                 }
-                return lazyData; 
+                return lazyData;
             }
             case COLTYPE_PROTEIN_SCORE: {
                 /*Float score = Float.valueOf(proteinSet.getPeptideOverSet().getScore());
@@ -586,7 +586,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
      *
     public static final int COLTYPE_PROTEIN_SET_ID = 0;
     public static final int COLTYPE_PROTEIN_SET_NAME = 1;
-    public static final int COLTYPE_PROTEIN_SET_DESCRIPTION = 2;    
+    public static final int COLTYPE_PROTEIN_SET_DESCRIPTION = 2;
     public static final int COLTYPE_PROTEIN_SCORE = 3;
     public static final int COLTYPE_PROTEINS_COUNT = 4;
     public static final int COLTYPE_PEPTIDES_COUNT = 5;
@@ -596,7 +596,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
     public static final int COLTYPE_UNIQUE_SEQUENCES_COUNT = 9;
     public static final int COLTYPE_PROTEIN_MASS = 10;
     public static final int COLTYPE_PROTEIN_SET_GENE_NAME = 11;
-     * @param filtersMap 
+     * @param filtersMap
      */
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
@@ -605,37 +605,37 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
 
         colIdx++; // COLTYPE_PROTEIN_SET_NAME
         filtersMap.put(colIdx, new StringDiffFilter(getColumnName(colIdx), null, colIdx));
-        
+
         colIdx++; // COLTYPE_PROTEIN_SET_DESCRIPTION
         filtersMap.put(colIdx, new StringDiffFilter(getColumnName(colIdx), null, colIdx));
-        
+
         colIdx++; // COLTYPE_PROTEIN_SCORE
         filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null, colIdx));
         colIdx++; //COLTYPE_PROTEINS_COUNT  => No Filter
         colIdx++; // COLTYPE_PEPTIDES_COUNT
         filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));
-        
+
         colIdx++; // COLTYPE_OBSERVABLE_PEPTIDES
         filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));
-        
+
         colIdx++; // COLTYPE_SPECTRAL_COUNT
         filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));
-        
+
         colIdx++; // COLTYPE_SPECIFIC_SPECTRAL_COUNT
         /*if (m_mergedData) {
             filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx)); colIdx++; // COLTYPE_BASIC_SPECTRAL_COUNT
         }*/
         filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));
-        
-        colIdx++; // COLTYPE_UNIQUE_SEQUENCES_COUNT        
+
+        colIdx++; // COLTYPE_UNIQUE_SEQUENCES_COUNT
         filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));
-        
+
         colIdx++; // COLTYPE_PROTEIN_MASS
         filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null, colIdx));
 
         colIdx++; // COLTYPE_PROTEIN_SET_GENE_NAME
         filtersMap.put(colIdx, new StringDiffFilter(getColumnName(colIdx), null, colIdx));
-          
+
     }
 
     @Override

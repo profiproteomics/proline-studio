@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -26,10 +26,11 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.rsmexplorer.gui.ptm.PTMGraphicCtrlPanel;
-import java.util.ArrayList;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class is very similaire as DataBoxPTMSitePeptides
@@ -47,7 +48,7 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
     public DataBoxPTMPeptidesGraphic() {
         super(DataboxType.DataBoxPTMPeptidesGraphic, DataboxStyle.STYLE_RSM);
         m_displayAllPepMatches = false;
-        m_isXICResult = false;
+        m_isMS1LabelFreeQuantitation = false;
 
         // Name of this databox
         m_typeName = "Graphical Peptides PTMs info";
@@ -94,7 +95,6 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
                 setLoaded(loadingId);
                 if (success) {
                     ((PTMGraphicCtrlPanel) getDataBoxPanelInterface()).setSelectedProtein(proteinMatch);
-                } else {
                 }
                 if (finished) {
                     unregisterTask(taskId);
@@ -122,18 +122,18 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
             return;
         }
         loadPeptidesInstances();
-        final List<PTMSite> notLoadedPtmSite = getNotLoadedPTMSite();
-
-        if (notLoadedPtmSite.isEmpty()) {
+//        final List<PTMSite> notLoadedPtmSite = getNotLoadedPTMSite();
+//
+//        if (notLoadedPtmSite.isEmpty()) {
             resetPrevPTMTaskId();
             graphicView.setData(m_ptmPepInstances);
             addDataChanged(PTMPeptideInstance.class, null);  //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
             propagateDataChanged();
 
-        } else {
-
-            loadPtmSite(notLoadedPtmSite);
-        }
+//        } else {
+//
+//            loadPtmSite(notLoadedPtmSite);
+//        }
 
     }
 

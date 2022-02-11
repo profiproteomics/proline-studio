@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -21,6 +21,7 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.dto.DDataset;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  *
@@ -36,7 +37,7 @@ public class DataBoxFrozenCopy extends AbstractDataBox {
         
         AvailableParameters avalaibleParameters = new AvailableParameters(srcDataBox);
         
-        HashMap<DataParameter, Integer> parametersMap = avalaibleParameters.getParametersMap();
+        Map<DataParameter, Integer> parametersMap = avalaibleParameters.getParametersMap();
         Iterator<DataParameter> it = parametersMap.keySet().iterator();
         while (it.hasNext()) {
             DataParameter parameter = it.next();
@@ -45,10 +46,9 @@ public class DataBoxFrozenCopy extends AbstractDataBox {
             HashMap<ParameterSubtypeEnum, Object> map = m_frozenDataMap.get(c);
             if (map == null) {
                 map = new HashMap<>();
-                map.put(subtype, srcDataBox.getData(c, subtype));
-                m_frozenDataMap.put(c, map);
             }
-
+            map.put(subtype, srcDataBox.getData(c, subtype));
+            m_frozenDataMap.put(c, map);
         }
         
         Class specificClass =  ResultSet.class;
@@ -60,7 +60,7 @@ public class DataBoxFrozenCopy extends AbstractDataBox {
             }
         }
         if (rset == null) {
-            ResultSummary rsm = (ResultSummary) srcDataBox.getData(specificClass, null);
+            ResultSummary rsm = (ResultSummary) srcDataBox.getData(ResultSummary.class, null);
             if (rsm != null) {
                 rset = rsm.getResultSet();
             }
@@ -69,9 +69,9 @@ public class DataBoxFrozenCopy extends AbstractDataBox {
             HashMap<ParameterSubtypeEnum, Object> map = m_frozenDataMap.get(specificClass);
             if (map == null) {
                 map = new HashMap<>();
+            }
                 map.put(null, rset);
                 m_frozenDataMap.put(specificClass, map);
-            }
         }
         
         specificClass =  ResultSummary.class;
@@ -86,9 +86,9 @@ public class DataBoxFrozenCopy extends AbstractDataBox {
             HashMap<ParameterSubtypeEnum, Object> map = m_frozenDataMap.get(specificClass);
             if (map == null) {
                 map = new HashMap<>();
-                map.put(null, rsm);
-                m_frozenDataMap.put(specificClass, map);
             }
+            map.put(null, rsm);
+            m_frozenDataMap.put(specificClass, map);
         }
         
         // register out parameters
@@ -100,7 +100,9 @@ public class DataBoxFrozenCopy extends AbstractDataBox {
         }
         registerOutParameter(outParameter);
 
-        
+        // register in parameters
+        ParameterList inParameter = srcDataBox.getInParameters();
+        registerInParameter(inParameter);
         
     }
 

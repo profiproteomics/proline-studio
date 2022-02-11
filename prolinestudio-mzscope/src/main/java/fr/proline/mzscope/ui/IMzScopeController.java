@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,7 +16,10 @@
  */
 package fr.proline.mzscope.ui;
 
+import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.IRawFile;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -29,4 +32,6 @@ public interface IMzScopeController {
     IRawFileViewer getRawFileViewer(IRawFile rawFile, boolean setVisible);
 
     IRawFileViewer getTabbedMultiRawFileViewer();
+    
+    void displayFeatures(Map<String, List<IFeature>> features);
 }

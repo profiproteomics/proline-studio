@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -23,7 +23,7 @@ import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import java.util.ArrayList;
-import org.openide.util.NbBundle;
+
 
 /**
  * Delete a Node in a Xic QuantExperimentalDesignTree
@@ -33,7 +33,7 @@ public class DeleteAction  extends AbstractRSMAction {
     
 
     public DeleteAction(AbstractTree tree) {
-        super(NbBundle.getMessage(DeleteAction.class, "CTL_DeleteAction"), tree);
+        super("Delete", tree);
     }
 
     @Override

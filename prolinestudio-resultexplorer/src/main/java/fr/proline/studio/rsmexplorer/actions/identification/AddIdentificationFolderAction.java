@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -34,7 +34,7 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdProjectIdentification
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import java.util.ArrayList;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 
 /**
  *

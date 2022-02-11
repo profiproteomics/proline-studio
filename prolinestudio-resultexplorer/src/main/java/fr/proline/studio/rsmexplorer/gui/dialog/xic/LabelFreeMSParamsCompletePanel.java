@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -28,8 +28,8 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.*;
-import org.openide.util.NbPreferences;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.NbPreferences;
+import fr.proline.studio.WindowManager;
 
 /**
  * Panel to set the different parameters for the XIC Quantitation

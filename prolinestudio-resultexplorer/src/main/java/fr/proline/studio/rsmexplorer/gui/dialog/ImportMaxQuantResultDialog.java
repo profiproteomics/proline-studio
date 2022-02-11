@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -18,53 +18,28 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.core.orm.uds.InstrumentConfiguration;
 import fr.proline.core.orm.uds.PeaklistSoftware;
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.dam.DatabaseDataManager;
-import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.parameter.AbstractParameterToString;
-import fr.proline.studio.parameter.BooleanParameter;
-import fr.proline.studio.parameter.ObjectParameter;
-import fr.proline.studio.parameter.ParameterError;
-import fr.proline.studio.parameter.ParameterList;
-import fr.proline.studio.parameter.StringParameter;
-import fr.proline.studio.settings.FilePreferences;
-import fr.proline.studio.settings.SettingsDialog;
-import fr.proline.studio.settings.SettingsUtils;
+import fr.proline.studio.gui.DefaultStorableDialog;
+import fr.proline.studio.parameter.*;
 import fr.proline.studio.utils.IconManager;
-import java.awt.Dialog;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Window;
+
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 import java.util.prefs.Preferences;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import org.openide.util.NbBundle;
-import org.openide.util.NbPreferences;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author VD225637
  */
-public class ImportMaxQuantResultDialog extends DefaultDialog {
+public class ImportMaxQuantResultDialog extends DefaultStorableDialog {
 
     private final static String SETTINGS_KEY = "ImportMaxQuantResult";
 
@@ -76,7 +51,6 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
 
     //To select folder containing result
     private JList<File> m_fileList;
-    private JScrollPane m_fileListScrollPane;
     private JButton m_addFileButton;
     private JButton m_removeFileButton;
     private String m_defaultImportMQPath;
@@ -89,7 +63,7 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
             m_singletonDialog = new ImportMaxQuantResultDialog(parent);
         }
 
-        m_singletonDialog.reinitialize();
+        m_singletonDialog.resetParameters();
 
         return m_singletonDialog;
     }
@@ -99,8 +73,6 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
 
         setTitle("Import MaxQuant Results");
 
-        setButtonVisible(BUTTON_LOAD, true);
-        setButtonVisible(BUTTON_SAVE, true);
         setDocumentationSuffix("h.1tuee74");
         setResizable(true);
         setMinimumSize(new Dimension(200, 240));
@@ -149,7 +121,7 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
         fileSelectionPanel.setBorder(BorderFactory.createTitledBorder(" Files Selection "));
 
         m_fileList = new JList<>(new DefaultListModel());
-        m_fileListScrollPane = new JScrollPane(m_fileList) {
+        JScrollPane m_fileListScrollPane = new JScrollPane(m_fileList) {
 
             private Dimension preferredSize = new Dimension(360, 200);
 
@@ -305,14 +277,6 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
         return allParametersPanel;
     }
 
-    private void reinitialize() {
-        // reinit of files selection
-        ((DefaultListModel) m_fileList.getModel()).removeAllElements();
-        m_removeFileButton.setEnabled(false);
-        setStatus(false, String.format("%d file(s)", m_fileList.getModel().getSize()));
-        restoreInitialParameters(NbPreferences.root());
-    }
-
     public long getInstrumentId() {
         InstrumentConfiguration instrument = (InstrumentConfiguration) m_sourceParameterList.getParameter("instrument").getObjectValue();
         return instrument.getId();
@@ -338,6 +302,65 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
         return filePaths;
     }
 
+
+    /***  DefaultStorableDialog Abstract methods ***/
+
+    @Override
+    protected String getSettingsKey() {
+        return SETTINGS_KEY;
+    }
+
+    @Override
+    protected boolean checkParameters() {
+
+        // check source parameters
+        ParameterError error = m_sourceParameterList.checkParameters();
+
+        // report error
+        if (error != null) {
+            setStatus(true, error.getErrorMessage());
+            highlight(error.getParameterComponent());
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    protected void resetParameters() {
+        // reinit of files selection
+        ((DefaultListModel) m_fileList.getModel()).removeAllElements();
+        m_removeFileButton.setEnabled(false);
+        setStatus(false, String.format("%d file(s)", m_fileList.getModel().getSize()));
+        restoreInitialParameters(NbPreferences.root());
+    }
+
+    @Override
+    protected void loadParameters(Preferences filePreferences) throws Exception {
+        Preferences preferences = NbPreferences.root();
+        String[] keys = filePreferences.keys();
+        for (int i = 0; i < keys.length; i++) {
+            String key = keys[i];
+            String value = filePreferences.get(key, null);
+            preferences.put(key, value);
+        }
+
+        restoreInitialParameters(preferences);
+
+        m_sourceParameterList.loadParameters(filePreferences);
+    }
+
+    @Override
+    protected void saveParameters(Preferences preferences) {
+        // save file path
+        if (m_defaultImportMQPath != null) {
+            preferences.put("DefaultImportMQResultPath", m_defaultImportMQPath);
+        }
+
+        // Save Other Parameters
+        m_sourceParameterList.saveParameters(preferences);
+    }
+
     @Override
     protected boolean okCalled() {
 
@@ -356,65 +379,6 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
         return true;
     }
 
-    @Override
-    protected boolean saveCalled() {
-        // check parameters
-        if (!checkParametersForSave()) {
-            return false;
-        }
-
-        JFileChooser fileChooser = SettingsUtils.getFileChooser(SETTINGS_KEY);
-        int result = fileChooser.showSaveDialog(this);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File f = fileChooser.getSelectedFile();
-            FilePreferences filePreferences = new FilePreferences(f, null, "");
-
-            saveParameters(filePreferences);
-
-            SettingsUtils.addSettingsPath(SETTINGS_KEY, f.getAbsolutePath());
-            SettingsUtils.writeDefaultDirectory(SETTINGS_KEY, f.getParent());
-        }
-
-        return false;
-    }
-
-    @Override
-    protected boolean loadCalled() {
-
-        SettingsDialog settingsDialog = new SettingsDialog(this, SETTINGS_KEY);
-        settingsDialog.setLocationRelativeTo(this);
-        settingsDialog.setVisible(true);
-
-        if (settingsDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
-            if (settingsDialog.isDefaultSettingsSelected()) {
-                reinitialize();
-            } else {
-                try {
-                    File settingsFile = settingsDialog.getSelectedFile();
-                    FilePreferences filePreferences = new FilePreferences(settingsFile, null, "");
-
-                    Preferences preferences = NbPreferences.root();
-                    String[] keys = filePreferences.keys();
-                    for (int i = 0; i < keys.length; i++) {
-                        String key = keys[i];
-                        String value = filePreferences.get(key, null);
-                        preferences.put(key, value);
-                    }
-
-                    restoreInitialParameters(preferences);
-
-                    m_sourceParameterList.loadParameters(filePreferences);
-
-                } catch (Exception e) {
-                    LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);
-                    setStatus(true, "Parsing of your Settings File failed");
-                }
-            }
-        }
-
-        return false;
-    }
-
     private boolean checkParametersForOK() {
         // check files selected
         int nbFiles = m_fileList.getModel().getSize();
@@ -424,34 +388,9 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
             return false;
         }
 
-        return checkParametersForSave();
+        return checkParameters();
     }
 
-    private boolean checkParametersForSave() {
-
-        // check source parameters
-        ParameterError error = m_sourceParameterList.checkParameters();
-
-        // report error
-        if (error != null) {
-            setStatus(true, error.getErrorMessage());
-            highlight(error.getParameterComponent());
-            return false;
-        }
-
-        return true;
-    }
-
-    private void saveParameters(Preferences preferences) {
-
-        // save file path
-        if (m_defaultImportMQPath != null) {
-            preferences.put("DefaultImportMQResultPath", m_defaultImportMQPath);
-        }
-
-        // Save Other Parameters    
-        m_sourceParameterList.saveParameters(preferences);
-    }
 
     private void restoreInitialParameters(Preferences preferences) {
         m_defaultImportMQPath = preferences.get("DefaultImportMQResultPath", null);
@@ -492,7 +431,7 @@ public class ImportMaxQuantResultDialog extends DefaultDialog {
         });
 
         m_accessionRegexpTF = new JTextField(20);
-        m_accessionRegexpTF.setToolTipText(NbBundle.getMessage(ImportMaxQuantResultDialog.class, "ImportMaxQuantResultDialog.accessionRegExp.Tooltip.text"));
+        m_accessionRegexpTF.setToolTipText("Specify regular expression to extract Protein accession from MaxQuant Protein Ids.\\n Leave blanc if not needed");
         StringParameter accessionParameter = new StringParameter("accession_regexp", "Accession regular expression", m_accessionRegexpTF, "", 0, null);
         accessionParameter.setUsed(true);
         parameterList.add(accessionParameter);

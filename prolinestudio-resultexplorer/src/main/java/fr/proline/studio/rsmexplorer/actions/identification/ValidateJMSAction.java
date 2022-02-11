@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -44,8 +44,8 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 
 /**
  * Action to validate or re-validate a Search Result
@@ -57,7 +57,7 @@ public class ValidateJMSAction extends AbstractRSMAction {
 
        
     public ValidateJMSAction(AbstractTree tree) {
-        super(NbBundle.getMessage(ValidateJMSAction.class, "CTL_ValidateAction"), tree);
+        super("Validate Search Result...", tree);
     }
 
     @Override
@@ -135,7 +135,7 @@ public class ValidateJMSAction extends AbstractRSMAction {
 
                 final DDataset d = dataSetNode.getDataset();
 
-                if (dataSetNode.hasResultSummary()) {                                        
+                if (dataSetNode.hasResultSummary() || propagateValidation ) {
                     removePreviousValidation(dataSetNode, propagateValidation);
                 } 
                 askValidation(dataSetNode, validationArguments, changeTypicalRules, scoringType, propagateValidation);
@@ -151,15 +151,15 @@ public class ValidateJMSAction extends AbstractRSMAction {
     private void removePreviousValidation(DataSetNode dataSetNode, boolean removeInHierarchy){
         
         if (removeInHierarchy) {
-        Runnable callback = new Runnable() {
-            @Override
-            public void run() {
-                removePreviousValidationImpl(dataSetNode, removeInHierarchy);
-            }
+            Runnable callback = new Runnable() {
+                @Override
+                public void run() {
+                    removePreviousValidationImpl(dataSetNode, removeInHierarchy);
+                }
 
-        };
-        
-        IdentificationTree.getCurrentTree().loadNode(dataSetNode, callback, true);
+            };
+
+            IdentificationTree.getCurrentTree().loadNode(dataSetNode, callback, true);
         } else {
             removePreviousValidationImpl(dataSetNode, removeInHierarchy);
         }

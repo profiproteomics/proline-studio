@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -25,7 +25,6 @@ import fr.profi.util.security.EncryptionManager;
 import fr.profi.util.security.SecurityUtils;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
-import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import static fr.proline.studio.dpm.task.util.JMSConnectionManager.JMS_EXPIRED_MSG_ERROR_CODE;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.util.HashMap;
@@ -44,6 +43,8 @@ public class AuthenticateUserTask extends AbstractJMSTask {
     private String m_password;
     private String[] m_databasePassword;
     private static int TASK_TIMEOUT_MS = 20000;
+
+    public static int count = 0;
             
     public AuthenticateUserTask(AbstractJMSCallback callback, String m_userName, String m_password, String[] m_databasePassword) {
         super(callback, true,new TaskInfo("Check User " + m_userName, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
@@ -51,6 +52,8 @@ public class AuthenticateUserTask extends AbstractJMSTask {
         this.m_password = m_password;
         this.m_databasePassword = m_databasePassword;
         super.setResponseTimeout(TASK_TIMEOUT_MS);
+
+        count++;
     }
     
     @Override
@@ -59,14 +62,13 @@ public class AuthenticateUserTask extends AbstractJMSTask {
         final JSONRPC2Request jsonRequest = new JSONRPC2Request(JMSConnectionManager.PROLINE_USER_AUTHENTICATE_METHOD_NAME, Integer.valueOf(m_taskInfo.getId()));
         jsonRequest.setNamedParams(createParams());
 
-        final TextMessage message = AccessJMSManagerThread.getAccessJMSManagerThread().getSession().createTextMessage(jsonRequest.toJSONString());
+        final TextMessage message = m_session.createTextMessage(jsonRequest.toJSONString());
 
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/admin/UserAccount");
-        addSourceToMessage(message);     
-        addDescriptionToMessage(message);
-        
+        addSupplementaryInfo(message);
+
         setTaskInfoRequest(message.getText());
         //  Send the Message
         m_producer.send(message);
@@ -92,6 +94,8 @@ public class AuthenticateUserTask extends AbstractJMSTask {
 
         final JSONRPC2Message jsonMessage = JSONRPC2Message.parse(jsonString);
         if(jsonMessage instanceof JSONRPC2Notification) {
+            System.out.println(count);
+
             m_loggerProline.warn("JSON Notification method: " + ((JSONRPC2Notification) jsonMessage).getMethod()+" instead of JSON Response");
             throw new Exception("Invalid JSONRPC2Message type");
             

@@ -157,10 +157,16 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
         m_taskInfo.setRequestContent(content);
     }
 
+    protected void  addSupplementaryInfo(Message message, Long projectId )throws JMSException {
+        addSourceToMessage(message);
+        addDescriptionToMessage(message);
+        addProjectIdToMessage(message, projectId);
+    }
+
     protected void  addSupplementaryInfo(Message message)throws JMSException {
         addSourceToMessage(message);
         addDescriptionToMessage(message);
-        addProjectIdToMessage(message);
+        addProjectIdToMessage(message, null);
     }
 
     protected void addSourceToMessage(Message message) throws JMSException {
@@ -187,12 +193,17 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_DESCR_KEY, m_taskInfo.getTaskDescription());
     }
 
-    protected void addProjectIdToMessage(Message message) throws JMSException {
-
-        Project p = DatabaseDataManager.getDatabaseDataManager().getCurrentProject();
+    protected void addProjectIdToMessage(Message message, Long projectId) throws JMSException {
         String pId = null;
-        if(p!=null)
-            pId = String.valueOf(p.getId());
+        if(projectId == null) {
+            Project p = DatabaseDataManager.getDatabaseDataManager().getCurrentProject();
+            if(p!=null)
+                projectId = p.getId();
+        }
+
+        if(projectId != null)
+            pId = String.valueOf(projectId);
+
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_PROJECT_ID_KEY, pId);
     }
 

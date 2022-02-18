@@ -27,10 +27,11 @@ public class ViewColocalizedPTMClustersAction extends AbstractTableAction {
     }
 
     PTMClusterTableModel ptmTbModel = (PTMClusterTableModel) ((CompoundTableModel)tableModel).getBaseModel();
+    FilterTableModelInterface filterTableModel = (FilterTableModelInterface) tableModel;
 
     //Get index in inital model (no sorting/filtering)
     int selectFilteredModelRow = table.convertRowIndexToModel(selectedRows[0]);
-    int selectClusterModelRow = ((FilterTableModelInterface) tableModel).convertRowToOriginalModel(selectFilteredModelRow);
+    int selectClusterModelRow = filterTableModel.convertRowToOriginalModel(selectFilteredModelRow);
 
     //Get PTMCLuster at specified index
     PTMCluster cluster = (PTMCluster) ptmTbModel.getRowValue(PTMCluster.class, selectClusterModelRow);
@@ -38,7 +39,10 @@ public class ViewColocalizedPTMClustersAction extends AbstractTableAction {
     //Get PTMCluster colocalized clusters and filter table with these clusters only
     if(cluster != null){
       List<PTMCluster> colocClusters = cluster.getPTMDataset().getColocatedClusters(cluster);
-      HashSet<Integer> restrainRowSet = ((FilterTableModelInterface) tableModel).getRestrainRowSet();
+      if(colocClusters.isEmpty())
+        return;
+
+      HashSet<Integer> restrainRowSet = filterTableModel.getRestrainRowSet();
       if (restrainRowSet == null) {
         restrainRowSet = new HashSet<>();
       } else {
@@ -46,18 +50,16 @@ public class ViewColocalizedPTMClustersAction extends AbstractTableAction {
       }
 
       //Reset filter to access all rows
-      ((FilterTableModelInterface) tableModel).restrain(restrainRowSet);
+      filterTableModel.restrain(null);
 
       for (PTMCluster colocCl : colocClusters) {
 
         //index in initial model
         int modelIndex = ptmTbModel.getModelIndexFor(colocCl);
-        // index in view
-        int originalModelRow = ((FilterTableModelInterface) tableModel).convertRowToOriginalModel(modelIndex);
-        restrainRowSet.add(originalModelRow);
+        restrainRowSet.add(modelIndex);
       }
 
-      ((FilterTableModelInterface) tableModel).restrain(restrainRowSet);
+      filterTableModel.restrain(restrainRowSet);
     }
   }
 

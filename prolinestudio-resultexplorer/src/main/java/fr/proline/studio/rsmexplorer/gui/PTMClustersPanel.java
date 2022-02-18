@@ -42,7 +42,6 @@ import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.parameter.SettingsButton;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataAnalyzerWindowBoxManager;
-import fr.proline.studio.pattern.DataBoxPTMClusters;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.progress.ProgressBarDialog;
 import  fr.proline.studio.rsmexplorer.DataBoxViewerManager.REASON_MODIF;

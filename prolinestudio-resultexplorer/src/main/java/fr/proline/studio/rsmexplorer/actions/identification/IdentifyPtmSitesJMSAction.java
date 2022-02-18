@@ -63,11 +63,17 @@ public class IdentifyPtmSitesJMSAction extends AbstractRSMAction {
     int nbNodes = selectedNodes.length;
 
     if (nbNodes > 0) {
-      List<Ptm> ptms = new ArrayList<>();
+      //Test if some nodes has already loaded PTMDataset
+      boolean isPTMDatasetLoaded = false;
       //Retrieve potential PTMs from dataset
+      List<Ptm> ptms = new ArrayList<>();
       for (int i = 0; i < nbNodes; i++) {
         ArrayList<PtmSpecificity> ptmSpecificities = new ArrayList<>();
         DataSetNode node = (DataSetNode) selectedNodes[i];
+        if(DatabaseDataManager.getDatabaseDataManager().getPTMDatasetSetForDS(node.getDataset().getId()) != null ||
+                DatabaseDataManager.getDatabaseDataManager().getPTMDatasetSetForDS(node.getDataset().getId()) != null)
+          isPTMDatasetLoaded = true;
+
         DatabasePTMsTask ptmTask = new DatabasePTMsTask(null);
         ptmTask.initLoadUsedPTMs(node.getDataset().getProject().getId(), node.getDataset().getResultSummaryId(), ptmSpecificities);
         ptmTask.fetchData();
@@ -82,9 +88,12 @@ public class IdentifyPtmSitesJMSAction extends AbstractRSMAction {
       dialog.setVisible(true);
       if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
 
+        //Test if PTMDataset loaded
+
         //Alert user : previous modification view (Site/Cluster) should be closed in order to load new data
-        InfoDialog id = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.NO_ICON,"Run Identify Modification Sites","Be sure to close all previous Modification Site/Cluster view !" +
-                "\n\nWarning: If you have previously saved annotated information on this dataset, it will be deleted!\nAre you sure you want to run \"Identify Modification Sites \" ?", true);
+        StringBuilder msg = isPTMDatasetLoaded ? new StringBuilder("Be sure to close all previous Modification Site/Cluster view !\n\n") : new StringBuilder();
+        msg.append("Warning: Previously saved Annotated Modification Dataset will be deleted ! \nAre you sure you want to continue ?");
+        InfoDialog id = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING,"Run Identify Modification Sites",msg.toString());
         id.setButtonName(DefaultDialog.BUTTON_OK, "Yes");
         id.setButtonName(DefaultDialog.BUTTON_CANCEL, "No");
         id.centerToWindow(WindowManager.getDefault().getMainWindow());

@@ -37,24 +37,16 @@ public class InfoDialog extends DefaultDialog {
         NO_ICON
     }
     
-    private String m_message = null;
+    private String m_message;
     
     private JCheckBox m_showNextTimecheckBox = null;
-    private String m_showAtStartKey = null;
+    private String m_showAtStartKey;
     
     public InfoDialog(Window parent, InfoType type, String title, String message) {
-        this(parent, type, title, message, null, false);
-    }
-
-    public InfoDialog(Window parent, InfoType type, String title, String message, boolean forceUseLabel) {
-        this(parent, type, title, message, null, forceUseLabel);
+        this(parent, type, title, message, null);
     }
 
     public InfoDialog(Window parent, InfoType type, String title, String message, String showAtStartKey) {
-        this(parent, type, title, message, showAtStartKey, false);
-    }
-
-    public InfoDialog(Window parent, InfoType type, String title, String message, String showAtStartKey, boolean forceUseLabel) {
 
         super(parent);
 
@@ -90,7 +82,7 @@ public class InfoDialog extends DefaultDialog {
         leftImageLabel.setBackground(Color.white);
 
         // info panel
-        JPanel infoPanel = getInfoPanel(forceUseLabel);
+        JPanel infoPanel = getInfoPanel();
 
         
         JPanel internalPanel = new JPanel(new GridBagLayout());
@@ -136,7 +128,7 @@ public class InfoDialog extends DefaultDialog {
 
     }
 
-    private JPanel getInfoPanel(boolean forceUseLabel) {
+    private JPanel getInfoPanel() {
         JPanel infoPanel = new JPanel();
         infoPanel.setBackground(Color.white);
         
@@ -155,7 +147,7 @@ public class InfoDialog extends DefaultDialog {
         if (m_message != null) {
             
             c.gridwidth = 2;
-            if (m_message.length() < 200 || forceUseLabel) {
+            if (m_message.length() < 200 ) {
                 
                 String messageArray[] = m_message.split("\n");
                 Font font = null;

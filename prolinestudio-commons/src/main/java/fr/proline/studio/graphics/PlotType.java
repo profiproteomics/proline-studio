@@ -91,6 +91,7 @@ public enum PlotType {
                 acceptedValues.add(Double.class);
                 acceptedValues.add(Float.class);
                 acceptedValues.add(Integer.class);
+                acceptedValues.add(Long.class);
                 break;
             case SCATTER_PLOT:
             case LINEAR_PLOT:
@@ -99,6 +100,7 @@ public enum PlotType {
                 acceptedValues.add(Float.class);
                 acceptedValues.add(Integer.class);
                 acceptedValues.add(String.class);
+                acceptedValues.add(Long.class);
                 break;
         }
         return acceptedValues;

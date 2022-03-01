@@ -142,101 +142,120 @@ public class MapAlignmentPanel extends AbstractMapAlignmentPanel {
 
             long mapIdSrc = getSelectedMapId(m_sourceMapsCB);
             long mapIdDst = getSelectedMapId(m_destMapsCB);
+
             MapAlignment map = MapAlignmentConverter.getMapAlgn(mapIdSrc, mapIdDst, m_allMapAlignments);
-
             IonsRTTableModel cloudData = getCloudData(mapIdSrc);
-            if (cloudData != null) {
+            if (cloudData == null) {
+                logger.warn(" compute Loess, no Cloud data for source Map, id "+mapIdSrc);
+                return;
+            }
 
-                double bandwidth = 0.1;
+            IonsRTTableModel cloudData2 = map == null ? getCloudData(m_referenceMapId) : null;
+            if ( map == null && cloudData2 == null) {
+                logger.warn(" compute Loess, Not direct MAP, but no Cloud data for reference Map, id "+m_referenceMapId);
+                return;
+            }
 
-                LoessParametersDialog dialog = new LoessParametersDialog();
-                dialog.getValueTF().setText(Double.toString(bandwidth));
-                Point panelLocation = this.getLocationOnScreen();
-                dialog.setLocation(panelLocation.x + this.getWidth()/2, panelLocation.y+this.getHeight()/2);
-                dialog.setVisible(true);
+            double bandwidth = 0.1;
 
-                if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK){
+            LoessParametersDialog dialog = new LoessParametersDialog();
+            dialog.getValueTF().setText(Double.toString(bandwidth));
+            Point panelLocation = this.getLocationOnScreen();
+            dialog.setLocation(panelLocation.x + this.getWidth() / 2, panelLocation.y + this.getHeight() / 2);
+            dialog.setVisible(true);
 
-                    bandwidth = Double.parseDouble(dialog.getValueTF().getText());
-
-                    int sourceMapRTColumn = cloudData.getColumnIndex(mapIdSrc);
-                    int destMapDeltaRTColumn = cloudData.getColumnIndex(mapIdDst);
-                    int size = cloudData.getRowCount();
-                    List<Pair<Double, Double>> data = new ArrayList<>(size);
-
-                    double ftAlignmentTimeTolerance = ((DataboxMapAlignment) this.m_dataBox).getFeatureAlignmentTimeTolerance();
-
-                    for (int i = 0; i < size; i++) {
-                        if (!cloudData.isCrossAssigned(i, destMapDeltaRTColumn)) {
-                            Object value = cloudData.getDataValueAt(i, sourceMapRTColumn);
-                            Double rt = ((value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue());
-                            value = cloudData.getDataValueAt(i, destMapDeltaRTColumn);
-                            Double deltaRT = ((value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue());
-                            if (Math.abs(deltaRT) <= ftAlignmentTimeTolerance)
-                                data.add(Pair.of(rt, deltaRT));
-                        }
-                    }
-
-                    Map<Double, Double> landmarks = data.stream().distinct().collect(groupingBy(p -> p.getKey(), averagingDouble(p -> p.getValue())));
-                    data = landmarks.entrySet().stream().map(e -> Pair.of(e.getKey(), e.getValue())).sorted().collect(Collectors.toList());
-
-                    double[] x = new double[data.size()];
-                    double[] y = new double[data.size()];
-                    for (int i = 0; i < data.size(); i++) {
-                        x[i] = data.get(i).getKey();
-                        y[i] = data.get(i).getValue();
-                    }
-                    try {
+            if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
 
 
-                        int robustness = 4; // LoessInterpolator.DEFAULT_ROBUSTNESS_ITERS
-                        double accuracy = 1e-24; //LoessInterpolator.DEFAULT_ACCURACY
-                        LoessInterpolator interpolator = new LoessInterpolator(bandwidth, robustness, accuracy);
-                        double[] yfit = interpolator.smooth(x, y);
-                        createRegressionPlot(x, yfit);
+                bandwidth = Double.parseDouble(dialog.getValueTF().getText());
 
-                        double[] residuals = new double[yfit.length];
-                        for (int k = 0; k < yfit.length; k++) {
-                            residuals[k] = (y[k] - yfit[k]) * (y[k] - yfit[k]);
-                        }
-                        
-                        interpolator = new LoessInterpolator(bandwidth, robustness, accuracy);
-                        double[] sd = interpolator.smooth(x, residuals);
-                        double[] upper = new double[yfit.length];
-                        double[] lower = new double[yfit.length];
-                        // 4.417 for 99.999% probability
-                        // 3.890 for 99.99% probability
-                        double nsigma = 3.890;
-
-                        for (int k = 0; k < yfit.length; k++) {
-                            double s = Math.sqrt(Math.max(0, sd[k]));
-                            upper[k] = yfit[k] + nsigma * s;
-                            lower[k] = yfit[k] - nsigma * s;
-                        }
-
-                        PrintWriter writer = new PrintWriter("squared_residuals.csv");
-                        writer.println("rt, deltaRt, predDeltaRt, residuals, sd, upperRt, lowerRT");
-                        for (int k = 0; k < yfit.length; k++) {
-                            writer.println(x[k]+","+y[k]+","+yfit[k]+","+residuals[k]+","+Math.sqrt(Math.max(0, sd[k]))+","+upper[k]+","+lower[k]);
-                        }
-
-                        writer.close();
-
-                        createRegressionPlot(x, upper);
-                        createRegressionPlot(x, lower);
-
-                        m_removeLoessCurveBtn.setEnabled(true);
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                if (map != null) { // Direct Map exist between src and dest
+                    computeAndDisplayLoessForMaps(cloudData, mapIdSrc, mapIdDst, bandwidth, m_alignmentGraphicPanel);
+                } else {
+                    //2 Plots / Map  src -> Ref, Ref -> dest
+                    computeAndDisplayLoessForMaps(cloudData, mapIdSrc, m_referenceMapId, bandwidth, m_alignmentGraphicPanel);
+                    computeAndDisplayLoessForMaps(cloudData2, m_referenceMapId, mapIdDst, bandwidth, m_alignmentGraphicPanel_2);
                 }
+                m_removeLoessCurveBtn.setEnabled(true);
+            }
+        }
+    }
+
+    private void computeAndDisplayLoessForMaps(IonsRTTableModel cloudData, Long mapIdSrc,Long mapIdDst, double bandwidth, BasePlotPanel graphicalPanel ){
+
+        int sourceMapRTColumn = cloudData.getColumnIndex(mapIdSrc);
+        int destMapDeltaRTColumn = cloudData.getColumnIndex(mapIdDst);
+        int size = cloudData.getRowCount();
+        List<Pair<Double, Double>> data = new ArrayList<>(size);
+
+        double ftAlignmentTimeTolerance = ((DataboxMapAlignment) this.m_dataBox).getFeatureAlignmentTimeTolerance();
+
+        for (int i = 0; i < size; i++) {
+            if (!cloudData.isCrossAssigned(i, destMapDeltaRTColumn)) {
+                Object value = cloudData.getDataValueAt(i, sourceMapRTColumn);
+                Double rt = ((value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue());
+                value = cloudData.getDataValueAt(i, destMapDeltaRTColumn);
+                Double deltaRT = ((value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue());
+                if (Math.abs(deltaRT) <= ftAlignmentTimeTolerance)
+                    data.add(Pair.of(rt, deltaRT));
             }
         }
 
+        Map<Double, Double> landmarks = data.stream().distinct().collect(groupingBy(p -> p.getKey(), averagingDouble(p -> p.getValue())));
+        data = landmarks.entrySet().stream().map(e -> Pair.of(e.getKey(), e.getValue())).sorted().collect(Collectors.toList());
+
+        double[] x = new double[data.size()];
+        double[] y = new double[data.size()];
+        for (int i = 0; i < data.size(); i++) {
+            x[i] = data.get(i).getKey();
+            y[i] = data.get(i).getValue();
+        }
+
+        try {
+            int robustness = 4; // LoessInterpolator.DEFAULT_ROBUSTNESS_ITERS
+            double accuracy = 1e-24; //LoessInterpolator.DEFAULT_ACCURACY
+            LoessInterpolator interpolator = new LoessInterpolator(bandwidth, robustness, accuracy);
+            double[] yfit = interpolator.smooth(x, y);
+            createRegressionPlot(x, yfit, graphicalPanel);
+
+            double[] residuals = new double[yfit.length];
+            for (int k = 0; k < yfit.length; k++) {
+                residuals[k] = (y[k] - yfit[k]) * (y[k] - yfit[k]);
+            }
+
+            interpolator = new LoessInterpolator(bandwidth, robustness, accuracy);
+            double[] sd = interpolator.smooth(x, residuals);
+            double[] upper = new double[yfit.length];
+            double[] lower = new double[yfit.length];
+            // 4.417 for 99.999% probability
+            // 3.890 for 99.99% probability
+            double nsigma = 3.890;
+
+            for (int k = 0; k < yfit.length; k++) {
+                double s = Math.sqrt(Math.max(0, sd[k]));
+                upper[k] = yfit[k] + nsigma * s;
+                lower[k] = yfit[k] - nsigma * s;
+            }
+
+            PrintWriter writer = new PrintWriter("squared_residuals.csv");
+            writer.println("rt, deltaRt, predDeltaRt, residuals, sd, upperRt, lowerRT");
+            for (int k = 0; k < yfit.length; k++) {
+                writer.println(x[k] + "," + y[k] + "," + yfit[k] + "," + residuals[k] + "," + Math.sqrt(Math.max(0, sd[k])) + "," + upper[k] + "," + lower[k]);
+            }
+
+            writer.close();
+
+            createRegressionPlot(x, upper, graphicalPanel);
+            createRegressionPlot(x, lower, graphicalPanel);
+
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    private void createRegressionPlot(double[] x, double[] newDeltas) {
+    private void createRegressionPlot(double[] x, double[] newDeltas, BasePlotPanel graphicPanel ) {
         List<Pair<Double, Double>> data;
         data = new ArrayList<>(x.length);
         for (int i = 0 ; i < x.length; i++) {
@@ -245,19 +264,19 @@ public class MapAlignmentPanel extends AbstractMapAlignmentPanel {
 
         BeanTableModel model = new BeanTableModel(Pair.class);
         model.setData(data);
-        String xAxisTitle = m_alignmentGraphicPanel.getXAxis().getTitle();
-        String yAxisTitle = m_alignmentGraphicPanel.getYAxis().getTitle();
+        String xAxisTitle = graphicPanel.getXAxis().getTitle();
+        String yAxisTitle = graphicPanel.getYAxis().getTitle();
 
-        PlotLinear regressionCurve = new PlotLinear(m_alignmentGraphicPanel, model, null ,0, 3);
+        PlotLinear regressionCurve = new PlotLinear(graphicPanel, model, null ,0, 3);
         PlotInformation plotInfo = new PlotInformation();
         plotInfo.setPlotColor(CyclicColorPalette.GRAY_DARK);
         regressionCurve.setPlotInformation(plotInfo);
         regressionCurve.setStroke(1f);
-        m_alignmentGraphicPanel.addPlot(regressionCurve, true);
+        graphicPanel.addPlot(regressionCurve, true);
         // restore axis titles
-        m_alignmentGraphicPanel.getXAxis().setTitle(xAxisTitle);
-        m_alignmentGraphicPanel.getYAxis().setTitle(yAxisTitle);
-        m_alignmentGraphicPanel.repaint();
+        graphicPanel.getXAxis().setTitle(xAxisTitle);
+        graphicPanel.getYAxis().setTitle(yAxisTitle);
+        graphicPanel.repaint();
     }
 
 

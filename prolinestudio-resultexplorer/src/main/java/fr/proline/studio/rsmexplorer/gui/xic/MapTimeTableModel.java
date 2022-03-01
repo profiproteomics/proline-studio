@@ -61,7 +61,7 @@ public class MapTimeTableModel implements ExtendedTableModelInterface {
         m_title = title;
         m_inverseDeltaSign = true;
         m_columnNames[0] = "Time in Map (min)";
-        m_columnNames[1] = "Delta moz (experimental - theorical)" ;
+        m_columnNames[1] = "Delta moz (experimental - theoretical)" ;
     }
 
     /**
@@ -80,7 +80,7 @@ public class MapTimeTableModel implements ExtendedTableModelInterface {
         m_title = title;
 
         m_columnNames[0] = "Time in Map " + fromMapName + " (min)";
-        m_columnNames[1] = "Delta time in Map " + toMapName + " (s)";
+        m_columnNames[1] = "Delta time to Map " + toMapName + " (s)";
     }
 
 

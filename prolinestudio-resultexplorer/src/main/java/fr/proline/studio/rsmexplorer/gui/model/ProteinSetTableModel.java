@@ -138,7 +138,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
         } else if(colUsed == COLTYPE_PROTEIN_SET_GENE_NAME){
             return "Correcponding Gene Name. This information is fill in during 'Retrieve Sequence' task.";
         } else if(colUsed == COLTYPE_OBSERVABLE_PEPTIDES){
-            return "Theorical observable peptides count. This information is fill in during 'Retrieve Sequence' task.";
+            return "Theoretical observable peptides count. This information is fill in during 'Retrieve Sequence' task.";
         } else {
             return getColumnName(col);
         }

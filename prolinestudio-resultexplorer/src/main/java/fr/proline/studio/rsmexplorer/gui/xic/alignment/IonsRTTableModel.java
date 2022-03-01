@@ -78,7 +78,7 @@ public class IonsRTTableModel implements ExtendedTableModelInterface {
         m_columnName[PEPTIDE_SEQUENCE] = "Peptide Sequence";
         m_columnName[CHARGE] = "Charge";
         m_columnName[MOZ] = "moz";
-        m_columnName[DELTA_MOZ] = "Delta moz (experimental - theorical)";
+        m_columnName[DELTA_MOZ] = "Delta moz (experimental - theoretical)";
         m_columnName[ELUTION_TIME_FROM] = "Time in Map " + m_mapTitleByRsmId.get(rsmIdArray[0]) + " (min)";
         for (int i = START_ELUTION_TO; i < rsmIdArray.length + ELUTION_TIME_FROM; i++) {
             m_columnName[i] = "Delta time in Map " + m_mapTitleByRsmId.get(rsmIdArray[i - ELUTION_TIME_FROM]) + " (s)";
@@ -100,12 +100,13 @@ public class IonsRTTableModel implements ExtendedTableModelInterface {
                 continue;
 
             qPepIonByQCId = masterQuantPeptideIon.getQuantPeptideIonByQchIds();
+            DQuantPeptideIon srcQPepIon;
             if (qPepIonByQCId == null || qPepIonByQCId.isEmpty()) {
                 continue;
             } else {
                 Long rsmIdFrom = rsmIdArray[0];
                 m_modelName = mapTitleByRsmId.get(rsmIdFrom) + " ElutionTime compare table model";
-                DQuantPeptideIon srcQPepIon = qPepIonByQCId.get(rsmIdFrom);
+                srcQPepIon = qPepIonByQCId.get(rsmIdFrom);
                 if (srcQPepIon == null) {
                     continue;
                 }
@@ -124,13 +125,13 @@ public class IonsRTTableModel implements ExtendedTableModelInterface {
                 }
             }
             deltaMoz =  Double.NaN;
-            if( masterQuantPeptideIon.getPeptideInstance() != null && masterQuantPeptideIon.getPeptideInstance().getPeptide() != null  && masterQuantPeptideIon.getRepresentativePepMatch() != null)
-                deltaMoz =  PeptideClassesUtils.getPPMFor(masterQuantPeptideIon.getRepresentativePepMatch(),masterQuantPeptideIon.getPeptideInstance().getPeptide() );
+            if( masterQuantPeptideIon.getPeptideInstance().getPeptide() != null )
+                deltaMoz =  PeptideClassesUtils.getDeltaMozFor(srcQPepIon.getMoz(), masterQuantPeptideIon.getCharge(), masterQuantPeptideIon.getPeptideInstance().getPeptide() );
             m_data.add(
                     new IonRTMoZRow(peptideInstance.getPeptideId(),
                                  peptideInstance.getPeptide().getSequence(),
                                  masterQuantPeptideIon.getCharge(),
-                                 masterQuantPeptideIon.getMoz(),
+                                 srcQPepIon.getMoz(),
                                  deltaMoz,
                                  rTimeFrom,
                                  rTimeTo,

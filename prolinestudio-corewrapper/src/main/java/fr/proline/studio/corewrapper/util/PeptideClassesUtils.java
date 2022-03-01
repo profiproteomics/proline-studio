@@ -41,7 +41,20 @@ public class PeptideClassesUtils {
             }
         return ppm;
     }
-    
+
+    public static Float getDeltaMozFor(double expMoz, double charge,  Peptide peptide) {
+        double calculatedMass = peptide.getCalculatedMass() ;
+        double theoreticalMoz = (calculatedMass + (charge * PROTON_MASS)) / charge;
+        float ppm = (float) (((expMoz-theoreticalMoz)*EXP_CSTE)/theoreticalMoz);
+
+        if ((calculatedMass >= -1e-10) && (calculatedMass <= 1e-10)) {
+            //calculatedMass == 0; // it was a bug, does no longer exist, but 0 values can exist in database.
+            ppm = 0;
+        }
+        return ppm;
+    }
+
+
     /**
      * 
      * @param petideIonMoz  

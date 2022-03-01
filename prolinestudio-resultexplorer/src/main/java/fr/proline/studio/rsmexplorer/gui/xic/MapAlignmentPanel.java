@@ -349,7 +349,7 @@ public class MapAlignmentPanel extends AbstractMapAlignmentPanel {
         } catch (Exception e) {
             logger.error("Error while retrieving time in map alignment: " + e);
         }
-        return calcTime;
+        return (calcTime/ 60); //Back to minute
     }
 
 
@@ -368,16 +368,16 @@ public class MapAlignmentPanel extends AbstractMapAlignmentPanel {
             if (map != null) // exhaustive mode, or in Iterative mode, one of mapIdA,mapIdZ is the reference map
             {
                 m_plotPanel2.setVisible(false);
-                setDataGraphicTableModel(map, m_alignmentGraphicPanel);
+                setDataGraphicTableModel(map, true);//m_alignmentGraphicPanel
 
             } else {
                 //from source to reference
                 map = MapAlignmentConverter.getMapAlgn(mapIdSrc, m_referenceMapId, m_allMapAlignments);
                 if (map != null) { // in simple parameters extraction abundance, there is not any map Alignment
-                    setDataGraphicTableModel(map, m_alignmentGraphicPanel);
+                    setDataGraphicTableModel(map, true);//m_alignmentGraphicPanel
                     //from reference to source
                     map = MapAlignmentConverter.getMapAlgn(m_referenceMapId, mapIdDst, m_allMapAlignments);
-                    setDataGraphicTableModel(map, m_alignmentGraphicPanel_2);
+                    setDataGraphicTableModel(map, false);//m_alignmentGraphicPanel_2
                     m_plotPanel2.setVisible(true);
                     this.m_splitPane.resetToPreferredSizes();
                 }
@@ -385,7 +385,7 @@ public class MapAlignmentPanel extends AbstractMapAlignmentPanel {
         }
     }
 
-    private void setDataGraphicTableModel(MapAlignment mapAlignment, BasePlotPanel graphicPanel) {
+    private void setDataGraphicTableModel(MapAlignment mapAlignment, boolean toFirstPanel) {
 
         Long mapIdSrc = mapAlignment.getSourceMap().getId();
         Long mapIdDst = mapAlignment.getDestinationMap().getId();
@@ -398,6 +398,7 @@ public class MapAlignmentPanel extends AbstractMapAlignmentPanel {
         double featureAlignmentTimeTolerance = ((DataboxMapAlignment) this.m_dataBox).getFeatureAlignmentTimeTolerance();
 
         ExtendedTableModelInterface extendedTableModel = new MapTimeTableModel(mapAlignment.getMapTimeList(), color, title, mapTitleFrom, mapTitleTo);
+        BasePlotPanel graphicPanel = toFirstPanel ? m_alignmentGraphicPanel : m_alignmentGraphicPanel_2;
         PlotLinear alignmentCurve = new PlotLinear(graphicPanel, extendedTableModel,null, PlotBaseAbstract.COL_X_ID, PlotBaseAbstract.COL_Y_ID);
 
         alignmentCurve.setPlotInformation(extendedTableModel.getPlotInformation());
@@ -466,18 +467,23 @@ public class MapAlignmentPanel extends AbstractMapAlignmentPanel {
                 int axisX = cloudData.getColumnIndex(mapIdSrc);
                 int axisY = cloudData.getColumnIndex(mapIdDst);
                 m_removeLoessCurveBtn.setEnabled(false);
-                m_ionsScatterPlot = new IonsRTScatterPlot(graphicPanel, cloudData, null, axisX, axisY);
-                m_ionsScatterPlot.showCrossAssignedIons(m_showHideCrossAssigned.getActionCommand().equals("HIDE"));
-                m_ionsScatterPlot.setColor(color);
-                m_ionsScatterPlot.setFeatureAlignmentTimeTolerance(featureAlignmentTimeTolerance);
+
+                IonsRTScatterPlot ionsScatterPlot = new IonsRTScatterPlot(graphicPanel, cloudData, null, axisX, axisY);
+                ionsScatterPlot.showCrossAssignedIons(m_showHideCrossAssigned.getActionCommand().equals("HIDE"));
+                ionsScatterPlot.setColor(color);
+                ionsScatterPlot.setFeatureAlignmentTimeTolerance(featureAlignmentTimeTolerance);
                 if (m_zoomMode == CLOUD_VIEW_BEST_FIT) {
                     //set visible Min Max, the real Min Max are too large to show the alignment PlotLinear
                     double yMax = alignmentCurve.getYMax();
                     double yMin = alignmentCurve.getYMin();
-                    m_ionsScatterPlot.setYMax(yMax + 2 * crossAssignmentTimeTolerance);
-                    m_ionsScatterPlot.setYMin(yMin - 2 * crossAssignmentTimeTolerance);
+                    ionsScatterPlot.setYMax(yMax + 2 * crossAssignmentTimeTolerance);
+                    ionsScatterPlot.setYMin(yMin - 2 * crossAssignmentTimeTolerance);
                 }
-                graphicPanel.addPlot(m_ionsScatterPlot);
+                if(toFirstPanel)
+                    m_ionsScatterPlot = ionsScatterPlot;
+                else
+                    m_ionsScatterPlot2 = ionsScatterPlot;
+                graphicPanel.addPlot(ionsScatterPlot);
             }
         }
         graphicPanel.repaint();

@@ -94,6 +94,7 @@ public abstract  class AbstractMapAlignmentPanel extends HourglassPanel implemen
 
   // for alignment iterative mode, sometimes, we should show 2 graphic
   protected BasePlotPanel m_alignmentGraphicPanel_2;
+  protected IonsRTScatterPlot m_ionsScatterPlot2;
   protected PlotPanel m_plotPanel2;
 
   protected boolean m_isInitialized = false;
@@ -180,22 +181,33 @@ public abstract  class AbstractMapAlignmentPanel extends HourglassPanel implemen
     cloudOptionPane.setLayout(new BoxLayout(cloudOptionPane, BoxLayout.LINE_AXIS));
 
     m_showHideCrossAssigned = new JButton();
-    m_showHideCrossAssigned.setIcon(IconManager.getIcon(IconManager.IconType.HIDE_CROSS_ASSIGNED));
-    m_showHideCrossAssigned.setActionCommand("HIDE");
+    m_showHideCrossAssigned.setIcon(IconManager.getIcon(IconManager.IconType.SHOW_CROSS_ASSIGNED));
+    m_showHideCrossAssigned.setActionCommand("SHOW");
     m_showHideCrossAssigned.setMargin(new Insets(2, 2, 2, 2));
     m_showHideCrossAssigned.setToolTipText("Show/Hide cross assigned ions");
     m_showHideCrossAssigned.addActionListener(e -> {
-      if (m_ionsScatterPlot != null) {
+      if (m_ionsScatterPlot != null || m_ionsScatterPlot2 != null) {
         if (e.getActionCommand().equals("HIDE")) {
-          m_ionsScatterPlot.showCrossAssignedIons(false);
+          if (m_ionsScatterPlot != null)
+            m_ionsScatterPlot.showCrossAssignedIons(false);
+          if (m_ionsScatterPlot2 != null)
+            m_ionsScatterPlot2.showCrossAssignedIons(false);
           m_showHideCrossAssigned.setActionCommand("SHOW");
           m_showHideCrossAssigned.setIcon(IconManager.getIcon(IconManager.IconType.SHOW_CROSS_ASSIGNED));
+
         } else {
-          m_ionsScatterPlot.showCrossAssignedIons(true);
+          if (m_ionsScatterPlot2 != null)
+            m_ionsScatterPlot2.showCrossAssignedIons(true);
+          if (m_ionsScatterPlot != null)
+            m_ionsScatterPlot.showCrossAssignedIons(true);
           m_showHideCrossAssigned.setActionCommand("HIDE");
           m_showHideCrossAssigned.setIcon(IconManager.getIcon(IconManager.IconType.HIDE_CROSS_ASSIGNED));
         }
         m_alignmentGraphicPanel.repaintUpdateDoubleBuffer();
+        m_plotPanel2.repaint();
+        if(m_alignmentGraphicPanel_2.isVisible())
+          m_alignmentGraphicPanel_2.repaintUpdateDoubleBuffer();
+
       }
     });
 

@@ -16,45 +16,36 @@
  */
 package fr.proline.studio.rsmexplorer.gui.model;
 
-import fr.proline.studio.WindowManager;
-import fr.proline.studio.dock.gui.InfoLabel;
-import fr.proline.studio.table.*;
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DMsQuery;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.corewrapper.util.PeptideClassesUtils;
-import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
-import fr.proline.studio.export.ExportModelUtilities;
+import fr.proline.studio.dock.gui.InfoLabel;
 import fr.proline.studio.export.ExportFontData;
-import fr.proline.studio.filter.ConvertValueInterface;
-import fr.proline.studio.filter.DoubleFilter;
-import fr.proline.studio.filter.Filter;
-import fr.proline.studio.filter.IntegerFilter;
-import fr.proline.studio.filter.StringFilter;
+import fr.proline.studio.export.ExportModelUtilities;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.MsQueryRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
-import fr.proline.studio.extendedtablemodel.CompoundTableModel;
-import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
-import fr.proline.studio.filter.StringDiffFilter;
-import fr.proline.studio.table.TableDefaultRendererManager;
+import fr.proline.studio.table.*;
+import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import javax.swing.table.TableCellRenderer;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
 
 /**
  * Table Model for PeptideInstance of a Rsm
@@ -192,7 +183,9 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
                 return (peptideMatch == null) ? null : peptideMatch.getPeptide().getSequence().length();
             }
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ: {
-                return Float.valueOf((float) peptideMatch.getExperimentalMoz());
+                BigDecimal bd = new BigDecimal(peptideMatch.getExperimentalMoz());
+                Float expMoz = bd.setScale(4, RoundingMode.HALF_UP).floatValue();
+                return expMoz;
             }
             case COLTYPE_PEPTIDE_PPM: {
                 float ppm = PeptideClassesUtils.getPPMFor(peptideMatch, peptideMatch.getPeptide());
@@ -201,7 +194,8 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
             case COLTYPE_PEPTIDE_CALCULATED_MASS: {
 
                 Peptide peptide = peptideMatch.getPeptide();
-                Float calculatedMass = Float.valueOf((float) peptide.getCalculatedMass());
+                BigDecimal bd = new BigDecimal(peptide.getCalculatedMass());
+                Float calculatedMass = bd.setScale(4, RoundingMode.HALF_UP).floatValue();
                 return calculatedMass;
 
             }

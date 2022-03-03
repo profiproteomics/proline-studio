@@ -22,34 +22,28 @@ import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.corewrapper.util.PeptideClassesUtils;
-import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportFontData;
-import fr.proline.studio.filter.ConvertValueInterface;
-import fr.proline.studio.filter.DoubleFilter;
-import fr.proline.studio.filter.Filter;
-import fr.proline.studio.filter.IntegerFilter;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.MsQueryRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
-import fr.proline.studio.extendedtablemodel.CompoundTableModel;
-import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
-import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+
 import javax.swing.table.TableCellRenderer;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
 
 /**
  *
@@ -206,7 +200,9 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements GlobalT
             }
              
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ: {
-                lazyData.setData(Float.valueOf((float) peptideMatch.getExperimentalMoz()));
+                BigDecimal bd = new BigDecimal(peptideMatch.getExperimentalMoz());
+                Float expMoz = bd.setScale(4, RoundingMode.HALF_UP).floatValue();
+                lazyData.setData(expMoz);
                 return lazyData;
             }
             case COLTYPE_PEPTIDE_PPM: { 
@@ -230,7 +226,8 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements GlobalT
                     givePriorityTo(m_taskId, row, col);
                     lazyData.setData(null);
                 } else {
-                    Float calculatedMass = Float.valueOf((float) peptide.getCalculatedMass()) ;
+                    BigDecimal bd = new BigDecimal(peptide.getCalculatedMass());
+                    Float calculatedMass = bd.setScale(4, RoundingMode.HALF_UP).floatValue();
                     lazyData.setData(calculatedMass);
                 }
                 

@@ -25,8 +25,9 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
  */
 public class PeptideClassesUtils {
     
-    public static final double PROTON_MASS =1.007825; //1.007276466812;
-    public static final double PEPTIDE_ISOTOPE_SHIFT=1.00335;
+
+    public static final double PROTON_MASS = 1.007276466812;
+    public static final double PEPTIDE_ISOTOPE_SHIFT = 1.00335;
     final static double EXP_CSTE = StrictMath.pow(10, 6);
             
     public static Float getPPMFor(DPeptideMatch pepMatch, Peptide peptide) {

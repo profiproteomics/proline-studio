@@ -23,7 +23,10 @@ import fr.proline.studio.Exceptions;
 import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.tasks.xic.MapAlignmentConverter;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
-import fr.proline.studio.graphics.*;
+import fr.proline.studio.graphics.BasePlotPanel;
+import fr.proline.studio.graphics.PlotBaseAbstract;
+import fr.proline.studio.graphics.PlotInformation;
+import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.pattern.xic.DataboxMapAlignment;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.AbstractLabelFreeMSParamsPanel;
@@ -37,7 +40,6 @@ import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -236,14 +238,6 @@ public class MapAlignmentPanel extends AbstractMapAlignmentPanel {
                 upper[k] = yfit[k] + nsigma * s;
                 lower[k] = yfit[k] - nsigma * s;
             }
-
-            PrintWriter writer = new PrintWriter("squared_residuals.csv");
-            writer.println("rt, deltaRt, predDeltaRt, residuals, sd, upperRt, lowerRT");
-            for (int k = 0; k < yfit.length; k++) {
-                writer.println(x[k] + "," + y[k] + "," + yfit[k] + "," + residuals[k] + "," + Math.sqrt(Math.max(0, sd[k])) + "," + upper[k] + "," + lower[k]);
-            }
-
-            writer.close();
 
             createRegressionPlot(x, upper, graphicalPanel);
             createRegressionPlot(x, lower, graphicalPanel);

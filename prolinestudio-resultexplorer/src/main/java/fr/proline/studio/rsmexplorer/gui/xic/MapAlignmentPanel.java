@@ -214,8 +214,8 @@ public class MapAlignmentPanel extends AbstractMapAlignmentPanel {
         }
 
         try {
-            int robustness = 4; // LoessInterpolator.DEFAULT_ROBUSTNESS_ITERS
-            double accuracy = 1e-24; //LoessInterpolator.DEFAULT_ACCURACY
+            int robustness = 2; // LoessInterpolator.DEFAULT_ROBUSTNESS_ITERS
+            double accuracy = 1e-12; //LoessInterpolator.DEFAULT_ACCURACY
             LoessInterpolator interpolator = new LoessInterpolator(bandwidth, robustness, accuracy);
             double[] yfit = interpolator.smooth(x, y);
             createRegressionPlot(x, yfit, graphicalPanel);

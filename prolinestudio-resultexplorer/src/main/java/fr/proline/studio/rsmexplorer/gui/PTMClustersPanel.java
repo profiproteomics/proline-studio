@@ -826,8 +826,8 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
 
                 if (m_ptmClusterTableModel.getRowCount() > 0 && m_ptmClusterTable.getSelectedRowCount() > 1) {
                     List<PTMCluster> clusters = getSelectedPTMClusters();
-                    PTMDataset ptmDataset = (PTMDataset) m_dataBox.getData(PTMDataset.class);
-                    PTMDatasetPair ptmDatasetpair = (PTMDatasetPair) m_dataBox.getData(PTMDatasetPair.class);
+//                    PTMDataset ptmDataset = (PTMDataset) m_dataBox.getData(PTMDataset.class);
+//                    PTMDatasetPair ptmDatasetpair = (PTMDatasetPair) m_dataBox.getData(PTMDatasetPair.class);
 
                     PTMDataset ptmDS = clusters.get(0).getPTMDataset();
                     boolean merged = ptmDS.mergeClusters(clusters);

@@ -820,7 +820,7 @@ public class ValidationDialog extends DefaultStorableDialog implements Component
     }
 
     private void createParameters() {
-        m_psmPrefilterParameters = new AbstractParameter[11]; //<< get sync
+        m_psmPrefilterParameters = new AbstractParameter[12]; //<< get sync
         m_psmPrefilterParameters[0] = null;
         m_psmPrefilterParameters[1] = new IntegerParameter("PSM_" + ValidationTask.PSMFilter.RANK.key, ValidationTask.PSMFilter.RANK.name, new JTextField(6), new Integer(1), new Integer(0), new Integer(10));
         m_psmPrefilterParameters[1].setAssociatedData("<=");
@@ -842,8 +842,10 @@ public class ValidationDialog extends DefaultStorableDialog implements Component
         m_psmPrefilterParameters[8].setAssociatedData(":");
         m_psmPrefilterParameters[9] = new NoneParameter("PSM_" + ValidationTask.PSMFilter.SINGLE_PSM_RANK.key, ValidationTask.PSMFilter.SINGLE_PSM_RANK.name);
         m_psmPrefilterParameters[9].setAssociatedData(":");
-        m_psmPrefilterParameters[10] = new IntegerParameter("PSM_" + ValidationTask.PSMFilter.ISOTOPE_OFFSET.key, ValidationTask.PSMFilter.ISOTOPE_OFFSET.name, new JTextField(6), new Integer(1), new Integer(0), null);
-        m_psmPrefilterParameters[10].setAssociatedData("<=");
+        m_psmPrefilterParameters[10] = new NoneParameter("PSM_" + ValidationTask.PSMFilter.SINGLE_SEQ_RANK.key, ValidationTask.PSMFilter.SINGLE_SEQ_RANK.name);
+        m_psmPrefilterParameters[10].setAssociatedData(":");
+        m_psmPrefilterParameters[11] = new IntegerParameter("PSM_" + ValidationTask.PSMFilter.ISOTOPE_OFFSET.key, ValidationTask.PSMFilter.ISOTOPE_OFFSET.name, new JTextField(6), new Integer(1), new Integer(0), null);
+        m_psmPrefilterParameters[11].setAssociatedData("<=");
         
         for (AbstractParameter p : m_psmPrefilterParameters) {
             if (p == null) {

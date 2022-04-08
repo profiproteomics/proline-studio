@@ -405,9 +405,17 @@ public class PTMDataset {
             return false;
 
         List<Long> siteIds = firstCluster.getPTMSites().stream().map(PTMSite::getId).collect(Collectors.toList());
+        String firstClusterAnnot = firstCluster.getSelectionInfo();
         PTMCluster mergedCluster = new PTMCluster(firstCluster.getId(), firstCluster.getLocalizationConfidence(), firstCluster.getSelectionLevel(),
-                firstCluster.getSelectionNotation(), firstCluster.getSelectionInfo(), siteIds, firstCluster.getPeptideIds(), this);
+                firstCluster.getSelectionNotation(), firstClusterAnnot, siteIds, firstCluster.getPeptideIds(), this);
         mergedCluster.setRepresentativePepMatch(firstCluster.getRepresentativePepMatch());
+
+        StringBuilder selectionInfoSB = new StringBuilder();
+        if(StringUtils.isNotEmpty(firstClusterAnnot)){
+            selectionInfoSB.append(firstClusterAnnot).append("; ");
+        }
+        selectionInfoSB.append("Merged clusters : ");
+        selectionInfoSB.append(firstCluster.getId()).append("; ");
 
         //If Quant Data, Get data to calculate MqPeptide for merged
         //Warning : assume cluster representative MQPepMatch is an AggregatedMasterQuantPeptide !
@@ -427,7 +435,7 @@ public class PTMDataset {
         // Go through Clusters and merge data into 'mergedCluster', if next cluster is colocated with first one !
         for(int i=1; i<finalClusters2Merge.size(); i++){
             PTMCluster nextCluster = finalClusters2Merge.get(i);
-
+            selectionInfoSB.append(nextCluster.getId()).append("; ");
             //Site count correspond to the max site count of all merged cluster, not the sum of sites
             if(mergedCluster.getPTMSitesCount() < nextCluster.getPTMSitesCount())
                 mergedCluster.setPTMSitesCount(nextCluster.getPTMSitesCount());
@@ -486,6 +494,7 @@ public class PTMDataset {
         if(isQuantitation())
             mergedCluster.setRepresentativeMQPepMatch(getRepresentativeMQPeptideForCluster(mergedCluster, mqPepByPepInstId));
 
+        mergedCluster.setSelectionInfo(selectionInfoSB.toString());
         int index = m_ptmClusters.indexOf(firstCluster);
         m_ptmClusters.removeAll(finalClusters2Merge);
         m_ptmClusters.add(index, mergedCluster);

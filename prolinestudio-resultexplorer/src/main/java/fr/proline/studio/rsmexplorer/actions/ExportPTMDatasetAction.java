@@ -40,6 +40,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
+// VDS: Export PTM Dataset in JSON format. Test only ....
 public class ExportPTMDatasetAction extends AbstractRSMAction {
 
   protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.ExportFastaAction");

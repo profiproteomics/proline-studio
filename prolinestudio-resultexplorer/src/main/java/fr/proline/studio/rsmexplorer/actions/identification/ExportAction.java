@@ -16,7 +16,7 @@
  */
 package fr.proline.studio.rsmexplorer.actions.identification;
 
-import fr.proline.studio.rsmexplorer.actions.ExportPTMDatasetAction;
+//import fr.proline.studio.rsmexplorer.actions.ExportPTMDatasetAction;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import javax.swing.JMenu;
@@ -78,9 +78,10 @@ public class ExportAction extends AbstractRSMAction {
         JMenuItem exportFastaItem = new JMenuItem(m_exporFastaAction);
         m_menu.add(exportFastaItem);
 
-        m_exportPTMDatasetAction = new ExportPTMDatasetAction(getTree());
-        JMenuItem exportPTMDatasetItem = new JMenuItem(m_exportPTMDatasetAction);
-        m_menu.add(exportPTMDatasetItem);
+        // VDS : Export PTM Dataset in JSON format. For test only
+//        m_exportPTMDatasetAction = new ExportPTMDatasetAction(getTree());
+//        JMenuItem exportPTMDatasetItem = new JMenuItem(m_exportPTMDatasetAction);
+//        m_menu.add(exportPTMDatasetItem);
         return m_menu;
     }
 

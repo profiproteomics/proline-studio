@@ -97,7 +97,7 @@ public class ExportAction extends AbstractRSMAction {
         m_exportPeakViewSpectraAction.updateEnabled(selectedNodes);
 
         boolean isEnabled = m_exportDatasetAction.isEnabled()
-                || m_exportPTMDatasetAction.isEnabled()
+               /* || m_exportPTMDatasetAction.isEnabled()*/
                 || m_exportSpectronautSpectraAction.isEnabled()
                 || m_exportPeakViewSpectraAction.isEnabled()
                 || (m_exportMzIdentMLAction != null && m_exportMzIdentMLAction.isEnabled());

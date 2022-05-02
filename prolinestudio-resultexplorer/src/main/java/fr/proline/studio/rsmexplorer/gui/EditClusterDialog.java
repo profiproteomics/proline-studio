@@ -113,6 +113,12 @@ public class EditClusterDialog extends DefaultDialog {
     removePeptideButton.addActionListener(e -> {
       if (m_ptmPeptidesTable.getSelectedRowCount() == 1) {
         removeSelectedPeptide();
+      } else {
+        InfoDialog err = new InfoDialog(WindowManager.getDefault().getMainWindow(),InfoDialog.InfoType.INFO, "Remove Peptide" ,"At least one, and only one, peptide should be selected.");
+        err.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
+        err.setButtonName(InfoDialog.BUTTON_OK, "OK");
+        err.centerToWindow(WindowManager.getDefault().getMainWindow());
+        err.setVisible(true);
       }
     });
     toolbar.add(removePeptideButton);

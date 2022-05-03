@@ -339,8 +339,8 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         return internalPanel;
     }                 
     
-    public void setData(Long taskId,  List<DFeature> features, QuantChannelInfo quantChannelInfo, List<Boolean> featureHasPeak, boolean finished) {
-        ((FeatureTableModel) ((CompoundTableModel) m_featureTable.getModel()).getBaseModel()).setData(taskId,  features, quantChannelInfo, featureHasPeak);
+    public void setData(Long taskId,  List<DFeature> features, QuantChannelInfo quantChannelInfo, List<Boolean> featureHasPeak, boolean finished, DMasterQuantPeptideIon peptideIon) {
+        ((FeatureTableModel) ((CompoundTableModel) m_featureTable.getModel()).getBaseModel()).setData(taskId,  features, quantChannelInfo, featureHasPeak, peptideIon);
 
         if (features == null) {
             m_titleLabel.setText(TABLE_TITLE);

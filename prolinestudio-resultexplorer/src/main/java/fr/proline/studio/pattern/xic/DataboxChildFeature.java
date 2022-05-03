@@ -121,7 +121,7 @@ public class DataboxChildFeature extends AbstractDataBox {
         
         if (m_quantChannelInfo == null) {
             
-            ((XicFeaturePanel) getDataBoxPanelInterface()).setData(-1l, null, null, null, true);
+            ((XicFeaturePanel) getDataBoxPanelInterface()).setData(-1l, null, null, null, true, null);
             
             return;
         }
@@ -159,14 +159,14 @@ public class DataboxChildFeature extends AbstractDataBox {
 
                     }
                     
-                    ((XicFeaturePanel) getDataBoxPanelInterface()).setData(taskId, m_childFeatureList, m_quantChannelInfo, m_featureHasPeak, finished);
+                    ((XicFeaturePanel) getDataBoxPanelInterface()).setData(taskId, m_childFeatureList, m_quantChannelInfo, m_featureHasPeak, finished, m_masterQuantPeptideIon);
                     
                 } else {
                     m_childFeatureList = new ArrayList<>();
                     m_featureHasPeak = new ArrayList<>();
                     m_peakelList = new ArrayList<>();
                     m_peakList = new ArrayList<>();
-                    ((XicFeaturePanel) getDataBoxPanelInterface()).setData(taskId, m_childFeatureList, m_quantChannelInfo, m_featureHasPeak, finished);
+                    ((XicFeaturePanel) getDataBoxPanelInterface()).setData(taskId, m_childFeatureList, m_quantChannelInfo, m_featureHasPeak, finished, m_masterQuantPeptideIon);
                 }
 
 

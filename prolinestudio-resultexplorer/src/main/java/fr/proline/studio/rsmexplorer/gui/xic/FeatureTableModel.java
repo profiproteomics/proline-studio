@@ -17,7 +17,9 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.lcms.dto.DFeature;
+import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.corewrapper.util.PeptideClassesUtils;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.export.ExportFontData;
@@ -42,6 +44,9 @@ import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.utils.CyclicColorPalette;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,30 +66,32 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
     public static final int COLTYPE_FEATURE_MAP_NAME = 1;
     public static final int COLTYPE_FEATURE_QC = 2;
     public static final int COLTYPE_FEATURE_MOZ = 3;
-    public static final int COLTYPE_FEATURE_CHARGE = 4;
-    public static final int COLTYPE_FEATURE_RETENTION_TIME = 5;
-    public static final int COLTYPE_FEATURE_APEX_INTENSITY = 6;
-    public static final int COLTYPE_FEATURE_INTENSITY = 7;
-    public static final int COLTYPE_FEATURE_DURATION = 8;
-    public static final int COLTYPE_FEATURE_QUALITY_SCORE = 9;
-    public static final int COLTYPE_FEATURE_IS_OVERLAPPING = 10;
-    public static final int COLTYPE_FEATURE_PREDICTED_RETENTION_TIME = 11;
-    public static final int COLTYPE_FEATURE_PEAKELS_COUNT = 12;
-    
+    public static final int COLTYPE_FEATURE_CALIBRATED_MOZ = 4;
+    public static final int COLTYPE_FEATURE_CHARGE = 5;
+    public static final int COLTYPE_FEATURE_RETENTION_TIME = 6;
+    public static final int COLTYPE_FEATURE_APEX_INTENSITY = 7;
+    public static final int COLTYPE_FEATURE_INTENSITY = 8;
+    public static final int COLTYPE_FEATURE_DURATION = 9;
+    public static final int COLTYPE_FEATURE_QUALITY_SCORE = 10;
+    public static final int COLTYPE_FEATURE_IS_OVERLAPPING = 11;
+    public static final int COLTYPE_FEATURE_PREDICTED_RETENTION_TIME = 12;
+    public static final int COLTYPE_FEATURE_PEAKELS_COUNT = 13;
+
     public final static String SERIALIZED_PROP_PREDICTED_ELUTION_TIME = "predicted_elution_time";
     public final static String SERIALIZED_PROP_PEAKELS_COUNT = "peakels_count";
     public final static String SERIALIZED_PROP_IS_RELIABLE = "is_reliable";
+
+    protected static final Logger logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     
+    private static final String[] m_columnNames = {"Id", "Map", "Quant. Channel", "m/z", "Calibrated MoZ", "Charge", "RT", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "Predicted RT", "#Peakels"};
+    private static final String[] m_toolTipColumns = {"Feature Id","Map name","Quantitation Channel ",  "Mass to Charge Ratio", "Calibrated Mass to Charge Ratio", "Charge", "Retention Time in minutes", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "Predicted Retention time in min", "Peakels count"};
+    private static final String[] m_columnNamesForExport = {"Id", "Map", "Quantitation Channel", "m/z", "Calibrated MoZ", "Charge", "Elution Time (sec)", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "Predicted Retention Time (sec)", "Peakels Count"};
     
-    
-    private static final String[] m_columnNames = {"Id", "Map", "Quant. Channel", "m/z", "Charge", "RT", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "Predicted RT", "#Peakels"};
-    private static final String[] m_toolTipColumns = {"Feature Id","Map name","Quantitation Channel ",  "Mass to Charge Ratio", "Charge", "Retention Time in minutes", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "Predicted Retention time in min", "Peakels count"};
-    private static final String[] m_columnNamesForExport = {"Id", "Map", "Quantitation Channel", "m/z", "Charge", "Elution Time (sec)", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "Predicted Retention Time (sec)", "Peakels Count"};
-    
-    
+    private DMasterQuantPeptideIon m_quantPeptideIon = null;
     private List<DFeature> m_features = null;
     private QuantChannelInfo m_quantChannelInfo = null;
     private List<Boolean> m_featureHasPeak = null;
+    private Map<Long, Double> calibratedMozByFeatureId = new HashMap<>();
 
     private String m_modelName;
 
@@ -208,6 +215,21 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                 return lazyData;
 
             }
+            case COLTYPE_FEATURE_CALIBRATED_MOZ: {
+                LazyData lazyData = getLazyData(row, col);
+                if (feature.getCharge() == null) {
+                    lazyData.setData(null);
+                    givePriorityTo(m_taskId, row, col);
+                }else {
+                    if(calibratedMozByFeatureId.containsKey(feature.getId()) )
+                        lazyData.setData(calibratedMozByFeatureId.get(feature.getId()));
+                    else
+                        lazyData.setData(getCalibratedMoZ(feature));
+                }
+                return lazyData;
+
+            }
+
             case COLTYPE_FEATURE_APEX_INTENSITY: {
                 LazyData lazyData = getLazyData(row, col);
                 if (feature.getCharge() == null) {
@@ -298,8 +320,28 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
         return null; // should never happen
     }
 
-    public void setData(Long taskId, List<DFeature> features, QuantChannelInfo quantChannelInfo, List<Boolean> featureHasPeak) {
+    private Double getCalibratedMoZ(DFeature feature){
+        logger.debug("calculate delta moz at RT " + feature.getElutionTime() + " for map =" + feature.getMap().getName());
+        Double calcMoz = Double.NaN;
+        try {
+            if(m_quantPeptideIon != null) {
+                Double deltaMoz = PeptideClassesUtils.getDeltaMozFor(feature.getMoz(), feature.getCharge(), m_quantPeptideIon.getPeptideInstance().getPeptide()).doubleValue();
+                calcMoz = feature.getMoz() + deltaMoz;
+                calibratedMozByFeatureId.put(feature.getId(), calcMoz);
+                logger.debug("...result= " + calcMoz);
+            }
+        } catch (Exception e) {
+            logger.error("Error while retrieving time in map calibration: " + e);
+        }
+        //Displayed deltaMoz is inverted compare to store deltaMoz !
+        return calcMoz;
+    }
+
+
+    public void setData(Long taskId, List<DFeature> features, QuantChannelInfo quantChannelInfo, List<Boolean> featureHasPeak, DMasterQuantPeptideIon pepIon) {
         m_features = features;
+        m_quantPeptideIon = pepIon;
+        calibratedMozByFeatureId.clear();
         m_quantChannelInfo = quantChannelInfo;
         m_featureHasPeak = featureHasPeak ;
 
@@ -375,6 +417,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
         
         filtersMap.put(COLTYPE_FEATURE_MOZ, new DoubleFilter(getColumnName(COLTYPE_FEATURE_MOZ), null, COLTYPE_FEATURE_MOZ));
+        filtersMap.put(COLTYPE_FEATURE_CALIBRATED_MOZ, new DoubleFilter(getColumnName(COLTYPE_FEATURE_CALIBRATED_MOZ), null, COLTYPE_FEATURE_CALIBRATED_MOZ));
         filtersMap.put(COLTYPE_FEATURE_CHARGE, new IntegerFilter(getColumnName(COLTYPE_FEATURE_CHARGE), null, COLTYPE_FEATURE_CHARGE));
         
         ConvertValueInterface minuteConverter = new ConvertValueInterface() {
@@ -422,6 +465,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
             case COLTYPE_FEATURE_QC:
                 return String.class;
             case COLTYPE_FEATURE_MOZ:
+            case COLTYPE_FEATURE_CALIBRATED_MOZ:
                 return Double.class;
             case COLTYPE_FEATURE_RETENTION_TIME:
             case COLTYPE_FEATURE_APEX_INTENSITY:
@@ -503,6 +547,12 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
             }
             case COLTYPE_FEATURE_PEAKELS_COUNT: {
                 return feature.getPeakelCount();
+            }
+            case COLTYPE_FEATURE_CALIBRATED_MOZ:{
+                if(calibratedMozByFeatureId.containsKey(feature.getId()))
+                    return calibratedMozByFeatureId.get(feature.getId());
+                else
+                    return getCalibratedMoZ(feature);
             }
         }
         return null; // should never happen
@@ -617,6 +667,14 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                 }
 
             }
+            case COLTYPE_FEATURE_CALIBRATED_MOZ: {
+                if (!calibratedMozByFeatureId.containsKey(feature.getId()) || calibratedMozByFeatureId.get(feature.getId()).isNaN())  {
+                    return "";
+                } else {
+                    return ""+calibratedMozByFeatureId.get(feature.getId());
+                }
+
+            }
             case COLTYPE_FEATURE_CHARGE: {
                 if (feature.getCharge() == null) {
                     return "";
@@ -709,6 +767,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
         listIds.add(COLTYPE_FEATURE_PEAKELS_COUNT);
         listIds.add(COLTYPE_FEATURE_IS_OVERLAPPING);
         listIds.add(COLTYPE_FEATURE_QUALITY_SCORE);
+        listIds.add(COLTYPE_FEATURE_CALIBRATED_MOZ);
         return listIds; 
     }
     
@@ -808,15 +867,13 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
         TableCellRenderer renderer = null;
         
         switch (col) {
-            case COLTYPE_FEATURE_MAP_NAME: {
+            case COLTYPE_FEATURE_MAP_NAME:
+            case COLTYPE_FEATURE_QC:
+            case COLTYPE_FEATURE_IS_OVERLAPPING: {
                 renderer = new FontRenderer( new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)) );
                 break;
             }
-            case COLTYPE_FEATURE_QC:
-            case COLTYPE_FEATURE_IS_OVERLAPPING: {
-                renderer = new FontRenderer( new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
-                break;
-            }
+            case COLTYPE_FEATURE_CALIBRATED_MOZ:
             case COLTYPE_FEATURE_MOZ: {
                 renderer = new FontRenderer( new DoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4 ));
                 break;

@@ -610,7 +610,7 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
         if ((rawFiles != null) && rawFiles.size() > 0) {
             PropertiesPanel propertiesPanel = new PropertiesPanel(rawFiles);
             String title = rawFiles.size() == 1 ? "Properties" : new StringBuilder().append("Properties ").append(rawFiles.get(0).getName()).toString();
-            addTab(viewersTabPane, title, propertiesPanel, "Raw file properties panel");
+            addTab(viewersTabPane, title, propertiesPanel, "mzDb file properties panel");
             return propertiesPanel;
         }
         return null;

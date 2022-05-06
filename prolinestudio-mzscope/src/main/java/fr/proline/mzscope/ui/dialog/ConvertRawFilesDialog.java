@@ -20,8 +20,10 @@ public class ConvertRawFilesDialog extends DefaultDialog {
   private File m_converterExe;
   private String m_lastDirectory;
   private JTextField m_converterExeTF;
+  private JTextField m_converterOptionTF;
   private final static String LAST_DIR = "mzscope.last.raw.directory";
   private final static String LAST_CONVERTER = "mzscope.converter.exe.path";
+  private final static String LAST_CONVERTER_OPTION = "mzscope.converter.option";
 
 
   public ConvertRawFilesDialog(Window parent) {
@@ -50,6 +52,10 @@ public class ConvertRawFilesDialog extends DefaultDialog {
     return m_converterExe;
   }
 
+  public String getConverterOption(){
+    return m_converterOptionTF.getText().trim();
+  }
+
   private void initInternalPanel() {
 
     JPanel internalPanel = new JPanel();
@@ -75,6 +81,7 @@ public class ConvertRawFilesDialog extends DefaultDialog {
     c.weightx = 0.2;
     c.gridwidth=1;
     internalPanel.add(converterLabel, c);
+
     c.gridx++;
     c.weightx = 0.4;
     m_converterExeTF = new JTextField();
@@ -112,6 +119,23 @@ public class ConvertRawFilesDialog extends DefaultDialog {
       }
     });
     internalPanel.add(addFileButton, c);
+
+    JLabel converterOptionLabel = new JLabel("Converter Options");
+    c.gridx = 0;
+    c.gridy++;
+    c.weighty = 0;
+    c.weightx = 0.3;
+    c.gridwidth=1;
+    internalPanel.add(converterOptionLabel, c);
+
+    c.gridx++;
+    c.weightx = 0.7;
+    c.gridwidth=2;
+
+    m_converterOptionTF = new JTextField();
+    String rawConverterOption = prefs.get(LAST_CONVERTER_OPTION, "");
+    m_converterOptionTF.setText(rawConverterOption);
+    internalPanel.add(m_converterOptionTF, c);
 
     setInternalComponent(internalPanel);
 
@@ -246,6 +270,7 @@ public class ConvertRawFilesDialog extends DefaultDialog {
   protected  void saveParameters(Preferences preferences) {
     preferences.put(LAST_CONVERTER, m_converterExe.getAbsolutePath());
     preferences.put(LAST_DIR, m_lastDirectory);
+    preferences.put(LAST_CONVERTER_OPTION, getConverterOption());
   }
 
 }

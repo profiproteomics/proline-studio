@@ -114,6 +114,6 @@ public class EmptyRawFile implements IRawFile {
 
   @Override
   public String toString(){
-    return "unloaded "+getName();
+    return "converting  "+getName();
   }
 }

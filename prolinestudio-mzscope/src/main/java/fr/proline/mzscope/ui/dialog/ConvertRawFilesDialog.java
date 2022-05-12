@@ -201,7 +201,7 @@ public class ConvertRawFilesDialog extends DefaultDialog {
       JFileChooser fchooser  = new JFileChooser();
       fchooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
       fchooser.setDialogTitle("Convert Raw file");
-      fchooser.setAcceptAllFileFilterUsed(false);
+//      fchooser.setAcceptAllFileFilterUsed(false);
       fchooser.setFileFilter(new RawFilter());
       Preferences prefs = NbPreferences.root();
       m_lastDirectory = prefs.get(LAST_DIR, fchooser.getCurrentDirectory().getAbsolutePath());

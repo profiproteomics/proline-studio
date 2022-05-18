@@ -97,7 +97,7 @@ public class Main {
     }
 
 
-    public static void initTheme() {
+    private static void initTheme() {
         // for Mac : we need to use Metal UI, otherwise the browse file on server does not work
         setUI();
 
@@ -108,7 +108,7 @@ public class Main {
 
 
     private static void setUI() {
-        String OS = System.getProperty("os.name").toLowerCase();
+        final String OS = System.getProperty("os.name").toLowerCase();
 
             SwingUtilities.invokeLater(new Runnable() {
 
@@ -116,27 +116,33 @@ public class Main {
                 public void run() {
 
                     try {
-                        if (OS.contains("mac")) {
+
+                        if (isMacOS(OS) || isUnixOS(OS)) {
                             UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
                         } else if (OS.contains("win")) {
                             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                         }
 
-                        Frame f = WindowManager.getDefault().getMainWindow();
-                        if (f == null) {
-                            // should never be null
-                            setUI();
-                        } else {
-                            SwingUtilities.updateComponentTreeUI(f);
-                        }
+                        MainFrame frame = MainFrame.getInstance();
+                        SwingUtilities.updateComponentTreeUI(frame);
+
                     } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
-                        e.printStackTrace();
+                        // should never happen
+                        m_logger.error("Setting look and feel failed", e);
                     }
 
                 }
 
             });
         }
+
+        private static boolean isMacOS(String os) {
+            return (os.contains("mac"));
+        }
+        private static boolean isUnixOS(String os) {
+            return (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0 || os.indexOf("aix") > 0 );
+        }
+
     }
 
 

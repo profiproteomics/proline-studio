@@ -638,7 +638,7 @@ public class ProjectExplorerPanel extends JPanel {
                         l.setIcon(IconManager.getIconWithHourGlass(IconManager.IconType.PROJECT));
                     } else {
                         Project project = projectItem.getProjectIdentificationData().getProject();
-                        
+
                         String serializedProperties = project.getSerializedProperties();
                         boolean isActive = true;
                         if (serializedProperties != null) {

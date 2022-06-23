@@ -464,7 +464,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
             e.consume();
             return true;
         }
-        if ((e.getModifiers() & KeyEvent.CTRL_MASK) != 0) {
+        if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0) {
             if (e.getKeyCode() == KeyEvent.VK_LEFT) {
                 displayScan(getCurrentRawfile().getPreviousSpectrumId(currentScan.getIndex(), currentScan.getMsLevel()));
                 e.consume();

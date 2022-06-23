@@ -113,7 +113,7 @@ public class ModifyClusterStatusPanel extends JPanel {
 
     //get confidence parameters values
     String confidenceDesc = m_statusConfidenceInfoTA.getText();
-    Integer confidenceNotation = (m_statusConfidenceLevelTF.getValue() == null || (m_statusConfidenceLevelTF.getValue().toString().isEmpty()) ) ? null : new Integer(m_statusConfidenceLevelTF.getValue().toString());
+    Integer confidenceNotation = (m_statusConfidenceLevelTF.getValue() == null || (m_statusConfidenceLevelTF.getValue().toString().isEmpty()) ) ? null : Integer.valueOf(m_statusConfidenceLevelTF.getValue().toString());
 
     if( (confidenceDesc != null && !confidenceDesc.equals(m_editedCluster.getSelectionInfo())) || (confidenceDesc == null &&  m_editedCluster.getSelectionInfo() !=null))  {
       m_editedCluster.setSelectionInfo(confidenceDesc);

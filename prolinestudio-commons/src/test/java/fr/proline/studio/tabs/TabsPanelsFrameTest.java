@@ -54,9 +54,9 @@ public class TabsPanelsFrameTest extends JFrame {
         this.add(getToolBar(), BorderLayout.NORTH);
         m_tabsPanel = new TabsPanel();
         this.add(m_tabsPanel, BorderLayout.CENTER);
-        List<IWrappedPanel> panels = new ArrayList();
+        List<IWrappedPanel> panels = new ArrayList<>();
         for (int i=0; i<nbPanelTest; i++){
-            panels.add(new TestPanel(new Long(i+1)));
+            panels.add(new TestPanel(Long.valueOf(i+1)));
         }
         m_tabsPanel.setPanels(panels, null);
         
@@ -81,9 +81,7 @@ public class TabsPanelsFrameTest extends JFrame {
             m_buttonLayout = new JButton();
             m_buttonLayout.setIcon(IconManager.getIcon(IconManager.IconType.GRID));
             m_buttonLayout.setToolTipText("Change the presentation: tabs/grid");
-            m_buttonLayout.addActionListener((ActionEvent e) -> {
-                m_tabsPanel.changeLayout();
-            });
+            m_buttonLayout.addActionListener((ActionEvent e) -> m_tabsPanel.changeLayout());
         }
         return m_buttonLayout;
     }

@@ -135,13 +135,13 @@ public class QuantPostProcessingPanel extends JPanel {
         m_peptideStatTestsAlpha = new JTextField();
         m_peptideStatTestsAlpha.setEnabled(!m_readOnly);
         String paramKey = QuantPostProcessingParams.getPrefixedSettingKey("peptide", QuantPostProcessingParams.STAT_TESTS_ALPHA);        
-        m_peptideStatTestsAlphaParameter = new DoubleParameter(paramKey, StringUtils.getLabelFromCamelCase(paramKey), m_peptideStatTestsAlpha, new Double(0.01), null, null);
+        m_peptideStatTestsAlphaParameter = new DoubleParameter(paramKey, StringUtils.getLabelFromCamelCase(paramKey), m_peptideStatTestsAlpha, Double.valueOf(0.01), null, null);
         m_parameterList.add(m_peptideStatTestsAlphaParameter);
 
         m_proteinStatTestsAlpha = new JTextField();
         m_proteinStatTestsAlpha.setEnabled(!m_readOnly);
         paramKey = QuantPostProcessingParams.getPrefixedSettingKey("protein", QuantPostProcessingParams.STAT_TESTS_ALPHA);     
-        m_proteinStatTestsAlphaParameter = new DoubleParameter(paramKey, StringUtils.getLabelFromCamelCase(paramKey), m_proteinStatTestsAlpha, new Double(0.01), null, null);
+        m_proteinStatTestsAlphaParameter = new DoubleParameter(paramKey, StringUtils.getLabelFromCamelCase(paramKey), m_proteinStatTestsAlpha,  Double.valueOf(0.01), null, null);
         m_parameterList.add(m_proteinStatTestsAlphaParameter);
 
         paramKey = QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.DISCARD_MISS_CLEAVED_PEPTIDES);  

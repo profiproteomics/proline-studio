@@ -639,12 +639,10 @@ public class ProjectExplorerPanel extends JPanel {
                     } else {
                         Project project = projectItem.getProjectIdentificationData().getProject();
                         
-                        JsonParser parser = new JsonParser();
-                        
                         String serializedProperties = project.getSerializedProperties();
                         boolean isActive = true;
                         if (serializedProperties != null) {
-                            JsonObject jsonObject = parser.parse(serializedProperties).getAsJsonObject();
+                            JsonObject jsonObject = JsonParser.parseString(serializedProperties).getAsJsonObject();
                             JsonPrimitive isActiveObject = jsonObject.getAsJsonPrimitive("is_active");
                             if(isActiveObject != null)
                                 isActive = isActiveObject.getAsBoolean();

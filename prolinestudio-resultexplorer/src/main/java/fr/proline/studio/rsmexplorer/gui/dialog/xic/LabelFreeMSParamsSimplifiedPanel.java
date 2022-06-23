@@ -81,7 +81,7 @@ public class LabelFreeMSParamsSimplifiedPanel extends AbstractLabelFreeMSParamsP
     private void createParameters() {
 
         m_extractionMoZTolTF = new JTextField();
-        DoubleParameter extractionMoZTolParameter = new DoubleParameter("extractionMoZTol", "Extraction moz tolerance", m_extractionMoZTolTF, DEFAULT_EXTRACTION_MOZTOL_VALUE, new Double(0), null);
+        DoubleParameter extractionMoZTolParameter = new DoubleParameter("extractionMoZTol", "Extraction moz tolerance", m_extractionMoZTolTF, DEFAULT_EXTRACTION_MOZTOL_VALUE, Double.valueOf(0), null);
         m_parameterList.add(extractionMoZTolParameter);
 
         m_crossAssignCBoxTitle = new CheckBoxTitledBorder("Cross Assignment", DEFAULT_CROSS_ASSIGN_VALUE);
@@ -94,7 +94,7 @@ public class LabelFreeMSParamsSimplifiedPanel extends AbstractLabelFreeMSParamsP
         m_parameterList.add(m_crossAssignStrategyParameter);
 
         m_crossAssignFeatureMapRTTolTF = new JTextField();
-        DoubleParameter featureMappingTimeTolParameter = new DoubleParameter("featureTimeTol", "RT tolerance", m_crossAssignFeatureMapRTTolTF, DEFAULT_CA_FEATMAP_RTTOL_VALUE, new Double(0), null);
+        DoubleParameter featureMappingTimeTolParameter = new DoubleParameter("featureTimeTol", "RT tolerance", m_crossAssignFeatureMapRTTolTF, DEFAULT_CA_FEATMAP_RTTOL_VALUE, Double.valueOf(0), null);
         m_parameterList.add(featureMappingTimeTolParameter);
 
         m_alignRTCB = new JCheckBox("Align RT", DEFAULT_ALIGN_VALUE);
@@ -103,7 +103,7 @@ public class LabelFreeMSParamsSimplifiedPanel extends AbstractLabelFreeMSParamsP
         m_parameterList.add(alignRTParameter);
 
         m_alignmentFeatureMapTimeToleranceTF = new JTextField();
-        DoubleParameter alignmentFeatureMappingTimeToleranceParameter = new DoubleParameter("featureMappingTimeTolerance", "Feature Mapping Time Tolerance", m_alignmentFeatureMapTimeToleranceTF, DEFAULT_ALIGN_FEATMAP_TIMETOL_VALUE, new Double(1), null);
+        DoubleParameter alignmentFeatureMappingTimeToleranceParameter = new DoubleParameter("featureMappingTimeTolerance", "Feature Mapping Time Tolerance", m_alignmentFeatureMapTimeToleranceTF, DEFAULT_ALIGN_FEATMAP_TIMETOL_VALUE, Double.valueOf(1), null);
         m_parameterList.add(alignmentFeatureMappingTimeToleranceParameter);
 
     }

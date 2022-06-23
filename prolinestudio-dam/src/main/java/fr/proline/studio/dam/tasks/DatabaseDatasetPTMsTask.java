@@ -19,6 +19,7 @@ package fr.proline.studio.dam.tasks;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -392,7 +393,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         }
         ObjectTree ot = entityManagerMSI.find(ObjectTree.class, rsm.getObjectTreeIdByName().get(schemaName));
         ObjectMapper mapper = new ObjectMapper();
-        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
         return mapper.readValue(ot.getClobData(), JSONPTMDataset.class);
     }
@@ -569,7 +570,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         peptidesQuery.setParameter("rmsIds", rsmIds);
 
         ObjectMapper mapper = new ObjectMapper();
-        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
         List<Object[]> l = peptidesQuery.getResultList();
         Iterator<Object[]> itPeptidesQuery = l.iterator();
@@ -708,7 +709,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         long start = System.currentTimeMillis();
         m_logger.debug(" @@ START fetchPTMSitesPepInstances SUBTASK ");
         ObjectMapper mapper = new ObjectMapper();
-        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
         int nbrPepIds = sliceOfPeptideIds.size();
         Long rsetId = m_dataset.getResultSetId();

@@ -177,7 +177,7 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
             case PROTEIN_MASS:
                 DBioSequence bioSequence = proteinMatch.getDBioSequence();
                 if (bioSequence != null) {
-                    return new Float(bioSequence.getMass());
+                    return Float.valueOf((float) bioSequence.getMass());
                 }
                 return null;
         }

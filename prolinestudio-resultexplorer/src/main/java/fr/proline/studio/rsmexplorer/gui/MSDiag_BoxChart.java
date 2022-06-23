@@ -97,7 +97,7 @@ public class MSDiag_BoxChart extends HourglassPanel {
         //renderer.setBaseOutlinePaint(Color.blue, true);
         renderer.setItemMargin(0.20);
         renderer.setMaximumBarWidth(1.0);
-        renderer.setBaseLegendShape(new Rectangle2D.Double(-4.0, -4.0, 8.0, 8.0));
+        renderer.setDefaultLegendShape(new Rectangle2D.Double(-4.0, -4.0, 8.0, 8.0));
 
         rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
         renderer.setDefaultToolTipGenerator(new StandardCategoryToolTipGenerator()); // info bulles on bars

@@ -65,7 +65,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     protected GraphNodeAction m_menuAction = new GraphNodeAction();
     
     
-    protected GraphPanel m_graphPanel = null;
+    protected GraphPanel m_graphPanel;
 
     private long m_startTime = System.currentTimeMillis();
     
@@ -127,10 +127,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     }
     
     public boolean hasInConnector() {
-        if ((m_inConnectors == null) || (m_inConnectors.isEmpty())) {
-            return false;
-        }
-        return true;
+        return (m_inConnectors != null) && (!m_inConnectors.isEmpty());
     }
     
     public void propagateSourceChanged() {
@@ -567,7 +564,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
         
         JMenu displayMenu = new JMenu("Display");
         
-        LinkedList<AbstractAction> displayActions = new LinkedList();
+        LinkedList<AbstractAction> displayActions = new LinkedList<>();
         int nbDisplay = (m_outConnector == null) ? 1 : m_outConnector.size();
         if (nbDisplay <= 1) {
             displayActions.add(new DisplayBelowAction(this, 0, null));
@@ -622,7 +619,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     
     public class DisplayInNewWindowAction extends AbstractAction {
 
-        private GraphNode m_graphNode = null;
+        private GraphNode m_graphNode;
         private int m_connectionIndex;
 
         public DisplayInNewWindowAction(GraphNode graphNode, int connectionIndex, String name) {
@@ -643,7 +640,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     
     public class DisplayBelowAction extends AbstractAction {
 
-        private GraphNode m_graphNode = null;
+        private GraphNode m_graphNode;
         private int m_connectionIndex;
 
         public DisplayBelowAction(GraphNode graphNode, int connectionIndex, String name) {
@@ -664,7 +661,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     
     public class SettingsAction extends AbstractAction {
 
-        private GraphNode m_graphNode = null;
+        private GraphNode m_graphNode;
 
         public SettingsAction(GraphNode graphNode, int connectionIndex) {
             super("Settings");
@@ -684,7 +681,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
 
     public class ProcessAction extends AbstractAction {
 
-        private GraphNode m_graphNode = null;
+        private GraphNode m_graphNode;
 
         public ProcessAction(GraphNode graphNode) {
             super("Process");
@@ -702,7 +699,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
     }
             
     public class ErrorAction extends AbstractAction {
-        private GraphNode m_graphNode = null;
+        private GraphNode m_graphNode;
         
         public ErrorAction(GraphNode graphNode) {
             super("Display Error");

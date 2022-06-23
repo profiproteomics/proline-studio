@@ -1261,7 +1261,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                 m_selectedDropZoneList.clear();
             }
 
-            int modifier = e.getModifiers();
+            int modifier = e.getModifiersEx();
 
             if (overDropZone == null) {
                 // remove all selections
@@ -1277,7 +1277,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                     modifier = 0;
                 }
 
-                if ((modifier & (InputEvent.SHIFT_MASK | InputEvent.CTRL_MASK)) == 0) {
+                if ((modifier & (InputEvent.SHIFT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK)) == 0) {
                     // no modifier
 
                     if (overDropZone.isSelected()) {
@@ -1293,7 +1293,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                     }
 
 
-                } else if ((modifier & (InputEvent.CTRL_MASK)) != 0) {
+                } else if ((modifier & (InputEvent.CTRL_DOWN_MASK)) != 0) {
                     if (overDropZone.isSelected()) {
                         overDropZone.setSelected(false);
                         m_selectedDropZoneList.remove(overDropZone);
@@ -1301,7 +1301,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                         overDropZone.setSelected(true);
                         m_selectedDropZoneList.add(overDropZone);
                     }
-                } else if ((modifier & (InputEvent.SHIFT_MASK)) != 0) {
+                } else if ((modifier & (InputEvent.SHIFT_DOWN_MASK)) != 0) {
                     // SHIFT KEY
                     // look for min and max row
                     int minRow = overDropZone.getRow();

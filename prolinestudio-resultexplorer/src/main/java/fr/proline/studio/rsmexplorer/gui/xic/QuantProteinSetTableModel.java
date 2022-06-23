@@ -259,7 +259,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                 LazyData lazyData = getLazyData(row, col);
 
                 // Retrieve typical Protein Match
-                DProteinMatch proteinMatch = null;
+                DProteinMatch proteinMatch;
                 if (proteinSet.getProteinSet() != null) {
                     proteinMatch = proteinSet.getProteinSet().getTypicalProteinMatch();
                     if (proteinMatch == null) {
@@ -379,7 +379,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                 LazyData lazyData = getLazyData(row, col);
 
                 // Retrieve typical Protein Match
-                DProteinMatch proteinMatch = null;
+                DProteinMatch proteinMatch;
                 if (proteinSet.getProteinSet() != null) {
                     proteinMatch = proteinSet.getProteinSet().getTypicalProteinMatch();
                     if (proteinMatch == null) {
@@ -473,8 +473,8 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                             }
                         } else {
                             Map<Long, String> quantStatusByQCIds = proteinSet.getQuantStatusByQchIds();
-                            String status = proteinSet.getQuantStatusByQchIds().getOrDefault(m_quantChannels[nbQc].getId(), "");
-                            Integer pepNumber = proteinSet.getQuantPeptideNumberByQchIds().get(m_quantChannels[nbQc].getId());
+                            String status = quantStatusByQCIds.getOrDefault(m_quantChannels[nbQc].getId(), "");
+                            Integer pepNumber = quantProteinSet.getPeptidesCount();
                             if (pepNumber == null || pepNumber < 0) {
                                 pepNumber = 0;
                             }
@@ -510,8 +510,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     public DMasterQuantProteinSet getMasterQuantProteinSet(int row) {
 
         // Retrieve QuantProtein Set
-        DMasterQuantProteinSet quantProteinSet = m_proteinSets.get(row);
-        return quantProteinSet;
+        return m_proteinSets.get(row);
     }
 
     public DProteinSet getProteinSet(int row) {
@@ -737,7 +736,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     public HashSet exportSelection(int[] rows) {
 
         int nbRows = rows.length;
-        HashSet selectedObjects = new HashSet();
+        HashSet<Long> selectedObjects = new HashSet<>();
         for (int i = 0; i < nbRows; i++) {
 
             int row = rows[i];
@@ -871,7 +870,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             }
             case COLTYPE_PROTEIN_SET_NAME: {
                 // Retrieve typical Protein Match
-                DProteinMatch proteinMatch = null;
+                DProteinMatch proteinMatch;
                 if (proteinSet.getProteinSet() != null) {
                     proteinMatch = proteinSet.getProteinSet().getTypicalProteinMatch();
                     if (proteinMatch == null) {
@@ -981,10 +980,10 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                                     return "";
                             }
                         } else {                            
-                            Integer pepNumber = proteinSet.getQuantPeptideNumberByQchIds().get(m_quantChannels[nbQc].getId());
+                            Integer pepNumber = quantProteinSet.getPeptidesCount();
                             if (pepNumber == null || pepNumber < 0) {
                                 pepNumber = 0;
-                            }                            
+                            }
                             switch (id) {
                                 case COLTYPE_PEP_NUMBER:
                                     return ( (quantProteinSet.getPeptidesCount()== null || quantProteinSet.getPeptidesCount()== 0) ? Integer.toString(pepNumber) : Integer.toString(quantProteinSet.getPeptidesCount()));
@@ -997,8 +996,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                                 case COLTYPE_PSM:
                                     return (quantProteinSet.getPeptideMatchesCount() == null ? Integer.toString(0) : Integer.toString(quantProteinSet.getPeptideMatchesCount()));
                                 case COLTYPE_STATUS: //should only occur for spectral count
-                                    String status = proteinSet.getQuantStatusByQchIds().get(m_quantChannels[nbQc].getId());
-                                    return status;
+                                    return proteinSet.getQuantStatusByQchIds().getOrDefault(m_quantChannels[nbQc].getId(), "");
                             }
                         }
                     }
@@ -1024,7 +1022,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     }
 
     public Boolean containsModifiedQuantProteinSet() {
-        Boolean containsModifed = false;
+        boolean containsModifed = false;
         try {
             int nbRow = getRowCount();
             for (int i = 0; i < nbRow; i++) {
@@ -1079,8 +1077,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         try {
             Map<String, Object> pmqSerializedMap = proteinSet.getSerializedPropertiesAsMap();
             grayed = ((pmqSerializedMap != null) && (pmqSerializedMap.containsKey(DMasterQuantProteinSet.MASTER_QUANT_PROTEINSET_WITH_PEPTIDE_MODIFIED)) && pmqSerializedMap.get(DMasterQuantProteinSet.MASTER_QUANT_PROTEINSET_WITH_PEPTIDE_MODIFIED).equals(Boolean.TRUE));
-        } catch (Exception e) {
-
+        } catch (Exception ignored) {
         }
 
         if (grayed) {
@@ -1165,8 +1162,8 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
 
         return renderer;
     }
-    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
-    private final HashMap<Integer, TableCellRenderer> m_rendererMapGrayed = new HashMap();
+    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap<>();
+    private final HashMap<Integer, TableCellRenderer> m_rendererMapGrayed = new HashMap<>();
 
     @Override
     public GlobalTableModelInterface getFrozzenModel() {

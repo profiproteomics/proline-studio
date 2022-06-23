@@ -18,6 +18,7 @@ package com.thierry.filtering.report;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.AbstractButton;
 import javax.swing.JLabel;
@@ -41,7 +42,7 @@ public class TableReportGenerator {
     public String generateFullReport(ReportBuilder builder) {
         ListSelectionModel previousModel = m_table.getSelectionModel();
         try {
-            m_table.setSelectionModel(previousModel.getClass().newInstance());
+            m_table.setSelectionModel(previousModel.getClass().getDeclaredConstructor().newInstance());
             builder.open();
             builder.startTable();
 
@@ -64,9 +65,7 @@ public class TableReportGenerator {
             builder.endTable();
             builder.close();
             return builder.toString();
-        } catch (InstantiationException e) {
-            return null;
-        } catch (IllegalAccessException e) {
+        } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
             return null;
         } finally {
             if (m_table != null) {
@@ -79,7 +78,7 @@ public class TableReportGenerator {
         ListSelectionModel previousModel = m_table.getSelectionModel();
         int[] rows = m_table.getSelectedRows();
         try {
-            m_table.setSelectionModel(previousModel.getClass().newInstance());
+            m_table.setSelectionModel(previousModel.getClass().getDeclaredConstructor().newInstance());
             int columnCount = m_table.getColumnCount();
             builder.open();
             builder.startTable();
@@ -100,9 +99,7 @@ public class TableReportGenerator {
             builder.endTable();
             builder.close();
             return builder.toString();
-        } catch (InstantiationException e) {
-            return null;
-        } catch (IllegalAccessException e) {
+        } catch (InvocationTargetException | InstantiationException | NoSuchMethodException | IllegalAccessException e) {
             return null;
         } finally {
             if (m_table != null) {

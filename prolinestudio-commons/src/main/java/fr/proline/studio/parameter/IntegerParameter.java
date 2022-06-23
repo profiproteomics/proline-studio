@@ -60,7 +60,7 @@ public class IntegerParameter extends AbstractParameter {
         if (value != null) {
             try {
                 int valueParsed = Integer.parseInt(value.toString());
-                m_startValue = new Integer(valueParsed);
+                m_startValue = Integer.valueOf(valueParsed);
             } catch (NumberFormatException nfe) {
             }
         }
@@ -157,7 +157,7 @@ public class IntegerParameter extends AbstractParameter {
 
             // --- Spinner ---
             JSpinner spinner = new JSpinner();
-            SpinnerNumberModel model = new SpinnerNumberModel(m_startValue, m_minValue, m_maxValue, new Integer(1));
+            SpinnerNumberModel model = new SpinnerNumberModel(m_startValue, m_minValue, m_maxValue, Integer.valueOf(1));
             spinner.setModel(model);
             spinner.addChangeListener(new javax.swing.event.ChangeListener() {
 

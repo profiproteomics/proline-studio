@@ -21,10 +21,6 @@ import fr.proline.core.orm.uds.repository.ExternalDbRepository;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.repository.ProlineDatabaseType;
 import fr.proline.studio.Exceptions;
-
-import fr.proline.module.seq.DatabaseAccess;
-import fr.proline.repository.IDatabaseConnector;
-import fr.proline.studio.Exceptions;
 import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
 import fr.proline.studio.dam.tasks.data.ptm.PTMDatasetPair;
 

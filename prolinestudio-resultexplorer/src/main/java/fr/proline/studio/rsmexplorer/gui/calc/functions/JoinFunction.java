@@ -245,7 +245,7 @@ public class JoinFunction extends AbstractFunction {
             Object[] objectArrayTableKey2 = new Object[nb + 1];
             Object[] associatedObjectArrayTableKey2 = new Object[nb + 1];
             objectArrayTableKey2[0] = "<No Second Key>";
-            associatedObjectArrayTableKey2[0] = new Integer(-1);
+            associatedObjectArrayTableKey2[0] = Integer.valueOf(-1);
             for (int j = 0; j < nb; j++) {
                 objectArrayTableKey2[j + 1] = objectArrayTableKey1[j];
                 associatedObjectArrayTableKey2[j + 1] = associatedObjectArrayTableKey1[j];

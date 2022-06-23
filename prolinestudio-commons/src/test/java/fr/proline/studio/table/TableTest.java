@@ -78,7 +78,7 @@ public class TableTest extends JFrame{
 }
 
 class CustomTableModel implements TableModel{
-    private List<String> columns = new ArrayList();
+    private List<String> columns = new ArrayList<>();
     private int nbR = 10;
     private int nbC = 25;
     

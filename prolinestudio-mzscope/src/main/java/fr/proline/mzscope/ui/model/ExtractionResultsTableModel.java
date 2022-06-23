@@ -51,7 +51,7 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
 
     final private static Logger logger = LoggerFactory.getLogger(ExtractionResultsTableModel.class);
     
-    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
+    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap<>();
     private List<IRawFile> m_rawFiles = new ArrayList<>();
 
     public enum EColumn {
@@ -115,7 +115,7 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
         int rawFileIdx = (columnIndex - cCount) / eCount;
         int columnIdx = (columnIndex - cCount - rawFileIdx*eCount) % eCount;
 
-        return new ImmutablePair(m_rawFiles.get(rawFileIdx), EColumn.values()[columnIdx]);
+        return new ImmutablePair<>(m_rawFiles.get(rawFileIdx), EColumn.values()[columnIdx]);
     }
 
     @Override
@@ -256,8 +256,7 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
 
     @Override
     public int[] getKeysColumn() {
-        int[] keys = {Column.MZ.id};
-        return keys;
+        return new int[]{Column.MZ.id};
     }
 
     @Override

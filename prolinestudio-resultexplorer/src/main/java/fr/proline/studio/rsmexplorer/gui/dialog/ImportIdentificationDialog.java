@@ -937,7 +937,7 @@ public class ImportIdentificationDialog extends DefaultStorableDialog {
 
     private ParameterList createMascotParser() {
         ParameterList parameterList = new ParameterList(MASCOT_PARSER);
-        parameterList.add(new DoubleParameter("subset.threshold", "Subset Threshold", JTextField.class, new Double(1.0), new Double(0), new Double(1)));
+        parameterList.add(new DoubleParameter("subset.threshold", "Subset Threshold", JTextField.class, Double.valueOf(1.0), Double.valueOf(0), Double.valueOf(1)));
 
         return parameterList;
     }
@@ -1050,7 +1050,7 @@ public class ImportIdentificationDialog extends DefaultStorableDialog {
         });
 
         m_decoyRegexTextField = new JTextField(20);
-        m_decoyRegexParameter = new StringParameter("decoy_accession", "Decoy Accession", m_decoyRegexTextField, "", new Integer(2), null);
+        m_decoyRegexParameter = new StringParameter("decoy_accession", "Decoy Accession", m_decoyRegexTextField, "", Integer.valueOf(2), null);
         m_decoyRegexParameter.setUsed(false);
         m_decoyRegexParameter.setCompulsory(false);
         parameterList.add(m_decoyRegexParameter);

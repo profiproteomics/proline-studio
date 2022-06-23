@@ -57,8 +57,8 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
     
     private HashMap<Integer, Col> m_modifiedColumns = null;
 
-    private final ArrayList<Col> m_extraColumns = new ArrayList();
-    private final ArrayList<TableCellRenderer> m_extraColumnRenderers = new ArrayList();
+    private final ArrayList<Col> m_extraColumns = new ArrayList<>();
+    private final ArrayList<TableCellRenderer> m_extraColumnRenderers = new ArrayList<>();
     
     
     private int m_bestXAxisColIndex = -1;

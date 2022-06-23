@@ -51,7 +51,7 @@ public class DatabaseBioSequenceTask {
                 proteinMatchById.get(proteinMatchId).setDBioSequence(new DBioSequence(sequence, mass, pI));
             }
 
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
 
         } finally {
             entityManagerMSI.close();

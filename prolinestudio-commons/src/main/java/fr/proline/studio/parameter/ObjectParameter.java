@@ -34,7 +34,7 @@ public class ObjectParameter<E> extends AbstractParameter {
     private E[] m_objects;
     private Object[] m_associatedObjects = null;
     private final int m_defaultIndex;
-    private AbstractParameterToString<E> m_paramToString = null;
+    private AbstractParameterToString<E> m_paramToString;
     
     private boolean m_edited = false;
 

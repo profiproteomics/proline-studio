@@ -135,7 +135,7 @@ public class ProteinsOfPeptideMatchTableModel extends DecoratedTableModel implem
             case COLTYPE_PROTEIN_MASS:               
                 DBioSequence bioSequence = proteinMatch.getDBioSequence();
                 if (bioSequence != null) {                    
-                    return new Float(bioSequence.getMass());
+                    return Float.valueOf((float) bioSequence.getMass());
                 } else 
                     return Float.NaN; // unknown
             }

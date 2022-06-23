@@ -62,7 +62,7 @@ public class DoubleParameter extends AbstractParameter {
         if (value != null) {
             try {
                 double valueParsed = Double.parseDouble(value.toString());
-                m_startValue = new Double(valueParsed);
+                m_startValue = Double.valueOf(valueParsed);
             } catch (NumberFormatException nfe) {
             }
         }

@@ -60,7 +60,7 @@ public class FloatParameter extends AbstractParameter {
         if (value != null) {
             try {
                 float valueParsed = Float.parseFloat(value.toString());
-                m_startValue = new Float(valueParsed);
+                m_startValue = Float.valueOf(valueParsed);
             } catch (NumberFormatException nfe) {
             }
         }

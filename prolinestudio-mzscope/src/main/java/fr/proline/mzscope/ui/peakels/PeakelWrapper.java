@@ -81,7 +81,7 @@ class PeakelWrapper implements ExtendedTableModelInterface {
       m_plotInformation.setPlotTitle("Elution peak\n");
       m_plotInformation.setDrawPoints(false);
       m_plotInformation.setDrawGap(true);
-      HashMap<String, String> plotInfo = new HashMap();
+      HashMap<String, String> plotInfo = new HashMap<>();
       plotInfo.put("m/z", Double.toString(m_peakel.getApexMz()));
       plotInfo.put("Apex Int.", DataFormat.formatWithGroupingSep(m_peakel.getApexIntensity(), 0));
       plotInfo.put("Isotope index", Integer.toString(m_isotopeIndex));

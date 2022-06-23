@@ -230,7 +230,7 @@ public class DiffFunction extends AbstractFunction {
         Object[] objectArrayTable1Key2 = new Object[nb+1];
         Object[] associatedObjectArrayTable1Key2 = new Object[nb+1];
         objectArrayTable1Key2[0] = "<No Second Key>";
-        associatedObjectArrayTable1Key2[0] = new Integer(-1);
+        associatedObjectArrayTable1Key2[0] = Integer.valueOf(-1);
         for (int i=0;i<nb;i++) {
             objectArrayTable1Key2[i+1] = objectArrayTable1Key1[i];
             associatedObjectArrayTable1Key2[i+1] = associatedObjectArrayTable1Key1[i];
@@ -240,7 +240,7 @@ public class DiffFunction extends AbstractFunction {
         Object[] objectArrayTable2Key2 = new Object[nb+1];
         Object[] associatedObjectArrayTable2Key2 = new Object[nb+1];
         objectArrayTable2Key2[0] = "<No Second Key>";
-        associatedObjectArrayTable2Key2[0] = new Integer(-1);
+        associatedObjectArrayTable2Key2[0] = Integer.valueOf(-1);
         for (int i=0;i<nb;i++) {
             objectArrayTable2Key2[i+1] = objectArrayTable2Key1[i];
             associatedObjectArrayTable2Key2[i+1] = associatedObjectArrayTable2Key1[i];

@@ -29,11 +29,10 @@ import java.util.HashSet;
 public class DockContainerTab extends DockContainerMulti {
 
 
-    private HashSet<DockContainer> m_dockContainerSet = new HashSet();
+    private HashSet<DockContainer> m_dockContainerSet = new HashSet<>();
 
     public DockContainerTab() {
-        final JTabbedPane tabbedPane = new JTabbedPane();
-        m_component = tabbedPane;
+        m_component = new JTabbedPane();
 
     }
 

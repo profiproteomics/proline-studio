@@ -711,7 +711,7 @@ public abstract class GraphNode extends AbstractConnectedGraphObject {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            InfoDialog errorDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Error", m_graphNode.getErrorMessage());
+            InfoDialog errorDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Error", m_graphNode.getErrorMessage(), false);
             errorDialog.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
             errorDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
             errorDialog.setVisible(true);

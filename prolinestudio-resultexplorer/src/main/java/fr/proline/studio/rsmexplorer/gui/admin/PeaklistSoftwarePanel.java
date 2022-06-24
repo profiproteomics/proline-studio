@@ -232,7 +232,7 @@ public class PeaklistSoftwarePanel extends JPanel {
                 parse(sb, StringUtils.defaultIfEmpty(selectedPS.getSpecTitleParsingRule().getFirstTime(), ""), "First Time :", spectrumTitle);
                 parse(sb, StringUtils.defaultIfEmpty(selectedPS.getSpecTitleParsingRule().getLastTime(), ""), "Last Time :", spectrumTitle);
 
-                InfoDialog parseResultDialog = new InfoDialog(m_dialogOwner, InfoDialog.InfoType.NO_ICON, "Spectrum Title Parsing Result", sb.toString());
+                InfoDialog parseResultDialog = new InfoDialog(m_dialogOwner, InfoDialog.InfoType.NO_ICON, "Spectrum Title Parsing Result", sb.toString(), false);
                 parseResultDialog.setButtonVisible(InfoDialog.BUTTON_OK, false);
                 parseResultDialog.setButtonName(BUTTON_CANCEL, "Close");
                 parseResultDialog.centerToWindow(m_dialogOwner);

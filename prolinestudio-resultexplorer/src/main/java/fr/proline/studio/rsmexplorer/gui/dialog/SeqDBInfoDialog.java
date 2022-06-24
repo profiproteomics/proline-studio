@@ -29,7 +29,7 @@ public class SeqDBInfoDialog extends InfoDialog {
     private static String SHOW_AT_START_KEY = "Show_SeqDb_Warning_At_Start";
     
     public SeqDBInfoDialog(Window parent) {
-        super(parent, InfoDialog.InfoType.WARNING, "No Protein Sequence Database Found", "There is no Protein Sequence Database available.\nPlease contact your IT Administrator to install it.", SHOW_AT_START_KEY);
+        super(parent, InfoDialog.InfoType.WARNING, "No Protein Sequence Database Found", "There is no Protein Sequence Database available.\nPlease contact your IT Administrator to install it.", SHOW_AT_START_KEY, true);
         setButtonName(InfoDialog.BUTTON_OK, "OK");
         setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
     }

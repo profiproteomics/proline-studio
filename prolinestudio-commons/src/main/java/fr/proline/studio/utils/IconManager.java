@@ -99,6 +99,9 @@ public class IconManager {
         BIG_HELP,
         BIG_WARNING,
         BIG_INFO,
+        HELP_30,
+        WARNING_30,
+        INFO_30,
         SERVER_ON,
         MSN_SET,
         WAVE,
@@ -502,6 +505,12 @@ public class IconManager {
                 return "fr/proline/studio/images/big-warning.png";
             case BIG_INFO:
                 return "fr/proline/studio/images/big-info.png";
+            case HELP_30:
+                return "fr/proline/studio/images/help-30.png";
+            case WARNING_30:
+                return "fr/proline/studio/images/warning-30.png";
+            case INFO_30:
+                return "fr/proline/studio/images/info-30.png";
             case SERVER_ON:
                 return "fr/proline/studio/images/server-on.png";
             case MSN_SET:

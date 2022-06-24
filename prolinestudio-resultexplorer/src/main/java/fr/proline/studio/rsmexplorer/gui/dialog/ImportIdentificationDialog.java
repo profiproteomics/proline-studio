@@ -347,7 +347,7 @@ public class ImportIdentificationDialog extends DefaultStorableDialog {
                 if (m_rootPathError) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Server has returned no Root Path for Result Files. There is a problem with the server installation, please contact your administrator.");
 
-                    InfoDialog errorDialog = new InfoDialog(m_singletonDialog, InfoDialog.InfoType.WARNING, "Root Path Error", "Server has returned no Root Path for Result Files.\nThere is a problem with the server installation, please contact your administrator.");
+                    InfoDialog errorDialog = new InfoDialog(m_singletonDialog, InfoDialog.InfoType.WARNING, "Root Path Error", "Server has returned no Root Path for Result Files.\nThere is a problem with the server installation, please contact your administrator.", true);
                     errorDialog.setButtonVisible(DefaultDialog.BUTTON_CANCEL, false);
                     errorDialog.setLocationRelativeTo(m_singletonDialog);
                     errorDialog.setVisible(true);

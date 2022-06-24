@@ -585,7 +585,7 @@ public class ProjectExplorerPanel extends JPanel {
             
             if ((projectItem != null) && (projectItem.isInactive())) {
                 SwingUtilities.invokeLater(() -> {
-                    InfoDialog infoDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Project Deleted", "Databases corresponding to this project have been deleted.\nAsk to your Administrator to restore them.");
+                    InfoDialog infoDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Project Deleted", "Databases corresponding to this project have been deleted.\nAsk to your Administrator to restore them.", true);
                     infoDialog.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
                     infoDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
                     infoDialog.setVisible(true);

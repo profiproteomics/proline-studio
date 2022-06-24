@@ -745,7 +745,7 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
                 //Verify which dataset is loaded : if Annotated PTMDataset,nothing to do otherwise should switch to annotated dataset !
                 PTMDatasetPair ptmDatasetpair = (PTMDatasetPair) m_dataBox.getData(PTMDatasetPair.class);
                 if(!ptmDatasetpair.shouldSavePTMDataset()){
-                    InfoDialog err = new InfoDialog(WindowManager.getDefault().getMainWindow(),InfoDialog.InfoType.INFO, "Save Information" ,"No modification to save...");
+                    InfoDialog err = new InfoDialog(WindowManager.getDefault().getMainWindow(),InfoDialog.InfoType.INFO, "Save Information" ,"No modification to save...",false);
                     err.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
                     err.setButtonName(InfoDialog.BUTTON_OK, "OK");
                     err.centerToWindow(WindowManager.getDefault().getMainWindow());
@@ -755,7 +755,7 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
 
                 boolean changeToAnnotated = false;
                 if (ptmDatasetpair.getPTMDatasetType() == PTMDatasetPair.RAW_PTM_DATASET) {
-                    InfoDialog err = new InfoDialog(WindowManager.getDefault().getMainWindow(),InfoDialog.InfoType.INFO, "Save Warning" ,"If annotated modification clusters already exist, it will be replace by new modification. Are you sure ? ");
+                    InfoDialog err = new InfoDialog(WindowManager.getDefault().getMainWindow(),InfoDialog.InfoType.INFO, "Save Warning" ,"If annotated modification clusters already exist, it will be replace by new modification. Are you sure ? ", false);
                     err.centerToWindow(WindowManager.getDefault().getMainWindow());
                     err.setVisible(true);
                     int choice = err.getButtonClicked();
@@ -839,14 +839,14 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
                         DataBoxViewerManager.loadedDataModified(m_dataBox.getProjectId(), m_dataBox.getRsetId(), m_dataBox.getRsmId(), PTMCluster.class,
                                 new ArrayList(clusters), REASON_MODIF.REASON_PTMCLUSTER_MERGED.getReasonValue());
                     } else {
-                        InfoDialog err = new InfoDialog(WindowManager.getDefault().getMainWindow(),InfoDialog.InfoType.WARNING, "Merge Error" ,"Merge has not be done. Be sure selected clusters are co-localized.");
+                        InfoDialog err = new InfoDialog(WindowManager.getDefault().getMainWindow(),InfoDialog.InfoType.WARNING, "Merge Error" ,"Merge has not be done. Be sure selected clusters are co-localized.", false);
                         err.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
                         err.setButtonName(InfoDialog.BUTTON_OK, "OK");
                         err.centerToWindow(WindowManager.getDefault().getMainWindow());
                         err.setVisible(true);
                     }
                 } else {
-                    InfoDialog err = new InfoDialog(WindowManager.getDefault().getMainWindow(),InfoDialog.InfoType.INFO, "Merge Information" ,"Select more than one co-localized modification clusters.");
+                    InfoDialog err = new InfoDialog(WindowManager.getDefault().getMainWindow(),InfoDialog.InfoType.INFO, "Merge Information" ,"Select more than one co-localized modification clusters.", false);
                     err.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
                     err.setButtonName(InfoDialog.BUTTON_OK, "OK");
                     err.centerToWindow(WindowManager.getDefault().getMainWindow());
@@ -911,7 +911,7 @@ public class PTMClustersPanel extends HourglassPanel implements RendererMouseCal
 
                     }
                 } else {
-                    InfoDialog err = new InfoDialog(WindowManager.getDefault().getMainWindow(),InfoDialog.InfoType.INFO, "Edition Information" ,"Can't edit more than one modification cluster at the time. ");
+                    InfoDialog err = new InfoDialog(WindowManager.getDefault().getMainWindow(),InfoDialog.InfoType.INFO, "Edition Information" ,"Can't edit more than one modification cluster at the time. ", false);
                     err.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
                     err.setButtonName(InfoDialog.BUTTON_OK, "OK");
                     err.centerToWindow(WindowManager.getDefault().getMainWindow());

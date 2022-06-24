@@ -706,7 +706,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 // create the actions
                 Boolean showHiddenFunctionnality = false; // JPM.TODO : completely removed for the moment preferences.getBoolean("Profi", false);
 
-                m_mainActions = new ArrayList<>(27);  // <--- get in sync
+                m_mainActions = new ArrayList<>(24);  // <--- get in sync
 
 
                 DisplayRsetAction displayRsetAction = new DisplayRsetAction(this);

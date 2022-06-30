@@ -47,7 +47,7 @@ import java.util.prefs.Preferences;
  *
  * @author JM235353
  */
-public class ValidationDialog extends DefaultStorableDialog implements ComponentListener {
+public class ValidationDialog extends DefaultStorableDialog {
 
     private static ValidationDialog m_singletonDialog = null;
     
@@ -107,7 +107,7 @@ public class ValidationDialog extends DefaultStorableDialog implements Component
     private JComboBox<String> m_psmFdrMethodComboBox = null;
     private AbstractParameter m_psmFdrCheckboxParameter;
     private JCheckBox m_psmFdrCheckbox = null;
-    private JComboBox<String> m_tdAnalyzerComboBox = null;
+//    private JComboBox<String> m_tdAnalyzerComboBox = null;
     private JPanel m_tdParamsPanel;
 //    private JLabel m_tdAnalyzerParamLabel = null;
 //    private JTextField m_tdAnalyzerParamTF = null;
@@ -152,6 +152,7 @@ public class ValidationDialog extends DefaultStorableDialog implements Component
 
     public ValidationDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
+        setResizable(true);
 
         setTitle("Identification Validation");
 
@@ -274,12 +275,16 @@ public class ValidationDialog extends DefaultStorableDialog implements Component
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1.0;
+        c.weighty = 1.0;
         internalPanel.add(tabbedPane, c);
 
         return internalPanel;
     }
 
     private JPanel createValidationPanel() {
+
+        JPanel validationPanel = new JPanel(new BorderLayout());
+        JScrollPane sPane = new JScrollPane();
 
         JPanel psmTabPanel = new JPanel(new GridBagLayout());
 
@@ -299,7 +304,9 @@ public class ValidationDialog extends DefaultStorableDialog implements Component
         c.gridy++;
         psmTabPanel.add(createProteinSetFilterPanel(), c);
 
-        return psmTabPanel;
+        sPane.setViewportView(psmTabPanel);
+        validationPanel.add(sPane, BorderLayout.CENTER);
+        return validationPanel;
     }
     
     private JPanel createPeptideFilterPanel() {
@@ -339,12 +346,9 @@ public class ValidationDialog extends DefaultStorableDialog implements Component
            m_propagatePsmFiltersCheckBox.setSelected(false);
         m_propagatePsmFiltersCheckBox.setEnabled(m_allowPropagateFilters);
         panel.add(m_propagatePsmFiltersCheckBox, c);
-        m_propagatePsmFiltersCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                boolean enabled = (m_propagatePsmFiltersCheckBox.isSelected());
-                m_propagatePsmFiltersParameter.setUsed(enabled);
-            }
+        m_propagatePsmFiltersCheckBox.addActionListener(e -> {
+            boolean enabled = (m_propagatePsmFiltersCheckBox.isSelected());
+            m_propagatePsmFiltersParameter.setUsed(enabled);
         });
         
         c.gridy++;   
@@ -352,7 +356,6 @@ public class ValidationDialog extends DefaultStorableDialog implements Component
         m_psmPrefiltersPanel =  new ParametersComboPanel(" Prefilter(s) ", m_psmPrefilterParameters);
         panel.add(m_psmPrefiltersPanel, c);
 
-        m_psmPrefiltersPanel.addComponentListener(this);
         c.gridy++;
         panel.add(createPSMFDRPanel(), c);
 
@@ -405,9 +408,7 @@ public class ValidationDialog extends DefaultStorableDialog implements Component
         c.weightx = 0.1;
         m_tdParamsPanel.add(Box.createHorizontalBox(), c);
 
-        m_psmFdrCheckbox.addActionListener((ActionEvent e) -> {
-          updatePSMFDRObjects(m_psmFdrCheckbox.isSelected());
-        });
+        m_psmFdrCheckbox.addActionListener((ActionEvent e) -> updatePSMFDRObjects(m_psmFdrCheckbox.isSelected()));
 
         // enable frd by clicking on any component
         MouseListener actionOnClick = new MouseAdapter() {
@@ -549,9 +550,7 @@ public class ValidationDialog extends DefaultStorableDialog implements Component
         c.weightx = 1.0;
         fdrPanel.add(Box.createHorizontalBox(), c);
 
-        m_peptideFdrCheckbox.addActionListener((ActionEvent e) -> {
-          updatePeptideFDRObjects(m_peptideFdrCheckbox.isSelected());
-        });
+        m_peptideFdrCheckbox.addActionListener((ActionEvent e) -> updatePeptideFDRObjects(m_peptideFdrCheckbox.isSelected()));
 
         MouseListener actionOnClick = new MouseAdapter() {
 
@@ -589,17 +588,11 @@ public class ValidationDialog extends DefaultStorableDialog implements Component
         m_propagateProtSetFiltersCheckBox.setEnabled(m_allowPropagateFilters);
         proteinSetFilterPanel.add(m_propagateProtSetFiltersCheckBox, c);
         
-        m_propagateProtSetFiltersCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                m_propagateProtSetFiltersParameter.setUsed(m_propagateProtSetFiltersCheckBox.isSelected());
-            }
-        });
+        m_propagateProtSetFiltersCheckBox.addActionListener(e -> m_propagateProtSetFiltersParameter.setUsed(m_propagateProtSetFiltersCheckBox.isSelected()));
         
         c.gridy++;
         c.weightx = 1.0;
         m_proteinPrefiltersPanel = new ParametersComboPanel(" Filter(s) ", m_proteinPrefilterParameters);
-        m_proteinPrefiltersPanel.addComponentListener(this);
         proteinSetFilterPanel.add(m_proteinPrefiltersPanel, c);
 
         c.gridy++;
@@ -639,12 +632,7 @@ public class ValidationDialog extends DefaultStorableDialog implements Component
         m_typicalProteinMatchCheckBox.setHorizontalAlignment(SwingConstants.RIGHT);
         typicalProteinPanel.add(m_typicalProteinMatchCheckBox, c);
 
-        m_typicalProteinMatchCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                m_changeTypicalPanel.enableRules(m_typicalProteinMatchCheckBox.isSelected());
-            }
-        });
+        m_typicalProteinMatchCheckBox.addActionListener(e -> m_changeTypicalPanel.enableRules(m_typicalProteinMatchCheckBox.isSelected()));
 
         c.gridx = 0;
         c.gridy++;
@@ -687,9 +675,7 @@ public class ValidationDialog extends DefaultStorableDialog implements Component
         c.gridx++;
         fdrPanel.add(m_proteinFdrMethodComboBox, c);
 
-        m_proteinFdrMethodComboBox.addActionListener((ActionEvent e) -> {
-          synchFDRMethods((JComboBox<String>)e.getSource());
-        });
+        m_proteinFdrMethodComboBox.addActionListener((ActionEvent e) -> synchFDRMethods((JComboBox<String>)e.getSource()));
 
         c.gridx++;
         fdrPanel.add(m_proteinFdrLabel, c);
@@ -704,9 +690,7 @@ public class ValidationDialog extends DefaultStorableDialog implements Component
         c.weightx = 1.0;
         fdrPanel.add(Box.createHorizontalBox(), c);
 
-        m_proteinFdrCheckbox.addActionListener((ActionEvent e) -> {
-          updateProteinFDRObjects(m_proteinFdrCheckbox.isSelected());
-        });
+        m_proteinFdrCheckbox.addActionListener((ActionEvent e) -> updateProteinFDRObjects(m_proteinFdrCheckbox.isSelected()));
 
         MouseListener actionOnClick = new MouseAdapter() {
             @Override
@@ -761,7 +745,7 @@ public class ValidationDialog extends DefaultStorableDialog implements Component
 
     private void restoreTypicalProteinParameters(Preferences preferences) {
 
-        boolean useTypicalProteinRegex =(preferences == null) ? true :   preferences.getBoolean("UseTypicalProteinRegex", true);
+        boolean useTypicalProteinRegex = (preferences == null) || preferences.getBoolean("UseTypicalProteinRegex", true);
 
         m_typicalProteinMatchCheckBox.setSelected(useTypicalProteinRegex);
         m_changeTypicalPanel.restoreInitialParameters();
@@ -822,11 +806,11 @@ public class ValidationDialog extends DefaultStorableDialog implements Component
     private void createParameters() {
         m_psmPrefilterParameters = new AbstractParameter[12]; //<< get sync
         m_psmPrefilterParameters[0] = null;
-        m_psmPrefilterParameters[1] = new IntegerParameter("PSM_" + ValidationTask.PSMFilter.RANK.key, ValidationTask.PSMFilter.RANK.name, new JTextField(6), Integer.valueOf(1), Integer.valueOf(0), Integer.valueOf(10));
+        m_psmPrefilterParameters[1] = new IntegerParameter("PSM_" + ValidationTask.PSMFilter.RANK.key, ValidationTask.PSMFilter.RANK.name, new JTextField(6), 1, 0, 10);
         m_psmPrefilterParameters[1].setAssociatedData("<=");
         m_psmPrefilterParameters[1].addBackwardCompatibleKey("Rank");
         m_psmPrefilterParameters[1].addBackwardCompatibleKey("PSM_RANK");
-        m_psmPrefilterParameters[2] = new IntegerParameter("PSM_" + ValidationTask.PSMFilter.PEP_LENGTH.key, ValidationTask.PSMFilter.PEP_LENGTH.name, new JTextField(6), Integer.valueOf(4), Integer.valueOf(4), null);
+        m_psmPrefilterParameters[2] = new IntegerParameter("PSM_" + ValidationTask.PSMFilter.PEP_LENGTH.key, ValidationTask.PSMFilter.PEP_LENGTH.name, new JTextField(6), 4, 4, null);
         m_psmPrefilterParameters[2].setAssociatedData(">=");
         m_psmPrefilterParameters[3] = new DoubleParameter("PSM_" + ValidationTask.PSMFilter.SCORE.key, ValidationTask.PSMFilter.SCORE.name, new JTextField(6), Double.valueOf(0), Double.valueOf(0), null);
         m_psmPrefilterParameters[3].setAssociatedData(">=");
@@ -834,9 +818,9 @@ public class ValidationDialog extends DefaultStorableDialog implements Component
         m_psmPrefilterParameters[4].setAssociatedData("<=");
         m_psmPrefilterParameters[5] = new DoubleParameter("PSM_" + ValidationTask.PSMFilter.MASCOT_ADJUSTED_EVALUE.key, ValidationTask.PSMFilter.MASCOT_ADJUSTED_EVALUE.name, new JTextField(6), Double.valueOf(1), Double.valueOf(0), Double.valueOf(1));
         m_psmPrefilterParameters[5].setAssociatedData("<=");
-        m_psmPrefilterParameters[6] = new DoubleParameter("PSM_" + ValidationTask.PSMFilter.MASCOT_IT_SCORE.key, ValidationTask.PSMFilter.MASCOT_IT_SCORE.name, new JTextField(6), Double.valueOf(0.05), Double.valueOf(0),Double.valueOf(1));
+        m_psmPrefilterParameters[6] = new DoubleParameter("PSM_" + ValidationTask.PSMFilter.MASCOT_IT_SCORE.key, ValidationTask.PSMFilter.MASCOT_IT_SCORE.name, new JTextField(6), 0.05, Double.valueOf(0),Double.valueOf(1));
         m_psmPrefilterParameters[6].setAssociatedData("=");
-        m_psmPrefilterParameters[7] = new DoubleParameter("PSM_" + ValidationTask.PSMFilter.MASCOT_HT_SCORE.key, ValidationTask.PSMFilter.MASCOT_HT_SCORE.name, new JTextField(6), Double.valueOf(0.05), Double.valueOf(0), Double.valueOf(1));
+        m_psmPrefilterParameters[7] = new DoubleParameter("PSM_" + ValidationTask.PSMFilter.MASCOT_HT_SCORE.key, ValidationTask.PSMFilter.MASCOT_HT_SCORE.name, new JTextField(6), 0.05, Double.valueOf(0), Double.valueOf(1));
         m_psmPrefilterParameters[7].setAssociatedData("=");
         m_psmPrefilterParameters[8] = new NoneParameter("PSM_" + ValidationTask.PSMFilter.SINGLE_PSM_QUERY.key, ValidationTask.PSMFilter.SINGLE_PSM_QUERY.name);
         m_psmPrefilterParameters[8].setAssociatedData(":");
@@ -844,7 +828,7 @@ public class ValidationDialog extends DefaultStorableDialog implements Component
         m_psmPrefilterParameters[9].setAssociatedData(":");
         m_psmPrefilterParameters[10] = new NoneParameter("PSM_" + ValidationTask.PSMFilter.SINGLE_SEQ_RANK.key, ValidationTask.PSMFilter.SINGLE_SEQ_RANK.name);
         m_psmPrefilterParameters[10].setAssociatedData(":");
-        m_psmPrefilterParameters[11] = new IntegerParameter("PSM_" + ValidationTask.PSMFilter.ISOTOPE_OFFSET.key, ValidationTask.PSMFilter.ISOTOPE_OFFSET.name, new JTextField(6), Integer.valueOf(1), Integer.valueOf(0), null);
+        m_psmPrefilterParameters[11] = new IntegerParameter("PSM_" + ValidationTask.PSMFilter.ISOTOPE_OFFSET.key, ValidationTask.PSMFilter.ISOTOPE_OFFSET.name, new JTextField(6), 1, 0, null);
         m_psmPrefilterParameters[11].setAssociatedData("<=");
         
         for (AbstractParameter p : m_psmPrefilterParameters) {
@@ -1166,25 +1150,6 @@ public class ValidationDialog extends DefaultStorableDialog implements Component
        @Override
     protected boolean cancelCalled() {
         return true;
-    }
-
-    @Override
-    public void componentResized(ComponentEvent e) {
-        repack();
-    }
-
-    @Override
-    public void componentMoved(ComponentEvent e) {
-
-    }
-
-    @Override
-    public void componentShown(ComponentEvent e) {
-    }
-
-    @Override
-    public void componentHidden(ComponentEvent e) {
-
     }
 
     void setPanelEnabled(JPanel panel, Boolean isEnabled) {

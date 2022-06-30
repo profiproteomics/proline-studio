@@ -16,20 +16,18 @@
  */
 package fr.proline.studio.rsmexplorer.gui.renderer;
 
+import fr.profi.util.CollectionUtils;
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
-import fr.proline.studio.utils.GlobalValues;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 import fr.proline.studio.table.renderer.GrayableTableCellRenderer;
+import fr.proline.studio.utils.GlobalValues;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import java.awt.*;
+import java.util.List;
+import java.util.*;
 
 /**
  * Renderer for a Peptide in a Table Cell
@@ -52,7 +50,7 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements Grayabl
         if ((value == null) || !(DPeptideMatch.class.isAssignableFrom(value.getClass()) || Peptide.class.isAssignableFrom(value.getClass()))) {
             displayString = "";
         } else if (DPeptideMatch.class.isAssignableFrom(value.getClass())) {
-            displayString = constructPeptideDisplay(((DPeptideMatch) value).getPeptide());
+            displayString = constructPeptideDisplay(((DPeptideMatch) value).getPeptide(), (DPeptideMatch)value);
         } else {
             displayString = constructPeptideDisplay((Peptide) value);
         }
@@ -65,46 +63,66 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements Grayabl
 
         return l;
     }
-    
+
     public static String constructPeptideDisplay(Peptide peptide) {
-        StringBuilder m_displaySB = new StringBuilder();
-        StringBuilder m_exportSB = new StringBuilder();
+        return PeptideRenderer.constructPeptideDisplay(peptide,null);
+    }
+
+    public static String constructPeptideDisplay(Peptide peptide, DPeptideMatch match) {
         String textToExport;
 
         if ((peptide != null) && (peptide.getTransientData() != null)) {
-
-            HashMap<Integer, DPeptidePTM> ptmMap = peptide.getTransientData().getDPeptidePtmMap();
-            if (ptmMap != null) {
-                m_displaySB.append(GlobalValues.HTML_TAG_BEGIN);
-            }
-
             String sequence = peptide.getSequence();
 
-            if (ptmMap == null) {
+            List<Integer> ambiguousIndex = new ArrayList<>();
+            boolean hasAmbiguity = false;
+            if(match!= null && match.hasAmbiguousSeq()){
+                hasAmbiguity = true;
+                String ambiguityInfo = (String) ((Map<String, Object>) match.getPropertiesAsMap().get("mascot_properties")).get("ambiguity_string");
+                List<String> ambiguityChars = Arrays.asList(ambiguityInfo.split(","));
+                CollectionUtils.createSlidingWindow(ambiguityChars, 3).forEach(substInfo ->  {
+                    ambiguousIndex.add(Integer.parseInt(substInfo.get(0)) -1);
+                });
+            }
+
+            StringBuilder m_displaySB = new StringBuilder();
+            HashMap<Integer, DPeptidePTM> ptmMap = peptide.getTransientData().getDPeptidePtmMap();
+            boolean hasPtms = ptmMap != null;
+
+            if(!hasPtms && !hasAmbiguity ) {
                 m_displaySB.append(sequence);
-                m_exportSB.append(sequence);
             } else {
+                m_displaySB.append(GlobalValues.HTML_TAG_BEGIN);
 
                 int nb = sequence.length();
                 for (int i = 0; i < nb; i++) {
 
-                    boolean nTerOrCterModification = false;
-                    if (i == 0) {
-                        DPeptidePTM nterPtm = ptmMap.get(0);
-                        if (nterPtm != null) {
-                            nTerOrCterModification = true;
-                        }
-                    } else if (i == nb - 1) {
-                        DPeptidePTM cterPtm = ptmMap.get(-1);
-                        if (cterPtm != null) {
-                            nTerOrCterModification = true;
-                        }
+                    boolean isAmbiguous = false;
+                    if(ambiguousIndex.contains(i)){
+                        isAmbiguous = true;
                     }
 
-                    DPeptidePTM ptm = ptmMap.get(i + 1);
+                    boolean nTerOrCterModification = false;
+                    DPeptidePTM ptm = null;
+                    if(hasPtms) {
+                        if (i == 0) {
+                            DPeptidePTM nterPtm = ptmMap.get(0);
+                            if (nterPtm != null) {
+                                nTerOrCterModification = true;
+                            }
+                        } else if (i == nb - 1) {
+                            DPeptidePTM cterPtm = ptmMap.get(-1);
+                            if (cterPtm != null) {
+                                nTerOrCterModification = true;
+                            }
+                        }
+
+                        ptm = ptmMap.get(i + 1);
+                    }
+
                     boolean aminoAcidModification = (ptm != null);
 
-                    if (nTerOrCterModification || aminoAcidModification) {
+                    if (nTerOrCterModification || aminoAcidModification || isAmbiguous) {
 
                         if (nTerOrCterModification && aminoAcidModification) {
                             m_displaySB.append("<span style='color:").append(GlobalValues.HTML_COLOR_VIOLET).append("'>");
@@ -117,33 +135,36 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements Grayabl
 
                         }
 
+                        if(isAmbiguous)
+                            m_displaySB.append("<b>");
+
                         m_displaySB.append(sequence.charAt(i));
-                        m_displaySB.append(GlobalValues.HTML_TAG_SPAN_END);
+
+                        if(isAmbiguous)
+                            m_displaySB.append("</b>");
+
+                        if(nTerOrCterModification || aminoAcidModification)
+                            m_displaySB.append(GlobalValues.HTML_TAG_SPAN_END);
 
                     } else {
                         m_displaySB.append(sequence.charAt(i));
                     }
-                    m_exportSB.append(sequence.charAt(i));
                 }
-            }
 
-            if (ptmMap != null) {
                 m_displaySB.append(GlobalValues.HTML_TAG_END);
             }
 
-            textToExport = m_exportSB.toString();
-            m_exportSB.setLength(0);
+            textToExport = m_displaySB.toString();
 
-            String res = m_displaySB.toString();
-            m_displaySB.setLength(0);
-            return res;
-        }
-
-        if (peptide == null) {
-            textToExport = "";
         } else {
-            textToExport = peptide.getSequence();
+
+            if (peptide == null) {
+                textToExport = "";
+            } else {
+                textToExport = peptide.getSequence();
+            }
         }
+
         return textToExport;
     }
 

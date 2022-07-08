@@ -54,19 +54,18 @@ public class GenerateSpectrumMatchesDialog extends DefaultDialog {
     private List<DDataset> m_datasets = null;
        
     public GenerateSpectrumMatchesDialog(Window parent){
+        this(parent, null);
+    }
+    
+    public GenerateSpectrumMatchesDialog(Window parent, List<DDataset> allDSs){
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-         
+        m_datasets = allDSs;
         setTitle("Generate Spectrum Matches");
         setDocumentationSuffix("id.1idq7dh");
         setHelpHeaderText("Choose Fragmentation Rule Set that will be used to generate spectrum matches.<br>" +
                 " With force parameter set, new generated spectrum matches will overwrite existing ones.");
         initInternalPanel();
         pack();
-    }
-    
-    public GenerateSpectrumMatchesDialog(Window parent, List<DDataset> allDSs){
-        this(parent);
-        m_datasets = allDSs;
     }
     
     private void initInternalPanel() {
@@ -158,7 +157,7 @@ public class GenerateSpectrumMatchesDialog extends DefaultDialog {
         boolean oneNull = false;
         boolean oneNotNull = false;
         boolean oneMerged = false;
-        if (m_datasets == null || m_datasets.isEmpty()) //from specific pepMatch. TODO Get DS informatoin ?
+        if (m_datasets == null || m_datasets.isEmpty()) //from specific pepMatch. TODO Get DS information ?
             return "unknown - see dataset properties";
         for (DDataset ds : m_datasets){
             if(!DDatasetType.AggregationInformation.NONE.equals(ds.getAggregationInformation()))

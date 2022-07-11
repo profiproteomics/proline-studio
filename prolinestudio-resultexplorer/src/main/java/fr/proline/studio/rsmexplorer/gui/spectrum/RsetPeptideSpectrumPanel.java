@@ -16,9 +16,13 @@
  */
 package fr.proline.studio.rsmexplorer.gui.spectrum;
 
+import fr.proline.core.orm.msi.MsiSearch;
+import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.uds.Project;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
@@ -41,6 +45,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collections;
 
 /**
  * Panel used to display a Spectrum of a PeptideMatch
@@ -51,7 +56,7 @@ public class RsetPeptideSpectrumPanel extends AbstractPeptideSpectrumPanel {
 
 
   protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-  private static String SPECTRUM_GENERATION_RUNNING = "Generate Spectrum Match in progress...";
+  private static final String SPECTRUM_GENERATION_RUNNING = "Generate Spectrum Match in progress...";
 
   private JButton m_generateMatchButton;
   private boolean _isSpectrumMatchGenerationAsked = false;
@@ -71,7 +76,14 @@ public class RsetPeptideSpectrumPanel extends AbstractPeptideSpectrumPanel {
     m_generateMatchButton.addActionListener(new ActionListener() {
           @Override
           public void actionPerformed(ActionEvent e) {
-            GenerateSpectrumMatchesDialog dialog = new GenerateSpectrumMatchesDialog(WindowManager.getDefault().getMainWindow());
+            DDataset dataset =(DDataset) getDataBox().getData(DDataset.class);
+            GenerateSpectrumMatchesDialog dialog;
+            if(dataset == null){
+              MsiSearch msiSearch = getPeptideMatchMsiSearch();
+              dialog = new GenerateSpectrumMatchesDialog(WindowManager.getDefault().getMainWindow(), msiSearch);
+            } else
+              dialog = new GenerateSpectrumMatchesDialog(WindowManager.getDefault().getMainWindow(),Collections.singletonList(dataset) );
+
             Point location = m_generateMatchButton.getLocationOnScreen();
             dialog.setLocation(location.x + 30, location.y - dialog.getHeight() - 60);
             dialog.setVisible(true);
@@ -88,6 +100,19 @@ public class RsetPeptideSpectrumPanel extends AbstractPeptideSpectrumPanel {
         }
     );
     m_toolbar.add(m_generateMatchButton);
+  }
+
+  private MsiSearch getPeptideMatchMsiSearch(){
+    ResultSet rs =(ResultSet) getDataBox().getData(ResultSet.class);
+    if(rs != null)
+      return rs.getMsiSearch();
+
+    ResultSummary rsm =(ResultSummary) getDataBox().getData(ResultSummary.class);
+    if(rsm !=null && rsm.getResultSet() !=null)
+      return rsm.getResultSet().getMsiSearch();
+
+    //VDS : Could add DB access to get information...
+    return null;
   }
 
   private void generateSpectrumMatch(Long frsId, Boolean forceGenerateSM) {

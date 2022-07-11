@@ -38,6 +38,8 @@ import javax.jms.TextMessage;
  */
 public class RetrieveBioSeqTask extends AbstractJMSTask {
 
+    private static boolean isRunning;
+
     private List<Long> m_resultSummariesIds = null;
     private long m_projectId;
     private boolean m_forceUpdate = false;
@@ -63,8 +65,9 @@ public class RetrieveBioSeqTask extends AbstractJMSTask {
         addSupplementaryInfo(message);
         setTaskInfoRequest(message.getText());
 
-        //  Send the Message        
-        m_producer.send(message, Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY, 50000);
+        //  Send the Message
+        isRunning= true;
+        m_producer.send(message);
         m_lastMsgId = message.getJMSMessageID();
         m_loggerProline.info("Message [{}] sent", m_lastMsgId);
         m_taskInfo.setJmsMessageID(message.getJMSMessageID());
@@ -82,7 +85,7 @@ public class RetrieveBioSeqTask extends AbstractJMSTask {
     public void taskDone(Message jmsMessage) throws Exception {
         final TextMessage textMessage = (TextMessage) jmsMessage;
         final String jsonString = textMessage.getText();
-
+        isRunning = false;
         final JSONRPC2Message jsonMessage = JSONRPC2Message.parse(jsonString);
         if (jsonMessage instanceof JSONRPC2Notification) {
             m_loggerProline.warn("JSON Notification method: " + ((JSONRPC2Notification) jsonMessage).getMethod() + " instead of JSON Response");
@@ -110,4 +113,7 @@ public class RetrieveBioSeqTask extends AbstractJMSTask {
         m_currentState = JMSState.STATE_DONE;
     }
 
+    public static boolean isRetrieveRunning(){
+        return isRunning;
+    }
 }

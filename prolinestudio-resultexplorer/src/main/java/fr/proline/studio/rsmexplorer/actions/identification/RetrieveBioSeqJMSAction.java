@@ -21,6 +21,7 @@ import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
+import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.RetrieveBioSeqTask;
 import fr.proline.studio.gui.InfoDialog;
@@ -53,9 +54,20 @@ public class RetrieveBioSeqJMSAction extends AbstractRSMAction {
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
 
+        if(!ServerConnectionManager.getServerConnectionManager().isRetrieveSeqServiceAvailable()){
+            setEnabled(false);
+            return;
+        }
+
+
         // to execute this action, the user must be the owner of the project
         Project selectedProject = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject();
         if (!DatabaseDataManager.getDatabaseDataManager().ownProject(selectedProject)) {
+            setEnabled(false);
+            return;
+        }
+
+        if(RetrieveBioSeqTask.isRetrieveRunning()) {
             setEnabled(false);
             return;
         }
@@ -130,6 +142,7 @@ public class RetrieveBioSeqJMSAction extends AbstractRSMAction {
                             "Error: " + msg + "\nnProtein Sequence can't be retrived, Check if the Sequence Repository Server is installed and started", false);
                     
                     errorDialog.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
+                    errorDialog.setButtonName(InfoDialog.BUTTON_OK, "OK");
                     errorDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
                     errorDialog.setVisible(true);
                 }

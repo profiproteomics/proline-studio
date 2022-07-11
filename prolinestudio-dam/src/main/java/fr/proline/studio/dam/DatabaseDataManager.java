@@ -43,11 +43,10 @@ public class DatabaseDataManager  {
     private UserAccount m_loggedUser;
     private String m_jdbcURL;
     private String m_jdbcDriver;
-    private HashMap<Object, Object> m_serverConnectionProperties;
     private Project m_currentProject;
 
-    private HashMap<Long, PTMDatasetPair> m_ptmDatasetSetPerDatasetId;
-    private HashMap<Long, PTMDatasetPair> m_ptmAnnotatedDatasetSetPerDatasetId;
+    private final HashMap<Long, PTMDatasetPair> m_ptmDatasetSetPerDatasetId;
+    private final HashMap<Long, PTMDatasetPair> m_ptmAnnotatedDatasetSetPerDatasetId;
 
     private HashMap<Aggregation.ChildNature, Aggregation> m_aggregationMap = null;
     
@@ -63,10 +62,10 @@ public class DatabaseDataManager  {
         return m_singleton;
     }
     
-    public void setServerConnectionProperties(HashMap<Object, Object> connProperties){
-        this.m_serverConnectionProperties = connProperties;
-    }
-    
+//    public void setServerConnectionProperties(HashMap<Object, Object> connProperties){
+//        this.m_serverConnectionProperties = connProperties;
+//    }
+//
     public void setIntruments(List<InstrumentConfiguration> l) {
         m_instruments = l.toArray(new InstrumentConfiguration[0]);
     }
@@ -185,10 +184,7 @@ public class DatabaseDataManager  {
     public void setAggregationList(List<Aggregation> l) {
         
         m_aggregationMap = new HashMap<>();
-        
-        Iterator<Aggregation> it = l.iterator();
-        while (it.hasNext()) {
-            Aggregation aggregation = it.next();
+        for (Aggregation aggregation : l) {
             m_aggregationMap.put(aggregation.getChildNature(), aggregation);
         }
     }
@@ -236,15 +232,12 @@ public class DatabaseDataManager  {
     }
 
     public void removeAllPTMDatasetsForDS(Long dsId){
-        if (m_ptmDatasetSetPerDatasetId.containsKey(dsId))
-            m_ptmDatasetSetPerDatasetId.remove(dsId);
-        if (m_ptmAnnotatedDatasetSetPerDatasetId.containsKey(dsId))
-            m_ptmAnnotatedDatasetSetPerDatasetId.remove(dsId);
+        m_ptmDatasetSetPerDatasetId.remove(dsId);
+        m_ptmAnnotatedDatasetSetPerDatasetId.remove(dsId);
     }
 
     public void removeAnnotatedPTMDatasetsForDS(Long dsId){
-        if (m_ptmAnnotatedDatasetSetPerDatasetId.containsKey(dsId))
-            m_ptmAnnotatedDatasetSetPerDatasetId.remove(dsId);
+        m_ptmAnnotatedDatasetSetPerDatasetId.remove(dsId);
     }
 
     public PTMDatasetPair getPTMDatasetSetForDS(Long dsId){
@@ -313,10 +306,11 @@ public class DatabaseDataManager  {
     
     public boolean isSeqDatabaseExists() {
 
-        EntityManager udsEM = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
-        ExternalDb seqDb = ExternalDbRepository.findExternalByType(udsEM, ProlineDatabaseType.SEQ);
-        m_checkDatabaseExists = (seqDb != null);
-
+        if(m_checkDatabaseExists == null) {
+            EntityManager udsEM = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
+            ExternalDb seqDb = ExternalDbRepository.findExternalByType(udsEM, ProlineDatabaseType.SEQ);
+            m_checkDatabaseExists = (seqDb != null);
+        }
         return m_checkDatabaseExists;
     }
 

@@ -180,9 +180,8 @@ public class ServerConnectionDialog extends ConnectionDialog {
                         });
                     }
 
-
-                    // dialog will be closed if the connection is established
-                    if (SeqDBInfoDialog.showAtStart() && !ServerConnectionManager.getServerConnectionManager().isRetrieveSeqServiceAvailable()/*!DatabaseDataManager.getDatabaseDataManager().isSeqDatabaseExists()*/) {
+                    //Test isRetrieveSeqServiceAvailable to init boolean which will be tested in action...
+                    if (!ServerConnectionManager.getServerConnectionManager().isRetrieveSeqServiceAvailable() && SeqDBInfoDialog.showAtStart() /*!DatabaseDataManager.getDatabaseDataManager().isSeqDatabaseExists()*/) {
                         SeqDBInfoDialog seqDBInfoDialog = new SeqDBInfoDialog(WindowManager.getDefault().getMainWindow());
                         seqDBInfoDialog.centerToScreen();
                         seqDBInfoDialog.setVisible(true);

@@ -77,6 +77,8 @@ public class FilterProtSetDialog extends DefaultStorableDialog implements Compon
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1.0;
+        this.setHelpHeaderText("Warning: Filtering will be done on current dataset, keeping previous validation and filters.");
+
         m_proteinPrefiltersPanel = new ParametersComboPanel(" Filter(s) ", m_proteinFilterParameters);
         m_proteinPrefiltersPanel.addComponentListener( this);
         internalPanel.add(m_proteinPrefiltersPanel, c);

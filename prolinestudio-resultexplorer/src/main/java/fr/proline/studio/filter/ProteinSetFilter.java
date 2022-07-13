@@ -32,14 +32,16 @@ public class ProteinSetFilter extends  StringFilter {
         DProteinSet value = (DProteinSet) v1;
         List<String> acc = new ArrayList<>();
         acc.add(value.getTypicalProteinMatch().getAccession());
-        if(value.getSameSet() != null)
-            for(DProteinMatch pm : value.getSameSet()){
+        if(value.getSameSet() != null) {
+            for (DProteinMatch pm : value.getSameSet()) {
                 acc.add(pm.getAccession());
             }
-        if(value.getSubSet() != null)
-            for(DProteinMatch pm : value.getSubSet()){
+        }
+        if(value.getSubSet() != null) {
+            for (DProteinMatch pm : value.getSubSet()) {
                 acc.add(pm.getAccession());
             }
+        }
 
         boolean found = false;
         switch (m_selectItem) {
@@ -68,6 +70,8 @@ public class ProteinSetFilter extends  StringFilter {
                                 break;
                             }
                         }
+                        if(found)
+                            break;
                     }
                 }
                 break;

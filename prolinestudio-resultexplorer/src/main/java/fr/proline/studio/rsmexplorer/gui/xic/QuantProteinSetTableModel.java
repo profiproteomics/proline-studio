@@ -480,7 +480,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                             }
                             switch (id) {
                                 case COLTYPE_PEP_NUMBER:
-                                    lazyData.setData((quantProteinSet.getPeptidesCount()== null || quantProteinSet.getPeptidesCount()== 0 ) ? pepNumber : quantProteinSet.getPeptidesCount());
+                                    lazyData.setData(pepNumber);
                                     break;
                                 case COLTYPE_SELECTION_LEVEL:
                                     lazyData.setData(quantProteinSet.getSelectionLevel());

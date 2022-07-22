@@ -1787,13 +1787,14 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                             status = protMatchStatusByIdPepMatch.get(pmId);
                         }
                     }
-                    if (protMatchPepNumberByIdByQcId.containsKey(qch.getId())) {
+
+                    if(protSetQch.getPeptidesCount()<= 0 && protMatchPepNumberByIdByQcId.containsKey(qch.getId())) {
                         Map<Long, Integer> protMatchPepNumberByIdPepMatch = protMatchPepNumberByIdByQcId.get(qch.getId());
                         if (protMatchPepNumberByIdPepMatch.containsKey(pmId)) {
                             pepNumber = protMatchPepNumberByIdPepMatch.get(pmId);
+                            protSetQch.setPeptidesCount(pepNumber);
                         }
                     }
-                    masterQuantProteinSet.getQuantProteinSetByQchIds().get(qch.getId()).setPeptidesCount(pepNumber);
                 }
                 quantStatusByQchIds.put(qch.getId(), status);
 

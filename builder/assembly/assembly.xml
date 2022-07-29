@@ -34,6 +34,9 @@
       <includes>
         <include>*/**</include>
       </includes>
+      <excludes>
+        <exclude>start_studio.bat</exclude>
+      </excludes>
 <!--      <outputDirectory>${project.artifactId}-${project.version}</outputDirectory>-->
       <outputDirectory></outputDirectory>
     </fileSet>
@@ -47,7 +50,13 @@
       </excludes>
     </fileSet>
 
-
   </fileSets>
+  <files>
+    <file>
+      <source>${project.build.directory}/${project.artifactId}-${project.version}/prolinestudio/start_studio.bat</source>
+      <outputDirectory></outputDirectory>
+      <filtered>true</filtered>
+    </file>
+  </files>
 
 </assembly>

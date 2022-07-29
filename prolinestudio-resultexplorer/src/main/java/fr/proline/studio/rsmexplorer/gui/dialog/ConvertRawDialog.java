@@ -76,7 +76,7 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
     private JScrollPane m_fileListScrollPane;
     private JButton m_addFileButton, m_removeFileButton;
     private ParameterList m_parameterList;
-    private BooleanParameter m_deleteMzdb, m_deleteRaw, m_uploadMzdb, m_createParentDirectoryParameter;
+    private BooleanParameter m_deleteMzdb, m_deleteRaw, m_uploadMzdb, m_createParentDirectoryParameter, m_isConverter_v1;
 
     private FileParameter m_converterFilePath, m_outputFilePath;
 
@@ -184,6 +184,10 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
         m_outputFilePath.setSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         m_outputFilePath.setDefaultDirectory(new File(preferences.get("mzDB_Settings.Output_Path", System.getProperty("user.home"))));
         m_parameterList.add(m_outputFilePath);
+
+        JCheckBox isConverterV1Checkbox = new JCheckBox("Converter version 1.1 or above");
+        m_isConverter_v1 = new BooleanParameter("CONVERTER_V1", "Converter version is greater or equal to 1.1", isConverterV1Checkbox, false);
+        m_parameterList.add(m_isConverter_v1);
 
         JCheckBox rawCheckbox = new JCheckBox("Delete raw file after a successful conversion");
         m_deleteRaw = new BooleanParameter("DELETE_RAW", "Delete raw file after a successful conversion", rawCheckbox, false);
@@ -395,7 +399,7 @@ public class ConvertRawDialog extends DefaultDialog implements FileDialogInterfa
 
             File file = (File) m_fileList.getModel().getElementAt(i);
 
-            ConversionSettings conversionSettings = new ConversionSettings(m_converterFilePath.getStringValue(), m_outputFilePath.getStringValue(), (boolean) m_deleteRaw.getObjectValue(), (m_serverConnected) ? (boolean) m_uploadMzdb.getObjectValue() : false);
+            ConversionSettings conversionSettings = new ConversionSettings(m_converterFilePath.getStringValue(), m_outputFilePath.getStringValue(), (boolean) m_deleteRaw.getObjectValue(), (m_serverConnected) ? (boolean) m_uploadMzdb.getObjectValue() : false,  (boolean) m_isConverter_v1.getObjectValue());
             
             if(conversionSettings.getUploadAfterConversion()){
                 MzdbUploadSettings uploadSettings = new MzdbUploadSettings((boolean) m_deleteMzdb.getObjectValue(), m_uploadLabelParameter.getStringValue(), (boolean) m_createParentDirectoryParameter.getObjectValue() ? File.separator + file.getParentFile().getName() : "");

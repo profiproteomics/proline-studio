@@ -22,6 +22,9 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import fr.proline.studio.Exceptions;
 
 /**
@@ -56,7 +59,15 @@ public class RawConversionTask extends AbstractDatabaseTask {
                 suffix = ".wiff";
             }
 
-            m_process = new ProcessBuilder(m_settings.getConverterPath(), "-i", m_file.getAbsolutePath(), "-o", m_settings.getOutputPath() + File.separator + m_file.getName().substring(0, m_file.getName().lastIndexOf(suffix)) + ".mzdb").start();
+            List<String> commandParams = new ArrayList<>();
+            commandParams.add(m_settings.getConverterPath());
+            commandParams.add("-i");
+            commandParams.add( m_file.getAbsolutePath());
+            commandParams.add("-o");
+            commandParams.add(m_settings.getOutputPath()+ File.separator + m_file.getName().substring(0, m_file.getName().lastIndexOf(suffix))+ ".mzdb");
+            if(m_settings.isVersion1_1())
+                commandParams.add("-n");
+            m_process = new ProcessBuilder(commandParams).start();
 
         } catch (IOException ex) {
             if (m_process != null && m_process.isAlive()) {

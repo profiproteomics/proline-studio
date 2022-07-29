@@ -310,5 +310,23 @@
         </plugins>
 
     </build>
-
+    <profiles>
+        <profile>
+            <id>full</id>
+            <!-- Default profile. To be used with Builder to create final distribution-->
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <java.token>${java.home.dir}</java.token>
+            </properties>
+        </profile>
+        <profile>
+            <id>standalone</id>
+            <!-- Dev profile to use generated zip as Studio dist (withour jdk, R, etc. added by builder ! -->
+            <properties>
+                <java.token> </java.token>
+            </properties>
+        </profile>
+    </profiles>
 </project>

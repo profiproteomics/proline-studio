@@ -75,6 +75,7 @@ public class ConvertionUploadBatch implements Runnable, MsListener {
 
         if (m_pathToExpand == null) {
             Iterator it = m_conversions.entrySet().iterator();
+            String mountingPointPath = null;
             while (it.hasNext()) {
                 Map.Entry pair = (Map.Entry) it.next();
                 ConversionSettings settings = (ConversionSettings) pair.getValue();
@@ -86,8 +87,11 @@ public class ConvertionUploadBatch implements Runnable, MsListener {
                         m_parentDirectories.add(settings.getUploadSettings().getDestination());
                     }
                 }
+                if (settings.getUploadSettings() != null && mountingPointPath==null)
+                    mountingPointPath = settings.getUploadSettings().getMountingPointPath();
             }
-            MzdbFilesTopPanel.getExplorer().getTreeFileChooserPanel().expandMultipleTreePath(m_parentDirectories, m_conversions.values().iterator().next().getUploadSettings().getMountingPointPath());
+            if(mountingPointPath != null)
+                MzdbFilesTopPanel.getExplorer().getTreeFileChooserPanel().expandMultipleTreePath(m_parentDirectories, mountingPointPath);
         } else {
             MzdbFilesTopPanel.getExplorer().getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
         }

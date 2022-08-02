@@ -16,25 +16,15 @@
  */
 package fr.proline.studio.dpm.task.jms;
 
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Message;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import fr.proline.studio.dpm.AccessJMSManagerThread;
-import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.TASK_LIST_INFO;
-import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+
 import javax.jms.JMSException;
-import javax.jms.Message;
 import javax.jms.TextMessage;
+import java.util.*;
 
 /**
  * compute Spectral Count Quantitation via JMS
@@ -46,12 +36,12 @@ public class SpectralCountTask extends AbstractJMSTask {
     private static final String m_serviceName = "proline/dps/msq/QuantifySC";
     private static final String m_version_2_0 = "2.0";
 
-    private DDataset m_refDataset = null;
-    private List<DDataset> m_rsmDataset = null;
-    private List<DDataset> m_rsmWeightDataset = null;
-    private Long[] m_quantiDatasetId = null;
-    private String m_dsName = null;
-    private String m_dsDescr = null;
+    private final DDataset m_refDataset;
+    private final List<DDataset> m_rsmDataset;
+    private final List<DDataset> m_rsmWeightDataset;
+    private final Long[] m_quantiDatasetId;
+    private String m_dsName;
+    private String m_dsDescr;
 
     public SpectralCountTask(AbstractJMSCallback callback, DDataset refDataset, List<DDataset> rsmDataset, List<DDataset> rsmWeightDataset, String dsName, String dsDescr, Long[] quantiDatasetId) {
         super(callback, new TaskInfo("Spectral Count on " + refDataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
@@ -107,9 +97,9 @@ public class SpectralCountTask extends AbstractJMSTask {
         // experimental_design
         Map<String, Object> experimentalDesignParams = new HashMap<>();
 
-        List sampleNumbers = new ArrayList();
-        List biologicalSampleList = new ArrayList();
-        List quantChanneList = new ArrayList();
+        List<Integer> sampleNumbers = new ArrayList<>();
+        List<Map<String, Object>> biologicalSampleList = new ArrayList<>();
+        List<Map<String, Object>> quantChanneList = new ArrayList<>();
         int number = 1;
         Iterator<DDataset> itDataset = m_rsmDataset.iterator();
         while (itDataset.hasNext()) {
@@ -136,7 +126,7 @@ public class SpectralCountTask extends AbstractJMSTask {
         }
         experimentalDesignParams.put("biological_samples", biologicalSampleList);
 
-        List biologicalGroupList = new ArrayList();
+        List<Map<String, Object>> biologicalGroupList = new ArrayList<>();
         Map<String, Object> biologicalGroupParams = new HashMap<>();
         biologicalGroupParams.put("number", Integer.valueOf(0));
         biologicalGroupParams.put("name", m_refDataset.getName());
@@ -144,7 +134,7 @@ public class SpectralCountTask extends AbstractJMSTask {
         biologicalGroupList.add(biologicalGroupParams);
         experimentalDesignParams.put("biological_groups", biologicalGroupList);
 
-        List masterQuantChannelsList = new ArrayList();
+        List<Map<String, Object>> masterQuantChannelsList = new ArrayList<>();
         Map<String, Object> masterQuantChannelParams = new HashMap<>();
         masterQuantChannelParams.put("number", 0);
         masterQuantChannelParams.put("name", m_refDataset.getName() + " Spectral Count");
@@ -160,75 +150,16 @@ public class SpectralCountTask extends AbstractJMSTask {
     }
 
     @Override
-    public void taskDone(final Message jmsMessage) throws Exception {
-
-        final TextMessage textMessage = (TextMessage) jmsMessage;
-        final String jsonString = textMessage.getText();
-
-        final JSONRPC2Message jsonMessage = JSONRPC2Message.parse(jsonString);
-        if (jsonMessage instanceof JSONRPC2Notification) {
-            m_loggerProline.warn("JSON Notification method: " + ((JSONRPC2Notification) jsonMessage).getMethod() + " instead of JSON Response");
-            throw new Exception("Invalid JSONRPC2Message type");
-
-        } else if (jsonMessage instanceof JSONRPC2Response) {
-
-            final JSONRPC2Response jsonResponse = (JSONRPC2Response) jsonMessage;
-            m_loggerProline.debug("JSON Response Id: " + jsonResponse.getID());
-
-            final JSONRPC2Error jsonError = jsonResponse.getError();
-
-            if (jsonError != null) {
-                m_loggerProline.error("JSON Error code {}, message : \"{}\"", jsonError.getCode(), jsonError.getMessage());
-                m_loggerProline.error("JSON Throwable", jsonError);
-                throw jsonError;
-            }
-
-            final Object result = jsonResponse.getResult();
-//      TODO:  COMMENT BELLOW FOR VERSION 2 ! 
-//                if (result == null || !Map.class.isInstance(result)) {
-//                    m_loggerProline.debug("Invalid result");
-//                    throw new Exception("Invalid result " + result);
-//                } else {
-//                    m_loggerProline.debug("Result :\n" + result);
-//                    Map returnedValues = (Map) result;
-//                    if (returnedValues.isEmpty()) {
-//                        m_loggerProline.error(getClass().getSimpleName() + " failed : No returned values");
-//                        m_currentState = JMSState.STATE_FAILED;
-//                        throw new Exception("No returned values " + result);
-//                    }
-//
-//                    // retrieve Quanti Dataset ID
-//                    Long quantiDatasetIdBD = (Long) returnedValues.get("quant_dataset_id");
-//                    if (quantiDatasetIdBD == null) {
-//                        m_loggerProline.error(getClass().getSimpleName() + " failed : No returned Quanti Dataset Id");
-//                        m_currentState = JMSState.STATE_FAILED;
-//                        throw new Exception("No returned Quanti Dataset Id ");
-//                    }
-//                    m_quantiDatasetId[0] = quantiDatasetIdBD;
-//
-//                    //retrieve SC Values as JSON String 
-////                    String scValues = (String) returnedValues.get("spectral_count_result");
-////                    if (scValues == null) {
-////                        m_loggerProline.error(getClass().getSimpleName() + " failed : No Spectral Count returned.");
-////                        m_currentState = JMSState.STATE_FAILED;
-////                        throw new Exception("No Spectral Count returned.");
-////                    }
-////                    m_spCountJSONResult[0] = scValues;
-//                }
-//      TODO: COMMENT ABOVE FOR VERSION 2
-                
-//      TODO: UNCOMMENT BELLOW FOR VERSION 2 ! 
-                if (result == null || !Long.class.isInstance(result)) {
-                    m_loggerProline.debug("Invalid result");
-                    throw new Exception("Invalid result " + result);
-                } else {
-                    m_loggerProline.debug("Result :\n" + result);
-                    // retrieve Quanti Dataset ID                   
-                    m_quantiDatasetId[0] = (Long) result;
-                }
-                
+    public void processWithResult(JSONRPC2Response jsonResponse) throws Exception {
+        final Object result = jsonResponse.getResult();
+        if (result == null || !Long.class.isInstance(result)) {
+            m_loggerProline.debug("Invalid result");
+            throw new Exception("Invalid result " + result);
+        } else {
+            m_loggerProline.debug("Result :\n" + result);
+            // retrieve Quanti Dataset ID
+            m_quantiDatasetId[0] = (Long) result;
         }
-        m_currentState = JMSState.STATE_DONE;
 
     }
 }

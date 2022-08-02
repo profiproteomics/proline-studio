@@ -16,9 +16,6 @@
  */
 package fr.proline.studio.dpm.task.jms;
 
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Message;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.proline.core.orm.uds.Project;
@@ -28,16 +25,13 @@ import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.studio.dam.data.ProjectQuantitationData;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import fr.proline.studio.dpm.AccessJMSManagerThread;
-import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.TASK_LIST_INFO;
-import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
-import java.util.HashMap;
-import java.util.Set;
+
 import javax.jms.JMSException;
-import javax.jms.Message;
 import javax.jms.TextMessage;
 import javax.persistence.EntityManager;
+import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Create Project Task through JMS
@@ -95,72 +89,49 @@ public class CreateProjectTask extends AbstractJMSTask {
     }
 
     @Override
-    public void taskDone(final Message jmsMessage) throws Exception {
+    public void processWithResult(JSONRPC2Response jsonResponse) throws Exception {
 
-        final TextMessage textMessage = (TextMessage) jmsMessage;
-        final String jsonString = textMessage.getText();
-
-        final JSONRPC2Message jsonMessage = JSONRPC2Message.parse(jsonString);
-        if (jsonMessage instanceof JSONRPC2Notification) {
-            m_loggerProline.warn("JSON Notification method: " + ((JSONRPC2Notification) jsonMessage).getMethod() + " instead of JSON Response");
-            throw new Exception("Invalid JSONRPC2Message type");
-
-        } else if (jsonMessage instanceof JSONRPC2Response) {
-
-            final JSONRPC2Response jsonResponse = (JSONRPC2Response) jsonMessage;
-            m_loggerProline.debug("JSON Response Id: " + jsonResponse.getID());
-
-            final JSONRPC2Error jsonError = jsonResponse.getError();
-
-            if (jsonError != null) {
-                m_loggerProline.error("JSON Error code {}, message : \"{}\"", jsonError.getCode(), jsonError.getMessage());
-                m_loggerProline.error("JSON Throwable", jsonError);
-                throw jsonError;
-            }
-
-            final Object result = jsonResponse.getResult();
-            if (result == null || !Long.class.isInstance(result)) {
-                m_loggerProline.debug("Invalid result: No projectId returned");
-                throw new Exception("Invalid result " + result);
-            } else {
-                m_loggerProline.debug("Result :\n" + result);
-            }
-            Long projectId = (Long) result;
-            EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
-            try {
-                entityManagerUDS.getTransaction().begin();
-
-                Project p = entityManagerUDS.find(Project.class, Long.valueOf(projectId.longValue()));
-
-                if (p == null) {
-                    m_taskError = new TaskError("Internal Error : Project not Found");
-                    return;
-                }
-
-                // avoid lazy initialization problem
-                Set<ProjectUserAccountMap> members = p.getProjectUserAccountMap();
-                for (ProjectUserAccountMap projectUserAccount : members) {
-                    projectUserAccount.getUserAccount();
-                }
-
-                m_projectIdentificationData.setProject(p);
-                m_projectQuantificationData.setProject(p);
-
-                entityManagerUDS.getTransaction().commit();
-
-            } catch (Exception e) {
-                m_loggerProline.error(getClass().getSimpleName() + " failed", e);
-                try {
-                    entityManagerUDS.getTransaction().rollback();
-                } catch (Exception rollbackException) {
-                    m_loggerProline.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
-                }
-            } finally {
-                entityManagerUDS.close();
-            }
-
+        final Object result = jsonResponse.getResult();
+        if (result == null || !Long.class.isInstance(result)) {
+            m_loggerProline.debug("Invalid result: No projectId returned");
+            throw new Exception("Invalid result " + result);
+        } else {
+            m_loggerProline.debug("Result :\n" + result);
         }
-        m_currentState = JMSState.STATE_DONE;
+        Long projectId = (Long) result;
+        EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
+        try {
+            entityManagerUDS.getTransaction().begin();
+
+            Project p = entityManagerUDS.find(Project.class, Long.valueOf(projectId.longValue()));
+
+            if (p == null) {
+                m_taskError = new TaskError("Internal Error : Project not Found");
+                return;
+            }
+
+            // avoid lazy initialization problem
+            Set<ProjectUserAccountMap> members = p.getProjectUserAccountMap();
+            for (ProjectUserAccountMap projectUserAccount : members) {
+                projectUserAccount.getUserAccount();
+            }
+
+            m_projectIdentificationData.setProject(p);
+            m_projectQuantificationData.setProject(p);
+
+            entityManagerUDS.getTransaction().commit();
+
+        } catch (Exception e) {
+            m_loggerProline.error(getClass().getSimpleName() + " failed", e);
+            try {
+                entityManagerUDS.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_loggerProline.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
+        } finally {
+            entityManagerUDS.close();
+        }
+
 
     }
 }

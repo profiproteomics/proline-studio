@@ -12,7 +12,7 @@ public class IsRetrieveSeqAvailableTask extends AbstractJMSTask {
 
     private static final String m_serviceName = "proline/seq/isServiceAlive";
     private static final String m_version = "1.0";
-    private Boolean[] m_result;
+    private final Boolean[] m_result;
 
     public IsRetrieveSeqAvailableTask(AbstractJMSCallback callback, Boolean[] m_result) {
         super(callback, true, new TaskInfo( "Verify if Retrieve Sequence is available", false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
@@ -50,7 +50,7 @@ public class IsRetrieveSeqAvailableTask extends AbstractJMSTask {
 
         } else if (jsonMessage instanceof JSONRPC2Response)  {
 
-            final JSONRPC2Response jsonResponse = (JSONRPC2Response) jsonMessage;
+            final JSONRPC2Response jsonResponse =  JSONRPC2Response.parse(jsonString, false, false, true);
             m_loggerProline.debug("JSON Response Id: " + jsonResponse.getID());
 
             final JSONRPC2Error jsonError = jsonResponse.getError();
@@ -74,6 +74,11 @@ public class IsRetrieveSeqAvailableTask extends AbstractJMSTask {
                 }
             }
         }
-        m_currentState = JMSState.STATE_DONE;
     }
+
+    //taskDone overwritten ... this method won't be called !    @Override
+    public void processWithResult(JSONRPC2Response jsonResponse) throws Exception {
+
+    }
+
 }

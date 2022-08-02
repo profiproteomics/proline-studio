@@ -18,19 +18,19 @@ package fr.proline.studio.dpm.task.jms;
 
 
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import fr.proline.studio.dpm.AccessJMSManagerThread;
-import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
+
+import javax.jms.BytesMessage;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.TextMessage;
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
-import javax.jms.BytesMessage;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.TextMessage;
 
 
 /**
@@ -120,17 +120,21 @@ public class DownloadProcessedFileTask extends AbstractJMSTask {
             if(!errorMsg.isEmpty())
                 throw new Exception(errorMsg);
 
-        } else if (jmsMessage instanceof TextMessage) {
+        } else if (jmsMessage instanceof final TextMessage textMessage) {
 		/* It is a JSON-RPC Response (Error) */
-            final TextMessage textMessage = (TextMessage) jmsMessage;
             final String jsonString = textMessage.getText();
             throw new Exception(" Invalide message type to download file ! " +jsonString);
 
         } else {
             throw new Exception(" Invalide message type to download file ! ");           
         }
-        
-         m_currentState = JMSState.STATE_DONE;
+
+    }
+
+    //taskDone overwritten ... this method won't be called !
+    @Override
+    public void processWithResult(JSONRPC2Response jsonResponse) throws Exception {
+
     }
 
 }

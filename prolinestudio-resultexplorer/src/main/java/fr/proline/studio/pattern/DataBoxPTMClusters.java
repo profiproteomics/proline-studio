@@ -222,7 +222,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {                   
-                m_logger.debug("DataBoxPTMClusters : **** Callback task "+taskId+", success "+success+", finished "+finished+"; with subtask : "+(subTask != null)+". Duration: "+(System.currentTimeMillis()-logStartTimelocal)+" TimeMillis"); 
+                m_logger.debug("DataBoxPTMClusters : **** Callback task "+taskId+", success "+success+", finished "+finished+"; with subtask : "+(subTask != null)+". Duration: "+(System.currentTimeMillis()-logStartTimelocal)+" TimeMillis");
                 if(success) {
                     if(subTask == null){
                         //Main task callback!
@@ -230,7 +230,6 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                         m_ptmDatasetPair = ptmDSSet.get(0);
                         getDataBoxPanelInterface().addSingleValue(m_ptmDatasetPair);
                         m_shouldBeSaved = false;
-                        m_logger.debug("  -- created "+getPTMDatasetToView().getPTMClusters().size()+" PTMCluster.");
                         m_loadPepMatchOnGoing=true;
                         ((PTMClustersPanel) getDataBoxPanelInterface()).setData(taskId, (ArrayList<PTMCluster>) getPTMDatasetToView().getPTMClusters(), finished);
                         loadPeptideMatches();
@@ -356,7 +355,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
 
                         @Override
                         public void run(boolean success, long task2Id, SubTask subTask, boolean finished) {
-                            m_logger.info("**** +++ END task "+task2Id+" if finished ? "+finished);
+                            m_logger.trace("**** +++ END task "+task2Id+" if finished ? "+finished);
                             if (finished) {
                                 unregisterTask(task2Id);                                
                             }
@@ -366,13 +365,13 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                     // ask asynchronous loading of data
                     DatabaseLoadLcMSTask taskMap = new DatabaseLoadLcMSTask(mapCallback);
                     taskMap.initLoadAlignmentForXic(getProjectId(), m_datasetSet);
-                    m_logger.info("DataBoxPTMClusters **** +++ Register task DatabaseLoadLcMSTask.initLoadAlignmentForXic "+taskMap.getId());
+                    m_logger.trace("DataBoxPTMClusters **** +++ Register task DatabaseLoadLcMSTask.initLoadAlignmentForXic "+taskMap.getId());
                     registerTask(taskMap);
 
                 }
 
                 if (finished) {
-                    m_logger.info(" **** +++ Unregister "+taskId+" + loadProteinMatchMapping + propagate and set Loaded");
+                    m_logger.debug(" DataBoxPTMClusters : **** Unregister "+taskId+" + loadProteinMatchMapping + propagate and set Loaded");
                     setLoaded(loadingId);                    
                     Map<Long, Long> typicalProteinMatchIdByProteinMatchId = loadProteinMatchMapping();
                     m_ptmDatasetPair.getClusterPTMDataset().setQuantProteinSets(masterQuantProteinSetList, typicalProteinMatchIdByProteinMatchId);
@@ -417,7 +416,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                 typicalProteinMatchIdByProteinMatchId.put(proteinMatchId, typicalProteinMatchId);
             }
             
-            m_logger.info("Protein match ids map retrieve {} entries in {} ms", typicalProteinMatchIdByProteinMatchId.size(), (System.currentTimeMillis() - start));
+            m_logger.trace("Protein match ids map retrieve {} entries in {} ms", typicalProteinMatchIdByProteinMatchId.size(), (System.currentTimeMillis() - start));
             entityManagerMSI.getTransaction().commit();
         } catch (RuntimeException e) {
             try {
@@ -435,7 +434,6 @@ public class DataBoxPTMClusters extends AbstractDataBox {
 
     
     private void startLoadingMasterQuantPeptides(final List<PTMCluster> proteinPTMClusters) {
-        m_logger.debug("start loading MQPeptides from PTMCluster and compute PTMCluster expression values");
         List<DMasterQuantPeptide> masterQuantPeptideList = new ArrayList<>();
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -449,7 +447,6 @@ public class DataBoxPTMClusters extends AbstractDataBox {
             public void run(boolean success, final long taskId, SubTask subTask, boolean finished) {
                 if(finished) {
                     unregisterTask(taskId);
-                    m_logger.info("MQPeptides loaded !! ");
                     Map<Long, DMasterQuantPeptide> mqPepByPepInstId = masterQuantPeptideList.stream().collect(Collectors.toMap(DMasterQuantPeptide::getPeptideInstanceId, x -> x));
 
                     for (PTMCluster currentCluster : proteinPTMClusters) {
@@ -466,7 +463,7 @@ public class DataBoxPTMClusters extends AbstractDataBox {
         DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
         List<Long> parentPepInstanceIds = proteinPTMClusters.stream().flatMap(cluster -> cluster.getParentPeptideInstances().stream()).map(DPeptideInstance::getId).distinct().collect(Collectors.toList());
         //VDS To complete parentPepInstanceIds with both PTMDataset ?!
-        m_logger.info("Loading {} peptideInstances XIC data", parentPepInstanceIds.size());
+        m_logger.trace("DataBoxPTMClusters : initLoadPeptides. Loading {} peptideInstances XIC data", parentPepInstanceIds.size());
         task.initLoadPeptides(getProjectId(),m_datasetSet, parentPepInstanceIds.toArray(new Long[0]), masterQuantPeptideList, true);
         registerTask(task);
     }

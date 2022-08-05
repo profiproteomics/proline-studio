@@ -111,9 +111,6 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
     public void askJMS() throws JMSException {
         try {
 
-            LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" askJMS Start "+getClass());
-
-
             /*
              * Thread specific : Session, Producer, Consumer ...
              */
@@ -136,13 +133,8 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
                 onMessage(responseMsg);
             }
 
-            LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" askJMS end "+getClass());
-
         } catch (Exception ex) {
-
-            LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" askJMS error "+getClass());
             ex.printStackTrace();
-
             m_loggerProline.error("Error sending JMS Message", ex);
             m_currentState = JMSState.STATE_FAILED;
             m_taskError = new TaskError(ex);

@@ -79,9 +79,6 @@ public class AccessJMSManagerThread extends Thread {
                 // init session if needed
                 initSession();
 
-                //VD TEST : To remove
-                LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" task.askJMS "+task.getClass());
-
                 // fetch data
                 task.askJMS();
 

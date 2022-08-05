@@ -14,12 +14,6 @@
     <name>ProlineStudio-mzScope</name>
     <description>Proline module to display mzdb files</description>
     
-    <properties>
-        <maven.compiler.source>13</maven.compiler.source>
-        <maven.compiler.target>13</maven.compiler.target>
-
-    </properties>
-    
     <dependencies>
         <!-- Proline -->
         <dependency>
@@ -118,12 +112,6 @@
             <artifactId>commons-math3</artifactId>
         </dependency>
 
-        <!-- Logger -->
-        <dependency> 
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>  
-            <!-- Version inherited from ProFI-Pom -->
-        </dependency>  
 
         <!--  propertySheet Panel -->
         <dependency>
@@ -159,8 +147,6 @@
                 <groupId>com.google.code.maven-replacer-plugin</groupId>
                 <artifactId>replacer</artifactId>
                 <!-- Version inherited from ProFI-Pom -->
-
-
 
             </plugin>
 

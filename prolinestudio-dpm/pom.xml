@@ -50,11 +50,6 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!-- loggings -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
 
         <!-- JMS -->
         <dependency>

@@ -16,23 +16,17 @@
  */
 package fr.proline.studio.dpm.task.jms;
 
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Message;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
+import fr.proline.studio.dpm.serverfilesystem.ServerFile;
+import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import fr.proline.studio.dam.taskinfo.TaskInfo;
-import fr.proline.studio.dpm.AccessJMSManagerThread;
-import fr.proline.studio.dpm.serverfilesystem.ServerFile;
-import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
-import fr.proline.studio.dpm.task.util.JMSConnectionManager;
-import java.util.ArrayList;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.TextMessage;
 
 /**
  * Task to create a new Project in the UDS db
@@ -40,8 +34,8 @@ import javax.jms.TextMessage;
  */
 public class FileSystemBrowseTask extends AbstractJMSTask {
 
-    private String m_dirPath;
-    private ArrayList<ServerFile> m_files;
+    private final String m_dirPath;
+    private final ArrayList<ServerFile> m_files;
     
     public FileSystemBrowseTask(AbstractJMSCallback callback, String dirPath, ArrayList<ServerFile> files) {
         super(callback,  new TaskInfo("Browse Server File System "+dirPath, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
@@ -82,56 +76,28 @@ public class FileSystemBrowseTask extends AbstractJMSTask {
     }
 
     @Override
-    public void taskDone(final Message jmsMessage) throws Exception {
-        
-        final TextMessage textMessage = (TextMessage) jmsMessage;
-        final String jsonString = textMessage.getText();
+    public void processWithResult(JSONRPC2Response jsonResponse) throws Exception {
+        final Object result = jsonResponse.getResult();
 
-        final JSONRPC2Message jsonMessage = JSONRPC2Message.parse(jsonString);
-        if(jsonMessage instanceof JSONRPC2Notification) {
-            m_loggerProline.warn("JSON Notification method: " + ((JSONRPC2Notification) jsonMessage).getMethod()+" instead of JSON Response");
-            throw new Exception("Invalid JSONRPC2Message type");
-        } else if (jsonMessage instanceof JSONRPC2Response)  {
-            
-            final JSONRPC2Response jsonResponse = (JSONRPC2Response) jsonMessage;
-	    m_loggerProline.debug("JSON Response Id: " + jsonResponse.getID());
+        if (result == null || !ArrayList.class.isInstance(result)) {
+            m_loggerProline.debug("Invalid or no result");
+            throw new Exception("null or invalid result " + result);
+        } else {
+            ArrayList resultList = (ArrayList) result;
+            for (int i = 0; i < resultList.size(); i++) {
+                Map fileMap = (Map) resultList.get(i);
 
-	    final JSONRPC2Error jsonError = jsonResponse.getError();
-
-	    if (jsonError != null) {
-		m_loggerProline.error("JSON Error code {}, message : \"{}\"", jsonError.getCode(), jsonError.getMessage());
-		m_loggerProline.error("JSON Throwable", jsonError);
-                throw jsonError;
-	    }
-
-	    final Object result = jsonResponse.getResult();
-
-	    if (result == null || ! ArrayList.class.isInstance(result) ) {
-		m_loggerProline.debug("Invalid or no result");
-                throw new Exception("null or invalid result "+result);
-	    } else {
-                ArrayList resultList = (ArrayList) result;
-		for (int i = 0; i < resultList.size(); i++) {
-                    Map fileMap = (Map) resultList.get(i);
-
-                    ServerFile f;
-                    boolean isDir = (Boolean) fileMap.get("is_dir");
-                    if (isDir) {
-                        f = new ServerFile((String) fileMap.get("path"), (String) fileMap.get("name"), true, 0, 0);
-                    } else {
-                        Long size = (fileMap.containsKey("size") ?(Long) fileMap.get("size") : 0 );
-                        f = new ServerFile((String) fileMap.get("path"), (String) fileMap.get("name"), false, (Long) fileMap.get("lastmodified"), size);
-                    }
-                    m_files.add(f);
+                ServerFile f;
+                boolean isDir = (Boolean) fileMap.get("is_dir");
+                if (isDir) {
+                    f = new ServerFile((String) fileMap.get("path"), (String) fileMap.get("name"), true, 0, 0);
+                } else {
+                    Long size = (fileMap.containsKey("size") ? (Long) fileMap.get("size") : 0);
+                    f = new ServerFile((String) fileMap.get("path"), (String) fileMap.get("name"), false, (Long) fileMap.get("lastmodified"), size);
                 }
-	    }
+                m_files.add(f);
+            }
         }
-        
-        // always returns STATE_DONE because to browse files on server
-        // is a synchronous service
-        m_currentState = JMSState.STATE_DONE;
     }
-    
-    
-    
+
 }

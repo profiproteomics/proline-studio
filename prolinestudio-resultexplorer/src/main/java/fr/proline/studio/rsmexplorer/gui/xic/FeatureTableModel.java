@@ -297,12 +297,12 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                     Object o = prop.get(SERIALIZED_PROP_PREDICTED_ELUTION_TIME);
                     if (o != null && o instanceof Double) {
                         Double predictedElutionTime = (Double)o;
-                        lazyData.setData(new Float(predictedElutionTime));
+                        lazyData.setData(Float.valueOf(predictedElutionTime.floatValue()));
                     }else{
-                        lazyData.setData(new Float(feature.getPredictedElutionTime()));
+                        lazyData.setData( Float.valueOf((float)feature.getPredictedElutionTime()));
                     }
                 }else{
-                    lazyData.setData(new Float(feature.getPredictedElutionTime()));
+                    lazyData.setData( Float.valueOf((float)feature.getPredictedElutionTime()));
                 }
                 return lazyData;
             }
@@ -543,7 +543,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                         return (Double)o;
                     }
                 }
-                return new Float(feature.getPredictedElutionTime());
+                return Float.valueOf((float) feature.getPredictedElutionTime());
             }
             case COLTYPE_FEATURE_PEAKELS_COUNT: {
                 return feature.getPeakelCount();

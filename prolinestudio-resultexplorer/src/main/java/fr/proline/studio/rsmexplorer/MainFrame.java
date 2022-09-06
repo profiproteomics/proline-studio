@@ -410,7 +410,7 @@ public class MainFrame extends AbstractDockFrame implements WindowListener {
 
         // check if there is tasks being done which ask not to close the application
         if (TaskInfoManager.getTaskInfoManager().askBeforeExitingApp()) {
-            InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "You should not exit. Important tasks are being done.\nAre you sure you want to exit ?");
+            InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "You should not exit. Important tasks are being done.\nAre you sure you want to exit ?", true);
             exitDialog.setButtonName(DefaultDialog.BUTTON_OK, "Yes");
             exitDialog.setButtonName(DefaultDialog.BUTTON_CANCEL, "No");
             exitDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
@@ -427,7 +427,7 @@ public class MainFrame extends AbstractDockFrame implements WindowListener {
         HashSet<AbstractTopPanel> topPanels = getTopPanels();
         for(AbstractTopPanel topPanel : topPanels ){
             if(topPanel.warnBeforeClosing()) {
-                InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "You should not exit. A window need an action : "+topPanel.getWarnClosingMessage()+"\nAre you sure you want to exit ?");
+                InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "You should not exit. A window need an action : "+topPanel.getWarnClosingMessage()+"\nAre you sure you want to exit ?", false);
                 exitDialog.setButtonName(DefaultDialog.BUTTON_OK, "Yes");
                 exitDialog.setButtonName(DefaultDialog.BUTTON_CANCEL, "No");
                 exitDialog.centerToWindow(WindowManager.getDefault().getMainWindow());

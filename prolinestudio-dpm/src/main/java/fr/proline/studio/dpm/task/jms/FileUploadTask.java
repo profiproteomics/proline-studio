@@ -16,30 +16,18 @@
  */
 package fr.proline.studio.dpm.task.jms;
 
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Message;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.proline.studio.Exceptions;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import fr.proline.studio.dpm.AccessJMSManagerThread;
-import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+
+import javax.jms.BytesMessage;
+import javax.jms.JMSException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import javax.jms.BytesMessage;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.TextMessage;
 
 /**
  * Upload Files for MaxQuant Result : Specific for MAxQuant by searching opnly
@@ -56,8 +44,8 @@ public class FileUploadTask extends AbstractJMSTask {
     private int m_action = UPLOAD_MAXQUANT_FILE;
 
     private String m_mountLabel;
-    private String m_filePath;
-    private String[] m_remoteFilePath = null;
+    private final String m_filePath;
+    private final String[] m_remoteFilePath;
 
     private String m_destinationPath = null;
 
@@ -143,41 +131,19 @@ public class FileUploadTask extends AbstractJMSTask {
     }
 
     @Override
-    public void taskDone(Message jmsMessage) throws Exception {
-        final TextMessage textMessage = (TextMessage) jmsMessage;
-        final String jsonString = textMessage.getText();
+    public void processWithResult(JSONRPC2Response jsonResponse) throws Exception {
 
-        final JSONRPC2Message jsonMessage = JSONRPC2Message.parse(jsonString);
-        if (jsonMessage instanceof JSONRPC2Notification) {
-            m_loggerProline.warn("JSON Notification method: " + ((JSONRPC2Notification) jsonMessage).getMethod() + " instead of JSON Response");
-            throw new Exception("Invalid JSONRPC2Message type");
-
-        } else if (jsonMessage instanceof JSONRPC2Response) {
-            final JSONRPC2Response jsonResponse = (JSONRPC2Response) jsonMessage;
-            m_loggerProline.debug("JSON Response Id: " + jsonResponse.getID());
-
-            final JSONRPC2Error jsonError = jsonResponse.getError();
-
-            if (jsonError != null) {
-                m_loggerProline.error("JSON Error code {}, message : \"{}\"", jsonError.getCode(), jsonError.getMessage());
-                m_loggerProline.error("JSON Throwable", jsonError);
-                throw jsonError;
-            }
-
-            final Object result = jsonResponse.getResult();
-            if ((result == null) || (!String.class.isInstance(result))) {
-                m_loggerProline.error(getClass().getSimpleName() + " failed : No returned values");
-                throw new Exception("Invalid result " + result);
-            }
-
-            String returnedValues = (String) result;
-
-            m_remoteFilePath[0] = returnedValues;
+        final Object result = jsonResponse.getResult();
+        if ((result == null) || (!String.class.isInstance(result))) {
+            m_loggerProline.error(getClass().getSimpleName() + " failed : No returned values");
+            throw new Exception("Invalid result " + result);
         }
 
-        m_currentState = JMSState.STATE_DONE;
+        String returnedValues = (String) result;
 
+        m_remoteFilePath[0] = returnedValues;
     }
+
 
     private static List<String> getZipFilesList(String rootFolder) {
 

@@ -68,8 +68,7 @@ public class JMSMessageUtil {
         }
       }
 
-      JMSNotificationMessage notifMsg = new JMSNotificationMessage(sName, sVersion, sSource, sDescription, sMoreInfo, sTimestamp, jmsId, jsonId, status);
-      return notifMsg;
+      return new JMSNotificationMessage(sName, sVersion, sSource, sDescription, sMoreInfo, sTimestamp, jmsId, jsonId, status);
     } catch (JMSException jmsE) {
       return null;
     }

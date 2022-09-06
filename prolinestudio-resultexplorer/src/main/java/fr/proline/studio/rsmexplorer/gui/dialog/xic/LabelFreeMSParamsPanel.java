@@ -85,7 +85,7 @@ public class LabelFreeMSParamsPanel extends JPanel {
 
                 // check if user also wants to erase locally
                 String infoText = m_completePanel ? "Switching to short XIC Parameters panel will reset the filled values." : "Switching to complete XIC Parameters panel will reset the filled values.";
-                InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "XIC Parameters Reset", infoText);
+                InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "XIC Parameters Reset", infoText, false);
                 exitDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
                 exitDialog.setVisible(true);
 

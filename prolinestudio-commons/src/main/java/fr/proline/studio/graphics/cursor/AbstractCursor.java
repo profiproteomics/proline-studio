@@ -128,7 +128,7 @@ public abstract class AbstractCursor implements MoveableInterface {
     
     public void addActionListener(ActionListener actionListener) {
         if (m_actionListenerList == null) {
-            m_actionListenerList = new ArrayList();
+            m_actionListenerList = new ArrayList<>();
         }
         m_actionListenerList.add(actionListener);
     }

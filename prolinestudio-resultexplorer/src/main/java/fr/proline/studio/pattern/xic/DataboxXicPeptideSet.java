@@ -345,7 +345,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     @Override
     public Object getExtraData(Class parameterType) {
         if (parameterType.equals(ExtendedTableModelInterface.class)) {
-            return new GraphicExtraData(m_keepZoom, new Double(0)); // Keep Zoom - minimal value of min Y value
+            return new GraphicExtraData(m_keepZoom, Double.valueOf(0)); // Keep Zoom - minimal value of min Y value
         }
         
         return super.getExtraData(parameterType);

@@ -311,7 +311,7 @@ public class StringFilter extends Filter {
             vTextField.setText(filterText);
         }
 
-        KeyStroke pasteKeyStrock = KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK, false);
+        KeyStroke pasteKeyStrock = KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK, false);
 
         vTextField.getInputMap().put(pasteKeyStrock, "paste");
 
@@ -329,7 +329,7 @@ public class StringFilter extends Filter {
         if (filterAreaText != null) {
             vArea.setText(filterAreaText);
         }
-        KeyStroke pasteKeyStrock = KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK, false);
+        KeyStroke pasteKeyStrock = KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK, false);
         vArea.getInputMap().put(pasteKeyStrock, "paste");
         PasteAction pasteAction = new PasteAction(vArea);
         vArea.getActionMap().put("paste", pasteAction);

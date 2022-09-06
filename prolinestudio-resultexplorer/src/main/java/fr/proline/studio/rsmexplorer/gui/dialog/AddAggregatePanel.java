@@ -184,7 +184,7 @@ public class AddAggregatePanel extends javax.swing.JPanel {
         typeCombobox.setSelectedItem(Aggregation.ChildNature.BIOLOGICAL_SAMPLE);
         
         multipleAggregateCheckBox.setSelected(false);
-        nbAggregateSpinner.setValue(new Integer(2));
+        nbAggregateSpinner.setValue(Integer.valueOf(2));
         nbAggregateSpinner.setEnabled(false);
              
     }

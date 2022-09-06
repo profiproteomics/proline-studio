@@ -41,8 +41,8 @@ public class CurveSample {
         int step = valueYSet.length - 1;
         int distance = Math.max(nbPoint / step, 1);
         float xSpace = (float) xLength / (nbPoint - 1);
-        _xValueSet = new ArrayList();
-        _yValueSet = new ArrayList();
+        _xValueSet = new ArrayList<>();
+        _yValueSet = new ArrayList<>();
         float x = 0;
         float y = valueYSet[0];
         float ySpace = 0;
@@ -71,11 +71,12 @@ public class CurveSample {
 
     @Override
     public String toString() {
-        String s = "size=" + _xValueSet.size() + " \n";
+        StringBuilder s = new StringBuilder("size=");
+        s.append(_xValueSet.size()).append(" \n");
         for (int i = 0; i < _xValueSet.size(); i++) {
-            s += "(" + _xValueSet.get(i) + "," + _yValueSet.get(i) + ")";
+            s.append("(").append(_xValueSet.get(i)).append(",").append(_yValueSet.get(i)).append(")");
         }
-        return s;
+        return s.toString();
     }
 
     public CurveSample(int[] distributedX, int[] valueYSet, int xLength) {
@@ -83,7 +84,7 @@ public class CurveSample {
     }
 
     public List<Object[]> getRowList() {
-        List<Object[]> result = new ArrayList();
+        List<Object[]> result = new ArrayList<>();
         Float[] row;
         for (int i = 0; i < _xValueSet.size(); i++) {
             row = new Float[3];

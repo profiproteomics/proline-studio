@@ -138,9 +138,9 @@ public class QuantAggregatePeptideIonTableModel extends DecoratedTableModel impl
                     }
 
                     if (peptideIon != null) {
-                        abundance = new Integer(Math.round(peptideIon.getAbundance()));
+                        abundance = Integer.valueOf(Math.round(peptideIon.getAbundance()));
                     } else {
-                        abundance = new Integer(0);
+                        abundance = Integer.valueOf(0);
                     }
 
                     m_abundances[row][col] = abundance;

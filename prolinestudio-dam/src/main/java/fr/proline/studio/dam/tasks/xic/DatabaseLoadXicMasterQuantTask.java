@@ -1772,12 +1772,12 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             // load status and peptideNumber by QcId   
             // VDS version 2.2.0  load quantPeptideNumberByQchIds is deprecated as it is now saved in quantProteinSet. Keep for previous SpectralCount. To be removed in version++
             Map<Long, String> quantStatusByQchIds = new HashMap<>();
-            Map<Long, Integer> quantPeptideNumberByQchIds = new HashMap<>();
+//            Map<Long, Integer> quantPeptideNumberByQchIds = new HashMap<>();
             for (DQuantitationChannel qch : listQC) {
                 String status = "Undefined";
                 Integer pepNumber = -1; //0;
                 quantStatusByQchIds.put(qch.getId(), status);
-                quantPeptideNumberByQchIds.put(qch.getId(), pepNumber);
+//                quantPeptideNumberByQchIds.put(qch.getId(), pepNumber);
                 if (masterQuantProteinSet.getQuantProteinSetByQchIds().containsKey(qch.getId())) {
                     DQuantProteinSet protSetQch = masterQuantProteinSet.getQuantProteinSetByQchIds().get(qch.getId());
                     Long pmId = protSetQch.getProteinMatchId();// proteinMatchId in this qch
@@ -1787,18 +1787,21 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                             status = protMatchStatusByIdPepMatch.get(pmId);
                         }
                     }
-                    if (protMatchPepNumberByIdByQcId.containsKey(qch.getId())) {
+
+                    if(protSetQch.getPeptidesCount()<= 0 && protMatchPepNumberByIdByQcId.containsKey(qch.getId())) {
                         Map<Long, Integer> protMatchPepNumberByIdPepMatch = protMatchPepNumberByIdByQcId.get(qch.getId());
                         if (protMatchPepNumberByIdPepMatch.containsKey(pmId)) {
                             pepNumber = protMatchPepNumberByIdPepMatch.get(pmId);
+                            protSetQch.setPeptidesCount(pepNumber);
                         }
                     }
                 }
                 quantStatusByQchIds.put(qch.getId(), status);
-                quantPeptideNumberByQchIds.put(qch.getId(), pepNumber);
+
+//                quantPeptideNumberByQchIds.put(qch.getId(), pepNumber);
             }
             masterQuantProteinSet.setQuantStatusByQchIds(quantStatusByQchIds);
-            masterQuantProteinSet.setQuantPeptideNumberByQchIds(quantPeptideNumberByQchIds);
+//            masterQuantProteinSet.setQuantPeptideNumberByQchIds(quantPeptideNumberByQchIds);
 
             // update in the list
             int index = -1;

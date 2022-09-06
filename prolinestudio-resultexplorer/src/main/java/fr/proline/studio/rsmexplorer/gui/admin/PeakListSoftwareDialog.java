@@ -434,7 +434,7 @@ public class PeakListSoftwareDialog extends DefaultDialog {
             PeaklistSoftwarePanel.parse(sb, m_firstTimeTextField.getText().trim(), "First Time :", spectrumTitle);
             PeaklistSoftwarePanel.parse(sb, m_lastTimeTextField.getText().trim(), "Last Time :", spectrumTitle);
 
-            InfoDialog parseResultDialog = new InfoDialog(_dialog, InfoDialog.InfoType.NO_ICON, "Spectrum Title Parsing Result", sb.toString());
+            InfoDialog parseResultDialog = new InfoDialog(_dialog, InfoDialog.InfoType.NO_ICON, "Spectrum Title Parsing Result", sb.toString(), false);
             parseResultDialog.setButtonVisible(InfoDialog.BUTTON_OK, false);
             parseResultDialog.setButtonName(BUTTON_CANCEL, "Close");
             parseResultDialog.centerToWindow(_dialog);

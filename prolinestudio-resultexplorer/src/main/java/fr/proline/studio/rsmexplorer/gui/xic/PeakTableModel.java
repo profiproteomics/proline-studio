@@ -321,23 +321,23 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
         List<Color> scanColor = new ArrayList();
         if(m_feature != null) {
             if (m_feature.getFirstScan() != null) {
-                scanValues.add(new Double(m_feature.getFirstScan().getTime()/60));
+                scanValues.add(Double.valueOf(m_feature.getFirstScan().getTime()/60));
                 scanText.add(" Time: ");
                 scanColor.add(m_color);
             }
             if (m_feature.getLastScan() != null) {
-                scanValues.add(new Double(m_feature.getLastScan().getTime()/60));
+                scanValues.add( Double.valueOf(m_feature.getLastScan().getTime()/60));
                 scanText.add(" Time: ");
                 scanColor.add(m_color);
             }
         } else if (m_peakel != null) {
             if (m_peakel.getFirstScan() != null) {
-                scanValues.add(new Double(m_peakel.getFirstScan().getTime()/60));
+                scanValues.add(Double.valueOf(m_peakel.getFirstScan().getTime()/60));
                 scanText.add(" Time: ");
                 scanColor.add(m_color);
             }
             if (m_peakel.getLastScan() != null) {
-                scanValues.add(new Double(m_peakel.getLastScan().getTime()/60));
+                scanValues.add(Double.valueOf(m_peakel.getLastScan().getTime()/60));
                 scanText.add(" Time: ");
                 scanColor.add(m_color);
             }

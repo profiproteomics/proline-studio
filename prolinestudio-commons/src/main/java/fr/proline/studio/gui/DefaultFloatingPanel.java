@@ -36,7 +36,7 @@ import javax.swing.JPanel;
 
 /**
  *
- * Panel with a generic behaviour to work as a floatting panel. -> possibility
+ * Panel with a generic behaviour to work as a floating panel. -> possibility
  * to drag it and to close it.
  *
  * @author JM235353
@@ -63,12 +63,7 @@ public class DefaultFloatingPanel extends HourglassPanel {
             closeButton.setFocusPainted(false);
             closeButton.setContentAreaFilled(false);
 
-            closeButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    setVisible(false);
-                }
-            });
+            closeButton.addActionListener(e -> setVisible(false));
 
             add(closeButton);
         }
@@ -130,7 +125,7 @@ public class DefaultFloatingPanel extends HourglassPanel {
         }
     }
 
-    public class DragGestureAdapter extends MouseAdapter {
+    public static class DragGestureAdapter extends MouseAdapter {
 
         public DragGestureAdapter() {
         }
@@ -200,7 +195,7 @@ public class DefaultFloatingPanel extends HourglassPanel {
         setLoaded(1);
         setVisible(false);
         if (!success) {
-            InfoDialog errorDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Error", errorMessage);
+            InfoDialog errorDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Error", errorMessage, true);
             errorDialog.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
             errorDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
             errorDialog.setVisible(true);

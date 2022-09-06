@@ -172,8 +172,8 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
         add(layeredPane, BorderLayout.CENTER);
 
         layeredPane.add(peptidePanel, JLayeredPane.DEFAULT_LAYER);
-        layeredPane.add(m_infoToggleButton.getInfoPanel(), new Integer(JLayeredPane.PALETTE_LAYER + 1));
-        layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER + 2));
+        layeredPane.add(m_infoToggleButton.getInfoPanel(), Integer.valueOf(JLayeredPane.PALETTE_LAYER + 1));
+        layeredPane.add(m_searchToggleButton.getSearchPanel(), Integer.valueOf(JLayeredPane.PALETTE_LAYER + 2));
     }
 
     private JPanel createPeptidePanel(boolean xicMode) {

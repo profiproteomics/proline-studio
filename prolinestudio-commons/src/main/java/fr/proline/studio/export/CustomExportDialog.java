@@ -169,7 +169,6 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         String path = preferences.absolutePath();
 
         File f = new File(path);
-        path = f.getAbsolutePath();
 
         //m_lastDefaultExportConfig =  preferences.get("DefaultExportConfig", null);
         //m_lastExportConfig =  preferences.get("ExportConfig", null);
@@ -210,7 +209,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         FilePreferences filePreferences = new FilePreferences(new File(path), null, "");
         String fileDefaultServerConfig = filePreferences.get(DEFAULT_SERVER_CONFIG_KEY, null);
 
-        boolean showWarning = false;
+        boolean showWarning;
 
         if (fileDefaultServerConfig == null) {
             // old file format : json config directly saved in file
@@ -231,12 +230,11 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
 
         if (!filePath.toString().equals("")) {
             Gson gson = new Gson();
-            String messageHashMapJsonString = jsonString;
-            m_exportConfig = gson.fromJson(messageHashMapJsonString, m_exportConfig.getClass());
+            m_exportConfig = gson.fromJson(jsonString, m_exportConfig.getClass());
         }
 
         if (showWarning) {
-            InfoDialog errorDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "The version of the Export Settings file does not correspond. It could lead to an error during the export.");
+            InfoDialog errorDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "The version of the Export Settings file does not correspond. It could lead to an error during the export.", true);
             errorDialog.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
             errorDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
             errorDialog.setVisible(true);
@@ -372,8 +370,6 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
                         }
                     }
                     table.setModel(tableModel);
-                } else {
-                    // if not in default, do not add it!
                 }
 
             }

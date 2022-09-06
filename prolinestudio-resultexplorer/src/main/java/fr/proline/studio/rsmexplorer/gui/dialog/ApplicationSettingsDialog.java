@@ -220,7 +220,7 @@ public class ApplicationSettingsDialog extends DefaultDialog implements TreeSele
         ObjectParameter logAlgoParameter = new ObjectParameter(PlotScatter.LOG_ALGO_KEY, PlotScatter.LOG_ALGO_NAME, comboBox, logOptions, objectTable, PlotScatter.DEFAULT_LOG_ALGO, null);
         m_plotParameterList.add(logAlgoParameter);
 
-        DoubleParameter replaceValue = new DoubleParameter(PlotScatter.DEFAULT_LOG_REPLACE_VALUE_KEY, PlotScatter.DEFAULT_LOG_REPLACE_VALUE_NAME, JTextField.class, new Double(1), new Double(10e-14), new Double(10e14));
+        DoubleParameter replaceValue = new DoubleParameter(PlotScatter.DEFAULT_LOG_REPLACE_VALUE_KEY, PlotScatter.DEFAULT_LOG_REPLACE_VALUE_NAME, JTextField.class, Double.valueOf(1), Double.valueOf(10e-14), Double.valueOf(10e14));
         m_plotParameterList.add(replaceValue);
 
         m_plotParameterList.loadParameters(m_preferences);

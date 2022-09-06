@@ -17,6 +17,7 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.core.orm.uds.UserAccount;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dock.AbstractTopPanel;
@@ -30,11 +31,11 @@ import fr.proline.studio.rsmexplorer.TaskLogTopPanel;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.TreeUtils;
 import fr.proline.studio.rsmexplorer.gui.calc.DataAnalyzerPanel;
-import java.awt.Window;
+
+import javax.swing.*;
+import java.awt.*;
 import java.util.Iterator;
 import java.util.Set;
-import javax.swing.*;
-import fr.proline.studio.WindowManager;
 
 /**
  * Dialog to Connect to the server
@@ -179,17 +180,12 @@ public class ServerConnectionDialog extends ConnectionDialog {
                         });
                     }
 
-                    // check if we have SeqDb
-                    if (SeqDBInfoDialog.showAtStart() && !DatabaseDataManager.getDatabaseDataManager().isSeqDatabaseExists()) {
-                        SwingUtilities.invokeLater(new Runnable() {
+                    //Test isRetrieveSeqServiceAvailable to init boolean which will be tested in action...
+                    if (!ServerConnectionManager.getServerConnectionManager().isRetrieveSeqServiceAvailable() && SeqDBInfoDialog.showAtStart() /*!DatabaseDataManager.getDatabaseDataManager().isSeqDatabaseExists()*/) {
+                        SeqDBInfoDialog seqDBInfoDialog = new SeqDBInfoDialog(WindowManager.getDefault().getMainWindow());
+                        seqDBInfoDialog.centerToScreen();
+                        seqDBInfoDialog.setVisible(true);
 
-                            @Override
-                            public void run() {
-                                SeqDBInfoDialog seqDBInfoDialog = new SeqDBInfoDialog(WindowManager.getDefault().getMainWindow());
-                                seqDBInfoDialog.centerToScreen();
-                                seqDBInfoDialog.setVisible(true);
-                            }
-                        });
                     }
 
                     if (changingUser) {
@@ -219,7 +215,6 @@ public class ServerConnectionDialog extends ConnectionDialog {
                         
                     }
                 }
-
             }
 
         };

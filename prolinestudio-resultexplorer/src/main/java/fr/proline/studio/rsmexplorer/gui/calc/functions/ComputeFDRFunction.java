@@ -525,7 +525,7 @@ public class ComputeFDRFunction extends AbstractFunction {
         
 
         m_verticalCursor = new VerticalCursor(basePlotPanel, 0);
-        m_verticalCursor.setMinValue(new Double(0));
+        m_verticalCursor.setMinValue(Double.valueOf(0));
         m_verticalCursor.setColor(Color.blue);
         m_verticalCursor.setStroke(AbstractCursor.LINE2_STROKE);
         m_mirrorVerticalCursor = new VerticalCursor(basePlotPanel, 0);
@@ -534,7 +534,7 @@ public class ComputeFDRFunction extends AbstractFunction {
         
 
         m_horizontalCursor = new HorizontalCursor(basePlotPanel, 0);
-        m_horizontalCursor.setMinValue(new Double(0));
+        m_horizontalCursor.setMinValue(Double.valueOf(0));
         m_horizontalCursor.setColor(Color.blue);
         m_horizontalCursor.setStroke(AbstractCursor.LINE2_STROKE);
 

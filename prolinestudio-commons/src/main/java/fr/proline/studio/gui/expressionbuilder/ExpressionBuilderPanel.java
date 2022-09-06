@@ -387,7 +387,7 @@ public class ExpressionBuilderPanel extends JPanel {
         String name = entity.getName();
         if (name.length() == 1) {
             int c = name.charAt(0);
-            m_shortCuts.put(new Integer(c), calcButton);
+            m_shortCuts.put( Integer.valueOf(c), calcButton);
         }
     }
     

@@ -28,12 +28,9 @@ import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-/*import org.netbeans.api.db.explorer.ConnectionManager;
-import org.netbeans.api.db.explorer.DatabaseConnection;
-import org.netbeans.api.db.explorer.JDBCDriver;
-import org.netbeans.api.db.explorer.JDBCDriverManager;
-*/
+
 
 /**
  * Used to connect to a UDS DB, MSI DB
@@ -105,18 +102,6 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
         
         action = MSI_CONNECTION;
     }
-    
-    /**
-     * Connection to PDI
-     * @param projectId 
-     */
-    /*public void initConnectionToPDI() {
-        setTaskInfo(new TaskInfo("Connection to PDI Database", TASK_LIST_INFO));
-        setPriority(Priority.TOP);
-
-        
-        action = PDI_CONNECTION;
-    }*/
     
     /**
      * to check if the project user is known in the database

@@ -202,7 +202,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
         m_peptidesTable = new PeptideTable();
         m_peptidesTable.setModel(new CompoundTableModel(new PeptideTableModel(), true));
         m_peptidesTable.getColumnExt(m_peptidesTable.convertColumnIndexToView(PeptideTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
-
+        m_peptidesTable.getColumnExt(m_peptidesTable.convertColumnIndexToView(PeptideTableModel.COLTYPE_PEPTIDE_NONE_AMBIGUOUS_SEQ)).setVisible(false);
         m_scrollPane = new JScrollPane();
         
         m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane, m_peptidesTable);

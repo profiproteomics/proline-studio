@@ -21,7 +21,6 @@ import fr.proline.studio.python.data.ColDoubleData;
 import fr.proline.studio.python.data.ColRef;
 import fr.proline.studio.python.data.PythonImage;
 import fr.proline.studio.python.data.Table;
-import org.apache.commons.math.MathException;
 import org.python.core.PyFloat;
 import org.python.core.PyInteger;
 import org.python.core.PyObject;
@@ -40,27 +39,27 @@ public class Stats {
     public static ColDoubleData abs(Col values) {
         return StatsImplementation.abs(values);
     }
-    
+
     public static PyFloat mean(Col values) {
         return StatsImplementation.mean(values);
     }
-    
+
     public static PyFloat std(Col values) {
         return StatsImplementation.std(values);
     }
-    
+
     public static ColDoubleData log2(Col values) {
         return StatsImplementation.log2(values);
     }
-    
+
     public static Table log2(Table t, PyTuple pcols) {
         return StatsImplementation.log2(t, pcols);
     }
-    
+
     public static Table log2(Table t, ColRef column) {
         return StatsImplementation.log2(t, column);
     }
-    
+
     public static ColDoubleData log10(Col values) {
         return StatsImplementation.log10(values);
     }
@@ -72,8 +71,8 @@ public class Stats {
     public static Table log10(Table t, ColRef column) {
         return StatsImplementation.log10(t, column);
     }
-    
-    
+
+
     public static PyObject adjustP(Col pvalues) throws Exception {
         return adjustP(pvalues, new PyFloat(1));
     }
@@ -114,7 +113,7 @@ public class Stats {
         return StatsRImplementation.varianceDistPlot(p, labels);
     }
 
-    
+
     public static PyObject calibrationPlot(Col pvalues) throws Exception {
         return calibrationPlot(pvalues, new PyString("pounds"));
     }
@@ -124,37 +123,37 @@ public class Stats {
     }
 
     public static PyObject calibrationPlot(Col pvaluesCol, PyFloat pi0Method, PyInteger nbins, PyFloat pz) throws Exception {
-        
+
         // numeric value for pi0Method
         Double numericValue = pi0Method.getValue();
         PyString pi0MethodString = new PyString(String.valueOf(numericValue));
         return StatsRImplementation.calibrationPlot(pvaluesCol, pi0MethodString, nbins, pz);
     }
-    
+
     public static PyObject calibrationPlot(Col pvaluesCol, PyString pi0Method, PyInteger nbins, PyFloat pz) throws Exception {
         return StatsRImplementation.calibrationPlot(pvaluesCol, pi0Method, nbins, pz);
     }
-    
-    public static ColDoubleData pvalue(PyTuple p) throws MathException {
+
+    public static ColDoubleData pvalue(PyTuple p) throws RuntimeException {
         PyTuple[] pArray = StatsUtil.colTupleToTuplesArray(p);
         return pvalue(pArray[0], pArray[1]);
     }
-    public static ColDoubleData pvalue(PyTuple p1, PyTuple p2) throws MathException {
+    public static ColDoubleData pvalue(PyTuple p1, PyTuple p2)  throws RuntimeException{
         return StatsImplementation.pvalue(p1, p2);
     }
 
-    public static Table quantifilter(PyTuple p, Table t, PyInteger option, PyInteger threshold) throws MathException {
+    public static Table quantifilter(PyTuple p, Table t, PyInteger option, PyInteger threshold)  throws RuntimeException{
         return StatsImplementation.quantifilter(p, t, option, threshold, false);
     }
 
-    public static Table quantifilterReversed(PyTuple p, Table t, PyInteger option, PyInteger threshold) throws MathException {
+    public static Table quantifilterReversed(PyTuple p, Table t, PyInteger option, PyInteger threshold) throws RuntimeException {
         return StatsImplementation.quantifilter(p, t, option, threshold, true);
     }
-    
+
     public static Table normalize(PyTuple p, PyTuple labels, PyString normalizeFamily, PyString normalizeOption) throws Exception {
         return StatsRImplementation.normalize(p, labels, normalizeFamily, normalizeOption);
     }
-    
+
     public static Table mvimputation(PyTuple p1, PyString method) throws Exception {
         return StatsRImplementation.mvimputation(p1, method);
     }
@@ -162,19 +161,19 @@ public class Stats {
         return StatsImplementation.mvimputationPercentile(p1, percentilePercentage, addImputationColumns);
     }
 
-    
+
     public static Table diffanalysis(PyTuple p, PyTuple labels, PyString diffAnalysisType) throws Exception {
         return StatsRImplementation.diffanalysis(p, labels, diffAnalysisType);
     }
-    
-    public static ColDoubleData ttd(PyTuple p) throws MathException {
+
+    public static ColDoubleData ttd(PyTuple p)  throws RuntimeException {
         PyTuple[] pArray = StatsUtil.colTupleToTuplesArray(p);
         return ttd(pArray[0], pArray[1]);
     }
-    public static ColDoubleData ttd(PyTuple p1, PyTuple p2) throws MathException {
+    public static ColDoubleData ttd(PyTuple p1, PyTuple p2)  throws RuntimeException {
         return StatsImplementation.ttd(p1, p2);
     }
-    
+
     public static PyObject computeFDR(Col pvalues, Col logFC, PyFloat pvalueThreshold, PyFloat logFCThreshold) throws Exception {
         return computeFDR(pvalues, logFC, pvalueThreshold, logFCThreshold, new PyFloat(1));
     }
@@ -196,7 +195,7 @@ public class Stats {
         String pi0Parameter = "pi0Method=\"" + pi0Method.toString() + "\"";
         return StatsRImplementation.computeFDR(pvalues, logFC, pvalueThreshold, logFCThreshold, pi0Parameter, alpha, nbins, pz);
     }
-    
+
     public static Table differentialProteins(Col pvalues, Col logFC, PyFloat pvalueThreshold, PyFloat logFCThreshold) throws Exception {
 
         return StatsImplementation.differentialProteins(pvalues, logFC, pvalueThreshold, logFCThreshold);

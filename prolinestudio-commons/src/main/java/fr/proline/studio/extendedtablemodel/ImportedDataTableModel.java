@@ -16,10 +16,12 @@
  */
 package fr.proline.studio.extendedtablemodel;
 
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.export.ExportModelUtilities;
-import fr.proline.studio.extendedtablemodel.ExtraDataType;
-import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.LongFilter;
@@ -32,14 +34,14 @@ import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
+
+import javax.swing.table.TableCellRenderer;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.swing.table.TableCellRenderer;
-import au.com.bytecode.opencsv.CSVReader;
 
 /**
  *
@@ -266,127 +268,125 @@ import au.com.bytecode.opencsv.CSVReader;
         }
         
         public static Exception loadFile(ImportedDataTableModel model, String filePath, char separator, boolean header, boolean testFile) {
-        
-        File f = new File(filePath);
-        if (!f.exists()) {
-            model.setData(null, null, null);
-        }
-        
-        try {
-            CSVReader reader = new CSVReader(new FileReader(filePath), separator);
 
-            
-            
-        // read column headers
-        String[] headerLine = null;
-        int nbColumns = 0;
-        int line = 1;
-        if (header) {
-            headerLine = reader.readNext();
-            if (headerLine == null) {
+          File f = new File(filePath);
+          if (!f.exists()) {
+            model.setData(null, null, null);
+          }
+
+          try {
+            final CSVParser parser = new CSVParserBuilder().withSeparator(separator).build();
+            CSVReader reader = new CSVReaderBuilder(new FileReader(filePath)).withCSVParser(parser).build();
+
+            // read column headers
+            String[] headerLine = null;
+            int nbColumns = 0;
+            int line = 1;
+            if (header) {
+              headerLine = reader.readNext();
+              if (headerLine == null) {
                 model.setData(null, null, null);
                 throw new IOException("No Data found in File");
+              }
+              nbColumns = headerLine.length;
+              line = 2;
             }
-            nbColumns = headerLine.length;
-            line = 2;
-        }
-        
-        if (headerLine == null) {
-            headerLine = new String[nbColumns];
-            for (int i = 0; i < nbColumns; i++) {
+
+            if (headerLine == null) {
+              headerLine = new String[nbColumns];
+              for (int i = 0; i < nbColumns; i++) {
                 headerLine[i] = String.valueOf(i + 1);
+              }
             }
-        }
 
-        // read lines, skip empty ones and check the number of columns
-        ArrayList<String[]> allDataLines = new ArrayList<>();
-        String[] dataLine;
-        while ((dataLine = reader.readNext()) != null) {
+            // read lines, skip empty ones and check the number of columns
+            ArrayList<String[]> allDataLines = new ArrayList<>();
+            String[] dataLine;
+            while ((dataLine = reader.readNext()) != null) {
 
-            int nbColumsCur = dataLine.length;
-            if (nbColumsCur == 0) {
+              int nbColumsCur = dataLine.length;
+              if (nbColumsCur == 0) {
                 // continue : empty line
-            } else if (nbColumns == 0) {
+              } else if (nbColumns == 0) {
                 nbColumns = nbColumsCur;
-            }
+              }
 
-            if (nbColumns != nbColumsCur) {
+              if (nbColumns != nbColumsCur) {
                 model.setData(null, null, null);
                 return new IOException("Number of columns differ in file at line " + line);
-            }
+              }
 
-            allDataLines.add(dataLine);
+              allDataLines.add(dataLine);
 
-            line++;
+              line++;
 
-            if ((testFile) && (line >= 7)) {
+              if ((testFile) && (line >= 7)) {
                 // we read only the first lines of the file
                 break;
-                
+
+              }
             }
-        }
 
 
+            // check the type of columns
+            int nbRows = allDataLines.size();
+            Class[] columTypes = new Class[nbColumns];
+            for (int col = 0; col < nbColumns; col++) {
 
-        // check the type of columns
-        int nbRows = allDataLines.size();
-        Class[] columTypes = new Class[nbColumns];
-        for (int col = 0; col < nbColumns; col++) {
-
-            boolean canBeLong = true;
-            boolean canBeDouble = true;
-            for (int row = 0; row < nbRows; row++) {
+              boolean canBeLong = true;
+              boolean canBeDouble = true;
+              for (int row = 0; row < nbRows; row++) {
                 String data = allDataLines.get(row)[col];
                 if (canBeLong) {
-                    try {
-                        Long.parseLong(data);
-                    } catch (NumberFormatException nfe) {
-                        canBeLong = false;
-                    }
+                  try {
+                    Long.parseLong(data);
+                  } catch (NumberFormatException nfe) {
+                    canBeLong = false;
+                  }
                 }
                 if ((!canBeLong) && (canBeDouble)) {
-                    try {
-                        Double.parseDouble(data);
-                    } catch (NumberFormatException nfe) {
-                        canBeDouble = false;
-                        break;
-                    }
+                  try {
+                    Double.parseDouble(data);
+                  } catch (NumberFormatException nfe) {
+                    canBeDouble = false;
+                    break;
+                  }
                 }
-            }
-            if (canBeLong) {
+              }
+              if (canBeLong) {
                 columTypes[col] = Long.class;
-            } else if (canBeDouble) {
+              } else if (canBeDouble) {
                 columTypes[col] = Double.class;
-            } else {
+              } else {
                 columTypes[col] = String.class;
+              }
             }
-        }
 
-        // create the model
-        Object[][] data = new Object[nbRows][nbColumns];
-        for (int row = 0; row < nbRows; row++) {
-            for (int col = 0; col < nbColumns; col++) {
+            // create the model
+            Object[][] data = new Object[nbRows][nbColumns];
+            for (int row = 0; row < nbRows; row++) {
+              for (int col = 0; col < nbColumns; col++) {
                 String value = allDataLines.get(row)[col];
                 if (columTypes[col].equals(Long.class)) {
-                    data[row][col] = Long.parseLong(value);
+                  data[row][col] = Long.parseLong(value);
                 } else if (columTypes[col].equals(Double.class)) {
-                    data[row][col] = Double.parseDouble(value);
+                  data[row][col] = Double.parseDouble(value);
                 } else {
-                    data[row][col] = value;
+                  data[row][col] = value;
                 }
 
+              }
             }
-        }
 
-        
-        model.setData(headerLine, columTypes, data);
-        model.setName(f.getName().substring(0, f.getName().lastIndexOf('.')));
 
-        } catch (Exception e) {
+            model.setData(headerLine, columTypes, data);
+            model.setName(f.getName().substring(0, f.getName().lastIndexOf('.')));
+
+          } catch (Exception e) {
             model.setData(null, null, null);
             return e;
+          }
+
+          return null;
         }
-        
-        return null;
-    }
     }

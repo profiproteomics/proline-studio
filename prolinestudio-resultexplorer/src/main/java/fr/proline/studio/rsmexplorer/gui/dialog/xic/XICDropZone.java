@@ -21,6 +21,9 @@ import fr.proline.studio.rsmexplorer.gui.TreeFileChooserTransferHandler;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.SelectRawFilesPanel.FlatDesignTableModel;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.HelpUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.io.File;
@@ -45,7 +48,7 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
      */
     private final HashMap<String, File> m_droppedFiles;
     private FlatDesignTableModel m_model;
-    private final String[] suffix = {".raw", ".mzdb", ".wiff"};
+    private final List<String> suffix; // {".raw", ".mzdb", ".wiff"};
     private XICDropZoneInfo m_info;
     private final TreeFileChooserTransferHandler m_transferHandler;
     private final HashMap<String, AssociationWrapper> m_associations;
@@ -55,7 +58,8 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
         
         m_droppedFiles = new HashMap<String, File>();
         m_associations = new HashMap<String, AssociationWrapper>();
-        
+        suffix = new ArrayList<>();
+        suffix.add("mzdb");
         setBorder(BorderFactory.createLineBorder(Color.BLACK));
         setToolTipText("Drag your .mzdb files & folders in the drop zone");
         setLayout(new BorderLayout());
@@ -171,9 +175,10 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
      */
     @Override
     public void addSample(Object sample) {
-        if (sample instanceof File) {
-            if (!m_droppedFiles.containsKey(HelpUtils.getFileName(((File) sample).toString().toLowerCase(), suffix))) {
-                m_droppedFiles.put(HelpUtils.getFileName(((File) sample).toString().toLowerCase(), suffix), (File) sample);
+        if (sample instanceof File && suffix.contains(FilenameUtils.getExtension(((File) sample).getName()).toLowerCase()) ) {
+            String name = FilenameUtils.getBaseName(((File) sample).getName().toLowerCase());
+            if (!m_droppedFiles.containsKey(name)) {
+                m_droppedFiles.put(name, (File) sample);
             }
         }
     }

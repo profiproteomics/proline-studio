@@ -17,6 +17,7 @@
 package fr.proline.studio.dam.tasks.ptm;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import fr.proline.studio.Exceptions;
 import fr.proline.studio.dam.tasks.data.ptm.JSONPTMDataset;
@@ -76,13 +77,13 @@ public class PTMDatasetReaderTest {
         Long[] leafIds = {4l, 3l};
 
         ObjectMapper mapper = new ObjectMapper();
-        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         JSONPTMDataset values;
         try {
             values = mapper.readValue(jsonDS, JSONPTMDataset.class);
 
             Assert.assertEquals(2, values.leafResultSummaryIds.length);
-            Assert.assertEquals(leafIds, values.leafResultSummaryIds);
+            Assert.assertArrayEquals(leafIds, values.leafResultSummaryIds);
 
             Assert.assertEquals(4, values.ptmIds.length);
             Assert.assertTrue(Arrays.asList(values.ptmIds).contains(27l));

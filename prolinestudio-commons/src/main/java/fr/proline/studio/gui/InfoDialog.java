@@ -29,7 +29,7 @@ import javax.swing.*;
  * @author JM235353
  */
 public class InfoDialog extends DefaultDialog {
-    
+
     public enum InfoType {
         WARNING,
         QUESTION,
@@ -42,11 +42,11 @@ public class InfoDialog extends DefaultDialog {
     private JCheckBox m_showNextTimecheckBox = null;
     private String m_showAtStartKey;
     
-    public InfoDialog(Window parent, InfoType type, String title, String message) {
-        this(parent, type, title, message, null);
+    public InfoDialog(Window parent, InfoType type, String title, String message, boolean useBigIcon) {
+        this(parent, type, title, message, null, useBigIcon);
     }
 
-    public InfoDialog(Window parent, InfoType type, String title, String message, String showAtStartKey) {
+    public InfoDialog(Window parent, InfoType type, String title, String message, String showAtStartKey,boolean useBigIcon ) {
 
         super(parent);
 
@@ -60,18 +60,26 @@ public class InfoDialog extends DefaultDialog {
         setButtonName(BUTTON_CANCEL, "No");
         setStatusVisible(false);
 
-        
         // Image at left
         Icon icon = null;
         switch (type) {
             case WARNING:
-                icon = IconManager.getIcon(IconManager.IconType.BIG_WARNING);
+                if(useBigIcon)
+                    icon = IconManager.getIcon(IconManager.IconType.BIG_WARNING);
+                else
+                    icon = IconManager.getIcon(IconManager.IconType.WARNING_30);
                 break;
             case QUESTION:
-                icon = IconManager.getIcon(IconManager.IconType.BIG_HELP);
+                if(useBigIcon)
+                    icon = IconManager.getIcon(IconManager.IconType.BIG_HELP);
+                else
+                    icon = IconManager.getIcon(IconManager.IconType.HELP_30);
                 break;
             case INFO:
-                icon = IconManager.getIcon(IconManager.IconType.BIG_INFO);
+                if(useBigIcon)
+                    icon = IconManager.getIcon(IconManager.IconType.BIG_INFO);
+                else
+                    icon = IconManager.getIcon(IconManager.IconType.INFO_30);
                 break;
             case NO_ICON:
                 icon = null;
@@ -135,7 +143,7 @@ public class InfoDialog extends DefaultDialog {
         
         
         infoPanel.setLayout(new GridBagLayout());
-        infoPanel.setBorder(BorderFactory.createTitledBorder(""));
+//        infoPanel.setBorder(BorderFactory.createTitledBorder(""));
 
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;

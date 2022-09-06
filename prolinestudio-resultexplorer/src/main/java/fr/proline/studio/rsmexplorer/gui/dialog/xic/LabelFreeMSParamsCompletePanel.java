@@ -143,11 +143,11 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
 
     private void createParameters() {
         m_extractionMoZTolTF = new JTextField();
-        DoubleParameter extractionMoZTolParameter = new DoubleParameter("extractionMoZTol", "Extraction moz tolerance", m_extractionMoZTolTF, DEFAULT_EXTRACTION_MOZTOL_VALUE, new Double(0), null);
+        DoubleParameter extractionMoZTolParameter = new DoubleParameter("extractionMoZTol", "Extraction moz tolerance", m_extractionMoZTolTF, DEFAULT_EXTRACTION_MOZTOL_VALUE, Double.valueOf(0), null);
         m_parameterList.add(extractionMoZTolParameter);
 
         m_psmMatchingMoZTolTF = new JTextField();
-        DoubleParameter psmMatchingMoZTolTFParameter = new DoubleParameter("psmMatchingMoZTolTF", "PSM Matching moz tolerance", m_psmMatchingMoZTolTF, DEFAULT_EXTRACTION_MOZTOL_VALUE, new Double(0), null);
+        DoubleParameter psmMatchingMoZTolTFParameter = new DoubleParameter("psmMatchingMoZTolTF", "PSM Matching moz tolerance", m_psmMatchingMoZTolTF, DEFAULT_EXTRACTION_MOZTOL_VALUE, Double.valueOf(0), null);
         m_parameterList.add(psmMatchingMoZTolTFParameter);
         m_parameterList.add(m_useLastPeakelDetectionParam);
 
@@ -173,11 +173,11 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         m_parameterList.add(m_crossAssignStrategyParameter);
 
         m_clusteringMoZTolTF = new JTextField();
-        DoubleParameter m_clusteringMoZTolParameter = new DoubleParameter("clusteringMoZTol", "Clustering moz tolerance", m_clusteringMoZTolTF, DEFAULT_CLUSTER_MOZTOL_VALUE, new Double(0), null);
+        DoubleParameter m_clusteringMoZTolParameter = new DoubleParameter("clusteringMoZTol", "Clustering moz tolerance", m_clusteringMoZTolTF, DEFAULT_CLUSTER_MOZTOL_VALUE, Double.valueOf(0), null);
         m_parameterList.add(m_clusteringMoZTolParameter);
 
         m_clusteringTimeTolTF = new JTextField();
-        DoubleParameter m_clusteringTimeTolParameter = new DoubleParameter("clusteringTimeTol", "Clustering time tolerance", m_clusteringTimeTolTF, DEFAULT_CLUSTER_TIMETOL_VALUE, new Double(0), null);
+        DoubleParameter m_clusteringTimeTolParameter = new DoubleParameter("clusteringTimeTol", "Clustering time tolerance", m_clusteringTimeTolTF, DEFAULT_CLUSTER_TIMETOL_VALUE, Double.valueOf(0), null);
         m_parameterList.add(m_clusteringTimeTolParameter);
 
         m_clusteringTimeComputationCB = new JComboBox(CLUSTERING_TIME_COMPUTATION_VALUES);
@@ -200,7 +200,7 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         m_parameterList.add(m_alignmentMethodParameter);
 
         m_alignmentMaxIterationTF = new JTextField();
-        IntegerParameter alignmentMaxIterationParameter = new IntegerParameter("alignmentMaxIteration", "Alignment max iteration", m_alignmentMaxIterationTF, DEFAULT_ALIGN_MAXITE_VALUE, new Integer(1), null);
+        IntegerParameter alignmentMaxIterationParameter = new IntegerParameter("alignmentMaxIteration", "Alignment max iteration", m_alignmentMaxIterationTF, DEFAULT_ALIGN_MAXITE_VALUE, Integer.valueOf(1), null);
         m_parameterList.add(alignmentMaxIterationParameter);
 
         m_alignmentSmoothingMethodCB = new JComboBox(ALIGNMENT_SMOOTHING_METHOD_VALUES);
@@ -208,19 +208,19 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         m_parameterList.add(m_alignmentSmoothingMethodParameter);
 
         m_alignmentSmoothWinSizeTF = new JTextField();
-        IntegerParameter alignmentSmoothingWinSizeParameter = new IntegerParameter("alignmentTimeInterval", "Alignment time interval", m_alignmentSmoothWinSizeTF, DEFAULT_SMOOTH_WINSIZE_VALUE, new Integer(1), null);
+        IntegerParameter alignmentSmoothingWinSizeParameter = new IntegerParameter("alignmentTimeInterval", "Alignment time interval", m_alignmentSmoothWinSizeTF, DEFAULT_SMOOTH_WINSIZE_VALUE, Integer.valueOf(1), null);
         m_parameterList.add(alignmentSmoothingWinSizeParameter);
 
         m_alignmentSmoothWinOverlapTF = new JTextField();
-        IntegerParameter alignmentSmoothingWinOverlapParameter = new IntegerParameter("smoothingSlidingWindowOverlap", "Smoothing sliding window overlap", m_alignmentSmoothWinOverlapTF, DEFAULT_SMOOTH_WINOVERLAP_VALUE, new Integer(1), DEFAULT_SMOOTH_WINOVERLAP_MAX_VALUE);
+        IntegerParameter alignmentSmoothingWinOverlapParameter = new IntegerParameter("smoothingSlidingWindowOverlap", "Smoothing sliding window overlap", m_alignmentSmoothWinOverlapTF, DEFAULT_SMOOTH_WINOVERLAP_VALUE, Integer.valueOf(1), DEFAULT_SMOOTH_WINOVERLAP_MAX_VALUE);
         m_parameterList.add(alignmentSmoothingWinOverlapParameter);
 
         m_alignmentSmoothMinWinLMTF = new JTextField();
-        IntegerParameter alignmentSmoothingMinWinlandmarksParameter = new IntegerParameter("smoothingMinimumNumberOfLandmarks", "Smoothing minimum number of landmarks", m_alignmentSmoothMinWinLMTF, DEFAULT_SMOOTH_NBRLM_VALUE, new Integer(1), null);
+        IntegerParameter alignmentSmoothingMinWinlandmarksParameter = new IntegerParameter("smoothingMinimumNumberOfLandmarks", "Smoothing minimum number of landmarks", m_alignmentSmoothMinWinLMTF, DEFAULT_SMOOTH_NBRLM_VALUE, Integer.valueOf(1), null);
         m_parameterList.add(alignmentSmoothingMinWinlandmarksParameter);
 
         m_alignmentFeatureMapMoZTolTF = new JTextField();
-        DoubleParameter alignmentFeatureMappingMoZTolParameter = new DoubleParameter("featureMappingMozTolerance", "Feature Mapping Moz Tolerance", m_alignmentFeatureMapMoZTolTF, DEFAULT_ALIGN_FEATMAP_MOZTOL_VALUE, new Double(0), null);
+        DoubleParameter alignmentFeatureMappingMoZTolParameter = new DoubleParameter("featureMappingMozTolerance", "Feature Mapping Moz Tolerance", m_alignmentFeatureMapMoZTolTF, DEFAULT_ALIGN_FEATMAP_MOZTOL_VALUE, Double.valueOf(0), null);
         m_parameterList.add(alignmentFeatureMappingMoZTolParameter);
 
         m_alignmentFeatureMapMethodCB = new JComboBox(FEATURE_MAPPING_METHOD_VALUES);
@@ -228,7 +228,7 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         m_parameterList.add(m_alignmentFeatureMappMethodParameter);
 
         m_alignmentFeatureMapTimeToleranceTF = new JTextField();
-        DoubleParameter alignmentFeatureMappingTimeToleranceParameter = new DoubleParameter("featureMappingTimeTolerance", "Feature Mapping Time Tolerance", m_alignmentFeatureMapTimeToleranceTF, DEFAULT_ALIGN_FEATMAP_TIMETOL_VALUE, new Double(1), null);
+        DoubleParameter alignmentFeatureMappingTimeToleranceParameter = new DoubleParameter("featureMappingTimeTolerance", "Feature Mapping Time Tolerance", m_alignmentFeatureMapTimeToleranceTF, DEFAULT_ALIGN_FEATMAP_TIMETOL_VALUE, Double.valueOf(1), null);
         m_parameterList.add(alignmentFeatureMappingTimeToleranceParameter);
 
 
@@ -251,11 +251,11 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         m_parameterList.add(m_featureFilterValueParameter);
 
         m_crossAssignFeatureMappMoZTolTF = new JTextField();
-        DoubleParameter featureMappingMoZTolParameter = new DoubleParameter("featureMoZTol", "moz tolerance ", m_crossAssignFeatureMappMoZTolTF, DEFAULT_CA_FEATMAP_MOZTOL_VALUE, new Double(0), null);
+        DoubleParameter featureMappingMoZTolParameter = new DoubleParameter("featureMoZTol", "moz tolerance ", m_crossAssignFeatureMappMoZTolTF, DEFAULT_CA_FEATMAP_MOZTOL_VALUE, Double.valueOf(0), null);
         m_parameterList.add(featureMappingMoZTolParameter);
 
         m_crossAssignFeatureMappRTTolTF = new JTextField();
-        DoubleParameter featureMappingTimeTolParameter = new DoubleParameter("featureTimeTol", "RT tolerance", m_crossAssignFeatureMappRTTolTF, DEFAULT_CA_FEATMAP_RTTOL_VALUE, new Double(0), null);
+        DoubleParameter featureMappingTimeTolParameter = new DoubleParameter("featureTimeTol", "RT tolerance", m_crossAssignFeatureMappRTTolTF, DEFAULT_CA_FEATMAP_RTTOL_VALUE, Double.valueOf(0), null);
         m_parameterList.add(featureMappingTimeTolParameter);
 
         m_normalizationSettingsCBTitle = new CheckBoxTitledBorder("Map Normalization", DEFAULT_NORMALIZATION_VALUE);

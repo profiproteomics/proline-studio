@@ -55,7 +55,7 @@ public abstract class Axis {
     protected static final Stroke DASHED = new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER, 10.0f, new float[]{2.0f, 2.0f}, 0.0f);
     protected static final Logger m_logger = LoggerFactory.getLogger(Axis.class);
     
-    protected ArrayList<PlotBaseAbstract> m_plots = null;
+    protected ArrayList<PlotBaseAbstract> m_plots;
     
     protected String m_title = null;
     protected Font m_titleFont = null;
@@ -97,7 +97,7 @@ public abstract class Axis {
     protected int m_labelMinWidth = 0;
     protected int m_labelMaxWidth = 0;
     protected int m_minimumAxisHeight = 0;
-    protected int m_minimumAxisWidth = 0;
+//    protected int m_minimumAxisWidth = 0;
 
     private boolean m_maxZoomDone = false;
 
@@ -238,7 +238,8 @@ public abstract class Axis {
                 max = Double.parseDouble(m_maxTextField.getText().trim());
                 min = Double.parseDouble(m_minTextField.getText().trim());
             } catch (NumberFormatException nfe) {
-                InfoDialog errorDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Error", "Min or max value contains non numerical values.");
+                InfoDialog errorDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Error", "Min or max value contains non numerical values.", false);
+                errorDialog.setButtonName(InfoDialog.BUTTON_OK, "OK");
                 errorDialog.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
                 errorDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
                 errorDialog.setVisible(true);
@@ -253,7 +254,7 @@ public abstract class Axis {
                 m_axis.setRange(min, max, true);
                 m_axis.m_plotPanel.repaintUpdateDoubleBuffer();
             } else {
-                InfoDialog errorDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Error", "Min value cannot be greater than or equal to the max value.");
+                InfoDialog errorDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Error", "Min value cannot be greater than or equal to the max value.", false);
                 errorDialog.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
                 errorDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
                 errorDialog.setVisible(true);
@@ -262,7 +263,7 @@ public abstract class Axis {
     }
 
     public Axis(BasePlotPanel p) {
-        m_plots = new ArrayList();
+        m_plots = new ArrayList<>();
         m_plotPanel = p;
         m_rangePanel = new AxisRangePanel(this);
     }

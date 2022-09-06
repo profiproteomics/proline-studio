@@ -78,7 +78,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
    }
 
    private static final Logger logger = LoggerFactory.getLogger(SpectrumPanel.class);
-   private static final int OVERLAY_KEY = KeyEvent.CTRL_MASK;
+   private static final int OVERLAY_KEY = KeyEvent.CTRL_DOWN_MASK;
    
    private final IRawFileViewer rawFilePanel;
    private ScanHeaderPanel headerSpectrumPanel;
@@ -512,7 +512,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
     @Override
     public void plotPanelMouseClicked(MouseEvent e, double xValue, double yValue) {
         if (e.getClickCount() == 2) {
-            if ((e.getModifiers() & OVERLAY_KEY) == 0 && rawFilePanel.getChromatogramDisplayMode() != Display.Mode.OVERLAY) {
+            if ((e.getModifiersEx() & OVERLAY_KEY) == 0 && rawFilePanel.getChromatogramDisplayMode() != Display.Mode.OVERLAY) {
                 scanPlot.clearMarkers();
                 scanPlot.addMarker(positionMarker);
             }
@@ -529,7 +529,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
                 } else {
                     builder.setMz(currentScan.getPrecursorMz()).setFragmentMz(mz).setFragmentMzTolPPM(ppmTol);
                 }
-                if ((e.getModifiers() & OVERLAY_KEY) != 0) {
+                if ((e.getModifiersEx() & OVERLAY_KEY) != 0) {
                     rawFilePanel.extractAndDisplayChromatogram(builder.build(), new Display(Display.Mode.OVERLAY), null);
                 } else {
                     rawFilePanel.extractAndDisplayChromatogram(builder.build(), new Display(rawFilePanel.getChromatogramDisplayMode()), null);

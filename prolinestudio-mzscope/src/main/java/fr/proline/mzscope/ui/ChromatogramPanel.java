@@ -65,8 +65,8 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
    private List<AxisRangeChromatogramListener> m_listeners = new ArrayList<>();
    
    public ChromatogramPanel() {
-      listMsMsMarkers = new ArrayList();
-      listChromatogram = new ArrayList();
+      listMsMsMarkers = new ArrayList<>();
+      listChromatogram = new ArrayList<>();
       changeSupport = new PropertyChangeSupport(this);
       initComponents();
    }
@@ -79,7 +79,7 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
       chromatogramPlotPanel.setDrawCursor(true);
       chromatogramPlotPanel.repaint();
       currentScanMarker = new LineMarker(chromatogramPlotPanel, 0.0, LineMarker.ORIENTATION_VERTICAL, Color.BLUE, false);
-      chromatogramPlots = new ArrayList();
+      chromatogramPlots = new ArrayList<>();
       this.add(plotPanel, BorderLayout.CENTER);
    }
    
@@ -108,24 +108,22 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
          }
          chromatogramPlotPanel.repaintUpdateDoubleBuffer();
       }
-      listMsMsMarkers = new ArrayList();
+      listMsMsMarkers = new ArrayList<>();
    }
 
    public Color displayChromatogram(IChromatogram chromato, Display display) {
       if (display.getMode() == Display.Mode.REPLACE || ((display.getMode() == Display.Mode.SERIES) && !display.getIdentifier().equals(lastDisplayIdentifier))) {
          currentChromatogram = chromato;
-         listChromatogram = new ArrayList();
+         listChromatogram = new ArrayList<>();
          chromatogramPlotPanel.setPlotTitle(chromato.getTitle());
          chromatogramPlotPanel.clearPlots();
          PlotLinear chromatogramPlot = chromatogramPlots.isEmpty() ? null : chromatogramPlots.get(0);
          if (chromatogramPlot != null) {
             chromatogramPlot.clearMarkers();
          }
-         chromatogramPlots = new ArrayList();
+         chromatogramPlots = new ArrayList<>();
       } else if (!listChromatogram.isEmpty()) {
-         StringBuilder stb = new StringBuilder("<");
-         stb.append(listChromatogram.size()+1).append(" chromatograms>");
-         chromatogramPlotPanel.setPlotTitle(stb.toString());
+        chromatogramPlotPanel.setPlotTitle("<" + (listChromatogram.size() + 1) + " chromatograms>");
       }
 
       listChromatogram.add(chromato);
@@ -276,14 +274,14 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
         double oldYMin = chromatogramPlotPanel.getYAxis().getMinValue();
         double oldYMax = chromatogramPlotPanel.getYAxis().getMaxValue();
         
-        double newRangeX = (double)(zoomXLevel * (oldXMax - oldXMin) / 100.0);
-        double x =   (double)(oldXMin + (relativeXValue * (oldXMax - oldXMin) / 100.0));
-        double newRangeY = (double)(zoomYLevel * (oldYMax - oldYMin) / 100.0);
-        double y =   (double)(oldYMin + (relativeYValue * (oldYMax - oldYMin) / 100.0));
-        double newXMin = x - (double)(newRangeX / 2.0);
-        double newXMax = x + (double)(newRangeX / 2.0);
-        double newYMin = y - (double)(newRangeY / 2.0);
-        double newYMax = y + (double)(newRangeY / 2.0);
+        double newRangeX = zoomXLevel * (oldXMax - oldXMin) / 100.0;
+        double x = oldXMin + (relativeXValue * (oldXMax - oldXMin) / 100.0);
+        double newRangeY = zoomYLevel * (oldYMax - oldYMin) / 100.0;
+        double y = oldYMin + (relativeYValue * (oldYMax - oldYMin) / 100.0);
+        double newXMin = x - (newRangeX / 2.0);
+        double newXMax = x + (newRangeX / 2.0);
+        double newYMin = y - (newRangeY / 2.0);
+        double newYMax = y + (newRangeY / 2.0);
         logger.debug("{} move from min={}, max={} to min={}, max={}", currentChromatogram.getRawFilename(), oldXMin, oldXMax, newXMin, newXMax);
         chromatogramPlotPanel.getXAxis().setRange(newXMin, newXMax);
         chromatogramPlotPanel.getYAxis().setRange(newYMin, newYMax);
@@ -296,13 +294,13 @@ public class ChromatogramPanel extends JPanel implements PlotPanelListener {
         double oldYMin = chromatogramPlotPanel.getYAxis().getMinValue();
         double oldYMax = chromatogramPlotPanel.getYAxis().getMaxValue();
         
-        double newRangeY = (double)(zoomYLevel * (oldYMax - oldYMin) / 100.0);
-        double y =   (double)(oldYMin + (relativeYValue * (oldYMax - oldYMin) / 100.0));
+        double newRangeY = zoomYLevel * (oldYMax - oldYMin) / 100.0;
+        double y = oldYMin + (relativeYValue * (oldYMax - oldYMin) / 100.0);
 
-        double newXMin = (double)((relativeXPosition * (currentChromatogram.getElutionEndTime() - currentChromatogram.getElutionStartTime())));
+        double newXMin = (relativeXPosition * (currentChromatogram.getElutionEndTime() - currentChromatogram.getElutionStartTime()));
         double newXMax = newXMin + zoomXRange;
-        double newYMin = y - (double)(newRangeY / 2.0);
-        double newYMax = y + (double)(newRangeY / 2.0);
+        double newYMin = y - (newRangeY / 2.0);
+        double newYMax = y + (newRangeY / 2.0);
         //logger.debug("{} move to min={}, max={}", currentChromatogram.rawFilename, newXMin, newXMax);
         chromatogramPlotPanel.getXAxis().setRange(newXMin, newXMax);
         chromatogramPlotPanel.getYAxis().setRange(newYMin, newYMax);

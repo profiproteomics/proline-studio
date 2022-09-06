@@ -79,7 +79,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
 
     private boolean m_mergedData = false;
 
-    private ScoreRenderer m_scoreRenderer = new ScoreRenderer();
+    private final ScoreRenderer m_scoreRenderer = new ScoreRenderer();
 
     public ProteinSetTableModel(LazyTable table) {
         super(table);
@@ -88,11 +88,9 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
 
     private void setColUsed(boolean mergedRsm) {
         if (mergedRsm) {
-            final int[] colUsed = {COLTYPE_PROTEIN_SET_ID, COLTYPE_PROTEIN_SET_NAME, COLTYPE_PROTEIN_SET_DESCRIPTION, COLTYPE_PROTEIN_SCORE, COLTYPE_PROTEINS_COUNT, COLTYPE_PEPTIDES_COUNT, COLTYPE_OBSERVABLE_PEPTIDES, COLTYPE_SPECTRAL_COUNT, COLTYPE_SPECIFIC_SPECTRAL_COUNT, COLTYPE_UNIQUE_SEQUENCES_COUNT, COLTYPE_PROTEIN_MASS, COLTYPE_PROTEIN_SET_GENE_NAME};
-            m_colUsed = colUsed;
+            m_colUsed = new int[]{COLTYPE_PROTEIN_SET_ID, COLTYPE_PROTEIN_SET_NAME, COLTYPE_PROTEIN_SET_DESCRIPTION, COLTYPE_PROTEIN_SCORE, COLTYPE_PROTEINS_COUNT, COLTYPE_PEPTIDES_COUNT, COLTYPE_OBSERVABLE_PEPTIDES, COLTYPE_SPECTRAL_COUNT, COLTYPE_SPECIFIC_SPECTRAL_COUNT, COLTYPE_UNIQUE_SEQUENCES_COUNT, COLTYPE_PROTEIN_MASS, COLTYPE_PROTEIN_SET_GENE_NAME};
         } else {
-            final int[] colUsed = {COLTYPE_PROTEIN_SET_ID, COLTYPE_PROTEIN_SET_NAME, COLTYPE_PROTEIN_SET_DESCRIPTION, COLTYPE_PROTEIN_SCORE, COLTYPE_PROTEINS_COUNT, COLTYPE_PEPTIDES_COUNT, COLTYPE_OBSERVABLE_PEPTIDES, COLTYPE_SPECTRAL_COUNT, COLTYPE_SPECIFIC_SPECTRAL_COUNT, COLTYPE_UNIQUE_SEQUENCES_COUNT, COLTYPE_PROTEIN_MASS, COLTYPE_PROTEIN_SET_GENE_NAME};
-            m_colUsed = colUsed;
+            m_colUsed = new int[]{COLTYPE_PROTEIN_SET_ID, COLTYPE_PROTEIN_SET_NAME, COLTYPE_PROTEIN_SET_DESCRIPTION, COLTYPE_PROTEIN_SCORE, COLTYPE_PROTEINS_COUNT, COLTYPE_PEPTIDES_COUNT, COLTYPE_OBSERVABLE_PEPTIDES, COLTYPE_SPECTRAL_COUNT, COLTYPE_SPECIFIC_SPECTRAL_COUNT, COLTYPE_UNIQUE_SEQUENCES_COUNT, COLTYPE_PROTEIN_MASS, COLTYPE_PROTEIN_SET_GENE_NAME};
         }
     }
 
@@ -102,7 +100,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
      * @return the list of columns ids of these columns
      */
     public List<Integer> getDefaultColumnsToHide(){
-        List<Integer> listIds = new ArrayList();
+        List<Integer> listIds = new ArrayList<>();
         listIds.add(COLTYPE_PROTEIN_SET_GENE_NAME);
         return listIds;
     }
@@ -280,7 +278,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
                     givePriorityTo(m_taskId, row, col);
                 } else {
 
-                    lazyData.setData(new ProteinCount(sameSetCount, subSetCount));
+                    lazyData.setData(new ProteinCount(sameSetCount, subSetCount, proteinSet));
                 }
 
                 return lazyData;
@@ -334,7 +332,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
                     Integer value = -1;  // pas tres propre mais NaN n'existe pas pour les Integer
                     try {
                         value = ((Integer) proteinMatch.getPeptideSet(rsmId).getSequenceCount());
-                    } catch (Exception e) {
+                    } catch (Exception ignored) {
                     }
 
                     lazyData.setData(value);
@@ -417,17 +415,10 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
             return;
         }
 
-        if (m_scoreRenderer == null) {
-            return;
-        }
-
         float maxScore = 0;
-        int size = m_proteinSets.length;
-        for (int i = 0; i < size; i++) {
+        for (DProteinSet proteinSet : m_proteinSets) {
 
             // Retrieve Protein Set
-            DProteinSet proteinSet = m_proteinSets[i];
-
             DProteinMatch proteinMatch = proteinSet.getTypicalProteinMatch();
             if (proteinMatch != null) {
                 long rsmId = proteinSet.getResultSummaryId();
@@ -563,8 +554,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
 
     @Override
     public int[] getKeysColumn() {
-        int[] keys = {convertColToColUsed(COLTYPE_PROTEIN_SET_NAME), convertColToColUsed(COLTYPE_PROTEIN_SET_ID)};
-        return keys;
+        return new int[]{convertColToColUsed(COLTYPE_PROTEIN_SET_NAME), convertColToColUsed(COLTYPE_PROTEIN_SET_ID)};
     }
 
     @Override
@@ -600,6 +590,15 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
      */
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
+        ConvertValueInterface proteinCountConverter = new ConvertValueInterface() {
+            @Override
+            public Object convertValue(Object o) {
+                if (o == null) {
+                    return null;
+                }
+                return ((ProteinCount) o).getAssociatedProteinSet();
+            }
+        };
 
         int colIdx = 0; // COLTYPE_PROTEIN_SET_ID
 
@@ -611,7 +610,10 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
 
         colIdx++; // COLTYPE_PROTEIN_SCORE
         filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null, colIdx));
+
         colIdx++; //COLTYPE_PROTEINS_COUNT  => No Filter
+        filtersMap.put(colIdx, new ProteinSetFilter(getColumnName(colIdx), proteinCountConverter, colIdx));
+
         colIdx++; // COLTYPE_PEPTIDES_COUNT
         filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));
 
@@ -647,12 +649,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
     public int[] getBestColIndex(PlotType plotType) {
 
         switch (plotType) {
-            case HISTOGRAM_PLOT: {
-                int[] cols = new int[2];
-                cols[0] = COLTYPE_PEPTIDES_COUNT;
-                cols[1] = COLTYPE_PROTEIN_SCORE;
-                return cols;
-            }
+            case HISTOGRAM_PLOT:
             case SCATTER_PLOT: {
                 int[] cols = new int[2];
                 cols[0] = COLTYPE_PEPTIDES_COUNT;
@@ -669,7 +666,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
             DProteinSet proteinSet = m_proteinSets[row];
             Integer sameSetCount = proteinSet.getSameSetCount();
             Integer subSetCount = proteinSet.getSubSetCount();
-            ProteinCount proteinCount = new ProteinCount(sameSetCount, subSetCount);
+            ProteinCount proteinCount = new ProteinCount(sameSetCount, subSetCount, proteinSet);
 
             return proteinCount.toString();
         }
@@ -717,7 +714,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
         return renderer;
 
     }
-    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
+    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap<>();
 
     @Override
     public GlobalTableModelInterface getFrozzenModel() {
@@ -728,14 +725,20 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
 
         private final int m_sameSetCount;
         private final int m_subSetCount;
+        private final DProteinSet m_associatedProteinSet;
 
-        public ProteinCount(int sameSetCount, int subSetCount) {
+        public ProteinCount(int sameSetCount, int subSetCount, DProteinSet associatedProteinSet) {
             m_sameSetCount = sameSetCount;
             m_subSetCount = subSetCount;
+            m_associatedProteinSet =associatedProteinSet;
         }
 
         public int getNbProteins() {
             return m_sameSetCount + m_subSetCount;
+        }
+
+        public DProteinSet getAssociatedProteinSet(){
+            return m_associatedProteinSet;
         }
 
         public String toHtml() {

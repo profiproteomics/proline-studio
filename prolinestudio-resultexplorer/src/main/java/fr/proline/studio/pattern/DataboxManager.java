@@ -18,6 +18,7 @@ package fr.proline.studio.pattern;
 
 import fr.proline.studio.pattern.xic.*;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
@@ -75,7 +76,12 @@ public class DataboxManager {
 
     public static AbstractDataBox getDataboxNewInstance(AbstractDataBox sourceDB) throws IllegalAccessException, InstantiationException {
 
-        AbstractDataBox newGenericDatabox = sourceDB.getClass().newInstance(); // copy the databox
+        AbstractDataBox newGenericDatabox = null; // copy the databox
+        try {
+            newGenericDatabox = sourceDB.getClass().getDeclaredConstructor().newInstance();
+        } catch (InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+        }
 
         //Some databox must be specifically configured ...
         // FIXME VDS : To be more generic ?!

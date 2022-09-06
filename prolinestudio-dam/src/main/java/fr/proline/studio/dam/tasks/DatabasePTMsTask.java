@@ -132,7 +132,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
             }
         }
         } finally {
-            PerformanceTest.displayTimeAllThreads();
+//            PerformanceTest.displayTimeAllThreads(); //VDS For debug Only !
         }
         return true; // should not happen                
     }

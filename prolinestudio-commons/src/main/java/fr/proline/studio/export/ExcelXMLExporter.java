@@ -102,7 +102,7 @@ public class ExcelXMLExporter implements ExporterInterface {
             }
 
             cell.setCellValue(rich);
-        } else if (NumberUtils.isNumber(t)) {
+        } else if (NumberUtils.isCreatable(t)) {
             double d = Double.parseDouble(t);
 
             cell.setCellValue(d);

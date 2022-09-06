@@ -17,7 +17,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
-import static fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractConnectedGraphObject.STROKE_SELECTED;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -43,14 +42,14 @@ public class GraphConnector extends AbstractConnectedGraphObject {
     private final boolean m_out;
     
     // when there are several in or out connectors, the index correspond to the number of the connector.
-    private int m_index = 0;
+    private int m_index;
     
     private final GraphNode m_graphNode;
     private GraphLink m_link = null;
     
-    protected GraphPanel m_graphPanel = null;
+    protected GraphPanel m_graphPanel;
     
-    private final LinkedList<GraphConnector> m_connections = new LinkedList(); 
+    private final LinkedList<GraphConnector> m_connections = new LinkedList<>();
     
     public GraphConnector(GraphNode graphNode, boolean out, int index, GraphPanel panel) {
         super(TypeGraphObject.CONNECTOR);
@@ -141,8 +140,7 @@ public class GraphConnector extends AbstractConnectedGraphObject {
         if ((m_out) || (m_connections.isEmpty())) {
             return null;
         }
-        GraphConnector connector = m_connections.getFirst();
-        return connector;
+        return m_connections.getFirst();
     }
     
     public boolean canBeLinked(GraphConnector connector) {

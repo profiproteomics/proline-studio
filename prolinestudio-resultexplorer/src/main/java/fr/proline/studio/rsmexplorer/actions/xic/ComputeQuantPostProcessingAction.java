@@ -172,7 +172,7 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
 
                 List<DMasterQuantitationChannel> listMasterQuantChannels = dataset.getMasterQuantitationChannels();
                 if (listMasterQuantChannels != null && !listMasterQuantChannels.isEmpty()) {
-                    Long masterQuantChannelId = new Long(listMasterQuantChannels.get(0).getId());
+                    Long masterQuantChannelId = Long.valueOf(listMasterQuantChannels.get(0).getId());
                     // CallBack for Xic Quantitation Service
                     //one callback by datasetNode
                     AbstractJMSCallback xicCallback = new AbstractJMSCallback() {

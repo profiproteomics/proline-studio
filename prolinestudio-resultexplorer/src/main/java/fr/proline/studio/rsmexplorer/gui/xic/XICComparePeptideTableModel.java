@@ -22,8 +22,10 @@ import fr.proline.core.orm.msi.dto.DQuantPeptide;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
+import fr.proline.studio.graphics.BestGraphicsInterface;
 import fr.proline.studio.graphics.PlotDataSpec;
 import fr.proline.studio.graphics.PlotInformation;
+import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.utils.GlobalValues;
@@ -40,7 +42,7 @@ import javax.swing.event.TableModelListener;
  *
  * @author Karine XUE at CEA
  */
-public class XICComparePeptideTableModel implements ExtendedTableModelInterface,TableModel {
+public class XICComparePeptideTableModel implements ExtendedTableModelInterface,TableModel, BestGraphicsInterface {
 
     public static final int COLTYPE_QC_ID = 0;
     public static final int COLTYPE_QC_NAME = 1;
@@ -74,7 +76,6 @@ public class XICComparePeptideTableModel implements ExtendedTableModelInterface,
     /**
      * copy of javax.swing.table.AbstractTableModel.java
      *
-     * @param e
      */
     public void fireTableDataChanged() {
         fireTableChanged(new TableModelEvent(this));
@@ -361,5 +362,23 @@ public class XICComparePeptideTableModel implements ExtendedTableModelInterface,
     //@Override
     public void removeTableModelListener(TableModelListener l) {
         listenerList.remove(TableModelListener.class, l);
+    }
+
+    @Override
+    public PlotType getBestPlotType() {
+        return PlotType.LINEAR_PLOT;
+    }
+
+    @Override
+    public int[] getBestColIndex(PlotType plotType) {
+        switch (plotType) {
+            case LINEAR_PLOT: {
+                int[] cols = new int[2];
+                cols[0] = COLTYPE_QC_NAME;
+                cols[1] = COLTYPE_ABUNDANCE;
+                return cols;
+            }
+        }
+        return null;
     }
 }

@@ -19,7 +19,7 @@ package fr.proline.studio.dam.tasks;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -176,7 +176,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
             }
         }
         } finally {
-            PerformanceTest.displayTimeAllThreads();
+//            PerformanceTest.displayTimeAllThreads();  //VDS for debug only !
         }
         return true; // should not happen                
     }
@@ -392,7 +392,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         }
         ObjectTree ot = entityManagerMSI.find(ObjectTree.class, rsm.getObjectTreeIdByName().get(schemaName));
         ObjectMapper mapper = new ObjectMapper();
-        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
         return mapper.readValue(ot.getClobData(), JSONPTMDataset.class);
     }
@@ -569,7 +569,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         peptidesQuery.setParameter("rmsIds", rsmIds);
 
         ObjectMapper mapper = new ObjectMapper();
-        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
         List<Object[]> l = peptidesQuery.getResultList();
         Iterator<Object[]> itPeptidesQuery = l.iterator();
@@ -708,7 +708,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         long start = System.currentTimeMillis();
         m_logger.debug(" @@ START fetchPTMSitesPepInstances SUBTASK ");
         ObjectMapper mapper = new ObjectMapper();
-        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
         int nbrPepIds = sliceOfPeptideIds.size();
         Long rsetId = m_dataset.getResultSetId();
@@ -743,7 +743,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         PerformanceTest.stopTime("peptidesQuery");
 
         long end = System.currentTimeMillis();
-        m_logger.debug(" @@ fetchPTMSitesPepInstances: Read "+nbrPepInstIds+" pep instances corresponding to " + nbrPepIds+" peptides in "+(end-start)+" ms" );
+//        m_logger.debug(" @@ fetchPTMSitesPepInstances: Read "+nbrPepInstIds+" pep instances corresponding to " + nbrPepIds+" peptides in "+(end-start)+" ms" );
         start = end;
 
         PerformanceTest.startTime("dataQuery");
@@ -768,7 +768,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
 
         //---- Create List of DPeptideMatch (linked to DSpectrum + DMsQuery) from query resumlt
         end = System.currentTimeMillis();
-        m_logger.debug(" @@ fetchPTMSitesPepInstances: query result size " + l.size()+" in "+(end-start)+" ms" );
+//        m_logger.debug(" @@ fetchPTMSitesPepInstances: query result size " + l.size()+" in "+(end-start)+" ms" );
         start= end;
 
         PerformanceTest.startTime("itPeptidesMatchesQuery loop");
@@ -888,7 +888,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         PerformanceTest.stopTime("itPeptidesMatchesQuery loop");
 
         end = System.currentTimeMillis();
-        m_logger.debug(" @@ fetchPTMSitesPepInstances: Created leafPeptideInstancesById. Nbr : " + leafPeptideInstancesById.size()+" in "+(end-start)+" ms");
+//        m_logger.debug(" @@ fetchPTMSitesPepInstances: Created leafPeptideInstancesById. Nbr : " + leafPeptideInstancesById.size()+" in "+(end-start)+" ms");
         start= end;
 
         //--- Retrieve PeptideReadablePtmString
@@ -921,7 +921,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         PerformanceTest.stopTime("parentPeptideInstancesByPepId.values().stream().flatMap");
 
         end = System.currentTimeMillis();
-        m_logger.debug(" @@ fetchPTMSitesPepInstances got PTM info  for all peptideMatches . nbr " + allpeptideMatches.size()+" in "+(end-start)+" ms");
+//        m_logger.debug(" @@ fetchPTMSitesPepInstances got PTM info  for all peptideMatches . nbr " + allpeptideMatches.size()+" in "+(end-start)+" ms");
         start= end;
 
         PerformanceTest.startTime("allpeptideMatches loop");
@@ -943,8 +943,8 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
 
         PerformanceTest.stopTime("allpeptideMatches loop");
 
-        m_logger.info(" @@ {} peptides matching to {} peptide matches retrieved", allPeptidesMap.size(), allpeptideMatches.size());
-        m_logger.info(" @@ {} peptide instances retrieved", parentPeptideInstancesByPepId.size());
+//        m_logger.info(" @@ {} peptides matching to {} peptide matches retrieved", allPeptidesMap.size(), allpeptideMatches.size());
+//        m_logger.info(" @@ {} peptide instances retrieved", parentPeptideInstancesByPepId.size());
 
         PerformanceTest.startTime("m_ptmSitesOutput loop");
         for (PTMSite site : m_ptmSitesOutput) {
@@ -968,7 +968,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         PerformanceTest.stopTime("m_ptmSitesOutput loop");
 
         end = System.currentTimeMillis();
-        m_logger.debug(" @@ END fetchPTMSitesPepInstances subtask "+" in "+(end-start)+" ms");
+//        m_logger.debug(" @@ END fetchPTMSitesPepInstances subtask "+" in "+(end-start)+" ms");
 
         PerformanceTest.stopTime("fetchPTMSitesPepInstances");
 

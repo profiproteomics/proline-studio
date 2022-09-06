@@ -109,7 +109,7 @@ public class EmptyTrashAction extends AbstractRSMAction {
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
 
         // check if user also wants to erase locally
-        InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Confirm Erasing of Recycle Bin", "Are you sure you want to erase the contents of the Recycle Bin?");
+        InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Confirm Erasing of Recycle Bin", "Are you sure you want to erase the contents of the Recycle Bin?", false);
         exitDialog.setButtonName(DefaultDialog.BUTTON_OK, "Yes");
         exitDialog.setButtonName(DefaultDialog.BUTTON_CANCEL, "No");
         exitDialog.centerToWindow(WindowManager.getDefault().getMainWindow());

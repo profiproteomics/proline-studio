@@ -17,6 +17,9 @@
 package fr.proline.studio.dpm.task.jms;
 
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Message;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.UserAccount;
 import fr.proline.studio.WindowManager;
@@ -36,6 +39,9 @@ import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static fr.proline.studio.dpm.task.util.JMSConnectionManager.JMS_EXPIRED_MSG_ERROR_CODE;
+import static fr.proline.studio.dpm.task.util.JMSConnectionManager.PROLINE_SERVICE_NAME_KEY;
+
 /**
  *
  * @author JM235353
@@ -46,7 +52,7 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
         STATE_FAILED,
         STATE_WAITING,
         STATE_DONE
-    };
+    }
 
     // callback is called by the AccessServiceThread when the service is done
     protected AbstractJMSCallback m_callback;
@@ -105,9 +111,6 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
     public void askJMS() throws JMSException {
         try {
 
-            LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" askJMS Start "+getClass());
-
-
             /*
              * Thread specific : Session, Producer, Consumer ...
              */
@@ -130,13 +133,8 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
                 onMessage(responseMsg);
             }
 
-            LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" askJMS end "+getClass());
-
         } catch (Exception ex) {
-
-            LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" askJMS error "+getClass());
             ex.printStackTrace();
-
             m_loggerProline.error("Error sending JMS Message", ex);
             m_currentState = JMSState.STATE_FAILED;
             m_taskError = new TaskError(ex);
@@ -208,12 +206,47 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
     }
 
     /**
-     * Called when the task is done
+     * Called when the task is done and reply is receive
+     * Default implementation will
+     *  - verify message is a JSONRPC2Response (throw exception if not),
+     *  - check eventual JSONRPC2Error (throw exception if exist)
+     * and call processWithResult(JSONRPC2Response jsonResponse)
+     * and set current state to done  (??)
+     * If other treatment must be done before processWithResult, overwrite this method.
      *
-     * @param jmsMessage
+     * @param jmsMessage reply message from JMS server
      * @throws Exception
      */
-    public abstract void taskDone(final Message jmsMessage) throws Exception;
+    public void taskDone(final Message jmsMessage) throws Exception {
+        final TextMessage textMessage = (TextMessage) jmsMessage;
+        final String jsonString = textMessage.getText();
+
+        final JSONRPC2Message jsonMessage = JSONRPC2Message.parse(jsonString);
+        if (jsonMessage instanceof JSONRPC2Notification) {
+            m_loggerProline.warn("JSON Notification method: " + ((JSONRPC2Notification) jsonMessage).getMethod() + " instead of JSON Response");
+            throw new Exception("Invalid JSONRPC2Message type");
+
+        } else if (jsonMessage instanceof JSONRPC2Response) {
+
+            final JSONRPC2Response jsonResponse = JSONRPC2Response.parse(jsonString, false, false, true);
+            m_loggerProline.trace("JSON Response Id: " + jsonResponse.getID());
+
+            JSONRPC2Error jsonError = jsonResponse.getError();
+            if (jsonError != null) {
+                int jsonErrCode = jsonError.getCode();
+                if (m_synchronous && jsonErrCode == JMS_EXPIRED_MSG_ERROR_CODE && m_taskInfo.getDuration() <= responseTimeout) {
+                    jsonError = jsonError.appendMessage("\n Your clock should not be synchronized with Proline Server's one !! ");
+                }
+                String serviceErr = (String) jsonResponse.getNonStdAttribute(PROLINE_SERVICE_NAME_KEY);
+                m_loggerProline.error("JSON Error code {}, on serive {},  message : \"{}\"", jsonError.getCode(), serviceErr, jsonError.getMessage());
+                throw jsonError;
+            }
+
+            processWithResult(jsonResponse);
+        }
+    }
+
+    public abstract void processWithResult(JSONRPC2Response jsonResponse) throws Exception;
 
     /**
      * Method called by the ServiceStatusThread to check if the service is done
@@ -232,12 +265,7 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
     @Override
     public final void onMessage(final Message jmsMessage) {
 
-
-
-        LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage start "+getClass());
-
         long endRun = System.currentTimeMillis();
-//        this.m_taskInfo.setDuration(endRun-m_startRun);
         this.m_taskInfo.setDuration(endRun - m_taskInfo.getStartTimestamp());
 
         if (jmsMessage != null) {
@@ -245,13 +273,11 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
 
             try {
                 taskDone(jmsMessage);
-
-
+                if(m_taskError == null)
+                    m_currentState = JMSState.STATE_DONE;
             } catch (JSONRPC2Error jsonErr) {
 
-                LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage error "+getClass());
-                jsonErr.printStackTrace();
-
+//                jsonErr.printStackTrace();
                 m_currentState = JMSState.STATE_FAILED;
                 m_loggerProline.error("Error handling JMS Message", jsonErr);
                 if (jsonErr.getCode() == JMSConnectionManager.JMS_CANCELLED_TASK_ERROR_CODE) {
@@ -260,19 +286,13 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
                 m_taskError = new TaskError(jsonErr);
             } catch (Exception e) {
 
-                LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage error2 "+getClass());
-                e.printStackTrace();
-
+//                e.printStackTrace();
                 m_currentState = JMSState.STATE_FAILED;
                 m_loggerProline.error("Error handling JMS Message", e);
                 m_taskError = new TaskError(e);
             }
         } else {
             String msg = "Error receiving message n° " + MESSAGE_COUNT_SEQUENCE.incrementAndGet() + ": timeout should have occured ";
-
-            LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage error3 "+getClass());
-
-
             m_loggerProline.info(msg);
             m_currentState = JMSState.STATE_FAILED;
             m_taskError = new TaskError(new RuntimeException(msg));
@@ -284,10 +304,6 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
                 jmsMessage.acknowledge();
             }
         } catch (JMSException ex) {
-
-            LoggerFactory.getLogger("ProlineStudio.DPM").debug("**JMSTEST** "+Thread.currentThread().getId()+":"+Thread.currentThread().getName()+" onMessage error4 "+getClass());
-            ex.printStackTrace();
-
             m_loggerProline.error("Error running JMS Message acknowledge", ex);
         }
 
@@ -301,8 +317,6 @@ public abstract class AbstractJMSTask extends AbstractLongTask implements Messag
             m_currentState = JMSState.STATE_FAILED;
             callback(false);
         }
-
-
 
     }
 

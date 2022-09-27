@@ -226,8 +226,13 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                 if(success) {
                     if(subTask == null){
                         //Main task callback!
-
                         m_ptmDatasetPair = ptmDSSet.get(0);
+                        String version = m_ptmDatasetPair.getClusterPTMDataset().getModelVersion();
+                        if (version == null || !version.equals("2.0")) {
+                            String msg = " Modification clusters/sites result was obtained with an older version. N/CTerm display may be incorrect. \n You may have to relaunch the \"Identification Modification Sites\" process.";
+                            JOptionPane.showMessageDialog(((JPanel) getDataBoxPanelInterface()), msg , DatabaseDatasetPTMsTask.ERROR_PTM_DATASET_OLD_VERSION, JOptionPane.WARNING_MESSAGE);
+                        }
+
                         getDataBoxPanelInterface().addSingleValue(m_ptmDatasetPair);
                         m_shouldBeSaved = false;
                         m_loadPepMatchOnGoing=true;

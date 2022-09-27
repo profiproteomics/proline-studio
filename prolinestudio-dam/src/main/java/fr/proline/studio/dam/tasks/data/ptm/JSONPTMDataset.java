@@ -24,7 +24,8 @@ public class JSONPTMDataset {
     //
     // Variables defined in Proline OM that will be read out from the database
     //@todo : try to make them private instead of public
-    
+    public String version;
+
     // array of of the PTMs of interest
     public Long[] ptmIds;
     

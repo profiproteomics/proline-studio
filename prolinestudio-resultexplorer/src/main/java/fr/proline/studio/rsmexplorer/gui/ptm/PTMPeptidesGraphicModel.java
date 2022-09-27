@@ -17,9 +17,11 @@
 package fr.proline.studio.rsmexplorer.gui.ptm;
 
 import fr.proline.core.orm.msi.dto.DBioSequence;
+import fr.proline.core.orm.msi.dto.DInfoPTM;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.dam.tasks.DatabaseBioSequenceTask;
+import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import java.util.ArrayList;
@@ -42,9 +44,8 @@ public class PTMPeptidesGraphicModel {
 
     private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
 
-    private PTMSite m_mainPTMSite; //dupliquer PanelGraphic
     private List<PTMPeptideInstance> m_ptmPeptidesInstances;
-    private Map<Integer, PTMMark> m_allPtmMarks;
+    private Map<Integer, List<PTMMark>> m_allPtmMarks;
 
     private String m_proteinSequence;
     private int m_lowerStartLocation;
@@ -77,18 +78,6 @@ public class PTMPeptidesGraphicModel {
         return m_proteinSequence;
     }
 
-    public PTMSite getMainPTMSite() {
-        return m_mainPTMSite;
-    }
-
-    public void setData(PTMSite mainPTMSite) {
-        if (m_mainPTMSite != null && m_mainPTMSite.equals(mainPTMSite)) {
-            return;
-        }
-
-        m_mainPTMSite = mainPTMSite;
-    }
-
     public void setData(List<PTMPeptideInstance> ptmInstances, long prjId) {
 
         if (Objects.equals(ptmInstances, m_ptmPeptidesInstances)) {
@@ -113,14 +102,19 @@ public class PTMPeptidesGraphicModel {
 
         DProteinMatch pm = null;
         boolean onlyProtNTermPTMWithOutMExist = true;
+        boolean siteWithNCTermExist = false;
         final Map<Integer, List<PTMSite>> ptmSiteByProteinPos = new HashMap<>();
         Iterator<PTMSite> allSites = m_ptmPeptidesInstances.stream().flatMap(pi -> pi.getPTMSites().stream()).collect(Collectors.toSet()).iterator();
+        PTMDataset ptmDS = null;
         while (allSites.hasNext()) {
             PTMSite nextPTMSite = allSites.next();
             if (pm == null) {
                 pm = nextPTMSite.getProteinMatch();
             }
+            if (ptmDS == null)
+                ptmDS = nextPTMSite.getPTMdataset();
             int loc = nextPTMSite.getPositionOnProtein();
+            siteWithNCTermExist = siteWithNCTermExist|| nextPTMSite.isNterm() || nextPTMSite.isCterm();
             onlyProtNTermPTMWithOutMExist = onlyProtNTermPTMWithOutMExist && nextPTMSite.isProteinNTermWithOutM();
 
             if (!ptmSiteByProteinPos.containsKey(loc)) {
@@ -131,7 +125,7 @@ public class PTMPeptidesGraphicModel {
         }
 
         //retrive each peptide
-        for (PTMPeptideInstance ptmPeptideInstance : ptmInstances) {
+        for (PTMPeptideInstance ptmPeptideInstance : m_ptmPeptidesInstances) {
             //for Nterm could be 0 or 1 if first AA of prot not present (withouM)
             int ptmPepStartLocOnProt = ptmPeptideInstance.getStartPosition();
             int ptmPepSeqLenght = ptmPeptideInstance.getSequence().length();
@@ -143,11 +137,17 @@ public class PTMPeptidesGraphicModel {
                 m_higherEndLocation = ptmPepStartLocOnProt + ptmPepSeqLenght;
             }
 
-            //create PTMMark, take all of the site(position, type of modification) from this peptide, in order to create a PTMMark list
+            //create PTMMark, take all the site(position, type of modification) from this peptide, in order to create a PTMMark list
             int protLocation;
             for (DPeptidePTM ptm : ptmPeptideInstance.getPeptideInstance().getPeptide().getTransientData().getDPeptidePtmMap().values()) {
                 boolean currentPTMisNCterm = false;
                 int locOnPeptide = (int) ptm.getSeqPosition();
+                if(locOnPeptide == 0) //Nterm. Set to first
+                    locOnPeptide = 1;
+                if(locOnPeptide == -1) //Cterm. Set to last
+                    locOnPeptide = ptmPepSeqLenght;
+//                Optional<DInfoPTM> ptmInfo = ptmDS.getInfoPTMs().stream().filter(iptm -> iptm.getIdPtmSpecificity() == ptm.getIdPtmSpecificity()).findFirst();
+//                if(ptmInfo.isPresent() && ptmInfo.get().)
                 protLocation = ptmPepStartLocOnProt + locOnPeptide;
                 int protLocToDisplay = protLocation;
                 if (ptmSiteByProteinPos.containsKey(protLocation)) {
@@ -158,7 +158,7 @@ public class PTMPeptidesGraphicModel {
                             m_lowerStartLocation = 0;
                             protLocToDisplay = 1;
                         }
-                        if (correspondingPTMSite.get().isProteinCTerm() || correspondingPTMSite.get().isProteinNTerm()) {
+                        if (correspondingPTMSite.get().isCterm() || correspondingPTMSite.get().isNterm()) {
                             currentPTMisNCterm = true;
                         }
                     }
@@ -170,14 +170,22 @@ public class PTMPeptidesGraphicModel {
                     protLocation = protLocation - 1;
                 }
                 PTMMark mark = new PTMMark(ptm, protLocation, protLocToDisplay, currentPTMisNCterm);
-                //LOG.debug(" PTMPepGraphicModel setData add PTMMark at " + protLocation +" show " + protLocToDisplay +" symb " + mark.getPtmSymbol());                  
-                PTMMark exist = m_allPtmMarks.get(protLocation);
-                if (exist == null || !exist.equals(mark)) {
-                    m_allPtmMarks.put(protLocation, mark);
+                //LOG.debug(" PTMPepGraphicModel setData add PTMMark at " + protLocation +" show " + protLocToDisplay +" symb " + mark.getPtmSymbol());
+
+                List<PTMMark> protLocPtmMarks = m_allPtmMarks.getOrDefault(protLocation, new ArrayList<>());
+                boolean ptmMarkExist = false;
+                for (PTMMark exist : protLocPtmMarks) {
+                    if (exist.equals(mark)) {
+                        ptmMarkExist = true;
+                        break;
+                    }
                 }
+                if (! ptmMarkExist) {
+                    protLocPtmMarks.add(mark);
+                    m_allPtmMarks.put(protLocation,protLocPtmMarks);
+                }
+
             }
-//            }
-            //LOG.trace(" PTMPepGraphicModel setData m_lowerStartLocation" + m_lowerStartLocation+" nbr m_allPtmMarks "+m_allPtmMarks.size());  
         }
 
         //create sequence         
@@ -251,7 +259,7 @@ public class PTMPeptidesGraphicModel {
         return m_ptmPeptidesInstances.size();
     }
 
-    public Map<Integer, PTMMark> getAllPtmMarks() {
+    public Map<Integer, List<PTMMark>> getAllPtmMarks() {
         return this.m_allPtmMarks;
     }
 

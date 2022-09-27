@@ -29,6 +29,7 @@ public class PTMMark {
     private int m_proteinLocation;
     private int m_proteinDisplayLocation;
     private boolean m_ptmIsNorCTerm; //N-term, C-term
+    private boolean m_addPtmNCTerm; //N-term, C-term
 
     public PTMMark(DPeptidePTM peptidePtm, int proteinLocation) {
         this(peptidePtm, proteinLocation, proteinLocation, false);
@@ -42,7 +43,17 @@ public class PTMMark {
     }
 
     public boolean equals(PTMMark compare) {
-        return (compare.getProteinLocation() == this.m_proteinLocation && m_peptidePtm.getIdPeptide() == compare.getPeptidePtm().getIdPeptide());
+        return (compare.getProteinLocation() == this.m_proteinLocation
+                && m_peptidePtm.getIdPeptide() == compare.getPeptidePtm().getIdPeptide()
+                && m_peptidePtm.getIdPtmSpecificity() == compare.getPeptidePtm().getIdPtmSpecificity());
+    }
+
+    public void setAddPtmNCTerm(boolean addCNTermMark){
+        this.m_addPtmNCTerm=addCNTermMark;
+    }
+
+    public boolean showNorCtermMark(){
+        return m_addPtmNCTerm;
     }
 
     public DPeptidePTM getPeptidePtm() {
@@ -60,6 +71,7 @@ public class PTMMark {
     public boolean isPTMNorCterm() {
         return m_ptmIsNorCTerm;
     }
+
 
     public String getPtmShortName() {
         DInfoPTM ptm = DInfoPTM.getInfoPTMMap().get(m_peptidePtm.getIdPtmSpecificity());

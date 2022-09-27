@@ -23,6 +23,7 @@ import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  *
@@ -48,7 +49,7 @@ public class PeptideSetView extends ViewPtmAbstract {
             g.setColor(ViewSetting.PEPTIDE_COLOR);
             vp.paint(g, viewContext);
 
-            y0 += (int) ViewSetting.HEIGHT_AA * 1.5;
+            y0 += ViewSetting.HEIGHT_AA * 1.5;
         }
     }
 
@@ -67,34 +68,26 @@ public class PeptideSetView extends ViewPtmAbstract {
     }
 
     protected void setPeptideViewList(ArrayList<PeptideView> peptideList) {
-        if(peptideList == null)
-            m_peptideList = new ArrayList<>();
-        else 
-            m_peptideList = peptideList;
+        m_peptideList = Objects.requireNonNullElseGet(peptideList, ArrayList::new);
     }
+
     /**
-     * 
+     *  Get selected PeptideView index at specified position
+     *
      * @param x
      * @param y
-     * @return  -1 when no found
+     * @return  PeptideView index -1 when none was found
      */
     protected int getSelectedItemIndex(int x, int y) {
-        boolean selected = false;
         y0 = m_y;
-        PeptideView vp;
-             for (int i = 0; i < m_peptideList.size(); i++) {
-                vp = m_peptideList.get(i);
-                int yRangA = y0;
-                int yRangZ = yRangA + ViewSetting.HEIGHT_AA;
-                if (y > yRangA && y < yRangZ) {
-                    //selected = vp.isSelected(x);
-                    selected = true; //when x is not inside of peptide, we select it
-                    if (selected) {
-                        return i;
-                    }
-                }
-                y0 += (int) ViewSetting.HEIGHT_AA * 1.5;
-            }        
+        for (int i = 0; i < m_peptideList.size(); i++) {
+            int yRangA = y0;
+            int yRangZ = yRangA + ViewSetting.HEIGHT_AA;
+            if (y > yRangA && y < yRangZ) {
+                return i;
+            }
+            y0 += ViewSetting.HEIGHT_AA * 1.5;
+        }
         return -1;
     }
 
@@ -103,7 +96,8 @@ public class PeptideSetView extends ViewPtmAbstract {
         
        if (index != -1)
            return m_peptideList.get(index).getToolTipText(x);
-       else return null;
+       else
+           return null;
     }
 
 }

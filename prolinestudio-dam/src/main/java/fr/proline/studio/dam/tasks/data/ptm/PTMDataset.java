@@ -35,6 +35,7 @@ public class PTMDataset {
     
     protected static final Logger LOG = LoggerFactory.getLogger("ProlineStudio.DAM.Task");
 
+    private String m_modelVersion;
     private DDataset m_dataset;
 
     private List<PTMSite> m_proteinPTMSites;
@@ -501,9 +502,17 @@ public class PTMDataset {
         return true;
     }
 
+    public String getModelVersion() {
+        return m_modelVersion;
+    }
+
+    public void setModelVersion(String modelVersion) {
+        this.m_modelVersion = modelVersion;
+    }
+
     public JSONPTMDataset createJSONPTMDataset() throws IllegalAccessException {
         JSONPTMDataset ptmDS = new JSONPTMDataset();
-
+        ptmDS.version = m_modelVersion;
         List<DInfoPTM> ptmInfos = getInfoPTMs();
         List<Long> ptmInfoIds = new ArrayList<>();
         for(int i=0 ; i<ptmInfos.size();i++){

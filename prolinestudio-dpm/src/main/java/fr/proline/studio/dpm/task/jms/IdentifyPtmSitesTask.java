@@ -33,7 +33,6 @@ import java.util.Map;
  */
 public class IdentifyPtmSitesTask extends AbstractJMSTask {
     private static final String m_serviceName = "proline/dps/msi/IdentifyPtmSites";
-    //private static final String m_version = "1.0";
     
     private final Long m_projectId;
     private final Long m_resultSummaryId;

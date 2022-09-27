@@ -58,7 +58,7 @@ public class PTMMarkSetView extends ViewPtmAbstract {
             if (m_ptmMap == null) {
                 return null;
             }
-            String prefix = "(" + x + "," + y + ") ";
+//            String prefix = "(" + x + "," + y + ") ";
             String tips = "";
             PTMMarkView pm = m_ptmMap.get(index);
             if (pm != null) {

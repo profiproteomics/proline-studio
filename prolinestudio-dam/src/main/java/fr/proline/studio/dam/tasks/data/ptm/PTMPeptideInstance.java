@@ -104,7 +104,7 @@ public class PTMPeptideInstance {
 
     //TODO: to be improved in case of searching the representative PSM for multiple clusters simultaneously
     if (clusters.size() > 1) {
-      m_logger.debug("searching a representative PSM for multiple clusters simultaneously not yet implemented: use only the first cluster");
+      m_logger.trace("searching a representative PSM for multiple clusters simultaneously not yet implemented: use only the first cluster");
     }
     PTMCluster cluster = clusters.get(0);
     DPeptideMatch pepMatch = null;

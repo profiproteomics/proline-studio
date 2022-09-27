@@ -85,6 +85,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
     private final static int SAVE_PTMDATASET = 2;
 
     public final static String ERROR_PTM_CLUSTER_LOADING = "PTM Cluster Loading Error";
+    public final static String ERROR_PTM_DATASET_OLD_VERSION = "Older PTM Dataset version";
     public final static String ERROR_PTM_CLUSTER_SAVING = "Error Saving Annotated PTM Dataset";
 
     public DatabaseDatasetPTMsTask(AbstractDatabaseCallback callback) {
@@ -243,10 +244,12 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
 
             //--- Create cluster PTMDataset
             m_clusterPtmDataset = new PTMDataset(m_dataset);
+            m_clusterPtmDataset.setModelVersion(jsonDS.version);
             m_clusterPtmDataset.setLeafResultSummaryIds(Arrays.asList(jsonDS.leafResultSummaryIds));
 
             //--- Create site PTMDataset
             m_sitePtmDataset = new PTMDataset(m_dataset);
+            m_sitePtmDataset.setModelVersion(jsonDS.version);
             m_sitePtmDataset.setLeafResultSummaryIds(Arrays.asList(jsonDS.leafResultSummaryIds));
 
             m_ptmDatasetPairOutput.add(new PTMDatasetPair(m_sitePtmDataset,m_clusterPtmDataset));
@@ -264,7 +267,6 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
                 }
             }
             createPTMDatasetPTMClusters(jsonDS, entityManagerMSI);
-
 
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);

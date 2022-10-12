@@ -68,7 +68,6 @@ public class SpectrumPanel extends AbstractSpectrumPanel implements ScanHeaderLi
 
 
    private boolean keepSameMsLevel = true;
-   private boolean autoZoom = false;
 
    private ScansSpinnerModel spinnerModel;
    
@@ -193,7 +192,7 @@ public class SpectrumPanel extends AbstractSpectrumPanel implements ScanHeaderLi
 
      spectrumToolbar.addSeparator();
      JButton testBtn = new JButton("MS2");
-     testBtn.setToolTipText("process MS2 Spectrum");
+     testBtn.setToolTipText("de-isotope MS2 Spectrum");
      testBtn.addActionListener(new ActionListener() {
        @Override
        public void actionPerformed(ActionEvent e) {
@@ -207,82 +206,8 @@ public class SpectrumPanel extends AbstractSpectrumPanel implements ScanHeaderLi
 
   private void processMS2Spectrum() {
     if (currentScan.getDataType() == Spectrum.ScanType.CENTROID) {
-      double tolPpm = 20.0;
-      double[] masses = currentScan.getMasses();
-      float[] intensities = currentScan.getIntensities();
-      final SpectrumData spectrumData = currentScan.getSpectrumData();
-      List<Peak> peaks = new ArrayList<>(spectrumData.getPeaksCount());
-      List<Peak> result = new ArrayList<>(spectrumData.getPeaksCount());
-      Map<Integer, Peak> peaksByIndex = new HashMap<>();
-      for (int k = 0; k < masses.length; k++) {
-        Peak p = new Peak(masses[k], intensities[k], k);
-        peaks.add(p);
-        peaksByIndex.put(p.index, p);
-      }
-
-      peaks.sort((o1, o2) -> Float.compare(o2.intensity, o1.intensity));
-
-      for (int k = 0; k < peaks.size(); k++) {
-        Peak p = peaks.get(k);
-        if (!p.used) {
-          Tuple2<Object, TheoreticalIsotopePattern> prediction = IsotopicPatternUtils.predictIsotopicPattern(spectrumData, p.mass, tolPpm);
-          if ( (1e6*(prediction._2.monoMz() - p.mass)/p.mass) <= tolPpm ) {
-            float intensity = 0;
-            int charge = prediction._2.charge();
-            for (Tuple2 t : prediction._2.mzAbundancePairs()) {
-              Double mz = (Double) t._1;
-              Float ab = (Float) t._2;
-              int peakIdx = SpectrumUtils.getPeakIndex(spectrumData.getMzList(), mz, tolPpm);
-              if ((peakIdx != -1) && (spectrumData.getIntensityList()[peakIdx] <= p.intensity)) {
-                  intensity+= spectrumData.getIntensityList()[peakIdx];
-                  peaksByIndex.get(peakIdx).used = true;
-              } else {
-                break;
-              }
-            }
-            if ( (charge == 1) || (intensity == p.intensity) ) {
-              Peak newPeak = new Peak(p.mass, intensity, p.index);
-              result.add(newPeak);
-            } else {
-              Peak newPeak = new Peak(p.mass*charge - (charge-1)*1.00728, intensity, p.index);
-              logger.info("Move peak ({},{}) to ({},{})", p.mass, p.intensity, newPeak.mass, newPeak.intensity);
-              result.add(newPeak);
-            }
-          } else {
-            p.used = true;
-            result.add(new Peak(p));
-          }
-        }
-      }
-
-      result.sort(Comparator.comparingDouble(o -> o.mass));
-      masses = new double[result.size()];
-      intensities = new float[result.size()];
-      int k = 0;
-      for (Peak p : result) {
-        masses[k] = p.mass;
-        intensities[k++] = p.intensity;
-      }
-      Spectrum newSpectrum = new Spectrum(-1, currentScan.getRetentionTime() , masses, intensities, currentScan.getMsLevel(), Spectrum.ScanType.CENTROID);
+      Spectrum newSpectrum = SpectrumUtils.deisotopeCentroidSpectrum(currentScan);
       setReferenceSpectrum(newSpectrum, -1.0f);
-    }
-  }
-
-  class Peak {
-
-    final double mass;
-    final float intensity;
-    final int index;
-    boolean used = false;
-
-    public Peak(Peak peak) {
-      this(peak.mass, peak.intensity, peak.index);
-    }
-
-    public Peak(double mass, float intensity, int index) {
-      this.mass = mass;
-      this.intensity = intensity;
-      this.index = index;
     }
   }
 

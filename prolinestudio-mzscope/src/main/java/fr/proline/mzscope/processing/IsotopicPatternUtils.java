@@ -149,13 +149,12 @@ public class IsotopicPatternUtils {
       }
     }
     List<Integer> charges = putativeCharges.stream().filter(z -> (z > 0) && (z <= MAX_CHARGE_STATE) ).sorted().collect(Collectors.toList());
-    logger.info("Putative Charges : "+charges.toString());
+    //logger.info("Putative Charges : "+charges.toString());
 
 
     double fittedPpmTol = ppmTol;
     Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = DotProductPatternScorer.calcIsotopicPatternHypotheses(spectrum, mz, fittedPpmTol);
     Tuple2<Object, TheoreticalIsotopePattern> bestPatternHypothese = DotProductPatternScorer.selectBestPatternHypothese(putativePatterns, 0.1);
-
 
         double targetMz = mz;
         while (Math.abs(1e6*(targetMz - bestPatternHypothese._2.monoMz())/targetMz) > ppmTol) {
@@ -165,9 +164,9 @@ public class IsotopicPatternUtils {
         }
 
 
-    if (!charges.contains(bestPatternHypothese._2.charge())) {
-      logger.info(" !!!!!  -> The predicted charge is not in the expected range  !!!! ");
-    }
+//    if (!charges.contains(bestPatternHypothese._2.charge())) {
+//      logger.info(" !!!!!  -> The predicted charge is not in the expected range  !!!! ");
+//    }
 
     return bestPatternHypothese;
   }

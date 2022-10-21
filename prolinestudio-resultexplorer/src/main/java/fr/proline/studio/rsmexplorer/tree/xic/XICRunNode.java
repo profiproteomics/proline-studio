@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -39,7 +39,6 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
-import org.openide.nodes.Sheet;
 
 /**
  * Tree Node representing a Run
@@ -336,18 +335,10 @@ public class XICRunNode extends AbstractNode {
         return getIcon(IconManager.IconType.FILE); //JPM.TODO : to be changed
     }
 
-    @Override
-    public Sheet createSheet() {
-        return null;
-    }
 
     @Override
     public AbstractNode copyNode() {
         return null;
-    }
-
-    @Override
-    public void loadDataForProperties(Runnable callback) {
     }
 
     public void setRawFile(final File selectedFile, ActionListener doneCallback) {

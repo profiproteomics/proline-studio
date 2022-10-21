@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -27,6 +27,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dock.gui.InfoLabel;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.RetrieveBioSeqTask;
@@ -36,7 +37,6 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.utils.IconManager;
-import fr.proline.studio.utils.StudioExceptions;
 import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -65,9 +65,9 @@ import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.DefaultTreeModel;
 import org.apache.commons.lang3.StringUtils;
-import org.openide.util.NbBundle;
-import org.openide.util.NbPreferences;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.NbPreferences;
+import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,12 +81,9 @@ public class ExportFastaAction extends AbstractRSMAction {
     //private LoadWaitingDialog m_loadWaitingDialog;
 
     public ExportFastaAction(AbstractTree tree) {
-        super(NbBundle.getMessage(ExportDatasetJMSAction.class, "CTL_ExportFastaAction"), tree);
+        super("Sequence Fasta", tree);
     }
 
-    public ExportFastaAction(AbstractTree tree, boolean exportTitle) {
-        super(NbBundle.getMessage(ExportFastaAction.class, "CTL_ExportAction") + " " + NbBundle.getMessage(ExportFastaAction.class, "CTL_ExportFastaAction"), tree);
-    }
 
     /**
      * open a dialog to define de export file location
@@ -97,9 +94,6 @@ public class ExportFastaAction extends AbstractRSMAction {
      */
     @Override
     public void actionPerformed(final AbstractNode[] selectedNodes, final int x, final int y) {
-        String waitingTxt = "Please wait while loading template to configure export";
-
-        final DataSetNode dataSetNode = (DataSetNode) selectedNodes[0];
         FastaExportMulitipleDialog exportMultipleDialog = new FastaExportMulitipleDialog(WindowManager.getDefault().getMainWindow(), selectedNodes);
 
         ExportFastaProgressTask exportFastaProgressTask = new ExportFastaProgressTask(selectedNodes, exportMultipleDialog);
@@ -395,7 +389,7 @@ public class ExportFastaAction extends AbstractRSMAction {
             try {
                 write(proteinSetArray, node);
             } catch (IOException ex) {
-                StudioExceptions.notify("IO Exception when write fasta file", ex);
+                WindowManager.getDefault().getMainWindow().alert(InfoLabel.INFO_LEVEL.ERROR, "IO Exception when write fasta file", ex);
             } finally {
                 node.setIsChanging(false);
                 DefaultTreeModel treeModel = (DefaultTreeModel) getTree().getModel();
@@ -458,7 +452,7 @@ public class ExportFastaAction extends AbstractRSMAction {
             try {
                 write(proteinSetArray, firstNode);
             } catch (IOException ex) {
-                StudioExceptions.notify("IO Exception when write fasta file", ex);
+                WindowManager.getDefault().getMainWindow().alert(InfoLabel.INFO_LEVEL.ERROR, "IO Exception when write fasta file", ex);
             } finally {
                 for (AbstractNode anode : m_selectedNodes) {
                     DataSetNode node = (DataSetNode) anode;

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.JOptionPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,24 +56,30 @@ public class RawFileManager {
 
     public IRawFile addRawFile(IRawFile rawFile) {
         currentFile = rawFile;
-        files.put(rawFile.getName(), currentFile);
+        files.put(rawFile.getFile().getAbsolutePath(), currentFile);
         logger.info("Rawfile {} added to RawFileManager",rawFile.getFile().getAbsolutePath());
         return rawFile;
     }
     
     public IRawFile addRawFile(File file) { 
-       if (file.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
+       String absolutePath =file.getAbsolutePath();
+       if (absolutePath.toLowerCase().endsWith(".mzdb")) {
             currentFile = new ThreadedMzdbRawFile(file);
-            files.put(file.getName(), currentFile);
-            logger.info("mzDB Rawfile {} added to RawFileManager",file.getAbsolutePath());
-        } else if (file.getAbsolutePath().toLowerCase().endsWith(".mzml")) {
+            files.put(absolutePath, currentFile);
+            logger.info("mzDB Rawfile {} added to RawFileManager",absolutePath);
+        } else if (absolutePath.toLowerCase().endsWith(".mzml")) {
             currentFile = new MzMLRawFile(file);
-            files.put(file.getName(), currentFile);
-            logger.info("mzML Rawfile {} added to RawFileManager",file.getAbsolutePath());
-        } else if(file.getAbsolutePath().toLowerCase().endsWith(".d")){
-            currentFile = new TimstofRawFile(file);
-            files.put(file.getName(), currentFile);
-            logger.info("TimsTof Rawfile {} added to RawFileManager",file.getAbsolutePath());
+            files.put(absolutePath, currentFile);
+            logger.info("mzML Rawfile {} added to RawFileManager",absolutePath);
+        } else if(absolutePath.toLowerCase().endsWith(".d")){
+            String[] options = {TimstofRawFile.MS1_SINGLE_SPECTRA, TimstofRawFile.MS1_SPECTRA_PER_SCAN};
+            int reply = JOptionPane.showOptionDialog(null, "MS1 Spectra display", "MS1 Format",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE, null, options, TimstofRawFile.MS1_SINGLE_SPECTRA);
+            if (reply == JOptionPane.YES_OPTION) 
+                currentFile = new TimstofRawFile(file);
+            else
+                currentFile = new TimstofRawFile(file, TimstofRawFile.MS1_SPECTRA_PER_SCAN);
+            files.put(absolutePath, currentFile);
+            logger.info("TimsTof Rawfile {} added to RawFileManager",absolutePath);
         }
        return currentFile;
     }
@@ -81,12 +88,12 @@ public class RawFileManager {
         return currentFile;
     }
 
-    public IRawFile getFile(String filename) {
-        if (files.containsKey(filename)) {
-            logger.info("RawFileManager will give access to {}",filename);
-            return files.get(filename);
+    public IRawFile getFile(String absoluteFilePath) {
+        if (files.containsKey(absoluteFilePath)) {
+            logger.info("RawFileManager will give access to {}",absoluteFilePath);
+            return files.get(absoluteFilePath);
         } else {
-            logger.warn("RawFile {} not found", filename);
+            logger.warn("RawFile {} not found", absoluteFilePath);
         }
         return null;
     }
@@ -115,7 +122,7 @@ public class RawFileManager {
     }
 
     public boolean removeRawFile(IRawFile rawFile) {
-        IRawFile removedFile = files.remove(rawFile.getName());
+        IRawFile removedFile = files.remove(rawFile.getFile().getAbsolutePath());
         return (removedFile != null);
     }
 }

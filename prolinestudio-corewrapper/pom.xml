@@ -5,25 +5,43 @@
     <parent>
         <artifactId>prolinestudio-parent</artifactId>
         <groupId>fr.proline</groupId>
-        <version>2.1.2</version>
+        <version>2.2.0</version>
     </parent>
 
     <groupId>fr.proline</groupId>
     <artifactId>prolinestudio-corewrapper</artifactId>
-    <packaging>nbm</packaging>
+    <packaging>jar</packaging>
 
     <name>ProlineStudio-CoreWrapper</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <core.version>2.1.2</core.version>
-        <server.version>2.1.2</server.version>
-        <util.version>1.0.0</util.version>
+        <core.version>2.2.0</core.version>
+        <server.version>2.2.0</server.version>
+        <util.version>1.1.0</util.version>
     </properties>
 
     <dependencies>
 
-        <!-- Other dependencies 
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>5.2.10.Final</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.1-api</artifactId>
+            <version>1.0.0.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>4.2.13.Final</version>
+        </dependency>
+
+
+        <!-- Other dependencies
         <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
@@ -94,128 +112,15 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>prolinestudio-logger</artifactId>
             <version>${project.version}</version>
-            <type>nbm</type>
+            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>prolinestudio-commons</artifactId>
             <version>${project.version}</version>
-            <type>nbm</type>
+            <type>jar</type>
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>nbm-maven-plugin</artifactId>
-                <!-- Version inherited from ProlineStudio-parent -->
-                <extensions>true</extensions>
-                <configuration>
-                    <publicPackages>
-                        <!--<publicPackage>javax.transaction</publicPackage>
-                        <publicPackage>javax.transaction.xa</publicPackage>-->
-                        <!--<publicPackage>javax.xml.transform.*</publicPackage>-->
-                        <publicPackage>fr.profi.jdbc</publicPackage>
-                        <publicPackage>fr.profi.jdbc.easy</publicPackage>
-                        <publicPackage>fr.profi.util</publicPackage>
-                        <publicPackage>fr.profi.util.math</publicPackage>
-                        <publicPackage>fr.profi.util.security</publicPackage>
-                        <publicPackage>fr.proline.api.service</publicPackage>
-                        <publicPackage>fr.proline.context</publicPackage>
-                        <publicPackage>fr.proline.core.algo.msi</publicPackage>
-                        <publicPackage>fr.proline.core.algo.msq</publicPackage>
-                        <publicPackage>fr.proline.core.dal.*</publicPackage>
-                        <publicPackage>fr.proline.core.om.builder</publicPackage>
-                        <publicPackage>fr.proline.core.om.model.lcms</publicPackage>
-                        <publicPackage>fr.proline.core.om.model.msi</publicPackage>
-                        <publicPackage>fr.proline.core.om.model.msq</publicPackage>
-                        <publicPackage>fr.proline.core.om.model.pdi</publicPackage>
-                        <publicPackage>fr.proline.core.om.model.uds</publicPackage>
-                        <publicPackage>fr.proline.core.om.msi</publicPackage>
-                        <publicPackage>fr.proline.core.om.provider.*</publicPackage>
-                        <publicPackage>fr.proline.core.om.storer.lcms</publicPackage>
-                        <publicPackage>fr.proline.core.om.storer.lcms.impl</publicPackage>
-                        <publicPackage>fr.proline.core.om.storer.msi</publicPackage>
-                        <publicPackage>fr.proline.core.om.storer.msi.impl</publicPackage>
-                        <publicPackage>fr.proline.core.om.storer.ps</publicPackage>
-                        <publicPackage>fr.proline.core.om.utils</publicPackage>
-                        <publicPackage>fr.proline.core.orm</publicPackage>
-                        <publicPackage>fr.proline.core.orm.lcms</publicPackage>
-                        <publicPackage>fr.proline.core.orm.msi</publicPackage>
-                        <publicPackage>fr.proline.core.orm.msi.dto</publicPackage>
-                        <publicPackage>fr.proline.core.orm.msi.repository</publicPackage>
-                        <publicPackage>fr.proline.core.orm.pdi</publicPackage>
-                        <publicPackage>fr.proline.core.orm.pdi.repository</publicPackage>
-                        <publicPackage>fr.proline.core.orm.ps</publicPackage>
-                        <publicPackage>fr.proline.core.orm.ps.repository</publicPackage>
-                        <publicPackage>fr.proline.core.orm.uds</publicPackage>
-                        <publicPackage>fr.proline.core.orm.uds.dto</publicPackage>
-                        <publicPackage>fr.proline.core.orm.uds.repository</publicPackage>
-                        <publicPackage>fr.proline.core.orm.util</publicPackage>
-                        <publicPackage>fr.proline.core.orm.lcms.dto</publicPackage>
-                        <publicPackage>fr.proline.core.parser.lcms</publicPackage>
-                        <publicPackage>fr.proline.core.parser.lcms.impl</publicPackage>
-                        <publicPackage>fr.proline.core.service.lcms</publicPackage>
-                        <publicPackage>fr.proline.core.service.msi</publicPackage>
-                        <publicPackage>fr.proline.core.service.msq</publicPackage>
-                        <publicPackage>fr.proline.core.service.msq.impl</publicPackage>
-                        <publicPackage>fr.proline.core.service.msq.quantitation</publicPackage>
-                        <publicPackage>fr.proline.core.service.uds</publicPackage>
-                        <publicPackage>fr.proline.core.utils.generator</publicPackage>
-                        <publicPackage>fr.proline.core.utils.lzma</publicPackage>
-                        <publicPackage>fr.proline.core.utils.serialization</publicPackage>
-                        <publicPackage>fr.proline.module</publicPackage>
-                        <publicPackage>fr.proline.module.parser.mascot</publicPackage>
-                        <publicPackage>fr.proline.module.seq</publicPackage>
-                        <publicPackage>fr.proline.module.seq.dto</publicPackage>
-                        <publicPackage>fr.proline.repository</publicPackage>
-                        <publicPackage>fr.proline.repository.util</publicPackage>
-                        <publicPackage>fr.proline.security</publicPackage>
-                        <publicPackage>fr.proline.studio.corewrapper.data</publicPackage>
-                        <publicPackage>fr.proline.studio.corewrapper.util</publicPackage>
-                        <publicPackage>fr.proline.util</publicPackage>
-                        <publicPackage>fr.proline.util.version</publicPackage>
-                        <publicPackage>javassist</publicPackage>
-                        <publicPackage>javax.annotation</publicPackage>
-                        <publicPackage>javax.annotation.concurrent</publicPackage>
-                        <publicPackage>javax.annotation.meta</publicPackage>
-                        <publicPackage>javax.persistence.*</publicPackage>
-                        <publicPackage>javax.sql</publicPackage>
-                        <publicPackage>javax.transaction.xa</publicPackage>
-                        <publicPackage>javax.xml.parsers</publicPackage>
-                        <publicPackage>javax.xml.transform.*</publicPackage>
-                        <publicPackage>org.apache.commons.collections</publicPackage>
-                        <publicPackage>org.apache.commons.lang3</publicPackage>
-                        <publicPackage>org.apache.commons.lang3.math</publicPackage>
-                        <publicPackage>org.apache.commons.logging</publicPackage>
-                        <publicPackage>org.apache.commons.logging.impl</publicPackage>
-                        <publicPackage>org.hibernate</publicPackage>
-                        <publicPackage>org.jboss.logging</publicPackage>
-                        <publicPackage>org.joda.time</publicPackage>
-                        <publicPackage>org.joda.time.format</publicPackage>
-                        <publicPackage>org.w3c.dom</publicPackage>
-                        <publicPackage>org.w3c.dom.html</publicPackage>
-                        <publicPackage>org.w3c.dom.ls</publicPackage>
-                        <publicPackage>org.dom4j.tree.*</publicPackage>
-                        <publicPackage>org.w3c.dom.events.*</publicPackage>
-                        <publicPackage>org.dom4j.*</publicPackage>
-                        <publicPackage>org.xml.sax</publicPackage>
-                        <publicPackage>org.xml.sax.ext</publicPackage>
-                        <publicPackage>org.xml.sax.helpers</publicPackage>
-                        <publicPackage>scala.*</publicPackage>
-                        <publicPackage>org.slf4j.impl.*</publicPackage>
-                        <publicPackage>org.apache.commons.*</publicPackage>
-                        <publicPackage>com.fasterxml.*</publicPackage>
-                        <publicPackage>com.fasterxml.jackson.databind.*</publicPackage>                                        
-                        <publicPackage>javax.jms.*</publicPackage>
-                        <publicPackage>javax.inject.*</publicPackage>
-                    </publicPackages>
-                </configuration>
-            </plugin>
-           
-        </plugins>
-    </build>
 
 </project>

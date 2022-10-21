@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,9 +16,9 @@
  */
 package fr.proline.studio.pattern;
 
+import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
-import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -35,6 +35,8 @@ import fr.proline.studio.rsmexplorer.gui.PTMPeptidesTablePanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XICComparePeptideTableModel;
 import fr.proline.studio.rsmexplorer.gui.xic.XicAbundanceProteinTableModel;
+import fr.proline.studio.types.XicMode;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +52,7 @@ import java.util.stream.Collectors;
  */
 public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
 
-    //For XIC Data only
+    //For Quantitation data only
     private QuantChannelInfo m_quantChannelInfo;
     private List<DMasterQuantPeptide> m_masterQuantPeptideList;
     private DMasterQuantProteinSet m_masterQuantProteinSet;
@@ -73,6 +75,17 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
     }
 
     /**
+     * Create a DataBoxPTMPeptides : table view of PTMPeptideInstances. By
+     * default, this databox is displayed in a quantitation context and only
+     * best Peptide Match is displayed
+     * Warning:  Default Constructor should be defined for Custom view & "Diaplay" navigation
+     *
+     */
+    public DataBoxPTMPeptides() {
+        this(false, false);
+    }
+
+    /**
      * Create a DataBoxPTMPeptides : table view of PTMPeptideInstances. Specify
      * if this databox is displayed in a quantitation context and if all peptide
      * matches should be displayed or only best one
@@ -82,10 +95,11 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
     public DataBoxPTMPeptides(boolean xicResult, boolean showAllPepMatches) {
         super(getDataboxType(xicResult, showAllPepMatches), xicResult ? DataboxStyle.STYLE_XIC : DataboxStyle.STYLE_RSM);
         m_displayAllPepMatches = showAllPepMatches;
-        m_isXICResult = xicResult;
-        m_typeName = m_displayAllPepMatches ? "PSMs" : "Peptides";
-        m_description = m_displayAllPepMatches ? "PSMs matching a modification site or cluster" : "Peptides matching of modification site or cluster";
-        m_logger.debug(" ----> Created DataBoxPTMPeptides " + m_typeName);
+        m_isMS1LabelFreeQuantitation = xicResult;
+        StringBuilder stb = (m_isMS1LabelFreeQuantitation) ? new StringBuilder("Quanti. ") : new StringBuilder();
+        m_typeName = m_displayAllPepMatches ? stb.append("Site PSMs").toString() : stb.append("Site Peptides").toString();
+        stb = (m_isMS1LabelFreeQuantitation) ? new StringBuilder("Quantified ") : new StringBuilder();
+        m_description = m_displayAllPepMatches ? stb.append("PSMs matching a modification site or cluster").toString() : stb.append("Peptides matching of modification site or cluster").toString();
 
         // Register in parameters          
         super.registerParameters();
@@ -93,7 +107,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
 
     @Override
     public void createPanel() {
-        PTMPeptidesTablePanel p = new PTMPeptidesTablePanel(m_displayAllPepMatches, m_isXICResult);
+        PTMPeptidesTablePanel p = new PTMPeptidesTablePanel(m_displayAllPepMatches, m_isMS1LabelFreeQuantitation);
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);
@@ -126,7 +140,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
             }
 
             //Get QuantInfo        
-            if (m_isXICResult) {
+            if (m_isMS1LabelFreeQuantitation) {
                 m_quantChannelInfo = (QuantChannelInfo) getData(QuantChannelInfo.class);
                 if (m_quantChannelInfo != null) {
                     panel.addSingleValue(m_quantChannelInfo);
@@ -134,11 +148,11 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                 m_masterQuantProteinSet = (DMasterQuantProteinSet) getData(DMasterQuantProteinSet.class);
             }
 
-            final List<PTMSite> notLoadedPtmSite = getNotLoadedPTMSite();
-
-            if (notLoadedPtmSite.isEmpty()) {
+//            final List<PTMSite> notLoadedPtmSite = getNotLoadedPTMSite();
+//
+//            if (notLoadedPtmSite.isEmpty()) {
                 resetPrevPTMTaskId();
-                if (m_isXICResult) {
+                if (m_isMS1LabelFreeQuantitation) {
                     loadXicAndPropagate();
                 } else {
                     ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, m_ptmPepInstances, m_ptmClusters, null, true);
@@ -147,10 +161,46 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                     addDataChanged(ExtendedTableModelInterface.class);
                     propagateDataChanged();
                 }
-            } else {
-                loadPtmSite(notLoadedPtmSite);
-            }
+//            } else {
+//                loadPtmSite(notLoadedPtmSite);
+//            }
         }
+    }
+
+    @Override
+    public Class[] getDataboxNavigationOutParameterClasses() {
+        if(isMS1LabelFreeQuantitation()) {
+            return new Class[]{DMasterQuantPeptide.class, PTMPeptideInstance.class};
+        } else {
+            return new Class[]{ PTMPeptideInstance.class};
+        }
+    }
+
+    @Override
+    public String getDataboxNavigationDisplayValue() {
+        try {
+            Peptide peptide = null;
+            if (isMS1LabelFreeQuantitation()) {
+                DMasterQuantPeptide qPep = ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).getSelectedMasterQuantPeptide();
+                if (qPep != null)
+                     peptide = qPep.getPeptideInstance().getPeptide();
+            } else {
+                DPeptideMatch p = (DPeptideMatch) getData(DPeptideMatch.class);
+                if (p != null) {
+                    peptide = p.getPeptide();
+                }
+            }
+
+            if (peptide != null) {
+                return peptide.getSequence();
+            }
+
+            return null;
+        } catch (Exception e){
+            m_logger.error("Error getting (quant) peptide information ",e);
+            return null;
+        }
+
     }
 
     private Long m_previousXICTaskId = null;
@@ -231,7 +281,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
         };
 
         // ask asynchronous loading of data
-        m_masterQuantPeptideList = new ArrayList();
+        m_masterQuantPeptideList = new ArrayList<>();
         if (m_previousXICTaskId != null) {
             // old task is suppressed if it has not been already done
             AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousXICTaskId);
@@ -249,7 +299,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
     @Override
     protected ArrayList<Integer> getSelectedIndex() {
         ArrayList<Long> selection = ((PTMPeptidesTablePanel) this.m_panel).getCrossSelectionInterface().getSelection();
-        ArrayList<Integer> result = new ArrayList();
+        ArrayList<Integer> result = new ArrayList<>();
         for (Long l : selection) {
             result.add(l.intValue());
         }
@@ -265,7 +315,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                 (!(panel instanceof SplittedPanelContainer.ReactiveTabbedComponent)
                     || ((panel instanceof SplittedPanelContainer.ReactiveTabbedComponent)
                     && ((SplittedPanelContainer.ReactiveTabbedComponent) panel).isShowed()))  //JPM.DATABOX : this check could produce bugs
-                && m_isXICResult) {
+                && m_isMS1LabelFreeQuantitation) {
 
             // Returning single data
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
@@ -278,8 +328,15 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                     protTableModel.setName("Protein");
                     return protTableModel;
                 }
-                if (parameterType.equals(DPeptideInstance.class)) {
-                    ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).getSelectedPTMPeptideInstance();
+//                if (parameterType.equals(DPeptideInstance.class)) {
+//                    return  ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).getSelectedPTMPeptideInstance();
+//                }
+
+                if (parameterType.equals(DMasterQuantPeptide.class)) {
+                    return  ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).getSelectedMasterQuantPeptide()    ;
+                }
+                if (parameterType.equals(XicMode.class)) {
+                    return new XicMode(m_isMS1LabelFreeQuantitation);
                 }
             }
             
@@ -293,7 +350,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
             if (parameterSubtype == ParameterSubtypeEnum.PEPTIDES_SELECTION_LIST) {
                 if (parameterType.equals(Integer.class)) {
                     CrossSelectionInterface crossSelectionInterface = ((PTMPeptidesTablePanel) this.m_panel).getCrossSelectionInterface();
-                    ArrayList<Integer> result = new ArrayList();
+                    ArrayList<Integer> result = new ArrayList<>();
                     if (crossSelectionInterface != null) {
                         ArrayList<Long> selection = null;
                         try {
@@ -316,7 +373,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
     }
 
     private List<XICComparePeptideTableModel> getTableModelInterfaceList() {
-        List<XICComparePeptideTableModel> list = new ArrayList();
+        List<XICComparePeptideTableModel> list = new ArrayList<>();
         if (m_quantChannelInfo == null && m_previousDataBox != null) {
             m_quantChannelInfo = (QuantChannelInfo) getData(QuantChannelInfo.class);
         }

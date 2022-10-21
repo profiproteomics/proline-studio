@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -19,7 +19,8 @@ package fr.proline.studio.msfiles;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.FileUploadTask;
-import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
+import fr.proline.studio.rsmexplorer.MzdbFilesTopPanel;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -112,9 +113,9 @@ public class MzdbUploadBatch implements Runnable, MsListener {
                     }
                 }
             }
-            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandMultipleTreePath(m_directories, m_uploads.entrySet().iterator().next().getValue().getMountingPointPath());
+            MzdbFilesTopPanel.getExplorer().getTreeFileChooserPanel().expandMultipleTreePath(m_directories, m_uploads.entrySet().iterator().next().getValue().getMountingPointPath());
         } else {
-            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
+            MzdbFilesTopPanel.getExplorer().getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
         }
 
         Iterator it = m_uploads.entrySet().iterator();
@@ -144,7 +145,7 @@ public class MzdbUploadBatch implements Runnable, MsListener {
             }
             
             if (success) {
-                MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();
+                MzdbFilesTopPanel.getExplorer().getTreeFileChooserPanel().updateTree();
             }
         }
     }

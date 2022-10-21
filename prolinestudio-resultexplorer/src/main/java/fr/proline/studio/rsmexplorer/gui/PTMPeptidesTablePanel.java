@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -48,11 +48,7 @@ import java.awt.Image;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import javax.swing.ImageIcon;
-import javax.swing.JLayeredPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JToolBar;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
@@ -132,6 +128,13 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
         }
         PTMPeptidesTableModel.Row row = m_ptmPeptidesTableModel.getPTMPeptideInstanceAt(getSelectedRowInTableModel());
         return row != null ? row.peptideMatch : null;
+    }
+
+    public DMasterQuantPeptide getSelectedMasterQuantPeptide() {
+        if (m_ptmPeptidesTableModel.getRowCount() <= 0) {
+            return null;
+        }
+        return m_ptmPeptidesTableModel.getMasterQuantPeptideAt(getSelectedRowInTableModel());
     }
 
     public int getSelectedIndex() {
@@ -435,7 +438,7 @@ public class PTMPeptidesTablePanel extends HourglassPanel implements DataBoxPane
         }
         m_isDisplayed = showed;
         if (showed) {
-            if (DataBoxPTMPeptides.class.isInstance(m_dataBox)) {
+            if (m_dataBox instanceof DataBoxPTMPeptides) {
                 ((DataBoxPTMPeptides) m_dataBox).updateData();
             }
         }

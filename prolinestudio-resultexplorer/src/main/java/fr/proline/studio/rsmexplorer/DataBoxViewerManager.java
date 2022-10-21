@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,9 +16,10 @@
  */
 package fr.proline.studio.rsmexplorer;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import org.openide.windows.TopComponent;
+import fr.proline.studio.WindowManager;
+import fr.proline.studio.dock.AbstractTopPanel;
+
+import java.util.*;
 
 /**
  *
@@ -26,17 +27,57 @@ import org.openide.windows.TopComponent;
  */
 public class DataBoxViewerManager {
 
-    public static final int REASON_PEPTIDE_SUPPRESSED = 0;
-    public static final int REASON_PROTEINS_REFINED = 1;
-    
-    public static void loadedDataModified(long projectId, Long rsetId, Long rsmId, Class c, ArrayList modificationsList, int reason) {
+    public static final String MODIFIED_TITLE_SUFFIX ="***";
 
-        Iterator<TopComponent> itTop = TopComponent.getRegistry().getOpened().iterator();
+    public enum REASON_MODIF{
+        REASON_CHANGE_TITLE((byte)0, false), // special entry, can't be combined with other. To Change title
+        REASON_PEPTIDE_SUPPRESSED((byte) 1,true),
+        REASON_PROTEINS_REFINED((byte)2,false),
+        REASON_PTMCLUSTER_MERGED((byte)4, true),
+        REASON_PTMCLUSTER_MODIFIED((byte)8,true),
+        REASON_PTMDATASET_SAVED((byte)16, false);
+
+
+        private byte m_reasonValue;
+        private boolean m_shouldSave;
+
+        REASON_MODIF(byte reasonValue, boolean shouldSave){
+            m_reasonValue = reasonValue;
+            m_shouldSave = shouldSave;
+        }
+
+        public byte getReasonValue(){
+            return m_reasonValue;
+        }
+
+        public static  REASON_MODIF getReasonModifFor(byte value){
+            REASON_MODIF[]  allVals = REASON_MODIF.values();
+            for (REASON_MODIF allVal : allVals) {
+                if ( allVal != REASON_CHANGE_TITLE && isReasonDefine(allVal, value))
+                    return allVal;
+            }
+            return null;
+        }
+
+        public boolean shouldBeSaved(){
+            return m_shouldSave;
+        }
+
+        public static boolean isReasonDefine(REASON_MODIF reason, byte value){
+            return ( (reason.getReasonValue() & value) == reason.getReasonValue());
+        }
+
+    }
+
+    public static void loadedDataModified(long projectId, Long rsetId, Long rsmId, Class c, ArrayList modificationsList, byte reason) {
+
+        Set<AbstractTopPanel> tcs = WindowManager.getDefault().getMainWindow().getTopPanels();
+        Iterator<AbstractTopPanel> itTop = tcs.iterator();
         while (itTop.hasNext()) {
-            TopComponent topComponent = itTop.next();
-            if (topComponent instanceof DataBoxViewerTopComponent) {
+            AbstractTopPanel topComponent = itTop.next();
+            if (topComponent instanceof DataBoxViewerTopPanel) {
 
-                DataBoxViewerTopComponent databoxViewerTP = ((DataBoxViewerTopComponent) topComponent);
+                DataBoxViewerTopPanel databoxViewerTP = ((DataBoxViewerTopPanel) topComponent);
 
                 long pId = databoxViewerTP.getProjectId();
                 if (pId != projectId) {

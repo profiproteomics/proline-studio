@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -76,13 +76,13 @@ public class DataboxMultiGraphics extends AbstractDataBox {
         
         inParameter.addParameter(Integer.class, ParameterSubtypeEnum.PEPTIDES_SELECTION_LIST, false /* not compulsory */);
         inParameter.addParameter(ExtendedTableModelInterface.class, ParameterSubtypeEnum.LIST_DATA);
-        inParameter.addParameter(CrossSelectionInterface.class, ParameterSubtypeEnum.LIST_DATA);
+        inParameter.addParameter(CrossSelectionInterface.class, ParameterSubtypeEnum.LIST_DATA, false);
 
         if (m_displayDoubleYAxis) {
 
             inParameter.addParameter(SecondAxisTableModelInterface.class);
-            inParameter.addParameter(PTMPeptideInstance.class);//for DataBoxPTMPeptide[XXXX].propagate //JPM.DATABOX : big wart to be suppressed : removed true
-            inParameter.addParameter(DMasterQuantPeptide.class);//for DataBoxXicPeptideSet.propagate
+            inParameter.addParameter(PTMPeptideInstance.class, false);//for DataBoxPTMPeptide[XXXX].propagate //JPM.DATABOX : big wart to be suppressed : removed true
+            inParameter.addParameter(DMasterQuantPeptide.class, false);//for DataBoxXicPeptideSet.propagate
 
         }
         

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -23,13 +23,14 @@ import fr.proline.core.orm.lcms.MapTime;
 import fr.proline.core.orm.lcms.ProcessedMap;
 import java.util.ArrayList;
 import java.util.List;
+
+import fr.proline.studio.Exceptions;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.openide.util.Exceptions;
 
 /**
  *

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -31,8 +31,8 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,7 @@ public class UpdatePeaklistSoftwareAction extends AbstractRSMAction {
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
  
     public UpdatePeaklistSoftwareAction(AbstractTree tree){
-        super(NbBundle.getMessage(UpdatePeaklistSoftwareAction.class, "CTL_UpdatePeaklistSoft"), tree);
+        super("Update Spectrum using Peaklist software...", tree);
     }
     
     @Override

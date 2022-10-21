@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,9 +16,11 @@
  */
 package fr.proline.studio.rsmexplorer.gui.xic;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import fr.proline.core.orm.msi.PtmSpecificity;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
+import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.gui.HourglassPanel;
@@ -37,11 +39,8 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JToolBar;
+import javax.swing.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,14 +61,17 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
     private JTabbedPane m_tabbedPane;
     private QuantPostProcessingPanel m_profilizerParamPanel;
     private JPanel m_confPanel;
+    private JPanel m_lowlevelConfPanel;
 
     private JPanel m_refinedPanel;
 
     private DDataset m_dataset;
     private boolean m_displayPostProcessing = false;
+    private boolean m_displayLowLevel = false;
     private boolean m_displayQuantParam = true;
 
     private static String TAB_POST_PROCESSING_TITLE = "Compute Post Processing";
+    private static String TAB_LOW_LEVEL_TITLE = "Low Level";
 
     public ExperimentalDesignPanel() {
         super();
@@ -127,6 +129,9 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
 
         m_refinedPanel = new JPanel();
         m_refinedPanel.setLayout(new BorderLayout());
+
+        m_lowlevelConfPanel = new JPanel();
+        m_lowlevelConfPanel.setLayout(new BorderLayout());
 
         m_tabbedPane.add("Exp.Design", m_scrollPaneExpDesign);
         m_tabbedPane.add("Exp. Parameters", m_confPanel);
@@ -224,6 +229,33 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
                 }
                 m_refinedPanel.removeAll();                
             }
+
+            if (m_dataset.getQuantLowLevelConfig() != null) {
+                m_lowlevelConfPanel.removeAll();
+                if (!m_displayLowLevel) {
+                    m_tabbedPane.add(TAB_LOW_LEVEL_TITLE, m_lowlevelConfPanel);
+                    m_displayLowLevel = true;
+                }
+
+                JScrollPane sPane = new JScrollPane();
+                sPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+                JTextArea area = new JTextArea(100,20);
+
+                Map<String, Object> llMap = m_dataset.getQuantLowLevelConfigAsMap();
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                String formattedString = gson.toJson(llMap);
+                area.setText(formattedString);
+                area.setLineWrap(true);
+                sPane.setViewportView(area);
+                m_lowlevelConfPanel.add(sPane, BorderLayout.CENTER);
+            } else {
+                if (m_displayLowLevel) {
+                    m_tabbedPane.remove(m_lowlevelConfPanel);
+                    m_displayLowLevel = false;
+                }
+                m_lowlevelConfPanel.removeAll();
+            }
+
         } catch (Exception ex) {
             m_logger.error("error while settings quanti params " + ex);
         }
@@ -232,7 +264,7 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
 
     private Map<Long, String> getPtmSpecificityNameById() {
         final ArrayList<PtmSpecificity> ptms = new ArrayList<>();
-        DatabasePTMSitesTask task = new DatabasePTMSitesTask(null);
+        DatabasePTMsTask task = new DatabasePTMsTask(null);
         task.initLoadUsedPTMs(m_dataset.getProject().getId(), m_dataset.getResultSummaryId(), ptms);
         task.fetchData();
         return ptms.stream().collect(Collectors.toMap(ptmS -> ptmS.getId(), ptmS -> ptmS.toString()));

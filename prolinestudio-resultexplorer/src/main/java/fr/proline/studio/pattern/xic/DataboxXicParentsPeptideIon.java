@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -32,10 +32,10 @@ import fr.proline.studio.pattern.ParameterList;
 import fr.proline.studio.pattern.ParameterSubtypeEnum;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XicParentPeptideIonPanel;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -56,7 +56,7 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
     //private boolean m_isXICMode = true;
     
     public DataboxXicParentsPeptideIon() {
-        super(AbstractDataBox.DataboxType.DataboxXicPeptideIon, AbstractDataBox.DataboxStyle.STYLE_XIC);
+        super(DataboxType.DataboxXicParentsPeptideIon, AbstractDataBox.DataboxStyle.STYLE_XIC);
 
         // Name of this databox
         m_typeName = "Source Quanti. Peptides Ions";
@@ -218,15 +218,7 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
                     }
                     return pi.getBestPeptideMatch();
                 }
-                /*if (parameterType.equals(DDataset.class)) {
-                    return m_dataset;
-                }
-                if (parameterType.equals(ExtendedTableModelInterface.class)) {
-                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();
-                }
-                if (parameterType.equals(CrossSelectionInterface.class)) {
-                    return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
-                }*/
+
                 if (parameterType.equals(QuantChannelInfo.class)) {
                     return ((XicParentPeptideIonPanel) getDataBoxPanelInterface()).getSelectedQuantChannelInfo();
                 }
@@ -244,13 +236,12 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
     }
     
     @Override
-    public Class[] getImportantInParameterClass() {
-        Class[] classList = {DMasterQuantPeptideIon.class, DPeptideMatch.class};
-        return classList;
+    public Class[] getDataboxNavigationOutParameterClasses() {
+        return new Class[]{DMasterQuantPeptideIon.class, DPeptideMatch.class};
     }
     
     @Override
-    public String getImportantOutParameterValue() {
+    public String getDataboxNavigationDisplayValue() {
         DMasterQuantPeptideIon peptideIon = (DMasterQuantPeptideIon) getData(DMasterQuantPeptideIon.class);
         if (peptideIon != null) {
             DPeptideInstance peptideInstance = peptideIon.getPeptideInstance();

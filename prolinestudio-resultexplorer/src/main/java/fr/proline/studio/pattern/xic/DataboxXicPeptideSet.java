@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -231,7 +231,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         };
 
         // ask asynchronous loading of data
-        m_masterQuantPeptideList = new ArrayList();
+        m_masterQuantPeptideList = new ArrayList<>();
         DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
         if (allPeptides) {
             task.initLoadPeptides(getProjectId(), m_dataset, m_masterQuantPeptideList, isXICMode());
@@ -339,8 +339,8 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
 
        /**
      * Return potential extra data available for the corresponding parameter of class type
-     * @param c
-     * @return 
+     * @param parameterType parameter class type
+     * @return  potential extra data available for the corresponding parameter of class type
      */
     @Override
     public Object getExtraData(Class parameterType) {
@@ -385,13 +385,12 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     }
 
     @Override
-    public Class[] getImportantInParameterClass() {
-        Class[] classList = {DMasterQuantPeptide.class, DPeptideMatch.class};
-        return classList;
+    public Class[] getDataboxNavigationOutParameterClasses() {
+        return new Class[]{DMasterQuantPeptide.class, DPeptideMatch.class};
     }
 
     @Override
-    public String getImportantOutParameterValue() {
+    public String getDataboxNavigationDisplayValue() {
         DMasterQuantPeptide mqp = (DMasterQuantPeptide) getData(DMasterQuantPeptide.class);
         if (mqp != null) {
             DPeptideInstance peptideInstance = mqp.getPeptideInstance();

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -17,33 +17,19 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.core.orm.uds.UserAccount;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.rsmexplorer.gui.admin.AdminDialog;
 import fr.proline.studio.dam.DatabaseDataManager;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import org.openide.awt.ActionRegistration;
-import org.openide.awt.ActionReference;
-import org.openide.awt.ActionReferences;
-import org.openide.awt.ActionID;
-import org.openide.util.ContextAwareAction;
-import org.openide.util.Lookup;
-import org.openide.util.NbBundle;
-import org.openide.util.NbBundle.Messages;
-import org.openide.windows.WindowManager;
+import javax.swing.*;
 
-@ActionID(category = "File", id = "fr.proline.studio.rsmexplorer.actions.AdminAction")
-@ActionRegistration(displayName = "#CTL_AdminAction")
-@ActionReferences({
-    @ActionReference(path = "Menu/File", position = 50)
-})
-@Messages("CTL_AdminAction=Admin")
-public final class AdminAction extends AbstractAction implements ActionListener, ContextAwareAction {
+
+public final class AdminAction extends AbstractAction implements ActionListener {
 
     public AdminAction() {
-        putValue(Action.NAME, NbBundle.getMessage(AdminAction.class, "CTL_AdminAction"));
+        putValue(Action.NAME, "Admin");
         setEnabled(true);
     }
 
@@ -53,6 +39,8 @@ public final class AdminAction extends AbstractAction implements ActionListener,
         Frame f = WindowManager.getDefault().getMainWindow();
         Boolean  isUser = true;
         UserAccount user = DatabaseDataManager.getDatabaseDataManager().getLoggedUser();
+        if(user == null)
+          JOptionPane.showMessageDialog(f,"You must be logged to access this view ", "Admin View Error",JOptionPane.ERROR_MESSAGE);
         if (user != null) {
            isUser = !DatabaseDataManager.isAdmin(user);
         }
@@ -66,18 +54,14 @@ public final class AdminAction extends AbstractAction implements ActionListener,
 
     }
 
-    @Override
-    public Action createContextAwareInstance(Lookup lkp) {
-        return new SettingsAction();
-    }
     
     @Override
      public boolean isEnabled() {
          
-        UserAccount user = DatabaseDataManager.getDatabaseDataManager().getLoggedUser();
-        if (user == null) {
-            return false;
-        }
+//        UserAccount user = DatabaseDataManager.getDatabaseDataManager().getLoggedUser();
+//        if (user == null) {
+//            return false;
+//        }
         return true;
     }
      

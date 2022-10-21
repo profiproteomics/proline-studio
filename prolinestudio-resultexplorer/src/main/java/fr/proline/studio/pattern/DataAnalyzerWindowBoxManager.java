@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,9 +16,10 @@
  */
 package fr.proline.studio.pattern;
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.id.ProjectId;
 import fr.proline.studio.table.TableInfo;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.DataAnalyzerPanel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 
@@ -34,7 +35,7 @@ import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 public class DataAnalyzerWindowBoxManager {
 
     private static WindowBox m_windowBox = null;
-    private static DataBoxViewerTopComponent m_win = null;
+    private static DataBoxViewerTopPanel m_win = null;
 
     public static void addTableInfo(TableInfo tableInfo) {
 
@@ -50,9 +51,9 @@ public class DataAnalyzerWindowBoxManager {
             }
 
             // open a window to display the window box
-            m_win = new DataBoxViewerTopComponent(m_windowBox);
-            m_win.open();
-            m_win.requestActive();
+            m_win = new DataBoxViewerTopPanel(m_windowBox);
+            WindowManager.getDefault().getMainWindow().displayWindow(m_win);
+
         } else {
             if (m_windowBox.getEntryBox() instanceof DataboxDataAnalyzer) {
                 DataboxDataAnalyzer analyzer = (DataboxDataAnalyzer) m_windowBox.getEntryBox();
@@ -70,13 +71,10 @@ public class DataAnalyzerWindowBoxManager {
 
                 m_windowBox.setEntryData(id, tableInfo);
             }
-            if (m_win.isOpened()) {
-                m_win.requestActive();
-            } else {
-                m_win = new DataBoxViewerTopComponent(m_windowBox);
-                m_win.open();
-                m_win.requestActive();
-            }
+
+
+            WindowManager.getDefault().getMainWindow().displayWindow(m_win);
+
         }
     }
 

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -41,6 +41,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.SecondAxisTableModelInterface;
 import static fr.proline.studio.graphics.PlotBaseAbstract.COL_X_ID;
@@ -91,10 +92,10 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
     private boolean m_setHideButton;
 
     public MultiGraphicsPanel(boolean dataLocked, boolean canChooseColor, boolean isDoubleYAxis, boolean setHideButton) {
-        super(dataLocked, isDoubleYAxis);        
+        super(dataLocked, isDoubleYAxis);
         columnXYIndex = new int[2];
         m_canChooseColor = canChooseColor;
-        m_setHideButton = setHideButton; 
+        m_setHideButton = setHideButton;
         fillGraphicToolbar();
     }
 
@@ -109,7 +110,7 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(0, 5, 0, 5);
         
-        PlotPanel panel = new PlotPanel(m_isDoubleYAxis);
+        PlotPanel panel = new PlotPanel();
         m_plotPanel = panel.getBasePlotPanel();
         m_plotPanel.setPlotToolbarListener(this);
         JPanel selectPanel = createSelectPanel();
@@ -130,7 +131,7 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
     public final void fillToolbar(JToolBar toolbar) {
 
         SettingsButton settingsButton = new SettingsButton(null, m_plotPanel);
-        
+
         ExportButton exportImageButton = new ExportButton("Graphic", m_plotPanel);
 
         // add buttons to toolbar
@@ -403,12 +404,12 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
                 double minXValue = xAxis.getMinValue();
                 double maxXValue = xAxis.getMaxValue();
                 keepZoom &= (maxXValue>minXValue);
-                
-                
+
+
                 YAxis yAxis = m_plotPanel.getYAxis();
                 double minYValue = yAxis.getMinValue();
                 double maxYValue = yAxis.getMaxValue();
-                
+
                 double minYValueRight = 0;
                 double maxYValueRight = 0;
                 if (m_isDoubleYAxis) {
@@ -428,7 +429,7 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
 
                 keepZoom &= (maxYValue>minYValue);
                 keepZoom &= (xAxis.getRangeModifiedByUser() || yAxis.getRangeModifiedByUser() || ((m_isDoubleYAxis) && m_plotPanel.getYAxisRight().getRangeModifiedByUser()));
-                
+
                 if (keepZoom) {
                     xAxis = m_plotPanel.getXAxis(); // axis has been changed
                     if (xAxis.isEnum()) {
@@ -452,7 +453,7 @@ public class MultiGraphicsPanel extends GraphicsToolbarPanel implements DataBoxP
                         }
                     }
                 }
-               
+
                 
                 m_plotPanel.repaint();
 

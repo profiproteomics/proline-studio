@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -33,43 +33,59 @@ public class WeightedDotProductScorer implements Scorer {
 
     private static final int MAX_SCORED_ISOTOPES = 8;
 
-  public Tuple2<Double, TheoreticalIsotopePattern> score(SpectrumData currentSpectrum, double intialMz, int shift, int charge, double ppmTol) {
+  public Tuple2<Double, TheoreticalIsotopePattern> score(SpectrumData currentSpectrum, double intialMz, int shift, int charge, double initialPpmTol) {
         double score = 0.0;
+        double ppmTol = initialPpmTol;
         double mz = intialMz - shift * IsotopePatternEstimator.avgIsoMassDiff() / charge;
         TheoreticalIsotopePattern pattern = IsotopePatternEstimator.getTheoreticalPattern(mz, charge);
+        
+        double scale = currentSpectrum.getIntensityList()[SpectrumUtils.getNearestPeakIndex(currentSpectrum.getMzList(), intialMz)] / (Float)pattern.mzAbundancePairs()[shift]._2;
+         
         Double ipMoz = mz;
         double[] observed = new double[pattern.mzAbundancePairs().length];
         double[] expected = new double[pattern.mzAbundancePairs().length];
-        int observations = 0;
-        //logger.info("mz {} charge pattern {}+, nb isotopes = {}", mz, charge, pattern.mzAbundancePairs().length);
         
         for (int rank = 0; rank < pattern.mzAbundancePairs().length; rank++) {
             ipMoz = (rank == 0) ? ipMoz : ipMoz + IsotopePatternEstimator.avgIsoMassDiff() / charge;
             int nearestPeakIdx = SpectrumUtils.getNearestPeakIndex(currentSpectrum.getMzList(), ipMoz);
                if (((1e6 * Math.abs(currentSpectrum.getMzList()[nearestPeakIdx] - ipMoz) / ipMoz) < ppmTol)) {
                    observed[rank] = currentSpectrum.getIntensityList()[nearestPeakIdx];
-                   observations++;
+                   // Try: reassign ipMoz with the observed value !
+                   //ipMoz = currentSpectrum.getMzList()[nearestPeakIdx];
                } else {
-                   observed[rank] = 0.0;
+                   observed[rank] = -(Float)pattern.mzAbundancePairs()[rank]._2 * scale;
                }
+            // Try: increase ppmTol for higher isotope rank
+            //double ppmIncr = Math.max(1, ppmTol/MAX_SCORED_ISOTOPES);
+            //ppmTol = Math.min( 2*initialPpmTol , ppmTol + ppmIncr);
             expected[rank] = (Float) pattern.mzAbundancePairs()[rank]._2;
         }
 
         score = dotProduct(observed, expected);
-        score = (1.0 - score)/observations;
+        score = (1.0 - score);
         //score = 1.0 - score;
         return new Tuple2<Double, TheoreticalIsotopePattern>(score, pattern);
     }
        
     public static double dotProduct(double[] observed, double[] expected) {
+      
+      
         double sumObserved = 0.0;
         double sumExpected = 0.0;
         double dotProduct = 0.0;
         
+        double sumWeight = 0.0;
+        double[] weight = {0.25, 0.25, 0.25, 0.08, 0.06, 0.05, 0.04, 0.02};
+        
         for (int k = 0; k < Math.min(observed.length, MAX_SCORED_ISOTOPES); k++) {
-            dotProduct += observed[k]*expected[k];
-            sumExpected += expected[k]*expected[k];
-            sumObserved += observed[k]*observed[k];
+          sumWeight += weight[k];
+        }
+        
+        for (int k = 0; k < Math.min(observed.length, MAX_SCORED_ISOTOPES); k++) {
+            weight[k] = weight[k]/sumWeight;
+            dotProduct += observed[k]*expected[k]*weight[k];
+            sumExpected += expected[k]*expected[k]*weight[k];
+            sumObserved += observed[k]*observed[k]*weight[k];
         }
         
         return ((sumExpected == 0) || (sumObserved == 0)) ? 0.0 : dotProduct/(Math.sqrt(sumExpected)*Math.sqrt(sumObserved));

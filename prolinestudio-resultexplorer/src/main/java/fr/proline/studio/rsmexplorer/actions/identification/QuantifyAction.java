@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -22,7 +22,7 @@ import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import org.openide.util.NbBundle;
+
 
 /**
  * Action for the menu to display data for Identification Summary
@@ -38,7 +38,7 @@ public class QuantifyAction extends AbstractRSMAction {
     private JMenu m_menu;
 
     public QuantifyAction(AbstractTree tree) {
-        super(NbBundle.getMessage(QuantifyAction.class, "CTL_QuantifyAction"), tree);
+        super("Quantify", tree);
     }
 
     @Override

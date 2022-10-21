@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -80,6 +80,7 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
   public static final int COLTYPE_PEPTIDE_MSQUERY = 19;
   public static final int COLTYPE_SPECTRUM_TITLE = 20;
   public static final int COLTYPE_PEPTIDE_SCORE = 21;
+  public static final int COLTYPE_PEPTIDE_NONE_AMBIGUOUS_SEQ = 22;
 
 
 //  private static final TableColumn[] COLUMNS = new TableColumn[COLTYPE_PEPTIDE_SCORE+1];
@@ -106,7 +107,8 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
           .add(COLTYPE_PEPTIDE_ION_PARENT_INTENSITY,"Ion Parent Int.", "Ion Parent Intensity", Float.class)
           .add(COLTYPE_PEPTIDE_MSQUERY,"MsQuery", "MsQuery", DMsQuery.class)
           .add(COLTYPE_SPECTRUM_TITLE, "Spectrum Title", "Spectrum Title", String.class)
-          .add(COLTYPE_PEPTIDE_SCORE, "Score", "Peptide Score", Float.class).build();
+          .add(COLTYPE_PEPTIDE_SCORE, "Score", "Peptide Score", Float.class)
+          .add(COLTYPE_PEPTIDE_NONE_AMBIGUOUS_SEQ, "None Ambiguous Seq", "Peptide Sequence with Ambiguous AA substituted ", String.class).build();
 
     private DPeptideInstance[] m_peptideInstances = null;
     private ScoreRenderer m_scoreRenderer = new ScoreRenderer();
@@ -387,6 +389,15 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
               Double score = (Double)((Map<String, Object>)properties.get("score")).get("score");
               return score.floatValue();
             }
+
+          case COLTYPE_PEPTIDE_NONE_AMBIGUOUS_SEQ: {
+            if (peptideMatch == null) {
+              return "";
+            }
+
+            return peptideMatch.getDisambiguatedSeq();
+
+          }
         }
         return null; // should never happen
     }
@@ -416,6 +427,7 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
 
         };
         filtersMap.put(COLTYPE_PEPTIDE_NAME, new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_NAME), peptideConverter, COLTYPE_PEPTIDE_NAME));
+        filtersMap.put(COLTYPE_PEPTIDE_NONE_AMBIGUOUS_SEQ, new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_NONE_AMBIGUOUS_SEQ), null, COLTYPE_PEPTIDE_NONE_AMBIGUOUS_SEQ));
 
         filtersMap.put(COLTYPE_PEPTIDE_NEXT_AA, new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_NEXT_AA), null, COLTYPE_PEPTIDE_NEXT_AA));
         filtersMap.put(COLTYPE_PEPTIDE_LENGTH, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_LENGTH), null, COLTYPE_PEPTIDE_LENGTH));

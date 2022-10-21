@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -95,7 +95,7 @@ public class DataBoxRsmPSMForMsQuery extends AbstractDataBox{
           ((PeptideMatchPanel)getDataBoxPanelInterface()).setData(-1L, null, null, true);
           return;
         }
-        if (_msqI != null && _msqI.getMsQuery() != null && oldMsQId == _msqI.getMsQuery().getId()){
+        if (_msqI.getMsQuery() != null && oldMsQId == _msqI.getMsQuery().getId()){
             return ;
         }
 
@@ -141,7 +141,7 @@ public class DataBoxRsmPSMForMsQuery extends AbstractDataBox{
         
 
         // ask asynchronous loading of data
-        m_peptideMatches = new ArrayList();
+        m_peptideMatches = new ArrayList<>();
         if (m_msQuery != null){
             registerTask(new DatabaseLoadPeptideMatchTask(callback, getProjectId(), m_msQuery, m_rsm, m_rset, m_peptideMatches));
         }
@@ -184,13 +184,12 @@ public class DataBoxRsmPSMForMsQuery extends AbstractDataBox{
     }
     
     @Override
-    public Class[] getImportantInParameterClass() {
-        Class[] classList = {DPeptideMatch.class};
-        return classList;
+    public Class[] getDataboxNavigationOutParameterClasses() {
+        return new Class[]{DPeptideMatch.class};
     }
 
     @Override
-    public String getImportantOutParameterValue() {
+    public String getDataboxNavigationDisplayValue() {
         DPeptideMatch p = (DPeptideMatch) getData(DPeptideMatch.class);
         if (p != null) {
             Peptide peptide = p.getPeptide();

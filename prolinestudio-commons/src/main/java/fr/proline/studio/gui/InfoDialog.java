@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,11 +16,11 @@
  */
 package fr.proline.studio.gui;
 
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.utils.IconManager;
 import java.awt.*;
 import java.util.prefs.Preferences;
 import javax.swing.*;
-import org.openide.util.NbPreferences;
 
 
 
@@ -37,14 +37,15 @@ public class InfoDialog extends DefaultDialog {
         NO_ICON
     }
     
-    private String m_message = null;
+    private String m_message;
     
     private JCheckBox m_showNextTimecheckBox = null;
-    private String m_showAtStartKey = null;
+    private String m_showAtStartKey;
     
     public InfoDialog(Window parent, InfoType type, String title, String message) {
         this(parent, type, title, message, null);
     }
+
     public InfoDialog(Window parent, InfoType type, String title, String message, String showAtStartKey) {
 
         super(parent);
@@ -146,7 +147,7 @@ public class InfoDialog extends DefaultDialog {
         if (m_message != null) {
             
             c.gridwidth = 2;
-            if (m_message.length() < 200) {
+            if (m_message.length() < 200 ) {
                 
                 String messageArray[] = m_message.split("\n");
                 Font font = null;

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -56,13 +56,12 @@ public class FileSystemRootsTask extends AbstractJMSTask {
         Map<String, Object> params = new HashMap<>(); // no parameter
         jsonRequest.setNamedParams(params);
 
-        final TextMessage message = AccessJMSManagerThread.getAccessJMSManagerThread().getSession().createTextMessage(jsonRequest.toJSONString());
+        final TextMessage message = m_session.createTextMessage(jsonRequest.toJSONString());
 
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/misc/FileSystem");
-        addSourceToMessage(message);
-        addDescriptionToMessage(message);
+        addSupplementaryInfo(message);
 
         setTaskInfoRequest(message.getText());
         m_taskInfo.setJmsMessageID(message.getJMSMessageID());

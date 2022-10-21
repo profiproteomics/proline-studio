@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,6 +16,8 @@
  */
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.studio.NbPreferences;
+
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -29,7 +31,7 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
-import org.openide.util.NbPreferences;
+
 
 /**
  *
@@ -71,7 +73,7 @@ public class TreeUtils {
     public static HashSet<String> loadExpansionState(TreeType type, String rootSuffix) {
         HashSet<String> retrievedSet = new HashSet<String>();
 
-        String s;
+        String s = null;
 
         if (type == TreeType.SERVER) {
             s = m_preferences.get("TreeStateUtil.Server_tree", null);

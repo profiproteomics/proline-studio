@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -81,7 +81,11 @@ public class PTMPeptideInstance {
   public void addCluster(PTMCluster cluster){
       m_clusters.add(cluster);
   }
-   
+
+  public void removeCluster(PTMCluster cluster){
+    m_clusters.remove(cluster);
+  }
+
   public List<PTMCluster> getClusters(){
       return m_clusters;
   }
@@ -96,13 +100,13 @@ public class PTMPeptideInstance {
     return matchingClusters.isEmpty() ? null : _getRepresentativePepMatch(matchingClusters);
   }
 
-  public DPeptideMatch _getRepresentativePepMatch(List<PTMCluster> clusters) {
+  private DPeptideMatch _getRepresentativePepMatch(List<PTMCluster> clusters) {
 
     //TODO: to be improved in case of searching the representative PSM for multiple clusters simultaneously
     if (clusters.size() > 1) {
       m_logger.debug("searching a representative PSM for multiple clusters simultaneously not yet implemented: use only the first cluster");
     }
-    PTMCluster cluster = m_clusters.get(0);
+    PTMCluster cluster = clusters.get(0);
     DPeptideMatch pepMatch = null;
 
     //Try using ptmSite PTMSitePeptideInstance
@@ -120,7 +124,8 @@ public class PTMPeptideInstance {
 
   public List<DPeptideMatch> getPepMatchesOnProteinMatch(DProteinMatch proteinMatch) {
     List<DPeptideMatch> pepMatches = new ArrayList<>();
-    List<Long> allowedProtMatchIds = m_sites.get(0).getPTMdataset().getProtMatchesIdForAccession(proteinMatch.getAccession());
+    String accession = proteinMatch==null ? null : proteinMatch.getAccession();
+    List<Long> allowedProtMatchIds = m_sites.get(0).getPTMdataset().getProtMatchesIdForAccession(accession);
     pepMatches.addAll(m_peptideInstance.getPeptideMatches().stream().filter(dpm -> allowedProtMatchIds.contains(dpm.getSequenceMatch().getId().getProteinMatchId())).collect(Collectors.toList()));
     return pepMatches;
   }

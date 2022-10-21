@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -343,13 +343,11 @@ public class MzdbRawFile implements IRawFile {
              
             Arrays.sort(peakels, (p1, p2) -> Double.compare(p2.getApexIntensity(), p1.getApexIntensity()));
             
+            long start = System.currentTimeMillis();
             PeakelsHelper helper = new PeakelsHelper(peakels);
-            //List<Feature> features2 = helper.deisotopePeakels(reader, mzTolPPM);            
-            //List<Feature> features = helper.deisotopePeakelsFromMzdb(reader, params.getMzTolPPM());
-            //List<Feature> features = helper.deisotopePeakelsFromMzdb(reader, params.getMzTolPPM());
-            List<Feature> features = helper.deisotopePeakels(reader, params.getMzTolPPM());
-            features.forEach(f -> result.add(new MzdbFeatureWrapper(f, this, 1)));
-            
+            Map<String, List<Feature>> featuresMap = helper.deisotopePeakels(params.getMzTolPPM(), params.getCoelutionRtTolerance());
+            featuresMap.get(PeakelsHelper.VALID_FEATURES).forEach(f -> result.add(new MzdbFeatureWrapper(f, this, 1)));
+            LOG.info("Deisotoping took {} ms", (System.currentTimeMillis()-start));
         } catch (SQLiteException | StreamCorruptedException ex) {
             LOG.error("Error while getting LcMs RunSlice Iterator: " + ex);
         }
@@ -640,8 +638,8 @@ public class MzdbRawFile implements IRawFile {
                     try {
                         MgfExportParameters mgfExportParam = (MgfExportParameters)exportParams;
                         LOG.debug("MGF writer start for " + this.getName() + ": mgfFilePath=" + outputFileName
-                                + ", precursorMzComputation=" + mgfExportParam.getPrecComp().getParamName() +
-                                ", mzTol=" + mgfExportParam.getMzTolPPM() 
+                                + ", precursorMzComputation=" + mgfExportParam.getPrecComp().getParamName()
+                                + ", mzTol=" + mgfExportParam.getMzTolPPM() 
                                 + ", intensityCutoff=" + mgfExportParam.getIntensityCutoff() 
                                 + ", exportProlineTitle=" + mgfExportParam.isExportProlineTitle());
                         MgfWriter writer = new MgfWriter(this.getFile().getAbsolutePath());

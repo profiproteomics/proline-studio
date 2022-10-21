@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -20,7 +20,6 @@ import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
-import org.openide.nodes.Sheet;
 
 /**
  * Tree Node representing a Biological Sample
@@ -38,17 +37,8 @@ public class XICBiologicalSampleNode extends AbstractNode {
     }
 
     @Override
-    public Sheet createSheet() {
-        return null;
-    }
-
-    @Override
     public AbstractNode copyNode() {
         return null;
-    }
-
-    @Override
-    public void loadDataForProperties(Runnable callback) {
     }
     
     @Override

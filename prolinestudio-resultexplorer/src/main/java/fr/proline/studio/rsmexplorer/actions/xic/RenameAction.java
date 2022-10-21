@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -28,8 +28,8 @@ import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
+
+import fr.proline.studio.WindowManager;
 
 /**
  * Rename a Node in a Xic QuantExperimentalDesignTree
@@ -39,7 +39,7 @@ public class RenameAction extends AbstractRSMAction {
 
 
     public RenameAction(AbstractTree tree) {
-        super(NbBundle.getMessage(RenameAction.class, "CTL_RenameAction"), tree);
+        super("Rename...", tree);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,18 +16,7 @@
  */
 package fr.proline.studio.rsmexplorer.tree.identification;
 
-import fr.proline.studio.rsmexplorer.actions.identification.DisplayRsmAction;
-import fr.proline.studio.rsmexplorer.actions.identification.DeleteAction;
-import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
-import fr.proline.studio.rsmexplorer.actions.identification.PropertiesAction;
-import fr.proline.studio.rsmexplorer.actions.identification.DisplayAllRsetAction;
-import fr.proline.studio.rsmexplorer.actions.identification.EmptyTrashAction;
-import fr.proline.studio.rsmexplorer.actions.identification.DisplayRsetAction;
-import fr.proline.studio.rsmexplorer.actions.identification.ChangeTypicalProteinJMSAction;
-import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsRsetJMSAction;
-import fr.proline.studio.rsmexplorer.actions.identification.MergeJMSAction;
-import fr.proline.studio.rsmexplorer.actions.identification.ValidateJMSAction;
-import fr.proline.studio.rsmexplorer.actions.identification.RetrieveBioSeqJMSAction;
+import fr.proline.studio.rsmexplorer.actions.identification.*;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
@@ -39,21 +28,6 @@ import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.rsmexplorer.actions.identification.AddIdentificationFolderAction;
-import fr.proline.studio.rsmexplorer.actions.identification.AggregateAction;
-import fr.proline.studio.rsmexplorer.actions.identification.ClearDatasetAction;
-import fr.proline.studio.rsmexplorer.actions.identification.CopySearchResult;
-import fr.proline.studio.rsmexplorer.actions.identification.ExportAction;
-import fr.proline.studio.rsmexplorer.actions.identification.FilterRSMProteinSetsJMSAction;
-import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatchesJMSAction;
-import fr.proline.studio.rsmexplorer.actions.identification.IdentifyPtmSitesJMSAction;
-import fr.proline.studio.rsmexplorer.actions.identification.ImportManager;
-import fr.proline.studio.rsmexplorer.actions.identification.ImportMaxQuantResultJMSAction;
-import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetJMSAction;
-import fr.proline.studio.rsmexplorer.actions.identification.PasteSearchResult;
-import fr.proline.studio.rsmexplorer.actions.identification.QuantifyAction;
-import fr.proline.studio.rsmexplorer.actions.identification.RenameRsetAction;
-import fr.proline.studio.rsmexplorer.actions.identification.UpdatePeaklistSoftwareAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.ChildFactory;
@@ -71,7 +45,7 @@ import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.*;
 import org.apache.commons.lang3.StringUtils;
-import org.openide.util.NbPreferences;
+import fr.proline.studio.NbPreferences;
 
 /**
  * Tree of projects and datasets (identification type)
@@ -731,7 +705,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 // create the actions
                 Boolean showHiddenFunctionnality = false; // JPM.TODO : completely removed for the moment preferences.getBoolean("Profi", false);
 
-                m_mainActions = new ArrayList<>(25);  // <--- get in sync
+                m_mainActions = new ArrayList<>(27);  // <--- get in sync
 
 
                 DisplayRsetAction displayRsetAction = new DisplayRsetAction(this);
@@ -739,6 +713,9 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
                 DisplayRsmAction displayRsmAction = new DisplayRsmAction(this);
                 m_mainActions.add(displayRsmAction);
+
+                DisplayPTMRsmAction displayPtmRsmAction = new DisplayPTMRsmAction(this);
+                m_mainActions.add(displayPtmRsmAction);
 
                 m_mainActions.add(null);  // separator
 
@@ -761,8 +738,11 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 RenameRsetAction renameRsetAction = new RenameRsetAction(this);
                 m_mainActions.add(renameRsetAction);
 
-                ClearDatasetAction clearAction = new ClearDatasetAction(this);
+                ClearDatasetAction clearAction = new ClearDatasetAction(this, false);
                 m_mainActions.add(clearAction);
+
+                ClearDatasetAction clearFullAction = new ClearDatasetAction(this, true);
+                m_mainActions.add(clearFullAction);
 
                 DeleteAction deleteAction = new DeleteAction(this);
                 m_mainActions.add(deleteAction);

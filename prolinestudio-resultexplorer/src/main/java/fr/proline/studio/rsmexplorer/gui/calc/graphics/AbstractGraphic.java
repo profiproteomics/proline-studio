@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,13 +16,15 @@
  */
 package fr.proline.studio.rsmexplorer.gui.calc.graphics;
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.rserver.dialog.ImageViewerTopComponent;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
@@ -34,7 +36,6 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.Image;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
-import org.openide.windows.WindowManager;
 
 /**
  * Base class for the definition of a Graphic (scatter, histogram...) with its parameters
@@ -128,13 +129,11 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
         String functionName = getName();
         if (m_generatedImage != null) {
             ImageViewerTopComponent win = new ImageViewerTopComponent(dataName + " " + functionName, m_generatedImage);
-            win.open();
-            win.requestActive();
+            WindowManager.getDefault().getMainWindow().displayWindow(win);
         } else {
             WindowBox windowBox = WindowBoxFactory.getGraphicsWindowBox(dataName, m_graphicsModelInterface, true);
-            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
-            win.open();
-            win.requestActive();
+            DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(windowBox);
+            WindowManager.getDefault().getMainWindow().displayWindow(win);
         }
     }
     

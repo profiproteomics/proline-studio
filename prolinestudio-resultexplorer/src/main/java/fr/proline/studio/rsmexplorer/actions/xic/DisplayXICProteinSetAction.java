@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -17,15 +17,16 @@
 package fr.proline.studio.rsmexplorer.actions.xic;
 
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
-import org.openide.util.NbBundle;
+
 
 /**
  *
@@ -34,7 +35,7 @@ import org.openide.util.NbBundle;
 public class DisplayXICProteinSetAction extends AbstractRSMAction {
 
     public DisplayXICProteinSetAction(AbstractTree tree) {
-        super(NbBundle.getMessage(DisplayXICProteinSetAction.class, "CTL_XicProteinSetAction"), tree);
+        super("Proteins Sets", tree);
     }
 
     @Override
@@ -59,9 +60,8 @@ public class DisplayXICProteinSetAction extends AbstractRSMAction {
 
 
             // open a window to display the window box
-            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-            win.open();
-            win.requestActive();
+            DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+            WindowManager.getDefault().getMainWindow().displayWindow(win);
         
 
 
@@ -74,33 +74,39 @@ public class DisplayXICProteinSetAction extends AbstractRSMAction {
     public void updateEnabled(AbstractNode[] selectedNodes) {
 
         // only one node selected
-        if (selectedNodes.length != 1) {
+//        if (selectedNodes.length != 1) {
+//            setEnabled(false);
+//            return;
+//        }
+
+        if (selectedNodes.length <0) {
             setEnabled(false);
             return;
         }
 
-        AbstractNode node = (AbstractNode) selectedNodes[0];
+        for (int i=0;i<selectedNodes.length;i++) {
+            AbstractNode node =  selectedNodes[i];
 
-        // the node must not be in changing state
-        if (node.isChanging()) {
-            setEnabled(false);
-            return;
+            // the node must not be in changing state
+            if (node.isChanging()) {
+                setEnabled(false);
+                return;
+            }
+
+            // must be a dataset
+            if (node.getType() != AbstractNode.NodeTypes.DATA_SET) {
+                setEnabled(false);
+                return;
+            }
+
+            DataSetNode datasetNode = (DataSetNode) node;
+
+            // must be a quantitation
+            if (!datasetNode.isQuantitation()) {
+                setEnabled(false);
+                return;
+            }
         }
-
-        // must be a dataset 
-        if (node.getType() != AbstractNode.NodeTypes.DATA_SET) {
-            setEnabled(false);
-            return;
-        }
-
-        DataSetNode datasetNode = (DataSetNode) node;
-
-        // must be a quantitation 
-        if (!datasetNode.isQuantitation()) {
-            setEnabled(false);
-            return;
-        }
-
         setEnabled(true);
     }
 }

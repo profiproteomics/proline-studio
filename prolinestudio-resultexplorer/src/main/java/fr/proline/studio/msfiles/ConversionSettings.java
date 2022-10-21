@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -25,12 +25,14 @@ public class ConversionSettings {
     private final String m_converterPath, m_outputPath;
     private final boolean m_deleteRaw, m_uploadAfterConversion;
     private MzdbUploadSettings m_uploadSettings;
-    
-    public ConversionSettings(String converterPath, String outputPath, boolean deleteRaw, boolean uploadAfterConversion){
+    private boolean m_isVersion1_1;
+
+    public ConversionSettings(String converterPath, String outputPath, boolean deleteRaw, boolean uploadAfterConversion, boolean isVersion1_1){
         m_converterPath = converterPath;
         m_outputPath = outputPath;
         m_deleteRaw = deleteRaw;
         m_uploadAfterConversion = uploadAfterConversion;
+        m_isVersion1_1 = isVersion1_1;
     }
     
     public String getConverterPath(){
@@ -47,6 +49,10 @@ public class ConversionSettings {
     
     public boolean getUploadAfterConversion(){
         return m_uploadAfterConversion;
+    }
+
+    public boolean isVersion1_1(){
+        return m_isVersion1_1;
     }
     
     public void setUploadSettings(MzdbUploadSettings settings){

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -29,7 +29,9 @@ import java.awt.GridBagConstraints;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -50,12 +52,27 @@ public class GenerateSpectrumMatchesDialog extends DefaultDialog {
     private JComboBox m_fragmentationRuleSetsComboBox = null;
     private JCheckBox m_forceGenerateChB = null;
     private JCheckBox m_useDefinedFRSChB = null;
-    
-    private List<DDataset> m_datasets = null;
-       
-    public GenerateSpectrumMatchesDialog(Window parent){
+
+    private List<MsiSearch> m_msiSearches = null;
+    private boolean oneMerged = false;
+
+    public GenerateSpectrumMatchesDialog(Window parent, MsiSearch msiSearch){
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-         
+        m_msiSearches = Collections.singletonList(msiSearch);
+
+        initDialog();
+    }
+    
+    public GenerateSpectrumMatchesDialog(Window parent, List<DDataset> allDSs){
+        super(parent, Dialog.ModalityType.APPLICATION_MODAL);
+        if(allDSs != null && !allDSs.isEmpty()) {
+            m_msiSearches = allDSs.stream().map(ds -> ds.getResultSet().getMsiSearch()).collect(Collectors.toList());
+            oneMerged = allDSs.stream().filter(ds -> !DDatasetType.AggregationInformation.NONE.equals(ds.getAggregationInformation())).count() > 0;
+        }
+        initDialog();
+    }
+
+    private void initDialog(){
         setTitle("Generate Spectrum Matches");
         setDocumentationSuffix("id.1idq7dh");
         setHelpHeaderText("Choose Fragmentation Rule Set that will be used to generate spectrum matches.<br>" +
@@ -63,12 +80,7 @@ public class GenerateSpectrumMatchesDialog extends DefaultDialog {
         initInternalPanel();
         pack();
     }
-    
-    public GenerateSpectrumMatchesDialog(Window parent, List<DDataset> allDSs){
-        this(parent);
-        m_datasets = allDSs;
-    }
-    
+
     private void initInternalPanel() {
                 
         JPanel internalPanel = new JPanel();
@@ -157,26 +169,20 @@ public class GenerateSpectrumMatchesDialog extends DefaultDialog {
         StringBuilder sb = new StringBuilder();
         boolean oneNull = false;
         boolean oneNotNull = false;
-        boolean oneMerged = false;
-        if (m_datasets == null || m_datasets.isEmpty()) //from specific pepMatch. TODO Get DS informatoin ?
+        if (m_msiSearches == null || m_msiSearches.isEmpty())
             return "unknown - see dataset properties";
-        for (DDataset ds : m_datasets){
-            if(!DDatasetType.AggregationInformation.NONE.equals(ds.getAggregationInformation()))
-                oneMerged = true;
+        for (MsiSearch msiSearch : m_msiSearches){
+            if(msiSearch == null)
+                oneNull = true;
             else {
-                MsiSearch msiSearch = ds.getResultSet().getMsiSearch();
-                if(msiSearch == null)
+                FragmentationRuleSet fragSet = DatabaseDataManager.getDatabaseDataManager().getFragmentationRuleSet(msiSearch.getSearchSetting().getFragmentationRuleSetId());
+                if (fragSet == null)
                     oneNull = true;
                 else {
-                    FragmentationRuleSet fragSet = DatabaseDataManager.getDatabaseDataManager().getFragmentationRuleSet(msiSearch.getSearchSetting().getFragmentationRuleSetId());
-                    if(fragSet == null)
-                        oneNull = true;
-                    else {
-                        if(oneNotNull)
-                            sb.append(", ");
-                        sb.append(fragSet.getName());
-                        oneNotNull = true;
-                    }
+                    if (oneNotNull)
+                        sb.append(", ");
+                    sb.append(fragSet.getName());
+                    oneNotNull = true;
                 }
             }
         }
@@ -196,7 +202,7 @@ public class GenerateSpectrumMatchesDialog extends DefaultDialog {
      
     @Override
     protected boolean okCalled() {
-        if(!m_useDefinedFRSChB.isSelected() && (FragmentationRuleSet) m_fragmentationRuleSetsComboBox.getSelectedItem()==null){
+        if(!m_useDefinedFRSChB.isSelected() && m_fragmentationRuleSetsComboBox.getSelectedItem() ==null){
             setStatus(true, "A Fragmentation Rule Set should be selected");
             highlight(m_fragmentationRuleSetsComboBox);
             return false;

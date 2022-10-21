@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -234,9 +234,9 @@ public class FilePreferences extends AbstractPreferences {
             if (propKey.startsWith(path)) {
               String subKey = propKey.substring(path.length());
               // Only do immediate descendants
-              if (subKey.indexOf('.') == -1) {
+              //if (subKey.indexOf('.') == -1) { //JPM : we do want to supress Validation.PSM_PRETTY_RANK for example : we don't use the parent mechanism
                 toRemove.add(propKey);
-              }
+              //}
             }
           }
  

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,7 +16,6 @@
  */
 package fr.proline.studio.rsmexplorer.tree.identification;
 
-import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.AbstractData;
@@ -28,9 +27,6 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.nodes.PropertySupport;
-import org.openide.nodes.Sheet;
-import org.openide.nodes.Node.Property;
 
 
 /**
@@ -102,43 +98,7 @@ public class IdProjectIdentificationNode extends AbstractNode {
         }
     }
 
-    @Override
-    public void loadDataForProperties(Runnable callback) {
-        // nothing to do
-        callback.run();
-    }
-    
-    @Override
-    public Sheet createSheet() {
-        Project p = getProject();
-        
-        Sheet sheet = Sheet.createDefault();
-        
-        try {
 
-            Sheet.Set propGroup = Sheet.createPropertiesSet();
-            
-         
-            Property prop = new PropertySupport.Reflection<>(p, Long.class, "getId", null);
-            prop.setName("id");
-            propGroup.put(prop);
-            
-            prop = new PropertySupport.Reflection<>(p, String.class, "getName", null);
-            prop.setName("name");
-            propGroup.put(prop);
-            
-            prop = new PropertySupport.Reflection<>(p, String.class, "getDescription", null);
-            prop.setName("description");
-            propGroup.put(prop);
-            
-            sheet.put(propGroup);
-
-        } catch (NoSuchMethodException e) {
-            m_logger.error(getClass().getSimpleName() + " properties error ", e);
-        }
-        
-        return sheet;
-    }
     
     @Override
     public AbstractNode copyNode() {

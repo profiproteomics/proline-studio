@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -38,9 +38,15 @@ public class PTMCluster implements Comparable<PTMCluster>{
     private final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ptm");
 
     private final List<PTMSite> m_sites;
+    private int m_sitesCount;
     private final List<Long> m_peptideIds;
     private final Long m_id;
-    private final Float m_localizationConfidence;
+    private Float m_localizationConfidence;
+
+    private int m_selectionLevel;
+    private Integer m_selectionNotation;
+    private String m_selectionInfo;
+
 
     private List<Integer> m_positionsOnProtein;
     private List<Float> m_probabilities;
@@ -56,24 +62,128 @@ public class PTMCluster implements Comparable<PTMCluster>{
     private final PTMDataset m_ptmDataset;
 
     public PTMCluster(JSONPTMCluster jsonValue, PTMDataset ptmds) {
-        this(jsonValue.id, jsonValue.localizationConfidence, Arrays.asList(jsonValue.ptmSiteLocations), Arrays.asList(jsonValue.peptideIds), ptmds);
+        this(jsonValue.id, jsonValue.localizationConfidence, jsonValue.selectionLevel,jsonValue.selectionConfidence, jsonValue.selectionInformation, Arrays.asList(jsonValue.ptmSiteLocations), Arrays.asList(jsonValue.peptideIds), ptmds);
     }
 
-    public PTMCluster(Long id, Float confidence, List<Long> ptmSiteIds, List<Long> peptideIds, PTMDataset ptmds) {
+    public PTMCluster(Long id, Float confidence, Integer selectionLevel, Integer selectionNotation, String selectionInfo, List<Long> ptmSiteIds, List<Long> peptideIds, PTMDataset ptmds) {
         m_ptmDataset = ptmds;
-        m_peptideIds = peptideIds;
+        m_peptideIds = new ArrayList<>();
+        m_peptideIds.addAll(peptideIds);
         m_localizationConfidence = confidence;
         m_sites = m_ptmDataset.getPTMSites().stream().filter(site -> ptmSiteIds.contains(site.getId())).sorted(Comparator.comparing(PTMSite::getPositionOnProtein)).collect(Collectors.toList());
+        m_sitesCount = m_sites.size();
         m_id = id;
 
+        m_selectionLevel = selectionLevel != null ? selectionLevel : 2;
+        m_selectionNotation = selectionNotation;
+        m_selectionInfo = selectionInfo != null ? selectionInfo : "";
+
         if(!m_sites.isEmpty()) {
-            //Get ProteinMatch from one of the PTMSite : all should have same. VDS TODO To test ?
+            //Get ProteinMatch from one of the PTMSite : all should have same.
             m_proteinMatch = m_sites.get(0).getProteinMatch();
             m_masterQuantProteinSet = m_sites.get(0).getMasterQuantProteinSet();
         }
 
     }
 
+    public int getSelectionLevel(){
+        return  m_selectionLevel;
+    }
+
+    public void setSelectionLevel(int selectionLevel){
+        if(selectionLevel < 0  || selectionLevel >3)
+            throw new IllegalArgumentException("Invalid selection level specified");
+
+        m_selectionLevel = selectionLevel;
+    }
+
+    /**
+     *
+     * @return PTLCluster status confidence as a positive number. Negative number indicates no notation has been done.
+     */
+    public Integer getSelectionNotation() {
+        return m_selectionNotation;
+    }
+
+    public void setSelectionNotation(Integer selectionNotation) {
+        this.m_selectionNotation = selectionNotation;
+    }
+
+    /**
+     * @return Return description of PTMCluster status or empty String if none is defined
+     */
+    public String getSelectionInfo() {
+        return m_selectionInfo;
+    }
+
+    public void setSelectionInfo(String selectionInfo) {
+        this.m_selectionInfo = selectionInfo;
+    }
+
+    protected void addSites(List<PTMSite> newSites){
+        boolean listChanged = false;
+        for(PTMSite s : newSites){
+            if(!m_sites.contains(s)) {
+                m_sites.add(s);
+                listChanged = true;
+            }
+        }
+        if(listChanged){
+            m_positionsOnProtein = null;
+            m_probabilities = null;
+            m_parentPTMPeptideInstances = null;
+            m_leafPTMPeptideInstances = null;
+            m_parentPeptideInstances = null;
+        }
+    }
+
+    protected void addPeptideIds(List<Long> newPepIds){
+        boolean listChanged = false;
+        for(Long s : newPepIds){
+            if(!m_peptideIds.contains(s)) {
+                m_peptideIds.add(s);
+                listChanged = true;
+            }
+        }
+        if(listChanged){
+            m_positionsOnProtein = null;
+            m_probabilities = null;
+            m_parentPTMPeptideInstances = null;
+            m_leafPTMPeptideInstances = null;
+            m_parentPeptideInstances = null;
+        }
+    }
+
+    public void removePeptide(PTMPeptideInstance pep){
+        if(pep == null)
+            return;
+        Long pepId = pep.getPeptideInstance().getPeptideId();
+        if(m_peptideIds.contains(pepId)){
+            m_peptideIds.remove(pepId);
+
+            //Recalculated MQPep if needed
+            DMasterQuantPeptide finalClusterMQpep = getRepresentativeMQPepMatch();
+            if (finalClusterMQpep != null && finalClusterMQpep instanceof AggregatedMasterQuantPeptide) {
+                Map<Long, DMasterQuantPeptide> mqPepByPepInstId = new HashMap<>();
+                ((AggregatedMasterQuantPeptide) finalClusterMQpep).getAggregatedMQPeptides().forEach(mqPep -> {
+                    if(m_peptideIds.contains(mqPep.getPeptideInstance().getPeptideId()))
+                        mqPepByPepInstId.put(mqPep.getPeptideInstanceId(), mqPep);
+                });
+                setRepresentativeMQPepMatch(m_ptmDataset.getRepresentativeMQPeptideForCluster(this, mqPepByPepInstId));
+            } else if(finalClusterMQpep != null ) {
+                //Should not occur
+                m_logger.warn(" ERROR. PTM Cluster in Quantitation do not used AggregatedMasterQuantPeptide. Unable to create new quantiation values ");
+            }
+
+            m_parentPTMPeptideInstances = null;
+            m_leafPTMPeptideInstances = null;
+            m_parentPeptideInstances = null;
+        }
+    }
+
+    protected void setLocalizationConfidence(Float localizationConfidence){
+        m_localizationConfidence = localizationConfidence;
+    }
     public Long getId() {
         return m_id;
     }
@@ -216,11 +326,26 @@ public class PTMCluster implements Comparable<PTMCluster>{
     public List<PTMSite> getPTMSites(){
         return m_sites;
     }
+
+    public Integer getPTMSitesCount(){
+        return  m_sitesCount;
+    }
+
+    public void setPTMSitesCount(Integer sitesCount){
+         m_sitesCount = sitesCount;
+    }
+
+
     
     public Integer getPeptideCount() {
         return m_peptideIds.size();
     }
-     
+
+
+    public List<Long> getPeptideIds() {
+        return m_peptideIds;
+    }
+
     public void setQuantProteinSet(DMasterQuantProteinSet mqps) {
         m_masterQuantProteinSet = mqps;
     }
@@ -228,7 +353,19 @@ public class PTMCluster implements Comparable<PTMCluster>{
     public DMasterQuantProteinSet getMasterQuantProteinSet() {
         return m_masterQuantProteinSet;
     }
-   
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null)
+            return false;
+
+        if(! (obj instanceof PTMCluster ))
+            return false;
+
+        PTMCluster objCluster= (PTMCluster) obj;
+        return  objCluster.m_id.equals(m_id); //ID Should be enough ! && objCluster.m_proteinMatch.equals(m_proteinMatch) &&  objCluster.m_sites.equals(m_sites);
+    }
+
     @Override
     public int compareTo(PTMCluster o) {                                 
         if(o == null)

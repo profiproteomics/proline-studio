@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -17,6 +17,9 @@
 package fr.proline.studio.filter;
 
 import static fr.proline.studio.filter.StringDiffFilter.SEARCH_TEXT_AREA;
+
+import fr.proline.studio.Exceptions;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.utils.StringUtils;
 import java.awt.GridBagConstraints;
 import java.awt.Toolkit;
@@ -40,9 +43,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.text.JTextComponent;
-import org.openide.util.Exceptions;
-import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -305,7 +305,7 @@ public class StringFilter extends Filter {
      */
     protected JTextField createPasteTextField(String filterText) {
         JTextField vTextField = new JTextField(12);
-        String msg = NbBundle.getMessage(this.getClass(), "Filter_String_RegularExpression.tooltip.text");
+        String msg = "<html>Search is based on wildcards:<br>  '*' : can replace all characters<br>  '?' : can replace one character<br><br>Use 'FOO*' to search a string starting with FOO. </html>";
         vTextField.setToolTipText(msg);
         if (filterText != null) {
             vTextField.setText(filterText);
@@ -324,7 +324,7 @@ public class StringFilter extends Filter {
 
     protected JTextArea createPasteArea(String filterAreaText) {
         JTextArea vArea = new JTextArea(5, 20);
-        String msg = NbBundle.getMessage(this.getClass(), "Filter_String_RegularExpression.tooltip.text");
+        String msg = "<html>Search is based on wildcards:<br>  '*' : can replace all characters<br>  '?' : can replace one character<br><br>Use 'FOO*' to search a string starting with FOO. </html>";
         vArea.setToolTipText(msg);
         if (filterAreaText != null) {
             vArea.setText(filterAreaText);

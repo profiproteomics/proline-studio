@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -196,7 +196,15 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
             if (m_multiPopup == null) {
 
                 // create the actions
-                m_multiActions = new ArrayList<>(5);  // <--- get in sync
+                m_multiActions = new ArrayList<>(8);  // <--- get in sync
+
+                DisplayXICAction displayXICAction = new DisplayXICAction(this);
+                m_multiActions.add(displayXICAction);
+
+                DisplayRsmAction displayRsmAction = new DisplayRsmAction(this);
+                m_multiActions.add(displayRsmAction);
+
+                m_multiActions.add(null);  // separator
 
                 AggregateQuantitationsAction aggregateAction = new AggregateQuantitationsAction(this);
                 m_multiActions.add(aggregateAction);

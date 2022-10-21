@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,32 +16,30 @@
  */
 package fr.proline.studio.pattern.xic;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
 import fr.proline.core.orm.lcms.MapAlignment;
-import fr.proline.core.orm.lcms.MapTime;
 import fr.proline.core.orm.lcms.ProcessedMap;
+import fr.proline.core.orm.lcms.ProcessedMapMozCalibration;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
-import fr.proline.studio.graphics.CrossSelectionInterface;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.ParameterList;
 import fr.proline.studio.pattern.ParameterSubtypeEnum;
-import fr.proline.studio.rsmexplorer.gui.xic.MapAlignmentPanel;
-import fr.proline.studio.rsmexplorer.gui.xic.MapTimePanel;
-import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
-import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.AbstractLabelFreeMSParamsPanel;
+import fr.proline.studio.rsmexplorer.gui.xic.*;
 import fr.proline.studio.rsmexplorer.gui.xic.alignment.IonsRTTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * databox for mapAlignment data
@@ -57,20 +55,27 @@ public class DataboxMapAlignment extends AbstractDataBox {
     private QuantChannelInfo m_quantChannelInfo;
     private List<DMasterQuantPeptideIon> m_masterQuantPeptideIonList;
 
-    private Map<Long, IonsRTTableModel> m_compareRT2Maps;
-    private double m_RT_Tolerance;
+    private Map<Long, IonsRTTableModel> m_ionsRTBySourceMapId;
+    private double m_crossAssignmentTimeTolerance = AbstractLabelFreeMSParamsPanel.DEFAULT_CA_FEATMAP_RTTOL_VALUE;
+    private double m_featureAlignmentTimeTolerance = AbstractLabelFreeMSParamsPanel.DEFAULT_ALIGN_FEATMAP_TIMETOL_VALUE;
     private Long m_paramTaskId;
     private boolean m_isCloudLoaded;
     private boolean m_isCloudTaskAsked;
-    
+    private boolean m_isMoZAlignment;
+
     public DataboxMapAlignment() {
+        this(false);
+    }
+
+    public DataboxMapAlignment(boolean isMoZAlignment) {
         super(DataboxType.DataBoxMapAlignment, DataboxStyle.STYLE_XIC);
+        m_isMoZAlignment = isMoZAlignment;
 
         // Name of this databox
-        m_typeName = "Map Alignment Plot";
-        m_description = "Graphical display of XIC Map Alignment.";
+        m_typeName = m_isMoZAlignment ?  "Moz Calibration Plot" : "Map Alignment Plot";
+        m_description = m_isMoZAlignment ? "Graphical display of XIC MoZ Calibration." : "Graphical display of XIC Map Alignment.";
 
-        m_compareRT2Maps = new HashMap<Long, IonsRTTableModel>();
+        m_ionsRTBySourceMapId = new HashMap<>();
         // Register in parameters
         ParameterList inParameter = new ParameterList();
         inParameter.addParameter(DDataset.class);
@@ -78,20 +83,21 @@ public class DataboxMapAlignment extends AbstractDataBox {
 
         // Register possible out parameters
         ParameterList outParameter = new ParameterList();
-        
+
         outParameter.addParameter(ExtendedTableModelInterface.class, ParameterSubtypeEnum.LIST_DATA);
-        outParameter.addParameter(CrossSelectionInterface.class, ParameterSubtypeEnum.LIST_DATA);
-        
+
         registerOutParameter(outParameter);
         
-        m_RT_Tolerance = 0.0;
-
         m_isCloudLoaded = false;
         m_isCloudTaskAsked = false;
     }
 
-    public double getRT_Tolerance() {
-        return m_RT_Tolerance;
+    public double getCrossAssignmentTimeTolerance() {
+        return m_crossAssignmentTimeTolerance;
+    }
+
+    public double getFeatureAlignmentTimeTolerance() {
+        return m_featureAlignmentTimeTolerance;
     }
 
     /**
@@ -100,9 +106,8 @@ public class DataboxMapAlignment extends AbstractDataBox {
      * m_previousDataBox.getData, his m_previousDataBox is this
      * DataboxMapAlignment used by DataboxMultiGraphics.dataChanged
      *
-     * @param getArray
      * @param parameterType
-     * @param isList
+     * @param parameterSubtype
      * @return
      */
     @Override
@@ -114,59 +119,53 @@ public class DataboxMapAlignment extends AbstractDataBox {
                 if (parameterType.equals(ExtendedTableModelInterface.class)) {
                     return getCompareDataInterfaceList();
                 }
-                if (parameterType.equals(CrossSelectionInterface.class)) {
-                    return getCrossSelectionInterfaceList();
-                }
             }
         }
         return super.getDataImpl(parameterType, parameterSubtype);
     }
 
     private List<ExtendedTableModelInterface> getCompareDataInterfaceList() {
-        List<ExtendedTableModelInterface> listCDI = new ArrayList();
-        List<MapTimePanel> listMapTimePanel = getMapTimeTableModelList();
-        for (MapTimePanel mapTimePanel : listMapTimePanel) {
-            listCDI.add(mapTimePanel.getGlobalTableModelInterface());
+        List<ExtendedTableModelInterface> listCDI = new ArrayList<>();
+
+        if(m_isMoZAlignment){
+            for(ProcessedMap map : m_dataset.getMaps()) {
+                List<ProcessedMapMozCalibration> allMozCalib = new ArrayList<>(map.getProcessedMapMozCalibration());
+
+                String mapTitle = m_quantChannelInfo.getMapTitle(map.getId());
+                String title = "MoZ calibration for "+ mapTitle;
+
+                for (ProcessedMapMozCalibration mapMozAlignment : allMozCalib) {
+                    Color color = m_quantChannelInfo.getMapColor(map.getId());
+                    MapTimeTableModel model = new MapTimeTableModel(mapMozAlignment.getProcessedMapMozList(), color, title, mapTitle);
+                    listCDI.add(model);
+                }
+            }
+        } else {
+            for (MapAlignment mapAlignment : m_dataset.getMapAlignmentsFromMap(m_dataset.getAlnReferenceMapId())) {
+                String fromMap = m_quantChannelInfo.getMapTitle(mapAlignment.getSourceMap().getId());
+                String toMap = m_quantChannelInfo.getMapTitle(mapAlignment.getDestinationMap().getId());
+                String title = "Map Alignment from " + fromMap + " (to " + toMap + ")";
+                Color color = m_quantChannelInfo.getMapColor(mapAlignment.getDestinationMap().getId());
+                MapTimeTableModel model = new MapTimeTableModel(mapAlignment.getMapTimeList(), color, title, fromMap, toMap);  //set mapAlignemnt curve data with its AxisX
+                listCDI.add(model);
+            }
         }
         return listCDI;
     }
 
-    private List<CrossSelectionInterface> getCrossSelectionInterfaceList() {
-        List<CrossSelectionInterface> listCSI = new ArrayList();
-        List<MapTimePanel> listMapTimePanel = getMapTimeTableModelList();
-        for (MapTimePanel mapTimePanel : listMapTimePanel) {
-            listCSI.add(mapTimePanel.getCrossSelectionInterface());
-        }
-        return listCSI;
-    }
-
-    /**
-     * get new MapAligments and create MapTimePanel for each MapAlignement
-     *
-     * @return
-     */
-    private List<MapTimePanel> getMapTimeTableModelList() {
-        //logger.debug(" getMapTimeTableModelList");
-        List<MapTimePanel> list = new ArrayList();
-        for (MapAlignment mapAlignment : m_dataset.getMapAlignmentsFromMap(m_dataset.getAlnReferenceMapId())) {//only these from reference map
-            //for (MapAlignment mapAlignment : m_dataset.getMapAlignments()) {//all maps
-            List<MapTime> listMapTime = mapAlignment.getMapTimeList();
-            MapTimePanel mapTimePanel = new MapTimePanel();
-            String fromMap = m_quantChannelInfo.getMapTitle(mapAlignment.getSourceMap().getId());
-            String toMap = m_quantChannelInfo.getMapTitle(mapAlignment.getDestinationMap().getId());
-            String title = "Map Alignment from " + fromMap + " (to " + toMap + ")";
-            Color color = m_quantChannelInfo.getMapColor(mapAlignment.getDestinationMap().getId());
-            mapTimePanel.setData((long) -1, mapAlignment, listMapTime, color, title, true, fromMap);  //set mapAlignemnt curve data with its AxisX
-            list.add(mapTimePanel);
-        }
-        return list;
-    }
 
     @Override
     public void createPanel() {
-        MapAlignmentPanel p = new MapAlignmentPanel(this);
-        p.setName(m_typeName);
-        setDataBoxPanelInterface(p);
+        if(m_isMoZAlignment){
+            MapMozAlignmentPanel p = new MapMozAlignmentPanel(this);
+            p.setName(m_typeName);
+            setDataBoxPanelInterface(p);
+
+        } else {
+            MapAlignmentPanel p = new MapAlignmentPanel(this);
+            p.setName(m_typeName);
+            setDataBoxPanelInterface(p);
+        }
     }
 
     @Override
@@ -204,7 +203,10 @@ public class DataboxMapAlignment extends AbstractDataBox {
                 // do nothing, if only de paramTask finished
                 if (taskId != m_paramTaskId) {
                     m_quantChannelInfo = new QuantChannelInfo(m_dataset);
-                    ((MapAlignmentPanel) getDataBoxPanelInterface()).setData(m_quantChannelInfo, getCompareDataInterfaceList(), getCrossSelectionInterfaceList());
+                    if(m_isMoZAlignment)
+                        ((MapMozAlignmentPanel) getDataBoxPanelInterface()).setData(m_quantChannelInfo, getCompareDataInterfaceList());
+                    else
+                        ((MapAlignmentPanel) getDataBoxPanelInterface()).setData(m_quantChannelInfo, getCompareDataInterfaceList());
 
                     if (finished) {
                         addDataChanged(ExtendedTableModelInterface.class, ParameterSubtypeEnum.LIST_DATA);
@@ -233,11 +235,14 @@ public class DataboxMapAlignment extends AbstractDataBox {
      */
     public void loadCloud() {
         
-        if (m_isCloudLoaded == true) {
-            ((MapAlignmentPanel) super.getDataBoxPanelInterface()).setAlignmentCloud();
+        if (m_isCloudLoaded) {
+            if(m_isMoZAlignment)
+                ((MapMozAlignmentPanel) getDataBoxPanelInterface()).setAlignmentCloud();
+            else
+                ((MapAlignmentPanel) getDataBoxPanelInterface()).setAlignmentCloud();
         } else {
             //avoid multiple call when the cloud is not loaded
-            if (this.m_isCloudTaskAsked == true) {
+            if (this.m_isCloudTaskAsked) {
                 return;
             }
 
@@ -266,8 +271,11 @@ public class DataboxMapAlignment extends AbstractDataBox {
                             //if all task loaded, then execute the first Alignement Cloud
                             if (DataboxMapAlignment.this.isLoaded()) {
                                 m_isCloudLoaded = true;
-                                m_RT_Tolerance = getTimeTol();
-                                ((MapAlignmentPanel) DataboxMapAlignment.this.getPanel()).setAlignmentCloud();
+                                extractTimeToleranceParameters();
+                                if(m_isMoZAlignment)
+                                    ((MapMozAlignmentPanel) getDataBoxPanelInterface()).setAlignmentCloud();
+                                else
+                                    ((MapAlignmentPanel) getDataBoxPanelInterface()).setAlignmentCloud();
                             }
                         }
                     }
@@ -275,7 +283,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
 
             };
 
-            m_masterQuantPeptideIonList = new ArrayList();
+            m_masterQuantPeptideIonList = new ArrayList<>();
             DatabaseLoadXicMasterQuantTask taskPeptideCloud = new DatabaseLoadXicMasterQuantTask(callback);
             taskPeptideCloud.initLoadPeptideIons(this.getProjectId(), m_dataset, m_masterQuantPeptideIonList);
             m_logCloudStartTime = System.currentTimeMillis();
@@ -288,58 +296,68 @@ public class DataboxMapAlignment extends AbstractDataBox {
     /**
      * from the m_dataset, extact the RT tolerance
      *
-     * @return
+     *  the cross assignment time tolerance
      */
-    private double getTimeTol() {
-        Double time = AbstractLabelFreeMSParamsPanel.DEFAULT_CA_FEATMAP_RTTOL_VALUE;
+    private void extractTimeToleranceParameters() {
+        Double time;
         try {
             Map<String, Object> quantParams = this.m_dataset.getQuantProcessingConfigAsMap();
             if (quantParams.containsKey("cross_assignment_config")) {
                 Map<String, Object> crossAssignmentConfig = (Map<String, Object>) quantParams.get("cross_assignment_config");
                 Map<String, Object> ftMappingParams = (Map<String, Object>) crossAssignmentConfig.getOrDefault("ft_mapping_params", new HashMap<>());
                 time = Double.valueOf((String) ftMappingParams.get("time_tol"));
-                if (time == null) {
-                    time = AbstractLabelFreeMSParamsPanel.DEFAULT_CA_FEATMAP_RTTOL_VALUE;
+                if (time != null) {
+                    m_crossAssignmentTimeTolerance = time;
                 }
             }
+
+            if (quantParams.containsKey("alignment_config")) {
+                Map<String, Object> alignmentConfig = (Map<String, Object>) quantParams.get("alignment_config");
+                if (alignmentConfig.containsKey("ft_mapping_method_params")) {
+                    Map<String, Object> featureMappingConfig = (Map<String, Object>) alignmentConfig.get("ft_mapping_method_params");
+                    time = Double.valueOf((String) featureMappingConfig.get("time_tol"));
+                    if (time != null) {
+                        m_featureAlignmentTimeTolerance = time;
+                    }
+                }
+            }
+
         } catch (Exception ex) {
-            logger.error("error while get Tolerence RT Time " + ex);
+            logger.error("error while get cross assignment or alignment RT tolerance " + ex);
 
         }
-        return time;
     }
 
     /**
-     * create a TableModel for PlotScatt
+     * create a IonsRTTableModel representing ion's retention time and deltaTime from the
+     * source map to the other maps.
      *
-     * @param mapFrom
-     * @param mapTo
+     * @param mapIdFrom the source (from) Map id.
      */
     public IonsRTTableModel getPeptideCloud(long mapIdFrom) {
         IonsRTTableModel listETI;
-        listETI = m_compareRT2Maps.get(mapIdFrom);
+        listETI = m_ionsRTBySourceMapId.get(mapIdFrom);
         if (listETI == null) {
-            listETI = createMapRTCompareTableModel(mapIdFrom);
-            m_compareRT2Maps.put(mapIdFrom, listETI);
+            listETI = createIonsRTTableModel(mapIdFrom);
+            m_ionsRTBySourceMapId.put(mapIdFrom, listETI);
 
         }
         return listETI;
     }
 
-    private IonsRTTableModel createMapRTCompareTableModel(long mapIdFrom) {
-        Map<Long, String> idNameMap = new HashMap<>(); // Map<rsmId,MapTitleName>
-        Map<Long, Long> idMap = new HashMap<>();       // Map<MapId,resultSummaryId>
+    private IonsRTTableModel createIonsRTTableModel(long mapIdFrom) {
+        Map<Long, String> mapTitleByRsmId = new HashMap<>(); // Map<rsmId,MapTitleName>
+        Map<Long, Long> rsmIdByMapId = new HashMap<>();       // Map<MapId,resultSummaryId>
         List<ProcessedMap> processMapList = m_quantChannelInfo.getDataset().getMaps();
         long[] rsmIdArray = new long[processMapList.size()];
         int index = 1;
         for (ProcessedMap map : processMapList) {
             Long mapId = map.getId();
-            String mapTitle = m_quantChannelInfo.getMapTitle(mapId); //by example F083069
+            String mapTitle = m_quantChannelInfo.getMapTitle(mapId);
+            Long rsmId = m_quantChannelInfo.getQuantChannelForMap(mapId).getId();
 
-            Long rsmId = m_quantChannelInfo.getQuantChannelForMap(mapId).getId();//resultSummayId
-
-            idMap.put(mapId, rsmId);
-            idNameMap.put(rsmId, mapTitle);
+            rsmIdByMapId.put(mapId, rsmId);
+            mapTitleByRsmId.put(rsmId, mapTitle);
             if (mapId == mapIdFrom) {
                 rsmIdArray[0] = rsmId;
             } else {
@@ -348,8 +366,7 @@ public class DataboxMapAlignment extends AbstractDataBox {
             }
         }
 
-        IonsRTTableModel cloud = new IonsRTTableModel(m_masterQuantPeptideIonList, idMap, idNameMap, rsmIdArray);
-        return cloud;
+        return new IonsRTTableModel(m_masterQuantPeptideIonList, rsmIdByMapId, mapTitleByRsmId, rsmIdArray);
     }
 
 }

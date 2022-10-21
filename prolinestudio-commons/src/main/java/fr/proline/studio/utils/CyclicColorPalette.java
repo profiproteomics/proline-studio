@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -183,7 +183,7 @@ public class CyclicColorPalette {
      * @param colorIndex
      * @return
      */
-    public static String getHTMLColor(int colorIndex) {
+    public static  String getHTMLColor(int colorIndex) {
         Color c = getColor(colorIndex);
         return getHTMLColor(c);
     }

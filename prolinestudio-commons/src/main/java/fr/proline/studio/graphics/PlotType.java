@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -91,6 +91,7 @@ public enum PlotType {
                 acceptedValues.add(Double.class);
                 acceptedValues.add(Float.class);
                 acceptedValues.add(Integer.class);
+                acceptedValues.add(Long.class);
                 break;
             case SCATTER_PLOT:
             case LINEAR_PLOT:
@@ -99,6 +100,7 @@ public enum PlotType {
                 acceptedValues.add(Float.class);
                 acceptedValues.add(Integer.class);
                 acceptedValues.add(String.class);
+                acceptedValues.add(Long.class);
                 break;
         }
         return acceptedValues;

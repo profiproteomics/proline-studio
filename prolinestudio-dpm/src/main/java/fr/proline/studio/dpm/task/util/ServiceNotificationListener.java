@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -75,16 +75,23 @@ public class ServiceNotificationListener implements MessageListener {
     @Override
     public void onMessage(Message jmsMessage) {
         
-        if (m_callbacks.size() <= 0 ) {
-            m_loggerProline.debug("SKIP Notification message  : " + JMSMessageUtil.formatMessage(jmsMessage));
-            
-        } else {
-            m_loggerProline.debug("Notification Listener Receiving message  : " + JMSMessageUtil.formatMessage(jmsMessage));            
+//        if (m_callbacks.size() <= 0 ) {
+//            m_loggerProline.debug("SKIP Notification message  : " + JMSMessageUtil.formatMessage(jmsMessage));
+//
+//        } else {
+            m_loggerProline.info(" *** JMSNOTIF 1 *** Notification Listener Receiving message  : " + JMSMessageUtil.formatMessage(jmsMessage));
             if (jmsMessage instanceof TextMessage) {
-                final TextMessage textMessage = (TextMessage) jmsMessage;                
+                final TextMessage textMessage = (TextMessage) jmsMessage;
+                m_loggerProline.info(" *** JMSNOTIF 2 *** message : "+textMessage.toString());
                 try {
                     final String jsonString = textMessage.getText();
+                    m_loggerProline.info(" *** JMSNOTIF 3 *** text message : "+jsonString);
+                    if(!jsonString.startsWith("{\"method\":")) {
+                        m_loggerProline.error(" *** None valide JSONRPC2Notification : Do not start with method entry.");
+                        return;
+                    }
                     final JSONRPC2Notification  jsonNotif = JSONRPC2Notification.parse(jsonString);
+                    m_loggerProline.info(" *** JMSNOTIF 4 *** JSONRPC2Notification : "+jsonNotif.toJSONString());
                     Map<String,Object> params = jsonNotif.getNamedParams();                
                     final JMSNotificationMessage resultMsg = new JMSNotificationMessage(params.getOrDefault(NOTIFICATION_SERVICE_NAME_KEY, "Undefined").toString(),params.getOrDefault(NOTIFICATION_SERVICE_VERSION_KEY, "default").toString(),
                             params.getOrDefault(NOTIFICATION_SERVICE_SOURCE_KEY, "Unknown").toString(), params.getOrDefault(NOTIFICATION_SERVICE_DESCR_KEY, "").toString(),
@@ -113,15 +120,20 @@ public class ServiceNotificationListener implements MessageListener {
                             callback.run(true);                        
                         }
                     }
-                    
+                    m_loggerProline.info(" *** JMSNOTIF *** DONE ");
                 } catch (JMSException | JSONRPC2ParseException ex) {
-                    m_loggerProline.error("Error handling JMS Message", ex);
+                    m_loggerProline.error(" *** JMSNOTIF *** Error handling JMS Message", ex);
                 }
 
             } else {
-                m_loggerProline.warn("Invalid JMS Message type");
+                try {
+                    m_loggerProline.warn("**** Invalid JMS Message type : "+jmsMessage);
+                    m_loggerProline.warn("**** Invalid JMS Message type : "+jmsMessage.getJMSType());
+                } catch (JMSException e) {
+                    e.printStackTrace();
+                }
             }
-        }
+//        }
     }
 
 }

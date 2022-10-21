@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -174,13 +174,12 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
     private HashSet m_dataToBeSelected = null;
 
     @Override
-    public Class[] getImportantInParameterClass() {
-        Class[] classList = {DProteinSet.class};
-        return classList;
+    public Class[] getDataboxNavigationOutParameterClasses() {
+        return new Class[]{DProteinSet.class};
     }
     
     @Override
-    public String getImportantOutParameterValue() {
+    public String getDataboxNavigationDisplayValue() {
         DProteinSet p = (DProteinSet) getData(DProteinSet.class);
         if (p != null) {
             DProteinMatch pm = p.getTypicalProteinMatch();

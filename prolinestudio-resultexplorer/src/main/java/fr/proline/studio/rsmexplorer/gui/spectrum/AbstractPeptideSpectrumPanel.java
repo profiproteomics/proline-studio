@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -42,7 +42,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.RectangleAnchor;
 import org.jfree.ui.TextAnchor;
-import org.openide.windows.WindowManager;
+import fr.proline.studio.WindowManager;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
@@ -475,8 +475,12 @@ public abstract class AbstractPeptideSpectrumPanel extends HourglassPanel implem
     m_dataSet.addSeries(SERIES_NAME, data);
 
     // Set title
-    String title = "Query " + msQuery.getInitialId() + " - " + p.getSequence();
-    m_chart.setTitle(title);
+    StringBuffer title = new StringBuffer("Query ");
+    title.append(msQuery.getInitialId()).append(" - ").append(p.getSequence());
+    if(!p.getPtmString().isEmpty() && p.getTransientData().isPeptideReadablePtmStringLoaded())
+      title.append(" [").append(p.getTransientData().getPeptideReadablePtmString().getReadablePtmString()).append("] ");
+      title.append(" ").append(pm.getCharge()).append("+");
+    m_chart.setTitle(title.toString());
 
     m_spectrumPanel.setBackground(Color.white);
 

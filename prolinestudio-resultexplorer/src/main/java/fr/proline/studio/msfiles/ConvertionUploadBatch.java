@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,7 +16,8 @@
  */
 package fr.proline.studio.msfiles;
 
-import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
+import fr.proline.studio.rsmexplorer.MzdbFilesTopPanel;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,6 +75,7 @@ public class ConvertionUploadBatch implements Runnable, MsListener {
 
         if (m_pathToExpand == null) {
             Iterator it = m_conversions.entrySet().iterator();
+            String mountingPointPath = null;
             while (it.hasNext()) {
                 Map.Entry pair = (Map.Entry) it.next();
                 ConversionSettings settings = (ConversionSettings) pair.getValue();
@@ -85,19 +87,16 @@ public class ConvertionUploadBatch implements Runnable, MsListener {
                         m_parentDirectories.add(settings.getUploadSettings().getDestination());
                     }
                 }
+                if (settings.getUploadSettings() != null && mountingPointPath==null)
+                    mountingPointPath = settings.getUploadSettings().getMountingPointPath();
             }
-            
-            MzdbUploadSettings uploadSettings = m_conversions.values().iterator().next().getUploadSettings();
-            if (uploadSettings != null) {
-                MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandMultipleTreePath(m_parentDirectories, uploadSettings.getMountingPointPath());
-                MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();
-            }
+            if(mountingPointPath != null)
+                MzdbFilesTopPanel.getExplorer().getTreeFileChooserPanel().expandMultipleTreePath(m_parentDirectories, mountingPointPath);
         } else {
-            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
-            MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();
+            MzdbFilesTopPanel.getExplorer().getTreeFileChooserPanel().expandTreePath(m_pathToExpand);
         }
 
-        
+        MzdbFilesTopPanel.getExplorer().getTreeFileChooserPanel().updateTree();
 
         Iterator it = m_conversions.entrySet().iterator();
         while (it.hasNext()) {
@@ -118,7 +117,7 @@ public class ConvertionUploadBatch implements Runnable, MsListener {
 
                 if (p.wasSuccessful()) {
                     if (p.getConversionSettings() != null && p.getConversionSettings().getUploadSettings() != null) {
-                        MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().updateTree();
+                        MzdbFilesTopPanel.getExplorer().getLocalFileSystemView().updateTree();
                         upload(p.getFile(), p.getConversionSettings().getUploadSettings());
                     }
                 }
@@ -142,7 +141,7 @@ public class ConvertionUploadBatch implements Runnable, MsListener {
             }
 
             if (success) {
-                MzdbFilesTopComponent.getExplorer().getTreeFileChooserPanel().updateTree();
+                MzdbFilesTopPanel.getExplorer().getTreeFileChooserPanel().updateTree();
             }
         }
     }

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,31 +16,21 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.corewrapper.data.QuantPostProcessingParams;
-import fr.proline.studio.parameter.AbstractParameter;
-import fr.proline.studio.parameter.BooleanParameter;
-import fr.proline.studio.parameter.DoubleParameter;
-import fr.proline.studio.parameter.ObjectParameter;
-import fr.proline.studio.parameter.ParameterList;
-import fr.proline.studio.settings.FilePreferences;
+import fr.proline.studio.parameter.*;
 import fr.proline.studio.utils.StringUtils;
-import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
-import javax.swing.*;
-import org.openide.util.NbPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
+import java.util.*;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 /**
  * panel with the different parameters for computing quantitation profile all
@@ -293,7 +283,7 @@ public class QuantPostProcessingPanel extends JPanel {
      * @param filePreferences
      * @throws BackingStoreException
      */
-    public void loadParameters(FilePreferences filePreferences, String version) throws BackingStoreException {        
+    public void loadParameters(Preferences filePreferences, String version) throws BackingStoreException {
         
         boolean loadedPTMsParamsError = false;//Specify if loaded params from file don't contains this Quant PTMs list        
         String[] hiddenParams = {m_parameterList.getPrefixName() + m_peptideStatTestsAlphaParameter.getName(),
@@ -334,7 +324,7 @@ public class QuantPostProcessingPanel extends JPanel {
             
             if (!completeMode) {                
                 if (Arrays.asList(hiddenParams).contains(key)) {
-                    filePreferences.remove(key); // Don't load this parameter     
+                    filePreferences.remove(key); // Don't load this parameter
                 } else {
                     String value = filePreferences.get(key, null);
                     preferences.put(key, value);
@@ -357,7 +347,7 @@ public class QuantPostProcessingPanel extends JPanel {
             String label = m_discardModifiedPeptidesChB.getText()+" (WARNING-PTMs: Read parameters don't match current list)";
             m_discardModifiedPeptidesChB.setText(label);
         }       
-        getParameterList().loadParameters(filePreferences); //Load params 
+        getParameterList().loadParameters(filePreferences); //Load params
         updateDiscardPTMs();
     }
 

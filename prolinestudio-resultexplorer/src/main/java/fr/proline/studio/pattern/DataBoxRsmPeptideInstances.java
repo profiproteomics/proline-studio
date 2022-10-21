@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -174,13 +174,12 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
     }
     
     @Override
-    public Class[] getImportantInParameterClass() {
-        Class[] classList = {PeptideInstance.class, DPeptideMatch.class};
-        return classList;
+    public Class[] getDataboxNavigationOutParameterClasses() {
+        return new Class[]{PeptideInstance.class, DPeptideMatch.class};
     }
 
     @Override
-    public String getImportantOutParameterValue() {
+    public String getDataboxNavigationDisplayValue() {
         DPeptideMatch p = (DPeptideMatch) getData(DPeptideMatch.class);
         if (p != null) {
             Peptide peptide = p.getPeptide();

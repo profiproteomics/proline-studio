@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -316,6 +316,7 @@ public class SelectRawFilesPanel extends JPanel implements XICRunNodeInitListene
         yesNoDialog.setVisible(true);
         if (yesNoDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
             m_model.cleanRawFile();
+            resetDropZonePanel();
             repaint();
         }
     }

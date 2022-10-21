@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -98,7 +98,7 @@ public class ScatterOrHistogramGraphic extends AbstractGraphic {
         int nbColumnsKept = 0;
         for (int i = 0; i < nbColumns; i++) {
             Class c = model1.getDataColumnClass(i);
-            if (c.equals(Integer.class) || c.equals(Float.class) || c.equals(Double.class)) {
+            if (c.equals(Integer.class) || c.equals(Float.class) || c.equals(Double.class) || c.equals(Long.class)) {
                 nbColumnsKept++;
             }
         }
@@ -107,7 +107,7 @@ public class ScatterOrHistogramGraphic extends AbstractGraphic {
         int iKept = 0;
         for (int i = 0; i < nbColumns; i++) {
             Class c = model1.getDataColumnClass(i);
-            if (c.equals(Integer.class) || c.equals(Float.class) || c.equals(Double.class)) {
+            if (c.equals(Integer.class) || c.equals(Float.class) || c.equals(Double.class) || c.equals(Long.class)) {
                 objectArray1[iKept] = model1.getColumnName(i);
                 associatedObjectArray1[iKept] = i;
                 if (i == bestXColumnIndex) {

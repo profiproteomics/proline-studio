@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -25,8 +25,9 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
  */
 public class PeptideClassesUtils {
     
-    public static final double PROTON_MASS =1.007825; //1.007276466812;
-    public static final double PEPTIDE_ISOTOPE_SHIFT=1.00335;
+
+    public static final double PROTON_MASS = 1.007276466812;
+    public static final double PEPTIDE_ISOTOPE_SHIFT = 1.00335;
     final static double EXP_CSTE = StrictMath.pow(10, 6);
             
     public static Float getPPMFor(DPeptideMatch pepMatch, Peptide peptide) {
@@ -41,7 +42,20 @@ public class PeptideClassesUtils {
             }
         return ppm;
     }
-    
+
+    public static Float getDeltaMozFor(double expMoz, double charge,  Peptide peptide) {
+        double calculatedMass = peptide.getCalculatedMass() ;
+        double theoreticalMoz = (calculatedMass + (charge * PROTON_MASS)) / charge;
+        float ppm = (float) (((expMoz-theoreticalMoz)*EXP_CSTE)/theoreticalMoz);
+
+        if ((calculatedMass >= -1e-10) && (calculatedMass <= 1e-10)) {
+            //calculatedMass == 0; // it was a bug, does no longer exist, but 0 values can exist in database.
+            ppm = 0;
+        }
+        return ppm;
+    }
+
+
     /**
      * 
      * @param petideIonMoz  

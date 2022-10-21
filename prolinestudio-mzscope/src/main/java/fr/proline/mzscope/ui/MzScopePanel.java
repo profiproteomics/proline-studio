@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -20,7 +20,6 @@ import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
 import fr.proline.mzscope.model.*;
 import fr.proline.mzscope.ui.peakels.DetectedFeaturesPanel;
-import fr.proline.mzscope.ui.peakels.FeaturesPanel;
 import fr.proline.mzscope.ui.peakels.PeakelsPanel;
 import fr.proline.mzscope.utils.ButtonTabComponent;
 import com.google.common.base.Strings;
@@ -38,6 +37,7 @@ import fr.proline.mzscope.ui.dialog.ExtractionParamsDialog;
 import fr.proline.mzscope.ui.event.ExtractionEvent;
 import fr.proline.mzscope.ui.event.ExtractionStateListener;
 import fr.proline.mzscope.utils.Display;
+import fr.proline.studio.Exceptions;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.DefaultDialog.ProgressTask;
 import java.awt.BorderLayout;
@@ -60,7 +60,6 @@ import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
-import org.openide.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static scala.collection.JavaConversions.asJavaIterable;
@@ -165,7 +164,7 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
     public void openRaw(List<File> files, boolean display) {
         List<IRawFile> rawfiles = new ArrayList();
         for (File f : files) {
-            IRawFile rawfile = RawFileManager.getInstance().getFile(f.getName());
+            IRawFile rawfile = RawFileManager.getInstance().getFile(f.getAbsolutePath());
             if (rawfile == null) {
                 rawfile = RawFileManager.getInstance().addRawFile(f);
             }
@@ -177,7 +176,7 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
     }
 
     public void openRawAndExtract(File file, final double moz, final double elutionTime, final double firstScanTime, final double lastScanTime) {
-        IRawFile tmpRawFile = RawFileManager.getInstance().getFile(file.getName());
+        IRawFile tmpRawFile = RawFileManager.getInstance().getFile(file.getAbsolutePath());
         if (tmpRawFile == null) {
             tmpRawFile = RawFileManager.getInstance().addRawFile(file);
         }
@@ -716,5 +715,13 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
         }
         return false;
     }
+
+  @Override
+  public void displayFeatures(Map<String, List<IFeature>> features) {
+    final DetectedFeaturesPanel featurePanel = new DetectedFeaturesPanel(this);
+    addFeatureTab("Generated Features", featurePanel, "generated");
+    featuresTabPane.setSelectedComponent(featurePanel);
+    featurePanel.setFeatures(features, false);
+  }
 
 }

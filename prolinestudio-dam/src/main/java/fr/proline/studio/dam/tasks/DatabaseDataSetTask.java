@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -43,10 +43,10 @@ import java.util.*;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import org.netbeans.api.db.explorer.ConnectionManager;
+/*import org.netbeans.api.db.explorer.ConnectionManager;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.api.db.explorer.JDBCDriver;
-import org.netbeans.api.db.explorer.JDBCDriverManager;
+import org.netbeans.api.db.explorer.JDBCDriverManager;*/
 
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DDatasetType.QuantitationMethodInfo;
@@ -56,7 +56,6 @@ import fr.proline.studio.dam.data.DatasetToCopy;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import java.io.IOException;
 import javax.persistence.NoResultException;
-import org.netbeans.api.db.explorer.DatabaseException;
 import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 
 /**
@@ -546,25 +545,25 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             // add the MSIdb connection to the Netbeans Service
             ExternalDb msiDb = ExternalDbRepository.findExternalByTypeAndProject(entityManagerUDS, ProlineDatabaseType.MSI, entityManagerUDS.merge(m_project));
 
-            try {
-                ConnectionManager cm = ConnectionManager.getDefault();
-                JDBCDriver driver = JDBCDriverManager.getDefault().getDrivers(DatabaseDataManager.getDatabaseDataManager().getUdsJdbcDriver())[0]; //JPM.WART : same driver for uds and msi
+            //try {
+                //ConnectionManager cm = ConnectionManager.getDefault();
+                //JDBCDriver driver = JDBCDriverManager.getDefault().getDrivers(DatabaseDataManager.getDatabaseDataManager().getUdsJdbcDriver())[0]; //JPM.WART : same driver for uds and msi
                 String udsJdbcUrl = DatabaseDataManager.getDatabaseDataManager().getUdsJdbcURL();
                 String msiJdbcUrl = udsJdbcUrl.substring(0, udsJdbcUrl.lastIndexOf('/') + 1) + msiDb.getDbName();
 
                 String dbUser = (String)DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(projectId).getProperty(AbstractDatabaseConnector.PERSISTENCE_JDBC_USER_KEY);
                 String dbPassword = (String)DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(projectId).getProperty(AbstractDatabaseConnector.PERSISTENCE_JDBC_PASSWORD_KEY);
 
-                DatabaseConnection dbconn = DatabaseConnection.create(driver, msiJdbcUrl, dbUser, "public", dbPassword, true);
+                //DatabaseConnection dbconn = DatabaseConnection.create(driver, msiJdbcUrl, dbUser, "public", dbPassword, true);
 
-                cm.addConnection(dbconn);
-            } catch (DatabaseException e) {
+                //cm.addConnection(dbconn);
+            /*} catch (DatabaseException e) {
 
                 String message = e.getMessage();
                 if ((message == null) || (!message.contains("connection already exists"))) { //JPM.WART : avoid error because the connection already exist
                     m_logger.error(getClass().getSimpleName() + " failed to add UDS connection to Services ", e);
                 }
-            }
+            }*/
 
             entityManagerUDS.getTransaction().commit();
 
@@ -944,7 +943,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private void setDDatasetQuantProperties(DDataset ddataset, Map<String, Long> objectTreeIdByName, EntityManager entityManagerUDS){
         if (objectTreeIdByName != null){
             for (Map.Entry<String, Long> entry: objectTreeIdByName.entrySet()) {
-                if (entry.getKey().startsWith("quantitation")) {
+                if (entry.getKey().startsWith("quantitation")|| entry.getKey().equals("proline.low_level_config")) {
                     Long objectId = entry.getValue();
                     fr.proline.core.orm.uds.ObjectTree objectTree = entityManagerUDS.find(fr.proline.core.orm.uds.ObjectTree.class, objectId);
                     ddataset.setObjectTree(objectTree);

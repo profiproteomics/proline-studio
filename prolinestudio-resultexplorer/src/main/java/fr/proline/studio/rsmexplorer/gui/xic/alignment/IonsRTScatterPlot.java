@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -17,14 +17,11 @@
 package fr.proline.studio.rsmexplorer.gui.xic.alignment;
 
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
-import fr.proline.studio.graphics.BasePlotPanel;
-import fr.proline.studio.graphics.CrossSelectionInterface;
-import fr.proline.studio.graphics.PlotScatter;
-import fr.proline.studio.graphics.XAxis;
-import fr.proline.studio.graphics.YAxis;
+import fr.proline.studio.graphics.*;
 import fr.proline.studio.utils.CyclicColorPalette;
-import java.awt.Color;
-import java.awt.Graphics2D;
+
+import java.awt.*;
+import java.awt.geom.AffineTransform;
 
 /**
  *
@@ -32,7 +29,8 @@ import java.awt.Graphics2D;
  */
 public class IonsRTScatterPlot extends PlotScatter {
 
-    private final static int TRANSPARENCY = 70;
+    private static final int TRANSPARENCY = 70;
+    private static final BasicStroke DEFAULT_STROKE = new BasicStroke(1.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
 
     private Color m_color;
     private Color m_highlightColor = new Color(CyclicColorPalette.GRAY_DARK.getRed(), CyclicColorPalette.GRAY_DARK.getGreen(), CyclicColorPalette.GRAY_DARK.getBlue(), TRANSPARENCY+15);
@@ -41,6 +39,7 @@ public class IonsRTScatterPlot extends PlotScatter {
 
     private StringBuilder m_sBuilder;
     private int m_colY; //index of column Y
+    private double m_featureAlignmentTimeTolerance;
 
     public IonsRTScatterPlot(BasePlotPanel plotPanel, ExtendedTableModelInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
         super(plotPanel, compareDataInterface, crossSelectionInterface, colX, colY);
@@ -51,6 +50,10 @@ public class IonsRTScatterPlot extends PlotScatter {
 
     public void setColor(Color c) {
         this.m_color = new Color(c.getRed(), c.getGreen(), c.getBlue(), TRANSPARENCY);
+    }
+
+    public void setFeatureAlignmentTimeTolerance(double tolerance) {
+        this.m_featureAlignmentTimeTolerance = tolerance;
     }
 
     public void showCrossAssignedIons(boolean showCrossAssignedIons) {
@@ -112,13 +115,14 @@ public class IonsRTScatterPlot extends PlotScatter {
     @Override
     public void paint(Graphics2D g, XAxis xAxis, YAxis yAxis) {
 
-
         // set clipping area
         int clipX = xAxis.valueToPixel(xAxis.getMinValue());
         int clipWidth = xAxis.valueToPixel(xAxis.getMaxValue()) - clipX;
         int clipY = yAxis.valueToPixel(yAxis.getMaxValue());
         int clipHeight = yAxis.valueToPixel(yAxis.getMinValue()) - clipY;
         g.setClip(clipX, clipY, clipWidth, clipHeight);
+
+        g.setStroke(DEFAULT_STROKE);
 
         // first plot non selected
         int size = (m_dataX != null) ? m_dataX.length : 0;
@@ -137,11 +141,18 @@ public class IonsRTScatterPlot extends PlotScatter {
                     g.setColor(m_highlightColor);
                     g.drawOval(x - 3, y - 3, 6, 6);
                 }
+            } else if (Math.abs(m_dataY[i]) > m_featureAlignmentTimeTolerance) {
+                AffineTransform savedTransform = g.getTransform();
+                AffineTransform transform = g.getTransform();
+                transform.translate(x, y);
+                transform.rotate(Math.PI / 4.0);
+                g.setTransform(transform);
+                g.drawRect(- 2, - 2, 4, 4);
+                g.setTransform(savedTransform);
             } else {
                 g.setColor(m_color);
                 g.fillOval(x - 3, y - 3, 6, 6);
             }
-
         }
 
         // plot selected

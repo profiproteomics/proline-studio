@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,11 +16,12 @@
  */
 package fr.proline.studio.rsmexplorer.actions.table;
 
-import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.DataBoxFrozenCopy;
-import fr.proline.studio.pattern.WindowBox;
-import fr.proline.studio.pattern.WindowBoxFactory;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.WindowManager;
+import fr.proline.studio.pattern.*;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
@@ -35,7 +36,7 @@ public class DisplayViewInNewWindowAction extends AbstractAction {
     
     private AbstractDataBox m_sourceBox;
     private AbstractDataBox m_destinationBox;
-
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
     public DisplayViewInNewWindowAction(AbstractDataBox sourceBox, AbstractDataBox destinationBox, String description) {
         super(description);
@@ -47,9 +48,10 @@ public class DisplayViewInNewWindowAction extends AbstractAction {
         
         m_sourceBox = sourceBox;
         try {
-            m_destinationBox = destinationBox.getClass().newInstance();
+            m_destinationBox = DataboxManager.getDataboxNewInstance(destinationBox);
         } catch (InstantiationException | IllegalAccessException e) {
             // should never happen
+            m_logger.error("Error creating new Databox ",e);
         }
     }
 
@@ -62,7 +64,7 @@ public class DisplayViewInNewWindowAction extends AbstractAction {
         dataBoxFrozenCopy.addNextDataBox(m_destinationBox);
 
 
-        String dataName = m_sourceBox.getImportantOutParameterValue();
+        String dataName = m_sourceBox.getDataboxNavigationDisplayValue();
         if ((dataName !=null) && (dataName.length()>12)) {
             dataName = dataName.substring(0,10)+"...";
         }
@@ -70,17 +72,16 @@ public class DisplayViewInNewWindowAction extends AbstractAction {
         final WindowBox wbox = WindowBoxFactory.getDetailWindowBox(dataName, dataName+": "+m_destinationBox.getDescription(), m_destinationBox);
 
         // open a window to display the window box
-        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-        win.open();
-        win.requestActive();
+        DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+        WindowManager.getDefault().getMainWindow().displayWindow(win);
         
-        Class[] classes = m_sourceBox.getImportantInParameterClass();
-        for (int i=0;i<classes.length;i++) {
-            dataBoxFrozenCopy.addDataChanged(classes[i], null);
+        Class[] classes = m_sourceBox.getDataboxNavigationOutParameterClasses();
+        if(classes != null) {
+            for (int i = 0; i < classes.length; i++) {
+                dataBoxFrozenCopy.addDataChanged(classes[i], null);
+            }
         }
         dataBoxFrozenCopy.propagateDataChanged();
-
-
 
     }
 

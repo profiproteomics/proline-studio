@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -17,13 +17,11 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabasePTMSitesTask;
-import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
 import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
@@ -31,14 +29,15 @@ import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.gui.SplittedPanelContainer;
-import fr.proline.studio.rsmexplorer.gui.PTMPeptidesTablePanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
+import fr.proline.studio.types.XicMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -52,7 +51,7 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
     protected List<PTMPeptideInstance> m_ptmPepInstances;
     protected List<PTMCluster> m_ptmClusters;
 
-    protected boolean m_isXICResult = true;
+    protected boolean m_isMS1LabelFreeQuantitation = true;
     protected boolean m_displayAllPepMatches = false;
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer.ptm");
 
@@ -68,10 +67,9 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
         // One ResultSummary
         ParameterList inParameter = new ParameterList();
         inParameter.addParameter(PTMPeptideInstance.class, m_displayAllPepMatches ? ParameterSubtypeEnum.LEAF_PTMPeptideInstance : ParameterSubtypeEnum.PARENT_PTMPeptideInstance);
-        inParameter.addParameter(PTMPeptideInstance.class);
-        
         inParameter.addParameter(PTMDataset.class);
-        if (m_isXICResult) {
+
+        if (m_isMS1LabelFreeQuantitation) {
             inParameter.addParameter(QuantChannelInfo.class);
             inParameter.addParameter(DMasterQuantProteinSet.class);
         }
@@ -88,8 +86,12 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
         outParameter.addParameter(DPeptideInstance.class, ParameterSubtypeEnum.LIST_DATA);
         outParameter.addParameter(ResultSummary.class);
         outParameter.addParameter(PTMDataset.class);
-        if (m_isXICResult) {
+        outParameter.addParameter(DDataset.class);
+        if (m_isMS1LabelFreeQuantitation) {
             outParameter.addParameter(ExtendedTableModelInterface.class);
+            outParameter.addParameter(DMasterQuantPeptide.class);
+            outParameter.addParameter(QuantChannelInfo.class);
+            outParameter.addParameter(XicMode.class);
         }
         outParameter.addParameter(MsQueryInfoRsm.class);
         registerOutParameter(outParameter);
@@ -99,8 +101,8 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
         return m_displayAllPepMatches;
     }
 
-    protected boolean isQuantiResult() {
-        return m_isXICResult;
+    protected boolean isMS1LabelFreeQuantitation() {
+        return m_isMS1LabelFreeQuantitation;
     }
 
     @Override
@@ -119,6 +121,9 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
                     if (m_rsm != null) {
                         return m_rsm;
                     }
+                }
+                if (parameterType.equals(DDataset.class)) {
+                    return m_ptmDataset.getDataset();
                 }
 
                 if (parameterType.equals(PTMDataset.class)) {
@@ -229,65 +234,65 @@ public abstract class AbstractDataBoxPTMPeptides extends AbstractDataBox {
         updateData();
     }
 
-    protected List<PTMSite> getNotLoadedPTMSite() {
-
-        final List<PTMSite> notLoadedPtmSite = new ArrayList<>();
-        for (PTMPeptideInstance ptmPepInst : m_ptmPepInstances) {
-            ptmPepInst.getPTMSites().stream().forEach(ptmSite -> {
-                if (!ptmSite.isLoaded()) {
-                    notLoadedPtmSite.add(ptmSite);
-                }
-            });
-        }
-        return notLoadedPtmSite;
-    }
+//    protected List<PTMSite> getNotLoadedPTMSite() {
+//
+//        final List<PTMSite> notLoadedPtmSite = new ArrayList<>();
+//        for (PTMPeptideInstance ptmPepInst : m_ptmPepInstances) {
+//            ptmPepInst.getPTMSites().stream().forEach(ptmSite -> {
+//                if (!ptmSite.isLoaded()) {
+//                    notLoadedPtmSite.add(ptmSite);
+//                }
+//            });
+//        }
+//        return notLoadedPtmSite;
+//    }
 
     protected void resetPrevPTMTaskId() {
         m_previousPTMTaskId = null;
     }
 
-    protected void loadPtmSite(List<PTMSite> notLoadedPtmSite) {
-
-        //Load PTMSite not yet loaded !
-        final int loadingId = setLoading();
-
-        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
-
-            @Override
-            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                setLoaded(loadingId);
-                if (!success) {
-                    ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, null, null, null, finished);
-                } else {
-                    m_previousPTMTaskId = null;
-                    unregisterTask(taskId);
-                    if (m_isXICResult) {
-                        loadXicAndPropagate();
-                    } else {
-                        ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, m_ptmPepInstances, m_ptmClusters, null, finished);
-                        addDataChanged(PTMPeptideInstance.class, null); //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
-                        addDataChanged(ExtendedTableModelInterface.class);
-                        propagateDataChanged();
-                    }
-                }
-            }
-        };
-
-        DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback);
-        task.initFillPTMSites(getProjectId(), m_rsm, notLoadedPtmSite);
-        Long taskId = task.getId();
-        if (m_previousPTMTaskId != null) {
-            // old task is suppressed if it has not been already done
-            AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousPTMTaskId);
-        }
-        m_previousPTMTaskId = taskId;
-        registerTask(task);
-    }
+//    protected void loadPtmSite(List<PTMSite> notLoadedPtmSite) {
+//
+//        //Load PTMSite not yet loaded !
+//        final int loadingId = setLoading();
+//
+//        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+//
+//            @Override
+//            public boolean mustBeCalledInAWT() {
+//                return true;
+//            }
+//
+//            @Override
+//            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+//                setLoaded(loadingId);
+//                if (!success) {
+//                    ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, null, null, null, finished);
+//                } else {
+//                    m_previousPTMTaskId = null;
+//                    unregisterTask(taskId);
+//                    if (m_isMS1LabelFreeQuantitation) {
+//                        loadXicAndPropagate();
+//                    } else {
+//                        ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, m_ptmPepInstances, m_ptmClusters, null, finished);
+//                        addDataChanged(PTMPeptideInstance.class, null); //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
+//                        addDataChanged(ExtendedTableModelInterface.class);
+//                        propagateDataChanged();
+//                    }
+//                }
+//            }
+//        };
+//
+//        DatabasePTMSitesTask task = new DatabasePTMSitesTask(callback);
+//        task.initFillPTMSites(getProjectId(), m_rsm, notLoadedPtmSite);
+//        Long taskId = task.getId();
+//        if (m_previousPTMTaskId != null) {
+//            // old task is suppressed if it has not been already done
+//            AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousPTMTaskId);
+//        }
+//        m_previousPTMTaskId = taskId;
+//        registerTask(task);
+//    }
 
     abstract protected DPeptideMatch getSelectedPeptideMatch();
 

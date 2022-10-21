@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -21,11 +21,11 @@ import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
+import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.ParameterList;
@@ -34,11 +34,11 @@ import fr.proline.studio.rsmexplorer.gui.xic.ProteinQuantPanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XicProteinSetPanel;
 import fr.proline.studio.types.XicMode;
-import java.util.ArrayList;
-import java.util.List;
-import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -162,7 +162,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         };
 
         // ask asynchronous loading of data
-        m_masterQuantProteinSetList = new ArrayList();
+        m_masterQuantProteinSetList = new ArrayList<>();
         DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
         task.initLoadProteinSets(getProjectId(), m_dataset, m_masterQuantProteinSetList);
         //Long taskId = task.getId();
@@ -184,16 +184,11 @@ public class DataboxXicProteinSet extends AbstractDataBox {
      * @param dataType
      */
     @Override
-    public void dataMustBeRecalculated(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, int reason) {
-        if (m_dataset.getResultSetId() != rsetId) {
+    public void dataMustBeRecalculated(Long rsetId, Long rsmId, Class dataType, ArrayList modificationsList, byte reason) {
+        if(! ( isDataOfInterest(rsetId, rsmId, dataType) && dataType.equals(DMasterQuantProteinSet.class)))
             return;
-        }
-        if (m_dataset.getResultSummaryId() != rsmId) {
-            return;
-        }
-        if (dataType.equals(DMasterQuantProteinSet.class)) {
-            ((XicProteinSetPanel) getDataBoxPanelInterface()).dataModified(modificationsList, reason);
-        }
+
+        ((XicProteinSetPanel) getDataBoxPanelInterface()).dataModified(modificationsList, reason);
     }
 
     @Override
@@ -286,13 +281,13 @@ public class DataboxXicProteinSet extends AbstractDataBox {
     }
 
     @Override
-    public Class[] getImportantInParameterClass() {
+    public Class[] getDataboxNavigationOutParameterClasses() {
         Class[] classList = {DMasterQuantProteinSet.class, DProteinSet.class};
         return classList;
     }
 
     @Override
-    public String getImportantOutParameterValue() {
+    public String getDataboxNavigationDisplayValue() {
         DProteinSet p = (DProteinSet) getData(DProteinSet.class);
         if (p != null) {
             DProteinMatch pm = p.getTypicalProteinMatch();

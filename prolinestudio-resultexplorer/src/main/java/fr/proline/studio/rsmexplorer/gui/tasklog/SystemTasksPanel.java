@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -17,6 +17,7 @@
 package fr.proline.studio.rsmexplorer.gui.tasklog;
 
 import fr.profi.util.StringUtils;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.dpm.data.JMSNotificationMessage;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
@@ -28,36 +29,22 @@ import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.utils.IconManager;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.jms.Message;
 import javax.jms.QueueBrowser;
-import javax.swing.JButton;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JToolBar;
-import javax.swing.ListSelectionModel;
 import javax.swing.Timer;
+import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
-import org.openide.windows.WindowManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -81,6 +68,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
 
     public SystemTasksPanel() {
         super();
+        m_loggerProline.warn(" STARTED system tasks !!");
         setLayout(new GridBagLayout());
         m_logParserDialog = new ServerLogFileNameDialog();
         GridBagConstraints c = new GridBagConstraints();
@@ -270,7 +258,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
 
     /*
      * Called when notification is enabled to allow other king of data collect.
-     * Browse Proline JMS Queue 
+     * Browse Proline JMS Queue
      */
     @Override
     protected void startOtherDataCollecting() {
@@ -317,6 +305,9 @@ public class SystemTasksPanel extends AbstractTasksPanel {
             }
 
         } catch (Exception jmsE) {
+
+            jmsE.printStackTrace();
+
             m_connectionErrCount++;
             if (m_connectionErrCount < 2) {
                 JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "Unable to browse pending messages (JMS Connection problem ?! : " + jmsE.getMessage() + ")", "Server Tasks Logs error", JOptionPane.ERROR_MESSAGE);
@@ -328,8 +319,8 @@ public class SystemTasksPanel extends AbstractTasksPanel {
 //                //TODO: add method in JMSConnectionManager to disconnect/reconnect without reset of variables
 //                String jmsHost = JMSConnectionManager.getJMSConnectionManager().m_jmsServerHost;
 //                JMSConnectionManager.getJMSConnectionManager().closeConnection();
-//                JMSConnectionManager.getJMSConnectionManager().setJMSServerHost(jmsHost);                
-//                if (!checkJMSVariables()) { // still can't connect 
+//                JMSConnectionManager.getJMSConnectionManager().setJMSServerHost(jmsHost);
+//                if (!checkJMSVariables()) { // still can't connect
 //                    stopOtherDataCollecting();
 //                }
 //                reInitConnection();
@@ -344,7 +335,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
         String jmsHost = JMSConnectionManager.getJMSConnectionManager().m_jmsServerHost;
         JMSConnectionManager.getJMSConnectionManager().closeConnection();
         JMSConnectionManager.getJMSConnectionManager().setJMSServerHost(jmsHost);
-        if (!checkJMSVariables()) { // still can't connect 
+        if (!checkJMSVariables()) { // still can't connect
             stopOtherDataCollecting();
             m_reconnectButton.setEnabled(true);
         } else {

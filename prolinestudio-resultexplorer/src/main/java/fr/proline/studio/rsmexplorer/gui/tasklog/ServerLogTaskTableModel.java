@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -95,38 +95,26 @@ public class ServerLogTaskTableModel extends AbstractDecoratedGlobalTableModel<L
     @Override
     public Class<?> getColumnClass(int columnIndex) {
         switch (columnIndex) {
-            case COLTYPE_ORDER_ID: {
+            case COLTYPE_ORDER_ID:
+            case COLTYPE_NB_TASK_PARALELLE: {
                 return Integer.class;
             }
-            case COLTYPE_PROJECT_ID: {
+            case COLTYPE_PROJECT_ID:
+            case COLTYPE_THREAD_NAME:
+            case COLTYPE_MESSAGE_ID:
+            case COLTYPE_CALL_SERVICE:
+            case COLTYPE_META_INFO: {
                 return String.class;
             }
             case COLTYPE_STATUS: {
                 return LogTask.STATUS.class;
             }
-            case COLTYPE_START_TIME: {
-                return Date.class;
-            }
+            case COLTYPE_START_TIME:
             case COLTYPE_STOP_TIME: {
                 return Date.class;
             }
-            case COLTYPE_THREAD_NAME: {
-                return String.class;
-            }
-            case COLTYPE_MESSAGE_ID: {
-                return String.class;
-            }
-            case COLTYPE_CALL_SERVICE: {
-                return String.class;
-            }
-            case COLTYPE_META_INFO: {
-                return String.class;
-            }
             case COLTYPE_DURATION: {
                 return Long.class;
-            }
-            case COLTYPE_NB_TASK_PARALELLE: {
-                return Integer.class;
             }
             default:
                 return null;

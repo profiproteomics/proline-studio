@@ -8,7 +8,9 @@ package fr.proline.mzscope.timstof;
 import fr.profi.brucker.timstof.converter.SpectrumGeneratingMethod;
 import fr.profi.brucker.timstof.io.TimstofReader;
 import fr.profi.brucker.timstof.model.AbstractTimsFrame;
+import fr.profi.brucker.timstof.model.TimsMSFrame;
 import fr.profi.brucker.timstof.model.TimsPASEFFrame;
+import fr.profi.util.StringUtils;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.FeaturesExtractionRequest;
 import fr.proline.mzscope.model.IChromatogram;
@@ -19,6 +21,7 @@ import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.MsnExtractionRequest;
 import fr.proline.mzscope.model.QCMetrics;
 import fr.proline.mzscope.model.Spectrum;
+
 import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,15 +45,34 @@ public class TimstofRawFile implements IRawFile{
     private Map<Integer, Integer> m_frame2FirstSpectraIndex;
     private IChromatogram m_ticChromato;
     private IChromatogram m_bpcChromato;
-
+    private String m_ms1Format;
+    
+    public final static String MS1_SINGLE_SPECTRA = "Single Spectra";
+    public final static String MS1_SPECTRA_PER_SCAN = "Spectra Per Scan";
     
     private static final Logger LOG = LoggerFactory.getLogger(TimstofRawFile.class);
     
     public TimstofRawFile(File ttFile){
+        this(ttFile,MS1_SINGLE_SPECTRA);
+    }
+    
+    public TimstofRawFile(File ttFile, String ms1SpectrumFormat){
         long start = System.currentTimeMillis();
         if(!ttFile.isDirectory())
            throw new IllegalArgumentException("You should specify a brucker .d directory");
-        
+        m_ms1Format = MS1_SINGLE_SPECTRA;        
+        if(ms1SpectrumFormat != null && StringUtils.isNotEmpty(ms1SpectrumFormat)) {
+            switch(ms1SpectrumFormat){
+                case MS1_SINGLE_SPECTRA: 
+                    m_ms1Format = MS1_SINGLE_SPECTRA;
+                    break;
+                case MS1_SPECTRA_PER_SCAN:
+                    m_ms1Format = MS1_SPECTRA_PER_SCAN;
+                    break;
+                default:
+                    LOG.warn("Invalid MS1 Spectra format specified ! Default is used (Single Spectra)");
+            }
+        }
         m_ttDirFile = ttFile;
        
         init();     
@@ -72,8 +94,9 @@ public class TimstofRawFile implements IRawFile{
         m_frame2FirstSpectraIndex = new HashMap<>();
         for(AbstractTimsFrame tf : m_ttFrames){
             Integer nbrSpectrum =  tf.getSpectrumCount();
-            
-            
+            if(m_ms1Format.equals(MS1_SPECTRA_PER_SCAN) && TimsMSFrame.class.isInstance(tf))
+                nbrSpectrum =((TimsMSFrame) tf).getNbrScans();
+                        
             m_frame2FirstSpectraIndex.put(tf.getId(),spectrumIndex);
             for(int i=0;i<nbrSpectrum; i++){
                 m_spectra2FrameIndex.put(spectrumIndex, tf.getId());
@@ -84,7 +107,7 @@ public class TimstofRawFile implements IRawFile{
     
     @Override
     public String getName() {
-       return m_ttDirFile.getName()+"TEST ";
+       return m_ttDirFile.getName();
     }
 
     @Override
@@ -113,7 +136,7 @@ public class TimstofRawFile implements IRawFile{
         return m_ticChromato;
     }
     
-     public float getSpectrumTIC(int index) {         
+     public float getSpectrumTIC(int index) {
         if(m_ticChromato == null)
             getTIC(-1);
         
@@ -148,7 +171,7 @@ public class TimstofRawFile implements IRawFile{
 
     @Override
     public Spectrum getSpectrum(int spectrumIndex) {
-        Integer frameId = m_spectra2FrameIndex.get(spectrumIndex);       
+            Integer frameId = m_spectra2FrameIndex.get(spectrumIndex);       
         
         Optional<AbstractTimsFrame> opFrame = m_ttFrames.stream().filter(frame -> frameId.equals(frame.getId())).findFirst();
         if(!opFrame.isPresent())
@@ -173,10 +196,24 @@ public class TimstofRawFile implements IRawFile{
            spectrum = new Spectrum(spectrumIndex, (float) pasefFrame.getTime(), tfSp.getMasses(), tfSp.getIntensities(), 2);
            spectrum.setTitle(tfSp.getTitle());
         } else if (!TimsPASEFFrame.class.isInstance(tf) ) {
-           //TODO VDS TO TEST if correct to fix  SpectrumGeneratingMethod.SMOOTH  or ask user...
-            fr.profi.brucker.timstof.model.Spectrum tfSp = tf.getSingleSpectrum(SpectrumGeneratingMethod.SMOOTH);
-            spectrum  = new Spectrum(spectrumIndex, (float) tf.getTime(), tfSp.getMasses(), tfSp.getIntensities(), 1);
-            spectrum.setTitle(tfSp.getTitle());
+            TimsMSFrame ms1Frame = (TimsMSFrame) tf;
+            if(m_ms1Format.equals(MS1_SPECTRA_PER_SCAN)) {
+                //Read spectrum corresponding to index...             
+                Integer indexInFrameSpectra = spectrumIndex - m_frame2FirstSpectraIndex.get(ms1Frame.getId()); //Index relative to frame 
+                fr.profi.brucker.timstof.model.Spectrum tfSp = ms1Frame.getScanSpectrum(indexInFrameSpectra);
+                if(tfSp != null){
+                    spectrum = new Spectrum(spectrumIndex, (float) ms1Frame.getTime(), tfSp.getMasses(), tfSp.getIntensities(), 1, Spectrum.ScanType.CENTROID);
+                    spectrum.setTitle(tfSp.getTitle()+"_scan_"+indexInFrameSpectra);
+                } else {
+                    spectrum = new Spectrum(spectrumIndex, (float) ms1Frame.getTime(), new double[0], new float[0], 1);
+                    spectrum.setTitle(ms1Frame.getId()+"_empty_scan_"+indexInFrameSpectra);
+                }
+            } else {
+                //TODO VDS TO TEST if correct to fix  SpectrumGeneratingMethod.SMOOTH  or ask user...
+                fr.profi.brucker.timstof.model.Spectrum tfSp = tf.getSingleSpectrum(SpectrumGeneratingMethod.SMOOTH);
+                spectrum  = new Spectrum(spectrumIndex, (float) tf.getTime(), tfSp.getMasses(), tfSp.getIntensities(), 1);
+                spectrum.setTitle(tfSp.getTitle());
+            }
         }
             
         return spectrum;
@@ -201,7 +238,7 @@ public class TimstofRawFile implements IRawFile{
 
     @Override
     public double[] getElutionTimes(int msLevel) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("TimsTof getElutionTimes: Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -280,12 +317,12 @@ public class TimstofRawFile implements IRawFile{
 
     @Override
     public List<Float> getMsMsEvent(double minMz, double maxMz) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("TimsTof getMsMsEvent: Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public boolean exportRawFile(String outFileName, IExportParameters exportParams) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("TimsTof exportRawFile: Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -295,12 +332,12 @@ public class TimstofRawFile implements IRawFile{
 
     @Override
     public Map<String, Object> getFileProperties() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("TimsTof getFileProperties: Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public QCMetrics getFileMetrics() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("TimsTof getFileMetrics: Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -315,6 +352,6 @@ public class TimstofRawFile implements IRawFile{
 
     @Override
     public List<IPeakel> extractPeakels(FeaturesExtractionRequest params) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("TimsTof extractPeakels: Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

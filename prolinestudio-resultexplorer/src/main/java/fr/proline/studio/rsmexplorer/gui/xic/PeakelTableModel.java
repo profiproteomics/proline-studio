@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -116,7 +116,7 @@ public class PeakelTableModel extends LazyTableModel implements GlobalTableModel
 
     @Override
     public int getSubTaskId(int col) {
-        return DatabaseLoadLcMSTask.SUB_TASK_PEAKEL;
+        return DatabaseLoadLcMSTask.SUB_TASK_PEAKEL_FOR_FEATURE;
     }
 
     @Override

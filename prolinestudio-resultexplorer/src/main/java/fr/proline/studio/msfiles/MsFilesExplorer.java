@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -17,7 +17,7 @@
 package fr.proline.studio.msfiles;
 
 import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
-import fr.proline.studio.rsmexplorer.MzdbFilesTopComponent;
+import fr.proline.studio.rsmexplorer.MzdbFilesTopPanel;
 import fr.proline.studio.rsmexplorer.gui.LocalFileSystemTransferHandler;
 import fr.proline.studio.rsmexplorer.gui.LocalFileSystemView;
 import fr.proline.studio.rsmexplorer.gui.TreeFileChooserPanel;
@@ -31,6 +31,7 @@ import java.io.File;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
@@ -45,7 +46,7 @@ public class MsFilesExplorer extends JPanel {
     private final TreeFileChooserPanel m_tree;
     private final TreeFileChooserTransferHandler m_transferHandler;
     private final LocalFileSystemView m_localFileSystemView;
-    
+
     private boolean m_downAllowed = false;
     private boolean m_upAllowed = false;
 
@@ -108,7 +109,7 @@ public class MsFilesExplorer extends JPanel {
         private ArrayList<FileToTransfer> m_filesDown = null;
         private ArrayList<FileToTransfer> m_directoriesDown = null;
         private ArrayList<FileToTransfer> m_parentDirectoriesDown = null;
-        
+
         
         public TransferFileButtonsPanel() {
             setLayout(new GridBagLayout());
@@ -147,7 +148,7 @@ public class MsFilesExplorer extends JPanel {
             m_upButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    
+
                     if (m_filesDown == null) {
                         JOptionPane.showMessageDialog(m_upButton, "You must select from the Proline Server File System to download them to the Local File System.", "Upload Error", JOptionPane.WARNING_MESSAGE);
                         return;
@@ -164,13 +165,13 @@ public class MsFilesExplorer extends JPanel {
                         JOptionPane.showMessageDialog(m_upButton, "You must select a directory of the Local File System where the files will be downloaded.", "Upload Error", JOptionPane.WARNING_MESSAGE);
                         return;
                     }
-                    
-                    ArrayList<File> fileList = new ArrayList<>(); 
+
+                    ArrayList<File> fileList = new ArrayList<>();
                     for (FileToTransfer f : m_filesDown) {
                         fileList.add(f.getFile());
                     }
                     TreePath path =  (!m_parentDirectoriesUp.isEmpty()) ? m_parentDirectoriesUp.get(0).getPath() : m_directoriesUp.get(0).getPath();
-                    MzdbDownloadBatch downloadBatch = new MzdbDownloadBatch(fileList, path, MzdbFilesTopComponent.getExplorer().getLocalFileSystemView().getSelectedRoot());
+                    MzdbDownloadBatch downloadBatch = new MzdbDownloadBatch(fileList, path, MzdbFilesTopPanel.getExplorer().getLocalFileSystemView().getSelectedRoot());
                     Thread downloadThread = new Thread(downloadBatch);
                     downloadThread.start();
                 }
@@ -197,8 +198,8 @@ public class MsFilesExplorer extends JPanel {
                         return;
                     }
 
-                    
-                    ArrayList<File> fileList = new ArrayList<>(); 
+
+                    ArrayList<File> fileList = new ArrayList<>();
                     for (FileToTransfer f : m_filesUp) {
                         fileList.add(f.getFile());
                     }
@@ -224,7 +225,7 @@ public class MsFilesExplorer extends JPanel {
             m_parentDirectoriesDown = parentDirectory;
         }
         
-        
+
     }
     
     

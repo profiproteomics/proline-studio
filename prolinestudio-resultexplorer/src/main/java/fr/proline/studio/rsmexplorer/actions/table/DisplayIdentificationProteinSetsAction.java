@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -17,10 +17,11 @@
 package fr.proline.studio.rsmexplorer.actions.table;
 
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.table.AbstractTableAction;
 import fr.proline.studio.table.ExportTableSelectionInterface;
 import java.util.HashSet;
@@ -59,9 +60,8 @@ public class DisplayIdentificationProteinSetsAction extends AbstractTableAction 
         wbox.setEntryData(m_box.getProjectId(), rsm);
 
         // open a window to display the window box
-        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-        win.open();
-        win.requestActive();
+        DataBoxViewerTopPanel win = new DataBoxViewerTopPanel(wbox);
+        WindowManager.getDefault().getMainWindow().displayWindow(win);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 VD225637
+ * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the CeCILL FREE SOFTWARE LICENSE AGREEMENT
@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.gui;
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.awt.Component;
@@ -32,7 +33,6 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import org.openide.windows.WindowManager;
 
 /**
  *

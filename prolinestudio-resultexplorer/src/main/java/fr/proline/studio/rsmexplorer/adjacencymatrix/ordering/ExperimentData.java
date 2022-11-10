@@ -16,7 +16,7 @@
  */
 package fr.proline.studio.rsmexplorer.adjacencymatrix.ordering;
 
-import ch.usi.inf.sape.hac.experiment.Experiment;
+import org.opencompare.hac.experiment.Experiment;
 
 public class ExperimentData implements Experiment {
 

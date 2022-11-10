@@ -146,11 +146,16 @@
             <artifactId>commons-math3</artifactId>
         </dependency>
 
+<!--        <dependency>-->
+<!--            <groupId>sape.inf.usi.ch</groupId>-->
+<!--            <artifactId>hac</artifactId> -->
+<!--            <version>2015-04</version> -->
+<!--        </dependency> -->
         <dependency>
-            <groupId>sape.inf.usi.ch</groupId>
-            <artifactId>hac</artifactId> 
-            <version>2015-04</version> 
-        </dependency> 
+            <groupId>org.opencompare</groupId>
+            <artifactId>hac</artifactId>
+            <version>1.0.0</version>
+        </dependency>
 
         <dependency>
             <groupId>org.xerial</groupId>

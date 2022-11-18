@@ -46,7 +46,7 @@ public interface IRawFile {
     * @param params
     * @return 
     */
-   public IChromatogram getXIC(MsnExtractionRequest params);
+   public IChromatogram getXIC(ExtractionRequest params);
    
    /**
     * Returns the Total Ion IChromatogram of this rax file.
@@ -160,7 +160,10 @@ public interface IRawFile {
     * @return true if this file is a DIA file.
     */
    public boolean isDIAFile();
-   
+
+   public boolean hasIonMobilitySeparation();
+
+
    /**
     * Returns as a Map a set of proerties associated with this raw file. 
     * 
@@ -180,4 +183,6 @@ public interface IRawFile {
    * All necessary resouces should be closed here
    */
    public void closeIRawFile();
+
+   IonMobilityIndex getIonMobilityIndex();
 }

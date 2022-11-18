@@ -73,7 +73,7 @@ public class MzMLRawFile implements IRawFile {
    }
     
    @Override
-   public IChromatogram getXIC(MsnExtractionRequest params) {
+   public IChromatogram getXIC(ExtractionRequest params) {
       IChromatogram chromatogram  = XICExtractor.extract(scans, (float)params.getMinMz(), (float)params.getMaxMz());      
       return chromatogram;      
    }
@@ -152,7 +152,17 @@ public class MzMLRawFile implements IRawFile {
         return false;
     }
 
-    @Override
+  @Override
+  public boolean hasIonMobilitySeparation() {
+    return false;
+  }
+
+  @Override
+  public IonMobilityIndex getIonMobilityIndex() {
+    return null;
+  }
+
+  @Override
     public Map<String, Object> getFileProperties() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

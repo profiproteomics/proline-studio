@@ -80,7 +80,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
     }
 
     @Override
-    public void extractAndDisplayChromatogram(final MsnExtractionRequest params, Display display, MzScopeCallback callback) {
+    public void extractAndDisplay(final ExtractionRequest params, Display display, MzScopeCallback callback) {
        // in this implementation display is ignored : always REPLACE since we will extract one IChromatogram per RawFile
         SwingWorker worker = new SwingWorker<Integer, IChromatogram>() {
             Display display = new Display(Display.Mode.SERIES);
@@ -107,6 +107,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             protected void done() {
                 try {
                     chromatogramPanel.setCurrentChromatogram(chromatogramByRawFile.get(currentRawFile));
+                    MzScopePreferences.getInstance().setLastExtractionRequest(params);
                     logger.info("{} TIC chromatogram extracted", get());
                 } catch (InterruptedException | ExecutionException e) {
                     logger.error("Error while reading chromatogram");
@@ -193,6 +194,8 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
         final double minMz = f.getMz() - f.getMz() * ppm / 1e6;
 
         final List<IRawFile> rawFiles = new ArrayList<>(rawfiles);
+        final ExtractionRequest extractionRequest = ExtractionRequest.builder(this).setMz(f.getMz()).setMzTolPPM((float)ppm).build();
+
         SwingWorker worker = new SwingWorker<Integer, IChromatogram>() {
             int count = 0;
             boolean isFirstProcessCall = true;
@@ -201,8 +204,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             protected Integer doInBackground() throws Exception {
                 //return getCurrentRawfile().getXIC(minMz, maxMz);
                 for (IRawFile rawFile : rawFiles) {
-                    MsnExtractionRequest params = MsnExtractionRequest.builder().setMaxMz(maxMz).setMinMz(minMz).build();
-                    IChromatogram c = rawFile.getXIC(params);
+                    IChromatogram c = rawFile.getXIC(extractionRequest);
                     count++;
                     publish(c);
                 }
@@ -234,6 +236,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             protected void done() {
                 try {
                     chromatogramPanel.setCurrentChromatogram(chromatogramByRawFile.get(currentRawFile));
+                    MzScopePreferences.getInstance().setLastExtractionRequest(extractionRequest);
                     logger.info("{} Display Feature", get());
                 } catch (InterruptedException | ExecutionException e) {
                     logger.error("Error while displaying feature");

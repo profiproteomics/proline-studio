@@ -31,7 +31,7 @@ public class ChromatogramAnnotator implements IAnnotator {
   }
 
   @Override
-  public AnnotatedChromatogram annotate(IRawFile rawFile, IChromatogram chromatogram, MsnExtractionRequest request, Integer expectedCharge) {
+  public AnnotatedChromatogram annotate(IRawFile rawFile, IChromatogram chromatogram, ExtractionRequest request, Integer expectedCharge) {
 
     try {
       int maxConsecutiveGaps = 3;

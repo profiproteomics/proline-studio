@@ -5,22 +5,13 @@
  */
 package fr.proline.mzscope.timstof;
 
-import fr.profi.brucker.timstof.model.SpectrumGeneratingMethod;
-import fr.profi.brucker.timstof.io.TimstofReader;
-import fr.profi.brucker.timstof.model.AbstractTimsFrame;
-import fr.profi.brucker.timstof.model.TimsMSFrame;
-import fr.profi.brucker.timstof.model.TimsPASEFFrame;
+import fr.profi.bruker.timstof.model.SpectrumGeneratingMethod;
+import fr.profi.bruker.timstof.io.TimstofReader;
+import fr.profi.bruker.timstof.model.AbstractTimsFrame;
+import fr.profi.bruker.timstof.model.TimsMSFrame;
+import fr.profi.bruker.timstof.model.TimsPASEFFrame;
 import fr.profi.util.StringUtils;
-import fr.proline.mzscope.model.Chromatogram;
-import fr.proline.mzscope.model.FeaturesExtractionRequest;
-import fr.proline.mzscope.model.IChromatogram;
-import fr.proline.mzscope.model.IExportParameters;
-import fr.proline.mzscope.model.IFeature;
-import fr.proline.mzscope.model.IPeakel;
-import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.model.MsnExtractionRequest;
-import fr.proline.mzscope.model.QCMetrics;
-import fr.proline.mzscope.model.Spectrum;
+import fr.proline.mzscope.model.*;
 
 import java.io.File;
 import java.util.Collections;
@@ -116,7 +107,7 @@ public class TimstofRawFile implements IRawFile{
     }
 
     @Override
-    public IChromatogram getXIC(MsnExtractionRequest params) {
+    public IChromatogram getXIC(ExtractionRequest params) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -192,7 +183,7 @@ public class TimstofRawFile implements IRawFile{
            if(indexInFrameSpectra >= precursorIds.size())
                return null;
            Collections.sort(precursorIds);           
-           fr.profi.brucker.timstof.model.Spectrum tfSp = pasefFrame.getPrecursorSpectrum(precursorIds.get(indexInFrameSpectra));
+           fr.profi.bruker.timstof.model.Spectrum tfSp = pasefFrame.getPrecursorSpectrum(precursorIds.get(indexInFrameSpectra));
            spectrum = new Spectrum(spectrumIndex, (float) pasefFrame.getTime(), tfSp.getMasses(), tfSp.getIntensities(), 2);
            spectrum.setTitle(tfSp.getTitle());
         } else if (!TimsPASEFFrame.class.isInstance(tf) ) {
@@ -200,7 +191,7 @@ public class TimstofRawFile implements IRawFile{
             if(m_ms1Format.equals(MS1_SPECTRA_PER_SCAN)) {
                 //Read spectrum corresponding to index...             
                 Integer indexInFrameSpectra = spectrumIndex - m_frame2FirstSpectraIndex.get(ms1Frame.getId()); //Index relative to frame 
-                fr.profi.brucker.timstof.model.Spectrum tfSp = ms1Frame.getScanSpectrum(indexInFrameSpectra);
+                fr.profi.bruker.timstof.model.Spectrum tfSp = ms1Frame.getScanSpectrum(indexInFrameSpectra);
                 if(tfSp != null){
                     spectrum = new Spectrum(spectrumIndex, (float) ms1Frame.getTime(), tfSp.getMasses(), tfSp.getIntensities(), 1, Spectrum.ScanType.CENTROID);
                     spectrum.setTitle(tfSp.getTitle()+"_scan_"+indexInFrameSpectra);
@@ -210,7 +201,7 @@ public class TimstofRawFile implements IRawFile{
                 }
             } else {
                 //TODO VDS TO TEST if correct to fix  SpectrumGeneratingMethod.SMOOTH  or ask user...
-                fr.profi.brucker.timstof.model.Spectrum tfSp = tf.getSingleSpectrum(SpectrumGeneratingMethod.SMOOTH);
+                fr.profi.bruker.timstof.model.Spectrum tfSp = tf.getSingleSpectrum(SpectrumGeneratingMethod.SMOOTH);
                 spectrum  = new Spectrum(spectrumIndex, (float) tf.getTime(), tfSp.getMasses(), tfSp.getIntensities(), 1);
                 spectrum.setTitle(tfSp.getTitle());
             }
@@ -330,7 +321,12 @@ public class TimstofRawFile implements IRawFile{
         return false;
     }
 
-    @Override
+  @Override
+  public boolean hasIonMobilitySeparation() {
+    return true;
+  }
+
+  @Override
     public Map<String, Object> getFileProperties() {
         throw new UnsupportedOperationException("TimsTof getFileProperties: Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -343,6 +339,11 @@ public class TimstofRawFile implements IRawFile{
     @Override
     public void closeIRawFile() {
         m_reader.closeTimstofFile(m_fileHandler);
+    }
+
+    @Override
+    public IonMobilityIndex getIonMobilityIndex() {
+        return null;
     }
 
     @Override

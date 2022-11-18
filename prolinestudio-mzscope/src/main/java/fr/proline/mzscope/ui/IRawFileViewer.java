@@ -21,6 +21,7 @@ import fr.proline.mzscope.utils.Display;
 import fr.proline.mzscope.utils.MzScopeCallback;
 
 import java.awt.*;
+import java.beans.PropertyChangeListener;
 import java.util.Map;
 
 /**
@@ -29,31 +30,33 @@ import java.util.Map;
  */
 public interface IRawFileViewer {
 
+   final public static String LAST_EXTRACTION_REQUEST = "lastExtractionRequest";
+
    /**
-    * Returns the current RawFile ie the the raw file associated with the current IChromatogram  (see below)
+    * Returns the current RawFile ie the raw file associated with the current viewer (see below)
     *
-    * @return
+    * @return the RawFile associated with this viewer.
     */
    public IRawFile getCurrentRawfile();
 
    /**
-    * Extract a IChromatogram according to the specified parameters and display the results in this panel. The specified 
-    * callback is called in the AWT event dispatch thread when the display finished.
+    * Extract data according to the specified parameters and display the results in this viewer. The specified
+    * callback is called in the AWT event dispatch thread when the display finishes.
     * 
-    * @param params the XIC extraction parameters 
+    * @param params the extraction parameters
     * @param display the display mode to use
-    * @param callback that must be called back after XIC extraction.
+    * @param callback that must be called back after extraction.
     */
-   public void extractAndDisplayChromatogram(MsnExtractionRequest params, Display display, MzScopeCallback callback);
+   public void extractAndDisplay(ExtractionRequest params, Display display, MzScopeCallback callback);
 
    /**
     * Display the chromatogram and return the plot color
     * 
-    * @param chromato the chromatogram to display 
+    * @param chromatogram the chromatogram to display
     * @param display parameters used to display the specified chromatogram
     * @return the color used to display the sepecified c
     */ 
-   public Color displayChromatogram(IChromatogram chromato, Display display);
+   public Color displayChromatogram(IChromatogram chromatogram, Display display);
 
    /**
     * Display the supplied chromatograms
@@ -119,5 +122,10 @@ public interface IRawFileViewer {
     * @return the Spectrum currently represented by this viewer.
     */
    public Spectrum getCurrentSpectrum();
+
+   void addPropertyChangeListener(String propertyName, PropertyChangeListener listener);
+
+   void removePropertyChangeListener(String propertyName, PropertyChangeListener listener);
+
 
 }

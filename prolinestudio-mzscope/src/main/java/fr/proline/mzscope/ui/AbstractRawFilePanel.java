@@ -32,8 +32,6 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -47,21 +45,16 @@ import java.util.concurrent.ExecutionException;
  */
 public abstract class AbstractRawFilePanel extends JPanel implements IRawFileViewer, KeyEventDispatcher {
 
-    final private static Logger logger = LoggerFactory.getLogger("ProlineStudio.mzScope.AbstractRawFilePanel");
+    final private static Logger logger = LoggerFactory.getLogger(AbstractRawFilePanel.class);
 
     private boolean displayScan = true;
-    private Display.Mode xicDisplayMode = Display.Mode.REPLACE;
-
-    private JSplitPane splitPane;
-    private JPanel mainPanel;
-    private JPanel chromatogramContainerPanel;
+    private Display.Mode displayMode = Display.Mode.REPLACE;
 
     protected ChromatogramPanel chromatogramPanel;
-    protected SpectrumPanel spectrumContainerPanel;
+    protected SpectrumPanel spectrumPanel;
     protected JToolBar chromatogramToolbar;
     protected Spectrum currentScan;
     private JToggleButton showMS2EventsButton;
-    private JToggleButton overlayBtn;
     private JLayeredPane m_layeredPane;
 
     protected IRawFileLoading rawFileLoading;
@@ -86,7 +79,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
 
     private void init() {
         initComponents();
-        spectrumContainerPanel.initComponents();
+        spectrumPanel.initComponents();
         KeyEventDispatcherDecorator.addKeyEventListener(this);
     }
 
@@ -96,7 +89,29 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
         m_layeredPane = new JLayeredPane();
         add(m_layeredPane, BorderLayout.CENTER);
 
-        JPanel mainPanel = getMainPanel();
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BorderLayout());
+
+        JPanel chromatogramContainerPanel = new JPanel();
+        chromatogramContainerPanel.setLayout(new BorderLayout());
+        chromatogramContainerPanel.add(getChromatogramPanel(), BorderLayout.CENTER);
+        chromatogramContainerPanel.add(getChromatogramToolbar(), BorderLayout.NORTH);
+
+        if (displayScan) {
+            JSplitPane splitPane = new JSplitPane();
+            splitPane.setDividerLocation(160);
+            splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
+            splitPane.setResizeWeight(0.5);
+            splitPane.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            splitPane.setDoubleBuffered(true);
+            splitPane.setOneTouchExpandable(true);
+            splitPane.setTopComponent(chromatogramContainerPanel);
+            splitPane.setBottomComponent(getSpectrumPanel());
+            mainPanel.add(splitPane, BorderLayout.CENTER);
+        } else {
+            mainPanel.add(chromatogramContainerPanel, BorderLayout.CENTER);
+        }
+
         m_layeredPane.add(mainPanel, JLayeredPane.DEFAULT_LAYER);
         m_layeredPane.addComponentListener(new ComponentAdapter() {
 
@@ -110,69 +125,20 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
         });
     }
 
-    private JPanel getMainPanel() {
-        if (mainPanel == null) {
-            mainPanel = new JPanel();
-            mainPanel.setName("mainPanel");
-            mainPanel.setLayout(new BorderLayout());
-            if (displayScan) {
-                mainPanel.add(getSplitPane(), BorderLayout.CENTER);
-            } else {
-                mainPanel.add(getChromatogramContainerPanel(), BorderLayout.CENTER);
-            }
-        }
-        return mainPanel;
-    }
-
-    private JSplitPane getSplitPane() {
-        if (this.splitPane == null) {
-            splitPane = new JSplitPane();
-            splitPane.setDividerLocation(160);
-            splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
-            splitPane.setResizeWeight(0.5);
-            splitPane.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-            splitPane.setDoubleBuffered(true);
-            splitPane.setOneTouchExpandable(true);
-            splitPane.setTopComponent(getChromatogramContainerPanel());
-            splitPane.setBottomComponent(getSpectrumContainerPanel());
-        }
-        return splitPane;
-    }
-
-    private JPanel getChromatogramContainerPanel() {
-        if (this.chromatogramContainerPanel == null) {
-            chromatogramContainerPanel = new JPanel();
-            chromatogramContainerPanel.setName("chromatogramContainerPanel");
-            chromatogramContainerPanel.setLayout(new BorderLayout());
-            chromatogramContainerPanel.add(getChromatogramPanel(), BorderLayout.CENTER);
-            chromatogramContainerPanel.add(getChromatogramToolbar(), BorderLayout.NORTH);
-        }
-        return chromatogramContainerPanel;
-    }
-
     private ChromatogramPanel getChromatogramPanel() {
         if (this.chromatogramPanel == null) {
             chromatogramPanel = new ChromatogramPanel();
-            chromatogramPanel.setName("chromatogramPanel");
-            chromatogramPanel.addPropertyChangeListener(new PropertyChangeListener() {
-
-                @Override
-                public void propertyChange(PropertyChangeEvent evt) {
-                    displayScan(getCurrentRawfile().getSpectrumId((Float) evt.getNewValue()));
-                }
-            });
+            chromatogramPanel.addPropertyChangeListener(evt -> displayScan(getCurrentRawfile().getSpectrumId((Float)evt.getNewValue())));
         }
         return chromatogramPanel;
-
     }
 
-    protected JPanel getSpectrumContainerPanel() {
-        if (this.spectrumContainerPanel == null) {
-            spectrumContainerPanel = new SpectrumPanel(this);
-            spectrumContainerPanel.setName("spectrumContainerPanel");
-            spectrumContainerPanel.setLayout(new BorderLayout());
+    protected JPanel getSpectrumPanel() {
+        if (this.spectrumPanel == null) {
+            spectrumPanel = new SpectrumPanel(this);
+            spectrumPanel.setLayout(new BorderLayout());
         }
-        return spectrumContainerPanel;
+        return spectrumPanel;
     }
 
     private JToolBar getChromatogramToolbar() {
@@ -183,52 +149,39 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
 
         JButton ticBtn = new JButton(IconManager.getIcon(IconManager.IconType.TIC));
         ticBtn.setToolTipText("Display TIC Chromatogram");
-        ticBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                displayTIC(-1);
-            }
-        });
+        ticBtn.addActionListener(e -> displayTIC(-1));
 
         JButton displayTICbtn = new JButton(IconManager.getIcon(IconManager.IconType.TIC));
         displayTICbtn.setToolTipText("Display TIC Chromatogram");
-        displayTICbtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                displayTIC(-1);
-            }
-        });
+        displayTICbtn.addActionListener(e -> displayTIC(-1));
 
         JButton displayTICMS1btn = new JButton(IconManager.getIcon(IconManager.IconType.TIC_MS1));
         displayTICMS1btn.setToolTipText("Display MS1 TIC Chromatogram");
-        displayTICMS1btn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                displayTIC(1);
-            }
-        });
+        displayTICMS1btn.addActionListener(e -> displayTIC(1));
 
         ExtendableButtonPanel extendableButtonPanel = new ExtendableButtonPanel(ticBtn);
         m_layeredPane.add(extendableButtonPanel, JLayeredPane.PALETTE_LAYER);
         extendableButtonPanel.registerButton(displayTICbtn);
         extendableButtonPanel.registerButton(displayTICMS1btn);
 
-
         chromatogramToolbar.add(ticBtn);
 
         JButton displayBPIbtn = new JButton(IconManager.getIcon(IconManager.IconType.BPC));
         displayBPIbtn.setToolTipText("Display Base Peak Chromatogram");
-        displayBPIbtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                displayBPI();
-            }
-        });
+        displayBPIbtn.addActionListener(e -> displayBPI());
         chromatogramToolbar.add(displayBPIbtn);
+
+
         chromatogramToolbar.add(getShowMS2Button());
         setMsMsEventButtonEnabled(false);
 
-        chromatogramToolbar.add(getOverlayBtn());
+        JToggleButton overlayBtn = new JToggleButton();
+        overlayBtn.setIcon(IconManager.getIcon(IconManager.IconType.OVERLAY));
+        overlayBtn.setSelected(false);
+        overlayBtn.setToolTipText("Overlay extracted chromatograms. This can also be done by using the Alt key");
+        overlayBtn.addActionListener(e -> displayMode = ((AbstractButton) e.getSource()).isSelected() ? Display.Mode.OVERLAY : Display.Mode.REPLACE);
+
+        chromatogramToolbar.add(overlayBtn);
         chromatogramToolbar.setFloatable(false);
         chromatogramToolbar.setRollover(true);
 
@@ -239,31 +192,9 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
         if (showMS2EventsButton == null) {
         showMS2EventsButton = new JToggleButton(IconManager.getIcon(IconManager.IconType.MS2), false);
         showMS2EventsButton.setToolTipText("Show or hide MS2 Events");
-        showMS2EventsButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                displayMsMsEvents(showMS2EventsButton.isSelected());
-            }
-        });
+        showMS2EventsButton.addActionListener(e -> displayMsMsEvents(showMS2EventsButton.isSelected()));
         }
         return showMS2EventsButton;
-    }
-    
-    protected JToggleButton getOverlayBtn() {
-        if (overlayBtn == null) {
-            overlayBtn = new JToggleButton();
-            overlayBtn.setIcon(IconManager.getIcon(IconManager.IconType.OVERLAY));
-            overlayBtn.setSelected(false);
-            overlayBtn.setName("cbXicOverlay");
-            overlayBtn.setToolTipText("Overlay extracted chromatograms. This can also be done by using the Alt key");
-            overlayBtn.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    xicDisplayMode = ((AbstractButton) e.getSource()).isSelected() ? Display.Mode.OVERLAY : Display.Mode.REPLACE;
-                }
-            });
-        }
-        return overlayBtn;
     }
 
     protected void setMsMsEventButtonEnabled(boolean b) {
@@ -274,7 +205,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
     }
 
     public Display.Mode getChromatogramDisplayMode() {
-        return xicDisplayMode;
+        return displayMode;
     }
 
     private void displayMsMsEvents(boolean showMsMsEvents) {
@@ -331,44 +262,62 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
     }
 
     @Override
-    public void extractAndDisplayChromatogram(MsnExtractionRequest params, final Display display, final MzScopeCallback callback) {
+    public void extractAndDisplay(final ExtractionRequest params, final Display display, final MzScopeCallback callback) {
         if (rawFileLoading != null) {
             rawFileLoading.setWaitingState(true);
         }
-        SwingWorker worker = new AbstractMs1ExtractionWorker(getCurrentRawfile(), params) {
-            @Override
-            protected void done() {
-                try {
-                    IChromatogram c = get();
-                    if (c != null) {
-                        displayChromatogram(c, display);
-                        setMsMsEventButtonEnabled(true);
-                        if (callback != null) {
-                            callback.callback(true);
-                        }
-                    } else {
-                        String msg = StringUtils.formatString(params.toString(), 60);
-                        JOptionPane.showMessageDialog(null, "The following extraction request did not produce any data: \n"+msg, "IChromatogram Extraction failure", JOptionPane.ERROR_MESSAGE);
-                    }
-                } catch (InterruptedException | ExecutionException e) {
-                    logger.error("Error while extraction chromatogram", e);
-                    if (callback != null) {
-                        callback.callback(false);
-                    }
-                } finally {
-                    if (rawFileLoading != null) {
-                        rawFileLoading.setWaitingState(false);
-                    }
+
+        final IRawFile rawfile = getCurrentRawfile();
+        if (!params.getMzRequestType().equals(ExtractionRequest.Type.NONE)) {
+            SwingWorker worker = new SwingWorker<IChromatogram, Void>() {
+
+                protected IChromatogram doInBackground() throws Exception {
+                    return rawfile.getXIC(params);
                 }
-            }
-        };
-        worker.execute();
+
+                @Override
+                protected void done() {
+                    try {
+                        IChromatogram c = get();
+                        if (c != null) {
+                            displayChromatogram(c, display);
+                            setMsMsEventButtonEnabled(true);
+                            if (callback != null) {
+                                callback.callback(true);
+                            }
+                        } else {
+                            String msg = StringUtils.formatString(params.toString(), 60);
+                            JOptionPane.showMessageDialog(null, "The following extraction request did not produce any data: \n" + msg, "IChromatogram Extraction failure", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } catch (InterruptedException | ExecutionException e) {
+                        logger.error("Error while extraction chromatogram", e);
+                        if (callback != null) {
+                            callback.callback(false);
+                        }
+                    } finally {
+                        if (rawFileLoading != null) {
+                            rawFileLoading.setWaitingState(false);
+                        }
+                    }
+                    updateLastExtractionRequest(params);
+                }
+            };
+            worker.execute();
+        } else {
+            // TODO display TIC
+            updateLastExtractionRequest(params);
+        }
+    }
+
+    private void updateLastExtractionRequest(ExtractionRequest request) {
+        MzScopePreferences.getInstance().setLastExtractionRequest(request);
+        firePropertyChange(LAST_EXTRACTION_REQUEST, null, request);
     }
 
     @Override
     public void displayPeakel(final IPeakel f) {
         double ppm = MzScopePreferences.getInstance().getMzPPMTolerance();
-        final MsnExtractionRequest.Builder builder = MsnExtractionRequest.builder().setMzTolPPM((float) ppm);
+        final ExtractionRequest.Builder builder = ExtractionRequest.builder(this).setMzTolPPM((float) ppm);
 
         if (f.getMsLevel() == 1) {
             builder.setMz(f.getMz());
@@ -384,10 +333,11 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
         if (rawFileLoading != null) {
             rawFileLoading.setWaitingState(true);
         }
+        final ExtractionRequest extractionRequest = builder.build();
         SwingWorker worker = new SwingWorker<IChromatogram, Void>() {
             @Override
             protected IChromatogram doInBackground() throws Exception {
-                return getCurrentRawfile().getXIC(builder.build());
+                return getCurrentRawfile().getXIC(extractionRequest);
             }
 
             @Override
@@ -405,6 +355,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
                 } catch (ExecutionException ex) {
                     logger.error("Error while extraction feature chromatogram", ex);
                 }
+                updateLastExtractionRequest(extractionRequest);
             }
         };
         worker.execute();
@@ -420,10 +371,10 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
             if (currentScan != null) {
                 chromatogramPanel.setCurrentScanTime(currentScan.getRetentionTime());
                 if (displayScan) {
-                    spectrumContainerPanel.displayScan(currentScan);
+                    spectrumPanel.displayScan(currentScan);
                     for (IChromatogram chromato : chromatogramPanel.getChromatograms()) {
                         if ((chromato.getMinMz() != -1) && (chromato.getMaxMz() != -1) && (currentScan.getMsLevel() == 1)) {
-                            spectrumContainerPanel.addMarkerRange(chromato.getMinMz(), chromato.getMaxMz());
+                            spectrumPanel.addMarkerRange(chromato.getMinMz(), chromato.getMaxMz());
                         }
                     }
 
@@ -437,7 +388,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
 
     @Override
     public void setReferenceSpectrum(Spectrum spectrum, Float scaleFactor) {
-        spectrumContainerPanel.setReferenceSpectrum(spectrum, scaleFactor);
+        spectrumPanel.setReferenceSpectrum(spectrum, scaleFactor);
     }
 
     @Override
@@ -476,11 +427,11 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
             }
 
         } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-            displayScan(spectrumContainerPanel.getPreviousScanIndex(currentScan.getIndex()));
+            displayScan(spectrumPanel.getPreviousScanIndex(currentScan.getIndex()));
             e.consume();
             return true;
         } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            displayScan(spectrumContainerPanel.getNextScanIndex(currentScan.getIndex()));
+            displayScan(spectrumPanel.getNextScanIndex(currentScan.getIndex()));
             e.consume();
             return true;
         }

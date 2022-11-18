@@ -192,7 +192,7 @@ public class ThreadedMzdbRawFile implements IRawFile {
    }
    
    @Override
-    public IChromatogram getXIC(final MsnExtractionRequest params) {
+    public IChromatogram getXIC(final ExtractionRequest params) {
       try {
          return service.submit(() -> {
             IChromatogram chromatogram = mzdbRawFile.getXIC(params);
@@ -237,7 +237,12 @@ public class ThreadedMzdbRawFile implements IRawFile {
         return mzdbRawFile.isDIAFile();
     }
 
-    @Override
+  @Override
+  public boolean hasIonMobilitySeparation() {
+    return mzdbRawFile.hasIonMobilitySeparation();
+  }
+
+  @Override
     public Map<String, Object> getFileProperties() {
               try {
          return service.submit(() -> {
@@ -274,5 +279,10 @@ public class ThreadedMzdbRawFile implements IRawFile {
       } catch (InterruptedException | ExecutionException ex) {
          logger.error("mzdbRawFile clise failed", ex);
       }         
-    }     
+    }
+
+  @Override
+  public IonMobilityIndex getIonMobilityIndex() {
+    return mzdbRawFile.getIonMobilityIndex();
+  }
 }

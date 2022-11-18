@@ -270,7 +270,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     }
 
     @Override
-    public void extractAndDisplayChromatogram(final MsnExtractionRequest params, Display display, MzScopeCallback callback) {
+    public void extractAndDisplay(final ExtractionRequest params, Display display, MzScopeCallback callback) {
         // in this implementation displayMode is ignored : always REPLACE since we will extract one IChromatogram per RawFile
         SwingWorker worker = new SwingWorker<Integer, IChromatogram>() {
             int count = 0;

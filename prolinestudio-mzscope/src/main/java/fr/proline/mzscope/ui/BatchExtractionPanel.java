@@ -59,9 +59,9 @@ import org.slf4j.LoggerFactory;
  * @author CB205360
  * 
  */
-public class ExtractionResultsPanel extends JPanel {
+public class BatchExtractionPanel extends JPanel {
 
-    final private static Logger logger = LoggerFactory.getLogger(ExtractionResultsPanel.class);
+    final private static Logger logger = LoggerFactory.getLogger(BatchExtractionPanel.class);
     private final static String LAST_DIR = "mzscope.last.csv.extraction.directory";
 
     private List<ExtractionObject> m_extractions;
@@ -82,7 +82,7 @@ public class ExtractionResultsPanel extends JPanel {
     public final static int TOOLBAR_ALIGN_HORIZONTAL = 1;
     private int m_toolbarAlign = TOOLBAR_ALIGN_HORIZONTAL;
 
-    public ExtractionResultsPanel(IMzScopeController extractionResults, int align) {
+    public BatchExtractionPanel(IMzScopeController extractionResults, int align) {
         this.m_viewersController = extractionResults;
         m_toolbarAlign = align;
         initComponents();
@@ -124,14 +124,9 @@ public class ExtractionResultsPanel extends JPanel {
         
         JButton iRTBtn = new JButton("iRT");
         iRTBtn.setToolTipText("indexed Retention Time Standard");
-        iRTBtn.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                m_importedTableModel = null;
-                setExtractions(buildIRTRequest(), null);
-            }
-
+        iRTBtn.addActionListener(e -> {
+            m_importedTableModel = null;
+            setExtractions(buildIRTRequest(this), null);
         });
         toolbar.add(iRTBtn);
         toolbar.addSeparator();
@@ -195,9 +190,9 @@ public class ExtractionResultsPanel extends JPanel {
                 }
 
                 float moztol = MzScopePreferences.getInstance().getMzPPMTolerance();
-                List<MsnExtractionRequest> requests = new ArrayList<>();
+                List<ExtractionRequest> requests = new ArrayList<>();
                 for (int k = 0; k < mzValues.size(); k++) {
-                    requests.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(mzValues.get(k)).setElutionTime(rtValues.get(k).floatValue()).build());
+                    requests.add(ExtractionRequest.builder(this).setMzTolPPM(moztol).setMz(mzValues.get(k)).setElutionTime(rtValues.get(k).floatValue()).build());
                 }
                 setExtractions(requests, zValues);
             } else {
@@ -217,10 +212,10 @@ public class ExtractionResultsPanel extends JPanel {
         return columnIdx;
     }
 
-    private void setExtractions(List<MsnExtractionRequest> extractionRequests, List<Integer> expectedCharge) {
+    private void setExtractions(List<ExtractionRequest> extractionRequests, List<Integer> expectedCharge) {
         List<ExtractionObject> results = new ArrayList<>();
         for (int k = 0; k < extractionRequests.size(); k++) {
-            MsnExtractionRequest request = extractionRequests.get(k);
+            ExtractionRequest request = extractionRequests.get(k);
             ExtractionObject extractionObject = new ExtractionObject(request, (expectedCharge !=null) ? expectedCharge.get(k) : 0);
             results.add(extractionObject);
         }
@@ -383,20 +378,20 @@ public class ExtractionResultsPanel extends JPanel {
 
     }
 
-    private static List<MsnExtractionRequest> buildIRTRequest() {
+    private static List<ExtractionRequest> buildIRTRequest(Object source) {
         float moztol = MzScopePreferences.getInstance().getMzPPMTolerance();
-        List<MsnExtractionRequest> list = new ArrayList<>();
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(487.257).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(547.297).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(622.853).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(636.869).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(644.822).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(669.838).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(683.827).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(683.853).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(699.338).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(726.835).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(776.929).build());
+        List<ExtractionRequest> list = new ArrayList<>();
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(487.257).build());
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(547.297).build());
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(622.853).build());
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(636.869).build());
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(644.822).build());
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(669.838).build());
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(683.827).build());
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(683.853).build());
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(699.338).build());
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(726.835).build());
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(776.929).build());
         return list;
     }
 }

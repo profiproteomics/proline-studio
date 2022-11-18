@@ -23,7 +23,7 @@ public class EmptyRawFile implements IRawFile {
   }
 
   @Override
-  public IChromatogram getXIC(MsnExtractionRequest params) {
+  public IChromatogram getXIC(ExtractionRequest params) {
     return null;
   }
 
@@ -98,6 +98,11 @@ public class EmptyRawFile implements IRawFile {
   }
 
   @Override
+  public boolean hasIonMobilitySeparation() {
+    return false;
+  }
+
+  @Override
   public Map<String, Object> getFileProperties() {
     return null;
   }
@@ -110,6 +115,11 @@ public class EmptyRawFile implements IRawFile {
   @Override
   public void closeIRawFile() {
 
+  }
+
+  @Override
+  public IonMobilityIndex getIonMobilityIndex() {
+    return null;
   }
 
   @Override

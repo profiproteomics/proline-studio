@@ -79,7 +79,7 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
     private JTabbedPane featuresTabPane = null;
 
     private IRawFileViewer selectedRawFilePanel;
-    private XICExtractionPanel extractionPanel = null;
+    private ExtractionToolbar extractionPanel = null;
     private EventListenerList listenerList = new EventListenerList();
     private Map<IRawFile, List<AbstractRawFilePanel>> mapRawFilePanelRawFile;
 
@@ -95,9 +95,9 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
         this.add(getMainComponent(), BorderLayout.CENTER);
     }
 
-    private XICExtractionPanel getExtractionPanel() {
+    private ExtractionToolbar getExtractionPanel() {
         if (extractionPanel == null) {
-            extractionPanel = new XICExtractionPanel(this);
+            extractionPanel = new ExtractionToolbar(this);
         }
         return extractionPanel;
     }
@@ -139,10 +139,9 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
     private void viewersTabPaneStateChanged(ChangeEvent evt) {
         Component c = viewersTabPane.getSelectedComponent();
         if ( (c != null) &&  IRawFileViewer.class.isAssignableFrom(c.getClass())) {
+            IRawFileViewer oldViewer = this.selectedRawFilePanel;
             this.selectedRawFilePanel = (IRawFileViewer) c;
-            if (selectedRawFilePanel != null && selectedRawFilePanel.getCurrentRawfile() != null) {
-                getExtractionPanel().setDIAEnabled(selectedRawFilePanel.getCurrentRawfile().isDIAFile());
-            }
+            firePropertyChange(IMzScopeController.CURRENT_RAWFILE_VIEWER, oldViewer, this.selectedRawFilePanel);
         }
     }
 
@@ -195,11 +194,11 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
         if (!fileAlreadyOpen) {
             displayRaw(rawfile, false);
         }
-        MsnExtractionRequest params = MsnExtractionRequest.builder().setMzTolPPM(MzScopePreferences.getInstance().getMzPPMTolerance()).setMz(moz).build();
+        ExtractionRequest params = ExtractionRequest.builder(this).setMzTolPPM(MzScopePreferences.getInstance().getMzPPMTolerance()).setMz(moz).build();
         list = mapRawFilePanelRawFile.get(rawfile);
         for (final AbstractRawFilePanel p : list) {
             if (p instanceof SingleRawFilePanel) {
-                p.extractAndDisplayChromatogram(params, new Display(Display.Mode.REPLACE), new MzScopeCallback() {
+                p.extractAndDisplay(params, new Display(Display.Mode.REPLACE), new MzScopeCallback() {
                     @Override
                     public void callback(boolean success) {
                         p.displayPeakel(new BasePeakel(moz, (float) elutionTime, (float) firstScanTime, (float) lastScanTime, rawfile, 1));

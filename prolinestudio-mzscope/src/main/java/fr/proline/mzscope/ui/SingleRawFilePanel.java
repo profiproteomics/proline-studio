@@ -70,15 +70,8 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
       JButton editFeatureBtn = new JButton();
       editFeatureBtn.setIcon(IconManager.getIcon(IconManager.IconType.SIGNAL));
       editFeatureBtn.setToolTipText("IChromatogram signal processing dialog");
-      editFeatureBtn.addActionListener(new ActionListener() {
-         @Override
-         public void actionPerformed(ActionEvent e) {
-            editFeature();
-         }
-      });
-
+      editFeatureBtn.addActionListener(e -> editFeature());
       chromatogramToolbar.add(editFeatureBtn);
-      spectrumContainerPanel.updateToolbar();
       return chromatogramToolbar;
    }
 

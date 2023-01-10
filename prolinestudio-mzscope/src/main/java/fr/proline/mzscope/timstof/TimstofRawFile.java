@@ -5,7 +5,7 @@
  */
 package fr.proline.mzscope.timstof;
 
-import fr.profi.brucker.timstof.converter.SpectrumGeneratingMethod;
+import fr.profi.brucker.timstof.model.SpectrumGeneratingMethod;
 import fr.profi.brucker.timstof.io.TimstofReader;
 import fr.profi.brucker.timstof.model.AbstractTimsFrame;
 import fr.profi.brucker.timstof.model.TimsMSFrame;

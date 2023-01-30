@@ -9,6 +9,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <studio.version>${project.version}</studio.version>
+        <java.home.dir>.\jdk\bin\</java.home.dir>
     </properties>
 
     <dependencies>
@@ -42,28 +43,28 @@
         <plugins>
 
 
-            <plugin>
-                <groupId>com.google.code.maven-replacer-plugin</groupId>
-                <artifactId>replacer</artifactId>
-                <version>1.5.3</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>replace</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <file>${project.build.directory}/${project.artifactId}-${project.version}/prolinestudio/start_studio.bat</file>
-                    <replacements>
-                        <replacement>
-                            <token>java </token>
-                            <value>.\\jre\\bin\\java</value>
-                        </replacement>
-                    </replacements>
-                </configuration>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>com.google.code.maven-replacer-plugin</groupId>-->
+<!--                <artifactId>replacer</artifactId>-->
+<!--                <version>1.5.3</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <phase>package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>replace</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--                <configuration>-->
+<!--                    <file>${project.build.directory}/${project.artifactId}-${project.version}/prolinestudio/start_studio.bat</file>-->
+<!--                    <replacements>-->
+<!--                        <replacement>-->
+<!--                            <token>java </token>-->
+<!--                            <value>.\\jre\\bin\\java</value>-->
+<!--                        </replacement>-->
+<!--                    </replacements>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
 
 
 
@@ -135,7 +136,6 @@
                             <groupId>${project.groupId}</groupId>
                             <artifactId>${project.artifactId}</artifactId>
                             <version>${project.version}</version>
-<!--                            <type>zip</type>-->
                             <classifier>${os.classifier}</classifier>							
                             <packaging>zip</packaging>
                         </configuration>

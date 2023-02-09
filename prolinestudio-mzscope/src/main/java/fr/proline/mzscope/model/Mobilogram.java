@@ -24,27 +24,28 @@ public class Mobilogram {
   }
 
   private void buildMobilogram(double minMz, double maxMz) {
-
-    final float[] intensitiesArray = spectrum.getSpectrumData().getIntensityList();
-    final short[] mobilityIndexes = spectrum.getSpectrumData().getMobilityIndexList();
-    final double[] masses = spectrum.getSpectrumData().getMzList();
-
-    Short2DoubleMap values = new Short2DoubleArrayMap();
-
-    for (int k = 0; k < mobilityIndexes.length; k++) {
-      double v = (values.containsKey(mobilityIndexes[k])) ? values.get(mobilityIndexes[k]) : 0.0;
-      double increment = (masses[k] >= minMz) && (masses[k] <= maxMz) ? intensitiesArray[k] : 0.0;
-      values.put(mobilityIndexes[k], v + increment);
-    }
-
-    final IonMobilityIndex mobilityIndex = spectrum.getIonMobilityIndex();
-    final List<Short> shortList = values.keySet().stream().sorted().collect(Collectors.toList());
-    mobilities = new double[shortList.size()];
-    intensities = new float[shortList.size()];
-    for (int k = shortList.size() - 1; k >= 0; k--) {
-      mobilities[k] = mobilityIndex.getMobility(shortList.get(k).intValue());
-      intensities[k] = (float)values.getOrDefault(shortList.get(k).shortValue(), 0.0);
-    }
+// TODO use mzdb-access ion_mobility branch to enable this feature
+//    final float[] intensitiesArray = spectrum.getSpectrumData().getIntensityList();
+//    final short[] mobilityIndexes = spectrum.getSpectrumData().getMobilityIndexList();
+//    final double[] masses = spectrum.getSpectrumData().getMzList();
+//
+//    Short2DoubleMap values = new Short2DoubleArrayMap();
+//
+//    for (int k = 0; k < mobilityIndexes.length; k++) {
+//      double v = (values.containsKey(mobilityIndexes[k])) ? values.get(mobilityIndexes[k]) : 0.0;
+//      double increment = (masses[k] >= minMz) && (masses[k] <= maxMz) ? intensitiesArray[k] : 0.0;
+//      values.put(mobilityIndexes[k], v + increment);
+//    }
+//
+//    final IonMobilityIndex mobilityIndex = spectrum.getIonMobilityIndex();
+//    final List<Short> shortList = values.keySet().stream().sorted().collect(Collectors.toList());
+//    mobilities = new double[shortList.size()];
+//    intensities = new float[shortList.size()];
+//    for (int k = shortList.size() - 1; k >= 0; k--) {
+//      mobilities[k] = mobilityIndex.getMobility(shortList.get(k).intValue());
+//      intensities[k] = (float)values.getOrDefault(shortList.get(k).shortValue(), 0.0);
+//    }
+    throw new UnsupportedOperationException("not yet available");
   }
 
   public void setMzFilter(double minMz, double maxMz) {

@@ -363,7 +363,9 @@ public class MzdbRawFile implements IRawFile {
         final float[] rightHwhmList = data.getRightHwhmList();
         final double[] mzList = data.getMzList();
         final float[] intensityList = data.getIntensityList();
-        final short[] mobilityIndexList = data.getMobilityIndexList();
+
+        // TODO use mzdb-access ion_mobility branch to enable this feature
+        // final short[] mobilityIndexList = data.getMobilityIndexList();
 
         for (int i = 0; i < data.getPeaksCount(); i++) {
 
@@ -372,9 +374,10 @@ public class MzdbRawFile implements IRawFile {
                 leftHwhm = leftHwhmList[i];
                 rightHwhm = rightHwhmList[i];
             }
-            if (mobilityIndexList[i] >= minMobilityIndex && mobilityIndexList[i] <= maxMobilityIndex) {
+// TODO use mzdb-access ion_mobility branch to enable this feature
+//            if (mobilityIndexList[i] >= minMobilityIndex && mobilityIndexList[i] <= maxMobilityIndex) {
                 peaks.add(new Peak(mzList[i], intensityList[i], leftHwhm, rightHwhm, spectrumSlice.getHeader()));
-            }
+//            }
         }
         return peaks.toArray(new Peak[peaks.size()]);
     }
@@ -558,7 +561,11 @@ public class MzdbRawFile implements IRawFile {
             SpectrumData data = rawSpectrum.getData();
             Map<Integer, DataEncoding> map = reader.getDataEncodingReader().getDataEncodingById();
             DataEncoding encoding = reader.getSpectrumDataEncoding((long) spectrumIndex);
-            Spectrum.ScanType scanType = (encoding.getMode().equals(DataMode.CENTROID) || encoding.getMode().equals(DataMode.CENTROID_3D)) ?  Spectrum.ScanType.CENTROID : Spectrum.ScanType.PROFILE;
+            // TODO use mzdb-access ion_mobility branch to enable this feature
+            // Spectrum.ScanType scanType = (encoding.getMode().equals(DataMode.CENTROID) || encoding.getMode().equals(DataMode.CENTROID_3D)) ?  Spectrum.ScanType.CENTROID : Spectrum.ScanType.PROFILE;
+
+            Spectrum.ScanType scanType = (encoding.getMode().equals(DataMode.CENTROID)) ?  Spectrum.ScanType.CENTROID : Spectrum.ScanType.PROFILE;
+
 
             if ((data.getLeftHwhmList() != null) && data.getRightHwhmList() != null && !encoding.getMode().equals(DataMode.PROFILE)) {
                 final double[] mzList = data.getMzList();
@@ -838,11 +845,13 @@ public class MzdbRawFile implements IRawFile {
 
     @Override
     public boolean hasIonMobilitySeparation() {
-        try {
-            return reader.getAcquisitionCVParam(CVEntry.ION_MOBILITY_SEPARATION) == null ? false : true;
-        } catch (Exception e) {
-            return false;
-        }
+// TODO use mzdb-access ion_mobility branch to enable this feature
+//        try {
+//            return reader.getAcquisitionCVParam(CVEntry.ION_MOBILITY_SEPARATION) == null ? false : true;
+//        } catch (Exception e) {
+//            return false;
+//        }
+        return false;
     }
 
 

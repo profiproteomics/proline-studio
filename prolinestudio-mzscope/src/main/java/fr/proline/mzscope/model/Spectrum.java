@@ -84,7 +84,9 @@ public class Spectrum {
    }
 
    public boolean hasIonMobilitySeparation() {
-      return spectrumData.getMobilityIndexList() != null && spectrumData.getMobilityIndexList().length > 0;
+// TODO use mzdb-access ion_mobility branch to enable this feature
+//      return spectrumData.getMobilityIndexList() != null && spectrumData.getMobilityIndexList().length > 0;
+      return false;
    }
 
    /**

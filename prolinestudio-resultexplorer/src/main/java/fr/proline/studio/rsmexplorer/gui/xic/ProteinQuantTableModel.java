@@ -18,6 +18,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DQuantProteinSet;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportModelUtilities;
@@ -60,10 +61,13 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
 
     private String m_modelName;
 
-    private boolean m_isXICMode = true;
+    private boolean m_isSC;
+    private DDatasetType.QuantitationMethodInfo m_quantMethodInfo;
 
     public ProteinQuantTableModel(LazyTable table) {
         super(table);
+        DDatasetType.QuantitationMethodInfo quantMethodInfo = DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION;
+        m_isSC = false;
     }
 
     @Override
@@ -73,7 +77,7 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
 
     @Override
     public String getColumnName(int col) {
-        return m_isXICMode ? m_columnNames[col] : m_columnNames_SC[col];
+        return !m_isSC ? m_columnNames[col] : m_columnNames_SC[col];
     }
 
     @Override
@@ -137,10 +141,11 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
         return null; // should never happen
     }
 
-    public void setData(DQuantitationChannel[] quantChannels, DMasterQuantProteinSet proteinSet, boolean isXICMode) {
+    public void setData(DQuantitationChannel[] quantChannels, DMasterQuantProteinSet proteinSet, DDatasetType.QuantitationMethodInfo quantitationMethodInfo) {
         this.m_quantChannels = quantChannels;
         this.m_quantProtein = proteinSet;
-        this.m_isXICMode = isXICMode;
+        this.m_quantMethodInfo = quantitationMethodInfo;
+        m_isSC = m_quantMethodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING);
 
         fireTableDataChanged();
 
@@ -169,7 +174,7 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
 
     @Override
     public String getDataColumnIdentifier(int columnIndex) {
-        return m_isXICMode ? m_columnNames[columnIndex] : m_columnNames_SC[columnIndex];
+        return !m_isSC ? m_columnNames[columnIndex] : m_columnNames_SC[columnIndex];
     }
 
     @Override
@@ -181,9 +186,7 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
             case COLTYPE_QC_NAME: {
                 return String.class;
             }
-            case COLTYPE_ABUNDANCE: {
-                return Float.class;
-            }
+            case COLTYPE_ABUNDANCE:
             case COLTYPE_RAW_ABUNDANCE: {
                 return Float.class;
             }
@@ -281,7 +284,7 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
         switch (col) {
 
             case COLTYPE_ABUNDANCE:
-                if(m_isXICMode){
+                if(!m_isSC){
                     renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
                 }else{
                     renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
@@ -289,7 +292,7 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
                 break;
 
             case COLTYPE_RAW_ABUNDANCE:
-                if (m_isXICMode) {
+                if (!m_isSC) {
                     renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
                 } else {
                     renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);

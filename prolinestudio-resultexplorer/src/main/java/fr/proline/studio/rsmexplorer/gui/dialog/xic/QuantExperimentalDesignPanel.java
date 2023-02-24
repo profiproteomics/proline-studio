@@ -24,10 +24,8 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.xic.DatasetReferenceNode;
 import fr.proline.studio.utils.IconManager;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+
+import java.awt.*;
 import java.util.Enumeration;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -94,13 +92,24 @@ public class QuantExperimentalDesignPanel extends JPanel {
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
-        c.anchor = GridBagConstraints.NORTHWEST;
 
         /*
         Create method JCombo box but display only for some types. 
         Only one choice for label free, no panel needed.
          */
-        m_methodsCbx = new JComboBox<>(retrieveQuantMethods(m_quantitationType));
+        QuantitationMethod[] quantMethods = retrieveQuantMethods(m_quantitationType);
+        QuantitationMethod[] allMethods;
+        if(m_quantitationType.equals(QuantitationMethod.Type.LABEL_FREE)) {
+            allMethods = quantMethods;
+        } else {
+            allMethods = new QuantitationMethod[quantMethods.length+1];
+            allMethods[0] = null;
+            for(int i = 1; i<= quantMethods.length; i++){
+                allMethods[i] = quantMethods[i-1];
+            }
+        }
+
+        m_methodsCbx = new JComboBox<>(allMethods);
         m_selectedMethod = ((QuantitationMethod) m_methodsCbx.getSelectedItem());
         m_methodsCbx.addItemListener((e) -> {
             m_selectedMethod = ((QuantitationMethod) m_methodsCbx.getSelectedItem());
@@ -243,6 +252,10 @@ public class QuantExperimentalDesignPanel extends JPanel {
 
     public List<Long> getQuantifiedRsmIds() {
         return m_experimentalDesignTree.getQuantifiedRsmIds(m_rootNode);
+    }
+
+    public Component getQuantMethodComponent(){
+        return m_methodsCbx;
     }
 
     public QuantitationMethod getQuantitationMethod() {

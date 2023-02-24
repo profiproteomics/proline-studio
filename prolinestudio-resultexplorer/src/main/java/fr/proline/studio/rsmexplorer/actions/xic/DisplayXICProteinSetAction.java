@@ -17,6 +17,7 @@
 package fr.proline.studio.rsmexplorer.actions.xic;
 
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.pattern.WindowBox;
@@ -53,9 +54,9 @@ public class DisplayXICProteinSetAction extends AbstractRSMAction {
     private void actionImpl(DataSetNode dataSetNode) {
         
         final DDataset dataset = ((DataSetData) dataSetNode.getData()).getDataset();
+        DDatasetType.QuantitationMethodInfo quantitationMethodInfo = ((DataSetData) dataSetNode.getData()).getDatasetType().getQuantMethodInfo();
 
-
-        WindowBox wbox = WindowBoxFactory.getXicQuantProteinSetWindowBox(dataset.getName(), dataset.getName()+" Protein Sets", dataSetNode.isQuantitation() && !dataSetNode.isQuantSC(), dataset.isAggregation());
+        WindowBox wbox = WindowBoxFactory.getQuantificationProteinSetWindowBox(dataset.getName(), dataset.getName()+" Protein Sets", quantitationMethodInfo, dataset.isAggregation());
             wbox.setEntryData(dataset.getProject().getId(), dataset);
 
 

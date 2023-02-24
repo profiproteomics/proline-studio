@@ -19,6 +19,7 @@ package fr.proline.studio.pattern;
 import fr.proline.core.orm.msi.ResultSet;
 import java.util.HashMap;
 
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.xic.DataboxChildFeature;
 import fr.proline.studio.pattern.xic.DataboxExperimentalDesign;
@@ -497,26 +498,27 @@ public class WindowBoxFactory {
      *
      * @param dataName
      * @param fullName
-     * @param xicMode
+     * @param methodInfo : {@link fr.proline.core.orm.uds.dto.DDatasetType.QuantitationMethodInfo} used for this dataset
      * @return
      */
-    public static WindowBox getXicQuantProteinSetWindowBox(String dataName, String fullName, boolean xicMode, boolean aggregatedQuantiPeptideIon) {
+    public static WindowBox getQuantificationProteinSetWindowBox(String dataName, String fullName, DDatasetType.QuantitationMethodInfo methodInfo, boolean aggregatedQuantiPeptideIon) {
 
+        boolean isSC = methodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING);
         // create boxes
-        int nbBoxes = xicMode ? ((aggregatedQuantiPeptideIon) ? 7 : 6) : 3;
+        int nbBoxes = isSC ? 3 : ((aggregatedQuantiPeptideIon) ? 7 : 6);
 
         AbstractDataBox[] boxes = new AbstractDataBox[nbBoxes];
         boxes[0] = new DataboxXicProteinSet();
         boxes[0].setDataName(dataName);
-        ((DataboxXicProteinSet) boxes[0]).setXICMode(xicMode);
+        ((DataboxXicProteinSet) boxes[0]).setQuantitationMethodInfo(methodInfo);
         boxes[1] = new DataboxXicPeptideSet();
-        ((DataboxXicPeptideSet) boxes[1]).setXICMode(xicMode);        
+        ((DataboxXicPeptideSet) boxes[1]).setQuantitationMethodInfo(methodInfo);
         boxes[2] = new DataboxMultiGraphics(false,true,true);
         ((DataboxMultiGraphics)boxes[2]).setHideButton(true);
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
-        if (xicMode) {
+        if (!isSC) {
             boxes[3] = new DataboxXicPeptideIon();
-            ((DataboxXicPeptideIon) boxes[3]).setXICMode(xicMode);
+            ((DataboxXicPeptideIon) boxes[3]).setXICMode(false); //VDS TODO change with setQuantitationMethodInfo
             boxes[3].setLayout(SplittedPanelContainer.PanelLayout.VERTICAL);
 
             if (aggregatedQuantiPeptideIon) {
@@ -536,29 +538,28 @@ public class WindowBoxFactory {
         }
 
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
-        if (!xicMode) {
+        if (isSC) {
             iconType = IconManager.IconType.QUANT_SC;
         }
         return new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
 
-    public static WindowBox getXicQuantPeptideSetWindowBox(String dataName, String fullName, boolean xicMode) {
+    public static WindowBox getXicQuantPeptideSetWindowBox(String dataName, String fullName, DDatasetType.QuantitationMethodInfo methodInfo) {
 
+        boolean isSC = methodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING);
         // create boxes
-        int nbBoxes = xicMode ? 2 : 1;
+        int nbBoxes = !isSC ? 2 : 1;
         AbstractDataBox[] boxes = new AbstractDataBox[nbBoxes];
         boxes[0] = new DataboxXicPeptideSet();
         boxes[0].setDataName(dataName);
-        ((DataboxXicPeptideSet) boxes[0]).setXICMode(xicMode);
-        if (xicMode) {
+        ((DataboxXicPeptideSet) boxes[0]).setQuantitationMethodInfo(methodInfo);;
+        if (!isSC) {
             boxes[1] = new DataboxXicPeptideIon();
-            ((DataboxXicPeptideIon) boxes[1]).setXICMode(xicMode);
+            ((DataboxXicPeptideIon) boxes[1]).setXICMode(false); //VDS TODO change with setQuantitationMethodInfo
         }
 
-        IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
-        if (!xicMode) {
-            iconType = IconManager.IconType.QUANT_SC;
-        }
+        IconManager.IconType iconType = isSC ? IconManager.IconType.QUANT_SC : IconManager.IconType.QUANT_XIC;
+
         return new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
 

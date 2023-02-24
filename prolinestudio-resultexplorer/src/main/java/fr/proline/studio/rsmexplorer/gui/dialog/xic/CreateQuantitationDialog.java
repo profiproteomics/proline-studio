@@ -502,6 +502,15 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
         }
     }
 
+    private boolean checkQuantMethod(){
+        if(m_experimentalDesignPanel.getQuantitationMethod() == null){
+            setStatus(true, "Specify Quantitation Method");
+            highlight(m_experimentalDesignPanel.getQuantMethodComponent());
+            return false;
+        }
+    return true;
+    }
+
     @Override
     protected boolean okCalled() {
 
@@ -510,7 +519,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
                 //verify sample, group name length
                 //VDS: Can't checkDesignStructure and checkBiologicalGroupName be merged !!
                 if ((checkDesignStructure(m_experimentalDesignPanel.getExperimentalDesignTree(), m_experimentalDesignNode, new HashSet<>())) &&
-                    (checkBiologicalGroupName(m_experimentalDesignPanel.getExperimentalDesignTree(), m_experimentalDesignNode))) {
+                    (checkBiologicalGroupName(m_experimentalDesignPanel.getExperimentalDesignTree(), m_experimentalDesignNode)) && checkQuantMethod()) {
                   //Will call displayLinkRawFilesPanel if Spectrum are OK !
                   checkSpectrum();
                 }

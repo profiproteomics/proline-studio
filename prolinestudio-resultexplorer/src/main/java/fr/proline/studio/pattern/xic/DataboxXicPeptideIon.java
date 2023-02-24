@@ -21,6 +21,7 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
@@ -111,7 +112,9 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
             if (m_masterQuantPeptide == null || m_masterQuantPeptide.equals(oldPeptide)) {
                 return;
             }
-            m_isXICMode = ((XicMode) m_previousDataBox.getData(XicMode.class)).isXicMode();
+            //VDS TODO : use QuantitationMethodInfo
+            DDatasetType.QuantitationMethodInfo quantMI = (DDatasetType.QuantitationMethodInfo) m_previousDataBox.getData(DDatasetType.QuantitationMethodInfo.class);
+            m_isXICMode = !quantMI.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING);
         }
         
         final int loadingId = setLoading();

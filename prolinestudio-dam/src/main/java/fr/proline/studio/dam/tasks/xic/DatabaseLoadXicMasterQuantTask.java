@@ -746,7 +746,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 mzdbFile = qc.getRun().getRawFile().getMzDbFileName();
             } catch (Exception e) {
                 String trace2String = Arrays.stream(e.getStackTrace()).map(StackTraceElement::toString).collect(Collectors.joining("\n"));
-                m_logger.error("Error while retrieving mzdb file: {}, \n StackTrace:\n{}", e, trace2String);
+                m_logger.warn("Error while retrieving mzdb file: {}, \n StackTrace:\n{}", e, trace2String);
             }
             dqc.setMzdbFileName(mzdbFile);
             // search for raw map in LCMS database

@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui.xic;
 
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.studio.info.InfoInterface;
 import fr.proline.studio.info.InfoToggleButton;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
@@ -105,8 +106,8 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     private DefaultFloatingPanel m_refineProteinsPanel;
 
     private MarkerContainerPanel m_markerContainerPanel;
-    private boolean m_isXICMode;
 
+    private DDatasetType.QuantitationMethodInfo m_quantMethodInfo;
     private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
@@ -119,6 +120,7 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     private static final String OVERVIEW_KEY = "OVERVIEW_KEY";
 
     public XicProteinSetPanel() {
+        m_quantMethodInfo = DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION;
         initComponents();
     }
 
@@ -222,20 +224,17 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
             }
 
-        };
-        ActionListener refineAction = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                DataboxXicProteinSet databox = (DataboxXicProteinSet) m_dataBox;
-                long projectId = m_dataBox.getProjectId();
-                DDataset dataset = (DDataset) databox.getData(DDataset.class);
+        }; //End ResultCallback
 
-                boolean okCalled = ComputeQuantPostProcessingAction.quantificationProfile(resultCallback, getX() + 20, getY() + 20, projectId, dataset);
-                if (okCalled) {
-                    m_refineProteinsPanel.actionStarted();
-                }
+        ActionListener refineAction = e -> {
+            DataboxXicProteinSet databox = (DataboxXicProteinSet) m_dataBox;
+            long projectId = m_dataBox.getProjectId();
+            DDataset dataset = (DDataset) databox.getData(DDataset.class);
+
+            boolean okCalled = ComputeQuantPostProcessingAction.quantificationProfile(resultCallback, getX() + 20, getY() + 20, projectId, dataset);
+            if (okCalled) {
+                m_refineProteinsPanel.actionStarted();
             }
-
         };
 
         String[] actionText = {"Compute"};
@@ -377,10 +376,10 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         return internalPanel;
     }
 
-    public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<DMasterQuantProteinSet> proteinSets, boolean isXICMode, boolean finished) {
+    public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<DMasterQuantProteinSet> proteinSets, DDatasetType.QuantitationMethodInfo quantMethodInfo, boolean finished) {
 
-        m_isXICMode = isXICMode;
-        ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).setData(taskId, quantChannels, proteinSets, isXICMode);
+        m_quantMethodInfo = quantMethodInfo;
+        ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).setData(taskId, quantChannels, proteinSets, m_quantMethodInfo);
         URLCellRenderer urlRenderer;
         TableCellRenderer renderer = ((CompoundTableModel) m_quantProteinSetTable.getModel()).getRenderer(0, QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_NAME);
         if (renderer instanceof GrayedRenderer) {
@@ -533,7 +532,8 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
             ParameterList overviewParameterList = new ParameterList("Overview Parameters");
 
-            String[] overviewDisplay = {m_isXICMode ? "Overview on Pep. Match Count" : "Overview on Basic SC", m_isXICMode ? "Overview on Raw Abundance" : "Overview on Specific SC", m_isXICMode ? "Overview on Abundance" : "Overview on Weighted SC"};
+            boolean isSC = m_quantMethodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING);
+            String[] overviewDisplay = {!isSC ? "Overview on Pep. Match Count" : "Overview on Basic SC", !isSC ? "Overview on Raw Abundance" : "Overview on Specific SC", !isSC ? "Overview on Abundance" : "Overview on Weighted SC"};
             Integer[] overviewValues = {0, 1, 2};
 
             List<TableColumn> columns = getColumns(true);
@@ -594,36 +594,8 @@ public class XicProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             getModel().addTableModelListener(l);
         }
 
-        /*@Override
-        public TablePopupMenu initPopupMenu() {
-            TablePopupMenu popupMenu = new TablePopupMenu();
-
-            m_idProteinSetAction = new DisplayIdentificationProteinSetsAction();
-            popupMenu.addAction(m_idProteinSetAction);
-            popupMenu.addAction(null);
-            popupMenu.addAction(new RestrainAction() {
-                @Override
-                public void filteringDone() {
-                    m_dataBox.addDataChanged(CompareDataInterface.class);
-                    m_dataBox.propagateDataChanged();
-                }
-            });
-            popupMenu.addAction(new ClearRestrainAction() {
-                @Override
-                public void filteringDone() {
-                    m_dataBox.addDataChanged(CompareDataInterface.class);
-                    m_dataBox.propagateDataChanged();
-                }
-            });
-
-            return popupMenu;
-        }*/
         private DisplayIdentificationProteinSetsAction m_idProteinSetAction;
 
-        /*@Override
-        public void prepostPopupMenu() {
-            m_idProteinSetAction.setBox(m_dataBox);
-        }*/
         @Override
         public TablePopupMenu initPopupMenu() {
             m_popupMenu = new DisplayTablePopupMenu(XicProteinSetPanel.this);

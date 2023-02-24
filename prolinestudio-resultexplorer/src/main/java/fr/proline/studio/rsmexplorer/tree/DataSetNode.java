@@ -432,7 +432,7 @@ public class DataSetNode extends AbstractNode {
     public boolean isQuantXIC() {
         if (isQuantitation()) {
             DDataset d = ((DataSetData) getData()).getDataset();
-            return d.getQuantMethodInfo() == DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION;
+            return (d.getQuantMethodInfo() == DDatasetType.QuantitationMethodInfo.ISOBARIC_TAGGING || d.getQuantMethodInfo() == DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION);
         } else {
             return false;
         }

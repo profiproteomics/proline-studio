@@ -20,11 +20,11 @@ import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
-import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
@@ -34,7 +34,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.rsmexplorer.gui.PTMPeptidesTablePanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XICComparePeptideTableModel;
-import fr.proline.studio.rsmexplorer.gui.xic.XicAbundanceProteinTableModel;
+import fr.proline.studio.rsmexplorer.gui.xic.SecondAxisProteinAbundanceTableModel;
 import fr.proline.studio.types.XicMode;
 
 import java.util.ArrayList;
@@ -323,8 +323,9 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                     if (m_quantChannelInfo == null || m_masterQuantProteinSet == null) {
                         return null;
                     }
-                    XicAbundanceProteinTableModel protTableModel = new XicAbundanceProteinTableModel();
-                    protTableModel.setData(m_quantChannelInfo.getQuantChannels(), m_masterQuantProteinSet);
+                    SecondAxisProteinAbundanceTableModel protTableModel = new SecondAxisProteinAbundanceTableModel();
+                    //VDS TODO: Use QuantMethodInfo in PTMView!
+                    protTableModel.setData(m_quantChannelInfo.getQuantChannels(), m_masterQuantProteinSet, DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION );
                     protTableModel.setName("Protein");
                     return protTableModel;
                 }
@@ -381,7 +382,8 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
         if (m_quantChannelInfo != null && m_masterQuantPeptideList != null) {
             for (DMasterQuantPeptide quantPeptide : m_masterQuantPeptideList) {
                 XICComparePeptideTableModel peptideData = new XICComparePeptideTableModel();
-                peptideData.setData(m_quantChannelInfo.getQuantChannels(), quantPeptide, true);
+                //VDS TODO: Use QuantMethodInfo in PTMView!
+                peptideData.setData(m_quantChannelInfo.getQuantChannels(), quantPeptide, DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION);
                 list.add(peptideData);
             }
         }

@@ -17,6 +17,7 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -58,13 +59,13 @@ public class ProteinQuantPanel  extends HourglassPanel implements DataBoxPanelIn
     private JScrollPane m_proteinScrollPane;
     private ProteinQuantTable m_proteinQuantTable;
     private MarkerContainerPanel m_markerContainerPanel;
-    
-    private boolean m_isXICMode;
-    private DQuantitationChannel[] m_quantChannels;
+
+    private DDatasetType.QuantitationMethodInfo m_quantMethodInfo;
     private DMasterQuantProteinSet m_proteinSet;
     
      public ProteinQuantPanel() {
-        initComponents();
+         m_quantMethodInfo = DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION;
+         initComponents();
     }
     
      private void initComponents() {
@@ -169,15 +170,14 @@ public class ProteinQuantPanel  extends HourglassPanel implements DataBoxPanelIn
         return internalPanel;
     }          
     
-    public void setData(DQuantitationChannel[] quantChannels,  DMasterQuantProteinSet proteinSet, boolean isXICMode) {
-        m_quantChannels = quantChannels;
+    public void setData(DQuantitationChannel[] quantChannels,  DMasterQuantProteinSet proteinSet, DDatasetType.QuantitationMethodInfo quantMethodInfo) {
         m_proteinSet = proteinSet ;
-        m_isXICMode = isXICMode;
-        ((ProteinQuantTableModel) ((CompoundTableModel) m_proteinQuantTable.getModel()).getBaseModel()).setData( quantChannels, proteinSet, m_isXICMode);
+        m_quantMethodInfo = quantMethodInfo;
+        ((ProteinQuantTableModel) ((CompoundTableModel) m_proteinQuantTable.getModel()).getBaseModel()).setData( quantChannels, proteinSet, m_quantMethodInfo);
         // select the first row
-        if (proteinSet != null && m_quantChannels != null && m_quantChannels.length > 0) {
+        if (proteinSet != null && quantChannels != null && quantChannels.length > 0) {
             m_proteinQuantTable.getSelectionModel().setSelectionInterval(0, 0);
-            m_markerContainerPanel.setMaxLineNumber(m_quantChannels.length);
+            m_markerContainerPanel.setMaxLineNumber(quantChannels.length);
             
         }
 

@@ -69,7 +69,7 @@ public class CSVExporter implements ExporterInterface {
             m_fw.write(CSV_SEPARATOR);
         }
         m_curCell++;
-        m_fw.write(StringEscapeUtils.escapeCsv(t));
+        m_fw.write((t == null) ? "" : StringEscapeUtils.escapeCsv(t));
     }
     
     @Override

@@ -555,6 +555,10 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
                 renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
                 break;
             }
+            case COLTYPE_PEPTIDE_ID: {
+                renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Long.class));
+                break;
+            }
             case COLTYPE_PEPTIDE_LENGTH:
             case COLTYPE_PEPTIDE_CHARGE:
             case COLTYPE_PEPTIDE_MISSED_CLEAVAGE:

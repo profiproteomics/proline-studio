@@ -91,6 +91,8 @@ public class IconManager {
         QUANT,
         QUANT_SC,
         QUANT_XIC,
+        QUANT_TMT,
+        QUANT_AGGREGATION_TMT,
         QUANT_AGGREGATION_XIC,
         CHART,
         BOOK,
@@ -489,6 +491,10 @@ public class IconManager {
                 return "fr/proline/studio/images/chart-quant.png";
             case QUANT_XIC:
                 return "fr/proline/studio/images/dataset-quant-xic.png";
+            case QUANT_TMT:
+                return "fr/proline/studio/images/dataset-tmt.png";
+            case QUANT_AGGREGATION_TMT:
+                return "fr/proline/studio/images/dataset-tmtA.png";
             case QUANT_SC:
                 return "fr/proline/studio/images/dataset-quant-sc.png";
             case QUANT_AGGREGATION_XIC:

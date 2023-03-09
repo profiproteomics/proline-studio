@@ -17,6 +17,7 @@
 package fr.proline.studio.rsmexplorer.actions.xic;
 
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.pattern.WindowBox;
@@ -53,8 +54,8 @@ public class DisplayXicParamAction extends AbstractRSMAction {
     private void actionImpl(DataSetNode dataSetNode) {
 
         final DDataset dataset = ((DataSetData) dataSetNode.getData()).getDataset();
-
-        WindowBox wbox = WindowBoxFactory.getExperimentalDesignWindowBox(dataset.getName(), dataset.getName() + " Exp. Design");
+        DDatasetType.QuantitationMethodInfo methodInfo =((DataSetData) dataSetNode.getData()).getDatasetType().getQuantMethodInfo();
+        WindowBox wbox = WindowBoxFactory.getExperimentalDesignWindowBox(dataset.getName(), dataset.getName() + " Exp. Design", methodInfo);
         wbox.setEntryData(dataset.getProject().getId(), dataset);
 
         // open a window to display the window box

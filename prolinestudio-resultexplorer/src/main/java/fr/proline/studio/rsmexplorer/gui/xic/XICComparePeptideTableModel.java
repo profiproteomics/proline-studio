@@ -59,20 +59,22 @@ public class XICComparePeptideTableModel implements ExtendedTableModelInterface,
 
     protected String m_modelName;
 
-    protected boolean m_isSC;
     protected DDatasetType.QuantitationMethodInfo m_quantMethodInfo;
     protected HashMap<Class, Object> m_extraValues = null;
     private boolean m_isSelected;
 
     public XICComparePeptideTableModel() {
         m_quantMethodInfo = DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION;
-        m_isSC = false;
         setColUsed();
+    }
+
+    protected boolean isSpectralCountQuant(){
+        return  m_quantMethodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING);
     }
 
     protected void setColUsed(){
         m_colUsed.clear();
-        if(m_isSC){
+        if(isSpectralCountQuant()){
             m_colUsed.add(COLTYPE_QC_ID);
             m_colUsed.add(COLTYPE_QC_NAME);
             m_colUsed.add(COLTYPE_RAW_ABUNDANCE);
@@ -94,7 +96,6 @@ public class XICComparePeptideTableModel implements ExtendedTableModelInterface,
         this.m_quantChannels = quantChannels;
         this.m_quantPeptide = peptide;
         this.m_quantMethodInfo = quantitationMethodInfo;
-        m_isSC = m_quantMethodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING);
         setColUsed();
         fireTableDataChanged();
     }
@@ -309,7 +310,7 @@ public class XICComparePeptideTableModel implements ExtendedTableModelInterface,
                     return null;
                 }
 
-                if(m_isSC) {
+                if(isSpectralCountQuant()) {
                     return quantPeptide.getRawAbundance().isNaN() ? null : quantPeptide.getRawAbundance();
                 } else {
                     return quantPeptide.getAbundance().isNaN() ? null : quantPeptide.getAbundance();
@@ -333,7 +334,7 @@ public class XICComparePeptideTableModel implements ExtendedTableModelInterface,
 
     //@Override
     public String getColumnName(int columnIndex) {
-        return m_isSC ? m_columnNames_SC[m_colUsed.get(columnIndex)] :  m_columnNames[m_colUsed.get(columnIndex)];
+        return isSpectralCountQuant() ? m_columnNames_SC[m_colUsed.get(columnIndex)] :  m_columnNames[m_colUsed.get(columnIndex)];
 
     }
 
@@ -351,7 +352,7 @@ public class XICComparePeptideTableModel implements ExtendedTableModelInterface,
                 return Float.class;
             }
             case COLTYPE_RAW_ABUNDANCE: {
-                if(m_isSC)
+                if(isSpectralCountQuant())
                     return Integer.class;
                 return Float.class;
             }
@@ -403,7 +404,7 @@ public class XICComparePeptideTableModel implements ExtendedTableModelInterface,
             case LINEAR_PLOT: {
                 int[] cols = new int[2];
                 cols[0] = convertColToColUsed(COLTYPE_QC_NAME);
-                if(m_isSC){
+                if(isSpectralCountQuant()){
                     cols[1] = convertColToColUsed(COLTYPE_RAW_ABUNDANCE);
                 } else {
                     cols[1] = convertColToColUsed(COLTYPE_ABUNDANCE);

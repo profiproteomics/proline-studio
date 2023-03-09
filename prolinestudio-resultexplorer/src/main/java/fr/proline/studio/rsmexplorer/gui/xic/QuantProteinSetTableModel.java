@@ -101,19 +101,20 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     private String m_modelName;
 
     private DDatasetType.QuantitationMethodInfo m_quantMethodInfo;
-    private boolean m_isSCQuant;
 
     public QuantProteinSetTableModel(LazyTable table) {
         super(table);
         m_quantMethodInfo = DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION;
-        m_isSCQuant = false;
     }
 
+    private boolean isSpectralCountQuant(){
+        return m_quantMethodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING);
+    }
     @Override
     public int getColumnCount() {
         if (m_quantChannels == null) {
             return m_columnNames.length;
-        } else if (m_isSCQuant) {
+        } else if (isSpectralCountQuant()) {
             return m_columnNames.length + m_quantChannelNumber * m_columnNamesQC_SC.length;
         } else {
             return m_columnNames.length + m_quantChannelNumber * m_columnNamesQC.length;
@@ -123,7 +124,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     private int getColumnPerQCCount() {
         if (m_quantChannels == null) {
             return 0;
-        } else if (m_isSCQuant) {
+        } else if (isSpectralCountQuant()) {
             return m_columnNamesQC_SC.length;
         } else {
             return m_columnNamesQC.length;
@@ -141,7 +142,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             StringBuilder sb = new StringBuilder();
             String rsmHtmlColor = CyclicColorPalette.getHTMLColor(nbQc);
             sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
-            if (m_isSCQuant) {
+            if (isSpectralCountQuant()) {
                 sb.append(m_columnNamesQC_SC[id]);
             } else {
                 sb.append(m_columnNamesQC[id]);
@@ -159,7 +160,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         } else if (m_quantChannels != null) {
             int nbQc = (col - m_columnNames.length) / getColumnPerQCCount();
             int id = col - m_columnNames.length - (nbQc * getColumnPerQCCount());
-            return !m_isSCQuant ? m_columnNamesQC[id] : m_columnNamesQC_SC[id];
+            return isSpectralCountQuant() ?  m_columnNamesQC_SC[id] :m_columnNamesQC[id];
         } else {
             return ""; // should not happen
         }
@@ -174,10 +175,10 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             int id = col - m_columnNames.length - (nbQc * getColumnPerQCCount());
 
             StringBuilder sb = new StringBuilder();
-            if (!m_isSCQuant) {
-                sb.append(m_columnNamesQC[id]);
-            } else {
+            if (isSpectralCountQuant()) {
                 sb.append(m_columnNamesQC_SC[id]);
+            } else {
+                sb.append(m_columnNamesQC[id]);
             }
             sb.append(" ");
             sb.append(m_quantChannels[nbQc].getName());
@@ -192,7 +193,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     @Override
     public String getToolTipForHeader(int col) {
         if (col == COLTYPE_OVERVIEW) {
-            return m_toolTipColumns[col] + " on " + (!m_isSCQuant ? m_toolTipQC[m_overviewType] : m_toolTipQC_SC[m_overviewType]);
+            return m_toolTipColumns[col] + " on " + (isSpectralCountQuant() ? m_toolTipQC_SC[m_overviewType] : m_toolTipQC[m_overviewType]);
         }
         if (col <= LAST_STATIC_COLUMN) {
             return m_toolTipColumns[col];
@@ -204,10 +205,10 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             StringBuilder sb = new StringBuilder();
             String rsmHtmlColor = CyclicColorPalette.getHTMLColor(nbQc);
             sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
-            if (!m_isSCQuant) {
-                sb.append(m_toolTipQC[id]);
-            } else {
+            if (isSpectralCountQuant()) {
                 sb.append(m_toolTipQC_SC[id]);
+            } else {
+                sb.append(m_toolTipQC[id]);
             }
             sb.append("<br/>");
             sb.append(m_quantChannels[nbQc].getFullName());
@@ -529,7 +530,6 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         m_quantChannelNumber = quantChannels.length;
         m_proteinSets = proteinSets;
         m_quantMethodInfo = quantitationMethodInfo;
-        m_isSCQuant = m_quantMethodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING);
         m_taskId = taskId;
 
         fireTableStructureChanged();
@@ -686,7 +686,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     }
 
     public String getByQCMColumnName(int index) {
-        return !m_isSCQuant ? m_columnNamesQC[index] : m_columnNamesQC_SC[index];
+        return isSpectralCountQuant() ? m_columnNamesQC_SC[index] :  m_columnNamesQC[index];
     }
 
     public int getQCNumber(int col) {
@@ -727,7 +727,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         if (m_quantChannels != null) {
             for (int i = m_quantChannels.length - 1; i >= 0; i--) {
                 listIds.add(m_columnNames.length + COLTYPE_SELECTION_LEVEL + (i * getColumnPerQCCount()));
-                if (!m_isSCQuant) {
+                if (!isSpectralCountQuant()) {
                     listIds.add(m_columnNames.length + COLTYPE_RAW_ABUNDANCE + (i * getColumnPerQCCount()));
                     listIds.add(m_columnNames.length + COLTYPE_PEP_NUMBER + (i * getColumnPerQCCount()));
                 }
@@ -762,10 +762,10 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             int id = col - m_columnNames.length - (nbQc * getColumnPerQCCount());
 
             StringBuilder sb = new StringBuilder();
-            if (!m_isSCQuant) {
-                sb.append(m_columnNamesQC[id]);
-            } else {
+            if (isSpectralCountQuant()) {
                 sb.append(m_columnNamesQC_SC[id]);
+            } else {
+                sb.append(m_columnNamesQC[id]);
             }
             sb.append(' ');
             sb.append(m_quantChannels[nbQc].getName());
@@ -1129,18 +1129,18 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                         break;
                     }
                     case COLTYPE_ABUNDANCE: {
-                        if (!m_isSCQuant) {
-                            renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
-                        } else {
+                        if (isSpectralCountQuant()) {
                             renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
+                        } else {
+                            renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
                         }
                         break;
                     }
                     case COLTYPE_RAW_ABUNDANCE: {
-                        if (!m_isSCQuant) {
-                            renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
-                        } else {
+                        if (isSpectralCountQuant()) {
                             renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
+                        } else {
+                            renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
                         }
                         break;
                     }
@@ -1222,14 +1222,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             } else {
                 int nbQc = (col - m_columnNames.length) / getColumnPerQCCount();
                 int id = col - m_columnNames.length - (nbQc * getColumnPerQCCount());
-                if (!m_isSCQuant) {
-                    switch (id) {
-                        case COLTYPE_ABUNDANCE:
-                            return QuantitationType.getQuantitationType(QuantitationType.ABUNDANCE);
-                        case COLTYPE_RAW_ABUNDANCE:
-                            return QuantitationType.getQuantitationType(QuantitationType.RAW_ABUNDANCE);
-                    }
-                } else {
+                if (isSpectralCountQuant()) {
                     switch (id) {
                         case COLTYPE_PSM:
                             return QuantitationType.getQuantitationType(QuantitationType.BASIC_SC);
@@ -1237,6 +1230,13 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                             return QuantitationType.getQuantitationType(QuantitationType.SPECIFIC_SC);
                         case COLTYPE_ABUNDANCE:
                             return QuantitationType.getQuantitationType(QuantitationType.WEIGHTED_SC);
+                    }
+                } else {
+                    switch (id) {
+                        case COLTYPE_ABUNDANCE:
+                            return QuantitationType.getQuantitationType(QuantitationType.ABUNDANCE);
+                        case COLTYPE_RAW_ABUNDANCE:
+                            return QuantitationType.getQuantitationType(QuantitationType.RAW_ABUNDANCE);
                     }
                 }
 

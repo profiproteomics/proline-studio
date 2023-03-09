@@ -61,13 +61,15 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
 
     private String m_modelName;
 
-    private boolean m_isSC;
     private DDatasetType.QuantitationMethodInfo m_quantMethodInfo;
 
     public ProteinQuantTableModel(LazyTable table) {
         super(table);
-        DDatasetType.QuantitationMethodInfo quantMethodInfo = DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION;
-        m_isSC = false;
+        m_quantMethodInfo = DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION;
+    }
+
+    private boolean isSpectralCountQuant(){
+        return m_quantMethodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING);
     }
 
     @Override
@@ -77,7 +79,7 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
 
     @Override
     public String getColumnName(int col) {
-        return !m_isSC ? m_columnNames[col] : m_columnNames_SC[col];
+        return isSpectralCountQuant() ? m_columnNames_SC[col] :  m_columnNames[col];
     }
 
     @Override
@@ -145,7 +147,6 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
         this.m_quantChannels = quantChannels;
         this.m_quantProtein = proteinSet;
         this.m_quantMethodInfo = quantitationMethodInfo;
-        m_isSC = m_quantMethodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING);
 
         fireTableDataChanged();
 
@@ -174,7 +175,7 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
 
     @Override
     public String getDataColumnIdentifier(int columnIndex) {
-        return !m_isSC ? m_columnNames[columnIndex] : m_columnNames_SC[columnIndex];
+        return isSpectralCountQuant() ? m_columnNames_SC[columnIndex] :  m_columnNames[columnIndex];
     }
 
     @Override
@@ -284,18 +285,18 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
         switch (col) {
 
             case COLTYPE_ABUNDANCE:
-                if(!m_isSC){
-                    renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
-                }else{
+                if(isSpectralCountQuant()){
                     renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
+                }else{
+                    renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
                 }
                 break;
 
             case COLTYPE_RAW_ABUNDANCE:
-                if (!m_isSC) {
-                    renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
-                } else {
+                if (isSpectralCountQuant()) {
                     renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
+                } else {
+                    renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
                 }
                 break;
 

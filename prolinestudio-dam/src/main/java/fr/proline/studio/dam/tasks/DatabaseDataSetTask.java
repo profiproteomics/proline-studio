@@ -505,8 +505,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             Iterator<DDataset> it = datasetListSelected.iterator();
             while (it.hasNext()) {
                 DDataset datasetCur = it.next();
-                boolean isQuantiXIC = datasetCur.isQuantitation() && datasetCur.getQuantMethodInfo() == QuantitationMethodInfo.FEATURES_EXTRACTION;
-                if (isQuantiXIC) {
+                boolean isQuantiWithChild = datasetCur.isQuantitation() && (datasetCur.getQuantMethodInfo() == QuantitationMethodInfo.FEATURES_EXTRACTION || datasetCur.getQuantMethodInfo() == QuantitationMethodInfo.ISOBARIC_TAGGING );
+                if (isQuantiWithChild) {
                     datasetCur.setChildrenCount(1);
                 }
                 if (datasetCur.isTrash()) {
@@ -514,7 +514,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 } else {
                     DataSetData dsData = new DataSetData(datasetCur);
                     
-                    if (isQuantiXIC) {
+                    if (isQuantiWithChild) {
                         dsData.setHasChildren(true);
                     }
                     m_list.add(dsData);
@@ -732,7 +732,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         for (Map.Entry<Long, DDataset> entrySet : ddatasetById.entrySet()) {
             DDataset ds = entrySet.getValue();
             if (ds.isQuantitation()){
-                if(ds.getQuantMethodInfo() == QuantitationMethodInfo.FEATURES_EXTRACTION) {
+                if(ds.getQuantMethodInfo() == QuantitationMethodInfo.FEATURES_EXTRACTION || ds.getQuantMethodInfo().equals(QuantitationMethodInfo.ISOBARIC_TAGGING)) {
                     ds.setChildrenCount(1);
                 }
                 //Load ObjectTree linked to the dataset

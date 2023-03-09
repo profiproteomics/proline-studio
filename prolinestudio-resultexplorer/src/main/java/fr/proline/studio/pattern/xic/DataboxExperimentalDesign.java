@@ -18,6 +18,7 @@ package fr.proline.studio.pattern.xic;
 
 
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
@@ -34,9 +35,9 @@ import fr.proline.studio.rsmexplorer.gui.xic.ExperimentalDesignPanel;
 public class DataboxExperimentalDesign extends AbstractDataBox {
 
     private DDataset m_dataset;
+    DDatasetType.QuantitationMethodInfo m_quantMethodInfo;
     
-    
-    public DataboxExperimentalDesign() { 
+    public DataboxExperimentalDesign() {
         super(DataboxType.DataboxExperimentalDesign, DataboxStyle.STYLE_XIC);
         
         // Name of this databox
@@ -55,10 +56,19 @@ public class DataboxExperimentalDesign extends AbstractDataBox {
         outParameter.addParameter(DDataset.class);
         registerOutParameter(outParameter);
     }
-    
+
+    public void setQuantitationMethodInfo(DDatasetType.QuantitationMethodInfo quantMethodInfo) {
+        m_quantMethodInfo = quantMethodInfo;
+
+        m_style = (m_quantMethodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING)) ? DataboxStyle.STYLE_SC : DataboxStyle.STYLE_XIC;
+        if (getDataBoxPanelInterface() != null) {
+            getDataBoxPanelInterface().addSingleValue(m_quantMethodInfo);
+        }
+    }
+
     @Override
     public void createPanel() {
-        ExperimentalDesignPanel p = new ExperimentalDesignPanel();
+        ExperimentalDesignPanel p = new ExperimentalDesignPanel(m_quantMethodInfo);
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);

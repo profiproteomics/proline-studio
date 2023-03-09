@@ -50,7 +50,6 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -64,7 +63,7 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
  *
  * @author MB243701
  */
-public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
+public class QuantChannelPeptideMatchPanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
 
     private AbstractDataBox m_dataBox;
 
@@ -78,7 +77,7 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
     private ExportButton m_exportButton;
 
 
-    public XicPeptideMatchPanel() {
+    public QuantChannelPeptideMatchPanel() {
         initComponents();
     }
 
@@ -173,10 +172,10 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
         m_psmScrollPane = new JScrollPane();
 
         m_psmTable = new XicPeptideMatchTable();
-        m_psmTable.setModel(new CompoundTableModel(new XicPeptideMatchTableModel((LazyTable) m_psmTable), true));
+        m_psmTable.setModel(new CompoundTableModel(new QuantChannelPeptideMatchTableModel((LazyTable) m_psmTable), true));
 
         // hide the id column
-        m_psmTable.getColumnExt(m_psmTable.convertColumnIndexToView(XicPeptideMatchTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
+        m_psmTable.getColumnExt(m_psmTable.convertColumnIndexToView(QuantChannelPeptideMatchTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
 
         m_psmTable.setSortable(false);
 
@@ -197,7 +196,7 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
     }
 
     public void setData(Long taskId, DQuantitationChannel[] quantChannelArray, QuantChannelInfo quantChannelInfo, List<DPeptideMatch> peptideMatchList, Map<Long, List<Long>> peptideMatchIdListPerQC, boolean finished) {
-        ((XicPeptideMatchTableModel) (((CompoundTableModel) m_psmTable.getModel()).getBaseModel())).setData(taskId, quantChannelArray, quantChannelInfo, peptideMatchList, peptideMatchIdListPerQC);
+        ((QuantChannelPeptideMatchTableModel) (((CompoundTableModel) m_psmTable.getModel()).getBaseModel())).setData(taskId, quantChannelArray, quantChannelInfo, peptideMatchList, peptideMatchIdListPerQC);
         int nb = 0;
         if (peptideMatchList != null) {
             nb = peptideMatchList.size();
@@ -309,7 +308,7 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
 
         public boolean selectPSM(Long peptideMatchId, String searchText) {
 
-            XicPeptideMatchTableModel tableModel = (XicPeptideMatchTableModel) ((CompoundTableModel)getModel()).getBaseModel();
+            QuantChannelPeptideMatchTableModel tableModel = (QuantChannelPeptideMatchTableModel) ((CompoundTableModel)getModel()).getBaseModel();
             int row = tableModel.findRow(peptideMatchId);
             if (row == -1) {
                 return false;
@@ -351,7 +350,7 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
             // Update Model (but protein set table must not react to the model update)
                 selectionWillBeRestored(true);
                 try {
-                    ((XicPeptideMatchTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
+                    ((QuantChannelPeptideMatchTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
                 } finally {
                     selectionWillBeRestored(false);
                 }
@@ -425,7 +424,7 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
             selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
 
             // Retrieve PeptideIon selected
-            XicPeptideMatchTableModel tableModel = (XicPeptideMatchTableModel) compoundTableModel.getBaseModel();
+            QuantChannelPeptideMatchTableModel tableModel = (QuantChannelPeptideMatchTableModel) compoundTableModel.getBaseModel();
             return tableModel.getPSM(selectedRow);
 
         }
@@ -467,7 +466,7 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
         
         @Override
         public TablePopupMenu initPopupMenu() {
-            m_popupMenu = new DisplayTablePopupMenu(XicPeptideMatchPanel.this);
+            m_popupMenu = new DisplayTablePopupMenu(QuantChannelPeptideMatchPanel.this);
 
             return m_popupMenu;
         }

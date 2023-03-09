@@ -51,7 +51,6 @@ public class SecondAxisProteinAbundanceTableModel extends XICComparePeptideTable
         this.m_quantChannels = quantChannels;
         this.m_proteinSet = proteinSet;
         this.m_quantMethodInfo = quantitationMethodInfo;
-        m_isSC = m_quantMethodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING);
         setColUsed();
         fireTableDataChanged();
     }
@@ -71,7 +70,7 @@ public class SecondAxisProteinAbundanceTableModel extends XICComparePeptideTable
                 return Float.class;
             }
             case COLTYPE_RAW_ABUNDANCE: {
-                if(m_isSC)
+                if(isSpectralCountQuant())
                     return Integer.class;
                 else
                     return Float.class;

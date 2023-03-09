@@ -21,6 +21,7 @@ import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DQuantPeptideIon;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
@@ -100,14 +101,19 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
     private List<DMasterQuantPeptideIon> m_quantPeptideIons = null;
     private DQuantitationChannel[] m_quantChannels = null;
     private int m_quantChannelNumber;
-    private boolean m_isXICMode = true;
+    private DDatasetType.QuantitationMethodInfo m_quantitationMethodInfo;
 
     private final ScoreRenderer m_scoreRenderer = new ScoreRenderer();
 
     private String m_modelName;
 
-    public QuantPeptideIonTableModel(LazyTable table) {
+    public QuantPeptideIonTableModel(LazyTable table, DDatasetType.QuantitationMethodInfo quantitationMethodInfo) {
         super(table);
+        m_quantitationMethodInfo = quantitationMethodInfo;
+    }
+
+    private boolean isSpectralCountQuant(){
+        return m_quantitationMethodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING);
     }
 
     @Override
@@ -130,10 +136,10 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
             StringBuilder sb = new StringBuilder();
             String rsmHtmlColor = CyclicColorPalette.getHTMLColor(nbQc);
             sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
-            if (m_isXICMode) {
-                sb.append(m_columnNamesQC[id]);
-            } else {
+            if (isSpectralCountQuant()) {
                 sb.append(m_columnNamesQC_SC[id]);
+            } else {
+                sb.append(m_columnNamesQC[id]);
             }
             sb.append("<br/>");
             sb.append(m_quantChannels[nbQc].getName());
@@ -154,10 +160,10 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
             int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
 
             StringBuilder sb = new StringBuilder();
-            if (m_isXICMode) {
-                sb.append(m_columnNamesQC[id]);
-            } else {
+            if (isSpectralCountQuant()) {
                 sb.append(m_columnNamesQC_SC[id]);
+            } else {
+                sb.append(m_columnNamesQC[id]);
             }
             sb.append(" ");
             sb.append(m_quantChannels[nbQc].getName());
@@ -175,7 +181,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
         } else if (m_quantChannels != null) {
             int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
             int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
-            return m_isXICMode ? m_columnNamesQC[id] : m_columnNamesQC_SC[id];
+            return isSpectralCountQuant() ? m_columnNamesQC_SC[id] :  m_columnNamesQC[id];
         } else {
             return ""; // should not happen
         }
@@ -193,10 +199,10 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
             StringBuilder sb = new StringBuilder();
             String rsmHtmlColor = CyclicColorPalette.getHTMLColor(nbQc);
             sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
-            if (m_isXICMode) {
-                sb.append(m_toolTipQC[id]);
-            } else {
+            if (isSpectralCountQuant()) {
                 sb.append(m_toolTipQC_SC[id]);
+            } else {
+                sb.append(m_toolTipQC[id]);
             }
             sb.append("<br/>");
             sb.append(m_quantChannels[nbQc].getFullName());
@@ -465,9 +471,9 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
     }
     private final StringBuilder m_sb = new StringBuilder();
 
-    public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<DMasterQuantPeptideIon> peptideIons, boolean isXICMode) {
+    public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<DMasterQuantPeptideIon> peptideIons, DDatasetType.QuantitationMethodInfo quantMethodInfo) {
         boolean structureChanged = true;
-        m_isXICMode = isXICMode;
+        m_quantitationMethodInfo =quantMethodInfo;
         if (m_quantChannels != null && m_quantChannels.length == quantChannels.length) {
             for (int i = 0; i < m_quantChannels.length; i++) {
                 structureChanged = !(m_quantChannels[i].equals(quantChannels[i]));
@@ -623,7 +629,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
         listIds.add(COLTYPE_PEPTIDE_ION_ID);
         if (m_quantChannels != null) {
             for (int i = m_quantChannels.length - 1; i >= 0; i--) {
-                if (m_isXICMode) {
+                if (!isSpectralCountQuant()) {
                     listIds.add(m_columnNames.length + COLTYPE_RAW_ABUNDANCE + (i * m_columnNamesQC.length));
                 }
                 listIds.add(m_columnNames.length + COLTYPE_SELECTION_LEVEL + (i * m_columnNamesQC.length));
@@ -836,10 +842,10 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
             int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
 
             StringBuilder sb = new StringBuilder();
-            if (m_isXICMode) {
-                sb.append(m_columnNamesQC[id]);
-            } else {
+            if (isSpectralCountQuant()) {
                 sb.append(m_columnNamesQC_SC[id]);
+            } else {
+                sb.append(m_columnNamesQC[id]);
             }
             sb.append(' ');
             sb.append(m_quantChannels[nbQc].getName());
@@ -1003,17 +1009,17 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                         break;
                     }
                     case COLTYPE_ABUNDANCE:
-                        if (m_isXICMode) {
-                            renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
-                        } else {
+                        if (isSpectralCountQuant()) {
                             renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
+                        } else {
+                            renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
                         }
                         break;
                     case COLTYPE_RAW_ABUNDANCE: {
-                        if (m_isXICMode) {
-                            renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
-                        } else {
+                        if (isSpectralCountQuant()) {
                             renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
+                        } else {
+                            renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
                         }
                         break;
                     }
@@ -1071,14 +1077,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
             } else {
                 int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
                 int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
-                if (m_isXICMode) {
-                    switch (id) {
-                        case COLTYPE_ABUNDANCE:
-                            return QuantitationType.getQuantitationType(QuantitationType.ABUNDANCE);
-                        case COLTYPE_RAW_ABUNDANCE:
-                            return QuantitationType.getQuantitationType(QuantitationType.RAW_ABUNDANCE);
-                    }
-                } else {
+                if (isSpectralCountQuant()) {
                     switch (id) {
                         case COLTYPE_PSM:
                             return QuantitationType.getQuantitationType(QuantitationType.BASIC_SC);
@@ -1086,6 +1085,13 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                             return QuantitationType.getQuantitationType(QuantitationType.SPECIFIC_SC);
                         case COLTYPE_ABUNDANCE:
                             return QuantitationType.getQuantitationType(QuantitationType.WEIGHTED_SC);
+                    }
+                } else {
+                    switch (id) {
+                        case COLTYPE_ABUNDANCE:
+                            return QuantitationType.getQuantitationType(QuantitationType.ABUNDANCE);
+                        case COLTYPE_RAW_ABUNDANCE:
+                            return QuantitationType.getQuantitationType(QuantitationType.RAW_ABUNDANCE);
                     }
                 }
 

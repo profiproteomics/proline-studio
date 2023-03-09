@@ -140,7 +140,7 @@ public class DataSetData extends AbstractData {
     @Override
     public void load(AbstractDatabaseCallback callback, List<AbstractData> list, AbstractDatabaseTask.Priority priority, boolean identificationDataset) {
 
-        if (!identificationDataset && m_dataset.getType().getQuantMethodInfo() == QuantitationMethodInfo.FEATURES_EXTRACTION) {
+        if (!identificationDataset && (m_dataset.getType().getQuantMethodInfo() == QuantitationMethodInfo.FEATURES_EXTRACTION) || m_dataset.getType().getQuantMethodInfo().equals(QuantitationMethodInfo.ISOBARIC_TAGGING)) {
             DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
             task.initLoadQuantChannels(m_dataset.getProject().getId(), m_dataset);
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);

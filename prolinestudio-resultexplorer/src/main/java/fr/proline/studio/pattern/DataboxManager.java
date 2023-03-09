@@ -71,7 +71,8 @@ public class DataboxManager {
         new DataBoxPTMPeptidesGraphic(),
         new DataboxXicParentsPeptideIon(),
         new DataBoxPTMClustersSites(),
-        new DataBoxPTMClustersSites(true)
+        new DataBoxPTMClustersSites(true),
+        new DataboxXicReporterIon()
     };
 
     public static AbstractDataBox getDataboxNewInstance(AbstractDataBox sourceDB) throws IllegalAccessException, InstantiationException {

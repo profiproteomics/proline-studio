@@ -120,16 +120,29 @@ public class DataSetNode extends AbstractNode {
             if (dataset == null || datasetType.getQuantMethodInfo() == QuantitationMethodInfo.NONE) {
                 return getIcon(IconManager.IconType.QUANT_XIC);
             }
-            if (dataset.getQuantMethodInfo() == QuantitationMethodInfo.FEATURES_EXTRACTION) { // XIC
-                if (datasetType.isAggregation()) {
-                    return getIcon(IconManager.IconType.QUANT_AGGREGATION_XIC);
+            QuantitationMethodInfo methodInfo = dataset.getQuantMethodInfo();
+            switch (methodInfo){
+                case FEATURES_EXTRACTION -> {
+                    if (datasetType.isAggregation()) {
+                        return getIcon(IconManager.IconType.QUANT_AGGREGATION_XIC);
+                    }
+                    return getIcon(IconManager.IconType.QUANT_XIC);
                 }
-                return getIcon(IconManager.IconType.QUANT_XIC);
-            } else if (dataset.getQuantMethodInfo() == QuantitationMethodInfo.SPECTRAL_COUNTING) { // Spectral count
-                return getIcon(IconManager.IconType.QUANT_SC);
-            } else {
-                return getIcon(IconManager.IconType.QUANT);
+                case SPECTRAL_COUNTING -> {
+                    return getIcon(IconManager.IconType.QUANT_SC);
+                }
+                case ISOBARIC_TAGGING -> {
+                    if (datasetType.isAggregation()) {
+                        return getIcon(IconManager.IconType.QUANT_AGGREGATION_TMT);
+                    }
+                    return getIcon(IconManager.IconType.QUANT_TMT);
+                }
+                default -> {
+                    return getIcon(IconManager.IconType.QUANT);
+                }
+
             }
+
         }
 
         return getIcon(IconManager.IconType.QUANT);// sould not happen

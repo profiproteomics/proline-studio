@@ -191,10 +191,9 @@ public class IsobaricMethodParamsPanel extends AbstractParamsPanel {
                 String reporterDS = (String) quantParams.get("reporter_ion_data_source");
                 m_reporterSourceCbx.setSelectedItem(ReporterSources.valueOf(reporterDS).getDisplayValue());
 
-                Boolean rescaleAbundances = Boolean.getBoolean((String) quantParams.getOrDefault("label_free_quant_config","false"));
-                m_rescaleAbundancestoMS1CB.setSelected(rescaleAbundances);
+                m_rescaleAbundancestoMS1CB.setSelected(quantParams.containsKey("label_free_quant_config"));
 
-            }catch (NullPointerException | ClassCastException exep){
+            } catch (NullPointerException | ClassCastException exep){
                 resetValues();
             }
 

@@ -210,10 +210,24 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
                             xicParamPanel.setQuantParams(m_dataset.getQuantProcessingConfigAsMap());
                         }
                         case ISOBARIC_TAGGING -> {
-                            IsobaricMethodParamsPanel tmtParamPanel = new IsobaricMethodParamsPanel(m_dataset.getQuantitationMethod(), true);
-                            m_confPanel.removeAll();
-                            m_confPanel.add(tmtParamPanel, BorderLayout.CENTER);
-                            tmtParamPanel.setQuantParams(m_dataset.getQuantProcessingConfigAsMap());
+                            Map<String,Object> tmtParams = m_dataset.getQuantProcessingConfigAsMap();
+                            if(tmtParams.containsKey("label_free_quant_config")) {
+                                IsobaricMethodParamsPanel tmtParamPanel = new IsobaricMethodParamsPanel(m_dataset.getQuantitationMethod(), true);
+                                m_confPanel.removeAll();
+                                m_confPanel.add(tmtParamPanel, BorderLayout.NORTH);
+                                tmtParamPanel.setQuantParams(tmtParams);
+
+                                LabelFreeMSParamsCompletePanel xicParamPanel = new LabelFreeMSParamsCompletePanel(true, false);
+                                xicParamPanel.resetScrollbar();
+                                m_confPanel.add(xicParamPanel, BorderLayout.CENTER);
+                                xicParamPanel.setQuantParams((Map<String,Object>) tmtParams.get("label_free_quant_config"));
+
+                            } else {
+                                IsobaricMethodParamsPanel tmtParamPanel = new IsobaricMethodParamsPanel(m_dataset.getQuantitationMethod(), true);
+                                m_confPanel.removeAll();
+                                m_confPanel.add(tmtParamPanel, BorderLayout.CENTER);
+                                tmtParamPanel.setQuantParams(tmtParams);
+                            }
 
                         }
                         default -> {

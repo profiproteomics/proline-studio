@@ -315,21 +315,21 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
     }
 
     @Override
-    public void displayPeakel(final IPeakel f) {
+    public void displayPeakel(final IPeakel peakel) {
         double ppm = MzScopePreferences.getInstance().getMzPPMTolerance();
-        final ExtractionRequest.Builder builder = ExtractionRequest.builder(this).setMzTolPPM((float) ppm);
+        final ExtractionRequest.Builder builder = ExtractionRequest.builder(this).setMzTolPPM((float) ppm).setMsLevel(peakel.getMsLevel());
 
-        if (f.getMsLevel() == 1) {
-            builder.setMz(f.getMz());
+        if (peakel.getMsLevel() == 1) {
+            builder.setMz(peakel.getMz());
         } else {
-            builder.setMz(f.getParentMz());
+            builder.setMz(peakel.getParentMz());
             ppm = MzScopePreferences.getInstance().getFragmentMzPPMTolerance();
             builder.setFragmentMzTolPPM((float) ppm);
-            builder.setFragmentMz(f.getMz());
+            builder.setFragmentMz(peakel.getMz());
         }
 
         // TODO : made this configurable un feature panel : extract around peakel rt or full time range
-        //builder.setElutionTimeLowerBound(f.getBasePeakel().getFirstElutionTime()-5*60).setElutionTimeUpperBound(f.getBasePeakel().getLastElutionTime()+5*60);
+        //builder.setElutionTimeLowerBound(peakel.getBasePeakel().getFirstElutionTime()-5*60).setElutionTimeUpperBound(peakel.getBasePeakel().getLastElutionTime()+5*60);
         if (rawFileLoading != null) {
             rawFileLoading.setWaitingState(true);
         }
@@ -344,9 +344,9 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
             protected void done() {
                 try {
                     displayChromatogram(get(), new Display(getChromatogramDisplayMode()));
-                    chromatogramPanel.displayFeature(f, new Display(Collections.singletonList(
-                        new IntervalMarker(null, Color.ORANGE, Color.RED, f.getFirstElutionTime() / 60.0, f.getLastElutionTime() / 60.0))));
-                    displayScan(getCurrentRawfile().getSpectrumId(f.getElutionTime()));
+                    chromatogramPanel.displayFeature(peakel, new Display(Collections.singletonList(
+                        new IntervalMarker(null, Color.ORANGE, Color.RED, peakel.getFirstElutionTime() / 60.0, peakel.getLastElutionTime() / 60.0))));
+                    displayScan(getCurrentRawfile().getSpectrumId(peakel.getElutionTime()));
                     if (rawFileLoading != null) {
                         rawFileLoading.setWaitingState(false);
                     }

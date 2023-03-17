@@ -16,6 +16,7 @@
  */
 package fr.proline.mzscope.mzdb;
 
+import fr.profi.mzdb.model.SpectrumHeader;
 import fr.proline.mzscope.model.*;
 import fr.proline.mzscope.model.IChromatogram;
 
@@ -244,7 +245,7 @@ public class ThreadedMzdbRawFile implements IRawFile {
 
   @Override
     public Map<String, Object> getFileProperties() {
-              try {
+      try {
          return service.submit(() -> {
             Map<String, Object> data =  mzdbRawFile.getFileProperties();
             return data;
@@ -284,5 +285,18 @@ public class ThreadedMzdbRawFile implements IRawFile {
   @Override
   public IonMobilityIndex getIonMobilityIndex() {
     return mzdbRawFile.getIonMobilityIndex();
+  }
+
+  @Override
+  public Map<SpectrumHeader, IsolationWindow> getIsolationWindowByMs2Headers() {
+    try {
+      return service.submit(() -> {
+        Map<SpectrumHeader, IsolationWindow> map =  mzdbRawFile.getIsolationWindowByMs2Headers();
+        return map;
+      }).get();
+    } catch (InterruptedException | ExecutionException ex ) {
+      logger.error("getIsolationWindowByMs2Headers call fail", ex);
+    }
+    return null;
   }
 }

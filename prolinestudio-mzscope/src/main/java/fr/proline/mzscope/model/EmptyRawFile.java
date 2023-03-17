@@ -1,5 +1,7 @@
 package fr.proline.mzscope.model;
 
+import fr.profi.mzdb.model.SpectrumHeader;
+
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -121,6 +123,9 @@ public class EmptyRawFile implements IRawFile {
   public IonMobilityIndex getIonMobilityIndex() {
     return null;
   }
+
+  @Override
+  public Map<SpectrumHeader, IsolationWindow> getIsolationWindowByMs2Headers() { return null;  }
 
   @Override
   public String toString(){

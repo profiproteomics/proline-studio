@@ -10,6 +10,7 @@ import fr.profi.bruker.timstof.io.TimstofReader;
 import fr.profi.bruker.timstof.model.AbstractTimsFrame;
 import fr.profi.bruker.timstof.model.TimsMSFrame;
 import fr.profi.bruker.timstof.model.TimsPASEFFrame;
+import fr.profi.mzdb.model.SpectrumHeader;
 import fr.profi.util.StringUtils;
 import fr.proline.mzscope.model.*;
 
@@ -344,6 +345,11 @@ public class TimstofRawFile implements IRawFile{
     @Override
     public IonMobilityIndex getIonMobilityIndex() {
         return null;
+    }
+
+    @Override
+    public Map<SpectrumHeader, IsolationWindow> getIsolationWindowByMs2Headers() {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override

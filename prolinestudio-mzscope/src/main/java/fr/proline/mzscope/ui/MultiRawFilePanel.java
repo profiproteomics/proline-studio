@@ -188,13 +188,13 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
     
     // override display feature to display all xic
     @Override
-    public void displayPeakel(final IPeakel f) {
+    public void displayPeakel(final IPeakel peakel) {
         double ppm = MzScopePreferences.getInstance().getMzPPMTolerance();
-        final double maxMz = f.getMz() + f.getMz() * ppm / 1e6;
-        final double minMz = f.getMz() - f.getMz() * ppm / 1e6;
+        final double maxMz = peakel.getMz() + peakel.getMz() * ppm / 1e6;
+        final double minMz = peakel.getMz() - peakel.getMz() * ppm / 1e6;
 
         final List<IRawFile> rawFiles = new ArrayList<>(rawfiles);
-        final ExtractionRequest extractionRequest = ExtractionRequest.builder(this).setMz(f.getMz()).setMzTolPPM((float)ppm).build();
+        final ExtractionRequest extractionRequest = ExtractionRequest.builder(this).setMz(peakel.getMz()).setMzTolPPM((float)ppm).build();
 
         SwingWorker worker = new SwingWorker<Integer, IChromatogram>() {
             int count = 0;
@@ -215,20 +215,20 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             protected void process(List<IChromatogram> chunks) {
                 int k = 0;
                 Display display = new Display(Collections
-                    .singletonList(new IntervalMarker(null, Color.ORANGE, Color.RED, f.getFirstElutionTime(), f.getLastElutionTime())));
+                    .singletonList(new IntervalMarker(null, Color.ORANGE, Color.RED, peakel.getFirstElutionTime(), peakel.getLastElutionTime())));
                 if (isFirstProcessCall) {
                     logger.info("display first chromato");
                     isFirstProcessCall = false;
                     displayChromatogram(chunks.get(0), new Display(Display.Mode.REPLACE));
                     k = 1;
-                    displayScan(getCurrentRawfile().getSpectrumId(f.getElutionTime()));
-                    chromatogramPanel.displayFeature(f, display);
+                    displayScan(getCurrentRawfile().getSpectrumId(peakel.getElutionTime()));
+                    chromatogramPanel.displayFeature(peakel, display);
                 }
                 for (; k < chunks.size(); k++) {
                     logger.info("add additionnal chromato");
                     displayChromatogram(chunks.get(k), new Display(Display.Mode.OVERLAY));
-                    displayScan(getCurrentRawfile().getSpectrumId(f.getElutionTime()));
-                    chromatogramPanel.displayFeature(f, display);
+                    displayScan(getCurrentRawfile().getSpectrumId(peakel.getElutionTime()));
+                    chromatogramPanel.displayFeature(peakel, display);
                 }
             }
 

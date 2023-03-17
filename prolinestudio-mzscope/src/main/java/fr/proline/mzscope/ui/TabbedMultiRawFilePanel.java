@@ -266,7 +266,8 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
                 }
             }
         }
-        return null;
+        // else return the first one
+        return this.rawfiles.get(0);
     }
 
     @Override

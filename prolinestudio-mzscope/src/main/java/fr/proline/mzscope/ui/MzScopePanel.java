@@ -115,7 +115,7 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
         return this.mainSplitPane;
     }
 
-    public JTabbedPane getFeaturesTabPane() {
+    private JTabbedPane getFeaturesTabPane() {
         if (this.featuresTabPane == null) {
             this.featuresTabPane = new JTabbedPane();
         }

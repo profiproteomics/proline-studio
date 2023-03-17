@@ -22,31 +22,34 @@ import com.google.common.primitives.Floats;
 import fr.profi.mzdb.*;
 import fr.profi.mzdb.algo.feature.extraction.FeatureExtractorConfig;
 import fr.profi.mzdb.db.model.SharedParamTree;
-import fr.profi.mzdb.db.model.params.param.CVEntry;
-import fr.profi.mzdb.io.reader.MzDbReaderQueries;
+import fr.profi.mzdb.db.model.params.IsolationWindowParamTree;
+import fr.profi.mzdb.db.model.params.Precursor;
+import fr.profi.mzdb.db.model.params.param.CVParam;
 import fr.profi.mzdb.io.reader.provider.RunSliceDataProvider;
 import fr.profi.mzdb.io.writer.MsSpectrumTSVWriter;
 import fr.profi.mzdb.io.writer.mgf.MgfWriter;
 import fr.profi.mzdb.model.*;
-import fr.proline.mzscope.model.*;
 import fr.proline.mzscope.model.Chromatogram;
-import fr.proline.mzscope.model.IChromatogram;
-import fr.proline.mzscope.model.IExportParameters.ExportType;
+import fr.proline.mzscope.model.*;
+import fr.proline.mzscope.model.IsolationWindow;
 import fr.proline.mzscope.model.Spectrum;
+import fr.proline.mzscope.model.IExportParameters.ExportType;
 import fr.proline.mzscope.processing.PeakelsHelper;
+import fr.proline.mzscope.processing.SpectrumUtils;
 import fr.proline.mzscope.ui.MgfExportParameters;
 import fr.proline.mzscope.ui.ScanHeaderExportParameters;
 import fr.proline.mzscope.ui.ScanHeaderType;
-import fr.proline.mzscope.processing.SpectrumUtils;
-
-import java.io.*;
-import java.text.DecimalFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Option;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.StreamCorruptedException;
+import java.text.DecimalFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -66,6 +69,8 @@ public class MzdbRawFile implements IRawFile {
     private double elutionStartTime = Double.NaN;
     private double elutionEndTime = Double.NaN;
     private boolean isDIAFile;
+
+    private Map<SpectrumHeader, IsolationWindow> isolationWindowByHeaders;
 
     private Map<Integer, DataMode> dataModeByMsLevel = new HashMap<>();
 
@@ -905,5 +910,43 @@ public class MzdbRawFile implements IRawFile {
     @Override
     public IonMobilityIndex getIonMobilityIndex() {
         return ionMobilityIndex;
+    }
+
+    @Override
+    public Map<SpectrumHeader, IsolationWindow> getIsolationWindowByMs2Headers() {
+        if (!isDIAFile) return null;
+        if (isolationWindowByHeaders == null) {
+            try {
+                isolationWindowByHeaders = retrieveTrueIsolationWindows(reader);
+            } catch (SQLiteException e) {
+                return null;
+            }
+        }
+        return isolationWindowByHeaders;
+    }
+
+    private static Map<SpectrumHeader, IsolationWindow> retrieveTrueIsolationWindows(MzDbReader reader) throws SQLiteException {
+        Map<SpectrumHeader, IsolationWindow> windows = new HashMap<>();
+        SpectrumHeader[] headers = reader.getMs2SpectrumHeaders();
+        SpectrumHeader.loadPrecursors(headers, reader.getConnection());
+        for (SpectrumHeader header : headers) {
+            Precursor precursor = header.getPrecursor();
+
+            if (precursor != null) {
+                String center = null, upper = null, lower = null;
+                IsolationWindowParamTree tree = precursor.getIsolationWindow();
+                for (CVParam cvParam : tree.getCVParams()) {
+                    if (cvParam.getAccession().equals("MS:1000827")) {
+                        center = cvParam.getValue();
+                    } else if (cvParam.getAccession().equals("MS:1000828")) {
+                        lower = cvParam.getValue();
+                    } else if (cvParam.getAccession().equals("MS:1000829")) {
+                        upper = cvParam.getValue();
+                    }
+                }
+                windows.put(header, new IsolationWindow(center, Double.valueOf(center) - Double.valueOf(lower), Double.valueOf(center) + Double.valueOf(upper)));
+            }
+        }
+        return windows;
     }
 }

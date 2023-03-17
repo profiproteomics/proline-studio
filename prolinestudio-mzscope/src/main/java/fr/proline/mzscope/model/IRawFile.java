@@ -16,6 +16,8 @@
  */
 package fr.proline.mzscope.model;
 
+import fr.profi.mzdb.model.SpectrumHeader;
+
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -184,5 +186,10 @@ public interface IRawFile {
    */
    public void closeIRawFile();
 
+   /**
+    * Returns the IonMobility Index.
+    */
    IonMobilityIndex getIonMobilityIndex();
+
+   Map<SpectrumHeader, IsolationWindow> getIsolationWindowByMs2Headers();
 }

@@ -16,6 +16,7 @@
  */
 package fr.proline.mzscope.mzml;
 
+import fr.profi.mzdb.model.SpectrumHeader;
 import fr.proline.mzscope.model.*;
 import fr.proline.mzscope.model.IChromatogram;
 
@@ -160,6 +161,11 @@ public class MzMLRawFile implements IRawFile {
   @Override
   public IonMobilityIndex getIonMobilityIndex() {
     return null;
+  }
+
+  @Override
+  public Map<SpectrumHeader, IsolationWindow> getIsolationWindowByMs2Headers() {
+    throw new UnsupportedOperationException("Not yet implemented");
   }
 
   @Override

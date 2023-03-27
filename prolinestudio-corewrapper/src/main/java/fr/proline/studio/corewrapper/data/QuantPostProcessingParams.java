@@ -52,7 +52,8 @@ public class QuantPostProcessingParams {
     //-- MODIFIED_PEPTIDE_FILTERING methods and keys
     public final static String DISCARD_MODIFIED_PEPTIDES = "discard_modified_peptides"; //V2&3
     public final static String DISCARD_OXIDIZED_PEPTIDES = "discard_oxidized_peptides"; //V1
-    
+
+    public final static String USE_PURITY_CORRECTION_MATRIX= "use_purity_correction_matrix";
     public final static String PTM_DEFINITION_IDS_TO_DISCARD = "ptm_definition_ids_to_discard"; 
     public final static String MODIFIED_PEPTIDE_FILTERING_METHOD = "modified_peptide_filtering_method";
     public final static String MODIFIED_PEPTIDE_FILTER_CONFIG = "modified_peptide_filter_config";    

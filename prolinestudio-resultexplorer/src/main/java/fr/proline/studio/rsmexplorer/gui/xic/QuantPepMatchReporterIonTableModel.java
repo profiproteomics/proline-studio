@@ -23,7 +23,6 @@ import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DQuantReporterIon;
-import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.export.ExportFontData;
@@ -32,6 +31,7 @@ import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.TimeRenderer;
@@ -762,7 +762,11 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
         TableCellRenderer renderer = null;
 
         switch (col) {
-
+            case COLTYPE_PEPTIDE_MATCH_ID:
+            case COLTYPE_PEPTIDE_MATCH_REP_ION_ID: {
+                renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Long.class));
+                break;
+            }
             case COLTYPE_PEPTIDE_SEQUENCE: {
                 renderer = new PeptideRenderer();
                 break;
@@ -780,7 +784,8 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
                 break;
             }
             case COLTYPE_PEPTIDE_MATCH_RETENTION_TIME: {
-                renderer = new TimeRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
+//                renderer = new TimeRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
+                renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4);
                 break;
             }
             case COLTYPE_PEPTIDE_SCORE: {

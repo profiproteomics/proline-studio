@@ -561,7 +561,7 @@ public class WindowBoxFactory {
             } else {
                 if (methodInfo.equals(DDatasetType.QuantitationMethodInfo.ISOBARIC_TAGGING)) {
                     boxes[4] = new DataboxXicReporterIon();
-                    boxes[4].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+//                    boxes[4].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
                 } else{
                     boxes[4] = new DataboxChildFeature();
                     boxes[4].setLayout(SplittedPanelContainer.PanelLayout.TABBED);

@@ -2352,21 +2352,52 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
      * load reporter Ion data for a given list of Ids
      *
      * @param entityManagerMSI
-     * @param listMasterReporterIonsIds
+     * @param listMasterReporterIons
      * @return
      */
-    private boolean fetchReporterIonData(EntityManager entityManagerMSI, List<MasterQuantReporterIon> listMasterReporterIonsIds) {
+    private boolean fetchReporterIonData(EntityManager entityManagerMSI, List<MasterQuantReporterIon> listMasterReporterIons) {
 
         Map<MasterQuantReporterIon, Long>  objectTreeIdByRepIon = new HashMap<>();
-        for (MasterQuantReporterIon mQuantRepIon : listMasterReporterIonsIds) {
+        HashMap<Long, MasterQuantReporterIon> mqRepIonById = new HashMap<>();
+        for (MasterQuantReporterIon mQuantRepIon : listMasterReporterIons) {
             objectTreeIdByRepIon.put(mQuantRepIon, mQuantRepIon.getMasterQuantComponent().getObjectTreeId());
+            mqRepIonById.put(mQuantRepIon.getId(), mQuantRepIon);
         } // end for
 
         fetchReporterIonAbundances(objectTreeIdByRepIon, entityManagerMSI);
 
-//        m_logger.info("Fetch ions pepInstance, pepMatch & Ab. for " + nbMsub + " ions duration = " + (System.currentTimeMillis() - start) + " ms");
-//        start = System.currentTimeMillis();
+        //fetch peptide matches
+        String pepMQuery = "SELECT mqRepIon.id, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, pm.serializedProperties, pm.msQuery.spectrum.firstTime " +
+                " FROM fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.MasterQuantReporterIon mqRepIon " +
+                "WHERE pm.msQuery.id = mqRepIon.msQueryId " +
+                "AND pm.resultSet.id = mqRepIon.resultSummary.resultSet.id " +
+                "AND pm.peptideId = mqRepIon.masterQuantPeptideIon.peptideId " +
+                "AND mqRepIon.id IN (:listId) ";
 
+        Query query = entityManagerMSI.createQuery(pepMQuery);
+        query.setParameter("listId", mqRepIonById.keySet().stream().toList());
+        List<Object[]> resultList = query.getResultList();
+        Iterator<Object[]> itPeptidesQuery = resultList.iterator();
+        while (itPeptidesQuery.hasNext()) {
+            Object[] resCur = itPeptidesQuery.next();
+            Long mqRepId = (Long) resCur[0];
+            Long pmId = (Long) resCur[1];
+            Integer pmRank = (Integer) resCur[2];
+            Integer pmCharge = (Integer) resCur[3];
+            Float pmDeltaMoz = (Float) resCur[4];
+            Double pmExperimentalMoz = (Double) resCur[5];
+            Integer pmMissedCleavage = (Integer) resCur[6];
+            Float pmScore = (Float) resCur[7];
+            Long pmResultSetId = (Long) resCur[8];
+            Integer pmCdPrettyRank = (Integer) resCur[9];
+            Integer pmSdPrettyRank = (Integer) resCur[10];
+            String pmSerializedProp = (String) resCur[11];
+            Float retTime = (Float) resCur[12];
+            DPeptideMatch pm = new DPeptideMatch(pmId, pmRank, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId, pmCdPrettyRank, pmSdPrettyRank, pmSerializedProp);
+            pm.setPeptide(m_specifiedMasterQuantPeptideIon.getPeptideInstance().getPeptide());
+            pm.setRetentionTime(retTime);
+            mqRepIonById.get(mqRepId).getTransientData().setPeptideMatch(pm);
+        }
         return true;
     }
 

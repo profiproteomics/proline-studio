@@ -55,6 +55,7 @@ public class QuantPostProcessingPanel extends JPanel {
     private JTabbedPane m_tabbedPane;
 
     //private JCheckBox m_useOnlySpecificPeptidesChB;
+    private JCheckBox m_usePurityCorrectionMatrixChB;
     private JComboBox<String> m_peptidesSelectionMethodCB;
     private JCheckBox m_discardMissCleavedPeptidesChB;
     private JCheckBox m_discardModifiedPeptidesChB;
@@ -84,6 +85,7 @@ public class QuantPostProcessingPanel extends JPanel {
 
     private DoubleParameter m_peptideStatTestsAlphaParameter;
     private DoubleParameter m_proteinStatTestsAlphaParameter;
+    private BooleanParameter m_usePurityCorrectionMatrixParameter;
     private BooleanParameter m_discardMissCleavedPeptidesParameter;
     private BooleanParameter m_discardModifiedPeptidesParameter;
     private BooleanParameter m_discardPeptideIonsSharingPeakelsParameter;
@@ -180,6 +182,12 @@ public class QuantPostProcessingPanel extends JPanel {
         m_discardPeptideIonsSharingPeakelsParameter = new BooleanParameter(paramKey, StringUtils.getLabelFromCamelCase(paramKey), m_discardPeptideIonsSharingPeakelsChB, false);
         m_discardPeptideIonsSharingPeakelsParameter.addBackwardCompatibleKey(QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.DISCARD_PEPTIDES_SHARING_PEAKELS));
         m_parameterList.add(m_discardPeptideIonsSharingPeakelsParameter);
+
+        paramKey = QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.USE_PURITY_CORRECTION_MATRIX);
+        m_usePurityCorrectionMatrixChB = new JCheckBox(StringUtils.getLabelFromCamelCase(paramKey));
+        m_usePurityCorrectionMatrixChB.setEnabled(!m_readOnly);
+        m_usePurityCorrectionMatrixParameter = new BooleanParameter(paramKey, StringUtils.getLabelFromCamelCase(paramKey), m_usePurityCorrectionMatrixChB, false);
+        m_parameterList.add(m_usePurityCorrectionMatrixParameter);
 
         //VDS TODO : change param structure for settings prefixe (peptide or protein) + param name
         m_applyPepNormalizationChB = new JCheckBox("Apply Normalization (median)");
@@ -435,6 +443,14 @@ public class QuantPostProcessingPanel extends JPanel {
         c.insets = new Insets(5, 5, 5, 5);
         pepSelectionPanel.add(m_discardPeptideIonsSharingPeakelsChB, c);
 
+        // use purity correction matrix
+        c.gridx = 0;
+        c.gridy++;
+        c.gridwidth = 2;
+        c.weightx = 1;
+        c.insets = new Insets(5, 5, 5, 5);
+        pepSelectionPanel.add(m_usePurityCorrectionMatrixChB, c);
+
         northPanel.add(pepSelectionPanel, BorderLayout.NORTH);
         return northPanel;
     }
@@ -687,6 +703,7 @@ public class QuantPostProcessingPanel extends JPanel {
         params.put(QuantPostProcessingParams.DISCARD_PEP_IONS_SHARING_PEAKELS, m_discardPeptideIonsSharingPeakelsChB.isSelected()); //last one 
         params.put(QuantPostProcessingParams.PEPTIDE_ABUNDANCE_SUMMARIZING_METHOD, QuantPostProcessingParams.getPeptideAbundanceSummarizingMethodKeys()[m_peptideAbundanceSummarizingMethodCB.getSelectedIndex()]);//shown in Protein tab
         params.put(QuantPostProcessingParams.APPLY_PROFILE_CLUSTERING, m_applyProfileClusteringChB.isSelected());
+        params.put(QuantPostProcessingParams.USE_PURITY_CORRECTION_MATRIX, m_usePurityCorrectionMatrixChB.isSelected()); //last one
 
         //for tab Pep. Configuration
         Map<String, Object> peptideStatConfigMap = new HashMap<>();
@@ -806,7 +823,10 @@ public class QuantPostProcessingPanel extends JPanel {
 
         Boolean discardSharingPeakel = isVersion3 ? Boolean.valueOf(refinedParams.get(QuantPostProcessingParams.DISCARD_PEP_IONS_SHARING_PEAKELS).toString()) : Boolean.valueOf(refinedParams.get(QuantPostProcessingParams.DISCARD_PEPTIDES_SHARING_PEAKELS).toString());
         m_discardPeptideIonsSharingPeakelsChB.setSelected(discardSharingPeakel);
-        
+
+        Boolean usePurityCorrMatrix = Boolean.valueOf(refinedParams.getOrDefault(QuantPostProcessingParams.USE_PURITY_CORRECTION_MATRIX, false).toString());
+        m_usePurityCorrectionMatrixChB.setSelected(usePurityCorrMatrix);
+
         String[] abundanceSummarizingMethodKeys = QuantPostProcessingParams.getPeptideAbundanceSummarizingMethodKeys();
         String summarisedMethodKey = isVersion3 ? (String) refinedParams.get(QuantPostProcessingParams.PEPTIDE_ABUNDANCE_SUMMARIZING_METHOD) : (String) refinedParams.get(QuantPostProcessingParams.ABUNDANCE_SUMMARIZING_METHOD);
         index = 0;

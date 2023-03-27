@@ -49,13 +49,14 @@
       	<exclude>prolinestudio/**</exclude>
       </excludes>
     </fileSet>
-    <files>
-      <file>
-        <source>${project.build.directory}/${project.artifactId}-${project.version}/prolinestudio/start_studio.bat</source>
+    <fileSet>
+       <directory>${project.build.directory}/${project.artifactId}-${project.version}/prolinestudio</directory>
+       <includes>
+         <include>start_studio.bat</include>
+       </includes>
         <outputDirectory></outputDirectory>
         <filtered>true</filtered>
-      </file>
-    </files>
+    </fileSet>
 
   </fileSets>
 

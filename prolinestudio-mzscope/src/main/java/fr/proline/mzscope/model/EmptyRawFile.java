@@ -1,5 +1,7 @@
 package fr.proline.mzscope.model;
 
+import fr.profi.mzdb.model.SpectrumHeader;
+
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +25,7 @@ public class EmptyRawFile implements IRawFile {
   }
 
   @Override
-  public IChromatogram getXIC(MsnExtractionRequest params) {
+  public IChromatogram getXIC(ExtractionRequest params) {
     return null;
   }
 
@@ -98,6 +100,11 @@ public class EmptyRawFile implements IRawFile {
   }
 
   @Override
+  public boolean hasIonMobilitySeparation() {
+    return false;
+  }
+
+  @Override
   public Map<String, Object> getFileProperties() {
     return null;
   }
@@ -111,6 +118,14 @@ public class EmptyRawFile implements IRawFile {
   public void closeIRawFile() {
 
   }
+
+  @Override
+  public IonMobilityIndex getIonMobilityIndex() {
+    return null;
+  }
+
+  @Override
+  public Map<SpectrumHeader, IsolationWindow> getIsolationWindowByMs2Headers() { return null;  }
 
   @Override
   public String toString(){

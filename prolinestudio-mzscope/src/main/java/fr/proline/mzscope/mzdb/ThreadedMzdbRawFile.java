@@ -16,6 +16,7 @@
  */
 package fr.proline.mzscope.mzdb;
 
+import fr.profi.mzdb.model.SpectrumHeader;
 import fr.proline.mzscope.model.*;
 import fr.proline.mzscope.model.IChromatogram;
 
@@ -192,7 +193,7 @@ public class ThreadedMzdbRawFile implements IRawFile {
    }
    
    @Override
-    public IChromatogram getXIC(final MsnExtractionRequest params) {
+    public IChromatogram getXIC(final ExtractionRequest params) {
       try {
          return service.submit(() -> {
             IChromatogram chromatogram = mzdbRawFile.getXIC(params);
@@ -237,9 +238,14 @@ public class ThreadedMzdbRawFile implements IRawFile {
         return mzdbRawFile.isDIAFile();
     }
 
-    @Override
+  @Override
+  public boolean hasIonMobilitySeparation() {
+    return mzdbRawFile.hasIonMobilitySeparation();
+  }
+
+  @Override
     public Map<String, Object> getFileProperties() {
-              try {
+      try {
          return service.submit(() -> {
             Map<String, Object> data =  mzdbRawFile.getFileProperties();
             return data;
@@ -274,5 +280,23 @@ public class ThreadedMzdbRawFile implements IRawFile {
       } catch (InterruptedException | ExecutionException ex) {
          logger.error("mzdbRawFile clise failed", ex);
       }         
-    }     
+    }
+
+  @Override
+  public IonMobilityIndex getIonMobilityIndex() {
+    return mzdbRawFile.getIonMobilityIndex();
+  }
+
+  @Override
+  public Map<SpectrumHeader, IsolationWindow> getIsolationWindowByMs2Headers() {
+    try {
+      return service.submit(() -> {
+        Map<SpectrumHeader, IsolationWindow> map =  mzdbRawFile.getIsolationWindowByMs2Headers();
+        return map;
+      }).get();
+    } catch (InterruptedException | ExecutionException ex ) {
+      logger.error("getIsolationWindowByMs2Headers call fail", ex);
+    }
+    return null;
+  }
 }

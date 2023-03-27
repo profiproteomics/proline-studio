@@ -37,6 +37,7 @@ import scala.Tuple2;
 
 import javax.swing.*;
 import java.awt.*;
+import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +49,7 @@ import static fr.proline.studio.graphics.marker.LabelMarker.ORIENTATION_XY_MIDDL
  *
  * @author MB243701
  */
-public abstract class AbstractSpectrumPanel extends JPanel  implements PlotPanelListener {
+public abstract class AbstractSpectrumPanel extends JPanel implements PlotPanelListener, PropertyChangeListener {
 
   private class ReferenceSpectrum {
       public final Spectrum spectrum;
@@ -61,9 +62,11 @@ public abstract class AbstractSpectrumPanel extends JPanel  implements PlotPanel
    }
 
    private static final Logger logger = LoggerFactory.getLogger(AbstractSpectrumPanel.class);
-   private static final DecimalFormat df = new DecimalFormat("#.###");
-   protected final IRawFileViewer rawFilePanel;
+   private static final DecimalFormat SCORE_FORMATTER = new DecimalFormat("#.###");
+   protected final IRawFileViewer rawFileViewer;
   protected BasePlotPanel spectrumPlotPanel;
+
+  protected JSplitPane splitPane;
 
   protected PlotXYAbstract scanPlot;
   protected LineMarker positionMarker;
@@ -74,9 +77,10 @@ public abstract class AbstractSpectrumPanel extends JPanel  implements PlotPanel
   protected List<AbstractMarker> ipMarkers = new ArrayList();
 
 
-   public AbstractSpectrumPanel(IRawFileViewer rawFilePanel) {
+   public AbstractSpectrumPanel(IRawFileViewer rawFileViewer) {
       super();
-      this.rawFilePanel = rawFilePanel;
+      this.rawFileViewer = rawFileViewer;
+      this.rawFileViewer.addPropertyChangeListener(IRawFileViewer.LAST_EXTRACTION_REQUEST, this);
    }
 
    public void initComponents() {
@@ -90,8 +94,12 @@ public abstract class AbstractSpectrumPanel extends JPanel  implements PlotPanel
       
       spectrumPlotPanel.repaint();
 
-      this.removeAll();
-      this.add(plotPanel, BorderLayout.CENTER);
+      splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+      splitPane.setLeftComponent(plotPanel);
+      splitPane.setDividerLocation(1.0);
+      splitPane.setDividerSize(0);
+
+      this.add(splitPane, BorderLayout.CENTER);
       this.add(getSpectrumToolbar(), BorderLayout.NORTH);
 
    }
@@ -155,7 +163,7 @@ public abstract class AbstractSpectrumPanel extends JPanel  implements PlotPanel
       Double mz = 0.1 + ((Double) pattern.mzAbundancePairs()[0]._1 + (Double) pattern.mzAbundancePairs()[1]._1) / 2.0;
       Float ab = (Float) pattern.mzAbundancePairs()[0]._2 * 0.75f;
       StringBuilder labelTxt = new StringBuilder("charge ");
-      labelTxt.append(pattern.charge()).append("+").append("(").append(df.format(scoredPattern._1)).append(")");
+      labelTxt.append(pattern.charge()).append("+").append("(").append(SCORE_FORMATTER.format(scoredPattern._1)).append(")");
       LabelMarker label = new LabelMarker(spectrumPlotPanel, new DataCoordinates(mz, ab * abundance / normAbundance), labelTxt.toString(), ORIENTATION_XY_MIDDLE, ORIENTATION_XY_MIDDLE, CyclicColorPalette.getColor(0));
       ipMarkers.add(label);
       scanPlot.addMarker(label);
@@ -180,7 +188,7 @@ public abstract class AbstractSpectrumPanel extends JPanel  implements PlotPanel
       if (scan != null && scan.getMasses().length > 0) {    
         
 //       logger.info("display scan id = {}, masses length = {} ", scan.getIndex(), scan.getMasses().length);
-         Color plotColor = rawFilePanel.getPlotColor(rawFilePanel.getCurrentRawfile() == null ? null : rawFilePanel.getCurrentRawfile().getName());
+         Color plotColor = rawFileViewer.getPlotColor(rawFileViewer.getCurrentRawfile() == null ? null : rawFileViewer.getCurrentRawfile().getName());
          ScanTableModel scanModel = new ScanTableModel(scan);
          scanModel.setColor(plotColor);
          scanPlot = buildPlot(scan, plotColor, 1.0f);

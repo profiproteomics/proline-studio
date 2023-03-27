@@ -59,9 +59,9 @@ import org.slf4j.LoggerFactory;
  * @author CB205360
  * 
  */
-public class ExtractionResultsPanel extends JPanel {
+public class BatchExtractionPanel extends JPanel {
 
-    final private static Logger logger = LoggerFactory.getLogger(ExtractionResultsPanel.class);
+    final private static Logger logger = LoggerFactory.getLogger(BatchExtractionPanel.class);
     private final static String LAST_DIR = "mzscope.last.csv.extraction.directory";
 
     private List<ExtractionObject> m_extractions;
@@ -74,15 +74,13 @@ public class ExtractionResultsPanel extends JPanel {
     private IMzScopeController m_viewersController;
     private JFileChooser m_fchooser;
     private MarkerContainerPanel m_markerContainerPanel;
-    private ExportButton m_exportButton;
-    private FilterButton m_filterButton;
-    
-    
+
+
     public final static int TOOLBAR_ALIGN_VERTICAL = 0;
     public final static int TOOLBAR_ALIGN_HORIZONTAL = 1;
     private int m_toolbarAlign = TOOLBAR_ALIGN_HORIZONTAL;
 
-    public ExtractionResultsPanel(IMzScopeController extractionResults, int align) {
+    public BatchExtractionPanel(IMzScopeController extractionResults, int align) {
         this.m_viewersController = extractionResults;
         m_toolbarAlign = align;
         initComponents();
@@ -124,14 +122,9 @@ public class ExtractionResultsPanel extends JPanel {
         
         JButton iRTBtn = new JButton("iRT");
         iRTBtn.setToolTipText("indexed Retention Time Standard");
-        iRTBtn.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                m_importedTableModel = null;
-                setExtractions(buildIRTRequest(), null);
-            }
-
+        iRTBtn.addActionListener(e -> {
+            m_importedTableModel = null;
+            setExtractions(buildIRTRequest(this), null);
         });
         toolbar.add(iRTBtn);
         toolbar.addSeparator();
@@ -142,11 +135,11 @@ public class ExtractionResultsPanel extends JPanel {
         toolbar.add(extractBtn);
         
         toolbar.addSeparator();
-        m_exportButton = new ExportButton(((CompoundTableModel) m_extractionResultsTable.getModel()), "Extraction Values", m_extractionResultsTable);
+        ExportButton m_exportButton = new ExportButton(((CompoundTableModel) m_extractionResultsTable.getModel()), "Extraction Values", m_extractionResultsTable);
         toolbar.add(m_exportButton);
-        m_filterButton = new FilterButton(((CompoundTableModel) m_extractionResultsTable.getModel())) {
+        FilterButton m_filterButton = new FilterButton(((CompoundTableModel) m_extractionResultsTable.getModel())) {
             @Override
-            protected void filteringDone() { 
+            protected void filteringDone() {
                 logger.info("Filtering done ! ");
             }
         };
@@ -183,21 +176,31 @@ public class ExtractionResultsPanel extends JPanel {
             int mzColumnIdx = findColumn(m_importedTableModel, new String[]{"moz", "m/z", "mz"});
             int rtColumnIdx = findColumn(m_importedTableModel, new String[]{"rt", "retention_time", "retention time", "elution_time", "elution time", "time"});
             int zColumnIdx = findColumn(m_importedTableModel, new String[]{"charge", "z"});
+            int fragColumnIdx = findColumn(m_importedTableModel, new String[]{"frag_mz", "frag_moz", "frag_m/z", "fragment_mz", "fragment_moz", "fragment_m/z"});
 
             if (mzColumnIdx != -1) {
                 List<Double> mzValues = new ArrayList<>();
                 List<Double> rtValues = new ArrayList<>();
                 List<Integer> zValues = new ArrayList<>();
+                List<Double> fragMzValues = new ArrayList<>();
                 for (int k = 0; k < m_importedTableModel.getRowCount(); k++) {
                     mzValues.add((Double) m_importedTableModel.getValueAt(k, mzColumnIdx));
                     rtValues.add((rtColumnIdx != -1) ? (Double) m_importedTableModel.getValueAt(k, rtColumnIdx) : -1.0);
                     zValues.add((zColumnIdx != -1) ? ((Long) m_importedTableModel.getValueAt(k, zColumnIdx)).intValue() : 0);
+                    fragMzValues.add((fragColumnIdx != -1) ? ((Double) m_importedTableModel.getValueAt(k, fragColumnIdx)) : -1.0);
                 }
 
                 float moztol = MzScopePreferences.getInstance().getMzPPMTolerance();
-                List<MsnExtractionRequest> requests = new ArrayList<>();
+                float fragMoztol = MzScopePreferences.getInstance().getFragmentMzPPMTolerance();
+                List<ExtractionRequest> requests = new ArrayList<>();
                 for (int k = 0; k < mzValues.size(); k++) {
-                    requests.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(mzValues.get(k)).setElutionTime(rtValues.get(k).floatValue()).build());
+                    final ExtractionRequest.Builder<?> requestBuilder = ExtractionRequest.builder(this).setMzTolPPM(moztol).setMz(mzValues.get(k)).setElutionTime(rtValues.get(k).floatValue());
+                    if (fragColumnIdx == -1) {
+                        requests.add(requestBuilder.build());
+                    } else {
+                        requestBuilder.setMsLevel(2).setFragmentMzTolPPM(fragMoztol).setFragmentMz(fragMzValues.get(k));
+                        requests.add(requestBuilder.build());
+                    }
                 }
                 setExtractions(requests, zValues);
             } else {
@@ -217,11 +220,11 @@ public class ExtractionResultsPanel extends JPanel {
         return columnIdx;
     }
 
-    private void setExtractions(List<MsnExtractionRequest> extractionRequests, List<Integer> expectedCharge) {
+    private void setExtractions(List<ExtractionRequest> extractionRequests, List<Integer> expectedCharge) {
         List<ExtractionObject> results = new ArrayList<>();
         for (int k = 0; k < extractionRequests.size(); k++) {
-            MsnExtractionRequest request = extractionRequests.get(k);
-            ExtractionObject extractionObject = new ExtractionObject(request, (expectedCharge !=null) ? expectedCharge.get(k) : 0);
+            ExtractionRequest request = extractionRequests.get(k);
+            ExtractionObject extractionObject = new ExtractionObject(request, (expectedCharge != null) ? expectedCharge.get(k) : 0);
             results.add(extractionObject);
         }
         m_extractionResultsTableModel.setExtractions(results);
@@ -383,20 +386,20 @@ public class ExtractionResultsPanel extends JPanel {
 
     }
 
-    private static List<MsnExtractionRequest> buildIRTRequest() {
+    private static List<ExtractionRequest> buildIRTRequest(Object source) {
         float moztol = MzScopePreferences.getInstance().getMzPPMTolerance();
-        List<MsnExtractionRequest> list = new ArrayList<>();
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(487.257).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(547.297).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(622.853).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(636.869).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(644.822).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(669.838).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(683.827).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(683.853).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(699.338).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(726.835).build());
-        list.add(MsnExtractionRequest.builder().setMzTolPPM(moztol).setMz(776.929).build());
+        List<ExtractionRequest> list = new ArrayList<>();
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(487.257).build());
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(547.297).build());
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(622.853).build());
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(636.869).build());
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(644.822).build());
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(669.838).build());
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(683.827).build());
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(683.853).build());
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(699.338).build());
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(726.835).build());
+        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(776.929).build());
         return list;
     }
 }
@@ -408,11 +411,13 @@ class BatchExtractionDialog extends DefaultDialog {
     public BatchExtractionDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         setTitle("Batch extraction");
-        setHelpHeaderText("The list of mz or (mz,rt) pairs of the extraction table will <br> " +
-                "be extracted from all open raw files. If rt values are specified, the extracted chromatograms <br>" +
-                "would be annotated by the following annotators: <br><ul> "+
-                "<li>peakel detection: detect peakels then match peakels by (mz,rt)</li>" +
-                "<li>basic: search for null intensities before and after the specified rt </li></ul>");
+        setHelpHeaderText(
+                "The list of mz or (mz,rt) pairs of the extraction table will be extracted <br> " +
+                "from all open raw files. If no rt is provided then the extraction reports <br>" +
+                "only the chromatogram max intensity. If rt values are provided, the extracted <br>" +
+                "chromatograms will be annotated by the following annotators: <br><ul> "+
+                "<li>peakel detection: detect peakels then match peakels by (mz,rt,z).</li>" +
+                "<li>basic: simply search for non-null intensities before and after the specified rt.</li></ul>");
         initInternalPanel();
         pack();
 
@@ -434,7 +439,7 @@ class BatchExtractionDialog extends DefaultDialog {
         JLabel label = new JLabel("Annotator: ");
         panel.add(label, c);
 
-        m_annotatorCbx = new JComboBox<>(new String[] {"peakel detection", "basic"});
+        m_annotatorCbx = new JComboBox<>(new String[] {"basic", "peakel detection"});
         c.gridx++;
         panel.add(m_annotatorCbx, c);
         setInternalComponent(panel);

@@ -19,47 +19,37 @@ package fr.proline.mzscope.mzdb;
 import com.almworks.sqlite4java.SQLiteException;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Floats;
-import fr.profi.mzdb.FeatureDetectorConfig;
-import fr.profi.mzdb.MzDbFeatureDetector;
-import fr.profi.mzdb.MzDbFeatureExtractor;
-import fr.profi.mzdb.MzDbReader;
-import fr.profi.mzdb.SmartPeakelFinderConfig;
+import fr.profi.mzdb.*;
 import fr.profi.mzdb.algo.feature.extraction.FeatureExtractorConfig;
+import fr.profi.mzdb.db.model.SharedParamTree;
+import fr.profi.mzdb.db.model.params.IsolationWindowParamTree;
+import fr.profi.mzdb.db.model.params.Precursor;
+import fr.profi.mzdb.db.model.params.param.CVParam;
 import fr.profi.mzdb.io.reader.provider.RunSliceDataProvider;
 import fr.profi.mzdb.io.writer.MsSpectrumTSVWriter;
 import fr.profi.mzdb.io.writer.mgf.MgfWriter;
-import fr.profi.mzdb.model.AcquisitionMode;
-import fr.profi.mzdb.model.DataEncoding;
-import fr.profi.mzdb.model.DataMode;
-import fr.profi.mzdb.model.Feature;
-import fr.profi.mzdb.model.Peak;
-import fr.profi.mzdb.model.Peakel;
-import fr.profi.mzdb.model.PutativeFeature;
-import fr.profi.mzdb.model.RunSlice;
-import fr.profi.mzdb.model.SpectrumData;
-import fr.profi.mzdb.model.SpectrumHeader;
+import fr.profi.mzdb.model.*;
+import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.*;
-import fr.proline.mzscope.model.IChromatogram;
+import fr.proline.mzscope.model.IsolationWindow;
+import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.model.IExportParameters.ExportType;
 import fr.proline.mzscope.processing.PeakelsHelper;
+import fr.proline.mzscope.processing.SpectrumUtils;
 import fr.proline.mzscope.ui.MgfExportParameters;
 import fr.proline.mzscope.ui.ScanHeaderExportParameters;
 import fr.proline.mzscope.ui.ScanHeaderType;
-import fr.proline.mzscope.processing.SpectrumUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import scala.Option;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StreamCorruptedException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import scala.Option;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -80,6 +70,14 @@ public class MzdbRawFile implements IRawFile {
     private double elutionEndTime = Double.NaN;
     private boolean isDIAFile;
 
+    private Map<SpectrumHeader, IsolationWindow> isolationWindowByHeaders;
+
+    private Map<Integer, DataMode> dataModeByMsLevel = new HashMap<>();
+
+    private boolean hasIonMobilitySeparation;
+
+    private IonMobilityIndex ionMobilityIndex;
+
     public MzdbRawFile(File file) {
         mzDbFile = file;
         init();
@@ -94,9 +92,15 @@ public class MzdbRawFile implements IRawFile {
             reader = new MzDbReader(mzDbFile, true);
             //reader.enableScanListLoading();
             //reader.enableParamTreeLoading();
-            long start = System.currentTimeMillis();
             isDIAFile= checkDIAFile();
-            LOG.debug("MzdbRawFile "+getName()+(isDIAFile?" is ": " is not ")+" a DIA File in "+(System.currentTimeMillis() - start)+" ms");
+            if (isDIAFile) {
+                LOG.debug("MzdbRawFile " + getName() +" is a DIA File");
+            }
+            hasIonMobilitySeparation = hasIonMobilitySeparation();
+            if (hasIonMobilitySeparation) {
+                readIonMobilityIndexes();
+                LOG.debug("MzdbRawFile " + getName() +" has Ion mobility separation");
+            }
         } catch (ClassNotFoundException | FileNotFoundException | SQLiteException e) {
             LOG.error("cannot read file " + mzDbFile.getAbsolutePath(), e);
         }
@@ -159,7 +163,6 @@ public class MzdbRawFile implements IRawFile {
                 yAxisData[i] = ((double) headers[i].getTIC());
             }
             if (Double.isNaN(elutionEndTime)) elutionEndTime = reader.getLastTime()/60.0;
-//            if (Double.isNaN(elutionEndTime)) elutionEndTime = Math.ceil(xAxisData[headers.length -1]);
             if (Double.isNaN(elutionStartTime))elutionStartTime = Math.floor(xAxisData[0]);
             chromatogram = new Chromatogram(getName(), getName()+" TIC", xAxisData, yAxisData, getElutionStartTime(), getElutionEndTime());
             return chromatogram;
@@ -190,30 +193,40 @@ public class MzdbRawFile implements IRawFile {
     }
 
     @Override
-    public IChromatogram getXIC(MsnExtractionRequest params) {
+    public IChromatogram getXIC(ExtractionRequest params) {
         long start = System.currentTimeMillis();
         Chromatogram chromatogram = null;
         LOG.info("Extract XIC with params : " + params.toString());
 
+        // override params.getMethod() value
+        final DataMode dataMode = getDataMode(params.getMsLevel());
+        XicMethod method = dataMode.equals(DataMode.PROFILE) || dataMode.equals(DataMode.FITTED) ? XicMethod.MAX : XicMethod.SUM;
+
         try {
-            Peak[] peaks;
-            if (params.getMsLevel() > 1){
-                peaks = reader.getMsnXIC(params.getMz(), params.getFragmentMz(), params.getFragmentMzTolPPM()*params.getFragmentMz()/1e6, params.getElutionTimeLowerBound(), params.getElutionTimeUpperBound(), params.getMethod());
-            } else {
-                peaks = reader.getMsXicInMzRtRanges(params.getMinMz(), params.getMaxMz(), params.getElutionTimeLowerBound(), params.getElutionTimeUpperBound(), params.getMethod());
-            }
-            chromatogram = createChromatoFromPeaks(peaks, params.getMsLevel() );
-            if (chromatogram != null) {
-                chromatogram.setMinMz((params.getMsLevel() == 1) ? params.getMinMz() : params.getFragmentMinMz());
-                chromatogram.setMaxMz((params.getMsLevel() == 1) ? params.getMaxMz() : params.getFragmentMaxMz());
-                StringBuilder builder = new StringBuilder();
-                builder.append("MS").append(params.getMsLevel()).append(" m/z: ");
-                builder.append(MASS_FORMATTER.format(chromatogram.getMinMz())).append("-").append(MASS_FORMATTER.format(chromatogram.getMaxMz()));
+
+            if (!hasIonMobilitySeparation() || params.getMobilityRequestType() == ExtractionRequest.Type.NONE) {
+                Peak[] peaks;
                 if (params.getMsLevel() > 1) {
-                    builder.append(" (prec m/z: ").append(MASS_FORMATTER.format(params.getMz())).append(')');
+                    peaks = reader.getMsnXIC(params.getMz(), params.getFragmentMz(), params.getFragmentMzTolPPM() * params.getFragmentMz() / 1e6, params.getElutionTimeLowerBound(), params.getElutionTimeUpperBound(), method);
+                } else {
+                    peaks = reader.getMsXicInMzRtRanges(params.getMinMz(), params.getMaxMz(), params.getElutionTimeLowerBound(), params.getElutionTimeUpperBound(), method);
                 }
-                chromatogram.setTitle(builder.toString());
+                chromatogram = buildChromatogram(peaks, params);
             } else {
+                SpectrumSlice[] spectrumSlices;
+                if (params.getMsLevel() > 1) {
+                    spectrumSlices = reader.getMsnSpectrumSlices(params.getMz(), params.getFragmentMz(), params.getFragmentMzTolPPM() * params.getFragmentMz() / 1e6, params.getElutionTimeLowerBound(), params.getElutionTimeUpperBound());
+                } else {
+                    final float minRtForRtree = params.getElutionTimeLowerBound() >= 0 ? params.getElutionTimeLowerBound() : 0.0f;
+                    final float maxRtForRtree = params.getElutionTimeUpperBound() > 0 ? params.getElutionTimeUpperBound() : (float)getElutionEndTime()*60.0f;
+                    spectrumSlices = reader.getMsSpectrumSlices(params.getMinMz(), params.getMaxMz(), minRtForRtree, maxRtForRtree);
+                }
+                Peak[] peaks = _spectrumSlicesToXIC(spectrumSlices, params, method);
+                chromatogram = buildChromatogram(peaks, params);
+            }
+
+
+            if (chromatogram == null) {
                 LOG.info("mzdb extracted chromatogram is empty");
             }
             LOG.info("mzdb chromatogram extracted in {} ms", (System.currentTimeMillis() - start));
@@ -223,9 +236,27 @@ public class MzdbRawFile implements IRawFile {
         return chromatogram;
     }
 
-    private Chromatogram createChromatoFromPeaks(Peak[] peaks, int msLevel) {
+    private DataMode getDataMode(int msLevel) {
+        try {
+            if (!dataModeByMsLevel.containsKey((msLevel))) {
+                final SpectrumHeader[] headers = reader.getSpectrumHeaders();
+                for(SpectrumHeader header : headers) {
+                    if (header.getMsLevel() == msLevel) {
+                        dataModeByMsLevel.put(msLevel, reader.getSpectrumDataEncoding(header.getId()).getMode());
+                    }
+                }
+            }
+        } catch (SQLiteException e) {
+            LOG.error("Error while reading DataMode", e);
+        }
+        return dataModeByMsLevel.get(msLevel);
+    }
+
+    private Chromatogram buildChromatogram(Peak[] peaks, ExtractionRequest params) {
+
         Chromatogram chromatogram = null;
-        
+        int msLevel = params.getMsLevel();
+
         if ((peaks != null) && (peaks.length > 0)) {
             List<Double> xAxisData = new ArrayList<>(peaks.length);
             List<Double> yAxisData = new ArrayList<>(peaks.length);
@@ -252,8 +283,108 @@ public class MzdbRawFile implements IRawFile {
                 LOG.error("Error while reading mzdb file", sle);
             }
             chromatogram = new Chromatogram(getName(), "", Doubles.toArray(xAxisData), Doubles.toArray(yAxisData), getElutionStartTime(), getElutionEndTime());
+            chromatogram.setMinMz((params.getMsLevel() == 1) ? params.getMinMz() : params.getFragmentMinMz());
+            chromatogram.setMaxMz((params.getMsLevel() == 1) ? params.getMaxMz() : params.getFragmentMaxMz());
+            StringBuilder builder = new StringBuilder();
+            builder.append("MS").append(params.getMsLevel()).append(" m/z: ");
+            builder.append(MASS_FORMATTER.format(chromatogram.getMinMz())).append("-").append(MASS_FORMATTER.format(chromatogram.getMaxMz()));
+            if (params.getMsLevel() > 1) {
+                builder.append(" (prec m/z: ").append(MASS_FORMATTER.format(params.getMz())).append(')');
+            }
+            chromatogram.setTitle(builder.toString());
+
         }
         return chromatogram;
+    }
+
+    private Peak[] _spectrumSlicesToXIC(SpectrumSlice[] spectrumSlices, ExtractionRequest params, XicMethod method) {
+
+        if (spectrumSlices == null) {
+            LOG.warn("null detected");// throw new
+        }
+
+        if (spectrumSlices.length == 0) {
+            // logger.warn("Empty spectrumSlices, too narrow request ?");
+            return new Peak[0];
+        }
+
+        int minIndex = ionMobilityIndex.getIndex(params.getMinMobility());
+        int maxIndex = ionMobilityIndex.getIndex(params.getMaxMobility());
+
+        int minMobilityIndex = Math.min(minIndex, maxIndex);
+        int maxMobilityIndex = Math.max(minIndex, maxIndex);
+
+        int spectrumSlicesCount = spectrumSlices.length;
+        List<Peak> xicPeaks = new ArrayList<Peak>(spectrumSlicesCount);
+
+        switch (method) {
+            case MAX: {
+
+                for (int i = 0; i < spectrumSlicesCount; i++) {
+                    SpectrumSlice sl = spectrumSlices[i];
+                    Peak[] peaks = toPeaks(sl, minMobilityIndex, maxMobilityIndex);
+                    int peaksCount = peaks.length;
+                    if (peaksCount == 0)
+                        continue;
+
+                    Arrays.sort(peaks, Peak.getIntensityComp());
+                    xicPeaks.add(peaks[peaksCount - 1]);
+                }
+
+                return xicPeaks.toArray(new Peak[xicPeaks.size()]);
+            }
+            case SUM: {
+                for (int i = 0; i < spectrumSlicesCount; i++) {
+                    SpectrumSlice sl = spectrumSlices[i];
+                    Peak[] peaks = toPeaks(sl,  minMobilityIndex, maxMobilityIndex);
+                    int peaksCount = peaks.length;
+                    if (peaksCount == 0)
+                        continue;
+
+                    Arrays.sort(peaks, Peak.getIntensityComp());
+                    float sum = 0.0f;
+                    for (Peak p : peaks) {
+                        sum += p.getIntensity();
+                    }
+
+                    Peak refPeak = peaks[(int) Math.floor(0.5 * peaksCount)];
+                    xicPeaks.add(new Peak(refPeak.getMz(), sum, refPeak.getLeftHwhm(), refPeak.getRightHwhm(), refPeak.getLcContext()));
+                }
+
+                return xicPeaks.toArray(new Peak[xicPeaks.size()]);
+            }
+            default: {
+                LOG.error("[_spectrumSlicesToXIC]: method must be one of 'MAX' or 'SUM', returning null");
+                return null;
+            }
+        }
+
+    }
+
+    public Peak[] toPeaks(SpectrumSlice spectrumSlice, int minMobilityIndex, int maxMobilityIndex) {
+        SpectrumData data = spectrumSlice.getData();
+        List<Peak> peaks = new ArrayList<>();
+        final float[] leftHwhmList = data.getLeftHwhmList();
+        final float[] rightHwhmList = data.getRightHwhmList();
+        final double[] mzList = data.getMzList();
+        final float[] intensityList = data.getIntensityList();
+
+        // TODO use mzdb-access ion_mobility branch to enable this feature
+        // final short[] mobilityIndexList = data.getMobilityIndexList();
+
+        for (int i = 0; i < data.getPeaksCount(); i++) {
+
+            float leftHwhm = 0, rightHwhm = 0;
+            if (leftHwhmList != null && rightHwhmList != null) {
+                leftHwhm = leftHwhmList[i];
+                rightHwhm = rightHwhmList[i];
+            }
+// TODO use mzdb-access ion_mobility branch to enable this feature
+//            if (mobilityIndexList[i] >= minMobilityIndex && mobilityIndexList[i] <= maxMobilityIndex) {
+                peaks.add(new Peak(mzList[i], intensityList[i], leftHwhm, rightHwhm, spectrumSlice.getHeader()));
+//            }
+        }
+        return peaks.toArray(new Peak[peaks.size()]);
     }
 
 
@@ -267,7 +398,7 @@ public class MzdbRawFile implements IRawFile {
             if (params.getMinMz() <= 0 && params.getMaxMz() <= 0) {
                 if(params.isMsnExtraction()){
                     runSlices = getMzDbReader().getLcMsnRunSliceIterator(params.getMinMz(), params.getMaxMz());
-                }else{
+                } else {
                     runSlices = getMzDbReader().getLcMsRunSliceIterator();
                 }
             } else {
@@ -435,15 +566,20 @@ public class MzdbRawFile implements IRawFile {
             SpectrumData data = rawSpectrum.getData();
             Map<Integer, DataEncoding> map = reader.getDataEncodingReader().getDataEncodingById();
             DataEncoding encoding = reader.getSpectrumDataEncoding((long) spectrumIndex);
+            // TODO use mzdb-access ion_mobility branch to enable this feature
+            // Spectrum.ScanType scanType = (encoding.getMode().equals(DataMode.CENTROID) || encoding.getMode().equals(DataMode.CENTROID_3D)) ?  Spectrum.ScanType.CENTROID : Spectrum.ScanType.PROFILE;
+
             Spectrum.ScanType scanType = (encoding.getMode().equals(DataMode.CENTROID)) ?  Spectrum.ScanType.CENTROID : Spectrum.ScanType.PROFILE;
-            final double[] mzList = data.getMzList();
-            final double[] leftSigma = new double[mzList.length];
-            final double[] rightSigma = new double[mzList.length];
-            final float[] intensityList = data.getIntensityList();
-            List<Float> xAxisData = new ArrayList<>(mzList.length);
-            List<Float> yAxisData = new ArrayList<>(mzList.length);
-            for (int count = 0; count < mzList.length; count++) {
-                if ((data.getLeftHwhmList() != null) && data.getLeftHwhmList()[count] > 0 && !encoding.getMode().equals(DataMode.PROFILE)) {
+
+
+            if ((data.getLeftHwhmList() != null) && data.getRightHwhmList() != null && !encoding.getMode().equals(DataMode.PROFILE)) {
+                final double[] mzList = data.getMzList();
+                final double[] leftSigma = new double[mzList.length];
+                final double[] rightSigma = new double[mzList.length];
+                final float[] intensityList = data.getIntensityList();
+                List<Float> xAxisData = new ArrayList<>(mzList.length);
+                List<Float> yAxisData = new ArrayList<>(mzList.length);
+                for (int count = 0; count < mzList.length; count++) {
                     leftSigma[count] = 2.0 * data.getLeftHwhmList()[count] / 2.35482;
                     double x = mzList[count] - 4.0 * leftSigma[count];
                     //search for the first left value less than x
@@ -464,12 +600,10 @@ public class MzdbRawFile implements IRawFile {
                         xAxisData.add((float) x);
                         yAxisData.add((float) y);
                     }
-                }
-                xAxisData.add((float) mzList[count]);
-                yAxisData.add(intensityList[count]);
-                if (data.getRightHwhmList() != null && data.getRightHwhmList()[count] > 0 && !encoding.getMode().equals(DataMode.PROFILE)) {
+                    xAxisData.add((float) mzList[count]);
+                    yAxisData.add(intensityList[count]);
                     rightSigma[count] = 2.0 * data.getRightHwhmList()[count] / 2.35482;
-                    double x = mzList[count] + rightSigma[count] / 2.0;
+                    x = mzList[count] + rightSigma[count] / 2.0;
                     if (!xAxisData.isEmpty()) {
                         int k = xAxisData.size() - 1;
                         while (k >= 0 && xAxisData.get(k) > x) {
@@ -487,27 +621,22 @@ public class MzdbRawFile implements IRawFile {
                         xAxisData.add((float) x);
                         yAxisData.add((float) y);
                     }
-                }  
-
+                }
+                spectrum = new Spectrum(spectrumIndex, rawSpectrum.getHeader().getElutionTime(), Doubles.toArray(xAxisData), Floats.toArray(yAxisData), rawSpectrum.getHeader().getMsLevel(), scanType);
+            }  else {
+                spectrum = new Spectrum(spectrumIndex, rawSpectrum.getHeader().getElutionTime(), data, rawSpectrum.getHeader().getMsLevel(), scanType);
             }
-            spectrum = new Spectrum(spectrumIndex, rawSpectrum.getHeader().getElutionTime(), Doubles.toArray(xAxisData), Floats.toArray(yAxisData), rawSpectrum.getHeader().getMsLevel(), scanType);
-            StringBuilder builder = new StringBuilder(getName());
+
+            spectrum.setTitle(rawSpectrum.getHeader().getTitle());
 
             if (spectrum.getMsLevel() == 2) {
-                builder.append(MASS_FORMATTER.format(rawSpectrum.getHeader().getPrecursorMz())).append(" (");
-                builder.append(rawSpectrum.getHeader().getPrecursorCharge()).append("+) - ");
                 spectrum.setPrecursorMz(rawSpectrum.getHeader().getPrecursorMz());
                 spectrum.setPrecursorCharge(rawSpectrum.getHeader().getPrecursorCharge());
             } else {
                 spectrum.setPrecursorMz(null);
                 spectrum.setPrecursorCharge(null);
             }
-            builder.append(", sc=").append(spectrumIndex).append(", rt=").append(TIME_FORMATTER.format(rawSpectrum.getHeader().getElutionTime() / 60.0));
-            builder.append(", ms").append(spectrum.getMsLevel());
-            //spectrum.setTitle(builder.toString());
-            spectrum.setTitle("");
-            spectrum.setSpectrumData(data);
-            //logger.debug("mzdb Spectrum length {} rebuilded in Spectrum length {} ", mzList.length, xAxisData.size());
+
         } catch (SQLiteException | StreamCorruptedException ex) {
             LOG.error("enable to retrieve Spectrum data", ex);
         }catch(Exception e){
@@ -720,6 +849,39 @@ public class MzdbRawFile implements IRawFile {
     }
 
     @Override
+    public boolean hasIonMobilitySeparation() {
+// TODO use mzdb-access ion_mobility branch to enable this feature
+//        try {
+//            return reader.getAcquisitionCVParam(CVEntry.ION_MOBILITY_SEPARATION) == null ? false : true;
+//        } catch (Exception e) {
+//            return false;
+//        }
+        return false;
+    }
+
+
+    protected void readIonMobilityIndexes() {
+        try {
+            final Optional<SharedParamTree> ionMobilityParams = reader.getSharedParamTreeList().stream().filter(sp -> sp.getSchemaName().equals("IonMobilityParams")).findFirst();
+            if (ionMobilityParams.isPresent()) {
+                String text = ionMobilityParams.get().getData().getUserTexts().get(0).getText();
+                String[] lines = text.split("\n");
+                final List<String> stringList = Arrays.stream(lines).filter(s -> s.contains(";")).collect(Collectors.toList());
+                double[] mobilities = new double[stringList.size()];
+                for(String s : stringList) {
+                    int idx = s.indexOf(';');
+                    mobilities[Integer.parseInt(s.substring(0, idx))] = Double.parseDouble(s.substring(idx+1));
+                }
+                ionMobilityIndex = new TIMSMobilityIndex(mobilities);
+             }
+
+        } catch (SQLiteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    @Override
     public Map<String, Object> getFileProperties() {
         try {
             return MzdbMetricsCollector.getFileFormatData(getMzDbReader());
@@ -743,5 +905,48 @@ public class MzdbRawFile implements IRawFile {
     @Override
     public void closeIRawFile() {
         reader.close();
+    }
+
+    @Override
+    public IonMobilityIndex getIonMobilityIndex() {
+        return ionMobilityIndex;
+    }
+
+    @Override
+    public Map<SpectrumHeader, IsolationWindow> getIsolationWindowByMs2Headers() {
+        if (!isDIAFile) return null;
+        if (isolationWindowByHeaders == null) {
+            try {
+                isolationWindowByHeaders = retrieveTrueIsolationWindows(reader);
+            } catch (SQLiteException e) {
+                return null;
+            }
+        }
+        return isolationWindowByHeaders;
+    }
+
+    private static Map<SpectrumHeader, IsolationWindow> retrieveTrueIsolationWindows(MzDbReader reader) throws SQLiteException {
+        Map<SpectrumHeader, IsolationWindow> windows = new HashMap<>();
+        SpectrumHeader[] headers = reader.getMs2SpectrumHeaders();
+        SpectrumHeader.loadPrecursors(headers, reader.getConnection());
+        for (SpectrumHeader header : headers) {
+            Precursor precursor = header.getPrecursor();
+
+            if (precursor != null) {
+                String center = null, upper = null, lower = null;
+                IsolationWindowParamTree tree = precursor.getIsolationWindow();
+                for (CVParam cvParam : tree.getCVParams()) {
+                    if (cvParam.getAccession().equals("MS:1000827")) {
+                        center = cvParam.getValue();
+                    } else if (cvParam.getAccession().equals("MS:1000828")) {
+                        lower = cvParam.getValue();
+                    } else if (cvParam.getAccession().equals("MS:1000829")) {
+                        upper = cvParam.getValue();
+                    }
+                }
+                windows.put(header, new IsolationWindow(center, Double.valueOf(center) - Double.valueOf(lower), Double.valueOf(center) + Double.valueOf(upper)));
+            }
+        }
+        return windows;
     }
 }

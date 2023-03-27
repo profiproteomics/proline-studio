@@ -16,6 +16,8 @@
  */
 package fr.proline.mzscope.model;
 
+import fr.profi.mzdb.model.SpectrumHeader;
+
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +48,7 @@ public interface IRawFile {
     * @param params
     * @return 
     */
-   public IChromatogram getXIC(MsnExtractionRequest params);
+   public IChromatogram getXIC(ExtractionRequest params);
    
    /**
     * Returns the Total Ion IChromatogram of this rax file.
@@ -160,7 +162,10 @@ public interface IRawFile {
     * @return true if this file is a DIA file.
     */
    public boolean isDIAFile();
-   
+
+   public boolean hasIonMobilitySeparation();
+
+
    /**
     * Returns as a Map a set of proerties associated with this raw file. 
     * 
@@ -180,4 +185,11 @@ public interface IRawFile {
    * All necessary resouces should be closed here
    */
    public void closeIRawFile();
+
+   /**
+    * Returns the IonMobility Index.
+    */
+   IonMobilityIndex getIonMobilityIndex();
+
+   Map<SpectrumHeader, IsolationWindow> getIsolationWindowByMs2Headers();
 }

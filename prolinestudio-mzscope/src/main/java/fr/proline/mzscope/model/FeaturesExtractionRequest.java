@@ -19,7 +19,7 @@ package fr.proline.mzscope.model;
 /**
  * @author CB205360
  */
-public class FeaturesExtractionRequest extends MsnExtractionRequest {
+public class FeaturesExtractionRequest extends ExtractionRequest {
 
   public static final boolean REMOVE_BASELINE = false;
   public static final boolean USE_SMOOTHING = true;
@@ -34,7 +34,7 @@ public class FeaturesExtractionRequest extends MsnExtractionRequest {
     EXTRACT_MS2_FEATURES, DETECT_PEAKELS, DETECT_FEATURES
   }
 
-  public static class Builder<T extends Builder<T>> extends MsnExtractionRequest.Builder<T> {
+  public static class Builder<T extends Builder<T>> extends ExtractionRequest.Builder<T> {
 
     ExtractionMethod extractionMethod;
     boolean removeBaseline = REMOVE_BASELINE;

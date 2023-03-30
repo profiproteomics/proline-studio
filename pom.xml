@@ -29,7 +29,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <brandingToken>prolinestudio</brandingToken>
         <core.version>2.3.0tmt-SNAPSHOT</core.version>
-        <server.version>2.3.0-SNAPSHOT</server.version>
+        <server.version>2.3.0tmt-SNAPSHOT</server.version>
         <util.version>1.2.0-SNAPSHOT</util.version>
         <mzdb.version>1.2.0-SNAPSHOT</mzdb.version>
         <sqlite4java.version>1.0.392</sqlite4java.version>

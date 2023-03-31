@@ -61,7 +61,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
 
         // Name of this databox
         m_typeName = "Quanti. Peptides Ions";
-        m_description = "All Peptides Ions of a Quanti. Peptide";
+        m_description = "All Peptides Ions of a Quanti. or Quanti Peptide";
         m_quantMethodInfo = DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION;
 
         // Register in parameters
@@ -103,10 +103,10 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
     @Override
     public void dataChanged() {
         
-        final boolean allPeptides = m_previousDataBox == null;
+        final boolean allPeptideIons = m_previousDataBox == null;
         DMasterQuantPeptide oldPeptide = m_masterQuantPeptide;
         
-        if (!allPeptides) {
+        if (!allPeptideIons) {
             m_masterQuantPeptide = (DMasterQuantPeptide) m_previousDataBox.getData(DMasterQuantPeptide.class);
             m_dataset = (DDataset) m_previousDataBox.getData(DDataset.class);
             m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(QuantChannelInfo.class);
@@ -134,13 +134,9 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                 }
                 
                 if (subTask == null) {
-                    if (!allPeptides) {
-                        ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideIonList, m_quantMethodInfo, finished);
-                    } else {
+                    if (allPeptideIons)
                         m_quantChannelInfo = new QuantChannelInfo(m_dataset);
-                        ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideIonList, m_quantMethodInfo, finished);
-                    }
-                    
+                   ((XicPeptideIonPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideIonList, m_quantMethodInfo, finished);
                 } else {
                     ((XicPeptideIonPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                 }
@@ -158,7 +154,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         // ask asynchronous loading of data
         m_masterQuantPeptideIonList = new ArrayList();
         DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
-        if (allPeptides) {
+        if (allPeptideIons) {
             task.initLoadPeptideIons(getProjectId(), m_dataset, m_masterQuantPeptideIonList);
         } else {
             task.initLoadPeptideIons(getProjectId(), m_dataset, m_masterQuantPeptide, m_masterQuantPeptideIonList);

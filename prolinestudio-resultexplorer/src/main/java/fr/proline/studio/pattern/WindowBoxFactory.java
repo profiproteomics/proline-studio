@@ -604,6 +604,25 @@ public class WindowBoxFactory {
         return new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
 
+    public static WindowBox getQuantificationReporterIonWindowBox(String dataName, String fullName, DDatasetType.QuantitationMethodInfo methodInfo) {
+
+        // create boxes
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        boxes[0] = new DataboxXicReporterIon();
+        boxes[0].setDataName(dataName);
+        ((DataboxXicReporterIon) boxes[0]).setQuantitationMethodInfo(methodInfo);
+
+        IconManager.IconType iconType;
+        switch (methodInfo) {
+            case SPECTRAL_COUNTING -> iconType = IconManager.IconType.QUANT_SC;
+            case FEATURES_EXTRACTION -> iconType = IconManager.IconType.QUANT_XIC;
+            case ISOBARIC_TAGGING -> iconType = IconManager.IconType.QUANT_TMT;
+            case RESIDUE_LABELING -> iconType = IconManager.IconType.QUANT_XIC;
+            default ->  throw new RuntimeException("Unsupported Quant method "+methodInfo);//should  not occur
+        }
+        return new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+    }
+
     public static WindowBox getQuantificationPeptideIonWindowBox(String dataName, String fullName, DDatasetType.QuantitationMethodInfo methodInfo) {
 
         // create boxes

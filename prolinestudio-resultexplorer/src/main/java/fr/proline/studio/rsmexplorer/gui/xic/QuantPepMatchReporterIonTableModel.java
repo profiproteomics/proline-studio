@@ -219,7 +219,7 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, row, col);
                 } else {
-                    if (peptideIon.getPeptideInstance() == null) {
+                    if (peptideIon == null || peptideIon.getPeptideInstance() == null) {
                         lazyData.setData(null);
                     } else {
                         lazyData.setData(peptideIon.getPeptideInstance().getPeptideId());
@@ -234,7 +234,7 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, row, col);
                 } else {
-                    if (peptideIon.getPeptideInstance() == null) {
+                    if (peptideIon == null || peptideIon.getPeptideInstance() == null) {
                         lazyData.setData(null);
                     } else {
                         lazyData.setData(peptideIon.getPeptideInstance().getPeptide());
@@ -246,20 +246,19 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
 
             case COLTYPE_PEPTIDE_PTM: {
                 LazyData lazyData = getLazyData(row, col);
-                DPeptideInstance peptideInstance = peptideIon.getPeptideInstance();
+
                 if (psmReporterIon.getResultSummary() == null) {
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, row, col);
-                } else if (peptideInstance == null) {
+                } else if (peptideIon == null || peptideIon.getPeptideInstance() == null) {
                     lazyData.setData("");
 
-                } else if (peptideInstance.getBestPeptideMatch() != null) {
-                    boolean ptmStringLoaded = peptideInstance.getBestPeptideMatch().getPeptide().getTransientData().isPeptideReadablePtmStringLoaded();
-                    if (!ptmStringLoaded) {
+                } else if (peptideIon.getPeptideInstance().getPeptide() != null) {
+                    if (!peptideIon.getPeptideInstance().getPeptide().getTransientData().isPeptideReadablePtmStringLoaded()) {
                         lazyData.setData(null);
                     } else {
                         String ptm = "";
-                        PeptideReadablePtmString ptmString = peptideInstance.getBestPeptideMatch().getPeptide().getTransientData().getPeptideReadablePtmString();
+                        PeptideReadablePtmString ptmString = peptideIon.getPeptideInstance().getPeptide().getTransientData().getPeptideReadablePtmString();
                         if (ptmString != null) {
                             ptm = ptmString.getReadablePtmString();
                         }

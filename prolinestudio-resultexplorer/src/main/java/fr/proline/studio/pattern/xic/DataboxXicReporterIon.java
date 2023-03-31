@@ -58,7 +58,7 @@ public class DataboxXicReporterIon extends AbstractDataBox {
 
         // Name of this databox
         m_typeName = "Quanti. PSMs";
-        m_description = "All Quanti. PSMs of a Quanti. Peptide Ion";
+        m_description = "All Quanti. PSMs of [Quanti. or Peptide Ion]";
         m_quantMethodInfo = DDatasetType.QuantitationMethodInfo.ISOBARIC_TAGGING;
 
         // Register in parameters
@@ -95,15 +95,18 @@ public class DataboxXicReporterIon extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
+        final boolean allReporterIons = m_previousDataBox == null;
         DMasterQuantPeptideIon oldPSMquant = m_masterQuantPeptideIon;
 
-        m_masterQuantPeptideIon = (DMasterQuantPeptideIon) m_previousDataBox.getData(DMasterQuantPeptideIon.class);
-        m_dataset = (DDataset) m_previousDataBox.getData(DDataset.class);
-        m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(QuantChannelInfo.class);
-        if (m_masterQuantPeptideIon == null || m_masterQuantPeptideIon.equals(oldPSMquant)) {
-            return;
+        if (!allReporterIons) {
+            m_masterQuantPeptideIon = (DMasterQuantPeptideIon) m_previousDataBox.getData(DMasterQuantPeptideIon.class);
+            m_dataset = (DDataset) m_previousDataBox.getData(DDataset.class);
+            m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(QuantChannelInfo.class);
+            if (m_masterQuantPeptideIon == null || m_masterQuantPeptideIon.equals(oldPSMquant)) {
+                return;
+            }
+            m_quantMethodInfo = (DDatasetType.QuantitationMethodInfo) m_previousDataBox.getData(DDatasetType.QuantitationMethodInfo.class);
         }
-        m_quantMethodInfo = (DDatasetType.QuantitationMethodInfo) m_previousDataBox.getData(DDatasetType.QuantitationMethodInfo.class);
 
         final int loadingId = setLoading();
 
@@ -123,7 +126,10 @@ public class DataboxXicReporterIon extends AbstractDataBox {
                 }
 
                 if (subTask == null) {
-                        ((QuantPepMatchReporterIonPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantRepIonsList, m_quantMethodInfo, finished);
+                    if (allReporterIons)
+                        m_quantChannelInfo = new QuantChannelInfo(m_dataset);
+                    ((QuantPepMatchReporterIonPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantRepIonsList, m_quantMethodInfo, finished);
+
                 } else {
                     ((QuantPepMatchReporterIonPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                 }
@@ -139,10 +145,14 @@ public class DataboxXicReporterIon extends AbstractDataBox {
         };
 
         // ask asynchronous loading of data
-        m_masterQuantRepIonsList = new ArrayList();
+        m_masterQuantRepIonsList = new ArrayList<>();
         DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
-        task.initLoadReporterIons(getProjectId(), m_dataset, m_masterQuantPeptideIon, m_masterQuantRepIonsList);
-        Long taskId = task.getId();
+        if (allReporterIons) {
+            task.initLoadReporterIons(getProjectId(), m_dataset, m_masterQuantRepIonsList);
+        } else {
+            task.initLoadReporterIons(getProjectId(), m_dataset, m_masterQuantPeptideIon, m_masterQuantRepIonsList);
+        }
+
         registerTask(task);
         
     }

@@ -397,7 +397,7 @@ public class QuantPepMatchReporterIonPanel extends HourglassPanel implements Dat
                 // Update Model (but protein set table must not react to the model update)
                 selectionWillBeRestored(true);
                 try {
-                    ((QuantPeptideIonTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
+                    ((QuantPepMatchReporterIonTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
                 } finally {
                     selectionWillBeRestored(false);
                 }

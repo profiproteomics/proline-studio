@@ -1016,7 +1016,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
     }
 
     public static TaskError fetchDataMainTaskAlignmentForXic(Long projectId, DDataset dataset) {
-        
+        long start = System.currentTimeMillis();
         EntityManager entityManagerLCMS = DStoreCustomPoolConnectorFactory.getInstance().getLcMsDbConnector(projectId).createEntityManager();
         try {
             entityManagerLCMS.getTransaction().begin();
@@ -1099,6 +1099,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
             entityManagerLCMS.getTransaction().rollback();
             return taskError;
         } finally {
+            m_logger.info("fetchDataMainTaskAlignmentForXic took " + (System.currentTimeMillis() - start) + " ms");
             entityManagerLCMS.close();
         }
 

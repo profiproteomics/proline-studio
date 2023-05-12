@@ -912,6 +912,9 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
         if (data instanceof LazyData) {
             data = ((LazyData) data).getData();
         }
+        if (data instanceof Peptide) {
+            data = ((Peptide) data).getSequence();
+        }
         return data;
     }
 

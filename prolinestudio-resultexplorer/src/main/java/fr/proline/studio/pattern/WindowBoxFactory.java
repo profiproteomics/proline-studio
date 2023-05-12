@@ -509,7 +509,7 @@ public class WindowBoxFactory {
             }
             case ISOBARIC_TAGGING ->  {
                 if(aggregatedQuantiPeptideIon){
-                    nbBoxes=6;
+                    nbBoxes=5;
                     iconType = IconManager.IconType.QUANT_AGGREGATION_TMT;
                 }else {
                     nbBoxes = 5;
@@ -548,16 +548,19 @@ public class WindowBoxFactory {
             boxes[3].setLayout(SplittedPanelContainer.PanelLayout.VERTICAL);
 
             if (aggregatedQuantiPeptideIon) {
-                boxes[4] = new DataboxXicParentsPeptideIon();
-                boxes[4].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
-                int  nb = 5;
+                int  nb = 4;
                 if (!methodInfo.equals(DDatasetType.QuantitationMethodInfo.ISOBARIC_TAGGING)) {
+                    boxes[nb] = new DataboxXicParentsPeptideIon();
+                    boxes[nb].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+                    nb++;
                     boxes[nb] = new DataboxChildFeature();
                     boxes[nb].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
                     nb++;
+                    boxes[nb] = new DataboxMultiGraphics(false, false);
+                    boxes[nb].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+                } else {
+                    boxes[nb] = new DataboxXicReporterIon();
                 }
-                boxes[nb] = new DataboxMultiGraphics(false, false);
-                boxes[nb].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
             } else {
                 if (methodInfo.equals(DDatasetType.QuantitationMethodInfo.ISOBARIC_TAGGING)) {
                     boxes[4] = new DataboxXicReporterIon();

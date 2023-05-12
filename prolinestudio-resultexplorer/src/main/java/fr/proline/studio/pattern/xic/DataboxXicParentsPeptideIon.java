@@ -74,9 +74,9 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
         // Register possible out parameters
         ParameterList outParameter = new ParameterList();
 
-//        outParameter.addParameter(DMasterQuantPeptideIon.class);  // selected child DMasterQuantPeptideIon.class of the aggregation
-//        outParameter.addParameter(QuantChannelInfo.class);
-//        outParameter.addParameter(DPeptideMatch.class);
+        outParameter.addParameter(DMasterQuantPeptideIon.class);  // selected child DMasterQuantPeptideIon.class of the aggregation
+        outParameter.addParameter(QuantChannelInfo.class);
+        outParameter.addParameter(DPeptideMatch.class);
         
         registerOutParameter(outParameter);
         
@@ -199,30 +199,30 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
     public Object getDataImpl(Class parameterType, ParameterSubtypeEnum parameterSubtype) {
         
      
-//        if (parameterType != null) {
-//
-//            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
-//
-//                if (parameterType.equals(DMasterQuantPeptideIon.class)) {
-//                    return ((XicParentPeptideIonPanel) getDataBoxPanelInterface()).getSelectedMasterQuantPeptideIon();
-//                }
-//                if (parameterType.equals(DPeptideMatch.class)) {
-//                    DMasterQuantPeptideIon qpi = ((XicParentPeptideIonPanel) getDataBoxPanelInterface()).getSelectedMasterQuantPeptideIon();
-//                    if (qpi == null) {
-//                        return null;
-//                    }
-//                    DPeptideInstance pi = qpi.getPeptideInstance();
-//                    if (pi == null) {
-//                        return null;
-//                    }
-//                    return pi.getBestPeptideMatch();
-//                }
-//
-//                if (parameterType.equals(QuantChannelInfo.class)) {
-//                    return ((XicParentPeptideIonPanel) getDataBoxPanelInterface()).getSelectedQuantChannelInfo();
-//                }
-//            }
-//        }
+        if (parameterType != null) {
+
+            if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
+
+                if (parameterType.equals(DMasterQuantPeptideIon.class)) {
+                    return ((XicParentPeptideIonPanel) getDataBoxPanelInterface()).getSelectedMasterQuantPeptideIon();
+                }
+                if (parameterType.equals(DPeptideMatch.class)) {
+                    DMasterQuantPeptideIon qpi = ((XicParentPeptideIonPanel) getDataBoxPanelInterface()).getSelectedMasterQuantPeptideIon();
+                    if (qpi == null) {
+                        return null;
+                    }
+                    DPeptideInstance pi = qpi.getPeptideInstance();
+                    if (pi == null) {
+                        return null;
+                    }
+                    return pi.getBestPeptideMatch();
+                }
+
+                if (parameterType.equals(QuantChannelInfo.class)) {
+                    return ((XicParentPeptideIonPanel) getDataBoxPanelInterface()).getSelectedQuantChannelInfo();
+                }
+            }
+        }
         return super.getDataImpl(parameterType, parameterSubtype);
     }
     

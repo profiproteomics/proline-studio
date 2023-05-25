@@ -52,8 +52,6 @@ public class QuantPostProcessingParams {
     //-- MODIFIED_PEPTIDE_FILTERING methods and keys
     public final static String DISCARD_MODIFIED_PEPTIDES = "discard_modified_peptides"; //V2&3
     public final static String DISCARD_OXIDIZED_PEPTIDES = "discard_oxidized_peptides"; //V1
-
-    public final static String USE_PURITY_CORRECTION_MATRIX= "use_purity_correction_matrix";
     public final static String PTM_DEFINITION_IDS_TO_DISCARD = "ptm_definition_ids_to_discard"; 
     public final static String MODIFIED_PEPTIDE_FILTERING_METHOD = "modified_peptide_filtering_method";
     public final static String MODIFIED_PEPTIDE_FILTER_CONFIG = "modified_peptide_filter_config";    
@@ -66,7 +64,19 @@ public class QuantPostProcessingParams {
     private final static String[] MODIFIED_PEPTIDE_FILTERING_METHOD_VALUES = {MODIFIED_PEPTIDE_FILTERING_DISCARD_ALL_FORMS_METHOD_VALUE, MODIFIED_PEPTIDE_FILTERING_DISCARD_MODIFIED_FORMS_METHOD_VALUE};
     private final static String[] MODIFIED_PEPTIDE_FILTERING_METHOD_KEYS = {MODIFIED_PEPTIDE_FILTERING_DISCARD_ALL_FORMS_METHOD_KEY, MODIFIED_PEPTIDE_FILTERING_DISCARD_MODIFIED_FORMS_METHOD_KEY};
     //--
-    
+
+    //-- PSMs methods and keys
+    public final static String USE_PURITY_CORRECTION_MATRIX= "use_purity_correction_matrix";
+    public final static String PURITY_CORRECTION_MATRIX= "purity_correction_matrix";
+    public final static String PSM_ABUNDANCE_SUMMARIZING_METHOD = "psm_abundance_summarizing_method";
+    public final static String PSM_ABUNDANCE_SUMMARIZING_SUM_METHOD_VALUE = "Sum";
+    public final static String PSM_ABUNDANCE_SUMMARIZING_SUM_METHOD_KEY = "SUM";
+    public final static String PSM_ABUNDANCE_SUMMARIZING_MEDIAN_METHOD_VALUE = "Median";
+    public final static String PSM_ABUNDANCE_SUMMARIZING_MEDIAN_METHOD_KEY = "MEDIAN";
+    private final static String[] PSM_ABUNDANCE_SUMMARIZING_METHOD_VALUES = {PSM_ABUNDANCE_SUMMARIZING_SUM_METHOD_VALUE, PSM_ABUNDANCE_SUMMARIZING_MEDIAN_METHOD_VALUE};  ;
+    private final static String[] PSM_ABUNDANCE_SUMMARIZING_METHOD_KEYS = {PSM_ABUNDANCE_SUMMARIZING_SUM_METHOD_KEY,PSM_ABUNDANCE_SUMMARIZING_MEDIAN_METHOD_KEY};  ;
+    //--
+
     //-- IONS ABUNDANCE_SUMMARIZING methods and keys
     public final static String PEP_ION_ABUNDANCE_SUMMARIZING_METHOD = "pep_ion_abundance_summarizing_method";
     public final static String ION_ABUNDANCE_SUMMARIZING_BEST_ION_METHOD_VALUE = "Best Ion";
@@ -134,7 +144,13 @@ public class QuantPostProcessingParams {
     public static  final String[] getPepIonAbundanceSummarizingMethodValues(){
         return ION_ABUNDANCE_SUMMARIZING_METHOD_VALUES;
     }
-    
+
+    public static  final String[] getPSMAbundanceSummarizingMethodValues(){
+        return PSM_ABUNDANCE_SUMMARIZING_METHOD_VALUES;
+    }
+    public static  final String[] getPSMAbundanceSummarizingMethodKeys(){
+        return PSM_ABUNDANCE_SUMMARIZING_METHOD_KEYS;
+    }
     public static final String[] getPepIonAbundanceSummarizingMethodKeys(){
         return ION_ABUNDANCE_SUMMARIZING_METHOD_KEYS;
     }        

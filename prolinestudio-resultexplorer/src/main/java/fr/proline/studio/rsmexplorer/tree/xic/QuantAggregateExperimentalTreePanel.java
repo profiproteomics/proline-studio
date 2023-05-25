@@ -1776,15 +1776,16 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
         int textHeight = (int) (rect.getHeight());
         int textWidth = (int) (rect.getWidth());
 
-        String subText = null;
+        StringBuilder subText = new StringBuilder(s.length()+2);
         int countSub = 1;
-        while (textWidth>=COLUMN_WIDTH_MAX) {
-            subText = ".."+s.substring(countSub++);
-            rect = fm.getStringBounds(s, g);
+        while (textWidth>=(COLUMN_WIDTH_MAX -2*PAD)) {
+            subText.setLength(0);
+            subText.append("..").append(s.substring(countSub++));
+            rect = fm.getStringBounds(subText.toString(), g);
             textWidth = (int) (rect.getWidth());
         }
-        if (subText != null) {
-            s = subText;
+        if (!subText.isEmpty()) {
+            s = subText.toString();
         }
 
         // Center text horizontally and vertically

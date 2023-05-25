@@ -28,9 +28,7 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.IsobaricMethodParamsPanel;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.LabelFreeMSParamsCompletePanel;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.QuantPostProcessingPanel;
+import fr.proline.studio.rsmexplorer.gui.dialog.xic.*;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
@@ -61,7 +59,8 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
     private QuantExperimentalDesignTree m_expDesignTree;
     private ExportButton m_exportButton;
     private JTabbedPane m_tabbedPane;
-    private QuantPostProcessingPanel m_profilizerParamPanel;
+//    private QuantPostProcessingPanel m_profilizerParamPanel;
+    private QuantSimplifiedPostProcessingPanel m_postProcessingParamPanel;
     private JPanel m_confPanel;
     private JPanel m_lowlevelConfPanel;
 
@@ -252,9 +251,9 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
                     m_displayPostProcessing = true;
                 }
                 Map<Long, String> ptmName = getPtmSpecificityNameById();
-                m_profilizerParamPanel = new QuantPostProcessingPanel(true, ptmName);//read only
-                m_refinedPanel.add(m_profilizerParamPanel, BorderLayout.CENTER);
-                m_profilizerParamPanel.setRefinedParams(m_dataset.getPostQuantProcessingConfigAsMap());
+                m_postProcessingParamPanel = new QuantSimplifiedPostProcessingPanel(true, m_quantMethodInfo, ptmName);//read only
+                m_refinedPanel.add(m_postProcessingParamPanel, BorderLayout.CENTER);
+                m_postProcessingParamPanel.setRefinedParams(m_dataset.getPostQuantProcessingConfigAsMap());
 
             } else {
                 if (m_displayPostProcessing) {

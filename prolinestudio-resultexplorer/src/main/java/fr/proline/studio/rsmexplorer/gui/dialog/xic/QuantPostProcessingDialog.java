@@ -18,6 +18,7 @@ package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.core.orm.msi.PtmSpecificity;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.studio.NbPreferences;
 import fr.proline.studio.corewrapper.data.QuantPostProcessingParams;
 import fr.proline.studio.gui.DefaultStorableDialog;
@@ -42,21 +43,21 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
 
     private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
-    private QuantPostProcessingPanel m_quantPostProcessingPanel;
+//    private AbstractQuantPostProcessingPanel m_quantPostProcessingPanel;
+      private QuantSimplifiedPostProcessingPanel m_quantPostProcessingPanel;
 
+    DDatasetType.QuantitationMethodInfo m_quantitationMethodInfo;
 
-    //public QuantPostProcessingMultipleDialog(Window parent, ArrayList<DataSetNode> nodeList) {
-    public QuantPostProcessingDialog(Window parent, ArrayList<PtmSpecificity> ptms, boolean isAggregation, DDataset paramsFromdataset) {
+   public QuantPostProcessingDialog(Window parent, ArrayList<PtmSpecificity> ptms, boolean isAggregation, DDatasetType.QuantitationMethodInfo quantitationMethodInfo, DDataset paramsFromdataset) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-        setTitle("Compute Post-Processing on Proteins Sets Abundances");
-
+        setTitle("Compute Post-Processing on Abundances");
         setDocumentationSuffix("id.thw4kt");
 
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);
 
         setResizable(true);
-
+        m_quantitationMethodInfo = quantitationMethodInfo;
         init(ptms, isAggregation, paramsFromdataset);
 
     }
@@ -109,6 +110,13 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
             return false;
         }
 
+        //more generic tests
+        if(!m_quantPostProcessingPanel.checkQuantPostProcessingParam()){
+            setStatus(true, "Error in specified post processing parameter.");
+            highlight(m_quantPostProcessingPanel);
+            return false;
+        }
+
         return true;
     }
 
@@ -136,8 +144,8 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
 
     private void init(ArrayList<PtmSpecificity> ptms, boolean isAggregation, DDataset dataset) {
         Map<Long, String> ptmSpecificityNameById = ptms.stream().collect(Collectors.toMap(ptmS -> ptmS.getId(), ptmS -> ptmS.toString()));
-        m_quantPostProcessingPanel = new QuantPostProcessingPanel(false, ptmSpecificityNameById);
-
+        m_quantPostProcessingPanel = new QuantSimplifiedPostProcessingPanel(false, m_quantitationMethodInfo, ptmSpecificityNameById);
+//        m_quantPostProcessingPanel = new QuantPostProcessingPanel(false, ptmSpecificityNameById);
         try {
             if ((dataset != null) && (dataset.getQuantProcessingConfigAsMap() != null)) {
 

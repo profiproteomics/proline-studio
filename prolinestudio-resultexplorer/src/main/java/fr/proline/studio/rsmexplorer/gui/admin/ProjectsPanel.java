@@ -36,7 +36,7 @@ import fr.proline.studio.table.AbstractDecoratedGlobalTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.TablePopupMenu;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.IconManager;
@@ -273,7 +273,7 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
                         column0.setPreferredWidth(30);
                         return new StatusRenderer();
                     case ProjectsInfoTableModel.COLTYPE_SIZE:
-                        DefaultRightAlignRenderer rightAign = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
+                        DefaultAlignRenderer rightAign = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT);
                         return new DoubleRenderer(rightAign, 0, true, true);
                     default:
                         return super.getCellRenderer(row, columnIndex);
@@ -474,7 +474,7 @@ public class ProjectsPanel extends JPanel implements ListSelectionListener {
         public static final int COLTYPE_PROJECTID = 1;// "Id"
         public static final int COLTYPE_NAME = 2;//"Project"
         public static final int COLTYPE_DESCRIPTION = 3;
-        public static final int COLTYPE_SIZE = 4;// "Size (MB)", new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0, true, true), null);
+        public static final int COLTYPE_SIZE = 4;// "Size (MB)",
         public static final int COLTYPE_USER = 5; //"Owner"
         public static final int COLTYPE_RAW_FILES_COUNT = 6;
         public static final int COLTYPE_DB_NAME = 7;// "Databases"

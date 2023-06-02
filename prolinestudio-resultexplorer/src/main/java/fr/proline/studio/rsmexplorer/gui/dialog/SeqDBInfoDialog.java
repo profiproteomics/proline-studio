@@ -29,7 +29,7 @@ public class SeqDBInfoDialog extends InfoDialog {
     private static String SHOW_AT_START_KEY = "Show_SeqDb_Warning_At_Start";
     
     public SeqDBInfoDialog(Window parent) {
-        super(parent, InfoDialog.InfoType.WARNING, "No Retrieve Protein Sequence Service Found", "There is no Retrieve Protein Sequence Service available.\nPlease contact your IT Administrator to install it.", SHOW_AT_START_KEY, true);
+        super(parent, InfoDialog.InfoType.WARNING, "No Retrieve Protein Sequence Service Found", "There is no Retrieve Protein Sequence Service available.\nPlease contact your IT Administrator to install it.", SHOW_AT_START_KEY, true, false);
         setButtonName(InfoDialog.BUTTON_OK, "OK");
         setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
     }

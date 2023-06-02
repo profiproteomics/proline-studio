@@ -42,8 +42,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.extendedtablemodel.ImportedDataTableModel;
 import fr.proline.studio.table.DecoratedTable;
-import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
@@ -54,15 +53,11 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.swing.ImageIcon;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 
 /**
@@ -395,11 +390,11 @@ public class ImportTSVFunction extends AbstractFunction {
         @Override
         public TableCellRenderer getRenderer(int row, int col) {
             if (m_columTypes[col] == String.class) {
-                return new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
+                return new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.LEFT);
             } else if  (m_columTypes[col] == Long.class) {
                 return TableDefaultRendererManager.getDefaultRenderer(Long.class);
             } else if  (m_columTypes[col] == Double.class) {
-                return new DoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true);
+                return new DoubleRenderer( new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 4, true, true);
             }  
             return null;
         }

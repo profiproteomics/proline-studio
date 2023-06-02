@@ -17,7 +17,6 @@
 package fr.proline.studio.table;
 
 import fr.proline.studio.NbPreferences;
-import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import com.thierry.filtering.TableSelection;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.AdvancedSelectionPanel;
@@ -490,9 +489,9 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
     public TableCellRenderer getCellRenderer(int row, int column) {
 
         TableModel model = getModel();
-        if (model instanceof GlobalTableModelInterface) {
+        if (model instanceof DecoratedTableModelInterface) {
             int columnInModel = convertColumnIndexToModel(column);
-            TableCellRenderer renderer = ((GlobalTableModelInterface) model).getRenderer(row, columnInModel);
+            TableCellRenderer renderer = ((DecoratedTableModelInterface) model).getRenderer(row, columnInModel);
             if (renderer != null) {
                 return renderer;
             }

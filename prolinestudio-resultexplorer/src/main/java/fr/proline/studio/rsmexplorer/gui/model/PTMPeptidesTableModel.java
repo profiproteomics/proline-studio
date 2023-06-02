@@ -43,8 +43,7 @@ import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
-import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.utils.StringUtils;
 import java.util.ArrayList;
@@ -55,6 +54,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 
 /**
@@ -532,21 +532,21 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
             }
             case COLTYPE_PEPTIDE_PTM:
             case COLTYPE_SPECTRUM_TITLE: {
-                renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
+                renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.LEFT);
                 break;
             }
             case COLTYPE_PEPTIDE_CHARGE:
             case COLTYPE_PEPTIDE_ID: {
-                renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class), JLabel.RIGHT);
                 break;
             }            
             case COLTYPE_PTM_PROBA: {
-                renderer =  new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
+                renderer =  new FloatRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 2);
                 break;
             }
             case COLTYPE_PEPTIDE_EXP_MOZ:
             case COLTYPE_DELTA_MASS_PTM: {
-                renderer = new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4);
+                renderer = new DoubleRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 4);
                 break;
             }
             case COLTYPE_PEPTIDE_SCORE: {
@@ -555,7 +555,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
             }
             default : {
                 if(col <= LAST_STATIC_COLUMN+m_ptmSiteCount){
-                    renderer =  new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
+                    renderer =  new FloatRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 2);
                 } else {  
                     //Qchannels
                     int dynQchIndex = col - (m_columnNames.length+m_ptmSiteCount);
@@ -565,16 +565,16 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
                         case DYNAMIC_COLTYPE_SELECTION_LEVEL:
                         case DYNAMIC_COLTYPE_PSM:
                         case DYNAMIC_COLTYPE_IDENT_PSM: {                        
-                            renderer =  new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                            renderer =  new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class), JLabel.RIGHT);
                             break;
                         }
                         case DYNAMIC_COLTYPE_ABUNDANCE:
                         case DYNAMIC_COLTYPE_RAW_ABUNDANCE:{
-                            renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
+                            renderer = new BigFloatOrDoubleRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 0);
                             break;
                         }
                         case DYNAMIC_COLTYPE_RETENTION_TIME:{
-                            renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
+                            renderer = new FloatRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 2);
                             break;
                         }
 

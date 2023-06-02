@@ -32,8 +32,7 @@ import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.mzscope.MzScopeInterface;
 import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
-import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FontRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.TimeRenderer;
@@ -54,6 +53,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 
 /**
@@ -870,28 +870,28 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
             case COLTYPE_FEATURE_MAP_NAME:
             case COLTYPE_FEATURE_QC:
             case COLTYPE_FEATURE_IS_OVERLAPPING: {
-                renderer = new FontRenderer( new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)) );
+                renderer = new FontRenderer( new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.LEFT) );
                 break;
             }
             case COLTYPE_FEATURE_CALIBRATED_MOZ:
             case COLTYPE_FEATURE_MOZ: {
-                renderer = new FontRenderer( new DoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4 ));
+                renderer = new FontRenderer( new DoubleRenderer( new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 4 ));
                 break;
             }
             case COLTYPE_FEATURE_APEX_INTENSITY:
             case COLTYPE_FEATURE_INTENSITY:
             case COLTYPE_FEATURE_DURATION: {
-                renderer = new FontRenderer( new BigFloatOrDoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0 ));
+                renderer = new FontRenderer( new BigFloatOrDoubleRenderer( new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 0 ));
                 break;
             }
             case COLTYPE_FEATURE_RETENTION_TIME:
             case COLTYPE_FEATURE_PREDICTED_RETENTION_TIME: {
-                renderer = new FontRenderer( new TimeRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class))));
+                renderer = new FontRenderer( new TimeRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT)));
                 break;
             }
             case COLTYPE_FEATURE_CHARGE:
             case COLTYPE_FEATURE_PEAKELS_COUNT: {
-                renderer = new FontRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class)));
+                renderer = new FontRenderer( new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class), JLabel.RIGHT));
                 break;
             }
         }

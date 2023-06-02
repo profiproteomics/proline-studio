@@ -16,31 +16,32 @@
  */
 package fr.proline.studio.table.renderer;
 
-import java.awt.Component;
-import java.io.Serializable;
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.table.TableCellRenderer;
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import java.awt.*;
 
 /**
- * This renderer encapsulates another renderer and force to display the text to the left
- * @author JM235353
+ * This renderer extends DefaultTableCellRenderer to color JLabel
  */
-public class DefaultLeftAlignRenderer implements TableCellRenderer, Serializable {
-    
-    private TableCellRenderer m_renderer;
-    
-    public DefaultLeftAlignRenderer(TableCellRenderer renderer) {
-        m_renderer = renderer;
+public class DefaultColoredCellRenderer extends DefaultTableCellRenderer {
+
+
+    private Color m_backColor;
+
+    public DefaultColoredCellRenderer(Color backgroundColor) {
+        m_backColor = backgroundColor;
     }
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        Component c = m_renderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        if (c instanceof JLabel) {
-            ((JLabel)c).setHorizontalAlignment(JLabel.LEFT);
+        String displayValue = value.toString();
+        if(value instanceof Float && ((Float)value).isNaN()){
+            displayValue="";
         }
-        return c;
+        JLabel l = (JLabel) super.getTableCellRendererComponent(table, displayValue, isSelected, hasFocus, row, column);
+        l.setBackground(m_backColor);
+        return l;
     }
-    
+
+
 }

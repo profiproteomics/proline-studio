@@ -17,6 +17,7 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.core.orm.msi.PtmSpecificity;
+import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.studio.NbPreferences;
@@ -47,8 +48,9 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
       private QuantSimplifiedPostProcessingPanel m_quantPostProcessingPanel;
 
     DDatasetType.QuantitationMethodInfo m_quantitationMethodInfo;
+    QuantitationMethod m_quantitationMethod;
 
-   public QuantPostProcessingDialog(Window parent, ArrayList<PtmSpecificity> ptms, boolean isAggregation, DDatasetType.QuantitationMethodInfo quantitationMethodInfo, DDataset paramsFromdataset) {
+   public QuantPostProcessingDialog(Window parent, ArrayList<PtmSpecificity> ptms, boolean isAggregation, QuantitationMethod quantitationMethod, DDatasetType.QuantitationMethodInfo quantitationMethodInfo, DDataset paramsFromdataset) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         setTitle("Compute Post-Processing on Abundances");
         setDocumentationSuffix("id.thw4kt");
@@ -58,6 +60,7 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
 
         setResizable(true);
         m_quantitationMethodInfo = quantitationMethodInfo;
+       m_quantitationMethod = quantitationMethod;
         init(ptms, isAggregation, paramsFromdataset);
 
     }
@@ -112,8 +115,8 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
 
         //more generic tests
         if(!m_quantPostProcessingPanel.checkQuantPostProcessingParam()){
-            setStatus(true, "Error in specified post processing parameter.");
-            highlight(m_quantPostProcessingPanel);
+            setStatus(true, m_quantPostProcessingPanel.getCheckErrorMessage());
+            highlight(m_quantPostProcessingPanel.getCheckErrorComponent());
             return false;
         }
 
@@ -144,7 +147,7 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
 
     private void init(ArrayList<PtmSpecificity> ptms, boolean isAggregation, DDataset dataset) {
         Map<Long, String> ptmSpecificityNameById = ptms.stream().collect(Collectors.toMap(ptmS -> ptmS.getId(), ptmS -> ptmS.toString()));
-        m_quantPostProcessingPanel = new QuantSimplifiedPostProcessingPanel(false, m_quantitationMethodInfo, ptmSpecificityNameById);
+        m_quantPostProcessingPanel = new QuantSimplifiedPostProcessingPanel(false, m_quantitationMethod, m_quantitationMethodInfo, ptmSpecificityNameById);
 //        m_quantPostProcessingPanel = new QuantPostProcessingPanel(false, ptmSpecificityNameById);
         try {
             if ((dataset != null) && (dataset.getQuantProcessingConfigAsMap() != null)) {

@@ -8,9 +8,10 @@ import fr.proline.studio.table.Column;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,7 +20,7 @@ import java.util.Map;
 
 public class PeakelsTableModel extends AbstractNonLazyTableModel implements GlobalTableModelInterface {
 
-  private static TableCellRenderer BIG_FLOAT = new BigFloatOrDoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0 );
+  private static TableCellRenderer BIG_FLOAT = new BigFloatOrDoubleRenderer( new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 0 );
 
   public static final Column COLTYPE_FEATURE_MZCOL = new Column("m/z", "m/z", Double.class,0, Column.DOUBLE_5DIGITS_RIGHT);
   public static final Column COLTYPE_FEATURE_ET_COL = new Column("Elution", "Elution Time in minutes", Float.class, 1, Column.DOUBLE_2DIGITS_RIGHT);

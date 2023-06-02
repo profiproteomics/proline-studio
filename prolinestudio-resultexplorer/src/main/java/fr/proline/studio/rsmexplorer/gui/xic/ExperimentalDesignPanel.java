@@ -251,7 +251,7 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
                     m_displayPostProcessing = true;
                 }
                 Map<Long, String> ptmName = getPtmSpecificityNameById();
-                m_postProcessingParamPanel = new QuantSimplifiedPostProcessingPanel(true, m_quantMethodInfo, ptmName);//read only
+                m_postProcessingParamPanel = new QuantSimplifiedPostProcessingPanel(true, m_dataset.getQuantitationMethod(), m_quantMethodInfo, ptmName);//read only
                 m_refinedPanel.add(m_postProcessingParamPanel, BorderLayout.CENTER);
                 m_postProcessingParamPanel.setRefinedParams(m_dataset.getPostQuantProcessingConfigAsMap());
 

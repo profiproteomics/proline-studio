@@ -16,29 +16,33 @@
  */
 package fr.proline.studio.table.renderer;
 
-import java.awt.Component;
-import java.io.Serializable;
-import javax.swing.JLabel;
-import javax.swing.JTable;
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
+import java.awt.*;
+import java.io.Serializable;
 
 /**
- * This renderer encapsulates another renderer and force to display the text to the right
+ * This renderer encapsulates another renderer and force to display the text to the left
  * @author JM235353
  */
-public class DefaultRightAlignRenderer implements TableCellRenderer, Serializable {
-    
+public class DefaultAlignRenderer implements TableCellRenderer, Serializable {
+
     private TableCellRenderer m_renderer;
-    
-    public DefaultRightAlignRenderer(TableCellRenderer renderer) {
+    private int m_textalignment;
+
+    public DefaultAlignRenderer(TableCellRenderer renderer, int textalignmentLabel) {
         m_renderer = renderer;
+        if(textalignmentLabel != JLabel.RIGHT && textalignmentLabel != JLabel.LEFT && textalignmentLabel != JLabel.CENTER)
+            throw new IllegalArgumentException("Invalid text alignment specified ");
+
+        m_textalignment= textalignmentLabel;
     }
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component c = m_renderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         if (c instanceof JLabel) {
-            ((JLabel)c).setHorizontalAlignment(JLabel.RIGHT);
+            ((JLabel)c).setHorizontalAlignment(m_textalignment);
         }
         return c;
     }

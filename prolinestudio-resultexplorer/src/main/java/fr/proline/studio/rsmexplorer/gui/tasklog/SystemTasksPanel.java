@@ -27,7 +27,7 @@ import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.TablePopupMenu;
-import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.utils.IconManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -553,7 +553,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
 
         @Override
         public TableCellRenderer getRenderer(int row, int col) {
-            return new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(getColumnClass(col)));
+            return new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(getColumnClass(col)), JLabel.LEFT);
         }
     }
 

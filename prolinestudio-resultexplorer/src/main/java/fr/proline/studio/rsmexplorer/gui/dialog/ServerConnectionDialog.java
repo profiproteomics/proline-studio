@@ -185,7 +185,6 @@ public class ServerConnectionDialog extends ConnectionDialog {
                         SeqDBInfoDialog seqDBInfoDialog = new SeqDBInfoDialog(WindowManager.getDefault().getMainWindow());
                         seqDBInfoDialog.centerToScreen();
                         seqDBInfoDialog.setVisible(true);
-
                     }
 
                     if (changingUser) {

@@ -40,6 +40,7 @@ import fr.proline.studio.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -717,16 +718,16 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
       case COLTYPE_PROTEIN_NAME:
       case COLTYPE_PEPTIDE_PTM:
       case COLTYPE_SPECTRUM_TITLE: {
-        renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
+        renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.LEFT);
         break;
       }
       case COLTYPE_PTM_CLUSTER_CONFIDENCE:
       case COLTYPE_PTM_PROBA: {
-        renderer = new PercentageRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
+        renderer = new PercentageRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT));
         break;
       }
       case COLTYPE_DELTA_MASS_PTM: {
-        renderer = new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4);
+        renderer = new DoubleRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 4);
         break;
       }
       case COLTYPE_PEPTIDE_SCORE: {
@@ -734,12 +735,12 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
         break;
       }
       case COLTYPE_PTMSITE_CONFIDENCES: {
-        renderer = new CollectionRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
+        renderer = new CollectionRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 2);
         break;
       }
       case COLTYPE_PTMSITE_PEP_POSITIONS:
       case COLTYPE_PTMSITE_POSITIONS: {
-        renderer = new CollectionRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
+        renderer = new CollectionRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT));
         break;
       }
 
@@ -762,7 +763,7 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
           switch (id) {
             case COLTYPE_ABUNDANCE:
             case COLTYPE_RAW_ABUNDANCE: {
-              renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
+              renderer = new BigFloatOrDoubleRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 0);
               break;
             }
           }

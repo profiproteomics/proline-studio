@@ -18,6 +18,7 @@ package fr.proline.studio.rsmexplorer.actions.xic;
 
 import fr.proline.core.orm.msi.PtmSpecificity;
 import fr.proline.core.orm.uds.Project;
+import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
@@ -140,7 +141,8 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
         boolean isAggregation = isAllAggregation(nodeList, posX, posY);
 
         DDatasetType.QuantitationMethodInfo qMethodInfo = nodeList.get(0).getDataset().getQuantMethodInfo();
-        QuantPostProcessingDialog dialog = new QuantPostProcessingDialog(WindowManager.getDefault().getMainWindow(), ptms, isAggregation, qMethodInfo, paramsFromdataset);
+        QuantitationMethod quantMethod = nodeList.get(0).getDataset().getQuantitationMethod();
+        QuantPostProcessingDialog dialog = new QuantPostProcessingDialog(WindowManager.getDefault().getMainWindow(), ptms, isAggregation, quantMethod, qMethodInfo, paramsFromdataset);
 //        dialog = new QuantPostProcessingDialog(WindowManager.getDefault().getMainWindow(), ptms, isAggregation, paramsFromdataset);
 
         dialog.setLocation(posX, posY);

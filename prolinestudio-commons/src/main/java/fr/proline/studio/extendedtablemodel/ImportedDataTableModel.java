@@ -31,10 +31,10 @@ import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TableDefaultRendererManager;
-import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import java.io.File;
 import java.io.FileReader;
@@ -113,11 +113,11 @@ import java.util.Map;
         @Override
         public TableCellRenderer getRenderer(int row, int col) {
             if (m_columTypes[col] == String.class) {
-                return new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
+                return new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.LEFT);
             } else if  (m_columTypes[col] == Long.class) {
                 return TableDefaultRendererManager.getDefaultRenderer(Long.class);
             } else if  (m_columTypes[col] == Double.class) {
-                return new DoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true);
+                return new DoubleRenderer( new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 4, true, true);
             }  
             return null;
         }

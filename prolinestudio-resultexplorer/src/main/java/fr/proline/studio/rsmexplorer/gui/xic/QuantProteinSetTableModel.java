@@ -35,7 +35,7 @@ import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.table.ExportTableSelectionInterface;
@@ -58,6 +58,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 
 /**
@@ -1110,7 +1111,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             }
             case COLTYPE_NB_PEPTIDE:
             case COLTYPE_NB_QUANT_PEPTIDE: {
-                renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class), JLabel.RIGHT);
                 break;
             }
             default: {
@@ -1118,35 +1119,35 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                 int id = col - m_columnNames.length - (nbQc * getColumnPerQCCount());
                 switch (id) {
                     case COLTYPE_PEP_NUMBER:
-                        renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                        renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class), JLabel.RIGHT);
 //                        if (m_isXICMode) {
 //                            renderer = new GrayedRenderer(renderer);
 //                        }
                         break;
                     case COLTYPE_SELECTION_LEVEL:
                     case COLTYPE_PSM: {
-                        renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                        renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class), JLabel.RIGHT);
                         break;
                     }
                     case COLTYPE_ABUNDANCE: {
                         if (isSpectralCountQuant()) {
-                            renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
+                            renderer = new FloatRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 2);
                         } else {
-                            renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
+                            renderer = new BigFloatOrDoubleRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 0);
                         }
                         break;
                     }
                     case COLTYPE_RAW_ABUNDANCE: {
                         if (isSpectralCountQuant()) {
-                            renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
+                            renderer = new FloatRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 0);
                         } else {
-                            renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
+                            renderer = new BigFloatOrDoubleRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 0);
                         }
                         break;
                     }
 //                    case COLTYPE_STATUS:
 //                        if (m_isXICMode) {
-//                            renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
+//                            renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
 //                            renderer = new GrayedRenderer(renderer);
 //                        }
 //                        break;                    

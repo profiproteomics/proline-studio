@@ -39,7 +39,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.ProcessCallbackInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.TableDefaultRendererManager;
@@ -52,6 +52,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import fr.proline.studio.NbPreferences;
+
+import javax.swing.*;
 
 /**
  * Abstract class for functions on Experience Disgn for the data analyzer
@@ -238,7 +240,7 @@ public abstract class AbstractOnExperienceDesignFunction extends AbstractFunctio
                                 Object res = var.getValue();
                                 if (res instanceof ColDoubleData) {
                                     ColDoubleData col = (ColDoubleData) var.getValue();
-                                    sourceTable.addColumn(col, m_colExtraInfo, new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true));
+                                    sourceTable.addColumn(col, m_colExtraInfo, new DoubleRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 4, true, true));
                                     model = sourceTable.getModel();
                                 } else if (res instanceof Table) {
                                     Table t = (Table) var.getValue();

@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.core.orm.uds.QuantitationMethod;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.editor.FloatTableCellEditor;
 import fr.proline.studio.rsmexplorer.gui.model.AbstractCorrectionMatrixTaleModel;
@@ -8,6 +9,7 @@ import fr.proline.studio.rsmexplorer.gui.model.PurityCorrectionMatrixTableModel;
 import fr.proline.studio.rsmexplorer.gui.model.ThermoCorrectionMatrixTableModel;
 import fr.proline.studio.table.*;
 import fr.proline.studio.table.renderer.DefaultAlignRenderer;
+import fr.proline.studio.utils.IconManager;
 import org.jdesktop.swingx.JXTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +38,9 @@ public class EditIsobaricMatrixDialog extends DefaultDialog {
     PurityCorrectionMatrixTable m_purityCorrectionTable;
     public EditIsobaricMatrixDialog(Window parent, QuantitationMethod method) {
         super(parent, ModalityType.APPLICATION_MODAL);
+        setButtonVisible(BUTTON_DEFAULT, true);
+        setButtonName(BUTTON_DEFAULT, "Clear");
+        setButtonIcon(BUTTON_DEFAULT, IconManager.getIcon(IconManager.IconType.ERASER));
         this.m_quantMethod = method;
         m_isGenericMatrix = (Arrays.stream(KNOWN_TMT_METHODS).anyMatch(c->c.equals(m_quantMethod.getName()))) ? false : true;
         setTitle("Edit Purity Matrix for "+m_quantMethod.getName());
@@ -72,12 +77,11 @@ public class EditIsobaricMatrixDialog extends DefaultDialog {
         m_purityCorrectionTable.setFillsViewportHeight(true);
         m_purityCorrectionTable.setAutoResizeMode(JXTable.AUTO_RESIZE_ALL_COLUMNS);
 
-//        m_purityCorrectionTable.setViewport(m_tableScrollPane.getViewport());
 
         internalPanel.add(m_tableScrollPane, c );
         setInternalComponent(internalPanel);
-//        setPreferredSize(new Dimension(Math.min(m_preferredDialogWidth,WindowManager.getDefault().getMainWindow().getWidth()),500));
-                setPreferredSize(new Dimension(m_preferredDialogWidth,500));
+        int windowWitdh =  (WindowManager.getDefault().getMainWindow() == null) ? m_preferredDialogWidth : WindowManager.getDefault().getMainWindow().getWidth();
+        setPreferredSize(new Dimension(Math.min(m_preferredDialogWidth, windowWitdh),500));
     }
 
     private int m_preferredDialogWidth;
@@ -86,7 +90,7 @@ public class EditIsobaricMatrixDialog extends DefaultDialog {
         PurityCorrectionMatrixTable table = new PurityCorrectionMatrixTable();
         table.removeStriping();
         table.getTableHeader().setDefaultRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.CENTER));
-
+        table.setCellSelectionEnabled(true);
         AbstractCorrectionMatrixTaleModel tableModel = (m_isGenericMatrix ?  new PurityCorrectionMatrixTableModel( m_quantMethod) : new ThermoCorrectionMatrixTableModel(m_quantMethod.getName()));
 
         table.setModel(tableModel);
@@ -118,8 +122,15 @@ public class EditIsobaricMatrixDialog extends DefaultDialog {
 
     @Override
     protected boolean okCalled() {
-        m_logger.info(" Matrix: "+getPurityMatrix());
         return true;
+    }
+
+    @Override
+    protected boolean defaultCalled(){
+        //Clear Matrix
+        ((AbstractCorrectionMatrixTaleModel) m_purityCorrectionTable.getModel()).clearMatrix();
+        repaint();
+        return false;
     }
 
     protected String getPurityMatrix(){

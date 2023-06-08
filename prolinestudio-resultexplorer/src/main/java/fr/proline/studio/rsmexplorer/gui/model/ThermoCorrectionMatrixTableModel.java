@@ -3,7 +3,6 @@ package fr.proline.studio.rsmexplorer.gui.model;
 import fr.proline.studio.utils.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class ThermoCorrectionMatrixTableModel extends AbstractCorrectionMatrixTaleModel  {
 
@@ -187,16 +186,17 @@ public class ThermoCorrectionMatrixTableModel extends AbstractCorrectionMatrixTa
     }
 
     public String getPurityMatrixAsString() {
-        int mReporters = massReporters.size();
+        int mReporterCount = massReporters.size();
         StringBuilder sb  = new StringBuilder();
-        Float[] row = new Float[mReporters];
+        Float[] row = new Float[mReporterCount];
         sb.append("[");
 
-        for(int index = 0;index<mReporters; index++){
+        for(int index = 0;index<mReporterCount; index++){
             MassReporter mr =  massReporters.get(index);
             Float coefSum = mr.getCoeffSum();
-
-            for(int rowIndex = 0;rowIndex<mReporters; rowIndex++){
+            if(index!=0)
+                sb.append(",");//separate reporters
+            for(int rowIndex = 0;rowIndex<mReporterCount; rowIndex++){
                 row[rowIndex] = 0.0f;
                 if(rowIndex == index) {
                     row[rowIndex] = ( (100 - coefSum)/100);

@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
+import fr.proline.core.orm.uds.QuantitationLabel;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
@@ -13,6 +14,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public abstract class AbstractCorrectionMatrixTaleModel extends DecoratedTableModel {
@@ -62,6 +64,15 @@ public abstract class AbstractCorrectionMatrixTaleModel extends DecoratedTableMo
             coefIndex = colIndex - 2;//remove name column + separator column
         }
         return coefIndex;
+    }
+
+    public void clearMatrix(){
+        for(MassReporter mr : massReporters){
+            for(int i=0; i<mr.correctionCount; i++){
+                if(!mr.coef.get(i).isNaN())
+                    mr.coef.set(i, 0.0f);
+            }
+        }
     }
 
     public boolean isCellEditable(int row, int col) {
@@ -119,7 +130,7 @@ public abstract class AbstractCorrectionMatrixTaleModel extends DecoratedTableMo
                 renderer = new DefaultAlignRenderer(new DefaultColoredCellRenderer(HighlighterFactory.GENERIC_GRAY), JLabel.LEFT);
             } else {
                 if (mr.isCoeffApplicable(coefIndex)) {
-                    renderer = new FloatRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 2);
+                    renderer = new FloatRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 4);
                 } else {
                     renderer = new DefaultColoredCellRenderer(new Color(255, 242, 204));
                 }
@@ -156,6 +167,16 @@ public abstract class AbstractCorrectionMatrixTaleModel extends DecoratedTableMo
 
     public abstract String getPurityMatrixAsString();
 
+    protected String getReporterLabel(QuantitationLabel label){
+        StringBuilder massRepLabel = new StringBuilder(label.getName());
+        try {
+            Map<String, Object> serProp = label.getSerializedPropertiesAsMap();
+            if(serProp!=null && !serProp.isEmpty() &&serProp.containsKey("reporter_mz") )
+                massRepLabel.append(" (").append(serProp.get("reporter_mz")).append(")");
+        } catch (Exception e) {
+        }
+        return massRepLabel.toString();
+    }
 
     static class MassReporter {
 
@@ -174,6 +195,10 @@ public abstract class AbstractCorrectionMatrixTaleModel extends DecoratedTableMo
                 else
                     this.coef.add(0.0f);
             }
+        }
+
+        public String getName(){
+            return name;
         }
 
         public List<Float> getCoefWithoutNan(){

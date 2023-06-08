@@ -56,17 +56,10 @@ public class FloatTableCellEditor extends DefaultCellEditor  {
         }
     }
 
-
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-        Float f = (Float) value;
-        String formatedValue;
-        if ((f == null) || (f.isNaN())) {
-            formatedValue = "";
-        } else {
-            formatedValue = DataFormat.format(f.floatValue(), m_digits);
-        }
-        return  super.getTableCellEditorComponent(table, formatedValue, isSelected, row,column);
+
+        return  super.getTableCellEditorComponent(table, "", isSelected, row,column);
     }
 
 }

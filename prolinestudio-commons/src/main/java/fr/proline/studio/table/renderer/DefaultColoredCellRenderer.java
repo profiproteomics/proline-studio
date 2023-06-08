@@ -26,7 +26,15 @@ import java.awt.*;
 public class DefaultColoredCellRenderer extends DefaultTableCellRenderer {
 
 
+    public static DefaultColoredCellRenderer disabledCellRendered = new DefaultColoredCellRenderer(UIManager.getColor ( "Label.background" ),  UIManager.getColor ( "Label.disabledForeground" ));
     private Color m_backColor;
+    private Color m_fontColor;
+
+    public DefaultColoredCellRenderer(Color backgroundColor, Color fontColor) {
+        m_backColor = backgroundColor;
+        m_fontColor = fontColor;
+    }
+
 
     public DefaultColoredCellRenderer(Color backgroundColor) {
         m_backColor = backgroundColor;
@@ -39,6 +47,8 @@ public class DefaultColoredCellRenderer extends DefaultTableCellRenderer {
             displayValue="";
         }
         JLabel l = (JLabel) super.getTableCellRendererComponent(table, displayValue, isSelected, hasFocus, row, column);
+        if(m_fontColor != null)
+            l.setForeground(m_fontColor);
         l.setBackground(m_backColor);
         return l;
     }

@@ -59,10 +59,11 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
         setButtonVisible(BUTTON_SAVE, true);
 
         setResizable(true);
+        setPreferredSize(new Dimension(600,800));
         m_quantitationMethodInfo = quantitationMethodInfo;
-       m_quantitationMethod = quantitationMethod;
+        m_quantitationMethod = quantitationMethod;
         init(ptms, isAggregation, paramsFromdataset);
-
+        pack();
     }
 
     @Override
@@ -87,8 +88,13 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
     @Override
     protected void loadParameters(Preferences filePreferences) throws Exception {
 
-        String version = filePreferences.get(QuantPostProcessingParams.PARAM_VERSION_KEY, null);
-        boolean modifiedPepParamExist = (filePreferences.get(QuantPostProcessingParams.SETTINGS_KEY+"."+QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.DISCARD_MODIFIED_PEPTIDES), null) != null);
+        String version = getPropertiesVersion(filePreferences);
+        m_quantPostProcessingPanel.loadParameters(filePreferences, version);
+    }
+
+    private String getPropertiesVersion(Preferences pref){
+        String version = pref.get(QuantPostProcessingParams.PARAM_VERSION_KEY, null);
+        boolean modifiedPepParamExist = (pref.get(QuantPostProcessingParams.SETTINGS_KEY+"."+QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.DISCARD_MODIFIED_PEPTIDES), null) != null);
         if(version == null){
             if(modifiedPepParamExist)
                 version = "2.0";
@@ -99,8 +105,7 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
             String msg = "Try loading Post Processing parameters ("+ QuantPostProcessingParams.CURRENT_VERSION + ") from file with version "+version+". All parameters may not have been taken into account !";
             JOptionPane.showMessageDialog(this, msg, "Load Post Processing parameters error", JOptionPane.ERROR_MESSAGE);
         }
-
-        m_quantPostProcessingPanel.loadParameters(filePreferences, version);
+        return version;
     }
 
     @Override
@@ -156,7 +161,8 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
 
             } else {
                 Preferences preferences = NbPreferences.root();
-                m_quantPostProcessingPanel.getParameterList().loadParameters(preferences);
+//                m_quantPostProcessingPanel.getParameterList().loadParameters(preferences);
+                  m_quantPostProcessingPanel.loadParameters(preferences, getPropertiesVersion(preferences));
             }
         } catch (Exception ex) {
             m_logger.error("error while settings quanti params " + ex);

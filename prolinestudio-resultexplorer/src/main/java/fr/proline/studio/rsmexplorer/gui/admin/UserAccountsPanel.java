@@ -322,6 +322,10 @@ public class UserAccountsPanel extends JPanel {
         
         @Override
         public Class getColumnClass(int col) {
+
+            if (col == COLTYPE_NAME)
+                    return UserAccount.class;
+
             return String.class;
         }
         
@@ -345,7 +349,7 @@ public class UserAccountsPanel extends JPanel {
             
             switch (columnIndex) {
                 case COLTYPE_NAME: {
-                    return user.getLogin();
+                    return user;
                 }
                 case COLTYPE_GROUP: {
                     return DatabaseDataManager.isAdmin(user) ? "Admin" : "User";
@@ -419,8 +423,8 @@ public class UserAccountsPanel extends JPanel {
                 label.setText(userAccount.getLogin());
                 
                 boolean isAdmin = DatabaseDataManager.isAdmin(userAccount);
-                
-                
+
+
                 label.setIcon(IconManager.getIcon(isAdmin ? IconManager.IconType.USER_ADMIN : IconManager.IconType.USER));
                 //userAccount.get
             }

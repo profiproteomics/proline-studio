@@ -56,8 +56,8 @@ public class XICDropZone extends JPanel implements DropZoneInterface {
     public XICDropZone(TreeFileChooserTransferHandler transferHandler) {
         m_transferHandler = transferHandler;
         
-        m_droppedFiles = new HashMap<String, File>();
-        m_associations = new HashMap<String, AssociationWrapper>();
+        m_droppedFiles = new HashMap<>();
+        m_associations = new HashMap<>();
         suffix = new ArrayList<>();
         suffix.add("mzdb");
         setBorder(BorderFactory.createLineBorder(Color.BLACK));

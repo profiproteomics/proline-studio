@@ -73,7 +73,7 @@ public class DatasetReferenceNode extends AbstractNode {
 
     @Override
     public AbstractNode copyNode() {
-        return null;
+        return new DatasetReferenceNode(getData());
     }
 
     @Override

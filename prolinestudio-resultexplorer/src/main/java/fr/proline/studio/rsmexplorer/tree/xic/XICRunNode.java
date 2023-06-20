@@ -83,7 +83,7 @@ public class XICRunNode extends AbstractNode {
      *
      * @param   l   the XICRunNodeInitListener
      */
-    public void removeTableModelListener(XICRunNodeInitListener l) {
+    public void removeXICRunNodeInitListener(XICRunNodeInitListener l) {
         listenerList.remove( l);
     }
 

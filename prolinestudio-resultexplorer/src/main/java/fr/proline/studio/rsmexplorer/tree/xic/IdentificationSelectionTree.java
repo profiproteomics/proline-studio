@@ -18,6 +18,9 @@ package fr.proline.studio.rsmexplorer.tree.xic;
 
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.event.MouseEvent;
 import javax.swing.BorderFactory;
 import javax.swing.event.TreeExpansionEvent;
@@ -31,11 +34,13 @@ import javax.swing.tree.TreePath;
  */
 public class IdentificationSelectionTree extends AbstractTree implements TreeWillExpandListener {
 
+    private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer");
+
     public IdentificationSelectionTree(AbstractNode top, boolean loadAllAtOnce) {
 
         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        XICTransferHandler handler = new XICTransferHandler(true, this);
+        XICTransferHandler handler = new XICTransferHandler(true, true, this);
         setTransferHandler(handler);
 
         setDragEnabled(true);

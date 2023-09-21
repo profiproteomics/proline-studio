@@ -135,7 +135,7 @@ public class MzdbIntegrityVerificationTask extends AbstractDatabaseTask {
 
                         }
 
-                    } catch (ClassNotFoundException | FileNotFoundException | SQLiteException e) {
+                    } catch (FileNotFoundException | SQLiteException e) {
                         m_valid = false;
                     } catch (StreamCorruptedException ex) {
                         Logger.getLogger(MzDbReaderHelper.class.getName()).log(Level.SEVERE, null, ex);

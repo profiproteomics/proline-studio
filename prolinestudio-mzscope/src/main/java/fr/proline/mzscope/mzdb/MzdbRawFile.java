@@ -101,7 +101,7 @@ public class MzdbRawFile implements IRawFile {
                 readIonMobilityIndexes();
                 LOG.debug("MzdbRawFile " + getName() +" has Ion mobility separation");
             }
-        } catch (ClassNotFoundException | FileNotFoundException | SQLiteException e) {
+        } catch (FileNotFoundException | SQLiteException e) {
             LOG.error("cannot read file " + mzDbFile.getAbsolutePath(), e);
         }
     }
@@ -774,7 +774,7 @@ public class MzdbRawFile implements IRawFile {
                         MgfWriter writer = new MgfWriter(this.getFile().getAbsolutePath());
                         writer.write(outputFileName, mgfExportParam.getPrecComp(), mgfExportParam.getIntensityCutoff(), mgfExportParam.isExportProlineTitle());
                         LOG.debug(" mgf created in " + (System.currentTimeMillis() - start) + " ms");
-                    } catch (SQLiteException | ClassNotFoundException ex) {
+                    } catch (SQLiteException ex) {
                         LOG.error("SQLiteException or ClassNotFoundException while exporting mgf file", ex);
                         return false;
                     } catch (FileNotFoundException ex) {

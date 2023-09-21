@@ -20,20 +20,42 @@ import org.jdesktop.swingx.JXComboBox;
  *
  * @author VD225637
  */
-public class SmoothingParamDialog extends DefaultDialog{
+public class SmoothingParamDialog extends DefaultDialog {
 
-        JTextField m_nbrPoint;
-        JComboBox m_smoothingMethods; 
-        public final static String PARTIAL_SG_SMOOTHER = "Partial Savitzky-Golay Smoother";
-        public final static String SG_SMOOTHER = "Savitzky-Golay Smoother";
-        public final static String BOTH_SMOOTHER = "All Smoothers";
-        String[] methods = {PARTIAL_SG_SMOOTHER, SG_SMOOTHER, BOTH_SMOOTHER};
+    JTextField m_nbrPoint;
+    JTextField ratioPeak;
+    JSpinner sp;
+    JComboBox m_smoothingMethods;
 
-        public SmoothingParamDialog(Window parent) {
-            super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-            setTitle("Smooting parameters ");
-            setInternalComponent(createInternalPanel());
-        }
+    JCheckBox checkBox;
+    public final static String PARTIAL_SG_SMOOTHER = "Partial Savitzky-Golay Smoother";
+    public final static String SG_SMOOTHER = "Savitzky-Golay Smoother";
+    public final static String BOTH_SMOOTHER = "All Smoothers";
+
+    public final static String SMOOTHING_JDSP = "SmoothingJDSP";
+
+    public final static String CONVOLUTION_METHOD = "ConvolutionJDSP";
+
+    public final static String GAUSSIAN_FITTING_METHOD = "Apache gaussian fitting";
+
+    public final static String WIENER_METHOD = "WienerJDSP";
+
+    public final static String SVGOLAY2_METHOD = "SavitskyJDSP";
+
+    public final static String EXPERIMENTAL_TEST = "Polynomial fitting";
+
+    public final static String MEDIAN_FILTER_METHOD = "medianFilterJDSP";
+
+    public final static String SIGNAL_QUALITY_EVALUATION = "signal quality evaluation";
+    String[] methods = {PARTIAL_SG_SMOOTHER, SG_SMOOTHER, BOTH_SMOOTHER, SMOOTHING_JDSP, CONVOLUTION_METHOD,
+            GAUSSIAN_FITTING_METHOD, WIENER_METHOD, SVGOLAY2_METHOD, EXPERIMENTAL_TEST, MEDIAN_FILTER_METHOD, SIGNAL_QUALITY_EVALUATION};
+
+
+    public SmoothingParamDialog(Window parent) {
+        super(parent, Dialog.ModalityType.APPLICATION_MODAL);
+        setTitle("Smoothing parameters ");
+        setInternalComponent(createInternalPanel());
+    }
 
     private JPanel createInternalPanel() {
         JPanel internalPanel = new JPanel(new GridBagLayout());

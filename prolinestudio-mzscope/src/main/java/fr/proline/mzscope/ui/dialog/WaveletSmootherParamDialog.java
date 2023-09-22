@@ -31,7 +31,8 @@ public class WaveletSmootherParamDialog extends DefaultDialog {
     JLabel thresholdLabel;
     public final static String MAX_CORRELATION="Correlation max";
     public final static String MIN_CORRELATION="Correlation min";
-    public final static String MAX_SMOOTHNESS="Max smoothness";
+
+    /*public final static String MAX_SMOOTHNESS="Max smoothness";*/
     public final static String BOTH_SMOOTHNESS_AND_CORRELATION="smoothness + correlation";
 
 
@@ -43,7 +44,7 @@ public class WaveletSmootherParamDialog extends DefaultDialog {
 
 
 
-    String[] waveletParameters={MAX_CORRELATION,MIN_CORRELATION,MAX_SMOOTHNESS,BOTH_SMOOTHNESS_AND_CORRELATION,
+    String[] waveletParameters={MAX_CORRELATION,MIN_CORRELATION,BOTH_SMOOTHNESS_AND_CORRELATION,
             MAX_SNR,MIN_ENERGY_DIFF,MIN_EUCLIDEAN_DISTANCE};
 
 

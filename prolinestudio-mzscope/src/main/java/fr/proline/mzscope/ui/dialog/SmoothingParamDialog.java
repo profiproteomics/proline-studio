@@ -98,7 +98,7 @@ public class SmoothingParamDialog extends DefaultDialog {
         c.gridx++;
         c.weightx = 1;
         m_smoothingMethods = new JXComboBox(methods);
-        m_smoothingMethods.setSelectedItem(SIGNAL_QUALITY_EVALUATION);
+        m_smoothingMethods.setSelectedItem(CONVOLUTION_METHOD);
         internalPanel.add(m_smoothingMethods, c);
         c.gridx=0;
         c.gridy++;

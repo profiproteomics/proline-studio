@@ -99,15 +99,29 @@ public class SignalEditorPanel extends SignalPanel {
     private JLabel displayAreaVariationJLabel;
 
     private JProgressBar progressBar;
-    private JTabbedPane statsPane;
+
+
+    private Signal initialSignal;
+
+    private Map<Integer, Signal> history;
+    private Map<Integer,Object[]> smoothSignalHistory;
+
+    private int index;
+    private JSpinner historySpinner;
+
+    private JButton viewSignalButton;
 
 
     public SignalEditorPanel(Signal signal) {
         super(signal);
         this.setPreferredSize(new Dimension(700, 900));
         m_smoothedSignals = new HashMap<>();
-       createStatsPanel();
-      //  createJTabbedPane();
+        createStatsPanel();
+        this.initialSignal = signal;
+        this.index = 0;
+        this.history = new HashMap<>();
+        this.smoothSignalHistory=new HashMap<>();
+
     }
 
     @Override
@@ -201,27 +215,39 @@ public class SignalEditorPanel extends SignalPanel {
         });
 
         toolbar.add(baseLineBtn);
-        clearButton=new JButton("Clear");
+        clearButton = new JButton("Clear");
         clearButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-              /* BasePlotPanel basePlot = m_plotPanel.getBasePlotPanel();
-
-
-                basePlot.repaintUpdateDoubleBuffer();
-               m_smoothedSignals.clear();
-
-
-                revalidate();
-                repaint();*/
-
-                removeSignals();
-
-
+                removeSmoothedSignals();
             }
         });
         clearButton.setEnabled(false);
         toolbar.add(clearButton);
+
+        viewSignalButton = new JButton("view signal: ");
+        viewSignalButton.addActionListener(e -> {
+
+            int index = (int) historySpinner.getValue();
+
+            if (index <= m_smoothedSignals.size()) {
+                displaySignal((Integer) historySpinner.getValue());
+            }
+
+        });
+        viewSignalButton.setEnabled(false);
+        toolbar.add(viewSignalButton);
+        SpinnerModel model = new SpinnerNumberModel(
+                1,
+                1,
+                1,
+                1
+        );
+
+        historySpinner = new JSpinner();
+        historySpinner.setModel(model);
+        toolbar.add(historySpinner);
+
         return toolbar;
     }
 
@@ -247,18 +273,18 @@ public class SignalEditorPanel extends SignalPanel {
             }
             String smoothMethod = dialog.getMethod();
             String modeOfConvolution = null;
-            String savitskyMode=null;
-            int polyOrder=3;
-            int derivatives=0;
-            int delta=5;
-            if (smoothMethod.equals(SmoothingParamDialog.SMOOTHING_JDSP)){
-                modeOfConvolution= dialog.getModeOfConvolution();
+            String savitskyMode = null;
+            int polyOrder = 3;
+            int derivatives = 0;
+            int delta = 5;
+            if (smoothMethod.equals(SmoothingParamDialog.SMOOTHING_JDSP)) {
+                modeOfConvolution = dialog.getModeOfConvolution();
             }
-            if (smoothMethod.equals(SmoothingParamDialog.SVGOLAY_JDSP)){
-                savitskyMode= dialog.getSavitskyMode();
-                polyOrder=dialog.getPolyOrder();
-                derivatives= dialog.getDerivativeOrder();
-                delta= dialog.getDeltaSpacing();
+            if (smoothMethod.equals(SmoothingParamDialog.SVGOLAY_JDSP)) {
+                savitskyMode = dialog.getSavitskyMode();
+                polyOrder = dialog.getPolyOrder();
+                derivatives = dialog.getDerivativeOrder();
+                delta = dialog.getDeltaSpacing();
             }
             // CD patch to maintain previous code
             boolean initialMethods = dialog.getMethod().equals(SmoothingParamDialog.SG_SMOOTHER) || dialog.getMethod().equals(SmoothingParamDialog.PARTIAL_SG_SMOOTHER) || dialog.getMethod().equals(SmoothingParamDialog.BOTH_SMOOTHER);
@@ -288,8 +314,8 @@ public class SignalEditorPanel extends SignalPanel {
                     break;
 
                 case SmoothingParamDialog.SMOOTHING_JDSP:
-                    logger.info("JDSP smooth method with initial window size: "+nbrPoints);
-                    smoothJDSP(input, "smooth method with window size: ", nbrPoints, usePeakRestore, ratio,modeOfConvolution);
+                    logger.info("JDSP smooth method with initial window size: " + nbrPoints);
+                    smoothJDSP(input, "smooth method with window size: ", nbrPoints, usePeakRestore, ratio, modeOfConvolution);
                     break;
                 case SmoothingParamDialog.CONVOLUTION_METHOD:
                     logger.info("Convolution method kernel size = " + nbrPoints);
@@ -308,7 +334,7 @@ public class SignalEditorPanel extends SignalPanel {
 
                 case SmoothingParamDialog.SVGOLAY_JDSP:
                     logger.info("Savitsky Golay JDSP smoothing, number of points= " + nbrPoints);
-                    savitskyJDSP(input, "Savitsky JDSP Smoothing", nbrPoints, usePeakRestore, ratio,savitskyMode,polyOrder,derivatives,delta);
+                    savitskyJDSP(input, "Savitsky JDSP Smoothing", nbrPoints, usePeakRestore, ratio, savitskyMode, polyOrder, derivatives, delta);
                     break;
                 case SmoothingParamDialog.EXPERIMENTAL_TEST:
                     logger.info("Experimental calculus for test");
@@ -388,7 +414,6 @@ public class SignalEditorPanel extends SignalPanel {
         maxJDSPButton.setEnabled(true);
         waveletJWaveButton.setEnabled(true);
         clearButton.setEnabled(true);
-
         BasePlotPanel basePlot = m_plotPanel.getBasePlotPanel();
         SignalWrapper wrappedSignal = new SignalWrapper(s, "smoothed signal : " + title, CyclicColorPalette.getColor((m_smoothedSignals.size() + 1) * 2));
         PlotLinear linear = new PlotLinear(basePlot, wrappedSignal, null, 0, 1);
@@ -398,45 +423,73 @@ public class SignalEditorPanel extends SignalPanel {
         basePlot.addPlot(linear, true);
         basePlot.repaintUpdateDoubleBuffer();
         m_smoothedSignals.put(s, linear);
+        if (m_smoothedSignals.size()>1){
+            viewSignalButton.setEnabled(true);
+        }
+        index = index + 1;
+        history.put(index, s);
+        historySpinner.setModel(new SpinnerNumberModel(1,1,m_smoothedSignals.size(),1));
         revalidate();
         repaint();
 
 
     }
-    private void removeSignals(){
+
+    private void removeSmoothedSignals() {
 
         BasePlotPanel basePlot = m_plotPanel.getBasePlotPanel();
+        m_smoothedSignals.clear();
+        history.clear();
+        index = 0;
+        viewSignalButton.setEnabled(false);
+        clearButton.setEnabled(false);
+        basePlot.clearPlots();
+        SignalWrapper wrappedSignal = new SignalWrapper(initialSignal, "original signal", CyclicColorPalette.getColor(1));
+        PlotLinear linear = new PlotLinear(basePlot, wrappedSignal, null, 0, 1);
+        linear.setPlotInformation(wrappedSignal.getPlotInformation());
+        linear.setStrokeFixed(true);
+        linear.setAntiAliasing(true);
 
-        Set<Signal> signals=m_smoothedSignals.keySet();
-        Collection<PlotLinear> linears=m_smoothedSignals.values();
-
-
-       for (PlotLinear linear :linears){
-           basePlot.repaintUpdateDoubleBuffer();
-           basePlot.remove(linear.getBasePlotPanel());
-
-
-
-       }
-       m_smoothedSignals.clear();
-
-
-
-
-
-
-
-
-       // linear.setPlotInformation(wrappedSignal.getPlotInformation());
-        //linear.setStrokeFixed(true);
-      //  linear.setAntiAliasing(true);
-      //  basePlot.addPlot(linear, true);
-      //  basePlot.repaintUpdateDoubleBuffer();
-      //  m_smoothedSignals.clear();
         basePlot.repaintUpdateDoubleBuffer();
+        basePlot.setPlot(linear);
         revalidate();
         repaint();
+        clearStatsPanel();
+        historySpinner.setModel(new SpinnerNumberModel(1,1,1,1));
     }
+
+    private void displaySignal(int index) {
+
+
+        BasePlotPanel basePlot = m_plotPanel.getBasePlotPanel();
+        basePlot.clearPlots();
+        // initial signal
+        SignalWrapper wrappedSignalInitial = new SignalWrapper(m_signal, "original signal", CyclicColorPalette.getColor(1));
+        PlotLinear linear1 = new PlotLinear(basePlot, wrappedSignalInitial, null, 0, 1);
+        linear1.setPlotInformation(wrappedSignalInitial.getPlotInformation());
+        linear1.setStrokeFixed(true);
+        linear1.setAntiAliasing(true);
+
+        basePlot.repaintUpdateDoubleBuffer();
+        basePlot.addPlot(linear1);
+
+        // signal selected
+        Signal signalDisplayed = history.get(index);
+        SignalWrapper wrappedSignal = new SignalWrapper(signalDisplayed, "Smoothed signal number: " + index, CyclicColorPalette.getColor(3));
+        PlotLinear linear2 = new PlotLinear(basePlot, wrappedSignal, null, 0, 1);
+        linear2.setPlotInformation(wrappedSignal.getPlotInformation());
+        linear2.setStrokeFixed(true);
+        linear2.setAntiAliasing(true);
+        basePlot.repaintUpdateDoubleBuffer();
+        basePlot.addPlot(linear2);
+        // TODO update statsPanel
+        clearStatsPanel();
+        revalidate();
+        repaint();
+
+
+    }
+
 
     private void detectMax() {
         for (Map.Entry<Signal, PlotLinear> e : m_smoothedSignals.entrySet()) {
@@ -542,7 +595,7 @@ public class SignalEditorPanel extends SignalPanel {
     /**
      * Smoothing by convolution with non-constant kernels
      */
-    private void smoothJDSP(List<Tuple2> xyPairs, String title, int windowSize, boolean recalculateSize, double ratio,String mode) {
+    private void smoothJDSP(List<Tuple2> xyPairs, String title, int windowSize, boolean recalculateSize, double ratio, String mode) {
 
         long startTime = System.nanoTime();
         logger.info("signal length before smoothing = " + xyPairs.size());
@@ -561,7 +614,7 @@ public class SignalEditorPanel extends SignalPanel {
             optimalWindowSize = SmoothUtils.getBestSmoothWindowSize(y);
         }
 
-        Smooth smoother = new Smooth(y, optimalWindowSize,mode);
+        Smooth smoother = new Smooth(y, optimalWindowSize, mode);
         double[] kernel = smoother.getKernel();
         System.out.println("kernel used for JDSP smoothing: " + Arrays.toString(kernel));
         double[] smoothedSignal = smoother.smoothSignal("same");
@@ -569,7 +622,7 @@ public class SignalEditorPanel extends SignalPanel {
         long computeTime = System.nanoTime() - startTime;
 
         addSmoothedSignal(s, title);
-        displaySmoothStats(x, y, smoothedSignal, "smooth method JDSP window size: " + optimalWindowSize+" mode: "+mode, computeTime);
+        displaySmoothStats(x, y, smoothedSignal, "smooth method JDSP window size: " + optimalWindowSize + " mode: " + mode, computeTime);
 
     }
 
@@ -709,7 +762,7 @@ public class SignalEditorPanel extends SignalPanel {
 
     }
 
-    private void savitskyJDSP(List<Tuple2> xyPairs, String savitskyJdspTitle, int windowSize, boolean peakRestore, double ratio,String mode,int polyOrder,int deriv,int delta) {
+    private void savitskyJDSP(List<Tuple2> xyPairs, String savitskyJdspTitle, int windowSize, boolean peakRestore, double ratio, String mode, int polyOrder, int deriv, int delta) {
         long startTime = System.nanoTime();
         Tuple2[] result = xyPairs.toArray(new Tuple2[xyPairs.size()]);
 
@@ -720,7 +773,7 @@ public class SignalEditorPanel extends SignalPanel {
             y[k] = (Double) result[k]._2;
         }
 
-       Savgol savgolFilter = new Savgol(windowSize, polyOrder, deriv, delta);
+        Savgol savgolFilter = new Savgol(windowSize, polyOrder, deriv, delta);
 
 
         double[] filteredSignal = savgolFilter.filter(y, mode);
@@ -738,12 +791,12 @@ public class SignalEditorPanel extends SignalPanel {
 
         addSmoothedSignal(JDSPSavitskyGolaySignal, savitskyJdspTitle);
 
-        displaySmoothStats(x, y, filteredSignal, "JDSP SVG "+"window size: "+windowSize+" poly order: "+polyOrder, computeTime);
+        displaySmoothStats(x, y, filteredSignal, "JDSP SVG " + "window size: " + windowSize + " poly order: " + polyOrder, computeTime);
     }
 
     /**
-     *
      * used to test methods can be deleted
+     *
      * @param xyPairs
      * @param title
      * @param nbrPoints
@@ -772,9 +825,6 @@ public class SignalEditorPanel extends SignalPanel {
         double[] fittedSignal = SmoothUtils.buildAsymmetricGaussian(bestFit[0], bestFit[1], bestFit[2], bestFit[2], x[0], x[result.length - 1], result.length);
 
 
-
-
-
         Signal polySignal = new Signal(x, fittedSignal);
 
         long computeTime = System.nanoTime() - startTime;
@@ -796,21 +846,15 @@ public class SignalEditorPanel extends SignalPanel {
             x[k] = (Double) result[k]._1;
             y[k] = (Double) result[k]._2;
         }
-
         Median medianFilter = new Median(windowSize);
         double[] medianSignal = medianFilter.filter(y);
-
         SmoothUtils.correctNegativeValues(y, medianSignal);
-
         if (peakRestore) {
             SmoothUtils.peakRestorer(y, medianSignal, x, ratio);
         }
         Signal convolutedSignal = new Signal(x, medianSignal);
-
         long computeTime = System.nanoTime() - startTime;
-
         addSmoothedSignal(convolutedSignal, find_peakTitle);
-
         displaySmoothStats(x, y, medianSignal, "median filter window size: " + windowSize, computeTime);
 
 
@@ -832,8 +876,6 @@ public class SignalEditorPanel extends SignalPanel {
             x[k] = (Double) result[k]._1;
             y[k] = (Double) result[k]._2;
         }
-
-
         double[] derivatives = SmoothUtils.getDerivatives(x, y);
         double qualitySignal = SmoothUtils.evaluateSignalRoughnessV3(y);
         System.out.println("Roughness of signal: " + qualitySignal);
@@ -856,18 +898,11 @@ public class SignalEditorPanel extends SignalPanel {
         double variationRate = 100 * (finalLength - initialLength) / initialLength;
         logger.info("Evaluation of signal quality:" + variationRate + " %");
         long computeTime = System.nanoTime() - startTime;
-
-        displaySmoothStats(x, y, y,SmoothingParamDialog.SIGNAL_QUALITY_EVALUATION , computeTime);
+        displaySmoothStats(x, y, y, SmoothingParamDialog.SIGNAL_QUALITY_EVALUATION, computeTime);
     }
 
-    /*private void createJTabbedPane(){
-        statsPane=new JTabbedPane();
-        statsPane.setPreferredSize(new Dimension(400,300));
-        createStatsPanel();
-        statsPane.add(smoothStatsPanel);
-        this.add(statsPane);
 
-    }*/
+
     private void createStatsPanel() {
 
         smoothStatsPanel = new JPanel(new GridBagLayout());
@@ -878,7 +913,7 @@ public class SignalEditorPanel extends SignalPanel {
         gbc.weightx = 0;
 
         smoothStatsPanel.setBackground(new Color(230, 232, 238));
-        smoothStatsPanel.setBorder(BorderFactory.createLineBorder(Color.BLUE));
+        smoothStatsPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
         smoothStatsPanel.setMinimumSize(new Dimension(this.getWidth(), 50));
         JLabel titleLabel = new JLabel("Smoothing statistics");
         titleLabel.setFont(new Font("Serif", Font.PLAIN, 20));
@@ -952,21 +987,17 @@ public class SignalEditorPanel extends SignalPanel {
 
         progressBar = new JProgressBar(0, 100);
         progressBar.setStringPainted(true);
-
-
         gbc.gridx++;
         smoothStatsPanel.add(progressBar, gbc);
+
         JLabel deviationJLabel = new JLabel("Area variation");
-        deviationJLabel.setForeground(Color.RED);
         gbc.gridx = 0;
         gbc.gridy++;
         smoothStatsPanel.add(deviationJLabel, gbc);
 
         displayAreaVariationJLabel = new JLabel();
         gbc.gridx++;
-
         smoothStatsPanel.add(displayAreaVariationJLabel, gbc);
-
 
         JLabel displayMethod = new JLabel("Method used for smoothing: ");
         gbc.gridy++;
@@ -986,9 +1017,7 @@ public class SignalEditorPanel extends SignalPanel {
         gbc.gridx++;
         smoothStatsPanel.add(displayComputeTime, gbc);
 
-
         this.add(smoothStatsPanel, BorderLayout.SOUTH);
-
         this.revalidate();
         this.repaint();
 
@@ -996,22 +1025,20 @@ public class SignalEditorPanel extends SignalPanel {
     }
 
     private void displaySmoothStats(double[] x, double[] initialSignal, double[] finalSignal, String smoothMethod, long computeTime) {
-
-
         int signalLength = x.length;
         displaySizeSignalJLabel.setText(signalLength + " points");
 
-        double smoothness = round(SmoothUtils.getSmoothness(initialSignal),4);
+        double smoothness = round(SmoothUtils.getSmoothness(initialSignal), 4);
         initialSmoothnessLabel.setText(Double.toString(smoothness));
 
-        double finalSmoothness = round(SmoothUtils.getSmoothness(finalSignal),4);
+        double finalSmoothness = round(SmoothUtils.getSmoothness(finalSignal), 4);
         finalSmoothnessLabelValue.setText(Double.toString(finalSmoothness));
 
-        double estimatedSNRValue = round(SmoothUtils.computeSignalToNoiseRatio(initialSignal, finalSignal),4);
-        double bias = round(SmoothUtils.computeAbsoluteBias(initialSignal, finalSignal),4);
-        double initialArea=round(SmoothUtils.calculateArea(x,initialSignal),4);
-        double finalArea=round(SmoothUtils.calculateArea(x,finalSignal),4);
-        double areaVariation=round(100*(finalArea-initialArea)/initialArea,4);
+        double estimatedSNRValue = round(SmoothUtils.computeSignalToNoiseRatio(initialSignal, finalSignal), 4);
+        double bias = round(SmoothUtils.computeAbsoluteBias(initialSignal, finalSignal), 4);
+        double initialArea = round(SmoothUtils.calculateArea(x, initialSignal), 4);
+        double finalArea = round(SmoothUtils.calculateArea(x, finalSignal), 4);
+        double areaVariation = round(100 * (finalArea - initialArea) / initialArea, 4);
 
         if (smoothMethod.equals(SmoothingParamDialog.SIGNAL_QUALITY_EVALUATION)) {
 
@@ -1021,15 +1048,11 @@ public class SignalEditorPanel extends SignalPanel {
             displayAreaVariationJLabel.setText("No smoothing done, no variation of area");
 
         } else {
-
             displaySNRJLabel.setText(estimatedSNRValue + " decibels");
             displayBiasValue.setText(Double.toString(bias));
-            displayAreaVariationJLabel.setText(areaVariation+" %");
-
+            displayAreaVariationJLabel.setText(areaVariation + " %");
         }
-
-
-        double estimatedQualityValue = round(SmoothUtils.evaluateSignalRoughnessV3(initialSignal),4);
+        double estimatedQualityValue = round(SmoothUtils.evaluateSignalRoughnessV3(initialSignal), 4);
         displayQualityValueJLabel.setText(String.valueOf(estimatedQualityValue));
         smoothMethodUsedLabel.setText(smoothMethod);
         displayComputeTime.setText(SmoothUtils.displayTime(computeTime));
@@ -1040,7 +1063,7 @@ public class SignalEditorPanel extends SignalPanel {
         double[] convolvedSignal = con.convolve("same");
 
         double finalLength = SmoothUtils.computeLengthOfSignal(x, convolvedSignal);
-        double variationRateOfLength =100+ 100 * (finalLength - initialLength) / initialLength;
+        double variationRateOfLength = 100 + 100 * (finalLength - initialLength) / initialLength;
         progressBar.setValue((int) variationRateOfLength);
         if (variationRateOfLength < 20) {
             progressBar.setForeground(new Color(183, 102, 104));
@@ -1050,6 +1073,19 @@ public class SignalEditorPanel extends SignalPanel {
             progressBar.setForeground(new Color(97, 192, 97));
         }
 
+    }
+
+    private void clearStatsPanel() {
+        displaySizeSignalJLabel.setText("");
+        initialSmoothnessLabel.setText("");
+        finalSmoothnessLabelValue.setText("");
+        displaySNRJLabel.setText("");
+        displayBiasValue.setText("");
+        displayAreaVariationJLabel.setText("");
+        displayQualityValueJLabel.setText("");
+        smoothMethodUsedLabel.setText("");
+        displayComputeTime.setText("");
+        progressBar.setValue((int) 0);
     }
 
 

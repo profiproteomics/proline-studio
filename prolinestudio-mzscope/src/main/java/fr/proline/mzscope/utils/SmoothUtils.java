@@ -319,7 +319,7 @@ public class SmoothUtils {
     }
     // Second method used for wavelet smoothing known as soft thresholding
     public static double[] compressSoftMethod(double[] arr, double threshold) {
-        System.out.println("soft thresholding method used to smooth signal");
+
         int arrLength = arr.length;
         double[] arrComp = new double[arrLength];
         double magnitude = 0;
@@ -569,7 +569,7 @@ public class SmoothUtils {
             if (correlation < bestCorrelation) {
                 bestSigma = testedSigma;
                 bestCorrelation = correlation;
-                System.out.println("Gaussian sigma modified");
+
             }
 
         }
@@ -661,7 +661,7 @@ public class SmoothUtils {
                             bestMean = meanTested;
                             bestLeftSigma = leftSigma;
                             bestRightSigma = rightSigma;
-                            System.out.println("better fit found");
+
 
                         }
                     }
@@ -699,10 +699,10 @@ public class SmoothUtils {
 
         int bestWindowSize = 5;
         String mode = "triangular";
-       // String mode2 = "rectangular";
+
         Smooth s1=new Smooth(initialSignal,bestWindowSize,mode);
         double[] testSignal=s1.smoothSignal("same");
-        double bestCorrelation=computeEuclideanDistance(initialSignal,testSignal);
+        double bestDistance=computeEuclideanDistance(initialSignal,testSignal);
 
         for (int k = 0; k <6; k++) {
             int windowTested=bestWindowSize-2+k;
@@ -710,9 +710,9 @@ public class SmoothUtils {
             double[] smoothSignal = s.smoothSignal("same");
             double distance = computeEuclideanDistance(initialSignal,smoothSignal);
 
-                    if (distance<bestCorrelation) {
+                    if (distance<bestDistance) {
                     bestWindowSize = windowTested;
-                   bestCorrelation=distance;
+                   bestDistance=distance;
                 }
         }
         return bestWindowSize;
@@ -735,248 +735,6 @@ public class SmoothUtils {
 
 
 
-/*    public static double[] waveletSmootherV2(List<Tuple2> xyPairs, String smoothMethod, double threshold, int waveletIndex, boolean userSelectedAWavelet) {
-
-
-        Tuple2[] result = xyPairs.toArray(new Tuple2[xyPairs.size()]);
-
-        double[] x = new double[result.length];
-        double[] y = new double[result.length];
-        for (int k = 0; k < result.length; k++) {
-            x[k] = (Double) result[k]._1;
-            y[k] = (Double) result[k]._2;
-        }
-
-
-        Wavelet[] arrOfWaveletObjects = WaveletBuilder.create2arr();
-
-        Compressor compressor = new CompressorMagnitude(threshold);
-        // compressorPeaksAverage Average not efficient
-        Compressor compressor2 = new CompressorPeaksAverage(threshold);
-
-        if (userSelectedAWavelet) {
-
-            Wavelet wavelet = arrOfWaveletObjects[waveletIndex];
-          //  waveletSelected=waveletIndex;
-
-            Transform fwt = new Transform(new AncientEgyptianDecomposition(new FastWaveletTransform(wavelet)));
-            // Transform fwt = new Transform(new AncientEgyptianDecomposition( new WaveletPacketTransform( wavelet )) );
-
-            double[] transformedSignal = fwt.forward(y);
-
-            double[] compressedSignal = compressor.compress(transformedSignal);
-            *//**
-             * Two other methods to compress signal
-             *//*
-           // double[] compressedSignal=SmoothUtils.compressSoftMethod(transformedSignal,threshold);
-           //double[] compressedSignal=SmoothUtils.compressImprovedMethod(transformedSignal,threshold);
-
-            double[] rebuiltSignal = fwt.reverse(compressedSignal);
-
-
-            SmoothUtils.correctNegativeValues(y,rebuiltSignal);
-
-
-            return rebuiltSignal;
-
-
-        } else {
-
-            double[] valuesOfBias = new double[arrOfWaveletObjects.length];
-            double[] energyDifference = new double[arrOfWaveletObjects.length];
-
-            double[] valuesOfROC = new double[arrOfWaveletObjects.length];
-            double[] valuesOfSNR = new double[arrOfWaveletObjects.length];
-
-
-            double[] valuesOfSmoothness = new double[arrOfWaveletObjects.length];
-            double[] correlations = new double[arrOfWaveletObjects.length];
-            double[] distanceToOptimalPoint = new double[arrOfWaveletObjects.length];
-            double[] distanceToInitialSignal = new double[arrOfWaveletObjects.length];
-            *//**
-             * at first will run over all wavelets and compute different metrics to
-             * evaluate performance of wavelets
-             *//*
-            for (int i = 0; i < arrOfWaveletObjects.length; i++) {
-                Wavelet wavelet = arrOfWaveletObjects[i];
-
-                Transform fwt = new Transform(new AncientEgyptianDecomposition(new FastWaveletTransform(wavelet)));
-                // Transform fwt = new Transform(new AncientEgyptianDecomposition( new WaveletPacketTransform( wavelet )) );
-
-                double[] transformedSignal = fwt.forward(y);
-
-                double[] compressedSignal = compressor.compress(transformedSignal);
-                *//**
-                 * Two other methods to compress signal
-                 *//*
-                // double[] compressedSignal=SmoothUtils.compressSoftMethod(transformedSignal,threshold);
-               //  double[] compressedSignal=SmoothUtils.compressImprovedMethod(transformedSignal,threshold);
-
-                double[] rebuiltSignal = fwt.reverse(compressedSignal);
-
-                SmoothUtils.correctNegativeValues(y,rebuiltSignal);
-                valuesOfBias[i]=SmoothUtils.computeAbsoluteBias(y,rebuiltSignal);
-                valuesOfSNR[i] = SmoothUtils.computeSignalToNoiseRatio(y, rebuiltSignal);
-                energyDifference[i] = SmoothUtils.computeEnergyDifference(rebuiltSignal, y);
-                valuesOfSmoothness[i] = SmoothUtils.getSmoothness(rebuiltSignal);
-                correlations[i] = Math.abs(SmoothUtils.ComputePearsonCorrelation(y, rebuiltSignal));
-                distanceToOptimalPoint[i] = SmoothUtils.calculateDistanceToOptimalPoint(correlations[i], valuesOfSmoothness[i]);
-                distanceToInitialSignal[i] = SmoothUtils.computeEuclideanDistance(y, rebuiltSignal);
-            }
-
-
-            int indexOfOptimalWavelet = SmoothUtils.findBestWavelet(correlations, valuesOfSmoothness);
-
-            int indexOfExperimentalMethod = SmoothUtils.findBestWaveletEuclidAndSmoothness(distanceToInitialSignal, valuesOfSmoothness);
-
-            double minDistance = distanceToInitialSignal[0];
-            int indexOfMinDist = 0;
-            for (int k = 0; k < arrOfWaveletObjects.length; k++) {
-                if (minDistance > distanceToInitialSignal[k]) {
-                    minDistance = distanceToInitialSignal[k];
-                    indexOfMinDist = k;
-                }
-            }
-
-            double minBias = valuesOfBias[0];
-            int indexOfMin = 0;
-            for (int k = 1; k < arrOfWaveletObjects.length; k++) {
-                if (minBias > valuesOfBias[k]) {
-                    minBias = valuesOfBias[k];
-                    indexOfMin = k;
-                }
-
-            }
-
-            double maxBias = valuesOfBias[0];
-            int indexOfMax = 0;
-            for (int k = 0; k < arrOfWaveletObjects.length; k++) {
-                if (maxBias < valuesOfBias[k]) {
-                    maxBias = valuesOfBias[k];
-                    indexOfMax = k;
-                }
-            }
-            double minEnergyDifference = energyDifference[0];
-            int indexOfMinEnergy = 0;
-            for (int k = 0; k < arrOfWaveletObjects.length; k++) {
-                if (minEnergyDifference > energyDifference[k]) {
-                    minEnergyDifference = energyDifference[k];
-                    indexOfMinEnergy = k;
-                }
-            }
-            double maxSmoothness = valuesOfSmoothness[0];
-            int indexOfmaxSmoothness = 0;
-            for (int k = 0; k < arrOfWaveletObjects.length; k++) {
-                if (maxSmoothness < valuesOfSmoothness[k]) {
-                    maxSmoothness = valuesOfSmoothness[k];
-                    indexOfmaxSmoothness = k;
-                }
-            }
-            double minDistanceToOptimalPoint = valuesOfROC[0];
-            int indexOfMinDistanceToOptimalPoint = 0;
-            for (int k = 0; k < arrOfWaveletObjects.length; k++) {
-                if (minDistanceToOptimalPoint > valuesOfROC[k]) {
-                    minDistanceToOptimalPoint = valuesOfROC[k];
-                    indexOfMinDistanceToOptimalPoint = k;
-                }
-            }
-            double maxSNR = valuesOfSNR[0];
-            int indexOfWaveletWithMaxSNR = 0;
-            for (int k = 0; k < arrOfWaveletObjects.length; k++) {
-                if (maxSNR < valuesOfSNR[k]) {
-                    maxSNR = valuesOfSNR[k];
-                    indexOfWaveletWithMaxSNR = k;
-                }
-            }
-            double minSNR = valuesOfSNR[0];
-            int indexOfWaveletWithMinSNR = 0;
-            for (int k = 0; k < arrOfWaveletObjects.length; k++) {
-                if (minSNR > valuesOfSNR[k]) {
-                    minSNR = valuesOfSNR[k];
-                    indexOfWaveletWithMinSNR = k;
-                }
-            }
-            double maxCorrelation = correlations[0];
-            int indexOfWaveletWithMaxCorrelation = 0;
-            for (int k = 0; k < arrOfWaveletObjects.length; k++) {
-                if (maxCorrelation < correlations[k]) {
-                    maxCorrelation = correlations[k];
-                    indexOfWaveletWithMaxCorrelation = k;
-
-                }
-            }
-            double minCorrelation = correlations[0];
-            int indexOfWaveletWithMinCorrelation = 0;
-            for (int k = 0; k < arrOfWaveletObjects.length; k++) {
-                if (minCorrelation > correlations[k]) {
-                    minCorrelation = correlations[k];
-                    indexOfWaveletWithMinCorrelation = k;
-                }
-            }
-
-            double optimalValue = distanceToOptimalPoint[0];
-            int indexOfOptimalValue = 0;
-            for (int k = 0; k < arrOfWaveletObjects.length; k++) {
-                if (optimalValue > distanceToOptimalPoint[k]) {
-                    optimalValue = distanceToOptimalPoint[k];
-                    indexOfOptimalValue = k;
-
-                }
-            }
-
-            Wavelet selectedWavelet;
-
-            switch (smoothMethod) {
-                case WaveletSmootherParamDialog.MAX_CORRELATION:
-                    selectedWavelet = arrOfWaveletObjects[indexOfWaveletWithMaxCorrelation];
-                    break;
-                case WaveletSmootherParamDialog.MIN_CORRELATION:
-                    selectedWavelet = arrOfWaveletObjects[indexOfWaveletWithMinCorrelation];
-                    break;
-                case WaveletSmootherParamDialog.MAX_SMOOTHNESS:
-                    selectedWavelet = arrOfWaveletObjects[indexOfmaxSmoothness];
-                    break;
-                case WaveletSmootherParamDialog.BOTH_SMOOTHNESS_AND_CORRELATION:
-                    selectedWavelet = arrOfWaveletObjects[indexOfOptimalWavelet];
-                    break;
-                case WaveletSmootherParamDialog.MAX_SNR:
-                    selectedWavelet = arrOfWaveletObjects[indexOfWaveletWithMaxSNR];
-                    break;
-                case WaveletSmootherParamDialog.MIN_ENERGY_DIFF:
-                    selectedWavelet = arrOfWaveletObjects[indexOfMinEnergy];
-                    break;
-                case WaveletSmootherParamDialog.MIN_EUCLIDEAN_DISTANCE:
-                    selectedWavelet = arrOfWaveletObjects[indexOfExperimentalMethod];
-                    break;
-
-                default:
-                    // TODO handle exception?
-                    selectedWavelet = arrOfWaveletObjects[0];
-                    break;
-            }
-          //  waveletSelected=SmoothUtils.getIndexOfWaveletByName(selectedWavelet.getName());
-
-            Transform fwtFast = new Transform(new AncientEgyptianDecomposition(new FastWaveletTransform(selectedWavelet)));
-            double[] transformedSignal = fwtFast.forward(y);
-            double[] denoisedSignal = compressor.compress(transformedSignal);
-
-            *//**
-             *
-             * Two other methods to compress signal
-             *//*
-
-            // double[] denoisedSignal=SmoothUtils.compressSoftMethod(transformedSignal,threshold);
-             // double[] denoisedSignal=SmoothUtils.compressImprovedMethod(transformedSignal,threshold);
-
-            double[] finalSignal = fwtFast.reverse(denoisedSignal);
-
-            SmoothUtils.correctNegativeValues(y,finalSignal);
-
-            return finalSignal;
-
-
-        }
-    }*/
     public static Pair<double[], String> waveletSmoother(List<Tuple2> xyPairs, String smoothMethod, double threshold, int waveletIndex, boolean userSelectedAWavelet) {
 
 
@@ -1191,7 +949,7 @@ public class SmoothUtils {
                     selectedWavelet = arrOfWaveletObjects[0];
                     break;
             }
-            //  waveletSelected=SmoothUtils.getIndexOfWaveletByName(selectedWavelet.getName());
+
             Transform fwtFast = new Transform(new AncientEgyptianDecomposition(new FastWaveletTransform(selectedWavelet)));
             double[] transformedSignal = fwtFast.forward(y);
             double[] denoisedSignal = compressor.compress(transformedSignal);
@@ -1213,7 +971,6 @@ public class SmoothUtils {
 
         }
     }
-
     public static int getIndexOfWaveletByName(String waveletName) {
         int index = 0;
         Wavelet[] listOfWavelets = WaveletBuilder.create2arr();
@@ -1228,9 +985,6 @@ public class SmoothUtils {
         Wavelet[] listOfWavelets = WaveletBuilder.create2arr();
         return listOfWavelets[waveletIndex];
     }
-
-
-
     public static double getBestGaussianNorm(double[] bestFit, double xMin, double xMax, int length, double[] y) {
         int steps = 30;
         double initialNorm = bestFit[0];
@@ -1249,15 +1003,9 @@ public class SmoothUtils {
 
             }
         }
-        System.out.println("Initial norm: " + initialNorm);
-        System.out.println("recalculated norm: " + optimalNorm);
+
         return optimalNorm;
-
-
     }
-
-
-
     public static String displayTime(long displayedTime) {
 
         String timeAsAString = "";

@@ -17,7 +17,7 @@ public class WaveletSmootherParamDialog extends DefaultDialog {
 
     public WaveletSmootherParamDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-        setTitle("Smoothing parameters for wavelet denoising ");
+        setTitle("Smoothing parameters for wavelet denoising");
         setInternalComponent(createInternalPanel());
     }
     JComboBox waveletScanParameter;
@@ -97,6 +97,7 @@ public class WaveletSmootherParamDialog extends DefaultDialog {
 
         waveletListCombo=new JComboBox<>(getWaveletNames(arrayOfWavelet));
         waveletListCombo.setEnabled(checkBox.isSelected());
+        waveletListCombo.setSelectedItem(arrayOfWavelet[7].getName());
         c.gridy++;
         internalPanel.add(waveletListCombo,c);
 

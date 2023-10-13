@@ -11,7 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * CeCILL License V2.1 for more details.
  *
- * You should have received a copy of the CeCILL License 
+ * You should have received a copy of the CeCILL License
  * along with this program; If not, see <http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html>.
  */
 package fr.proline.mzscope.ui;
@@ -52,13 +52,14 @@ import javax.swing.*;
 import jwave.exceptions.JWaveException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.fitting.GaussianCurveFitter;
-import org.apache.commons.math3.fitting.PolynomialCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoints;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Tuple2;
 import fr.proline.mzscope.utils.SmoothUtils;
+
+import static org.apache.commons.math3.util.Precision.round;
 
 
 /**
@@ -73,7 +74,8 @@ public class SignalEditorPanel extends SignalPanel {
     private JButton maxBtn;
     private JButton maxJDSPButton;
 
-    private JButton experimentalJDSPButton;
+    private JButton waveletJWaveButton;
+    private JButton clearButton;
 
 
     private JButton baseLineBtn;
@@ -94,18 +96,18 @@ public class SignalEditorPanel extends SignalPanel {
 
     private JLabel displaySizeSignalJLabel;
 
-    private JLabel displayStandardDeviationJLabel;
+    private JLabel displayAreaVariationJLabel;
 
     private JProgressBar progressBar;
+    private JTabbedPane statsPane;
 
 
     public SignalEditorPanel(Signal signal) {
         super(signal);
         this.setPreferredSize(new Dimension(700, 900));
         m_smoothedSignals = new HashMap<>();
-        createStatsPanel();
-
-
+       createStatsPanel();
+      //  createJTabbedPane();
     }
 
     @Override
@@ -164,9 +166,9 @@ public class SignalEditorPanel extends SignalPanel {
         });
         toolbar.add(maxJDSPButton);
 
-        experimentalJDSPButton = new JButton("wavelet smoother");
-        experimentalJDSPButton.setEnabled(true);
-        experimentalJDSPButton.addActionListener(
+        waveletJWaveButton = new JButton("Wavelet smooth");
+        waveletJWaveButton.setEnabled(true);
+        waveletJWaveButton.addActionListener(
                 new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
@@ -179,7 +181,7 @@ public class SignalEditorPanel extends SignalPanel {
                     }
                 }
         );
-        toolbar.add(experimentalJDSPButton);
+        toolbar.add(waveletJWaveButton);
 
         baseLineBtn = new JButton("Baseline");
         baseLineBtn.addActionListener(new ActionListener() {
@@ -199,15 +201,38 @@ public class SignalEditorPanel extends SignalPanel {
         });
 
         toolbar.add(baseLineBtn);
+        clearButton=new JButton("Clear");
+        clearButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+              /* BasePlotPanel basePlot = m_plotPanel.getBasePlotPanel();
+
+
+                basePlot.repaintUpdateDoubleBuffer();
+               m_smoothedSignals.clear();
+
+
+                revalidate();
+                repaint();*/
+
+                removeSignals();
+
+
+            }
+        });
+        clearButton.setEnabled(false);
+        toolbar.add(clearButton);
         return toolbar;
     }
 
     private void runSmoothing() throws JWaveException {
+
         SmoothingParamDialog dialog = new SmoothingParamDialog(WindowManager.getDefault().getMainWindow());
         dialog.pack();
         dialog.setVisible(true);
 
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+
             // peakel detection did not include peaks with intensity = 0, this seems also mandatory since PartialSG smoother
             // get strange behavior with 0 intensities
 
@@ -220,6 +245,21 @@ public class SignalEditorPanel extends SignalPanel {
             if (usePeakRestore) {
                 ratio = dialog.getJSpinnerValue();
             }
+            String smoothMethod = dialog.getMethod();
+            String modeOfConvolution = null;
+            String savitskyMode=null;
+            int polyOrder=3;
+            int derivatives=0;
+            int delta=5;
+            if (smoothMethod.equals(SmoothingParamDialog.SMOOTHING_JDSP)){
+                modeOfConvolution= dialog.getModeOfConvolution();
+            }
+            if (smoothMethod.equals(SmoothingParamDialog.SVGOLAY_JDSP)){
+                savitskyMode= dialog.getSavitskyMode();
+                polyOrder=dialog.getPolyOrder();
+                derivatives= dialog.getDerivativeOrder();
+                delta= dialog.getDeltaSpacing();
+            }
             // CD patch to maintain previous code
             boolean initialMethods = dialog.getMethod().equals(SmoothingParamDialog.SG_SMOOTHER) || dialog.getMethod().equals(SmoothingParamDialog.PARTIAL_SG_SMOOTHER) || dialog.getMethod().equals(SmoothingParamDialog.BOTH_SMOOTHER);
             if (initialMethods) {
@@ -227,7 +267,6 @@ public class SignalEditorPanel extends SignalPanel {
                     nbrPoints = Math.min(input.size() / 4, 9);
             }
 
-            String smoothMethod = dialog.getMethod();
             switch (smoothMethod) {
                 case SmoothingParamDialog.SG_SMOOTHER:
                     logger.info("display smoothed signal, SG nb smoothing points = " + nbrPoints);
@@ -249,8 +288,8 @@ public class SignalEditorPanel extends SignalPanel {
                     break;
 
                 case SmoothingParamDialog.SMOOTHING_JDSP:
-                    logger.info("JDSP smooth method with window size = " + nbrPoints);
-                    smoothJDSP(input, "smooth method with window size: ", nbrPoints, usePeakRestore, ratio);
+                    logger.info("JDSP smooth method with initial window size: "+nbrPoints);
+                    smoothJDSP(input, "smooth method with window size: ", nbrPoints, usePeakRestore, ratio,modeOfConvolution);
                     break;
                 case SmoothingParamDialog.CONVOLUTION_METHOD:
                     logger.info("Convolution method kernel size = " + nbrPoints);
@@ -258,26 +297,26 @@ public class SignalEditorPanel extends SignalPanel {
                     break;
 
                 case SmoothingParamDialog.GAUSSIAN_FITTING_METHOD:
-                    logger.info("Fitting of curves by gaussian regression, optimization = "+usePeakRestore);
-                    GaussianFinder(input, "gaussian fitting", nbrPoints, usePeakRestore, ratio);
+                    logger.info("Fitting of curves by gaussian regression, optimization = " + usePeakRestore);
+                    GaussianFitter(input, "gaussian fitting", nbrPoints, usePeakRestore, ratio);
                     break;
 
                 case SmoothingParamDialog.WIENER_METHOD:
-                    logger.info("Wiener filter with window size= "+nbrPoints+" peak restore used= "+usePeakRestore);
+                    logger.info("Wiener filter with window size= " + nbrPoints + " peak restore used= " + usePeakRestore);
                     filterWiener(input, "Wiener filter", nbrPoints, usePeakRestore, ratio);
                     break;
 
-                case SmoothingParamDialog.SVGOLAY2_METHOD:
+                case SmoothingParamDialog.SVGOLAY_JDSP:
                     logger.info("Savitsky Golay JDSP smoothing, number of points= " + nbrPoints);
-                    savitskyJDSP(input, "Savitsky JDSP Smoothing", nbrPoints, usePeakRestore, ratio);
+                    savitskyJDSP(input, "Savitsky JDSP Smoothing", nbrPoints, usePeakRestore, ratio,savitskyMode,polyOrder,derivatives,delta);
                     break;
                 case SmoothingParamDialog.EXPERIMENTAL_TEST:
                     logger.info("Experimental calculus for test");
-                    polynomialFitter(input, "Experimental Smoothing", nbrPoints, usePeakRestore, ratio);
+                    experimentalMethod(input, "Experimental Smoothing", nbrPoints, usePeakRestore, ratio);
                     break;
 
                 case SmoothingParamDialog.MEDIAN_FILTER_METHOD:
-                    logger.info("Median filter with window size= " + nbrPoints+" peak restored= "+usePeakRestore);
+                    logger.info("Median filter with window size= " + nbrPoints + " peak restored= " + usePeakRestore);
                     medianFilterJDSP(input, "median filter method", nbrPoints, usePeakRestore, ratio);
                     break;
 
@@ -329,13 +368,13 @@ public class SignalEditorPanel extends SignalPanel {
         }
 
         Pair<double[], String> smoothResult = SmoothUtils.waveletSmoother(input, smoothMethod, threshold, waveletIndex, userSelectedWavelet);
-        double[] smoothedSignal=smoothResult.getLeft();
-        String waveletUsedForSmoothing=smoothResult.getRight();
+        double[] smoothedSignal = smoothResult.getLeft();
+        String waveletUsedForSmoothing = smoothResult.getRight();
         Signal convolutedSignal = new Signal(x, smoothedSignal);
         long computeTime = System.nanoTime() - startTime;
-        String thresholdString=Double.toString(threshold);
+        String thresholdString = Double.toString(threshold);
         addSmoothedSignal(convolutedSignal, "wavelet transform");
-        String displayMethod="Wavelet transform: "+waveletUsedForSmoothing+" level: "+Double.toString(threshold);
+        String displayMethod = "Wavelet transform: " + waveletUsedForSmoothing + " level: " + Double.toString(threshold);
         displaySmoothStats(x, y, smoothedSignal, displayMethod, computeTime);
         revalidate();
         repaint();
@@ -347,7 +386,8 @@ public class SignalEditorPanel extends SignalPanel {
         minmaxBtn.setEnabled(true);
         maxBtn.setEnabled(true);
         maxJDSPButton.setEnabled(true);
-        experimentalJDSPButton.setEnabled(true);
+        waveletJWaveButton.setEnabled(true);
+        clearButton.setEnabled(true);
 
         BasePlotPanel basePlot = m_plotPanel.getBasePlotPanel();
         SignalWrapper wrappedSignal = new SignalWrapper(s, "smoothed signal : " + title, CyclicColorPalette.getColor((m_smoothedSignals.size() + 1) * 2));
@@ -362,6 +402,40 @@ public class SignalEditorPanel extends SignalPanel {
         repaint();
 
 
+    }
+    private void removeSignals(){
+
+        BasePlotPanel basePlot = m_plotPanel.getBasePlotPanel();
+
+        Set<Signal> signals=m_smoothedSignals.keySet();
+        Collection<PlotLinear> linears=m_smoothedSignals.values();
+
+
+       for (PlotLinear linear :linears){
+           basePlot.repaintUpdateDoubleBuffer();
+           basePlot.remove(linear.getBasePlotPanel());
+
+
+
+       }
+       m_smoothedSignals.clear();
+
+
+
+
+
+
+
+
+       // linear.setPlotInformation(wrappedSignal.getPlotInformation());
+        //linear.setStrokeFixed(true);
+      //  linear.setAntiAliasing(true);
+      //  basePlot.addPlot(linear, true);
+      //  basePlot.repaintUpdateDoubleBuffer();
+      //  m_smoothedSignals.clear();
+        basePlot.repaintUpdateDoubleBuffer();
+        revalidate();
+        repaint();
     }
 
     private void detectMax() {
@@ -412,6 +486,7 @@ public class SignalEditorPanel extends SignalPanel {
             PlotLinear plot = e.getValue();
 
             for (int k = 0; k < heightOfTroughs.length; k++) {
+                // CD plots both peaks and troughs
                 plot.addMarker(new PointMarker(m_plotPanel.getBasePlotPanel(), new DataCoordinates(xValuesOfTroughs[k], heightOfTroughs[k]), plot.getPlotInformation().getPlotColor()));
                 plot.addMarker(new PointMarker(m_plotPanel.getBasePlotPanel(), new DataCoordinates(xValuesOfPeaks[k], heightOfPeaks[k]), plot.getPlotInformation().getPlotColor()));
 
@@ -467,7 +542,7 @@ public class SignalEditorPanel extends SignalPanel {
     /**
      * Smoothing by convolution with non-constant kernels
      */
-    private void smoothJDSP(List<Tuple2> xyPairs, String title, int windowSize, boolean scanWindowSize, double ratio) {
+    private void smoothJDSP(List<Tuple2> xyPairs, String title, int windowSize, boolean recalculateSize, double ratio,String mode) {
 
         long startTime = System.nanoTime();
         logger.info("signal length before smoothing = " + xyPairs.size());
@@ -481,15 +556,12 @@ public class SignalEditorPanel extends SignalPanel {
             y[k] = (Double) result[k]._2;
         }
 
-        String mode = "triangular";
-        String mode2 = "rectangular";
-
         int optimalWindowSize = windowSize;
-        if (scanWindowSize) {
+        if (recalculateSize) {
             optimalWindowSize = SmoothUtils.getBestSmoothWindowSize(y);
         }
 
-        Smooth smoother = new Smooth(y, optimalWindowSize, mode);
+        Smooth smoother = new Smooth(y, optimalWindowSize,mode);
         double[] kernel = smoother.getKernel();
         System.out.println("kernel used for JDSP smoothing: " + Arrays.toString(kernel));
         double[] smoothedSignal = smoother.smoothSignal("same");
@@ -497,14 +569,13 @@ public class SignalEditorPanel extends SignalPanel {
         long computeTime = System.nanoTime() - startTime;
 
         addSmoothedSignal(s, title);
-        displaySmoothStats(x, y, smoothedSignal, "smooth method JDSP window size: "+windowSize, computeTime);
+        displaySmoothStats(x, y, smoothedSignal, "smooth method JDSP window size: " + optimalWindowSize+" mode: "+mode, computeTime);
 
     }
 
 
     /**
      * Simple averaging method by convolution with kernel composed of constant values
-     *
      */
 
     private void smoothByConvolution(List<Tuple2> xyPairs, String title, int nbrPoints, boolean usePeakRestore, double ratio) {
@@ -524,9 +595,9 @@ public class SignalEditorPanel extends SignalPanel {
         System.out.println("kernel used for convolution: " + Arrays.toString(kernel));
 
         Convolution con = new Convolution(y, kernel);
+
         // mode "same" allows to maintain the length of the signal
         double[] convolvedSignal = con.convolve("same");
-
         SmoothUtils.correctNegativeValues(y, convolvedSignal);
 
         if (usePeakRestore) {
@@ -540,7 +611,7 @@ public class SignalEditorPanel extends SignalPanel {
 
         addSmoothedSignal(s, title);
 
-        displaySmoothStats(x, y, convolvedSignal, "Convolution kernel size: "+nbrPoints, computeTime);
+        displaySmoothStats(x, y, convolvedSignal, "Convolution kernel size: " + nbrPoints, computeTime);
 
 
     }
@@ -550,12 +621,12 @@ public class SignalEditorPanel extends SignalPanel {
      * gaussian regression
      */
 
-    private void GaussianFinder(List<Tuple2> xyPairs, String title, int nbrPoints, boolean correctionApplied, double ratio) {
+    private void GaussianFitter(List<Tuple2> xyPairs, String title, int nbrPoints, boolean correctionApplied, double ratio) {
 
         long startTime = System.nanoTime();
 
         Tuple2[] result = xyPairs.toArray(new Tuple2[xyPairs.size()]);
-        System.out.println("experimental test called");
+
         double[] x = new double[result.length];
         double[] y = new double[result.length];
         for (int k = 0; k < result.length; k++) {
@@ -579,7 +650,7 @@ public class SignalEditorPanel extends SignalPanel {
 
 
         } else {
-            // TODO test if order is optimal ?
+
             double bestMean = SmoothUtils.getBestGaussianMean(bestFit, x[0], x[result.length - 1], result.length, y);
             bestFit[1] = bestMean;
 
@@ -622,7 +693,7 @@ public class SignalEditorPanel extends SignalPanel {
             y[k] = (Double) result[k]._2;
         }
 
-        Wiener wienerFilter= new Wiener(windowSize);
+        Wiener wienerFilter = new Wiener(windowSize);
         double[] filteredSignal = wienerFilter.filter(y);
 
         if (usePeakRestore) {
@@ -634,11 +705,11 @@ public class SignalEditorPanel extends SignalPanel {
         long computeTime = System.nanoTime() - startTime;
         addSmoothedSignal(wienerSignal, title);
 
-        displaySmoothStats(x, y, filteredSignal, "Wiener Method with window size: "+windowSize, computeTime);
+        displaySmoothStats(x, y, filteredSignal, "Wiener Method with window size: " + windowSize, computeTime);
 
     }
 
-    private void savitskyJDSP(List<Tuple2> xyPairs, String savitskyJdspTitle, int windowSize, boolean peakRestore, double ratio) {
+    private void savitskyJDSP(List<Tuple2> xyPairs, String savitskyJdspTitle, int windowSize, boolean peakRestore, double ratio,String mode,int polyOrder,int deriv,int delta) {
         long startTime = System.nanoTime();
         Tuple2[] result = xyPairs.toArray(new Tuple2[xyPairs.size()]);
 
@@ -649,15 +720,8 @@ public class SignalEditorPanel extends SignalPanel {
             y[k] = (Double) result[k]._2;
         }
 
-        // String mode = "wrap";
-        String mode = "nearest";
-        //String mode="constant";
-        // String mode="mirror";
+       Savgol savgolFilter = new Savgol(windowSize, polyOrder, deriv, delta);
 
-        int polyOrder = 3; //Order of the polynomial used to generate coefficients
-        int deriv = 0; // Order of derivative
-        int delta = 10; // Spacing of samples to which filter is applied
-        Savgol savgolFilter = new Savgol(windowSize, polyOrder, deriv, delta);
 
         double[] filteredSignal = savgolFilter.filter(y, mode);
 
@@ -674,16 +738,20 @@ public class SignalEditorPanel extends SignalPanel {
 
         addSmoothedSignal(JDSPSavitskyGolaySignal, savitskyJdspTitle);
 
-        displaySmoothStats(x, y, filteredSignal, "JDSP Savitsky Golay", computeTime);
+        displaySmoothStats(x, y, filteredSignal, "JDSP SVG "+"window size: "+windowSize+" poly order: "+polyOrder, computeTime);
     }
 
     /**
-     * curve fitting with polynomials as a test
-     * Not adapted to be removed
      *
+     * used to test methods can be deleted
+     * @param xyPairs
+     * @param title
+     * @param nbrPoints
+     * @param peakRestore
+     * @param ratio
      */
 
-    private void polynomialFitter(List<Tuple2> xyPairs, String title, int nbrPoints, boolean peakRestore, double ratio) {
+    private void experimentalMethod(List<Tuple2> xyPairs, String title, int nbrPoints, boolean peakRestore, double ratio) {
         long startTime = System.nanoTime();
 
         Tuple2[] result = xyPairs.toArray(new Tuple2[xyPairs.size()]);
@@ -694,24 +762,25 @@ public class SignalEditorPanel extends SignalPanel {
             y[k] = (Double) result[k]._2;
         }
 
-
-        final PolynomialCurveFitter fitter = PolynomialCurveFitter.create(nbrPoints);
+        GaussianCurveFitter fitter = GaussianCurveFitter.create();
         WeightedObservedPoints obs = new WeightedObservedPoints();
-
         for (int index = 0; index < result.length; index++) {
             obs.add(x[index], y[index]);
         }
-        final double[] polynomialCoefficients = fitter.fit(obs.toList());
-        double[] smoothedSignal = SmoothUtils.buildPolynomialFromCoefficients(polynomialCoefficients, x[0], x[result.length - 1], result.length);
 
-        SmoothUtils.correctNegativeValues(y, smoothedSignal);
+        double[] bestFit = fitter.fit(obs.toList());
+        double[] fittedSignal = SmoothUtils.buildAsymmetricGaussian(bestFit[0], bestFit[1], bestFit[2], bestFit[2], x[0], x[result.length - 1], result.length);
 
-        Signal polySignal = new Signal(x, smoothedSignal);
+
+
+
+
+        Signal polySignal = new Signal(x, fittedSignal);
 
         long computeTime = System.nanoTime() - startTime;
         addSmoothedSignal(polySignal, title);
 
-        displaySmoothStats(x, y, smoothedSignal, "Polynomial fitting", computeTime);
+        displaySmoothStats(x, y, y, "Experimental test", computeTime);
 
 
     }
@@ -736,25 +805,25 @@ public class SignalEditorPanel extends SignalPanel {
         if (peakRestore) {
             SmoothUtils.peakRestorer(y, medianSignal, x, ratio);
         }
-
-
         Signal convolutedSignal = new Signal(x, medianSignal);
 
         long computeTime = System.nanoTime() - startTime;
 
         addSmoothedSignal(convolutedSignal, find_peakTitle);
 
-        displaySmoothStats(x, y, medianSignal, "median filter window size: "+windowSize, computeTime);
+        displaySmoothStats(x, y, medianSignal, "median filter window size: " + windowSize, computeTime);
 
 
     }
 
     /**
      * Method that calculates three indicators of the quality of the signal
-     *
+     * No smooth done
+     * Can be deleted all the calculus done in this method are already done for each smooth methods
      */
 
     private void evaluateSignalQuality(List<Tuple2> xyPairs, int nbrPoints, boolean usePeakRestore, double ratio) {
+        long startTime = System.nanoTime();
         Tuple2[] result = xyPairs.toArray(new Tuple2[xyPairs.size()]);
 
         double[] x = new double[result.length];
@@ -765,30 +834,40 @@ public class SignalEditorPanel extends SignalPanel {
         }
 
 
-        double[] derivatives=SmoothUtils.getDerivatives(x,y);
+        double[] derivatives = SmoothUtils.getDerivatives(x, y);
         double qualitySignal = SmoothUtils.evaluateSignalRoughnessV3(y);
-        System.out.println("Roughness of signal: " +qualitySignal);
+        System.out.println("Roughness of signal: " + qualitySignal);
 
         double smoothness = SmoothUtils.getSmoothness(y);
         System.out.println("overall smoothness of signal : " + smoothness);
-
+        // -----
         double maxHeight1 = Arrays.stream(y).max().getAsDouble();
         StandardDeviation std = new StandardDeviation();
 
-        double derivativesDeviation=std.evaluate(derivatives)/maxHeight1;
+        double derivativesDeviation = std.evaluate(derivatives) / maxHeight1;
 
-        logger.info("Standard deviation of derivatives: "+derivativesDeviation);
+        logger.info("Standard deviation of derivatives: " + derivativesDeviation);
         double initialLength = SmoothUtils.computeLengthOfSignal(x, y);
-        // build of a smoothedSignal
+        // build of a smoothed signal
         double[] kernel = SmoothUtils.buildKernel(nbrPoints);
         Convolution con = new Convolution(y, kernel);
         double[] convolvedSignal = con.convolve("same");
-        double finalLength=SmoothUtils.computeLengthOfSignal(x,convolvedSignal);
-        double variationRate=100*(finalLength-initialLength)/initialLength;
-        logger.info("Evaluation of signal quality:"+variationRate+" %");
+        double finalLength = SmoothUtils.computeLengthOfSignal(x, convolvedSignal);
+        double variationRate = 100 * (finalLength - initialLength) / initialLength;
+        logger.info("Evaluation of signal quality:" + variationRate + " %");
+        long computeTime = System.nanoTime() - startTime;
+
+        displaySmoothStats(x, y, y,SmoothingParamDialog.SIGNAL_QUALITY_EVALUATION , computeTime);
     }
 
+    /*private void createJTabbedPane(){
+        statsPane=new JTabbedPane();
+        statsPane.setPreferredSize(new Dimension(400,300));
+        createStatsPanel();
+        statsPane.add(smoothStatsPanel);
+        this.add(statsPane);
 
+    }*/
     private void createStatsPanel() {
 
         smoothStatsPanel = new JPanel(new GridBagLayout());
@@ -846,7 +925,7 @@ public class SignalEditorPanel extends SignalPanel {
         gbc.gridx++;
         smoothStatsPanel.add(displaySNRJLabel, gbc);
 
-        JLabel displayBiasJLabel = new JLabel("Estimated bias: ");
+        JLabel displayBiasJLabel = new JLabel("Calculated bias: ");
         gbc.gridy++;
         gbc.gridx = 0;
         smoothStatsPanel.add(displayBiasJLabel, gbc);
@@ -877,16 +956,16 @@ public class SignalEditorPanel extends SignalPanel {
 
         gbc.gridx++;
         smoothStatsPanel.add(progressBar, gbc);
-        JLabel deviationJLabel=new JLabel("Slopes standard deviation: ");
+        JLabel deviationJLabel = new JLabel("Area variation");
         deviationJLabel.setForeground(Color.RED);
-        gbc.gridx=0;
+        gbc.gridx = 0;
         gbc.gridy++;
-        smoothStatsPanel.add(deviationJLabel,gbc);
+        smoothStatsPanel.add(deviationJLabel, gbc);
 
-        displayStandardDeviationJLabel=new JLabel();
+        displayAreaVariationJLabel = new JLabel();
         gbc.gridx++;
 
-        smoothStatsPanel.add(displayStandardDeviationJLabel,gbc);
+        smoothStatsPanel.add(displayAreaVariationJLabel, gbc);
 
 
         JLabel displayMethod = new JLabel("Method used for smoothing: ");
@@ -922,42 +1001,54 @@ public class SignalEditorPanel extends SignalPanel {
         int signalLength = x.length;
         displaySizeSignalJLabel.setText(signalLength + " points");
 
-        double smoothness = SmoothUtils.getSmoothness(initialSignal);
+        double smoothness = round(SmoothUtils.getSmoothness(initialSignal),4);
         initialSmoothnessLabel.setText(Double.toString(smoothness));
 
-        double finalSmoothness = SmoothUtils.getSmoothness(finalSignal);
+        double finalSmoothness = round(SmoothUtils.getSmoothness(finalSignal),4);
         finalSmoothnessLabelValue.setText(Double.toString(finalSmoothness));
 
-        Double estimatedSNRValue = SmoothUtils.computeSignalToNoiseRatio(initialSignal, finalSignal);
-        displaySNRJLabel.setText(estimatedSNRValue + " decibels");
+        double estimatedSNRValue = round(SmoothUtils.computeSignalToNoiseRatio(initialSignal, finalSignal),4);
+        double bias = round(SmoothUtils.computeAbsoluteBias(initialSignal, finalSignal),4);
+        double initialArea=round(SmoothUtils.calculateArea(x,initialSignal),4);
+        double finalArea=round(SmoothUtils.calculateArea(x,finalSignal),4);
+        double areaVariation=round(100*(finalArea-initialArea)/initialArea,4);
 
-        double bias = SmoothUtils.computeAbsoluteBias(initialSignal, finalSignal);
-        displayBiasValue.setText(Double.toString(bias));
-        double estimatedQualityValue = SmoothUtils.evaluateSignalRoughnessV3(initialSignal);
+        if (smoothMethod.equals(SmoothingParamDialog.SIGNAL_QUALITY_EVALUATION)) {
+
+            smoothStatsPanel.setBackground(new Color(220, 224, 245));
+            displaySNRJLabel.setText("No estimation of noise available");
+            displayBiasValue.setText("No smoothing done, no bias");
+            displayAreaVariationJLabel.setText("No smoothing done, no variation of area");
+
+        } else {
+
+            displaySNRJLabel.setText(estimatedSNRValue + " decibels");
+            displayBiasValue.setText(Double.toString(bias));
+            displayAreaVariationJLabel.setText(areaVariation+" %");
+
+        }
+
+
+        double estimatedQualityValue = round(SmoothUtils.evaluateSignalRoughnessV3(initialSignal),4);
         displayQualityValueJLabel.setText(String.valueOf(estimatedQualityValue));
         smoothMethodUsedLabel.setText(smoothMethod);
         displayComputeTime.setText(SmoothUtils.displayTime(computeTime));
-        double initialLength=SmoothUtils.computeLengthOfSignal(x,initialSignal);
+        double initialLength = SmoothUtils.computeLengthOfSignal(x, initialSignal);
 
         double[] kernel = SmoothUtils.buildKernel(5);
         Convolution con = new Convolution(initialSignal, kernel);
         double[] convolvedSignal = con.convolve("same");
-        double finalLength=SmoothUtils.computeLengthOfSignal(x,convolvedSignal);
-        double variationRateOfLength=100+100*(finalLength-initialLength)/initialLength;
 
+        double finalLength = SmoothUtils.computeLengthOfSignal(x, convolvedSignal);
+        double variationRateOfLength =100+ 100 * (finalLength - initialLength) / initialLength;
         progressBar.setValue((int) variationRateOfLength);
-        if (variationRateOfLength<25)
-        {progressBar.setForeground(new Color(183, 102, 104));}
-        else if (variationRateOfLength<50) {
+        if (variationRateOfLength < 20) {
+            progressBar.setForeground(new Color(183, 102, 104));
+        } else if (variationRateOfLength < 50) {
             progressBar.setForeground(new Color(51, 70, 159));
-        }
-        else {
+        } else {
             progressBar.setForeground(new Color(97, 192, 97));
         }
-        Pair<Double,Double> SDSPairs=SmoothUtils.computeStandardDeviationOfSlopes(x,initialSignal);
-        Double ratioOfSlopes= SDSPairs.getRight()/ SDSPairs.getLeft();
-        displayStandardDeviationJLabel.setText(ratioOfSlopes.toString());
-
 
     }
 

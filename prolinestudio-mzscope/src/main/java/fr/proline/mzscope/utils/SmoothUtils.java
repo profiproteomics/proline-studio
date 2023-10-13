@@ -31,17 +31,6 @@ public class SmoothUtils {
 
     final private static Logger logger = LoggerFactory.getLogger(SmoothUtils.class);
 
-
-   /* private static int waveletSelected=0;
-
-    public static int getWaveletSelected() {
-        return waveletSelected;
-    }
-
-    public static void setWaveletSelected(int waveletSelected) {
-        SmoothUtils.waveletSelected = waveletSelected;
-    }*/
-
     public static void peakRestorer(double[] initialSignal, double[] smoothedSignal, double[] x, double ratio) {
 
         FindPeak fp = new FindPeak(initialSignal);
@@ -60,8 +49,8 @@ public class SmoothUtils {
 
         double[] xValuesOfPeaks = new double[peaks.length];
         for (int i = 0; i < peaks.length; i++) {
-            int index = peaks[i];
-            xValuesOfPeaks[i] = x[index];
+
+            xValuesOfPeaks[i] = x[peaks[i]];
 
         }
         int countPeaksRestored = 0;
@@ -99,7 +88,7 @@ public class SmoothUtils {
     public static double[] getSlopeAngles(double[]x,double[]y){
         double [] signalSlopeAngles=new double[x.length-1];
         for (int k=0;k<x.length-1;k++){
-            // values always close to pi/2
+            // values always close to pi/2.....😤
             signalSlopeAngles[k]=Math.atan((y[k+1]-y[k])/(x[k+1]-x[k]));
         }
         return signalSlopeAngles;
@@ -710,27 +699,22 @@ public class SmoothUtils {
 
         int bestWindowSize = 5;
         String mode = "triangular";
-        String mode2 = "rectangular";
+       // String mode2 = "rectangular";
         Smooth s1=new Smooth(initialSignal,bestWindowSize,mode);
         double[] testSignal=s1.smoothSignal("same");
         double bestCorrelation=computeEuclideanDistance(initialSignal,testSignal);
-        double bestSignalSmoothness=SmoothUtils.getSmoothness(testSignal);
-        double bestRatio=bestCorrelation/bestSignalSmoothness;
 
         for (int k = 0; k <6; k++) {
             int windowTested=bestWindowSize-2+k;
             Smooth s=new Smooth(initialSignal,windowTested,mode);
             double[] smoothSignal = s.smoothSignal("same");
             double distance = computeEuclideanDistance(initialSignal,smoothSignal);
-            double smoothness=SmoothUtils.getSmoothness(smoothSignal);
-            double ratio=smoothness/distance;
-                    if (ratio>bestRatio) {
+
+                    if (distance<bestCorrelation) {
                     bestWindowSize = windowTested;
-                    bestRatio=ratio;
+                   bestCorrelation=distance;
                 }
-
-            }
-
+        }
         return bestWindowSize;
     }
 
@@ -1385,13 +1369,14 @@ public class SmoothUtils {
         return length;
     }
 
+    // method that might be not adapted , used in geography to estimate roughness of landscapes 🤔
     public static Pair<Double, Double> computeStandardDeviationOfSlopes(double[]x, double[]y){
         StandardDeviation standardDeviation=new StandardDeviation();
 
         double[] slopeAngles=getSlopeAngles(x,y);
         double stdSlopes=standardDeviation.evaluate(slopeAngles);
 
-        double[] kernel = SmoothUtils.buildKernel(15);
+        double[] kernel = SmoothUtils.buildKernel(5);
         Convolution con = new Convolution(y, kernel);
         double[] convolvedSignal = con.convolve("same");
         double[] smoothedSlopeAngles=getSlopeAngles(x,convolvedSignal);
@@ -1400,6 +1385,19 @@ public class SmoothUtils {
         return Pair.of(stdSmoothedSlopes,stdSlopes);
 
 
+    }
+    public static double calculateArea(double[] x,double[] y){
+
+        double integral1=0;
+        double integral2=0;
+
+        for (int k=0;k<x.length-1;k++){
+            integral1=integral1+(x[k+1]-x[k])*y[k];
+            integral2=integral2+(x[k+1]-x[k])*y[k+1];
+
+
+        }
+        return (integral2+integral1)/2;
     }
 
 }

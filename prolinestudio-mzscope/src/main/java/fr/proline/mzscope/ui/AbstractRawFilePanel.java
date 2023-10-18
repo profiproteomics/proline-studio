@@ -59,6 +59,8 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
 
     protected IRawFileLoading rawFileLoading;
 
+    private boolean forceFittedToCentroid;
+
     public AbstractRawFilePanel() {
         super();
         init();
@@ -81,6 +83,11 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
         initComponents();
         spectrumPanel.initComponents();
         KeyEventDispatcherDecorator.addKeyEventListener(this);
+    }
+
+    @Override
+    public void changeForceFittedToCentroid(){
+        forceFittedToCentroid = !forceFittedToCentroid;
     }
 
     private void initComponents() {
@@ -367,7 +374,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFileVie
             if (rawFileLoading != null) {
                 rawFileLoading.setWaitingState(true);
             }
-            currentScan = getCurrentRawfile().getSpectrum((int) index);
+            currentScan = getCurrentRawfile().getSpectrum((int) index, forceFittedToCentroid);
             if (currentScan != null) {
                 chromatogramPanel.setCurrentScanTime(currentScan.getRetentionTime());
                 if (displayScan) {

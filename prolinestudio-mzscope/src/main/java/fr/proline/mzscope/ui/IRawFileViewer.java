@@ -127,5 +127,5 @@ public interface IRawFileViewer {
 
    void removePropertyChangeListener(String propertyName, PropertyChangeListener listener);
 
-
+   public  void changeForceFittedToCentroid();
 }

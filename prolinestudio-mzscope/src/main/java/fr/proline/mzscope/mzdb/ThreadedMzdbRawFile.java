@@ -136,6 +136,16 @@ public class ThreadedMzdbRawFile implements IRawFile {
   }
 
   @Override
+  public Spectrum getSpectrum(final int spectrumIndex, boolean forceF2C) {
+      try {
+          return service.submit(() -> mzdbRawFile.getSpectrum(spectrumIndex, forceF2C )).get();
+      } catch (InterruptedException | ExecutionException ex ) {
+          logger.error("getSpectrum call fail", ex);
+      }
+      return null;
+  }
+
+  @Override
    public Spectrum getSpectrum(final int spectrumIndex) {
       try {
          return service.submit(() -> mzdbRawFile.getSpectrum(spectrumIndex)).get();

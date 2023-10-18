@@ -55,6 +55,11 @@ public class EmptyRawFile implements IRawFile {
   }
 
   @Override
+  public Spectrum getSpectrum(int spectrumIndex, boolean forceFittedToCentroid) {
+    return null;
+  }
+
+  @Override
   public int getSpectrumCount() {
     return 0;
   }

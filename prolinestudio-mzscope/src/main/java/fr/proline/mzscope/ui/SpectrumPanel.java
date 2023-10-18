@@ -168,6 +168,15 @@ public class SpectrumPanel extends AbstractSpectrumPanel implements ScanHeaderLi
      viewMobilogramBtn.addActionListener(e -> toggleMobilogramPlot());
      spectrumToolbar.add(viewMobilogramBtn);
 
+       spectrumToolbar.addSeparator();
+       JButton m_forceCentroidBtn = new JButton();
+       m_forceCentroidBtn.setIcon(IconManager.getIcon(IconManager.IconType.FITTED_2_CENTROID));
+       m_forceCentroidBtn.setToolTipText("Force Fitted to Centroid");
+       m_forceCentroidBtn.addActionListener(e -> {
+           rawFileViewer.changeForceFittedToCentroid();
+       });
+       spectrumToolbar.add(m_forceCentroidBtn);
+
      spectrumToolbar.addSeparator();
 
       spinnerModel = new ScansSpinnerModel();

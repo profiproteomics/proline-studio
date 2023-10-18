@@ -77,7 +77,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     private Double zoomXLevel = Double.NaN;
     private Double relativeYValue = Double.NaN;
     private Double zoomYLevel = Double.NaN;
-    
+    private boolean forceFittedToCentroid;
     
     public TabbedMultiRawFilePanel(List<IRawFile> rawfiles) {
         super();
@@ -358,7 +358,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     public void displayScan(long index) {
         IRawFile selectedRawFile = getCurrentRawfile();
         if (selectedRawFile != null && ((currentScan == null) || (index != currentScan.getIndex()) )) {
-            currentScan = selectedRawFile.getSpectrum((int) index);
+            currentScan = selectedRawFile.getSpectrum((int) index, forceFittedToCentroid);
             if (currentScan != null) {
                 spectrumContainerPanel.displayScan(currentScan);
             }
@@ -644,6 +644,11 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     @Override
     public Spectrum getCurrentSpectrum() {
         return currentScan;
+    }
+
+    @Override
+    public void changeForceFittedToCentroid() {
+        forceFittedToCentroid = !forceFittedToCentroid;
     }
 
 }

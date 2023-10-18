@@ -84,7 +84,12 @@ public class MzMLRawFile implements IRawFile {
       return toModelSpectrum(scans.get(spectrumIndex));
    }
 
-   @Override
+    @Override
+    public Spectrum getSpectrum(int spectrumIndex, boolean forceFittedToCentroid) {
+        return getSpectrum(spectrumIndex); //Ignore forceFittedToCentroid
+    }
+
+    @Override
    public int getSpectrumId(double retentionTime) {
       for (Scan s : scans) {
          if (Math.abs(s.getRetentionTime() - retentionTime) < 0.001)

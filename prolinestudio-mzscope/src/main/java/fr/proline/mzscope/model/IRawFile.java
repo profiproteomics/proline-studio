@@ -88,6 +88,8 @@ public interface IRawFile {
     */
    public Spectrum getSpectrum(int spectrumIndex);
 
+   public Spectrum getSpectrum(int spectrumIndex, boolean forceFittedToCentroid);
+
    /**
     * Return the total number of spectra.
     * 

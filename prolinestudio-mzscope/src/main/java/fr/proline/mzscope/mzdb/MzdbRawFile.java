@@ -559,7 +559,7 @@ public class MzdbRawFile implements IRawFile {
     }
 
     @Override
-    public Spectrum getSpectrum(int spectrumIndex) {
+    public Spectrum getSpectrum(int spectrumIndex, boolean forceFittedToCentroid) {
         Spectrum spectrum = null;
         try {
             fr.profi.mzdb.model.Spectrum rawSpectrum = reader.getSpectrum((long) spectrumIndex);
@@ -570,9 +570,11 @@ public class MzdbRawFile implements IRawFile {
             // Spectrum.ScanType scanType = (encoding.getMode().equals(DataMode.CENTROID) || encoding.getMode().equals(DataMode.CENTROID_3D)) ?  Spectrum.ScanType.CENTROID : Spectrum.ScanType.PROFILE;
 
             Spectrum.ScanType scanType = (encoding.getMode().equals(DataMode.CENTROID)) ?  Spectrum.ScanType.CENTROID : Spectrum.ScanType.PROFILE;
+            if(forceFittedToCentroid)
+                scanType = (encoding.getMode().equals(DataMode.PROFILE)) ?  Spectrum.ScanType.PROFILE : Spectrum.ScanType.CENTROID;
 
 
-            if ((data.getLeftHwhmList() != null) && data.getRightHwhmList() != null && !encoding.getMode().equals(DataMode.PROFILE)) {
+            if ( !forceFittedToCentroid && (data.getLeftHwhmList() != null) && data.getRightHwhmList() != null && !encoding.getMode().equals(DataMode.PROFILE) ) {
                 final double[] mzList = data.getMzList();
                 final double[] leftSigma = new double[mzList.length];
                 final double[] rightSigma = new double[mzList.length];
@@ -643,6 +645,11 @@ public class MzdbRawFile implements IRawFile {
             LOG.error("Error while retrieving Spectrum data", e);
         }
         return spectrum;
+    }
+
+    @Override
+    public Spectrum getSpectrum(int spectrumIndex) {
+        return getSpectrum(spectrumIndex, false);
     }
 
     @Override

@@ -212,6 +212,11 @@ public class TimstofRawFile implements IRawFile{
     }
 
     @Override
+    public Spectrum getSpectrum(int spectrumIndex, boolean forceFittedToCentroid) {
+        return getSpectrum(spectrumIndex); //Ignore forceFittedToCentroid
+    }
+
+    @Override
     public int getSpectrumCount() {
         return m_spectra2FrameIndex.size();
     }

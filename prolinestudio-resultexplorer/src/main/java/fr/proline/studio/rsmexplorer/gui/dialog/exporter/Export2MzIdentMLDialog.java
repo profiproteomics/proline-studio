@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog.exporter;
 
+import fr.proline.studio.NbPreferences;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.DefaultStorableDialog;
 import fr.proline.studio.utils.IconManager;
@@ -37,21 +38,24 @@ public class Export2MzIdentMLDialog extends DefaultStorableDialog {
     private static final int STEP_PANEL_FILE_CHOOSER = 1;
     private int m_step = STEP_PANEL_EXPORT_PARAM_DEF;
 
-    private DefaultDialog.ProgressTask m_task = null; //VDS ? 
+    private DefaultDialog.ProgressTask m_task = null;
     private Export2MzIdentMLParamPanel m_paramPanel;
     private Export2MzIdentMLFilePanel m_filePanel;
+    private boolean m_multipleExport;
 
-    public Export2MzIdentMLDialog(Window parent) {
+    private static String helpMessage = "Spectrum Matches should have been generated before exporting to MzidentML format.<br> It is also recommended to jave run 'Retrieve proteins sequences'.";
+
+    public Export2MzIdentMLDialog(Window parent, boolean exportMultipleDS) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         setTitle("Export to MzIdentML format");
         setResizable(true);
+        m_multipleExport = exportMultipleDS;
 
-//        setDocumentationSuffix(m_contact_FN_key); //VDS TODO
         setButtonName(BUTTON_OK, "Next");
         setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
         setDocumentationSuffix("id.338fx5o");
         m_paramPanel = new Export2MzIdentMLParamPanel(this);
-        this.setHelpHeader(IconManager.getIcon(IconManager.IconType.INFORMATION),"MzIdentML parameters", "Spectrum Matches should have been generated before exporting to MzidentML format.<br> It is also recommended to jave run 'Retrieve proteins sequences'.");
+        this.setHelpHeader(IconManager.getIcon(IconManager.IconType.INFORMATION),"MzIdentML parameters",helpMessage );
         setInternalComponent(m_paramPanel);
     }
 
@@ -102,8 +106,10 @@ public class Export2MzIdentMLDialog extends DefaultStorableDialog {
             setButtonVisible(BUTTON_LOAD, false);
             setButtonVisible(BUTTON_SAVE, false);
 
-            m_filePanel = new Export2MzIdentMLFilePanel(this);
-            this.setHelpHeader(IconManager.getIcon(IconManager.IconType.INFORMATION), "MzIdentML output file", "Spectrum Matches should have been generated before exporting to MzidentML format.<br> It is also recommended to jave run 'Retrieve proteins sequences'.");
+            m_filePanel = new Export2MzIdentMLFilePanel(this, !m_multipleExport);
+            String title = m_multipleExport ? "MzIdentML output folder" : "MzIdentML output file";
+            String msg = helpMessage +  (m_multipleExport ? "<br><br>Select folder to export all files to" : "Select file to export to");
+            this.setHelpHeader(IconManager.getIcon(IconManager.IconType.INFORMATION),title , msg);
             replaceInternalComponent(m_filePanel);
             
             revalidate();
@@ -116,6 +122,9 @@ public class Export2MzIdentMLDialog extends DefaultStorableDialog {
                 return false;
             }
             startTask(m_task);
+            Preferences preferences = NbPreferences.root();
+            preferences.put("DefaultExcelExportPath", m_filePanel.getFileName());
+
             return false;
         }
     }

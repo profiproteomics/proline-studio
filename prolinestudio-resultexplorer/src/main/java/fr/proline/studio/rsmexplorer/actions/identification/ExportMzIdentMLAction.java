@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import fr.proline.studio.WindowManager;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,10 +48,10 @@ public class ExportMzIdentMLAction extends AbstractRSMAction {
     
         @Override
     public void actionPerformed(final AbstractNode[] selectedNodes, final int x, final int y) {
-        final DataSetNode dataSetNode = (DataSetNode) selectedNodes[0];
+
 
         //Once export to file is choosen, open MzIdentMLSpecific dialog
-        Export2MzIdentMLDialog mzIdentDialog = new Export2MzIdentMLDialog(WindowManager.getDefault().getMainWindow());
+        Export2MzIdentMLDialog mzIdentDialog = new Export2MzIdentMLDialog(WindowManager.getDefault().getMainWindow(), selectedNodes.length>1);
         
         DefaultDialog.ProgressTask task = new DefaultDialog.ProgressTask() {
                 @Override
@@ -101,13 +102,32 @@ public class ExportMzIdentMLAction extends AbstractRSMAction {
                             if (success) {
 
                                 String fileName = mzIdentDialog.getFileName();
-                                //TODO use ExportFactory getList ... 
-                                if (!fileName.toLowerCase().endsWith(".mzid")) {
-                                    fileName += ".mzid";
-                                }
+                                //TODO use ExportFactory getList ...
                                 if (_filePath.size() == 1) {
+                                    if (!fileName.toLowerCase().endsWith(".mzid")) {
+                                        fileName += ".mzid";
+                                    }
                                     DownloadProcessedFileTask task = new DownloadProcessedFileTask(downloadCallback, fileName, _filePath.get(0), _jmsNodeId.get(0));
                                     AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+                                } else {
+                                    int nb = 0;
+                                    List<String> prevName = new ArrayList<>();
+                                    for (String fp : _filePath) {
+                                        String fn = FilenameUtils.getBaseName(fp);
+                                        String dirName = mzIdentDialog.getFileName();
+                                        if (!dirName.endsWith("\\")) {
+                                            dirName += "\\";
+                                        }
+                                        m_logger.debug(" STEP 1 NEXT EXPORTED FILE "+nb+" => "+fn);
+                                        //VDS TODO Get DS name
+                                        Long dsId = getDatasetId(fn);
+                                        String dsName = getDatasetName(dsId, selectedNodes);
+                                        fn = dirName+dsName+"_"+ dsId.toString()+"_" + nb +".mzid" ;
+                                        m_logger.debug(" STEP 2 NEXT EXPORTED FILE "+nb+" => "+fn);
+                                        DownloadProcessedFileTask task = new DownloadProcessedFileTask(downloadCallback, fn, fp, _jmsNodeId.get(nb));
+                                        nb++;
+                                        AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+                                    }
                                 }
 
                             } else {
@@ -119,7 +139,9 @@ public class ExportMzIdentMLAction extends AbstractRSMAction {
                     };
 
                     List<DDataset> dsets = new ArrayList<>();
-                    dsets.add(dataSetNode.getDataset());
+                    for (AbstractNode node : selectedNodes) {
+                        dsets.add(((DataSetNode) node).getDataset());
+                    }
                     ExportDatasetTask task = new ExportDatasetTask(exportCallback, dsets, null, _filePath, _jmsNodeId, ExportDatasetTask.ExporterFormat.MZIDENTML, mzIdentDialog.getExportParams());
                     AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
@@ -132,36 +154,65 @@ public class ExportMzIdentMLAction extends AbstractRSMAction {
         mzIdentDialog.setVisible(true);
         
     }
-    
+
+    private String getDatasetName(Long dsId, AbstractNode[] selectedNodes) {
+        for (AbstractNode node : selectedNodes) {
+            if (((DataSetNode) node).getDataset().getId() == dsId) {
+                return  ((DataSetNode) node).getDataset().getName();
+            }
+        }
+        return "";
+    }
+
+    /**
+     * Return the DS Id by parsing the server exported fileName
+     * @param fileName : name is formated as : <prefix>-<DS_ID>_random.<ext>
+     * @return
+     */
+    private Long getDatasetId(String fileName) {
+        Long dsId = -1L;
+        int id0 = fileName.indexOf("-");
+        int id1 = fileName.lastIndexOf("_");
+        if (id0 > -1 && id1 > -1 && id0 < id1) {
+            String dsIdStr = fileName.substring(id0 + 1, id1);
+            try {
+                dsId = Long.parseLong(dsIdStr);
+            } catch (NumberFormatException e) {
+                dsId = -1L;
+            }
+        }
+        return dsId;
+    }
+
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
 
         int nbSelectedNodes = selectedNodes.length;
 
-        if (nbSelectedNodes != 1) {
+        if (nbSelectedNodes < 1) {
             setEnabled(false);
             return;
         }
 
-        AbstractNode node = selectedNodes[0];
-        AbstractNode.NodeTypes nodeType = node.getType();
-        if (nodeType != AbstractNode.NodeTypes.DATA_SET && node.getType() != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
-            setEnabled(false);
-            return;
-        }
-       
-        if (node.isChanging()) {
-            setEnabled(false);
-            return;
-        }
+        for (AbstractNode node : selectedNodes) {
+            AbstractNode.NodeTypes nodeType = node.getType();
+            if (nodeType != AbstractNode.NodeTypes.DATA_SET && node.getType() != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
+                setEnabled(false);
+                return;
+            }
+
+            if (node.isChanging()) {
+                setEnabled(false);
+                return;
+            }
 
 
-
-        // We can only export a RSM
-        DataSetNode datasetNode = (DataSetNode) node;
-        if (!datasetNode.hasResultSummary()) {
-            setEnabled(false);
-            return;
+            // We can only export a RSM
+            DataSetNode datasetNode = (DataSetNode) node;
+            if (!datasetNode.hasResultSummary()) {
+                setEnabled(false);
+                return;
+            }
         }
             
         setEnabled(true);

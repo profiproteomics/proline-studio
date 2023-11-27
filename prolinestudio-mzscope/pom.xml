@@ -13,7 +13,7 @@
     
     <name>ProlineStudio-mzScope</name>
     <description>Proline module to display mzdb files</description>
-    
+
     <dependencies>
         <!-- Proline -->
         <dependency>
@@ -95,7 +95,14 @@
             <artifactId>ximpleware-vtd-xml</artifactId>
             <version>2.11</version>
         </dependency>
-        
+
+
+        <dependency>
+            <groupId>com.github.chhh</groupId>
+            <artifactId>msftbx</artifactId>
+            <version>1.8.8</version>
+        </dependency>
+
         <!-- JXTable -->
         <dependency>
             <groupId>org.swinglabs.swingx</groupId>
@@ -111,7 +118,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
         </dependency>
-
 
         <!--  propertySheet Panel -->
         <dependency>
@@ -146,6 +152,18 @@
             <artifactId>jwave</artifactId>
             <version>1.0.3</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-csv</artifactId>
+            <version>2.12.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.12.4</version>
+        </dependency>
+
 
 
 

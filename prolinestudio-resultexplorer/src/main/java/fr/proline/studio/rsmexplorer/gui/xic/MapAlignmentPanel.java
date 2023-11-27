@@ -36,14 +36,16 @@ import fr.proline.studio.table.BeanTableModel;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.IconManager;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LoessInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.util.FastMath;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.averagingDouble;
@@ -168,26 +170,75 @@ public class MapAlignmentPanel extends AbstractMapAlignmentPanel {
 
             if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
 
-
                 bandwidth = Double.parseDouble(dialog.getValueTF().getText());
 
                 if (map != null) { // Direct Map exist between src and dest
-                    computeAndDisplayLoessForMaps(cloudData, mapIdSrc, mapIdDst, bandwidth, m_alignmentGraphicPanel);
+                    computeAndDisplayLoessForMaps(getRTLandmarks(cloudData, mapIdSrc, mapIdDst), bandwidth, m_alignmentGraphicPanel);
                 } else {
                     //2 Plots / Map  src -> Ref, Ref -> dest
-                    computeAndDisplayLoessForMaps(cloudData, mapIdSrc, m_referenceMapId, bandwidth, m_alignmentGraphicPanel);
-                    computeAndDisplayLoessForMaps(cloudData2, m_referenceMapId, mapIdDst, bandwidth, m_alignmentGraphicPanel_2);
+                    computeAndDisplayLoessForMaps(getRTLandmarks(cloudData, mapIdSrc, m_referenceMapId), bandwidth, m_alignmentGraphicPanel);
+                    computeAndDisplayLoessForMaps(getRTLandmarks(cloudData2, m_referenceMapId, mapIdDst), bandwidth, m_alignmentGraphicPanel_2);
                 }
                 m_removeLoessCurveBtn.setEnabled(true);
             }
         }
     }
 
-    private void computeAndDisplayLoessForMaps(IonsRTTableModel cloudData, Long mapIdSrc,Long mapIdDst, double bandwidth, BasePlotPanel graphicalPanel ){
+    private void computeAndDisplayLoessForMaps(List<Pair<Double, Double>> landmarks, double bandwidth, BasePlotPanel graphicalPanel ){
 
+        if (bandwidth <= 0) {
+            _altComputeAndDisplayLoessForMaps(landmarks, graphicalPanel);
+        } else {
+
+            double[] x = new double[landmarks.size()];
+            double[] y = new double[landmarks.size()];
+            for (int i = 0; i < landmarks.size(); i++) {
+                x[i] = landmarks.get(i).getKey();
+                y[i] = landmarks.get(i).getValue();
+            }
+
+            try {
+                int robustness = LoessInterpolator.DEFAULT_ROBUSTNESS_ITERS;
+                double accuracy = LoessInterpolator.DEFAULT_ACCURACY;
+                LoessInterpolator interpolator = new LoessInterpolator(bandwidth, robustness, accuracy);
+                double[] yfit = interpolator.smooth(x, y);
+                createRegressionPlot(toFilteredList(x, yfit), graphicalPanel, Color.DARK_GRAY);
+
+                double[] residuals = new double[yfit.length];
+                for (int k = 0; k < yfit.length; k++) {
+                    residuals[k] = (y[k] - yfit[k]) * (y[k] - yfit[k]);
+                }
+
+
+                bandwidth = Math.max(0.3, bandwidth);
+                interpolator = new LoessInterpolator(bandwidth, robustness, accuracy);
+                double[] sd = interpolator.smooth(x, residuals);
+                double[] upper = new double[yfit.length];
+                double[] lower = new double[yfit.length];
+                // 4.417 for 99.999% probability
+                // 3.890 for 99.99% probability
+                double nsigma = 3.890;
+
+                for (int k = 0; k < yfit.length; k++) {
+                    double s = Math.sqrt(Math.max(0, sd[k]));
+                    upper[k] = yfit[k] + nsigma * s;
+                    lower[k] = yfit[k] - nsigma * s;
+                }
+
+                createRegressionPlot(x, upper, graphicalPanel);
+                createRegressionPlot(x, lower, graphicalPanel);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private List<Pair<Double, Double>> getRTLandmarks(IonsRTTableModel cloudData, Long mapIdSrc, Long mapIdDst) {
         int sourceMapRTColumn = cloudData.getColumnIndex(mapIdSrc);
         int destMapDeltaRTColumn = cloudData.getColumnIndex(mapIdDst);
         int size = cloudData.getRowCount();
+
         List<Pair<Double, Double>> data = new ArrayList<>(size);
 
         double ftAlignmentTimeTolerance = ((DataboxMapAlignment) this.m_dataBox).getFeatureAlignmentTimeTolerance();
@@ -205,43 +256,175 @@ public class MapAlignmentPanel extends AbstractMapAlignmentPanel {
 
         Map<Double, Double> landmarks = data.stream().distinct().collect(groupingBy(p -> p.getKey(), averagingDouble(p -> p.getValue())));
         data = landmarks.entrySet().stream().map(e -> Pair.of(e.getKey(), e.getValue())).sorted().collect(Collectors.toList());
+        return data;
+    }
 
-        double[] x = new double[data.size()];
-        double[] y = new double[data.size()];
-        for (int i = 0; i < data.size(); i++) {
-            x[i] = data.get(i).getKey();
-            y[i] = data.get(i).getValue();
+    private void _altComputeAndDisplayLoessForMaps(List<Pair<Double, Double>> landmarks, BasePlotPanel graphicalPanel ){
+
+        double[] x = new double[landmarks.size()];
+        double[] y = new double[landmarks.size()];
+        for (int i = 0; i < landmarks.size(); i++) {
+            x[i] = landmarks.get(i).getKey();
+            y[i] = landmarks.get(i).getValue();
         }
+
+        double timeInterval = 60*5;
+        double windowOverlap = 0.05;
+        double stepSize = timeInterval*(1-windowOverlap);
+        int nbIter = (int)Math.ceil((x[x.length-1]-x[0])*60.0/stepSize);
+        logger.info("Step size {}s, nbIter:  {}", stepSize, nbIter);
+        DescriptiveStatistics stats = new DescriptiveStatistics();
+        DescriptiveStatistics densityStats = new DescriptiveStatistics();
+
+        for (int step = 0; step <= nbIter; step++) {
+            double min = step*stepSize + x[0]*60.0;
+            double max = min + timeInterval;
+            landmarks.stream().filter(p -> (p.getKey()*60.0 >= min) && (p.getKey()*60.0 <= max)).forEach(p ->  {
+                stats.addValue(p.getValue());
+            });
+            densityStats.addValue(stats.getN());
+            stats.clear();
+        }
+
+        double meanSize = densityStats.getMean();
+        logger.info("mean density {} from N {} values: ",meanSize, densityStats.getN());
+//        meanSize = Math.max(meanSize, 5);
+//        meanSize = Math.min(meanSize, 100);
+//        double bandwidth = 0.6+((0.01-0.6)/(100-5)*(meanSize-5));
+
+        double bandwidth = Math.max(0.01, 40.0/x.length);
+        logger.info("calculated bandwidth : "+bandwidth);
 
         try {
             int robustness = LoessInterpolator.DEFAULT_ROBUSTNESS_ITERS;
             double accuracy = LoessInterpolator.DEFAULT_ACCURACY;
             LoessInterpolator interpolator = new LoessInterpolator(bandwidth, robustness, accuracy);
             double[] yfit = interpolator.smooth(x, y);
-            createRegressionPlot(x, yfit, graphicalPanel);
+            createRegressionPlot(toFilteredList(x, yfit), graphicalPanel, Color.DARK_GRAY);
 
+//            final PolynomialSplineFunction function = interpolator.interpolate(x, y);
+//            double[] yinterp = new double[y.length];
+//            for (int i = 0; i < y.length; i++) {
+//                yinterp[i] = function.value(x[i]);
+//            }
+//            createRegressionPlot(x, yinterp, graphicalPanel, Color.blue);
+
+            double[] squaredResiduals = new double[yfit.length];
+            double[] absResiduals = new double[yfit.length];
             double[] residuals = new double[yfit.length];
+            int upperCount = 0;
+            int lowerCount = 0;
+
             for (int k = 0; k < yfit.length; k++) {
-                residuals[k] = (y[k] - yfit[k]) * (y[k] - yfit[k]);
+                squaredResiduals[k] = (y[k] - yfit[k]) * (y[k] - yfit[k]);
+                absResiduals[k] = FastMath.abs(y[k] - yfit[k]);
+                residuals[k] = (y[k] - yfit[k]);
+                if (residuals[k] >= 0) upperCount++;
+                if (residuals[k] <= 0) lowerCount++;
             }
 
+            logger.info("Upper count = {}", upperCount);
+            logger.info("Lower count = {}", lowerCount);
+
+            bandwidth = Math.max(0.3, bandwidth);
+            logger.info("calculated squaredResiduals bandwidth : "+bandwidth);
             interpolator = new LoessInterpolator(bandwidth, robustness, accuracy);
-            double[] sd = interpolator.smooth(x, residuals);
+            double[] smoothedSquaredResiduals = interpolator.smooth(x, squaredResiduals);
+            double[] smoothedAbsResiduals = interpolator.smooth(x, absResiduals);
+
+            double[] weights = new double[squaredResiduals.length];
+            for (int k = 0; k < x.length; k++) {
+                weights[k] = absResiduals[k] > 3.890 * 1.4826 * smoothedAbsResiduals[k] ? 0.0 : 1.0;
+                if (absResiduals[k] > 3.890 * 1.4826 * smoothedAbsResiduals[k]) {
+//                    logger.info("point k={}, x={}, dx={} rejected", k, x[k], y[k]);
+                }
+//                logger.info("{}; {}", x[k], absResiduals[k]);
+            }
+
+            final double sum = Arrays.stream(weights).sum();
+            logger.info("weights = {} / {}",sum, weights.length);
+
+//            bandwidth = Math.max(0.01, 40.0/x.length);
+//            bandwidth = Math.max(0.1, bandwidth);
+            logger.info("calculated weighted squaredResiduals bandwidth : "+bandwidth);
+            interpolator = new LoessInterpolator(bandwidth, robustness, accuracy);
+            double[] asd2 = interpolator.smooth(x, absResiduals, weights);
+
+
+            double[] upperX = new double[upperCount];
+            double[] lowerX = new double[lowerCount];
+            double[] upperResiduals = new double[upperCount];
+            double[] lowerResiduals = new double[lowerCount];
+            double[] upperWeights = new double[upperCount];
+            double[] lowerWeights = new double[lowerCount];
+
+            upperCount = 0;
+            lowerCount = 0;
+            for (int k = 0; k < x.length; k++) {
+                if (residuals[k] >= 0) {
+                    upperX[upperCount] = x[k];
+                    upperWeights[upperCount] = weights[k];
+                    upperResiduals[upperCount++] = residuals[k];
+                }
+                if (residuals[k] <= 0) {
+                    lowerX[lowerCount] = x[k];
+                    lowerWeights[lowerCount] = weights[k];
+                    lowerResiduals[lowerCount++] = residuals[k];
+                }
+            }
+
+            bandwidth = Math.max(0.01, 40.0/x.length);
+            bandwidth = Math.max(0.1, bandwidth);
+            logger.info("calculated weighted squaredResiduals bandwidth : "+bandwidth);
+            interpolator = new LoessInterpolator(bandwidth, robustness, accuracy);
+            double[] smoothedUpperResiduals = interpolator.smooth(upperX, upperResiduals, upperWeights);
+            double[] smoothedLowerResiduals = interpolator.smooth(lowerX, lowerResiduals, lowerWeights);
+            PolynomialSplineFunction upperLinearFct = new LinearInterpolator().interpolate(upperX, smoothedUpperResiduals);
+            PolynomialSplineFunction lowerLinearFct = new LinearInterpolator().interpolate(lowerX, smoothedLowerResiduals);
+
             double[] upper = new double[yfit.length];
             double[] lower = new double[yfit.length];
+            double[] aUpper = new double[yfit.length];
+            double[] aLower = new double[yfit.length];
+            double[] a2Upper = new double[yfit.length];
+            double[] a2Lower = new double[yfit.length];
+            double[] a3Upper = new double[yfit.length];
+            double[] a3Lower = new double[yfit.length];
+
+            double nsigma = 3.890;
             // 4.417 for 99.999% probability
             // 3.890 for 99.99% probability
-            double nsigma = 3.890;
-
+            // 3.290 for 99.9   % probability
             for (int k = 0; k < yfit.length; k++) {
-                double s = Math.sqrt(Math.max(0, sd[k]));
+                double s = Math.sqrt(Math.max(0, smoothedSquaredResiduals[k]));
+                double as = 1.4826 * smoothedAbsResiduals[k];
+                double as2 = 1.4826 * asd2[k];
                 upper[k] = yfit[k] + nsigma * s;
                 lower[k] = yfit[k] - nsigma * s;
+                aUpper[k] = yfit[k] + nsigma * as;
+                aLower[k] = yfit[k] - nsigma * as;
+                a2Upper[k] = yfit[k] + nsigma * as2;
+                a2Lower[k] = yfit[k] - nsigma * as2;
+                if (upperLinearFct.isValidPoint(x[k])) {
+                    a3Upper[k] = yfit[k] + 3.09 * 1.4826 * upperLinearFct.value(x[k]);
+                }
+                if (lowerLinearFct.isValidPoint(x[k])) {
+                    a3Lower[k] = yfit[k] + 3.09 * 1.4826 * lowerLinearFct.value(x[k]);
+                }
+
             }
 
-            createRegressionPlot(x, upper, graphicalPanel);
-            createRegressionPlot(x, lower, graphicalPanel);
+            createRegressionPlot(toList(x, upper), graphicalPanel, Color.DARK_GRAY);
+            createRegressionPlot(toList(x, lower), graphicalPanel, Color.DARK_GRAY);
 
+            createRegressionPlot(toList(x, aUpper), graphicalPanel, Color.ORANGE);
+            createRegressionPlot(toList(x, aLower), graphicalPanel, Color.ORANGE);
+
+            createRegressionPlot(toList(x, a2Upper), graphicalPanel, Color.MAGENTA);
+            createRegressionPlot(toList(x, a2Lower), graphicalPanel, Color.MAGENTA);
+
+            createRegressionPlot(toList(x, a3Upper), graphicalPanel, Color.BLUE);
+            createRegressionPlot(toList(x, a3Lower), graphicalPanel, Color.BLUE);
 
 
         } catch (Exception e) {
@@ -249,12 +432,41 @@ public class MapAlignmentPanel extends AbstractMapAlignmentPanel {
         }
     }
 
-    private void createRegressionPlot(double[] x, double[] newDeltas, BasePlotPanel graphicPanel ) {
+
+    private void createRegressionPlot(double[] x, double[] newDeltas, BasePlotPanel graphicPanel) {
+        createRegressionPlot(toList(x, newDeltas), graphicPanel, CyclicColorPalette.GRAY_DARK);
+    }
+
+
+    private List<Pair<Double, Double>> toFilteredList(double[] x, double[] newDeltas) {
+        List<Pair<Double, Double>> data;
+        data = new ArrayList<>(x.length);
+        data.add(Pair.of(x[0], newDeltas[0]));
+        double prevTime = x[0];
+        double prevTimePlusDelta = x[0] + newDeltas[0]/60.0;
+
+        for (int i = 1 ; i < x.length; i++) {
+            if ((x[i] > prevTime) && ((x[i]+newDeltas[i]/60.0) > prevTimePlusDelta ) ) {
+                data.add(Pair.of(x[i], newDeltas[i]));
+                prevTime = x[i];
+                prevTimePlusDelta = x[i]+newDeltas[i]/60.0;
+            }
+        }
+
+        logger.info("Filtering effect : {} pts to {} ", x.length, data.size());
+        return data;
+    }
+
+    private List<Pair<Double, Double>> toList(double[] x, double[] newDeltas) {
         List<Pair<Double, Double>> data;
         data = new ArrayList<>(x.length);
         for (int i = 0 ; i < x.length; i++) {
-          data.add(Pair.of(x[i], newDeltas[i]));
+            data.add(Pair.of(x[i], newDeltas[i]));
         }
+        return data;
+    }
+
+    private void createRegressionPlot(List<Pair<Double, Double>> data, BasePlotPanel graphicPanel, Color color) {
 
         BeanTableModel model = new BeanTableModel(Pair.class);
         model.setData(data);
@@ -263,7 +475,7 @@ public class MapAlignmentPanel extends AbstractMapAlignmentPanel {
 
         PlotLinear regressionCurve = new PlotLinear(graphicPanel, model, null ,0, 3);
         PlotInformation plotInfo = new PlotInformation();
-        plotInfo.setPlotColor(CyclicColorPalette.GRAY_DARK);
+        plotInfo.setPlotColor(color);
         regressionCurve.setPlotInformation(plotInfo);
         regressionCurve.setStroke(1f);
         graphicPanel.addPlot(regressionCurve, true);
@@ -272,7 +484,6 @@ public class MapAlignmentPanel extends AbstractMapAlignmentPanel {
         graphicPanel.getYAxis().setTitle(yAxisTitle);
         graphicPanel.repaint();
     }
-
 
     public void setData(QuantChannelInfo quantChannelInfo, List<ExtendedTableModelInterface> compareDataInterfaceList) {
         //@Karine XUE,when a databaseLoadTask or it's subTask is finished, the callback will be called in DataBox, 

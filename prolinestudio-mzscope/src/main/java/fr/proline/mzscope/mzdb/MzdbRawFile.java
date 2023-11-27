@@ -774,7 +774,7 @@ public class MzdbRawFile implements IRawFile {
                     try {
                         MgfExportParameters mgfExportParam = (MgfExportParameters)exportParams;
                         LOG.debug("MGF writer start for " + this.getName() + ": mgfFilePath=" + outputFileName
-                                + ", precursorMzComputation=" + mgfExportParam.getPrecComp().getParamName()
+                                + ", precursorMzComputation=" + mgfExportParam.getPrecComp().getMethodName()
                                 + ", mzTol=" + mgfExportParam.getMzTolPPM() 
                                 + ", intensityCutoff=" + mgfExportParam.getIntensityCutoff() 
                                 + ", exportProlineTitle=" + mgfExportParam.isExportProlineTitle());
@@ -782,7 +782,7 @@ public class MzdbRawFile implements IRawFile {
                         writer.write(outputFileName, mgfExportParam.getPrecComp(), mgfExportParam.getIntensityCutoff(), mgfExportParam.isExportProlineTitle());
                         LOG.debug(" mgf created in " + (System.currentTimeMillis() - start) + " ms");
                     } catch (SQLiteException  ex) {
-                        LOG.error("SQLiteException or ClassNotFoundException while exporting mgf file", ex);
+                        LOG.error("SQLiteException while exporting mgf file", ex);
                         return false;
                     } catch (FileNotFoundException ex) {
                         LOG.error("FileNotFoundException while exporting mgf file: ", ex);

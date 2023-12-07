@@ -55,7 +55,7 @@ public class LabelFreeMSParamsPanel extends JPanel {
     }
 
     public String getParamsVersion() {
-        return "2.0";
+        return AbstractLabelFreeMSParamsPanel.CURRENT_QUANT_PARAM_VERSION;
     }
 
     public AbstractLabelFreeMSParamsPanel getParamsPanel() {
@@ -134,9 +134,9 @@ public class LabelFreeMSParamsPanel extends JPanel {
         m_completePanel = completePanel;
         updateButton(m_completePanel);
         if (m_completePanel) {
-            return new LabelFreeMSParamsCompletePanel(false, readValues);
+            return new LabelFreeMSParamsCompletePanel(false, readValues, getParamsVersion());
         } else {
-            return new LabelFreeMSParamsSimplifiedPanel();
+            return new LabelFreeMSParamsSimplifiedPanel(getParamsVersion());
         }
     }
 

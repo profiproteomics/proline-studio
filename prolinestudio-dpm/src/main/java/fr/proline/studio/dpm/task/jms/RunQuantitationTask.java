@@ -31,7 +31,7 @@ import java.util.Map;
  */
 public class RunQuantitationTask extends AbstractJMSTask {
     private static final String m_serviceName = "proline/dps/msq/Quantify";
-    private final String m_version = "3.0";
+    private final String m_version = "4.0";
     
     private final Long[] m_xicQuantiResult;
     private final String m_quantiDSName;

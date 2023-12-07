@@ -564,8 +564,8 @@ public class MzdbRawFile implements IRawFile {
         try {
             fr.profi.mzdb.model.Spectrum rawSpectrum = reader.getSpectrum((long) spectrumIndex);
             SpectrumData data = rawSpectrum.getData();
-            Map<Integer, DataEncoding> map = reader.getDataEncodingReader().getDataEncodingById();
-            DataEncoding encoding = reader.getSpectrumDataEncoding((long) spectrumIndex);
+            Map<Long, DataEncoding> map = reader.getDataEncodingReader().getDataEncodingById();
+            DataEncoding encoding = reader.getSpectrumDataEncoding(spectrumIndex);
             // TODO use mzdb-access ion_mobility branch to enable this feature
             // Spectrum.ScanType scanType = (encoding.getMode().equals(DataMode.CENTROID) || encoding.getMode().equals(DataMode.CENTROID_3D)) ?  Spectrum.ScanType.CENTROID : Spectrum.ScanType.PROFILE;
 

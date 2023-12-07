@@ -152,7 +152,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog implements Q
 
             try {
                 Map<String, Object> quantConfig = existingQuantDataset.getQuantProcessingConfigAsMap();
-                if (quantConfig.containsKey("config_version") && quantConfig.get("config_version").equals("2.0")) {
+                if (quantConfig.containsKey("config_version") && quantConfig.get("config_version").equals(AbstractLabelFreeMSParamsPanel.CURRENT_QUANT_PARAM_VERSION)) {
                     LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().setIsSimplifiedPanel(false); //to view all config 
                     LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().setQuantParams(quantConfig);
                 } else {

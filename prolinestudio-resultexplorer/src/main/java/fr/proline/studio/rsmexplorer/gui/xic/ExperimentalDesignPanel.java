@@ -202,11 +202,13 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
                 if (m_dataset.getQuantProcessingConfig() != null) {
                     switch (m_quantMethodInfo) {
                         case FEATURES_EXTRACTION -> {
-                            LabelFreeMSParamsCompletePanel xicParamPanel = new LabelFreeMSParamsCompletePanel(true, false);
+                            Map<String,Object>  quantCfg = m_dataset.getQuantProcessingConfigAsMap();
+                            String cfgVersion = quantCfg.containsKey("config_version") ? quantCfg.get("config_version").toString() : "1.0";
+                            LabelFreeMSParamsCompletePanel xicParamPanel = new LabelFreeMSParamsCompletePanel(true, false, cfgVersion);
                             m_confPanel.removeAll();
                             xicParamPanel.resetScrollbar();
                             m_confPanel.add(xicParamPanel, BorderLayout.CENTER);
-                            xicParamPanel.setQuantParams(m_dataset.getQuantProcessingConfigAsMap());
+                            xicParamPanel.setQuantParams(quantCfg);
                         }
                         case ISOBARIC_TAGGING -> {
                             Map<String,Object> tmtParams = m_dataset.getQuantProcessingConfigAsMap();
@@ -216,10 +218,12 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
                                 m_confPanel.add(tmtParamPanel, BorderLayout.NORTH);
                                 tmtParamPanel.setQuantParams(tmtParams);
 
-                                LabelFreeMSParamsCompletePanel xicParamPanel = new LabelFreeMSParamsCompletePanel(true, false);
+                                Map<String,Object>  quantCfg = (Map<String,Object>) tmtParams.get("label_free_quant_config");
+                                String cfgVersion = quantCfg.containsKey("config_version") ? quantCfg.get("config_version").toString() : "1.0";
+                                LabelFreeMSParamsCompletePanel xicParamPanel = new LabelFreeMSParamsCompletePanel(true, false, cfgVersion);
                                 xicParamPanel.resetScrollbar();
                                 m_confPanel.add(xicParamPanel, BorderLayout.CENTER);
-                                xicParamPanel.setQuantParams((Map<String,Object>) tmtParams.get("label_free_quant_config"));
+                                xicParamPanel.setQuantParams(quantCfg);
 
                             } else {
                                 IsobaricMethodParamsPanel tmtParamPanel = new IsobaricMethodParamsPanel(m_dataset.getQuantitationMethod(), true);

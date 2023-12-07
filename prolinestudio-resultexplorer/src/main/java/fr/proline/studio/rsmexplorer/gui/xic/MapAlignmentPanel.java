@@ -554,7 +554,7 @@ public class MapAlignmentPanel extends AbstractMapAlignmentPanel {
             quantParams = m_quantChannelInfo.getDataset().getQuantProcessingConfigAsMap();
             if (quantParams.containsKey(AbstractLabelFreeMSParamsPanel.ALIGNMENT_CONFIG)) {
                 Map<String, Object> alignmentConfig = (Map<String, Object>) quantParams.get(AbstractLabelFreeMSParamsPanel.ALIGNMENT_CONFIG);
-                method = (String) alignmentConfig.getOrDefault(AbstractLabelFreeMSParamsPanel.ALIGNMENT_METHOD_NAME, "unknown");
+                method = (String) alignmentConfig.getOrDefault(AbstractLabelFreeMSParamsPanel.QUANT_CONFIG_METHOD_NAME, "unknown");
             }
             return method;
         } catch (Exception e) {

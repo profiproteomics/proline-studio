@@ -27,7 +27,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.swing.JToggleButton;
+import javax.swing.*;
+
 import org.jdesktop.swingx.JXTable;
 
 /**
@@ -148,6 +149,7 @@ public class SearchToggleButton extends JToggleButton {
         public void doSearch(Filter f, boolean firstSearch) {
             int modelRowIndex = m_tableModelFilterInterface.search(m_table, f, firstSearch);
             if (modelRowIndex == -1) {
+                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "No result found", "Search", JOptionPane.INFORMATION_MESSAGE );
                 return;
             }
             int rowView = m_table.convertRowIndexToView(modelRowIndex);

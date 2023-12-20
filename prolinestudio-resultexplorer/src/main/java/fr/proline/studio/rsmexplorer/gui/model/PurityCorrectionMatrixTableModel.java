@@ -5,10 +5,11 @@ import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.studio.table.renderer.DefaultColoredCellRenderer;
 import fr.proline.studio.utils.StringUtils;
 
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import java.util.ArrayList;
 
-public class PurityCorrectionMatrixTableModel extends AbstractCorrectionMatrixTaleModel  {
+public class PurityCorrectionMatrixTableModel extends AbstractCorrectionMatrixTableModel {
 
     final QuantitationMethod m_quantMethod;
 
@@ -42,8 +43,15 @@ public class PurityCorrectionMatrixTableModel extends AbstractCorrectionMatrixTa
     */
    public void setData(Double[][] allReporterCoeff){
 
-       if(allReporterCoeff.length != massReporters.size())
-           throw new RuntimeException("Unable to set matrix data, not the same number of reporters !");
+     if(allReporterCoeff == null) {
+       JOptionPane.showMessageDialog(null, "Unable to set matrix data, no data specified !", "Matrix Error", JOptionPane.ERROR_MESSAGE);
+       return;
+     }
+
+     if(allReporterCoeff.length != massReporters.size())
+         JOptionPane.showMessageDialog(null,"Unable to set matrix data, not the same number of reporters !", "Matrix Error", JOptionPane.ERROR_MESSAGE );
+
+//           throw new RuntimeException("Unable to set matrix data, not the same number of reporters !");
 
         for(int i =0 ; i< allReporterCoeff.length; i++){
             MassReporter mr = massReporters.get(i);

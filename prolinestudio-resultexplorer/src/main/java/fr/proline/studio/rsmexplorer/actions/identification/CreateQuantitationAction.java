@@ -265,7 +265,7 @@ public class CreateQuantitationAction extends AbstractRSMAction {
                 return;
             }
 
-            AbstractNode node = (AbstractNode) selectedNodes[0];
+            AbstractNode node = selectedNodes[0];
 
             // the node must not be in changing state
             if (node.isChanging()) {
@@ -280,9 +280,9 @@ public class CreateQuantitationAction extends AbstractRSMAction {
             }
 
             DataSetNode datasetNode = (DataSetNode) node;
-
-            // must be a quantitation XIC
-            if (!datasetNode.isQuantXIC()) {
+            DDataset dataset = datasetNode.getDataset();
+            // must be a labelFree quantitation
+            if (!datasetNode.isQuantXIC() || !dataset.getQuantitationMethod().getType().equals(QuantitationMethod.Type.LABEL_FREE.toString())) {
                 setEnabled(false);
                 return;
             }

@@ -4,7 +4,7 @@ import fr.proline.studio.utils.StringUtils;
 
 import java.util.ArrayList;
 
-public class ThermoCorrectionMatrixTableModel extends AbstractCorrectionMatrixTaleModel  {
+public class ThermoCorrectionMatrixTableModel extends AbstractCorrectionMatrixTableModel {
 
     //Known TMT methods
     public final static String TMT_6PLEX_METHOD = "TMT 6plex";

@@ -4,7 +4,7 @@ import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.studio.WindowManager;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.editor.FloatTableCellEditor;
-import fr.proline.studio.rsmexplorer.gui.model.AbstractCorrectionMatrixTaleModel;
+import fr.proline.studio.rsmexplorer.gui.model.AbstractCorrectionMatrixTableModel;
 import fr.proline.studio.rsmexplorer.gui.model.PurityCorrectionMatrixTableModel;
 import fr.proline.studio.rsmexplorer.gui.model.ThermoCorrectionMatrixTableModel;
 import fr.proline.studio.table.*;
@@ -25,24 +25,26 @@ public class EditIsobaricMatrixDialog extends DefaultDialog {
     private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
     private static final String[] KNOWN_TMT_METHODS = {
-            AbstractCorrectionMatrixTaleModel.TMT_6PLEX_METHOD,
-            AbstractCorrectionMatrixTaleModel.TMT_10PLEX_METHOD,
-            AbstractCorrectionMatrixTaleModel.TMT_11PLEX_METHOD,
-            AbstractCorrectionMatrixTaleModel.TMT_16PLEX_METHOD,
-            AbstractCorrectionMatrixTaleModel.TMT_18PLEX_METHOD};
+            AbstractCorrectionMatrixTableModel.TMT_6PLEX_METHOD,
+            AbstractCorrectionMatrixTableModel.TMT_10PLEX_METHOD,
+            AbstractCorrectionMatrixTableModel.TMT_11PLEX_METHOD,
+            AbstractCorrectionMatrixTableModel.TMT_16PLEX_METHOD,
+            AbstractCorrectionMatrixTableModel.TMT_18PLEX_METHOD};
     private static final String KNOWN_HELP_MESSAGE ="Enter values as given by Thermo for this TMT Plex";
     private static final String UNKNOWN_HELP_MESSAGE ="Enter the matrix specifying purity correction to use";
-    private QuantitationMethod m_quantMethod;
+    private static final String READ_ONLY_HELP_MESSAGE ="NO modification can be done here...";
+    private final QuantitationMethod m_quantMethod;
     boolean m_isGenericMatrix;
     JScrollPane m_tableScrollPane;
     PurityCorrectionMatrixTable m_purityCorrectionTable;
+    private boolean m_readOnly =false;
     public EditIsobaricMatrixDialog(Window parent, QuantitationMethod method) {
         super(parent, ModalityType.APPLICATION_MODAL);
         setButtonVisible(BUTTON_DEFAULT, true);
         setButtonName(BUTTON_DEFAULT, "Clear");
         setButtonIcon(BUTTON_DEFAULT, IconManager.getIcon(IconManager.IconType.ERASER));
         this.m_quantMethod = method;
-        m_isGenericMatrix = (Arrays.stream(KNOWN_TMT_METHODS).anyMatch(c->c.equals(m_quantMethod.getName()))) ? false : true;
+        m_isGenericMatrix = Arrays.stream(KNOWN_TMT_METHODS).noneMatch(c -> c.equals(m_quantMethod.getName()));
         setTitle("Edit Purity Matrix for "+m_quantMethod.getName());
         setResizable(true);
         initDialog();
@@ -50,9 +52,26 @@ public class EditIsobaricMatrixDialog extends DefaultDialog {
         pack();
     }
 
+
+    public EditIsobaricMatrixDialog(Window parent, QuantitationMethod method, Double[][] tableData){
+        super(parent, ModalityType.APPLICATION_MODAL);
+        m_readOnly = true;
+        setButtonVisible(BUTTON_CANCEL, false);
+        this.m_quantMethod = method;
+        m_isGenericMatrix = true;
+        setTitle("View Purity Matrix for "+m_quantMethod.getName());
+        setResizable(true);
+        initDialog();
+        ((PurityCorrectionMatrixTableModel) m_purityCorrectionTable.getModel()).setData(tableData);
+        m_purityCorrectionTable.packAll();
+        pack();
+    }
+
     private void initDialog(){
         setButtonVisible(BUTTON_HELP,false);
-        if(m_isGenericMatrix){
+        if(m_readOnly){
+            setHelpHeader("View Purity Correction Matrix", READ_ONLY_HELP_MESSAGE);
+        } else if(m_isGenericMatrix){
             setHelpHeader("Purity Correction Matrix", UNKNOWN_HELP_MESSAGE);
         } else
             setHelpHeader("Thermo Correction Matrix", KNOWN_HELP_MESSAGE);
@@ -76,7 +95,8 @@ public class EditIsobaricMatrixDialog extends DefaultDialog {
         m_tableScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         m_purityCorrectionTable.setFillsViewportHeight(true);
         m_purityCorrectionTable.setAutoResizeMode(JXTable.AUTO_RESIZE_ALL_COLUMNS);
-
+        if(m_readOnly)
+            m_purityCorrectionTable.setEditable(false);
 
         internalPanel.add(m_tableScrollPane, c );
         setInternalComponent(internalPanel);
@@ -91,7 +111,7 @@ public class EditIsobaricMatrixDialog extends DefaultDialog {
         table.removeStriping();
         table.getTableHeader().setDefaultRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.CENTER));
         table.setCellSelectionEnabled(true);
-        AbstractCorrectionMatrixTaleModel tableModel = (m_isGenericMatrix ?  new PurityCorrectionMatrixTableModel( m_quantMethod) : new ThermoCorrectionMatrixTableModel(m_quantMethod.getName()));
+        AbstractCorrectionMatrixTableModel tableModel = (m_isGenericMatrix ?  new PurityCorrectionMatrixTableModel( m_quantMethod) : new ThermoCorrectionMatrixTableModel(m_quantMethod.getName()));
 
         table.setModel(tableModel);
         TableColumnModel columnModel = table.getColumnModel();
@@ -128,13 +148,13 @@ public class EditIsobaricMatrixDialog extends DefaultDialog {
     @Override
     protected boolean defaultCalled(){
         //Clear Matrix
-        ((AbstractCorrectionMatrixTaleModel) m_purityCorrectionTable.getModel()).clearMatrix();
+        ((AbstractCorrectionMatrixTableModel) m_purityCorrectionTable.getModel()).clearMatrix();
         repaint();
         return false;
     }
 
     protected String getPurityMatrix(){
-        return ((AbstractCorrectionMatrixTaleModel) m_purityCorrectionTable.getModel()).getPurityMatrixAsString();
+        return ((AbstractCorrectionMatrixTableModel) m_purityCorrectionTable.getModel()).getPurityMatrixAsString();
     }
 
     private class PurityCorrectionMatrixTable extends DecoratedTable {

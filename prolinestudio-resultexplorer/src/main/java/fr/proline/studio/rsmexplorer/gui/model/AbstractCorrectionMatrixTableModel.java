@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public abstract class AbstractCorrectionMatrixTaleModel extends DecoratedTableModel {
+public abstract class AbstractCorrectionMatrixTableModel extends DecoratedTableModel {
 
     protected List<String> columnNames;
     List<MassReporter> massReporters;

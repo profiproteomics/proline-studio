@@ -343,7 +343,7 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
      */
     public void setQuantParams(Map<String, Object> quantParams) {
 //        String version = quantParams.getOrDefault("config_version", "1.0").toString();
-        StringBuffer errorMsg = new StringBuffer("Error settins following params, default values used:\n");
+        StringBuffer errorMsg = new StringBuffer("Error setting following params, default values used:\n");
         boolean parseError = false;
         try {
             Map<String, Object> extRactParams = (Map<String, Object>) quantParams.get("extraction_params");
@@ -367,7 +367,7 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
                     } catch (NumberFormatException ex) {
                         parseError = true;
                         errorMsg.append("alignment.max_iterations\n");
-                        m_logger.error("error while settings max_iterations quanti params " + ex);
+                        m_logger.error("error while settings max_iterations quantification params " + ex);
                         m_alignmentMaxIterationTF.setText(DEFAULT_ALIGN_MAXITE_VALUE.toString());
                     }
                 }
@@ -510,9 +510,9 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
             updateAlignmentSettings();
             updateMozCalibSettings();
             updateCrossAssignmentSettings();
-        }catch (Exception e) {
+        } catch (Exception e) {
             parseError = true;
-            errorMsg.append("Unknown error occurred displayed value may be wrong. See Dataset properties (").append(e.getMessage()).append(") \n");
+            errorMsg.append("Unknown error occurred. Displayed values may be wrong. See Dataset Properties view. (").append(e.getMessage()).append(") \n");
 
         }
         if(parseError)

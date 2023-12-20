@@ -7,7 +7,6 @@ import fr.proline.studio.WindowManager;
 import fr.proline.studio.corewrapper.data.QuantPostProcessingParams;
 import fr.proline.studio.gui.CheckBoxTitledBorder;
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.parameter.*;
 import fr.proline.studio.rsmexplorer.gui.model.PurityCorrectionMatrixTableModel;
 import fr.proline.studio.table.DecoratedTable;
@@ -15,7 +14,6 @@ import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.table.renderer.DefaultColoredCellRenderer;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.StringUtils;
-import org.jdesktop.swingx.JXTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +47,10 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
     private File m_purityMatrixFile;
     private String m_purityMatrixValues;
     JPanel m_psmMatrixPanel;
+
+    PurityCorrectionMatrixTableModel m_readOnlyPurityTableModel;
+    JLabel m_psmFileMatrixStatus;
+    JLabel m_psmTableMatrixStatus;
     private CheckBoxTitledBorder m_usePurityCorrectionMatrixCBoxTitle;
     private JComboBox<String> m_peptidesSelectionMethodCB;
     private JCheckBox m_discardMissCleavedPeptidesChB;
@@ -159,7 +161,6 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         m_purityCorrectionMatrixParameter = new StringParameter(paramKey, StringUtils.getLabelFromCamelCase(paramKey), JTextField.class, "", 0, Integer.MAX_VALUE);
         m_parameterList.add(m_purityCorrectionMatrixParameter);
 
-        //VDS TODO : change param structure for settings prefixe (peptide or protein) + param name
         m_applyPepNormalizationChB = new JCheckBox("Apply Normalization");
         m_applyPepNormalizationChB.setEnabled(!m_readOnly);
         m_applyPepNormalizationParameter = new BooleanParameter("applyPepNormalization", "Apply Normalization on peptides", m_applyPepNormalizationChB, false);
@@ -216,9 +217,12 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         }
     }
 
-    //TODO mutualize un Util Class
     private static void setEnabled(Container container, boolean isEnabled) {
+        if(container==null)
+            return;
+
         container.setEnabled(isEnabled);
+
         for (Component children : container.getComponents()) {
             if (Container.class.isAssignableFrom(children.getClass())) {
                 setEnabled((Container) children, isEnabled);
@@ -236,7 +240,7 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
      */
     public void loadParameters(Preferences filePreferences, String version) throws BackingStoreException {
 
-        boolean loadedPTMsParamsError = false;//Specify if loaded params from file don't contains this Quant PTMs list
+        boolean loadedPTMsParamsError = false;//Specify if loaded params from file don't contain this Quant PTMs list
         Preferences preferences = NbPreferences.root();
         String[] keys = filePreferences.keys();
 
@@ -249,7 +253,7 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         }
         boolean discardModifiedPeptides = false;
         boolean purityMatrixDefined =false;
-        Boolean usePurityMatrix = false;
+        boolean usePurityMatrix = false;
         String filePrefix = version.equals("1.0") ? m_parameterList.getBackwardCompatiblePrefixes().get(0) : m_parameterList.getPrefixName();
         for (String key : keys) {
             if(key.startsWith(filePrefix+QuantPostProcessingParams.PREFIX_PTM_IDS_TO_DISCARD)){
@@ -265,12 +269,13 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
             //redefine
             if(key.startsWith(filePrefix+QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.USE_PURITY_CORRECTION_MATRIX)) ){
                 usePurityMatrix =  filePreferences.getBoolean(key, false) &&  m_quantitationMethodInfo.equals(DDatasetType.QuantitationMethodInfo.ISOBARIC_TAGGING);
-                filePreferences.put(filePrefix+QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.USE_PURITY_CORRECTION_MATRIX), usePurityMatrix.toString());
+                filePreferences.put(filePrefix+QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.USE_PURITY_CORRECTION_MATRIX), Boolean.toString(usePurityMatrix));
             }
 
             if(key.startsWith(filePrefix+QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.PURITY_CORRECTION_MATRIX)) && m_quantitationMethodInfo.equals(DDatasetType.QuantitationMethodInfo.ISOBARIC_TAGGING)){
-                purityMatrixDefined = true;
                 m_purityMatrixValues = filePreferences.get(key, null);
+                if(m_purityMatrixValues != null && !m_purityMatrixValues.isEmpty())
+                    purityMatrixDefined = true;
             }
 
             String value = filePreferences.get(key, null);
@@ -420,8 +425,7 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         return protPanel;
     }
 
-    JLabel m_psmFileMatrixStatus;
-    JLabel m_psmTableMatrixStatus;
+
     private JPanel createPSMAbundancePanel() {
         JPanel psmPanel = new JPanel(new BorderLayout());
         psmPanel.setBorder(BorderFactory.createTitledBorder(" PSMs "));
@@ -439,8 +443,8 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
             c.insets = new Insets(5, 5, 5, 5);
             c.gridx = 0;
             c.gridy = 0;
-            JLabel label = new JLabel("Select Purity Correction Matrix file:");
-            m_psmMatrixPanel.add(label, c);
+            JLabel psmMatrixFileLabel = new JLabel("Select Purity Correction Matrix file:");
+            m_psmMatrixPanel.add(psmMatrixFileLabel, c);
 
             c.gridx++;
             JButton fileChooser = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
@@ -460,7 +464,7 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
             c.gridx = 0;
             c.gridy++;
             c.weightx = 0;
-            JLabel label2 = new JLabel("Specify Purity Correction Matrix file:");
+            JLabel label2 = new JLabel("Specify Purity Correction Matrix :");
             m_psmMatrixPanel.add(label2, c);
             c.gridx++;
             c.weightx = 0;
@@ -495,17 +499,14 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
             c.gridx = 0;
             c.gridy = 0;
 
-            JScrollPane tableScrollPane = new JScrollPane();
-            DecoratedTable purityCorrectionTable = createTable();
-            tableScrollPane.setViewportView(purityCorrectionTable);
-            tableScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-            tableScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+            JScrollPane readOnlyTableScrollPane = new JScrollPane();
+            DecoratedTable purityCorrectionTable = createReadOnlyTable();
+            readOnlyTableScrollPane.setViewportView(purityCorrectionTable);
+            readOnlyTableScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            readOnlyTableScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
             purityCorrectionTable.setFillsViewportHeight(true);
-            purityCorrectionTable.setAutoResizeMode(JXTable.AUTO_RESIZE_ALL_COLUMNS);
 
-            purityCorrectionTable.setEnabled(false);
-
-            m_psmMatrixPanel.add(tableScrollPane,c);
+            m_psmMatrixPanel.add(readOnlyTableScrollPane,c);
         }
         setEnabled(m_psmMatrixPanel, !m_readOnly);
         psmMatrixPanel.add(m_psmMatrixPanel, BorderLayout.NORTH);
@@ -513,8 +514,7 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         return psmPanel;
     }
 
-    private PurityCorrectionMatrixTableModel m_roRTbleModel;
-    private DecoratedTable createTable(){
+    private DecoratedTable createReadOnlyTable(){
         DecoratedTable table = new DecoratedTable() {
             @Override
             public void prepostPopupMenu() {
@@ -527,19 +527,19 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         };
 
         table.removeStriping();
-        m_roRTbleModel = new PurityCorrectionMatrixTableModel(m_quantitationMethod, m_readOnly);
-        table.setModel(m_roRTbleModel);
+        m_readOnlyPurityTableModel = new PurityCorrectionMatrixTableModel(m_quantitationMethod, true);
+        table.setModel(m_readOnlyPurityTableModel);
         table.getTableHeader().setDefaultRenderer(DefaultColoredCellRenderer.disabledCellRendered);
         TableColumnModel columnModel = table.getColumnModel();
         // set preferred width of different columns
-        int colCount= m_roRTbleModel.getColumnCount();
+        int colCount= m_readOnlyPurityTableModel.getColumnCount();
         for(int i=0; i<colCount; i++){
-            if(i == m_roRTbleModel.getCenterColIndex()) {
+            if(i == m_readOnlyPurityTableModel.getCenterColIndex()) {
                 columnModel.getColumn(i).setMaxWidth(40);
             } else if( i ==0) {
                 columnModel.getColumn(i).setMaxWidth(80);
             } else {
-                int colWidth = m_roRTbleModel.getCoeffColumWidth();
+                int colWidth = m_readOnlyPurityTableModel.getCoeffColumWidth();
                 columnModel.getColumn(i).setMaxWidth(colWidth);
             }
         }
@@ -548,15 +548,16 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
     }
 
     private void viewMatrixDialog() {
-        String msg;
-        if(m_purityMatrixValues == null || m_purityMatrixValues.isEmpty())
-            msg = "No Purity matrix was defined yet ...";
-        else
-            msg = m_purityMatrixValues;
-        InfoDialog d = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.INFO, "Purity Matrix", msg, null,false, true);
-        d.setButtonName(DefaultDialog.BUTTON_OK,"OK");
-        d.setButtonVisible(DefaultDialog.BUTTON_CANCEL, false);
-        d.setVisible(true);
+
+        if(m_purityMatrixValues == null || m_purityMatrixValues.isEmpty()) {
+            JOptionPane.showMessageDialog(this.getParent(),"\nNo Purity matrix was defined yet ...\n","View Purity Matrix", JOptionPane.ERROR_MESSAGE);
+
+        } else {
+            EditIsobaricMatrixDialog viewDialog = new EditIsobaricMatrixDialog(WindowManager.getDefault().getMainWindow(), m_quantitationMethod, convertStringToDoubleMatrix(m_purityMatrixValues));
+            viewDialog.setMaximumSize(new Dimension(100,100));
+
+            viewDialog.setVisible(true);
+        }
     }
 
     private EditIsobaricMatrixDialog m_matrixDialog;
@@ -573,7 +574,6 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         } else {
             m_psmTableMatrixStatus.setIcon(IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));
         }
-//        repaint();
     }
 
 
@@ -702,7 +702,6 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         } else {
             m_psmFileMatrixStatus.setIcon(IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));
         }
-//        repaint();
     }
 
     private boolean readPurityMatrixFile(){
@@ -710,7 +709,13 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         if(m_purityMatrixFile != null && m_purityMatrixFile.exists()){
             try {
                 BufferedReader br = new BufferedReader(new FileReader(m_purityMatrixFile));
-                m_purityMatrixValues = br.lines().collect(Collectors.joining(" "));
+                String purityMatrixValues = br.lines().collect(Collectors.joining(" "));
+                Double[][] matrix = convertStringToDoubleMatrix(purityMatrixValues);
+                if(matrix == null){
+                    m_logger.warn("Invalid matrix file specified");
+                    return false;
+                }
+                m_purityMatrixValues =purityMatrixValues;
                 return true;
             } catch (FileNotFoundException e) {
                 m_logger.warn("Quant Post Processing Error: Unable to read purity matrix file");
@@ -726,11 +731,20 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
 
         if(m_quantitationMethodInfo.equals(DDatasetType.QuantitationMethodInfo.ISOBARIC_TAGGING) && m_usePurityCorrectionMatrixCBoxTitle.isSelected()){
           if(m_purityMatrixValues == null || m_purityMatrixValues.isEmpty()) {//  if(m_purityMatrixFile == null ||!m_purityMatrixFile.exists()) {
-                errorMsg = "No (or invalid) purity matrix specified ";
-                errorCompo =m_usePurityCorrectionMatrixCBoxTitle.getInternalCheckBox();
-                return false;
-            }
+            errorMsg = "No (or invalid) purity matrix specified ";
+            errorCompo = m_psmMatrixPanel; //m_usePurityCorrectionMatrixCBoxTitle.getInternalCheckBox();
+            return false;
+          }
+
+           //check specified matrix
+          Double[][] matrix = convertStringToDoubleMatrix(m_purityMatrixValues);
+          if(matrix == null){
+              errorMsg = "Invalid purity matrix specified ";
+              errorCompo = m_psmMatrixPanel; //m_usePurityCorrectionMatrixCBoxTitle.getInternalCheckBox();
+              return false;
+          }
         }
+
         boolean discardPSMOK = true;
         if(m_discardModifiedPeptidesChB.isSelected()){
             discardPSMOK = false;
@@ -910,7 +924,7 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         m_usePurityCorrectionMatrixCBoxTitle.setSelected(usePurityCorrMatrix);
         if(usePurityCorrMatrix){
             m_purityMatrixValues = refinedParams.getOrDefault(QuantPostProcessingParams.PURITY_CORRECTION_MATRIX, "").toString();
-            m_roRTbleModel.setData(convertStringToDoubleMatrix(m_purityMatrixValues));
+            m_readOnlyPurityTableModel.setData(convertStringToDoubleMatrix(m_purityMatrixValues));
         }
 
         String[] abundanceSummarizingMethodKeys = QuantPostProcessingParams.getPeptideAbundanceSummarizingMethodKeys();
@@ -945,21 +959,31 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
     }
 
     private Double[][] convertStringToDoubleMatrix(String input) {
+        if(input == null || input.isEmpty())
+            return null;
 
-        String[] allCoeffs = input.substring(1, input.length() - 1).replaceAll("\\s", "").split("\\],\\[");
-        Double[][] finalMatrix = new Double[allCoeffs.length][];
+        try {
+            String[] allCoeffs = input.substring(1, input.length() - 1).replaceAll("\\s", "").split("\\],\\[");
+            Double[][] finalMatrix = new Double[allCoeffs.length][];
 
-        for (int i = 0; i < allCoeffs.length; i++) {
-            String aReporterCoeffList = allCoeffs[i].replaceAll("[\\[\\]\\s]", "");
-            String[] indivCoefList = aReporterCoeffList.split(",");
-            // Initialize the row in the result matrix
-            finalMatrix[i] = new Double[indivCoefList.length];
-            for (int j = 0; j < indivCoefList.length; j++) {
-                finalMatrix[i][j] = Double.parseDouble(indivCoefList[j]);
+            for (int i = 0; i < allCoeffs.length; i++) {
+                String aReporterCoeffList = allCoeffs[i].replaceAll("[\\[\\]\\s]", "");
+                String[] indivCoefList = aReporterCoeffList.split(",");
+                if(indivCoefList.length != allCoeffs.length){ //not square matrix ...
+                    m_logger.debug(" Error converting matrix : not square "+allCoeffs.length+" X "+indivCoefList.length);
+                    return null;
+                }
+                // Initialize the row in the result matrix
+                finalMatrix[i] = new Double[indivCoefList.length];
+                for (int j = 0; j < indivCoefList.length; j++) {
+                    finalMatrix[i][j] = Double.parseDouble(indivCoefList[j]);
+                }
             }
+            return finalMatrix;
+        }catch (Exception e){
+            m_logger.debug(" Error converting matrix : Exception "+e.getMessage());
+            return null;
         }
-
-        return finalMatrix;
     }
 
 

@@ -375,6 +375,8 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog implements Q
                     AbstractNode nextQttNode =(AbstractNode) childEnum.nextElement();
                     registerExpDesignRawFiles(nextQttNode, pID, project, mutexFileRegistered);
                 }
+            } else {
+                registerExpDesignRawFiles(m_experimentalDesignNode, pID, project, mutexFileRegistered);
             }
         } catch (Exception e) {
             errorMsg = "Raw File(s) Registration Failed.";

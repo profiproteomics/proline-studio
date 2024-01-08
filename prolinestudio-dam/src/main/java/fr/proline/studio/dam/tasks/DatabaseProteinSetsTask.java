@@ -26,6 +26,8 @@ import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+
+import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
@@ -239,7 +241,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SAMESET_SUBSET_COUNT, m_proteinSetIds.size(), SLICE_SIZE);
 
             // execute the request now
-            sameSetAndSubSetCount(entityManagerMSI, m_proteinSetIds, subTask);
+            sameSetAndSubSetInfo(entityManagerMSI, m_proteinSetIds, subTask);
         }
 
         // set priority as low for the possible sub tasks
@@ -313,7 +315,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
                     specificSpectralCount(entityManagerMSI, slice);
                     break;
                 case SUB_TASK_SAMESET_SUBSET_COUNT:
-                    sameSetAndSubSetCount(entityManagerMSI, m_proteinSetIds, slice);
+                    sameSetAndSubSetInfo(entityManagerMSI, m_proteinSetIds, slice);
                     break;
 
             }
@@ -522,48 +524,57 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     }
 
     /**
-     * Retrieve SameSet/SubSet for a Sub Task
+     * Retrieve SameSet/SubSet info for a Sub Task
      *
-     * @param entityManagerMSI
-     * @param proteinSetIds
-     * @param subTask
+     * @param entityManagerMSI to use to get info from DB
+     * @param proteinSetIds proteinSetIds of interest
+     * @param subTask : subTask used to retrieve info
      */
-    private void sameSetAndSubSetCount(EntityManager entityManagerMSI, ArrayList<Long> proteinSetIds, SubTask subTask) {
+    private void sameSetAndSubSetInfo(EntityManager entityManagerMSI, ArrayList<Long> proteinSetIds, SubTask subTask) {
 
         List sliceOfProteinSetIds = subTask.getSubList(proteinSetIds);
 
+        String allCountQueryString = "SELECT ps.id, pspmi.is_in_subset, count(pm), string_agg(pm.accession,', ')" +
+                " FROM protein_set ps left outer join protein_set_protein_match_item pspmi on ps.id = pspmi.protein_set_id left outer join protein_match pm on pspmi.protein_match_id = pm.id " +
+                " WHERE pspmi.result_summary_id = ?1 " +
+                " AND ps.id IN (?2) "+
+                " GROUP BY ps.id, pspmi.is_in_subset ";
+        Query allCountQuery = entityManagerMSI.createNativeQuery(allCountQueryString);
+        allCountQuery.setParameter(1, m_rsm.getId());
+        allCountQuery.setParameter(2, sliceOfProteinSetIds);
 
-        // SameSet count query
-        String sameSetCountQueryString = "SELECT ps.id, count(pm) FROM ProteinSet ps, PeptideSet pepset, ProteinMatch pm, PeptideSetProteinMatchMap pepset_to_pm WHERE ps.id IN (:proteinSetIds) AND pepset.proteinSet=ps AND pepset_to_pm.id.peptideSetId=pepset.id AND pepset_to_pm.id.proteinMatchId=pm.id GROUP BY ps";
-        Query sameSetCountQuery = entityManagerMSI.createQuery(sameSetCountQueryString);
-
-        sameSetCountQuery.setParameter("proteinSetIds", sliceOfProteinSetIds);
-        //sameSetCountQuery.setParameter("rsmId", rsm.getId());
-        List<Object[]> sameSetCountRes = sameSetCountQuery.getResultList();
-        Iterator<Object[]> sameSetCountResIt = sameSetCountRes.iterator();
-        while (sameSetCountResIt.hasNext()) {
-            Object[] cur = sameSetCountResIt.next();
-            Long proteinSetId = (Long) cur[0];
-            DProteinSet proteinSet = m_proteinSetMap.get(proteinSetId);
-            int sameSetCount = ((Long) cur[1]).intValue();
-            proteinSet.setSameSetCount(sameSetCount);
-        }
-
-        // All proteins in Protein Set count query
-        // -> used to know number of proteins in Sub set
-
-        String allCountQueryString = "SELECT ps.id, count(pm) FROM ProteinMatch pm, ProteinSetProteinMatchItem ps_to_pm, ProteinSet ps WHERE  ps_to_pm.proteinSet.id IN (:proteinSetIds) AND ps_to_pm.proteinSet.id = ps.id AND ps_to_pm.proteinMatch.id=pm.id AND ps_to_pm.resultSummary.id=:rsmId GROUP BY ps";
-        Query allCountQuery = entityManagerMSI.createQuery(allCountQueryString);
-        allCountQuery.setParameter("proteinSetIds", sliceOfProteinSetIds);
-        allCountQuery.setParameter("rsmId", m_rsm.getId());
+        Map<Long, String> sameSubSetAccByProtSetId = new HashMap<>();
         List<Object[]> allCountRes = allCountQuery.getResultList();
         Iterator<Object[]> allCountResIt = allCountRes.iterator();
         while (allCountResIt.hasNext()) {
             Object[] cur = allCountResIt.next();
-            Long proteinSetId = (Long) cur[0];
+            Long proteinSetId = ((BigInteger) cur[0]).longValue();
+            Boolean isInSubset =(Boolean) cur[1];
+            int proteinsCount = ((BigInteger) cur[2]).intValue();
+            String allAccessions = cur[3].toString();
             DProteinSet proteinSet = m_proteinSetMap.get(proteinSetId);
-            int allCount = ((Long) cur[1]).intValue();
-            proteinSet.setSubSetCount(allCount - proteinSet.getSameSetCount());
+            if(isInSubset)
+                proteinSet.setSubSetCount(proteinsCount);
+            else
+                proteinSet.setSameSetCount(proteinsCount);
+
+            if(sameSubSetAccByProtSetId.containsKey(proteinSetId)){
+                String finalAccList = sameSubSetAccByProtSetId.get(proteinSetId) + ", "+allAccessions;
+                sameSubSetAccByProtSetId.put(proteinSetId, finalAccList);
+            } else
+                sameSubSetAccByProtSetId.put(proteinSetId, allAccessions);
+        }
+
+        //Set Same/SubSet Accession List
+        Iterator<Long> accIterator = sameSubSetAccByProtSetId.keySet().iterator();
+        while (accIterator.hasNext()){
+            Long id = accIterator.next();
+            String allAcc = sameSubSetAccByProtSetId.get(id);
+            String[] accAsArray = allAcc.split(", ");
+            DProteinSet proteinSet = m_proteinSetMap.get(id);
+            proteinSet.setSameSubSetNames(accAsArray);
+            if(proteinSet.getSubSetCount() == null)
+                proteinSet.setSubSetCount(0);
         }
 
     }

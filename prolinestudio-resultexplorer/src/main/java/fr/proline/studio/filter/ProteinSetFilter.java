@@ -4,6 +4,7 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,18 +31,7 @@ public class ProteinSetFilter extends  StringFilter {
     @Override
     public boolean filter(Object v1, Object v2) {
         DProteinSet value = (DProteinSet) v1;
-        List<String> acc = new ArrayList<>();
-        acc.add(value.getTypicalProteinMatch().getAccession());
-        if(value.getSameSet() != null) {
-            for (DProteinMatch pm : value.getSameSet()) {
-                acc.add(pm.getAccession());
-            }
-        }
-        if(value.getSubSet() != null) {
-            for (DProteinMatch pm : value.getSubSet()) {
-                acc.add(pm.getAccession());
-            }
-        }
+        List<String> acc = Arrays.asList(value.getSameSubSetNames());
 
         boolean found = false;
         switch (m_selectItem) {

@@ -17,7 +17,12 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.core.orm.uds.Project;
+import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
+import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.UpdateSpectraParamsTask;
@@ -84,11 +89,8 @@ public class UpdatePeaklistSoftwareAction extends AbstractRSMAction {
                     public void run(boolean success) {
                         IdentificationTree tree = IdentificationTree.getCurrentTree();
                         DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-                        
-                        for(DataSetNode node : selectedDSNodes){
-                            node.setIsChanging(false);                                
-                            treeModel.nodeChanged(node);
-                        }                  
+
+                        updateDatasetInfo(selectedDSNodes, treeModel);
                     }
                 };
                 
@@ -96,6 +98,37 @@ public class UpdatePeaklistSoftwareAction extends AbstractRSMAction {
                 AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
             }
         }
+    }
+
+    private void updateDatasetInfo(List<DataSetNode> selectedDSNodes, DefaultTreeModel treeModel){
+        ArrayList<DDataset> datasets = new ArrayList<>();
+        for(int i =0; i< selectedDSNodes.size(); i++){
+            DataSetNode dataSetNode = selectedDSNodes.get(i);
+            datasets.add(dataSetNode.getDataset());
+        }
+
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+
+                for(DataSetNode node : selectedDSNodes){
+                    node.setIsChanging(false);
+                    treeModel.nodeChanged(node);
+                }
+
+            }
+        };
+
+        DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+        task.initUpdateRset(datasets);
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+
     }
     
     

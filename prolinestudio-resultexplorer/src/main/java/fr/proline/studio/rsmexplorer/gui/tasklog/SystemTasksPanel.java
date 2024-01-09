@@ -22,15 +22,16 @@ import fr.proline.studio.dpm.data.JMSNotificationMessage;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.dpm.task.util.JMSMessageUtil;
-import fr.proline.studio.rsmexplorer.gui.dialog.GetSystemInfoButtonAction;
-import fr.proline.studio.table.DecoratedTable;
-import fr.proline.studio.table.DecoratedTableModel;
-import fr.proline.studio.table.TableDefaultRendererManager;
-import fr.proline.studio.table.TablePopupMenu;
+import fr.proline.studio.export.ExportFontData;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.filter.*;
+import fr.proline.studio.graphics.PlotInformation;
+import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.table.*;
 import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.utils.IconManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.jms.Message;
 import javax.jms.QueueBrowser;
@@ -39,8 +40,8 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -60,96 +61,55 @@ public class SystemTasksPanel extends AbstractTasksPanel {
     private static final int UPDATE_DELAY = 1000;
     private Timer m_updateTimer = null;
     private static int m_connectionErrCount = 0;
-    protected static final Logger m_loggerProline = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
     private JButton m_reconnectButton;
     private JButton m_logParserButton;
-    private ServerLogFileNameDialog m_logParserDialog;
+    private final ServerLogFileNameDialog m_logParserDialog;
 
     public SystemTasksPanel() {
         super();
-        m_loggerProline.warn(" STARTED system tasks !!");
-        setLayout(new GridBagLayout());
-        m_logParserDialog = new ServerLogFileNameDialog();
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
+        m_logger.warn(" STARTED system tasks !!");
 
-        c.weightx = 1;
-        c.weighty = 1;
-        add(createToolbarPanel(), c);
+        m_logParserDialog = new ServerLogFileNameDialog();
+
     }
 
-    private JToolBar initToolbar() {
-        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
-        toolbar.setFloatable(false);
+    @Override
+    protected  FilterTableModelInterface getTaskTableModel(){
+        return  (CompoundTableModel) m_messageTable.getModel();
+    }
 
-        JButton clearButton = new JButton(IconManager.getIcon(IconManager.IconType.ERASER));
-        clearButton.setToolTipText("Clear system tasks list");
-        clearButton.addActionListener(new ActionListener() {
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                clearData();
-            }
-        });
-        toolbar.add(clearButton);
-        GetSystemInfoButtonAction systemInfoButton = new GetSystemInfoButtonAction();
-        toolbar.add(systemInfoButton);
+    @Override
+    protected  JToolBar initToolbar() {
+        JToolBar toolbar = super.initToolbar();
 
         m_reconnectButton = new JButton(IconManager.getIcon(IconManager.IconType.REFRESH));
         m_reconnectButton.setToolTipText("Reconnect to server tasks logs");
         m_reconnectButton.setEnabled(false);
-        m_reconnectButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!isMonitoringConnected()) { //should be the case if button enabled !
-                    m_connectionErrCount = 0; //reinit counter
-                    reInitConnection();
-                }
+        m_reconnectButton.addActionListener(e -> {
+            if (!isMonitoringConnected()) { //should be the case if button enabled !
+                m_connectionErrCount = 0; //reinit counter
+                reInitConnection();
             }
         });
         toolbar.add(m_reconnectButton);
+
         m_logParserButton = new JButton(IconManager.getIcon(IconManager.IconType.DOCUMENT_LIST));
         m_logParserButton.setToolTipText("View server tasks log history");
         m_logParserButton.setEnabled(true);
-        m_logParserButton.addActionListener(createLogParserButtonAction());
+        m_logParserButton.addActionListener(e -> {
+            m_logParserDialog.setLocationRelativeTo(m_logParserButton);
+            m_logParserDialog.setVisible(true);
+        });
         toolbar.add(m_logParserButton);
         return toolbar;
     }
 
-    private ActionListener createLogParserButtonAction() {
-        ActionListener action = new ActionListener() {
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                m_logParserDialog.setLocationRelativeTo(m_logParserButton);
-                m_logParserDialog.setVisible(true);
 
-            }
-
-        };
-        return action;
-    }
-
-    private JPanel createToolbarPanel() {
-        JPanel toolbarPanel = new JPanel();
-
-        toolbarPanel.setLayout(new BorderLayout());
-
-        JPanel internalPanel = createInternalPanel();
-        toolbarPanel.add(internalPanel, BorderLayout.CENTER);
-
-        JToolBar toolbar = initToolbar();
-        toolbarPanel.add(toolbar, BorderLayout.WEST);
-
-        return toolbarPanel;
-
-    }
-
-    private JPanel createInternalPanel() {
+    @Override
+    protected JPanel createInternalPanel() {
 
         JPanel internalPanel = new JPanel();
 
@@ -160,7 +120,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
         m_messageTable = new SystemMessageTable();
-        m_messageTable.setModel(new SystemMessageTableModel());
+        m_messageTable.setModel(new CompoundTableModel(new SystemMessageTableModel(), true));
 
         TableColumnModel columnModel = m_messageTable.getColumnModel();
         columnModel.getColumn(SystemMessageTableModel.COLTYPE_MESSAGE_EVENT_DATE).setCellRenderer(new DateAndTimeRenderer());
@@ -181,8 +141,9 @@ public class SystemTasksPanel extends AbstractTasksPanel {
 
     }
 
-    public void clearData() {
-        ((SystemMessageTableModel) m_messageTable.getModel()).resetData();
+    @Override
+    protected void clearActionPerformed() {
+        m_messageTable.getInnerModel().resetData();
     }
 
     @Override
@@ -200,7 +161,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
     // Creates specific callback method to be called when service event notification occurs
     @Override
     protected AbstractJMSCallback getServiceNotificationCallback(JMSNotificationMessage[] sysInfoResult) {
-        AbstractJMSCallback notifierCallback = new AbstractJMSCallback() {
+      return new AbstractJMSCallback() {
 
             @Override
             public boolean mustBeCalledInAWT() {
@@ -215,7 +176,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
                     selectedRow = m_messageTable.convertRowIndexToModel(selectedRow);
                 }
 
-                ((SystemMessageTableModel) m_messageTable.getModel()).addMessage(sysInfoResult[0]);
+                m_messageTable.getInnerModel().addMessage(sysInfoResult[0]);
 
                 if (selectedRow >= 0) {
                     int modelIndex = m_messageTable.convertRowIndexToView(selectedRow);
@@ -223,13 +184,12 @@ public class SystemTasksPanel extends AbstractTasksPanel {
                 }
             }
         };
-        return notifierCallback;
     }
 
     // Creates specific callback method to be called when purge consumer has been executed
     @Override
     protected AbstractJMSCallback getPurgeConsumerCallback(JMSNotificationMessage[] purgerResult) {
-        AbstractJMSCallback purgerCallback = new AbstractJMSCallback() {
+      return new AbstractJMSCallback() {
 
             @Override
             public boolean mustBeCalledInAWT() {
@@ -243,7 +203,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
                     selectedRow = m_messageTable.convertRowIndexToModel(selectedRow);
                 }
 
-                ((SystemMessageTableModel) m_messageTable.getModel()).addMessage(purgerResult[0]);
+                m_messageTable.getInnerModel().addMessage(purgerResult[0]);
 
                 if (selectedRow >= 0) {
                     int modelIndex = m_messageTable.convertRowIndexToView(selectedRow);
@@ -252,7 +212,6 @@ public class SystemTasksPanel extends AbstractTasksPanel {
 
             }
         };
-        return purgerCallback;
     }
 
 
@@ -263,13 +222,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
     @Override
     protected void startOtherDataCollecting() {
         if (m_updateTimer == null) {
-            ActionListener taskPerformer = new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent evt) {
-                    browsePendingMessages();
-                }
-            };
+            ActionListener taskPerformer = evt -> browsePendingMessages();
             m_updateTimer = new Timer(UPDATE_DELAY, taskPerformer);
 
         }
@@ -298,7 +251,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
             if (selectedRow >= 0) {
                 selectedRow = m_messageTable.convertRowIndexToModel(selectedRow);
             }
-            ((SystemMessageTableModel) m_messageTable.getModel()).addMessages(pendingMsg);
+            m_messageTable.getInnerModel().addMessages(pendingMsg);
             if (selectedRow >= 0) {
                 int modelIndex = m_messageTable.convertRowIndexToView(selectedRow);
                 m_messageTable.setRowSelectionInterval(modelIndex, modelIndex);
@@ -353,7 +306,20 @@ public class SystemTasksPanel extends AbstractTasksPanel {
         m_updateTimer.stop();
     }
 
-    class SystemMessageTable extends DecoratedTable {
+    static class SystemMessageTable extends DecoratedTable {
+
+        SystemMessageTableModel innerModel;
+        @Override
+        public void setModel(TableModel dataModel) {
+            super.setModel(dataModel);
+            if(dataModel instanceof CompoundTableModel){
+                innerModel =(SystemMessageTableModel) ((CompoundTableModel)dataModel).getBaseModel();
+            }
+        }
+
+        public SystemMessageTableModel getInnerModel(){
+            return innerModel;
+        }
 
         public SystemMessageTable() {
             super();
@@ -373,7 +339,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
 
     }
 
-    class SystemMessageTableModel extends DecoratedTableModel {
+    static class SystemMessageTableModel extends DecoratedTableModel implements GlobalTableModelInterface {
 
         public static final int COLTYPE_MESSAGE_EVENT_TYPE = 0;
         public static final int COLTYPE_MESSAGE_JSON_RPC_ID = 1;
@@ -386,8 +352,8 @@ public class SystemTasksPanel extends AbstractTasksPanel {
         private final String[] m_columnNames = {"", "Id", "Service", "Date", "Source", "Message ID", "Supplementary Data"};
         private final String[] m_columnTooltips = {"Current Service State (START, FAIL, SUCCESS, PENDING)", "Identifier of JSON RPC message", "Proline Service Description", "Date of the event on the service", "The source (user/computer) of the service call", "Message Server Unique ID", "All complementary data we can get: service name/version ..."};
 
-        private ArrayList<JMSNotificationMessage> m_notificationMsgs = new ArrayList<>();
-        private HashMap<String, Integer> indexByMsgId = new HashMap<>();
+        private final ArrayList<JMSNotificationMessage> m_notificationMsgs = new ArrayList<>();
+        private final HashMap<String, Integer> indexByMsgId = new HashMap<>();
 
         public void resetData() {
             m_notificationMsgs.clear();
@@ -432,7 +398,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
         }
 
         private synchronized void sortMessageById() {
-            Collections.sort(m_notificationMsgs, new SortById());
+            m_notificationMsgs.sort(new SortById());
             indexByMsgId.clear();
             for (int i = 0; i < m_notificationMsgs.size(); i++) {
                 indexByMsgId.put(m_notificationMsgs.get(i).getServerUniqueMsgId(), i);
@@ -440,10 +406,106 @@ public class SystemTasksPanel extends AbstractTasksPanel {
 
         }
 
+        @Override
+        public String getExportRowCell(int row, int col) {
+            return null;
+        }
+
+        @Override
+        public ArrayList<ExportFontData> getExportFonts(int row, int col) {
+            return null;
+        }
+
+        @Override
+        public String getExportColumnName(int col) {
+            return null;
+        }
+
+        @Override
+        public ArrayList<ExtraDataType> getExtraDataTypes() {
+            return null;
+        }
+
+        @Override
+        public Object getValue(Class c) {
+            return null;
+        }
+
+        @Override
+        public Object getRowValue(Class c, int row) {
+            return null;
+        }
+
+        @Override
+        public Object getColValue(Class c, int col) {
+            return null;
+        }
+
+        @Override
+        public GlobalTableModelInterface getFrozzenModel() {
+            return null;
+        }
+
+        @Override
+        public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
+            filtersMap.put(COLTYPE_MESSAGE_JSON_RPC_ID, new IntegerFilter(getColumnName(COLTYPE_MESSAGE_JSON_RPC_ID),null, COLTYPE_MESSAGE_JSON_RPC_ID));
+            filtersMap.put(COLTYPE_MESSAGE_SERVICE_NAME, new StringDiffFilter(getColumnName(COLTYPE_MESSAGE_SERVICE_NAME),null, COLTYPE_MESSAGE_SERVICE_NAME));
+            filtersMap.put(COLTYPE_MESSAGE_EVENT_DATE, new DateFilter(getColumnName(COLTYPE_MESSAGE_EVENT_DATE),null, COLTYPE_MESSAGE_EVENT_DATE));
+            filtersMap.put(COLTYPE_MESSAGE_SERVICE_SOURCE, new StringDiffFilter(getColumnName(COLTYPE_MESSAGE_SERVICE_SOURCE),null, COLTYPE_MESSAGE_SERVICE_SOURCE));
+            filtersMap.put(COLTYPE_MESSAGE_REQ_ID, new StringDiffFilter(getColumnName(COLTYPE_MESSAGE_REQ_ID),null, COLTYPE_MESSAGE_REQ_ID));
+            filtersMap.put(COLTYPE_MESSAGE_COMPLEMENTARY_DATA, new StringDiffFilter(getColumnName(COLTYPE_MESSAGE_COMPLEMENTARY_DATA),null, COLTYPE_MESSAGE_COMPLEMENTARY_DATA));
+
+        }
+
+        @Override
+        public PlotType getBestPlotType() {
+            return null;
+        }
+
+        @Override
+        public int[] getBestColIndex(PlotType plotType) {
+            return new int[0];
+        }
+
+        @Override
+        public boolean isLoaded() {
+            return true;
+        }
+
+        @Override
+        public int getLoadingPercentage() {
+            return 100;
+        }
+
+        @Override
+        public Long getTaskId() {
+            return null;
+        }
+
+        @Override
+        public LazyData getLazyData(int row, int col) {
+            return null;
+        }
+
+        @Override
+        public void givePriorityTo(Long taskId, int row, int col) {
+
+        }
+
+        @Override
+        public void sortingChanged(int col) {
+
+        }
+
+        @Override
+        public int getSubTaskId(int col) {
+            return 0;
+        }
+
         /**
          * Used for sorting in descending order
          */
-        class SortById implements Comparator<JMSNotificationMessage> {
+        static class SortById implements Comparator<JMSNotificationMessage> {
 
             @Override
             public int compare(JMSNotificationMessage a, JMSNotificationMessage b) {
@@ -463,17 +525,59 @@ public class SystemTasksPanel extends AbstractTasksPanel {
         }
 
         @Override
+        public String getDataColumnIdentifier(int columnIndex) {
+            return null;
+        }
+
+        @Override
+        public Class getDataColumnClass(int columnIndex) {
+            return null;
+        }
+
+        @Override
+        public Object getDataValueAt(int rowIndex, int columnIndex) {
+            return null;
+        }
+
+        @Override
+        public int[] getKeysColumn() {
+            return new int[0];
+        }
+
+        @Override
+        public int getInfoColumn() {
+            return 0;
+        }
+
+        @Override
+        public void setName(String name) {
+
+        }
+
+        @Override
+        public String getName() {
+            return null;
+        }
+
+        @Override
+        public Map<String, Object> getExternalData() {
+            return null;
+        }
+
+        @Override
+        public PlotInformation getPlotInformation() {
+            return null;
+        }
+
+        @Override
         public String getColumnName(int col) {
             return m_columnNames[col];
         }
 
         @Override
         public int getRowCount() {
-            if (m_notificationMsgs == null) {
-                return 0;
-            }
 
-            return m_notificationMsgs.size();
+          return m_notificationMsgs.size();
         }
 
         @Override
@@ -557,7 +661,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
         }
     }
 
-    public class DateAndTimeRenderer extends DefaultTableCellRenderer {
+    public static class DateAndTimeRenderer extends DefaultTableCellRenderer {
 
         public DateAndTimeRenderer() {
         }
@@ -573,7 +677,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
         }
     }
 
-    public class EventTypeRenderer extends DefaultTableCellRenderer {
+    public static class EventTypeRenderer extends DefaultTableCellRenderer {
 
         public EventTypeRenderer() {
         }

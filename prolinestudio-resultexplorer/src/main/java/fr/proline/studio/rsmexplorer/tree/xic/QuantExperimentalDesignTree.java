@@ -573,8 +573,8 @@ public class QuantExperimentalDesignTree extends AbstractTree {
         masterQuantChannelParams.put("name", node.getData().getName());
         masterQuantChannelParams.put("quant_channels", quantChanneList);
         if (refDataset != null) {
-            masterQuantChannelParams.put("ident_dataset_id", (refRsmId != null) ? refRsmId : refDataset.getId());
-            masterQuantChannelParams.put("ident_result_summary_id", refDataset.getResultSummaryId());
+            masterQuantChannelParams.put("ident_dataset_id", refDataset.getId());
+            masterQuantChannelParams.put("ident_result_summary_id",  (refRsmId != null) ? refRsmId : (refRsmId != null) ? refRsmId : refDataset.getResultSummaryId());
         }
         masterQuantChannelsList.add(masterQuantChannelParams);
         experimentalDesignParams.put("master_quant_channels", masterQuantChannelsList);

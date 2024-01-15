@@ -22,6 +22,7 @@ import fr.proline.mzscope.utils.MzScopeCallback;
 
 import java.awt.*;
 import java.beans.PropertyChangeListener;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,11 +34,18 @@ public interface IRawFileViewer {
    final public static String LAST_EXTRACTION_REQUEST = "lastExtractionRequest";
 
    /**
-    * Returns the current RawFile ie the raw file associated with the current viewer (see below)
+    * Returns the current RawFile ie the raw file associated and selected with the current viewer (see below)
     *
     * @return the RawFile associated with this viewer.
     */
    public IRawFile getCurrentRawfile();
+
+   /**
+    * Returns all the RawFiles of the current viewer
+    *
+    * @return the RawFile associated with this viewer.
+    */
+   public List<IRawFile> getAllRawfiles();
 
    /**
     * Extract data according to the specified parameters and display the results in this viewer. The specified

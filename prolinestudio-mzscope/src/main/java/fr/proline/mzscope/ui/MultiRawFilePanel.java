@@ -80,6 +80,11 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
     }
 
     @Override
+    public List<IRawFile> getAllRawfiles() {
+        return rawfiles;
+    }
+
+    @Override
     public void extractAndDisplay(final ExtractionRequest params, Display display, MzScopeCallback callback) {
        // in this implementation display is ignored : always REPLACE since we will extract one IChromatogram per RawFile
         SwingWorker worker = new SwingWorker<Integer, IChromatogram>() {

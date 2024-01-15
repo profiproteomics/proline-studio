@@ -24,10 +24,9 @@ import fr.proline.mzscope.utils.Display;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.JButton;
@@ -63,6 +62,15 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
    @Override
    public IRawFile getCurrentRawfile() {
       return rawfile;
+   }
+
+   @Override
+   public List<IRawFile> getAllRawfiles() {
+      if (rawfile == null) {
+         return null;
+      }
+
+      return Collections.singletonList(rawfile);
    }
 
    protected JToolBar updateToolbar() {

@@ -37,6 +37,8 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
 
     private ObjectParameter<String> m_clusteringTimeComputationParameter;
     private ObjectParameter<String> m_clusteringIntensityComputationParameter;
+    private DoubleParameter m_clusteringMozTolParameter;
+    private DoubleParameter m_clusteringTimeTolParameter;
     private ObjectParameter<String> m_featureFilterNameParameter;
     private ObjectParameter<String> m_featureFilterOperatorParameter;
     private ObjectParameter<String> m_normalizationParameter;
@@ -114,8 +116,8 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
     private JCheckBox m_retainOnlyReliableFeaturesCB;
 
     //CLUSTERING PARAMs
-    private JTextField m_clusteringMoZTolTF;
-    private JTextField m_clusteringTimeTolTF;
+//    private JTextField m_clusteringMoZTolTF;
+//    private JTextField m_clusteringTimeTolTF;
     private JComboBox m_clusteringTimeComputationCB;
     private JComboBox m_clusteringIntensityComputationCB;
 
@@ -193,12 +195,12 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         m_crossAssignStrategyParameter = new ObjectParameter<>("crossAssignStrategy", "Cross Assignment Strategy", m_crossAssignStrategyCB, CROSSASSIGN_STRATEGY_VALUES, CROSSASSIGN_STRATEGY_KEYS, 0, null);
         m_parameterList.add(m_crossAssignStrategyParameter);
 
-        m_clusteringMoZTolTF = new JTextField();
-        DoubleParameter m_clusteringMoZTolParameter = new DoubleParameter("clusteringMoZTol", "Clustering moz tolerance", m_clusteringMoZTolTF, DEFAULT_CLUSTER_MOZTOL_VALUE, Double.valueOf(0), null);
-        m_parameterList.add(m_clusteringMoZTolParameter);
+//        m_clusteringMoZTolTF = new JTextField();
+        m_clusteringMozTolParameter = new DoubleParameter("clusteringMoZTol", "Clustering moz tolerance", new JTextField(), DEFAULT_CLUSTER_MOZTOL_VALUE, Double.valueOf(0), null);
+        m_parameterList.add(m_clusteringMozTolParameter);
 
-        m_clusteringTimeTolTF = new JTextField();
-        DoubleParameter m_clusteringTimeTolParameter = new DoubleParameter("clusteringTimeTol", "Clustering time tolerance", m_clusteringTimeTolTF, DEFAULT_CLUSTER_TIMETOL_VALUE, Double.valueOf(0), null);
+//        m_clusteringTimeTolTF = new JTextField();
+        m_clusteringTimeTolParameter  = new DoubleParameter("clusteringTimeTol", "Clustering time tolerance", new JTextField(), DEFAULT_CLUSTER_TIMETOL_VALUE, Double.valueOf(0), null);
         m_parameterList.add(m_clusteringTimeTolParameter);
 
         m_clusteringTimeComputationCB = new JComboBox(CLUSTERING_TIME_COMPUTATION_VALUES);
@@ -464,16 +466,16 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
             //*** Clustering Params
             //
             Map<String, Object> clusterParams = (Map<String, Object>) quantParams.get("clustering_params");
-            try {
-                m_clusteringMoZTolTF.setText("" + Double.parseDouble(clusterParams.getOrDefault("moz_tol", DEFAULT_CLUSTER_MOZTOL_VALUE).toString()));
-                m_clusteringTimeTolTF.setText("" + Double.parseDouble(clusterParams.getOrDefault("time_tol", DEFAULT_CLUSTER_TIMETOL_VALUE).toString()));
-            } catch (NumberFormatException | NullPointerException ex) {
-                parseError = true;
-                errorMsg.append("clustering.mozTolerance; clustering.RTTolerance\n");
-                m_logger.error("error while settings clustering_params quanti params " + ex);
-                m_clusteringMoZTolTF.setText(DEFAULT_CLUSTER_MOZTOL_VALUE.toString());
-                m_clusteringTimeTolTF.setText(DEFAULT_CLUSTER_TIMETOL_VALUE.toString());
-            }
+//            try {
+//                m_clusteringMoZTolTF.setText("" + Double.parseDouble(clusterParams.getOrDefault("moz_tol", DEFAULT_CLUSTER_MOZTOL_VALUE).toString()));
+//                m_clusteringTimeTolTF.setText("" + Double.parseDouble(clusterParams.getOrDefault("time_tol", DEFAULT_CLUSTER_TIMETOL_VALUE).toString()));
+//            } catch (NumberFormatException | NullPointerException ex) {
+//                parseError = true;
+//                errorMsg.append("clustering.mozTolerance; clustering.RTTolerance\n");
+//                m_logger.error("error while settings clustering_params quanti params " + ex);
+//                m_clusteringMoZTolTF.setText(DEFAULT_CLUSTER_MOZTOL_VALUE.toString());
+//                m_clusteringTimeTolTF.setText(DEFAULT_CLUSTER_TIMETOL_VALUE.toString());
+//            }
             m_clusteringIntensityComputationParameter.setValue((String) clusterParams.getOrDefault("intensity_computation", CLUSTERING_INTENSITY_COMPUTATION_VALUES[0]));
             m_clusteringTimeComputationParameter.setValue((String) clusterParams.getOrDefault("time_computation", CLUSTERING_TIME_COMPUTATION_VALUES[0]));
 
@@ -543,9 +545,9 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         params.put("detection_params", detectionParams);
 
         Map<String, Object> clusteringParams = new HashMap<>();
-        clusteringParams.put("moz_tol", m_clusteringMoZTolTF.getText());
+        clusteringParams.put("moz_tol", m_clusteringMozTolParameter.getStringValue());
         clusteringParams.put("moz_tol_unit", DEFAULT_MOZTOL_UNIT);
-        clusteringParams.put("time_tol", m_clusteringTimeTolTF.getText());
+        clusteringParams.put("time_tol", m_clusteringTimeTolParameter.getStringValue());
         clusteringParams.put("time_computation", m_clusteringTimeComputationParameter.getStringValue());
         clusteringParams.put("intensity_computation", m_clusteringIntensityComputationParameter.getStringValue());
         params.put("clustering_params", clusteringParams);
@@ -718,28 +720,28 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
     private JPanel createClusteringPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         JPanel clusteringPanel = new JPanel(new GridBagLayout());
-        JPanel clusteringFeaturePanel = new JPanel(new GridBagLayout());
-        clusteringFeaturePanel.setBorder(createTitledBorder(" Feature Clusterization rules ", 1));
+//        JPanel clusteringFeaturePanel = new JPanel(new GridBagLayout());
+//        clusteringFeaturePanel.setBorder(createTitledBorder(" Feature Clusterization rules ", 1));
 
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
+//        GridBagConstraints c = new GridBagConstraints();
+//        c.anchor = GridBagConstraints.NORTHWEST;
+//        c.fill = GridBagConstraints.BOTH;
+//        c.insets = new java.awt.Insets(5, 5, 5, 5);
 
-        c.gridx = 0;
-        c.gridy = 0;
-        clusteringFeaturePanel.add(new JLabel("delta moz (ppm) <= "), c);
-        c.gridx++;
-        c.weightx = 1;
-        clusteringFeaturePanel.add(m_clusteringMoZTolTF, c);
-        c.weightx = 0;
-
-        c.gridy++;
-        c.gridx = 0;
-        clusteringFeaturePanel.add(new JLabel("delta RT (s) <= "), c);
-        c.gridx++;
-        c.weightx = 1;
-        clusteringFeaturePanel.add(m_clusteringTimeTolTF, c);
+//        c.gridx = 0;
+//        c.gridy = 0;
+//        clusteringFeaturePanel.add(new JLabel("delta moz (ppm) <= "), c);
+//        c.gridx++;
+//        c.weightx = 1;
+//        clusteringFeaturePanel.add(m_clusteringMoZTolTF, c);
+//        c.weightx = 0;
+//
+//        c.gridy++;
+//        c.gridx = 0;
+//        clusteringFeaturePanel.add(new JLabel("delta RT (s) <= "), c);
+//        c.gridx++;
+//        c.weightx = 1;
+//        clusteringFeaturePanel.add(m_clusteringTimeTolTF, c);
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTHWEST;
@@ -749,12 +751,12 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         gbc.gridy = 0;
         gbc.weightx = 1.0;
         gbc.weighty = 1.0;
-        clusteringPanel.add(clusteringFeaturePanel, gbc);
+//        clusteringPanel.add(clusteringFeaturePanel, gbc);
 
         JPanel summarizingPanel = new JPanel(new GridBagLayout());
         summarizingPanel.setBorder(createTitledBorder(" Clustered features summarization", 1));
 
-        c = new GridBagConstraints();
+        GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
@@ -775,7 +777,7 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         summarizingPanel.add(m_clusteringIntensityComputationCB, c);
         c.weightx = 0;
 
-        gbc.gridy++;
+//        gbc.gridy++;
         clusteringPanel.add(summarizingPanel, gbc);
         panel.add(clusteringPanel, BorderLayout.NORTH);
         setEnabled(panel, !m_readOnly);

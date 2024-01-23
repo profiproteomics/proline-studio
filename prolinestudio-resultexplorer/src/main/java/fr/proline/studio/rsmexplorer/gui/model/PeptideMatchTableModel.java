@@ -722,6 +722,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
         putFilter(COLTYPE_PEPTIDE_MISSED_CLIVAGE, IntegerFilter.class, null, filtersMap);
         putFilter(COLTYPE_PEPTIDE_RANK, IntegerFilter.class, null, filtersMap);
         putFilter(COLTYPE_PEPTIDE_RETENTION_TIME, DoubleFilter.class, null, filtersMap);
+        putFilter(COLTYPE_PEPTIDE_PTM, StringDiffFilter.class, null, filtersMap);
 
         if (m_forRSM) {
             putFilter(COLTYPE_PEPTIDE_PROTEIN_SET_COUNT, IntegerFilter.class, null, filtersMap);

@@ -30,17 +30,13 @@ import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.*;
-import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.utils.IconManager;
 
 import javax.jms.Message;
 import javax.jms.QueueBrowser;
 import javax.swing.Timer;
 import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
+import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
@@ -121,6 +117,10 @@ public class SystemTasksPanel extends AbstractTasksPanel {
 
         m_messageTable = new SystemMessageTable();
         m_messageTable.setModel(new CompoundTableModel(new SystemMessageTableModel(), true));
+
+        TableRowSorter<TableModel> sorter = new TableRowSorter<>(m_messageTable.getModel());
+        m_messageTable.setRowSorter(sorter);
+
 
         TableColumnModel columnModel = m_messageTable.getColumnModel();
         columnModel.getColumn(SystemMessageTableModel.COLTYPE_MESSAGE_EVENT_DATE).setCellRenderer(new DateAndTimeRenderer());
@@ -443,7 +443,7 @@ public class SystemTasksPanel extends AbstractTasksPanel {
 
         @Override
         public GlobalTableModelInterface getFrozzenModel() {
-            return null;
+            return this;
         }
 
         @Override
@@ -526,17 +526,17 @@ public class SystemTasksPanel extends AbstractTasksPanel {
 
         @Override
         public String getDataColumnIdentifier(int columnIndex) {
-            return null;
+            return m_columnNames[columnIndex];
         }
 
         @Override
         public Class getDataColumnClass(int columnIndex) {
-            return null;
+            return getColumnClass(columnIndex);
         }
 
         @Override
         public Object getDataValueAt(int rowIndex, int columnIndex) {
-            return null;
+            return getValueAt(rowIndex,columnIndex);
         }
 
         @Override
@@ -657,7 +657,8 @@ public class SystemTasksPanel extends AbstractTasksPanel {
 
         @Override
         public TableCellRenderer getRenderer(int row, int col) {
-            return new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(getColumnClass(col)), JLabel.LEFT);
+        //    return new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(getColumnClass(col)), JLabel.LEFT);
+            return null;
         }
     }
 

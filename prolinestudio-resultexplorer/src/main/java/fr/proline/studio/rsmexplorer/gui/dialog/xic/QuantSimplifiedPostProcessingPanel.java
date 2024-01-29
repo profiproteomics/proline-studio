@@ -55,6 +55,9 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
     private JComboBox<String> m_peptidesSelectionMethodCB;
     private JCheckBox m_discardMissCleavedPeptidesChB;
     private JCheckBox m_discardModifiedPeptidesChB;
+    private CheckBoxTitledBorder m_usePIFCBoxTitle;// private JCheckBox m_discardPSMUsingPIFChB;
+    private JTextField m_discardPSMPIFValueTF;
+    private JLabel m_discardPSMPIFValueLabel;
     private JCheckBox m_applyPepNormalizationChB;
     private JCheckBox m_discardPeptideIonsSharingPeakelsChB;
     private List<JCheckBox> m_peptideModificationListChB;
@@ -66,6 +69,8 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
 
     private JCheckBox m_applyProtNormalizationChB;
 
+    private BooleanParameter m_discardPSMUsingPIFParameter;
+    private FloatParameter m_discardPSMPIFValueParameter;
     private StringParameter m_purityCorrectionMatrixParameter;
     private BooleanParameter m_usePurityCorrectionMatrixParameter;
     private BooleanParameter m_discardMissCleavedPeptidesParameter;
@@ -109,6 +114,7 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
             param.setUsed(true);
         }
         updateDiscardPTMs();
+        updateDiscardPIF();
     }
 
     private void createParameters() {
@@ -120,14 +126,27 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         m_discardMissCleavedPeptidesParameter.addBackwardCompatibleKey(QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.DISCARD_MISS_CLEAVED_PEPTIDES_PREV));
         m_parameterList.add(m_discardMissCleavedPeptidesParameter);
 
+        paramKey = QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.DISCARD_PIF_PEPTIDE_MATCHES_VALUE);
+        m_discardPSMPIFValueTF = new JTextField();
+        m_discardPSMPIFValueLabel =new JLabel("Discard PSM with PIF <= ");
+        m_discardPSMPIFValueTF.setEnabled(!m_readOnly);
+        m_discardPSMPIFValueLabel.setEnabled(!m_readOnly);
+        m_discardPSMPIFValueParameter = new FloatParameter(paramKey, StringUtils.getLabelFromCamelCase(paramKey), m_discardPSMPIFValueTF, QuantPostProcessingParams.DEFAULT_PIF_FILTER_VALUE, 0.0f, 1.0f);
+        m_parameterList.add(m_discardPSMPIFValueParameter);
+
+        paramKey = QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.DISCARD_PIF_PEPTIDE_MATCHES);
+        m_usePIFCBoxTitle = new CheckBoxTitledBorder("Use Precursor Intensity Fraction filter", false);
+//        String usePifLabel= "Use Precursor Intensity Fraction filter";
+//        m_discardPSMUsingPIFChB = new JCheckBox(usePifLabel);
+        m_usePIFCBoxTitle.setEnabled(!m_readOnly);
+        m_usePIFCBoxTitle.addChangeListener(e -> updateDiscardPIF());
+        m_discardPSMUsingPIFParameter = new BooleanParameter(paramKey, "Use Precursor Intensity Fraction filter", m_usePIFCBoxTitle.getInternalCheckBox(), false);
+        m_parameterList.add(m_discardPSMUsingPIFParameter);
+
+
         paramKey = QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.DISCARD_MODIFIED_PEPTIDES);
         m_discardModifiedPeptidesChB = new JCheckBox(StringUtils.getLabelFromCamelCase(paramKey));
-        m_discardModifiedPeptidesChB.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateDiscardPTMs();
-            }
-        });
+        m_discardModifiedPeptidesChB.addActionListener(e -> updateDiscardPTMs());
         m_discardModifiedPeptidesChB.setEnabled(!m_readOnly);
         m_discardModifiedPeptidesParameter = new BooleanParameter(paramKey, StringUtils.getLabelFromCamelCase(paramKey), m_discardModifiedPeptidesChB, false);
         m_discardModifiedPeptidesParameter.addBackwardCompatibleKey(QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.DISCARD_OXIDIZED_PEPTIDES));
@@ -214,6 +233,12 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
             m_peptideModificationListChB.forEach((ptmCBx) -> ptmCBx.setEnabled(m_discardModifiedPeptidesChB.isSelected()));
             m_modifiedPeptidesFilteringMethodLabel.setEnabled(m_discardModifiedPeptidesChB.isSelected());
             m_modifiedPeptidesFilteringMethodCB.setEnabled(m_discardModifiedPeptidesChB.isSelected());
+        }
+    }
+    private void updateDiscardPIF() {
+        if (!m_readOnly) {
+            m_discardPSMPIFValueTF.setEnabled(m_usePIFCBoxTitle.isSelected());
+            m_discardPSMPIFValueLabel.setEnabled(m_usePIFCBoxTitle.isSelected());
         }
     }
 
@@ -320,7 +345,7 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
     }
 
     private JPanel getAbundancePanel() {
-        JPanel tabPanel = new JPanel(new GridBagLayout());
+        JPanel abundancePanel = new JPanel(new GridBagLayout());
 
         GridBagConstraints tabPanelC = new GridBagConstraints();
         tabPanelC.anchor = GridBagConstraints.NORTHWEST;
@@ -334,7 +359,7 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         // PSMs Ab
         if(m_quantitationMethodInfo.equals(DDatasetType.QuantitationMethodInfo.ISOBARIC_TAGGING)) {
             JPanel psmPanel = createPSMAbundancePanel();
-            tabPanel.add(psmPanel, tabPanelC);
+            abundancePanel.add(psmPanel, tabPanelC);
             tabPanelC.gridy++;
         }
 
@@ -344,20 +369,20 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         pepPanel.add(m_applyPepNormalizationChB, BorderLayout.NORTH);
 
         tabPanelC.gridx = 0;
-        tabPanel.add(pepPanel, tabPanelC);
+        abundancePanel.add(pepPanel, tabPanelC);
 
         // Protein Ab
         JPanel protPanel = createProteinAbundancePanel();
 
         tabPanelC.gridx = 0;
         tabPanelC.gridy++;
-        tabPanel.add(protPanel, tabPanelC);
+        abundancePanel.add(protPanel, tabPanelC);
 
         tabPanelC.gridy++;
         tabPanelC.weighty = 1;
-        tabPanel.add(Box.createVerticalGlue(), tabPanelC);
+        abundancePanel.add(Box.createVerticalGlue(), tabPanelC);
 
-        return tabPanel;
+        return abundancePanel;
     }
 
     private JPanel createProteinAbundancePanel() {
@@ -371,15 +396,16 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         GridBagConstraints c1 = new GridBagConstraints();
         c1.anchor = GridBagConstraints.NORTHWEST;
         c1.fill = GridBagConstraints.BOTH;
-        c1.insets = new Insets(5, 5, 5, 5);
+        c1.insets = new Insets(5, 10, 5, 5);
 
         // peptide selection method
         c1.gridx = 0;
         c1.gridy = 0;
         c1.weightx = 0;
         JLabel peptideSelectionMethodLabel = new JLabel(m_peptidesSelectionMethodParameter.getName());
-        peptideSelectionMethodLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+//        peptideSelectionMethodLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         pepSelectionPanel.add(peptideSelectionMethodLabel, c1);
+        c1.insets = new Insets(5, 5, 5, 5);
 
         c1.gridx++;
         c1.weightx = 1;
@@ -405,11 +431,12 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         c1.gridy++;
         c1.weightx = 0;
         c1.gridwidth = 1;
-        c1.insets = new Insets(5, 5, 5, 5);
+        c1.insets = new Insets(5, 10, 5, 5);
         m_modifiedPeptidesFilteringMethodLabel = new JLabel(m_modifiedPeptidesFilteringMethodParameter.getName()); //Modified Peptide Filtering Method :");
-        m_modifiedPeptidesFilteringMethodLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+//        m_modifiedPeptidesFilteringMethodLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         pepSelectionPanel.add(m_modifiedPeptidesFilteringMethodLabel, c1);
 
+        c1.insets = new Insets(5, 5, 5, 5);
         c1.gridx++;
         c1.weightx = 1;
         pepSelectionPanel.add(m_modifiedPeptidesFilteringMethodCB, c1);
@@ -510,7 +537,25 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         }
         setEnabled(m_psmMatrixPanel, !m_readOnly);
         psmMatrixPanel.add(m_psmMatrixPanel, BorderLayout.NORTH);
-        psmPanel.add(psmMatrixPanel, BorderLayout.NORTH);
+
+        JPanel pifPanel = new JPanel(new GridBagLayout());
+        pifPanel.setBorder(m_usePIFCBoxTitle);
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.weightx = 0;
+        c.weighty = 0;
+        c.insets = new Insets(5, 5, 5, 5);
+        c.gridx = 0;
+        c.gridy = 0;
+//        m_discardPSMPIFValueLabel =new JLabel("Discard PSM with PIF <= ");
+        pifPanel.add(m_discardPSMPIFValueLabel, c);
+        c.weightx = 0.5;
+        c.gridx++;
+        pifPanel.add(m_discardPSMPIFValueTF,c);
+
+        psmPanel.add(pifPanel, BorderLayout.NORTH);
+        psmPanel.add(psmMatrixPanel, BorderLayout.CENTER);
         return psmPanel;
     }
 
@@ -776,7 +821,8 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         //for tab Pep. selection
         Map<String, Object> params = new HashMap<>();
         params.put(QuantPostProcessingParams.CONFIG_VERSION,QuantPostProcessingParams.CURRENT_VERSION);
-
+        params.put(QuantPostProcessingParams.DISCARD_PIF_PEPTIDE_MATCHES, m_usePIFCBoxTitle.isSelected()); //To add to IHM
+        params.put(QuantPostProcessingParams.DISCARD_PIF_PEPTIDE_MATCHES_VALUE, Float.valueOf(m_discardPSMPIFValueTF.getText())); //To add to IHM
         params.put(QuantPostProcessingParams.DISCARD_MISS_CLEAVED_PEPTIDES, m_discardMissCleavedPeptidesChB.isSelected());
         params.put(QuantPostProcessingParams.DISCARD_MODIFIED_PEPTIDES, m_discardModifiedPeptidesChB.isSelected());
         params.put(QuantPostProcessingParams.PEP_ION_ABUNDANCE_SUMMARIZING_METHOD, QuantPostProcessingParams.getPepIonAbundanceSummarizingMethodKeys()[m_peptideIonAbundanceSummarizingMethodCB.getSelectedIndex()]);
@@ -920,6 +966,19 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         Boolean discardSharingPeakel = isVersion3 ? Boolean.valueOf(refinedParams.get(QuantPostProcessingParams.DISCARD_PEP_IONS_SHARING_PEAKELS).toString()) : Boolean.valueOf(refinedParams.get(QuantPostProcessingParams.DISCARD_PEPTIDES_SHARING_PEAKELS).toString());
         m_discardPeptideIonsSharingPeakelsChB.setSelected(discardSharingPeakel);
 
+        Boolean usePifOption = Boolean.valueOf(refinedParams.getOrDefault(QuantPostProcessingParams.DISCARD_PIF_PEPTIDE_MATCHES, false).toString());
+        m_usePIFCBoxTitle.setSelected(usePifOption);
+        if(usePifOption){
+            try {
+                Float pifValue = Float.valueOf(refinedParams.getOrDefault(QuantPostProcessingParams.DISCARD_PIF_PEPTIDE_MATCHES_VALUE, QuantPostProcessingParams.DEFAULT_PIF_FILTER_VALUE).toString());
+                m_discardPSMPIFValueTF.setText("" + pifValue);
+            } catch (NumberFormatException ex) {
+                m_logger.error("error while settings m_discardPSMPIFValueTF quantification params " + ex);
+                m_discardPSMPIFValueTF.setText("" + QuantPostProcessingParams.DEFAULT_PIF_FILTER_VALUE);
+            }
+        }
+
+
         Boolean usePurityCorrMatrix = Boolean.valueOf(refinedParams.getOrDefault(QuantPostProcessingParams.USE_PURITY_CORRECTION_MATRIX, false).toString());
         m_usePurityCorrectionMatrixCBoxTitle.setSelected(usePurityCorrMatrix);
         if(usePurityCorrMatrix){
@@ -956,6 +1015,7 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         m_applyProtNormalizationChB.setSelected(Boolean.valueOf(proteinStatConfigMap.get(QuantPostProcessingParams.APPLY_NORMALIZATION).toString()));
 
         updateDiscardPTMs();
+        updateDiscardPIF();
     }
 
     private Double[][] convertStringToDoubleMatrix(String input) {

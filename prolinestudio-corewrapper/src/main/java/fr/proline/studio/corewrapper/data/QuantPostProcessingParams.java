@@ -107,6 +107,10 @@ public class QuantPostProcessingParams {
     private final static String[] PEPTIDES_SELECTION_METHOD_KEYS = {PEPTIDES_SELECTION_SPECIFIC_METHOD_KEY,PEPTIDES_SELECTION_RAZOR_AND_SPECIFIC_METHOD_KEY , PEPTIDES_SELECTION_ALL_PEPTIDES_METHOD_KEY};
         
     // -- other params
+    public final static String DISCARD_PIF_PEPTIDE_MATCHES = "discard_peptide_matches_pif";  //V3
+    public final static String DISCARD_PIF_PEPTIDE_MATCHES_VALUE = "discard_peptide_matches_pif_value";  //V3
+    public final static Float DEFAULT_PIF_FILTER_VALUE = Float.valueOf("0.80") ;  //V3
+
     public final static String DISCARD_MISS_CLEAVED_PEPTIDES = "discard_miss_cleaved_peptides";  //V3
     public final static String DISCARD_MISS_CLEAVED_PEPTIDES_PREV = "discard_missed_cleaved_peptides";//V1&2
     public final static String DISCARD_PEPTIDES_SHARING_PEAKELS = "discard_peptides_sharing_peakels";//V1&2

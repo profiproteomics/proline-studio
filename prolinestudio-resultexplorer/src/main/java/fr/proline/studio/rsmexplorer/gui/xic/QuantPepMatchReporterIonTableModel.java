@@ -24,6 +24,7 @@ import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DQuantReporterIon;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.dam.data.SelectLevelEnum;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.export.ExportFontData;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
@@ -34,6 +35,7 @@ import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.XicStatusRenderer;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
@@ -62,18 +64,20 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
     public static final int COLTYPE_PEPTIDE_MATCH_ID = 0;
     public static final int COLTYPE_PEPTIDE_MATCH_REP_ION_ID = 1;
     public static final int COLTYPE_PEPTIDE_SEQUENCE = 2;
-    public static final int COLTYPE_PEPTIDE_PTM = 3;
-    public static final int COLTYPE_PEPTIDE_SCORE = 4;
-    public static final int COLTYPE_PEPTIDE_MATCH_CHARGE = 5;
-    public static final int COLTYPE_PEPTIDE_MATCH_MOZ = 6;
-    public static final int COLTYPE_PEPTIDE_MATCH_RETENTION_TIME = 7;
-    public static final int LAST_STATIC_COLUMN = COLTYPE_PEPTIDE_MATCH_RETENTION_TIME;
-    private static final String[] m_columnNames = {"Pep. Match Id", "PSM Rep. Ion Id", "Peptide Sequence", "PTMs", "Score", "Charge", "m/z", "RT", };
-    private static final String[] m_columnNamesForFilter = {"Peptide Match Id", "Pep. Match Reporter Ion id", "Peptide Sequence", "PTMs", "Score", "Charge", "m/z", "RT"};
-    private static final String[] m_toolTipColumns = {"Peptide Match Id",  "Master Quant Reporter Ion Id", "Identified Peptide Sequence",  "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Retention time (min)", };
+    public static final int COLTYPE_PEPTIDE_MATCH_REP_ION_STATUS = 3;
+    public static final int COLTYPE_PEPTIDE_PTM = 4;
+    public static final int COLTYPE_PEPTIDE_SCORE = 5;
+    public static final int COLTYPE_PEPTIDE_MATCH_CHARGE = 6;
+    public static final int COLTYPE_PEPTIDE_MATCH_MOZ = 7;
+    public static final int COLTYPE_PEPTIDE_MATCH_RETENTION_TIME = 8;
 
-    //public static final int COLTYPE_SELECTION_LEVEL = 0;
-    // public static final int COLTYPE_PSM = 0;
+    public static final int COLTYPE_PEPTIDE_MATCH_PIF = 9;
+
+    public static final int LAST_STATIC_COLUMN = COLTYPE_PEPTIDE_MATCH_PIF;
+    private static final String[] m_columnNames = {"Pep. Match Id", "PSM Rep. Ion Id", "Peptide Sequence", "Status", "PTMs", "Score", "Charge", "m/z", "RT","PIF"};
+    private static final String[] m_columnNamesForFilter = {"Peptide Match Id", "Pep. Match Reporter Ion id", "Peptide Sequence", "Pep. Match status" , "PTMs", "Score", "Charge", "m/z", "RT","PIF"};
+    private static final String[] m_toolTipColumns = {"Peptide Match Id",  "Master Quant Reporter Ion Id", "Identified Peptide Sequence", "Pep. Match status: invalid, valid",  "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Retention time (min)","Precursor Intensity Fraction "};
+
     public static final int COLTYPE_RAW_ABUNDANCE = 0;
     public static final int COLTYPE_ABUNDANCE = 1;
 
@@ -183,6 +187,8 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
     public Class getColumnClass(int col) {
         if (col == COLTYPE_PEPTIDE_MATCH_REP_ION_ID)
             return Long.class;
+        else if(col == COLTYPE_PEPTIDE_MATCH_REP_ION_STATUS)
+            return XicStatusRenderer.SelectLevel.class;
         return LazyData.class;
     }
 
@@ -212,17 +218,31 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
                 return psmReporterIon.getId();
             }
 
-            case COLTYPE_PEPTIDE_MATCH_ID: {
+            case COLTYPE_PEPTIDE_MATCH_PIF:{
                 LazyData lazyData = getLazyData(row, col);
-                if (psmReporterIon.getResultSummary() == null) {
+                DPeptideMatch peptideMatch = psmReporterIon.getTransientData().getPeptideMatch();
+                if (peptideMatch == null) {
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, row, col);
                 } else {
-                    if (peptideIon == null || peptideIon.getPeptideInstance() == null) {
+                    Map<String, Object> vals = peptideMatch.getPropertiesAsMap();
+                    if(vals!=null && !vals.isEmpty() && vals.containsKey("precursor_intensity_fraction"))
+                        lazyData.setData(vals.get("precursor_intensity_fraction").toString());
+                    else
                         lazyData.setData(null);
-                    } else {
-                        lazyData.setData(peptideIon.getPeptideInstance().getPeptideId());
-                    }
+                }
+                return lazyData;
+            }
+
+            case COLTYPE_PEPTIDE_MATCH_ID: {
+                // Retrieve Peptide Match
+                LazyData lazyData = getLazyData(row, col);
+                DPeptideMatch peptideMatch = psmReporterIon.getTransientData().getPeptideMatch();
+                if (peptideMatch == null) {
+                    lazyData.setData(null);
+                    givePriorityTo(m_taskId, row, col);
+                } else {
+                    lazyData.setData(peptideMatch.getId());
                 }
                 return lazyData;
             }
@@ -320,6 +340,14 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
                 }
                 return lazyData;
 
+            }
+            case COLTYPE_PEPTIDE_MATCH_REP_ION_STATUS:{
+                SelectLevelEnum selectionLevel =  SelectLevelEnum.valueOf(psmReporterIon.getMasterQuantComponent().getSelectionLevel());
+                return new XicStatusRenderer.SelectLevel(selectionLevel, selectionLevel);
+//                switch (selectionLevel) {
+//                    case 1 : return  "invalid";
+//                    default: return "valid";
+//                }
             }
             default: {
                 // Quant Channel columns
@@ -505,6 +533,7 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
         List<Integer> listIds = new ArrayList<>();
         listIds.add(COLTYPE_PEPTIDE_MATCH_ID);
         listIds.add(COLTYPE_PEPTIDE_MATCH_REP_ION_ID);
+        listIds.add(COLTYPE_PEPTIDE_MATCH_PIF);
         if (m_quantChannels != null) {
             for (int i = m_quantChannels.length - 1; i >= 0; i--) {
                 listIds.add(m_columnNames.length + COLTYPE_RAW_ABUNDANCE + (i * m_columnNamesQC.length));
@@ -603,6 +632,27 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
                     return StringUtils.getTimeInMinutes(peptideMatchReportertIon.getTransientData().getPeptideMatch().getRetentionTime(), 2);
                 }
             }
+            case  COLTYPE_PEPTIDE_MATCH_REP_ION_STATUS:{
+                XicStatusRenderer.SelectLevel selectLevel =(XicStatusRenderer.SelectLevel)  getValueAt(row, col);
+                return selectLevel.getDescription();
+//                Integer selectionLevel= (Integer)  getValueAt(row, col);
+//                switch (selectionLevel) {
+//                    case 1 : return  "invalid";
+//                    default: return "valid";
+//                }
+            }
+            case COLTYPE_PEPTIDE_MATCH_PIF:{
+                DPeptideMatch peptideMatch = peptideMatchReportertIon.getTransientData().getPeptideMatch();
+                if (peptideMatch == null) {
+                    return "";
+                } else {
+                    Map<String, Object> vals = peptideMatch.getPropertiesAsMap();
+                    if(vals!=null && !vals.isEmpty() && vals.containsKey("precursor_intensity_fraction"))
+                        return vals.get("precursor_intensity_fraction").toString();
+                    else
+                        return "";
+                }
+            }
             default: {
                 // Quant Channel columns
                 int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
@@ -677,9 +727,11 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
             case COLTYPE_PEPTIDE_MATCH_RETENTION_TIME: {
                 return Float.class;
             }
+            case COLTYPE_PEPTIDE_MATCH_PIF:
             case COLTYPE_PEPTIDE_PTM: {
                 return String.class;
             }
+            case COLTYPE_PEPTIDE_MATCH_REP_ION_STATUS:
             case COLTYPE_PEPTIDE_MATCH_CHARGE: {
                 return Integer.class;
             }
@@ -707,6 +759,8 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
         if (data instanceof LazyData) {
             data = ((LazyData) data).getData();
         }
+        if(columnIndex == COLTYPE_PEPTIDE_MATCH_REP_ION_STATUS)
+            return ((XicStatusRenderer.SelectLevel) data).getStatus().getIntValue(); // return XicStatusRenderer.SelectLevel.class;
         return data;
     }
 
@@ -769,6 +823,10 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
                 renderer = new PeptideRenderer();
                 break;
             }
+            case COLTYPE_PEPTIDE_MATCH_REP_ION_STATUS:{
+                return  new XicStatusRenderer(null, COLTYPE_PEPTIDE_MATCH_REP_ION_STATUS);
+            }
+            case COLTYPE_PEPTIDE_MATCH_PIF:
             case COLTYPE_PEPTIDE_PTM: {
                 renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.LEFT);
                 break;

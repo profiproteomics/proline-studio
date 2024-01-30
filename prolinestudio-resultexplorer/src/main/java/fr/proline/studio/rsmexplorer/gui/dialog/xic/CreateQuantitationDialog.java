@@ -608,12 +608,18 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog implements Q
                   if (isQuantConfigPanelNeeded()) {
                     displayNextPanel();
                   } else {
-                    // LINK_RAW_FILE was the last panel, hide tje dialog by returning true
+                    // LINK_RAW_FILE was the last panel, hide the dialog by returning true
+                      // Save Quant Method  Parameters if exist
+                      if(m_quantMethodParamsPanel!=null) {
+                          Preferences preferences = NbPreferences.root();
+                          ParameterList qMethodParameterList = m_quantMethodParamsPanel.getParameterList();
+                          qMethodParameterList.saveParameters(preferences);
+                      }
                     return true;
                   }
                 }
                 return false;
-            default:
+            default: //STEP_PANEL_LABEL_FREE_PARAMS
 
                 if (!checkQuantParameters()) {
                     return false;
@@ -625,6 +631,11 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog implements Q
                 parameterList.saveParameters(preferences);
                 preferences.putBoolean(AbstractLabelFreeMSParamsPanel.XIC_SIMPLIFIED_PARAMS, LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().isSimplifiedPanel());
 
+                // Save Quant Method  Parameters if exist
+                if(m_quantMethodParamsPanel!=null) {
+                    ParameterList qMethodParameterList = m_quantMethodParamsPanel.getParameterList();
+                    qMethodParameterList.saveParameters(preferences);
+                }
                 return true;
         }
 

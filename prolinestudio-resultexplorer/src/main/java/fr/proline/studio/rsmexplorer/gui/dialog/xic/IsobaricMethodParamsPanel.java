@@ -76,11 +76,11 @@ public class IsobaricMethodParamsPanel extends AbstractParamsPanel {
         m_readOnly = readOnly;
         m_parameterList = new ParameterList(ISOBARIC_PARAMS_PREFIX);
         createParameters();
-        m_parameterList.updateValues(NbPreferences.root());
-
         setLayout(new BorderLayout());
         JPanel mainPanel = createMainPanel();
         add(mainPanel, BorderLayout.CENTER);
+        m_parameterList.updateValues(NbPreferences.root());
+
     }
 
     private void createParameters(){

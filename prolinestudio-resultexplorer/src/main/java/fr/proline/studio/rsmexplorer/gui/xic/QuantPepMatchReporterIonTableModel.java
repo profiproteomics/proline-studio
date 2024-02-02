@@ -76,7 +76,7 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
     public static final int LAST_STATIC_COLUMN = COLTYPE_PEPTIDE_MATCH_PIF;
     private static final String[] m_columnNames = {"Pep. Match Id", "PSM Rep. Ion Id", "Peptide Sequence", "Status", "PTMs", "Score", "Charge", "m/z", "RT","PIF"};
     private static final String[] m_columnNamesForFilter = {"Peptide Match Id", "Pep. Match Reporter Ion id", "Peptide Sequence", "Pep. Match status" , "PTMs", "Score", "Charge", "m/z", "RT","PIF"};
-    private static final String[] m_toolTipColumns = {"Peptide Match Id",  "Master Quant Reporter Ion Id", "Identified Peptide Sequence", "Pep. Match status: invalid, valid",  "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Retention time (min)","Precursor Intensity Fraction "};
+    private static final String[] m_toolTipColumns = {"Peptide Match Id",  "Master Quant Reporter Ion Id", "Identified Peptide Sequence", "Pep. Match status: invalid, valid",  "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Retention time (min)","Precursor Ion Fraction "};
 
     public static final int COLTYPE_RAW_ABUNDANCE = 0;
     public static final int COLTYPE_ABUNDANCE = 1;
@@ -226,10 +226,18 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
                     givePriorityTo(m_taskId, row, col);
                 } else {
                     Map<String, Object> vals = peptideMatch.getPropertiesAsMap();
-                    if(vals!=null && !vals.isEmpty() && vals.containsKey("precursor_intensity_fraction"))
-                        lazyData.setData(vals.get("precursor_intensity_fraction").toString());
+                    if(vals!=null && !vals.isEmpty() && vals.containsKey("precursor_intensity_fraction")) {
+                        String pifStringVal = vals.get("precursor_intensity_fraction").toString();
+                        try {
+                            Float pifVal = Float.valueOf(pifStringVal);
+                            lazyData.setData(pifVal);
+                        } catch (NumberFormatException nfe){
+                            m_logger.error("Unable to get Float value for PIF "+pifStringVal+" set to NaN");
+                            lazyData.setData(Float.NaN);
+                        }
+                    }
                     else
-                        lazyData.setData(null);
+                        lazyData.setData(Float.NaN);
                 }
                 return lazyData;
             }
@@ -344,10 +352,6 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
             case COLTYPE_PEPTIDE_MATCH_REP_ION_STATUS:{
                 SelectLevelEnum selectionLevel =  SelectLevelEnum.valueOf(psmReporterIon.getMasterQuantComponent().getSelectionLevel());
                 return new XicStatusRenderer.SelectLevel(selectionLevel, selectionLevel);
-//                switch (selectionLevel) {
-//                    case 1 : return  "invalid";
-//                    default: return "valid";
-//                }
             }
             default: {
                 // Quant Channel columns
@@ -473,6 +477,7 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
             }
             return ((Peptide) o).getSequence();
         };
+        filtersMap.put(COLTYPE_PEPTIDE_MATCH_PIF, new DoubleFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_MATCH_PIF), null, COLTYPE_PEPTIDE_MATCH_PIF));
         filtersMap.put(COLTYPE_PEPTIDE_SEQUENCE, new StringDiffFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_SEQUENCE), peptideConverter, COLTYPE_PEPTIDE_SEQUENCE));
         filtersMap.put(COLTYPE_PEPTIDE_PTM, new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_PTM), null, COLTYPE_PEPTIDE_PTM));
         filtersMap.put(COLTYPE_PEPTIDE_SCORE, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_SCORE), null, COLTYPE_PEPTIDE_SCORE));
@@ -724,10 +729,10 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
             case COLTYPE_PEPTIDE_SEQUENCE:
                 return String.class;
             case COLTYPE_PEPTIDE_SCORE:
+            case COLTYPE_PEPTIDE_MATCH_PIF:
             case COLTYPE_PEPTIDE_MATCH_RETENTION_TIME: {
                 return Float.class;
             }
-            case COLTYPE_PEPTIDE_MATCH_PIF:
             case COLTYPE_PEPTIDE_PTM: {
                 return String.class;
             }

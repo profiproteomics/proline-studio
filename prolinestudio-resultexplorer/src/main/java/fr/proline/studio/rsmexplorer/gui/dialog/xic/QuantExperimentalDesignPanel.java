@@ -48,7 +48,7 @@ public class QuantExperimentalDesignPanel extends JPanel {
 
     private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer");
 
-    private final AbstractNode m_rootNode;
+    private AbstractNode m_rootNode;
     private final IdentificationTree m_selectionTree;
     private QuantExperimentalDesignTree m_experimentalDesignTree;
     private final AbstractNode m_initialRootNode;
@@ -88,10 +88,28 @@ public class QuantExperimentalDesignPanel extends JPanel {
         Only one choice for label free, no panel needed.
          */
         initializeMethodComponents();
-
-        JPanel mainPanel = createMainPanel();
         setLayout(new BorderLayout());
+        JPanel mainPanel = createMainPanel();
         add(mainPanel, BorderLayout.CENTER);
+    }
+
+    private void reinitPanel(){
+        AbstractNode treeRoot;
+        //Reinit Tree
+        if(m_isMultiQuantPanel){
+            treeRoot = new DataSetNode(DataSetData.createTemporaryFolder("All Quantifications"));
+        } else
+            treeRoot = m_initialRootNode;
+        m_rootNode = treeRoot;
+        m_experimentalDesignTree = m_isMultiQuantPanel ? new QuantExperimentalDesignTree(m_rootNode, true, false) : new QuantExperimentalDesignTree(m_rootNode, true, true);
+        m_expDesignTransferTreeHandler = (XICTransferHandler) m_experimentalDesignTree.getTransferHandler();
+        fireExpDesignTreeChanges();
+        //Reload Panel components
+        removeAll();
+        setLayout(new BorderLayout());
+        add(createMainPanel(), BorderLayout.CENTER);
+        revalidate();
+        repaint();
     }
 
     public boolean isMultiQuantPanel(){
@@ -107,15 +125,13 @@ public class QuantExperimentalDesignPanel extends JPanel {
         mainPanel.setLayout(new GridBagLayout());
 
         JPanel designTreePanel = createDesignTreePanel();
-
-        JPanel framePanel = new JPanel(new GridBagLayout());
-        framePanel.setBorder(BorderFactory.createTitledBorder(" Experimental Design "));
-
         JSplitPane sp = new JSplitPane();
         sp.setLeftComponent(designTreePanel);
         sp.setRightComponent(m_selectionPanel);
         sp.setResizeWeight(0.5);
 
+        JPanel framePanel = new JPanel(new GridBagLayout());
+        framePanel.setBorder(BorderFactory.createTitledBorder(" Experimental Design "));
         final GridBagConstraints cFrame = new GridBagConstraints();
         cFrame.insets = new java.awt.Insets(5, 5, 5, 5);
         cFrame.gridx = 0;
@@ -176,20 +192,13 @@ public class QuantExperimentalDesignPanel extends JPanel {
 
         if(m_isMultiBatchAllowed) {
             m_multiBatchCB = new JCheckBox("Multi Batch Quantitation");
-            m_multiBatchCB.addActionListener(e -> changeMultiQuantPanelView());
+            m_multiBatchCB.addActionListener(e -> {
+                m_isMultiQuantPanel = m_isMultiQuantAllowed && !m_multiBatchCB.isSelected();
+                reinitPanel();
+            });
         }
     }
 
-    private void changeMultiQuantPanelView() {
-        m_isMultiQuantPanel = m_isMultiQuantAllowed && !m_multiBatchCB.isSelected();
-        m_experimentalDesignTree = m_isMultiQuantPanel ? new QuantExperimentalDesignTree(m_rootNode, true, false) : new QuantExperimentalDesignTree(m_initialRootNode, true, true);
-        m_expDesignTransferTreeHandler = (XICTransferHandler) m_experimentalDesignTree.getTransferHandler();
-        fireExpDesignTreeChanges();
-        removeAll();
-        add(createMainPanel(), BorderLayout.CENTER);
-        repaint();
-        revalidate();
-    }
 
     private JPanel createMethodPanel() {
         JPanel panel = new JPanel();
@@ -261,38 +270,61 @@ public class QuantExperimentalDesignPanel extends JPanel {
 
             designTreePanel.add(treeScrollPane, c);
         } else {
-            designTreePanel.setLayout(new GridBagLayout());
-            GridBagConstraints c = new GridBagConstraints();
-            c.anchor = GridBagConstraints.NORTHWEST;
-            c.fill = GridBagConstraints.NONE;
-            c.insets = new java.awt.Insets(5, 5, 5, 5);
 
-            c.gridx = 0;
-            c.gridy = 0;
-            c.weightx = 0;
-            c.weighty = 0;
+            JSplitPane sp = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+            sp.setResizeWeight(0.5);
 
-            JLabel QuantTitle = new JLabel("Drag&Drop datasets to quantify here : ");
-            designTreePanel.add(QuantTitle, c);
+            JPanel dndPanel = new JPanel();
+            dndPanel.setLayout(new GridBagLayout());
+            GridBagConstraints c2 = new GridBagConstraints();
+            c2.anchor = GridBagConstraints.NORTHWEST;
+            c2.fill = GridBagConstraints.NONE;
+            c2.insets = new java.awt.Insets(5, 5, 5, 5);
+            c2.gridx = 0;
+            c2.gridy = 0;
+            c2.weightx = 0;
+            c2.weighty = 0;
+            JLabel quantTitle = new JLabel("Drag&Drop datasets to quantify here : ");
+            dndPanel.add(quantTitle, c2);
 
-            c.gridy++;
-            c.weightx = 1;
-            c.weighty = 1;
-            c.fill = GridBagConstraints.BOTH;
-            JList<String> m_datasetToQuantList = new JList<>(new DefaultListModel<>()
-            );
-            m_datasetToQuantList.setTransferHandler( new ListTransferHandler(m_experimentalDesignTree, m_initialRootNode, m_expDesignTransferTreeHandler));
-            JScrollPane listPane = new JScrollPane(m_datasetToQuantList);
-            designTreePanel.add(listPane, c);
+            c2.gridx++;
+            c2.anchor = GridBagConstraints.EAST;
+            JButton clearButton = new JButton();
+            clearButton.setIcon(IconManager.getIcon(IconManager.IconType.ERASER));
+            clearButton.setToolTipText("Clear All");
+            clearButton.addActionListener(e ->  {
+                m_isMultiQuantPanel = m_isMultiQuantAllowed;
+                reinitPanel();
+            });
+            dndPanel.add(clearButton, c2);
 
-            c.gridy++;
-            c.weightx = 1;
-            c.weighty = 1;
-            c.fill = GridBagConstraints.BOTH;
+            c2.gridx=0;
+            c2.gridy++;
+            c2.weightx = 1;
+            c2.weighty = 1;
+            c2.gridwidth=2;
+            c2.fill = GridBagConstraints.BOTH;
+            JList<String> datasetToQuantList = new JList<>(new DefaultListModel<>());
+            datasetToQuantList.setTransferHandler( new ListTransferHandler(m_experimentalDesignTree, m_initialRootNode, m_expDesignTransferTreeHandler));
+            JScrollPane listPane = new JScrollPane(datasetToQuantList);
+            dndPanel.add(listPane, c2);
 
             JScrollPane treeScrollPane = new JScrollPane();
             treeScrollPane.setViewportView(m_experimentalDesignTree);
-            designTreePanel.add(treeScrollPane, c);
+
+            sp.setTopComponent(dndPanel);
+            sp.setBottomComponent(treeScrollPane);
+
+            designTreePanel.setLayout(new GridBagLayout());
+            GridBagConstraints c = new GridBagConstraints();
+            c.anchor = GridBagConstraints.NORTHWEST;
+            c.fill = GridBagConstraints.BOTH;
+            c.insets = new java.awt.Insets(5, 5, 5, 5);
+            c.gridx = 0;
+            c.gridy = 0;
+            c.weightx = 1;
+            c.weighty = 1;
+            designTreePanel.add(sp, c);
         }
 
         return designTreePanel;
@@ -370,7 +402,7 @@ public class QuantExperimentalDesignPanel extends JPanel {
     //
     //  Managing Listeners
     //
-    private List<QuantExpDesignTreeListener> listenerList;   /** List of listeners */
+    private List<QuantExpDesignTreeListener> listenerList;   // List of listeners
 
     /**
      * Adds a QuantExpDesignTreeListener that will be notified when experimentalDesignTree has changed
@@ -402,15 +434,15 @@ public class QuantExperimentalDesignPanel extends JPanel {
 
     static class ListTransferHandler extends TransferHandler {
 
-        private XICTransferHandler m_xicHandler;
-        QuantExperimentalDesignTree m_experimentalDesignTrees;
-        AbstractNode m_templateNode;
+        private final XICTransferHandler m_xicHandler;
+        private final QuantExperimentalDesignTree m_experimentalDesignTrees;
+        private final AbstractNode m_templateNode;
 
         protected ListTransferHandler(QuantExperimentalDesignTree experimentalDesignTrees, AbstractNode template, XICTransferHandler xicHandler) {
             super();
             m_experimentalDesignTrees = experimentalDesignTrees;
             m_templateNode = template;
-            m_xicHandler= xicHandler;
+            m_xicHandler = xicHandler;
         }
 
 
@@ -442,7 +474,7 @@ public class QuantExperimentalDesignPanel extends JPanel {
                         m_templateNode.copyChildren(newChild);
                         ((DefaultTreeModel)m_experimentalDesignTrees.getModel()).insertNodeInto(newChild, root, nbC-1);
                         nbC++;
-                        ArrayList<DataSetNode> singleDatanode = new ArrayList();
+                        ArrayList<DataSetNode> singleDatanode = new ArrayList<>();
                         singleDatanode.add(item);
                         singleData.setDatasetList(singleDatanode);
                         m_xicHandler.importDirectNodeToQuant(newChild, singleData);

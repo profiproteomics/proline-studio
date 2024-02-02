@@ -180,7 +180,7 @@ public class LabelFreeMSParamsSimplifiedPanel extends AbstractLabelFreeMSParamsP
                 alignmentConfig.put("ft_mapping_method_name", FEATURE_MAPPING_METHOD_KEYS[0]);
                 Map<String, Object> alnFtParams = new HashMap<>();
                 alnFtParams.put("time_tol", m_alignmentFeatureMapTimeToleranceTF.getText());
-                alignmentConfig.put("ft_mapping_method_params", alnFtParams);
+                alignmentConfig.put("ft_mapping_params", alnFtParams);
                 alignmentConfig.put("ignore_errors", false);
                 params.put(AbstractLabelFreeMSParamsPanel.ALIGNMENT_CONFIG, alignmentConfig);
             }

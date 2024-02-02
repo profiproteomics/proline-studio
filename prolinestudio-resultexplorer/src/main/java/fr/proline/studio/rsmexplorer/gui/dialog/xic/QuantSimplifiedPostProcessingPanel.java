@@ -135,12 +135,12 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         m_parameterList.add(m_discardPSMPIFValueParameter);
 
         paramKey = QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.DISCARD_PIF_PEPTIDE_MATCHES);
-        m_usePIFCBoxTitle = new CheckBoxTitledBorder("Use Precursor Intensity Fraction filter", false);
-//        String usePifLabel= "Use Precursor Intensity Fraction filter";
+        m_usePIFCBoxTitle = new CheckBoxTitledBorder("Use Precursor Ion Fraction filter", false);
+//        String usePifLabel= "Use Precursor Ion Fraction filter";
 //        m_discardPSMUsingPIFChB = new JCheckBox(usePifLabel);
         m_usePIFCBoxTitle.setEnabled(!m_readOnly);
         m_usePIFCBoxTitle.addChangeListener(e -> updateDiscardPIF());
-        m_discardPSMUsingPIFParameter = new BooleanParameter(paramKey, "Use Precursor Intensity Fraction filter", m_usePIFCBoxTitle.getInternalCheckBox(), false);
+        m_discardPSMUsingPIFParameter = new BooleanParameter(paramKey, "Use Precursor Ion Fraction filter", m_usePIFCBoxTitle.getInternalCheckBox(), false);
         m_parameterList.add(m_discardPSMUsingPIFParameter);
 
 
@@ -217,7 +217,8 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         String paramName = QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.PSM_ABUNDANCE_SUMMARIZING_METHOD_VALUE);
         m_psmAbundanceSummarizingMethodCB = new JComboBox<>(QuantPostProcessingParams.getPSMAbundanceSummarizingMethodValues());
         m_psmAbundanceSummarizingMethodCB.setEnabled(!m_readOnly);
-        m_psmAbundanceSummarizingMethodParameter = new ObjectParameter<>(paramKey, StringUtils.getLabelFromCamelCase(paramName), m_psmAbundanceSummarizingMethodCB, QuantPostProcessingParams.getPSMAbundanceSummarizingMethodValues(), QuantPostProcessingParams.getPSMAbundanceSummarizingMethodKeys(), 0, null);
+        String psmSummarizingLabel = "PSM Abundance Summarizing Method";
+        m_psmAbundanceSummarizingMethodParameter = new ObjectParameter<>(paramKey, psmSummarizingLabel, m_psmAbundanceSummarizingMethodCB, QuantPostProcessingParams.getPSMAbundanceSummarizingMethodValues(), QuantPostProcessingParams.getPSMAbundanceSummarizingMethodKeys(), 0, null);
         m_parameterList.add(m_psmAbundanceSummarizingMethodParameter);
 
         paramKey = QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.MODIFIED_PEPTIDE_FILTERING_METHOD);

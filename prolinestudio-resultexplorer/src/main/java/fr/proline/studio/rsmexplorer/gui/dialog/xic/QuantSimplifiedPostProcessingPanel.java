@@ -24,10 +24,7 @@ import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
 import java.util.List;
 import java.util.*;
 import java.util.prefs.BackingStoreException;
@@ -49,6 +46,7 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
     JPanel m_psmMatrixPanel;
 
     PurityCorrectionMatrixTableModel m_readOnlyPurityTableModel;
+    JButton m_savePurityMatrix;
     JLabel m_psmFileMatrixStatus;
     JLabel m_psmTableMatrixStatus;
     private CheckBoxTitledBorder m_usePurityCorrectionMatrixCBoxTitle;
@@ -475,6 +473,7 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
             m_psmMatrixPanel.add(psmMatrixFileLabel, c);
 
             c.gridx++;
+            c.insets = new Insets(5, 5, 5, 2);
             JButton fileChooser = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
             fileChooser.setMargin(new Insets(5, 5, 5, 5));
             fileChooser.addActionListener(e -> getPurityMatrixFile());
@@ -482,6 +481,7 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
 
             c.gridx++;
             c.weightx = 1;
+            c.insets = new Insets(5, 0, 5, 5);
             m_psmFileMatrixStatus = new JLabel();
             m_psmFileMatrixStatus.setIcon(IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));
             m_psmFileMatrixStatus.setBorder(new EmptyBorder(new Insets(1, 1, 1, 1)));
@@ -496,24 +496,43 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
             m_psmMatrixPanel.add(label2, c);
             c.gridx++;
             c.weightx = 0;
+            c.insets = new Insets(5, 5, 5, 2);
             JButton matrixAccess = new JButton(IconManager.getIcon(IconManager.IconType.GRID));
             matrixAccess.setMargin(new Insets(5, 5, 5, 5));
             matrixAccess.addActionListener(e -> openMatrixDialog());
             m_psmMatrixPanel.add(matrixAccess, c);
+
             c.gridx++;
             c.weightx = 1;
+            c.insets = new Insets(5, 0, 5, 5);
             m_psmTableMatrixStatus = new JLabel();
             m_psmTableMatrixStatus.setIcon(IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));
             m_psmTableMatrixStatus.setBorder(new EmptyBorder(new Insets(1, 1, 1, 1)));
             m_psmMatrixPanel.add(m_psmTableMatrixStatus, c);
 
+            //Buttons
             c.gridy++;
-            c.anchor = GridBagConstraints.NORTHEAST;
+            c.anchor = GridBagConstraints.EAST;
+            c.fill = GridBagConstraints.NONE;
+            c.gridx++;
+            c.weightx = 1;
+            c.insets = new Insets(5, 0, 5, 2);
+            m_psmMatrixPanel.add(Box.createHorizontalGlue(), c);
+
+            c.gridx++;
+
             c.weightx = 0;
             JButton matrixView = new JButton("View Matrix");
             matrixView.setMargin(new Insets(5, 5, 5, 5));
             matrixView.addActionListener(e -> viewMatrixDialog());
             m_psmMatrixPanel.add(matrixView, c);
+
+            c.gridx++;
+            c.weightx = 0;
+            m_savePurityMatrix = new JButton("Save Matrix");
+            m_savePurityMatrix.setMargin(new Insets(5, 5, 5, 5));
+            m_savePurityMatrix.addActionListener(e -> saveMatrixDialog());
+            m_psmMatrixPanel.add(m_savePurityMatrix, c);
 
         } else { //readOnly : display purityMatrix
             m_psmMatrixPanel = new JPanel();
@@ -558,6 +577,38 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         psmPanel.add(pifPanel, BorderLayout.NORTH);
         psmPanel.add(psmMatrixPanel, BorderLayout.CENTER);
         return psmPanel;
+    }
+
+    private void saveMatrixDialog()  {
+        if(m_purityMatrixValues == null || m_purityMatrixValues.isEmpty()) {
+            JOptionPane.showMessageDialog(this.getParent(),"\nNo Purity matrix was defined yet ...\n","View Purity Matrix", JOptionPane.ERROR_MESSAGE);
+
+        } else {
+            JFileChooser fchooser = new JFileChooser();
+            fchooser.setMultiSelectionEnabled(false);
+            int result = fchooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File newFile = fchooser.getSelectedFile();
+                try {
+                    if(newFile.exists()){
+                        int resultOverwrite = JOptionPane.showConfirmDialog(this, "File exist. Overwrite ?!","Overwrite File",JOptionPane.YES_NO_OPTION);
+                        if(resultOverwrite == JOptionPane.YES_OPTION)
+                            newFile.delete();
+                        else
+                            return;
+                    }
+
+                    int resultSave = JOptionPane.showConfirmDialog(this, "Save current purity matrix in file "+newFile.getName()+" (in generic format) ? ","Save matrix",JOptionPane.YES_NO_OPTION);
+                    if(resultSave == JOptionPane.YES_OPTION) {
+                        FileWriter fw = new FileWriter(newFile);
+                        fw.write(m_purityMatrixValues);
+                        fw.close();
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
 
     private DecoratedTable createReadOnlyTable(){

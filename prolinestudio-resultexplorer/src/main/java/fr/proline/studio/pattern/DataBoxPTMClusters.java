@@ -252,9 +252,10 @@ public class DataBoxPTMClusters extends AbstractDataBox {
                         DatabaseDataManager.getDatabaseDataManager().addLoadedAnnotatedPTMDatasetSet(ptmDSSet.get(0));
                     else
                         DatabaseDataManager.getDatabaseDataManager().addLoadedPTMDatasetSet(ptmDSSet.get(0));
-                    m_logger.debug(" Task "+taskId+" DONE. Should propagate changes ");
+                    m_logger.debug(" Task "+taskId+" DONE. Should propagate changes. Duration: "+(System.currentTimeMillis()-logStartTimelocal)+" TimeMillis");
                     addDataChanged(ExtendedTableModelInterface.class);
                     propagateDataChanged();
+
                 }
             }
         };

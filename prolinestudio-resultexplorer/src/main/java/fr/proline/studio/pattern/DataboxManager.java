@@ -70,8 +70,6 @@ public class DataboxManager {
         new DataBoxPTMPeptides(true, true),    // Quanti PTMs Peptides Matches
         new DataBoxPTMPeptidesGraphic(),
         new DataboxXicParentsPeptideIon(),
-        new DataBoxPTMClustersSites(),
-        new DataBoxPTMClustersSites(true),
         new DataboxXicReporterIon()
     };
 
@@ -94,8 +92,6 @@ public class DataboxManager {
             newGenericDatabox = new DataBoxPTMPeptides(((DataBoxPTMPeptides) sourceDB).isMS1LabelFreeQuantitation(), ((DataBoxPTMPeptides) sourceDB).isAllPSMsDisplayed());
         } else  if(DataBoxPTMClusters.class.equals(newGenericDatabox.getClass())) {
             newGenericDatabox = new DataBoxPTMClusters( ((DataBoxPTMClusters)sourceDB).m_type.equals(AbstractDataBox.DataboxType.DataBoxPTMSiteAsClusters) );
-        } else  if(DataBoxPTMClustersSites.class.equals(newGenericDatabox.getClass())) {
-            newGenericDatabox = new DataBoxPTMClustersSites( ((DataBoxPTMClustersSites)sourceDB).m_type.equals(AbstractDataBox.DataboxType.DataBoxXicPTMClustersSites) );
         }
 
         return  newGenericDatabox;

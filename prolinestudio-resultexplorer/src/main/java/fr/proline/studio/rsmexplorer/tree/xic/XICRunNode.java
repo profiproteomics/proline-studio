@@ -350,7 +350,7 @@ public class XICRunNode extends AbstractNode {
         m_treeModel.nodeChanged(this);
 
         String searchString = selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.'));
-        String userFilePath = selectedFile.getAbsolutePath();
+        String userFilePath = selectedFile.getParentFile().getAbsolutePath();
 
         final HashMap<String, RawFile> m_rawFilesMap = new HashMap<>();
         final TreeNode _this = this;
@@ -374,6 +374,7 @@ public class XICRunNode extends AbstractNode {
                     runInfoData.setRun(rawFile.getRuns().get(0));
                     //verify if it's the same as user file : same path
                     String foundPath = rawFile.getMzDbFileDirectory();
+
                     m_logger.debug(" FOUND MZDB with path : "+foundPath+" USER Path was   "+userFilePath);
                     if(!userFilePath.equals(foundPath)){
                         SwingUtilities.invokeLater(new Runnable() {

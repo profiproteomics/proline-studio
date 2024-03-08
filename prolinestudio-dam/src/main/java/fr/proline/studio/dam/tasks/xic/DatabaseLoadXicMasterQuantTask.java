@@ -273,11 +273,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             case LOAD_QUANT_CHANNELS_FOR_XIC:
                 m_dataset = null;
                 break;
-            case LOAD_PEPTIDE_FOR_XIC:
-                m_masterQuantPeptideList = null;
-                break;
-            case LOAD_PEPTIDE_FOR_PROTEIN_SET:
-            case LOAD_PEPTIDE_FROM_PEPTIDES_INSTANCES:
+            case LOAD_PEPTIDE_FOR_XIC, LOAD_PEPTIDE_FOR_PROTEIN_SET, LOAD_PEPTIDE_FROM_PEPTIDES_INSTANCES:
                 m_masterQuantPeptideList = null;
                 break;
             case LOAD_PEPTIDE_ION_FOR_PEPTIDE:
@@ -296,125 +292,133 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
 
     @Override
     public boolean fetchData() {
-        if (action == LOAD_QUANT_CHANNELS_FOR_XIC) {
-            if (needToFetch()) {
-                m_taskError = fetchDataQuantChannels(m_projectId, m_dataset);
-                return (m_taskError == null);
-            }
-        } else if (action == LOAD_PROTEIN_SET_FOR_XIC) {
-            if (needToFetch()) {
-                // first data are fetched
-                if (m_dataset.getMasterQuantitationChannels() == null || m_dataset.getMasterQuantitationChannels().isEmpty()) {
+        try {
+            if (action == LOAD_QUANT_CHANNELS_FOR_XIC) {
+                if (needToFetch()) {
                     m_taskError = fetchDataQuantChannels(m_projectId, m_dataset);
+                    return (m_taskError == null);
                 }
-                if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
-                    m_taskError = DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
+            } else if (action == LOAD_PROTEIN_SET_FOR_XIC) {
+                if (needToFetch()) {
+                    // first data are fetched
+                    if (m_dataset.getMasterQuantitationChannels() == null || m_dataset.getMasterQuantitationChannels().isEmpty()) {
+                        m_taskError = fetchDataQuantChannels(m_projectId, m_dataset);
+                    }
+                    if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
+                        m_taskError = DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
+                    }
+                    return fetchDataProteinMainTask();
+                } else {
+                    // fetch data of SubTasks
+                    return fetchProteinSetDataSubTask();
                 }
-                return fetchDataProteinMainTask();
-            } else {
-                // fetch data of SubTasks
-                return fetchProteinSetDataSubTask();
-            }
 
-        } else if (action == LOAD_PEPTIDE_FOR_XIC) {
-            if (needToFetch()) {
-                // first data are fetched
-                if (m_dataset.getMasterQuantitationChannels() == null || m_dataset.getMasterQuantitationChannels().isEmpty()) {
-                    m_taskError = fetchDataQuantChannels(m_projectId, m_dataset);
+            } else if (action == LOAD_PEPTIDE_FOR_XIC) {
+                if (needToFetch()) {
+                    // first data are fetched
+                    if (m_dataset.getMasterQuantitationChannels() == null || m_dataset.getMasterQuantitationChannels().isEmpty()) {
+                        m_taskError = fetchDataQuantChannels(m_projectId, m_dataset);
+                    }
+                    if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
+                        DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
+                    }
+                    return fetchDataPeptideMainTask(m_xic, null);
+                } else {
+                    // fetch data of SubTasks
+                    return fetchPeptideInstanceDataSubTask(m_xic);
                 }
-                if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
-                    DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
-                }
-                return fetchDataPeptideMainTask(m_xic, null);
-            } else {
-                // fetch data of SubTasks
-                return fetchPeptideInstanceDataSubTask(m_xic);
-            }
 
-        } else if (action == LOAD_PEPTIDE_FOR_PROTEIN_SET) {
-            if (needToFetch()) {
-                // first data are fetched
-                //fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
-                if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
-                    m_taskError = DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
+            } else if (action == LOAD_PEPTIDE_FOR_PROTEIN_SET) {
+                if (needToFetch()) {
+                    // first data are fetched
+                    //fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
+                    if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
+                        m_taskError = DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
+                    }
+                    return fetchDataPeptideForProteinSetMainTask(m_xic);
                 }
-                return fetchDataPeptideForProteinSetMainTask(m_xic);
-            }
 
-        } else if (action == LOAD_PEPTIDE_FROM_PEPTIDES_INSTANCES) {
-            if (needToFetch()) {
-                // first data are fetched
-                //fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
-                if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
-                    m_taskError = DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
+            } else if (action == LOAD_PEPTIDE_FROM_PEPTIDES_INSTANCES) {
+                if (needToFetch()) {
+                    // first data are fetched
+                    //fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
+                    if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
+                        m_taskError = DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
+                    }
+                    m_logger.info(" --- CALL LOAD_PEPTIDE_FROM_PEPTIDES_INSTANCES NBR "+m_peptideInstanceIdArray.length);
+                    return fetchDataPeptideMainTask(m_xic, m_peptideInstanceIdArray);
+                } else {
+                    // fetch data of SubTasks
+                    return fetchPeptideInstanceDataSubTask(m_xic);
                 }
-                return fetchDataPeptideMainTask(m_xic, m_peptideInstanceIdArray);
-            } else {
-                // fetch data of SubTasks
-                return fetchPeptideInstanceDataSubTask(m_xic);
-            }
-        } else if (action == LOAD_PEPTIDE_ION_FOR_XIC) {
-            if (needToFetch()) {
-                // first data are fetched
-                if (m_dataset.getMasterQuantitationChannels() == null || m_dataset.getMasterQuantitationChannels().isEmpty()) {
-                    m_taskError = fetchDataQuantChannels(m_projectId, m_dataset);
+            } else if (action == LOAD_PEPTIDE_ION_FOR_XIC) {
+                if (needToFetch()) {
+                    // first data are fetched
+                    if (m_dataset.getMasterQuantitationChannels() == null || m_dataset.getMasterQuantitationChannels().isEmpty()) {
+                        m_taskError = fetchDataQuantChannels(m_projectId, m_dataset);
+                    }
+                    if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
+                        m_taskError = DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
+                    }
+                    return fetchDataPeptideIonMainTask();
+                } else {
+                    // fetch data of SubTasks
+                    return fetchPeptideIonDataSubTask();
                 }
-                if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
-                    m_taskError = DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
-                }
-                return fetchDataPeptideIonMainTask();
-            } else {
-                // fetch data of SubTasks
-                return fetchPeptideIonDataSubTask();
-            }
 
-        } else if (action == LOAD_PEPTIDE_ION_FOR_PEPTIDE) {
-            if (needToFetch()) {
-                // first data are fetched
-                //fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
-                if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
-                    m_taskError = DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
+            } else if (action == LOAD_PEPTIDE_ION_FOR_PEPTIDE) {
+                if (needToFetch()) {
+                    // first data are fetched
+                    //fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
+                    if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
+                        m_taskError = DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
+                    }
+                    return fetchDataPeptideIonForPeptideMainTask();
                 }
-                return fetchDataPeptideIonForPeptideMainTask();
-            }
 
-        } else if (action == LOAD_PEPTIDE_ION_FOR_AGGREGATE_PEPTIDE_ION) {
-            if (needToFetch()) {
+            } else if (action == LOAD_PEPTIDE_ION_FOR_AGGREGATE_PEPTIDE_ION) {
+                if (needToFetch()) {
                 /*if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {  //JPM.PARENT.TODO : useful ?
                     m_taskError = DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
                 }*/
-                return fetchDataPeptideIonForAggregatePeptideIonMainTask();
-            }
-        }
-        else if (action == LOAD_PSM_FOR_PEPTIDE) {
-            if (needToFetch()) {
-                // first data are fetched
-                //fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
-                return fetchDataPSMForPeptideMainTask();
-            } else {
-                return fetchPSMForPeptideSubTask();
-            }
-
-        } else if (action == LOAD_REPORTER_ION_FOR_PEPTIDE_ION){
-            if (needToFetch()) {
-                if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
-                    m_taskError = DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
+                    return fetchDataPeptideIonForAggregatePeptideIonMainTask();
                 }
-                return fetchDataReporterIonForPeptideIonMainTask();
-            }
-        } else if (action == LOAD_REPORTER_ION_FOR_QUANT){
-            if (needToFetch()) {
-                // first data are fetched
-                if (m_dataset.getMasterQuantitationChannels() == null || m_dataset.getMasterQuantitationChannels().isEmpty()) {
-                    m_taskError = fetchDataQuantChannels(m_projectId, m_dataset);
-                }
-                if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
-                    m_taskError = DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
+            } else if (action == LOAD_PSM_FOR_PEPTIDE) {
+                if (needToFetch()) {
+                    // first data are fetched
+                    //fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
+                    return fetchDataPSMForPeptideMainTask();
+                } else {
+                    return fetchPSMForPeptideSubTask();
                 }
 
-                return fetchDataReporterIonForQuantMainTask();
-            } else
-                return fetchReporterIonForQuanDataSubTask();
+            } else if (action == LOAD_REPORTER_ION_FOR_PEPTIDE_ION) {
+                if (needToFetch()) {
+                    if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
+                        m_taskError = DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
+                    }
+                    return fetchDataReporterIonForPeptideIonMainTask();
+                }
+            } else if (action == LOAD_REPORTER_ION_FOR_QUANT) {
+                if (needToFetch()) {
+                    // first data are fetched
+                    if (m_dataset.getMasterQuantitationChannels() == null || m_dataset.getMasterQuantitationChannels().isEmpty()) {
+                        m_taskError = fetchDataQuantChannels(m_projectId, m_dataset);
+                    }
+                    if ((m_dataset.getMapAlignments() == null || m_dataset.getMapAlignments().isEmpty())) {
+                        m_taskError = DatabaseLoadLcMSTask.fetchDataMainTaskAlignmentForXic(m_projectId, m_dataset);
+                    }
+
+                    return fetchDataReporterIonForQuantMainTask();
+                } else
+                    return fetchReporterIonForQuanDataSubTask();
+            }
+        } finally {
+              m_logger.info(" - Display Perf !!! Commented ");
+//            m_logger.info("!!!! Display Perf !!! ");
+//            PerformanceTest.displayTimeCurrentThread();  //VDS for debug only !
+//            PerformanceTest.clearTimeCurrentThread();
+//            m_logger.info("!!!! Display Perf DONE !!! ");
         }
 
         return true; // should not happen
@@ -510,7 +514,6 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             dataset.setQuantitationMethod(quantMethodDB);
             // load labels lazydata
             List<QuantitationLabel> labels = quantMethodDB.getLabels();
-            //noinspection ResultOfMethodCallIgnored = init lazydata
             labels.size();
             dataset.setDescription(datasetDB.getDescription());
             List<DMasterQuantitationChannel> masterQuantitationChannels = null;
@@ -840,6 +843,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
     private boolean fetchDataProteinMainTask() {
         EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(m_projectId).createEntityManager();
         try {
+            PerformanceTest.startTime("fetchDataProteinMainTask");
             entityManagerMSI.getTransaction().begin();
 
             List<DMasterQuantitationChannel> listMasterQuantitationChannels = m_dataset.getMasterQuantitationChannels();
@@ -849,6 +853,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
 
                     //resultSummary
                     if (resultSummaryId != null) {
+                        PerformanceTest.startTime("fetchDataProteinMainTask.getProtList");
                         // retrieve the proteinSet list with isValidated = true
                         Query proteinSetsQuery = entityManagerMSI.createQuery("SELECT ps.id  FROM PeptideSet pepset JOIN pepset.proteinSet as ps "
                                 + " WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY pepset.score DESC");
@@ -858,10 +863,11 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         }
                         proteinSetsQuery.setParameter("rsmId", resultSummaryId);
                         List<Long> proteinSets = (List<Long>)proteinSetsQuery.getResultList();
+                        PerformanceTest.stopTime("fetchDataProteinMainTask.getProtList");
                         if (proteinSets != null && !proteinSets.isEmpty()) {
                             // for each proteinSet, retrieve the DMasterQuantProteinSet
                             int nbProteinSet = proteinSets.size();
-                            m_logger.debug("------- > fetchDataProteinMainTask : get ProtSet with MQPS: " + nbProteinSet);
+//                            m_logger.debug("------- > fetchDataProteinMainTask : get ProtSet with MQPS: " + nbProteinSet);
                             m_proteinSetIds = new ArrayList<>(nbProteinSet);
                             m_resultSetIds = new ArrayList<>(nbProteinSet);
                             for (Long id : proteinSets) {
@@ -876,7 +882,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
 
                             //fetchProteinSetData(entityManagerMSI, m_proteinSetIds);
                             // slice the task and get the first one
-                            SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_PROTEIN_SET, m_proteinSetIds.size(), SLICE_SIZE);
+                            SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_PROTEIN_SET, m_proteinSetIds.size(), SLICE_SIZE*4);
 
                             // execute the first slice now
                             fetchProteinSetData(subTask, entityManagerMSI);
@@ -887,7 +893,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 } // end of the for
 
             }
-
+            PerformanceTest.stopTime("fetchDataProteinMainTask");
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
@@ -1206,13 +1212,12 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     + "pm.peptideId=p.id "
                     + "ORDER BY pm.score DESC";
         }
-
+        PerformanceTest.startTime("fetchPeptideInstanceData.Query");
         Query query = entityManagerMSI.createQuery(querySelect);
         query.setParameter("listId", listPeptideInstanceIds);
-        List<Object[]> resultList = (List<Object[]>) query.getResultList();
 
         HashMap<Long, DPeptideMatch> peptideMatchMap = new HashMap<>();
-        Iterator<Object[]> itPeptidesQuery = resultList.iterator();
+        Iterator<Object[]> itPeptidesQuery = query.getResultList().iterator();
         while (itPeptidesQuery.hasNext()) {
             Object[] resCur = itPeptidesQuery.next();
             PeptideInstance pi = (PeptideInstance) resCur[0];
@@ -1251,27 +1256,32 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
 
             peptideInstanceById.put(dpi.getId(), dpi);
         }
+        PerformanceTest.stopTime("fetchPeptideInstanceData.Query");
 
+//        PerformanceTest.startTime("fetchPeptideInstanceData.peptideMap");
         if(!peptideMap.isEmpty()) {
-            m_logger.debug(" fetchPeptideInstanceData Call Read PTM tasks 1 ....");
+//            m_logger.debug(" fetchPeptideInstanceData Call Read PTM tasks 1 ....");
             DatabasePTMsTask.fillReadablePTMDataForPeptides(entityManagerMSI, m_dataset.getResultSetId(), peptideMap, null);
             DatabasePTMsTask.fillPeptidePTMForPeptides(entityManagerMSI, peptideMap, null);
         }
+//        PerformanceTest.stopTime("fetchPeptideInstanceData.peptideMap");
 
         int nbMP = m_masterQuantPeptideList.size();
         //  load MasterQuantPeptide and list of QuantPeptide
-        String queryDMasterQuantPeptide = "SELECT q.id, q.selectionLevel, q.objectTreeId,  q.serializedProperties,  pi.resultSummary.id, pi.id "
+//        PerformanceTest.startTime("queryDMasterQuantPeptideStr");
+        String queryDMasterQuantPeptideStr = "SELECT q.id, q.selectionLevel, q.objectTreeId,  q.serializedProperties,  pi.resultSummary.id, pi.id "
                 + "FROM MasterQuantComponent q, PeptideInstance pi "
                 + " WHERE pi.id IN (:listPeptideInstanceId) AND  q.id = pi.masterQuantComponentId "
                 + " ORDER BY q.id ASC ";
-        Query mqPeptideQ = entityManagerMSI.createQuery(queryDMasterQuantPeptide);
+        Query mqPeptideQ = entityManagerMSI.createQuery(queryDMasterQuantPeptideStr);
         mqPeptideQ.setParameter("listPeptideInstanceId", listPeptideInstanceIds);
         List<Object[]> resultListMQPeptide = mqPeptideQ.getResultList();
         List<Long> listObjectTreeId = new ArrayList<>();
         List<Long> listPeptideId = new ArrayList<>();
         List<DMasterQuantPeptide> listMasterQP = new ArrayList<>();
+//        PerformanceTest.stopTime("queryDMasterQuantPeptideStr");
 
-        PerformanceTest.startTime("PeptideXIC.FORresultListMQPeptide");
+//        PerformanceTest.startTime("PeptideXIC.FORresultListMQPeptide");
         //Call fetchPeptideIonData once with all Ids
         List<Long> bestMQPepIonIds = new ArrayList<>();
         Map<Long, DMasterQuantPeptide> masterQPepByBestPepIonId = new HashMap<>();
@@ -1317,15 +1327,16 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         } //End for query result
 
         //Get Peptide Ion info only once
-        PerformanceTest.startTime("PeptideXIC.fetchPeptideIonData");
+//        PerformanceTest.startTime("PeptideXIC.fetchPeptideIonData");
         fetchPeptideIonData(entityManagerMSI, bestMQPepIonIds);
         for(DMasterQuantPeptideIon mqpi : m_masterQuantPeptideIonList){
             masterQPepByBestPepIonId.get(mqpi.getId()).setRepresentativePepMatch(mqpi.getRepresentativePepMatch());
         }
-        PerformanceTest.stopTime("PeptideXIC.fetchPeptideIonData");
-        PerformanceTest.stopTime("PeptideXIC.FORresultListMQPeptide");
+//        PerformanceTest.stopTime("PeptideXIC.fetchPeptideIonData");
+//        PerformanceTest.stopTime("PeptideXIC.FORresultListMQPeptide");
 
         // load PSM count for each peptide instance in the different quantChannels
+//        PerformanceTest.startTime("PeptideXIC.listPeptideId");
         Map<Long, Map<Long, Integer>> identPSMPerQCIdPerPepId = new HashMap<>();
         if (!listPeptideId.isEmpty()) {
             String queryCountPSM = "SELECT pi.peptideMatchCount, pi.resultSummary.id, pi.peptide.id "
@@ -1334,9 +1345,9 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             Query queryPSM = entityManagerMSI.createQuery(queryCountPSM);
             queryPSM.setParameter("listRsm", rsmIdList);
             queryPSM.setParameter("listPepIds", listPeptideId);
-            List<Object[]> resultListPSM = queryPSM.getResultList();
-            for (Iterator<Object[]> iterator = resultListPSM.iterator(); iterator.hasNext();) {
-                Object[] nb = (Object[]) (iterator.next());
+            Iterator<Object[]> resultListPSMIt = queryPSM.getResultList().iterator();
+            while (resultListPSMIt.hasNext()) {
+                Object[] nb = resultListPSMIt.next();
                 int psm = (Integer) nb[0];
                 Long rsmId = ((Long) nb[1]);
                 Long qcId = rsmIdVsQcId.get(rsmId);
@@ -1349,8 +1360,10 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 identPSMPerQCIdPerPepId.put(peptideId, identPSMPerQCId);
             }
         }
+//        PerformanceTest.stopTime("PeptideXIC.listPeptideId");
         List<ObjectTree> listOt = new ArrayList<>();
-        if (listObjectTreeId.size() > 0) {
+//        PerformanceTest.startTime("PeptideXIC.listObjectTreeId");
+        if (!listObjectTreeId.isEmpty()) {
             String otQuery = "SELECT ot FROM fr.proline.core.orm.msi.ObjectTree ot WHERE id IN (:listId) ";
             TypedQuery<ObjectTree> queryObjectTree = entityManagerMSI.createQuery(otQuery, ObjectTree.class);
             queryObjectTree.setParameter("listId", listObjectTreeId);
@@ -1398,7 +1411,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             // update the list 
             m_masterQuantPeptideList.set(index, masterQuantPeptide);
         }
-
+//        PerformanceTest.stopTime("PeptideXIC.listObjectTreeId");
         // non quantified peptides instances :
         // no master quantPeptide: build a fake masterQuantPeptide to display the peptideInstance
         Map<Long, DPeptideInstance> extendedPeptideInstanceById = null;
@@ -1469,14 +1482,14 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 //search index of peptideInstance
                 DPeptideInstance peptideInstance = null;
                 PerformanceTest.startTime("PeptideXIC.masterQuantPeptide.getPeptideInstanceId");
-                if (masterQuantPeptide.getPeptideInstanceId() > 0 && listPeptideInstanceIds.indexOf(masterQuantPeptide.getPeptideInstanceId()) != -1) {
+                if (masterQuantPeptide.getPeptideInstanceId() > 0 && listPeptideInstanceIds.contains(masterQuantPeptide.getPeptideInstanceId())) {
                     peptideInstance = extendedPeptideInstanceById.get(masterQuantPeptide.getPeptideInstanceId());
                     DMasterQuantPeptide o = new DMasterQuantPeptide(-1, -1, -1, null, masterQuantPeptide.getQuantResultSummaryId());
                     o.setPeptideInstance(peptideInstance);
                     o.setPeptideInstanceId(masterQuantPeptide.getPeptideInstanceId());
 
                     // load PSM count for each peptide instance in the different quantChannels
-                    PerformanceTest.startTime("PeptideXIC.queryCountPSM.query");
+//                    PerformanceTest.startTime("PeptideXIC.queryCountPSM.query");
                     String queryCountPSM = "SELECT pi.peptideMatchCount, pi.resultSummary.id FROM PeptideInstance pi "
                             + "WHERE pi.resultSummary.id in (:listRsm) AND pi.peptide.id =:pepId ";
                     Query queryPSM = entityManagerMSI.createQuery(queryCountPSM);
@@ -1484,9 +1497,10 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     queryPSM.setParameter("pepId", peptideInstance.getPeptideId());
                     Map<Long, DQuantPeptide> quantProteinSetByQchIds = new HashMap<>();
                     List<Object[]> resultListPSM = queryPSM.getResultList();
-                    PerformanceTest.stopTime("PeptideXIC.queryCountPSM.query");
-                    for (Iterator<Object[]> iterator = resultListPSM.iterator(); iterator.hasNext();) {
-                        Object[] nb = (Object[]) (iterator.next());
+//                    PerformanceTest.stopTime("PeptideXIC.queryCountPSM.query");
+
+                    for (Iterator<Object[]> iterator = resultListPSM.iterator(); iterator.hasNext(); ) {
+                        Object[] nb = iterator.next();
                         int psm = ((Integer) nb[0]);
                         Long rsmId = ((Long) nb[1]);
                         Long qcId = rsmIdVsQcId.get(rsmId);
@@ -1500,7 +1514,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 }
                 PerformanceTest.stopTime("PeptideXIC.masterQuantPeptide.getPeptideInstanceId");
             }
-        }
+        } //End for all mqPep
+
         PerformanceTest.stopTime("PeptideXIC.FORnbMP");
         if(!peptideMap.isEmpty()) {
             m_logger.debug("fetchPeptideInstanceData Call Read PTM 2");
@@ -1509,7 +1524,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         }
 
         // load masterQuantPeptide not linked to a peptideInstance
-        queryDMasterQuantPeptide = "SELECT  new fr.proline.core.orm.msi.dto.DMasterQuantPeptide"
+        String queryDMasterQuantPeptide = "SELECT  new fr.proline.core.orm.msi.dto.DMasterQuantPeptide"
                 + "(q.id, q.selectionLevel, q.objectTreeId,  q.serializedProperties,  q.resultSummary.id) "
                 + "FROM MasterQuantComponent q "
                 + " WHERE q.id=:masterQuantPeptideId";
@@ -1564,7 +1579,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         fetchProteinSetName(entityManagerMSI, peptideMatchIds, peptideMatchMap);
 
        PerformanceTest.stopTime("PeptideXIC.fetchPeptideInstanceData");
-       PerformanceTest.displayTimeAllThreads();
+//       PerformanceTest.displayTimeAllThreads();
         return true;
     }
 
@@ -1577,9 +1592,10 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         } catch (Exception ignored) {
         }
                 
-        if(postProcessingParam == null)
-            isBestIonSummarizingMethod = true; //If no ComputePostProcessing, information may exist anyway 
-        else if(!postProcessingParam.isEmpty() && postProcessingParam.containsKey(QuantPostProcessingParams.PEP_ION_ABUNDANCE_SUMMARIZING_METHOD)){
+//        if(postProcessingParam == null)
+//            isBestIonSummarizingMethod = false; //If no ComputePostProcessing, information may exist anyway ... Default is Sum...
+//        else
+        if(postProcessingParam != null && !postProcessingParam.isEmpty() && postProcessingParam.containsKey(QuantPostProcessingParams.PEP_ION_ABUNDANCE_SUMMARIZING_METHOD)){
             String method = postProcessingParam.get(QuantPostProcessingParams.PEP_ION_ABUNDANCE_SUMMARIZING_METHOD).toString();
             isBestIonSummarizingMethod = QuantPostProcessingParams.ION_ABUNDANCE_SUMMARIZING_BEST_ION_METHOD_KEY.equals(method);
         }
@@ -1673,7 +1689,11 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
      */
     public static boolean fetchProteinSetData(EntityManager entityManagerMSI, DDataset dataset, List<DMasterQuantProteinSet> masterQuantProteinSetList, List<Long> proteinSetIds) {
         int nbMQP = masterQuantProteinSetList.size();
+
         m_logger.debug("fetchProteinSetData for " + proteinSetIds.size() + " of " +nbMQP+" masterQuantProteinSetList ");
+        PerformanceTest.startTime("fetchProteinSetData subtask");
+
+//        PerformanceTest.startTime("fetchProteinSetData queryDMasterQuantProteinSet");
         String queryDMasterQuantProteinSet = "SELECT new fr.proline.core.orm.msi.dto.DMasterQuantProteinSet"
                 + "(q.id,  q.selectionLevel, q.objectTreeId,  q.serializedProperties,  p.resultSummary.id,  p.id) "
                 + " FROM MasterQuantComponent q,  ProteinSet p "
@@ -1683,39 +1703,43 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         masterQuantProteinSetsQuery.setParameter("listId", proteinSetIds);
         //masterQuantProteinSetsQuery.setParameter("rsmId", resultSummaryId); // NO NEED, and even if this constaint is added, the query become slow
         List<DMasterQuantProteinSet> listResult = masterQuantProteinSetsQuery.getResultList();
-//        m_logger.debug(" found  DMasterQuantProteinSet " + listResult.size());
+//        PerformanceTest.stopTime("fetchProteinSetData queryDMasterQuantProteinSet");
 
-        TypedQuery<DProteinSet> proteinSetQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinSet(ps.id, ps.representativeProteinMatchId, ps.resultSummary.id, ps.serializedProperties) FROM ProteinSet ps WHERE ps.id=:psId ", DProteinSet.class);
-        String queryProteinMatch = "SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(pm.id, pm.accession,  pm.score, pm.peptideCount, pm.resultSet.id, pm.description, pm.geneName, pm.serializedProperties) "
+//        PerformanceTest.startTime("fetchProteinSetData createQueries");
+        Query allProteinSetQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinSet(ps.id, ps.representativeProteinMatchId, ps.resultSummary.id, ps.serializedProperties) "
+                +" FROM ProteinSet ps WHERE ps.id in (:psIds)");
+        String queryAllProteinMatch = "SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(pm.id, pm.accession,  pm.score, pm.peptideCount, pm.resultSet.id, pm.description, pm.geneName, pm.serializedProperties) "
                 + "FROM ProteinMatch pm "
-                + "WHERE pm.id=:pmId";
-        TypedQuery<DProteinMatch> proteinMatchQuery = entityManagerMSI.createQuery(queryProteinMatch, DProteinMatch.class);
+                + "WHERE pm.id in (:pmIds)";
+        Query allProteinMatchQuery = entityManagerMSI.createQuery(queryAllProteinMatch);
 
         // Get nbr Peptide quantified and nbr total peptide (identified)
-        String queryStrCountNbPepAndQuantPep = "SELECT count(pi.id) , pepSet.peptideCount "
-                + "FROM fr.proline.core.orm.msi.PeptideSet pepSet JOIN pepSet.peptideSetPeptideInstanceItems pspi JOIN pspi.peptideInstance pi, fr.proline.core.orm.msi.MasterQuantComponent mqc "
-                + "WHERE pepSet.resultSummaryId=:rsmId AND pepSet.proteinSet.id=:proteinSetId AND "
+        String queryStrCountNbPepAndQuantPep = "SELECT protSet.id, count(pi.id) , pepSet.peptideCount "
+                + "FROM fr.proline.core.orm.msi.ProteinSet protSet,  fr.proline.core.orm.msi.PeptideSet pepSet JOIN pepSet.peptideSetPeptideInstanceItems pspi JOIN pspi.peptideInstance pi, fr.proline.core.orm.msi.MasterQuantComponent mqc "
+                + "WHERE pepSet.resultSummaryId=protSet.resultSummary.id AND pepSet.proteinSet.id=protSet.id AND protSet.id in (:proteinSetIds) AND "
                 + "pi.masterQuantComponentId IS NOT NULL AND "
                 + "mqc.id = pi.masterQuantComponentId AND "
                 + "mqc.selectionLevel > 1"
-                + "GROUP BY pepSet.peptideCount ";
+                + "GROUP BY protSet.id, pepSet.peptideCount ";
         Query queryCountPepAndQuantPep = entityManagerMSI.createQuery(queryStrCountNbPepAndQuantPep);
 
         // Get nbr total peptide (identified). Use when no peptide quantified -> NO pi.masterQuantComponentId
-        String queryStrCountNbPep = "SELECT  pepSet.peptideCount "
-                + "FROM fr.proline.core.orm.msi.PeptideSet pepSet "
-                + "WHERE pepSet.resultSummaryId=:rsmId AND pepSet.proteinSet.id=:proteinSetId  ";
-        Query queryCountPep = entityManagerMSI.createQuery(queryStrCountNbPep);
+        String queryStrAllCountNbPep = "SELECT  protSet.id, pepSet.peptideCount "
+                + "FROM fr.proline.core.orm.msi.ProteinSet protSet, fr.proline.core.orm.msi.PeptideSet pepSet "
+                + "WHERE pepSet.resultSummaryId= protSet.resultSummary.id AND protSet.id in (:proteinSetIds)  AND pepSet.proteinSet.id= protSet.id  ";
+        Query allQueryCountPep = entityManagerMSI.createQuery(queryStrAllCountNbPep);
 
         String queryStrPepCountByProtMatch = "SELECT ps.peptideCount, pspmm.proteinMatch.id "
                 + "FROM PeptideSetProteinMatchMap pspmm, PeptideSet ps "
                 + "WHERE  pspmm.resultSummary.id=:rsmId  AND ps.id = pspmm.peptideSet.id ";
         Query queryPepCountByProtMatch = entityManagerMSI.createQuery(queryStrPepCountByProtMatch);
-        String queryStrProtSetStatus = "SELECT ps.id, pspmi.proteinMatch.id, pspmi.isInSubset, ps.representativeProteinMatchId, ps.isValidated "
-                + "FROM ProteinSetProteinMatchItem pspmi, ProteinSet ps "
-                + " WHERE ps.id = pspmi.proteinSet.id "
-                + " AND pspmi.resultSummary.id=:rsmId ";
+
+        String queryStrProtSetStatus = "SELECT ps.id, pspmi.proteinMatch.id, pspmi.isInSubset, ps.representativeProteinMatchId, ps.isValidated, pspmi.resultSummary.id "
+                + " FROM ProteinSet ps JOIN  ProteinSetProteinMatchItem pspmi ON ps.id = pspmi.id.proteinSetId"
+                + " WHERE ps.resultSummary.id in (:rsmIds) order by ps.id, pspmi.proteinMatch.id";
         Query queryProtSetStatus = entityManagerMSI.createQuery(queryStrProtSetStatus);
+
+//        PerformanceTest.stopTime("fetchProteinSetData createQueries");
         List<DQuantitationChannel> listQC = new ArrayList<>();
         Map<Long, Map<Long, String>> protMatchStatusByIdByQcId = new HashMap<>();
         Map<Long, Map<Long, Integer>> protMatchPepNumberByIdByQcId = new HashMap<>();
@@ -1723,62 +1747,130 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         //Get ProtMatches PepCount and Status in all Quant Channels RSMs
         if (dataset != null && dataset.getMasterQuantitationChannels() != null && !dataset.getMasterQuantitationChannels().isEmpty()) {
             listQC = dataset.getMasterQuantitationChannels().get(0).getQuantitationChannels();
+            List<Long> rsmsIds = listQC.stream().map(aQch -> aQch.getIdentResultSummaryId()).toList();
+            Map<Long, Long> qchIdsByrsmIds = listQC.stream().collect(Collectors.toMap(qch -> qch.getIdentResultSummaryId(), qch -> qch.getId()));
+
+            PerformanceTest.startTime("fetchProteinSetData queryProtSetStatus");
+            queryProtSetStatus.setParameter("rsmIds", rsmsIds);
+            List<Object[]> rStatus = queryProtSetStatus.getResultList();
+
+            Long proteinMatchId;
+            Boolean isInSubset;
+            Long typProteinMatchId;
+            Boolean isProtSetValidated;
+            Long rsmId;
+            for(Object[] resultStatV2 : rStatus) {
+                proteinMatchId = (Long) resultStatV2[1];
+                isInSubset = (Boolean) resultStatV2[2];
+                typProteinMatchId = (Long) resultStatV2[3];
+                isProtSetValidated = (Boolean) resultStatV2[4];
+                rsmId = (Long)resultStatV2[5];
+
+                String protMatchStatus;
+                if (isInSubset) {
+                    protMatchStatus = "Subset";
+                } else if (typProteinMatchId.equals(proteinMatchId)) { //is the typical
+                    protMatchStatus = "Typical";
+                } else {
+                    protMatchStatus = "Sameset";
+                }
+                if (!isProtSetValidated) {
+                    protMatchStatus = "Invalid " + protMatchStatus;
+                }
+                Long qChId = qchIdsByrsmIds.get(rsmId);
+                if(!protMatchStatusByIdByQcId.containsKey(qChId))
+                    protMatchStatusByIdByQcId.put(qChId, new HashMap<>());
+                protMatchStatusByIdByQcId.get(qChId).put(proteinMatchId, protMatchStatus);
+            }
+            PerformanceTest.stopTime("fetchProteinSetData queryProtSetStatus");
+
             for (DQuantitationChannel qch : listQC) {
+                PerformanceTest.startTime("fetchProteinSetData queryPepCountByProtMatch");
                 Long identQCRsmId = qch.getIdentResultSummaryId();
-                Map<Long, String> statusByProtMatchId = new HashMap<>();
                 Map<Long, Integer> pepNumberByProtMatchId = new HashMap<>();
-                queryProtSetStatus.setParameter("rsmId", identQCRsmId);
                 queryPepCountByProtMatch.setParameter("rsmId", identQCRsmId);
-                List<Object[]> rStatus = queryProtSetStatus.getResultList();
+
                 List<Object[]> rPepNumber = queryPepCountByProtMatch.getResultList();
-                for (Object[] res : rStatus) {
-                    Long proteinMatchId = (Long) res[1];
-                    Boolean isInSubset = (Boolean) res[2];
-                    Long typProteinMatchId = (Long) res[3];
-                    Boolean isProtSetValidated = (Boolean) res[4];
-                    String protMatchStatus;
-                    if (isInSubset) {
-                        protMatchStatus = "Subset";
-                    } else if (typProteinMatchId.equals(proteinMatchId)) { //is the typical 
-                        protMatchStatus = "Typical";
-                    } else {
-                        protMatchStatus = "Sameset";
-                    }
-                    if (!isProtSetValidated) {
-                        protMatchStatus = "Invalid " + protMatchStatus;
-                    }
-                    statusByProtMatchId.put(proteinMatchId, protMatchStatus);
-                }
+                Long pepCountProteinMatchId;
+                Integer pepNumber;
                 for (Object[] resPep : rPepNumber) {
-                    Long proteinMatchId = (Long) resPep[1];
-                    Integer pepNumber = (Integer) resPep[0];
-                    pepNumberByProtMatchId.put(proteinMatchId, pepNumber);
+                    pepCountProteinMatchId = (Long) resPep[1];
+                    pepNumber = (Integer) resPep[0];
+                    pepNumberByProtMatchId.put(pepCountProteinMatchId, pepNumber);
                 }
-                protMatchStatusByIdByQcId.put(qch.getId(), statusByProtMatchId);
+
                 protMatchPepNumberByIdByQcId.put(qch.getId(), pepNumberByProtMatchId);
+                PerformanceTest.stopTime("fetchProteinSetData queryPepCountByProtMatch");
             }
         }
 
         m_logger.debug(" fetchProteinSetData -- Get DMasterQuantProteinSet info and associated DQuantProteinSet for each Quant Channel");
+        List<Long> mqProtSetProteinSetIds = listResult.stream().map(mqProtSet -> Long.valueOf(mqProtSet.getProteinSetId())).collect(Collectors.toList());
+
+        PerformanceTest.startTime("fetchProteinSetData queryCountPepAndQuantPepv2");
+        Map<Long, List<Integer>> countByProtSetId = new HashMap<>();
+        // nb PeptideInstance and nbPeptide quantified
+        queryCountPepAndQuantPep.setParameter("proteinSetIds", mqProtSetProteinSetIds);
+        Iterator<Object[]> resultList = queryCountPepAndQuantPep.getResultList().iterator();
+        while (resultList.hasNext()) {
+            Object[] nb = resultList.next();
+            List<Integer> counts = new ArrayList<>();
+            Long protSetId =((Long) nb[0]);
+            counts.add(((Long) nb[1]).intValue());
+            counts.add((Integer) nb[2]);
+            countByProtSetId.put(protSetId, counts);
+        }
+        PerformanceTest.stopTime("fetchProteinSetData queryCountPepAndQuantPepv2");
+
+        PerformanceTest.startTime("fetchProteinSetData queryCountPepv2");
+        allQueryCountPep.setParameter("proteinSetIds", mqProtSetProteinSetIds);
+        Map<Long, Integer> pepCountByProtSetId = new HashMap<>();
+        Iterator<Object[]> rl = allQueryCountPep.getResultList().iterator();
+        while (rl.hasNext()) {
+            Object[] aResult = rl.next();
+            pepCountByProtSetId.put((Long)aResult[0], (Integer) aResult[1]);
+        }
+        PerformanceTest.stopTime("fetchProteinSetData queryCountPepv2");
+
+//        PerformanceTest.startTime("fetchProteinSetData DMasterQuantProteinSet DProtSet");
+        allProteinSetQuery.setParameter("psIds", mqProtSetProteinSetIds);
+        Map<Long, DProteinSet> dProtSetById = new HashMap<>();
+        List<Long> protMatchIds = new ArrayList<>();
+        Iterator<DProteinSet> prtSets =  allProteinSetQuery.getResultList().iterator();
+        while (prtSets.hasNext()){
+            DProteinSet nextProtSet =prtSets.next();
+            dProtSetById.put(nextProtSet.getId(), nextProtSet);
+            protMatchIds.add(nextProtSet.getProteinMatchId());
+        }
+
+//        PerformanceTest.stopTime("fetchProteinSetData DMasterQuantProteinSet DProtSet");
+
+//        PerformanceTest.startTime("fetchProteinSetData DMasterQuantProteinSet proteinMatchQuery");
+        allProteinMatchQuery.setParameter("pmIds", protMatchIds);
+        Iterator<DProteinMatch> prtMatches =  allProteinMatchQuery.getResultList().iterator();
+        Map<Long, DProteinMatch> dProtMatchById = new HashMap<>();
+        while (prtMatches.hasNext()){
+            DProteinMatch nextProtMatch = prtMatches.next();
+            dProtMatchById.put(nextProtMatch.getId(), nextProtMatch);
+        }
+        for(DProteinSet nextProtSet : dProtSetById.values()) {
+
+            DProteinMatch typicalProteinMatch = dProtMatchById.get(nextProtSet.getProteinMatchId());
+            if (typicalProteinMatch == null) {
+                m_logger.debug("--- NOT FOUND  DProteinMatch for ProtSet " + nextProtSet.getId());
+            }
+            nextProtSet.setTypicalProteinMatch(typicalProteinMatch);
+        }
+//        PerformanceTest.stopTime("fetchProteinSetData DMasterQuantProteinSet proteinMatchQuery");
 
         //Get DMasterQuantProteinSet info and associated DQuantProteinSet for each Quant Channel
         for (DMasterQuantProteinSet masterQuantProteinSet : listResult) {
-            proteinSetQuery.setParameter("psId", masterQuantProteinSet.getProteinSetId());
-            DProteinSet dProteinSet = proteinSetQuery.getSingleResult();
-            if (dProteinSet == null) {
-                m_logger.debug("--- NOT FOUND  DProteinSet for MQPrS " + masterQuantProteinSet.getId()); //VDS : should continue or stop with exception, else NPE !
-            }
-            // typical protein match id
-            proteinMatchQuery.setParameter("pmId", dProteinSet.getProteinMatchId());
-            try {
-                DProteinMatch typicalProteinMatch = proteinMatchQuery.getSingleResult();
-                if (typicalProteinMatch == null) {
-                    m_logger.debug("--- NOT FOUND  DProteinMatch for MQPrS " + masterQuantProteinSet.getId());
-                }
-                dProteinSet.setTypicalProteinMatch(typicalProteinMatch);
-            } catch (NoResultException | NonUniqueResultException e) {
-                m_logger.error("DatabaseLoadXicMasterQuantTask failed", e);
-            }
+
+            Long protSetId = masterQuantProteinSet.getProteinSetId();
+            DProteinSet dProteinSet = dProtSetById.get(protSetId);
+
+
+            PerformanceTest.startTime("fetchProteinSetData QuantProteinSetList");
             // load QuantProteinSetList
             String quantProtSetdata = ""; //ObjectTree.clobData
             ObjectTree ot = entityManagerMSI.find(ObjectTree.class, masterQuantProteinSet.getObjectTreeId()); // get the objectTree from id.
@@ -1791,17 +1883,16 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             }
             masterQuantProteinSet.setQuantProteinSetByQchIds(quantProteinSetByQchIds);
             masterQuantProteinSet.setProteinSet(dProteinSet);
+            PerformanceTest.stopTime("fetchProteinSetData QuantProteinSetList");
 
+//            PerformanceTest.startTime("fetchProteinSetData CountPepAndQuantPep");
             // nb PeptideInstance and nbPeptide quantified
-            queryCountPepAndQuantPep.setParameter("rsmId", masterQuantProteinSet.getQuantResultSummaryId());
-            queryCountPepAndQuantPep.setParameter("proteinSetId", masterQuantProteinSet.getProteinSetId());
             int nbPep = 0;
             int nbPepQuant = 0;
-            List<Object[]> resultList = queryCountPepAndQuantPep.getResultList();
-            if (!resultList.isEmpty()) {
-                Object[] nb = resultList.get(0);
-                nbPep = (Integer) nb[1];
-                nbPepQuant = ((Long) nb[0]).intValue();
+            if (countByProtSetId.containsKey(protSetId)) {
+                List<Integer> counts = countByProtSetId.get(protSetId);
+                nbPepQuant = counts.get(0);
+                nbPep = counts.get(1);
             }
 
             //try to get nbPepQuant from masterQuantProteinSet
@@ -1809,22 +1900,19 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             if(mqPSprop!= null){
                 nbPepQuant = mqPSprop.getSelectedMasterQuantPeptideIds().size();
             }
-
-
+//            PerformanceTest.stopTime("fetchProteinSetData CountPepAndQuantPep");
 
             //If queryCountPepAndQuantPep return an empty result (or empty nbPep ?! not sure it's possible)
-            if (nbPep == 0) {
-                queryCountPep.setParameter("rsmId", masterQuantProteinSet.getQuantResultSummaryId());
-                queryCountPep.setParameter("proteinSetId", masterQuantProteinSet.getProteinSetId());
-                List rl = queryCountPep.getResultList();
-                if (!rl.isEmpty()) {
-                    nbPep = (Integer) rl.get(0);
-                }
+//            PerformanceTest.startTime("fetchProteinSetData queryCountPep");
+            if (nbPep == 0 && pepCountByProtSetId.containsKey(protSetId)) {
+                nbPep = pepCountByProtSetId.get(protSetId);
             }
             masterQuantProteinSet.setNbPeptides(nbPep);
             masterQuantProteinSet.setNbQuantifiedPeptides(nbPepQuant);
+//            PerformanceTest.stopTime("fetchProteinSetData queryCountPep");
 
-            // load status and peptideNumber by QcId   
+            // load status and peptideNumber by QcId
+//            PerformanceTest.startTime("fetchProteinSetData Status");
             Map<Long, String> quantStatusByQchIds = new HashMap<>();
             for (DQuantitationChannel qch : listQC) {
                 String status = "Undefined";
@@ -1852,6 +1940,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
 
             }
             masterQuantProteinSet.setQuantStatusByQchIds(quantStatusByQchIds);
+//            PerformanceTest.stopTime("fetchProteinSetData Status");
 
             // update in the list
             int index = -1;
@@ -1863,6 +1952,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             }
             masterQuantProteinSetList.set(index, masterQuantProteinSet);
         }
+        PerformanceTest.stopTime("fetchProteinSetData subtask");
         return true;
     }
 
@@ -1882,6 +1972,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             entityManagerMSI.getTransaction().begin();
             switch (slice.getSubTaskId()) {
                 case SUB_TASK_PEPTIDE_INSTANCE:
+                    m_logger.debug(" --- CALL LOAD_PEPTIDE_FROM_PEPTIDES_INSTANCES SUB_TASK_PEPTIDE_INSTANCE ");
                     fetchPeptideInstanceData(slice, entityManagerMSI, xic);
                     break;
             }
@@ -2059,9 +2150,6 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         + "FROM MasterQuantReporterIon mqri, MasterQuantPeptideIon  mqpi "
                         + "WHERE mqri.resultSummary.id=:rsmId and mqri.masterQuantPeptideIon = mqpi";
 
-//                        String queryPepIon = "SELECT mqri, mqpi "
-//                                + "FROM MasterQuantReporterIon mqri, MasterQuantPeptideIon  mqpi "
-//                                + "WHERE mqri.resultSummary.id=:rsmId and mqri.masterQuantPeptideIon = mqpi";
                         Query  reporterAndPepIonQuery = entityManagerMSI.createQuery(queryPepIon);
                         reporterAndPepIonQuery.setParameter("rsmId", resultSummaryId);
                         List<Long> listIds = (List<Long>) reporterAndPepIonQuery.getResultList();
@@ -2168,7 +2256,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             entityManagerMSI.close();
         }
 
-        // set priority as low for the possible sub tasks
+        // set priority as low for the possible subtasks
         m_defaultPriority = Priority.LOW;
         m_currentPriority = Priority.LOW;
 
@@ -2298,8 +2386,6 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         int nbM = m_masterQuantPeptideIonList.size();
 
         PerformanceTest.startTime("fetchPeptideIonData");
-//        int nbMsub = listMasterPeptideIonsIds == null ? 0 : listMasterPeptideIonsIds.size(); //For log
-//        long start = System.currentTimeMillis();//For log
 
         String queryMasterPeptideIons = "SELECT new fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon(pi, mqpi, p, pm) "
                 + "FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.MasterQuantPeptideIon mqpi, "
@@ -2351,9 +2437,6 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             m_masterQuantPeptideIonList.set(index, mQuantPeptideIon);
             indexes.add(index);
         } // end for
-
-//        m_logger.info("DMQPep ions for " + nbMsub + " ions duration = " + (System.currentTimeMillis() - start) + " ms");
-//        start = System.currentTimeMillis();
 
         /////////////////////////////////
         HashMap<Long, Peptide> peptideMap = new HashMap<>();
@@ -2445,7 +2528,6 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         } // end for
 
         fetchPeptideIonAbundances(listObjectTreeId, entityManagerMSI, indexes);
-//        m_logger.info("Fetch ions pepInstance, pepMatch & Ab. for " + nbMsub + " ions duration = " + (System.currentTimeMillis() - start) + " ms");
         PerformanceTest.stopTime("fetchPeptideIonData");
         return true;
     }
@@ -2653,7 +2735,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
     private void fetchReporterIonAbundances(Map<MasterQuantReporterIon, Long> objectTreeIdByRepIonId, EntityManager entityManagerMSI) {
         //object tree
         Map<Long, ObjectTree> listOtById = new HashMap<>();
-        if (objectTreeIdByRepIonId.size() > 0) {
+        if (!objectTreeIdByRepIonId.isEmpty()) {
             String otQuery = "SELECT ot FROM fr.proline.core.orm.msi.ObjectTree ot WHERE id IN (:listId) ";
             TypedQuery<ObjectTree> queryObjectTree = entityManagerMSI.createQuery(otQuery, ObjectTree.class);
             queryObjectTree.setParameter("listId", objectTreeIdByRepIonId.values());
@@ -2678,7 +2760,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
     private void fetchPeptideIonAbundances(List<Long> listObjectTreeId, EntityManager entityManagerMSI, List<Integer> indexes) {
         //object tree
         List<ObjectTree> listOt = new ArrayList<>();
-        if (listObjectTreeId.size() > 0) {
+        if (!listObjectTreeId.isEmpty()) {
             String otQuery = "SELECT ot FROM fr.proline.core.orm.msi.ObjectTree ot WHERE id IN (:listId) ";
             TypedQuery<ObjectTree> queryObjectTree = entityManagerMSI.createQuery(otQuery, ObjectTree.class);
             queryObjectTree.setParameter("listId", listObjectTreeId);

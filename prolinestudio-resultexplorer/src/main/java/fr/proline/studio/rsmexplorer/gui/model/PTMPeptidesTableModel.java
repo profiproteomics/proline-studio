@@ -17,13 +17,8 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
-import fr.proline.core.orm.msi.dto.DInfoPTM;
-import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
-import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.core.orm.msi.dto.DPeptidePTM;
-import fr.proline.core.orm.msi.dto.DProteinMatch;
-import fr.proline.core.orm.msi.dto.DPtmSiteProperties;
-import fr.proline.core.orm.msi.dto.DQuantPeptide;
+import fr.proline.core.orm.msi.dto.*;
+import fr.proline.studio.dam.data.SelectLevelEnum;
 import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.export.ExportFontData;
@@ -36,6 +31,7 @@ import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.XicStatusRenderer;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.table.ExportFontModelUtilities;
 import fr.proline.studio.table.LazyData;
@@ -66,18 +62,19 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     
     // Static columns list
     public static final int COLTYPE_PEPTIDE_ID = 0;
-    public static final int COLTYPE_PEPTIDE_NAME = 1;
-    public static final int COLTYPE_PEPTIDE_SCORE = 2;
-    public static final int COLTYPE_PEPTIDE_EXP_MOZ = 3;
-    public static final int COLTYPE_PEPTIDE_CHARGE = 4;
-    public static final int COLTYPE_PEPTIDE_PTM = 5;
-    public static final int COLTYPE_DELTA_MASS_PTM =6;
-    public static final int COLTYPE_PTM_PROBA = 7;
-    public static final int COLTYPE_SPECTRUM_TITLE = 8;
+    public static final int COLTYPE_SELECTION_LEVEL = 1;
+    public static final int COLTYPE_PEPTIDE_NAME = 2;
+    public static final int COLTYPE_PEPTIDE_SCORE = 3;
+    public static final int COLTYPE_PEPTIDE_EXP_MOZ = 4;
+    public static final int COLTYPE_PEPTIDE_CHARGE = 5;
+    public static final int COLTYPE_PEPTIDE_PTM = 6;
+    public static final int COLTYPE_DELTA_MASS_PTM =7;
+    public static final int COLTYPE_PTM_PROBA = 8;
+    public static final int COLTYPE_SPECTRUM_TITLE = 9;
     public static final int LAST_STATIC_COLUMN = COLTYPE_SPECTRUM_TITLE;
     
-    private static final String[] m_columnNames = {"Id", "Peptide", "Score", "Exp. MoZ", "Charge", "PTMs", "PTMs D.Mass", "PTMs Confid.(%)", "Spectrum title"};
-    private static final String[] m_columnTooltips = {"Peptide match Id", "Peptide Sequence", "Score of the peptide match", "Experimental Mass to Charge Ratio","Charge", "PTMs associated with this peptide", "PTMs delta mass", "PTMs localisation confidence", "Peptide match query title"};
+    private static final String[] m_columnNames = {"Id", "Status", "Peptide", "Score", "Exp. MoZ", "Charge", "PTMs", "PTMs D.Mass", "PTMs Confid.(%)", "Spectrum title"};
+    private static final String[] m_columnTooltips = {"Peptide match Id","Quant. Status", "Peptide Sequence", "Score of the peptide match", "Experimental Mass to Charge Ratio","Charge", "PTMs associated with this peptide", "PTMs delta mass", "PTMs localisation confidence", "Peptide match query title"};
 
     // Dynamic columns list 1 : PTM Probability related
     private static final String COLTYPE_SITE_PROBA_SUFFIX = "Probability";
@@ -97,7 +94,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     private static final String[] m_columnNamesQC = {"Sel. level", "Ident. Pep. match count", "Pep. match count", "Raw abundance", "Abundance", "Retention time"};
     private static final String[] m_toolTipQC = {"Selection level", "Identification peptides match count", "Peptides match count", "Raw abundance", "Abundance", "Retention time"};
 
-    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
+    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap<>();
     private List<Integer> m_columnsIdsToHide = new ArrayList<>();
 
     private List<PTMPeptideInstance> m_ptmPepInstances = new ArrayList<>();
@@ -106,10 +103,32 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     public static class Row {
         public PTMPeptideInstance ptmPeptideInstance;
         public DPeptideMatch peptideMatch;
+        private final Long qPepId;
+        private final Integer defaultSelLevel;
 
-        public Row(PTMPeptideInstance peptideInstance, DPeptideMatch peptideMatch) {
+        public Row(PTMPeptideInstance peptideInstance, DPeptideMatch peptideMatch, Long qPepId, Integer generalSelLevel) {
             this.ptmPeptideInstance = peptideInstance;
             this.peptideMatch = peptideMatch;
+            this.qPepId = qPepId;
+            this.defaultSelLevel = generalSelLevel;
+        }
+
+        public SelectLevelEnum getSelectLevelInContext(){
+
+            SelectLevelEnum  selLevel = SelectLevelEnum.valueOf(defaultSelLevel);
+            if(ptmPeptideInstance.getClusters() != null && !ptmPeptideInstance.getClusters().isEmpty()){
+                DMasterQuantProteinSet proteinSet = ptmPeptideInstance.getClusters().get(0).getMasterQuantProteinSet();
+                if(proteinSet!=null){
+                    if(proteinSet.getMasterQuantProtSetProperties() != null && proteinSet.getMasterQuantProtSetProperties().getMqPeptideSelLevelById() != null){
+                        Map<Long,Integer> selLevelByMQPepId = proteinSet.getMasterQuantProtSetProperties().getMqPeptideSelLevelById();
+                        if(selLevelByMQPepId.containsKey(qPepId)) {
+                            Integer mapSelLevel = selLevelByMQPepId.get(qPepId);
+                            selLevel = SelectLevelEnum.valueOf(mapSelLevel);
+                        }
+                    }
+                }
+            }
+            return selLevel;
         }
     }
     private ArrayList<Row> m_ptmPepInstancesAsRow = new ArrayList<>();
@@ -121,7 +140,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     private final ScoreRenderer m_scoreRenderer = new ScoreRenderer();
 
     private String m_modelName;
-    private boolean m_showPeptideMatches = false;
+    private boolean m_showPeptideMatches;
 
    /*
     * @param table : associated LazyTable
@@ -166,7 +185,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
         m_ptmPepInstances = ptmPeptides != null ? ptmPeptides : new ArrayList<>();
         m_ptmPepInstancesAsRow = new ArrayList<>();        
         m_ptmPepInstances.forEach(ptmPI -> {
-            DProteinMatch protMatchOfInterest = ptmPI.getPTMSites().size() >0 ? ptmPI.getPTMSites().get(0).getProteinMatch() : null ;
+            DProteinMatch protMatchOfInterest = !ptmPI.getPTMSites().isEmpty() ? ptmPI.getPTMSites().get(0).getProteinMatch() : null ;
             //Create PeptideMatch List to display according to m_showPeptideMatches
             List<DPeptideMatch> pepMatches = new ArrayList<>();
             if(m_showPeptideMatches){
@@ -198,8 +217,13 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
                                     
                 m_pepMatchProbaByIdByPTMSite.put(colName, probaByPepMatchd);
             }); //End for all PTMPepInstance PTMSites
-            
-            pepMatches.forEach( pepM -> {m_ptmPepInstancesAsRow.add(new Row(ptmPI, pepM));});            
+
+            pepMatches.forEach( pepM -> {
+                DMasterQuantPeptide mqPep = (m_quantPeptidesByPepInsId!=null) ? m_quantPeptidesByPepInsId.get(ptmPI.getPeptideInstance().getId()) : null;
+                Long qPepId = (mqPep!=null) ? mqPep.getId() : null;
+                Integer generalSelLevel = (mqPep!=null) ? mqPep.getSelectionLevel() : 2;
+                m_ptmPepInstancesAsRow.add(new Row(ptmPI, pepM, qPepId, generalSelLevel));
+            });
         }); //END For all PTMPeptideInstancs
         
         // Test if structure changed since last display
@@ -210,7 +234,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     }
     
     private void setDefaultColumnToHide(){
-         m_columnsIdsToHide = new ArrayList();
+         m_columnsIdsToHide = new ArrayList<>();
          m_columnsIdsToHide.add(COLTYPE_PEPTIDE_ID);
          int startQChColIndex = m_columnNames.length+m_ptmSiteCount;
          if (m_isXicResult){
@@ -219,7 +243,8 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
                 m_columnsIdsToHide.add(startQChColIndex + DYNAMIC_COLTYPE_RAW_ABUNDANCE + (i * m_columnNamesQC.length));
                 m_columnsIdsToHide.add(startQChColIndex + DYNAMIC_COLTYPE_SELECTION_LEVEL + (i * m_columnNamesQC.length));
             }
-         }
+         } else
+             m_columnsIdsToHide.add(COLTYPE_SELECTION_LEVEL);
     }
     
     public List<Integer> getDefaultColumnsToHide() {       
@@ -388,6 +413,16 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
             case COLTYPE_SPECTRUM_TITLE: {
                 return (pepMatch==null) ?  "UNKNOWN" : pepMatch.getMsQuery().getDSpectrum().getTitle();    
             }
+            case COLTYPE_SELECTION_LEVEL: {
+                if(m_isXicResult){
+                    DMasterQuantPeptide qPep = m_quantPeptidesByPepInsId.get(ptmPepInstance.getPeptideInstance().getId());
+                    SelectLevelEnum selLevel = m_ptmPepInstancesAsRow.get(rowIndex).getSelectLevelInContext();
+                    return new XicStatusRenderer.SelectLevel(selLevel, SelectLevelEnum.valueOf(qPep.getSelectionLevel()));
+                } else {
+                    return new XicStatusRenderer.SelectLevel(SelectLevelEnum.SELECTED_AUTO, SelectLevelEnum.SELECTED_AUTO);
+                }
+
+            }
             default: {                
                 //Correspond to dynamically added columns
                 if(columnIndex <= (LAST_STATIC_COLUMN+m_ptmSiteCount)){
@@ -535,6 +570,11 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
                 renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.LEFT);
                 break;
             }
+            case COLTYPE_SELECTION_LEVEL: {
+                renderer = new XicStatusRenderer(null, COLTYPE_SELECTION_LEVEL);
+                break;
+            }
+
             case COLTYPE_PEPTIDE_CHARGE:
             case COLTYPE_PEPTIDE_ID: {
                 renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class), JLabel.RIGHT);
@@ -605,6 +645,7 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
     @Override
     public Class getDataColumnClass(int columnIndex) {
         switch (columnIndex) {
+            case COLTYPE_SELECTION_LEVEL:
             case  COLTYPE_PEPTIDE_CHARGE:
                 return Integer.class;
             case COLTYPE_PEPTIDE_ID:
@@ -665,6 +706,8 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
             case COLTYPE_PTM_PROBA:                
             case COLTYPE_PEPTIDE_SCORE:
                 return Float.class;
+            case COLTYPE_SELECTION_LEVEL:
+                return XicStatusRenderer.SelectLevel.class;
             default:  //For dynamically columns                                
             {
                 //PTM Site Probabilities
@@ -689,14 +732,16 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
         }
         if (columnIndex == COLTYPE_PEPTIDE_NAME) {
             return ((DPeptideMatch) getValueAt(rowIndex, columnIndex)).getPeptide().getSequence();
-        }
-        if (columnIndex == COLTYPE_PEPTIDE_ID) {
+        } else  if (columnIndex == COLTYPE_PEPTIDE_ID) {
             if(m_showPeptideMatches)
             //return m_ptmPepInstances.get(rowIndex).getPeptideInstance().getId();
                 return m_ptmPepInstancesAsRow.get(rowIndex).peptideMatch.getId();
             else
                 return m_ptmPepInstancesAsRow.get(rowIndex).ptmPeptideInstance.getPeptideInstance().getId();
+        } else if(columnIndex == COLTYPE_SELECTION_LEVEL){
+            return ((XicStatusRenderer.SelectLevel) data).getStatus().getIntValue(); // return XicStatusRenderer.SelectLevel.class;
         }
+
         return data;
     }
 

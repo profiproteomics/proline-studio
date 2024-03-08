@@ -24,6 +24,7 @@ import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
@@ -41,7 +42,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  *
@@ -138,7 +138,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
                 panel.setData(null, null, null, null, false);
                 return;
             }
-
+            m_logger.trace("DataBoxPTMPeptides : **** updateData m_ptmPepInstances "+m_ptmPepInstances.size()+"; m_ptmClusters "+m_ptmClusters +" m_isMS1LabelFreeQuantitation: "+m_isMS1LabelFreeQuantitation);
             //Get QuantInfo        
             if (m_isMS1LabelFreeQuantitation) {
                 m_quantChannelInfo = (QuantChannelInfo) getData(QuantChannelInfo.class);
@@ -149,7 +149,6 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
             }
 
 //            final List<PTMSite> notLoadedPtmSite = getNotLoadedPTMSite();
-//
 //            if (notLoadedPtmSite.isEmpty()) {
                 resetPrevPTMTaskId();
                 if (m_isMS1LabelFreeQuantitation) {
@@ -219,6 +218,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
 
             @Override
             public void run(boolean success, final long taskId, SubTask subTask, boolean finished) {
+                m_logger.debug("DataBoxPTMPeptides : **** loadXicAndPropagate.initLoadPeptides CALLBACK subTask"+subTask+" finosh " +finished);
                 if (subTask == null) {
                     if (m_quantChannelInfo != null) {
                         Map<Long, DMasterQuantPeptide> qpepByPepId = new HashMap<>();
@@ -243,7 +243,7 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
 
                                 Map<Long, DMasterQuantPeptide> qpepByPepId = new HashMap<>();
                                 for (DMasterQuantPeptide masterQPep : m_masterQuantPeptideList) {
-                                    masterQPep.getPeptideInstanceId();
+                                    masterQPep.getPeptideInstanceId();//VDS 2keep ?
                                     qpepByPepId.put(masterQPep.getPeptideInstanceId(), masterQPep);
                                 }
                                 //m_logger.debug(" DB PTM peptide : DatabaseLoadLcMSTask run m_quantChannelInfo defined CALL setData ");                                
@@ -287,9 +287,29 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
             AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousXICTaskId);
             m_previousXICTaskId = null;
         }
-        if (m_ptmPepInstances != null && !m_ptmPepInstances.isEmpty()) {
+
+        if(m_ptmClusters != null && !m_ptmClusters.isEmpty()) {
+            m_logger.debug("DataBoxPTMPeptides : **** loadXicAndPropagate m_ptmClusters "+m_ptmClusters.size());
+
+            Map<Long, DMasterQuantPeptide> qpepByPepId = new HashMap<>();
+            for(PTMCluster cluster : m_ptmClusters) {
+                List<DMasterQuantPeptide> qPeps = cluster.getRepresentativeMQPepMatch() != null ? cluster.getRepresentativeMQPepMatch().getAggregatedMQPeptides() : new ArrayList<>();
+                m_masterQuantPeptideList.addAll(qPeps);
+                m_logger.trace("DataBoxPTMPeptides : **** loadXicAndPropagate m_masterQuantPeptideList "+m_masterQuantPeptideList.size());
+                for(DMasterQuantPeptide qPep : qPeps)
+                    qpepByPepId.put(qPep.getPeptideInstanceId(), qPep);
+            }
+
+            ((PTMPeptidesTablePanel) getDataBoxPanelInterface()).setData(null, m_ptmPepInstances, m_ptmClusters, qpepByPepId, true);
+            setLoaded(loadingId);
+            addDataChanged(PTMPeptideInstance.class, null); //  //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
+            addDataChanged(ExtendedTableModelInterface.class);
+            propagateDataChanged();
+
+        } else if (m_ptmPepInstances != null && !m_ptmPepInstances.isEmpty()) {
             DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
-            List<Long> parentPepInstanceIdsL = m_ptmPepInstances.stream().map(ptmPepInst -> ptmPepInst.getPeptideInstance().getId()).collect(Collectors.toList());
+            m_logger.debug("DataBoxPTMPeptides : **** loadXicAndPropagate Task initLoadPeptides  "+task.getId());
+            List<Long> parentPepInstanceIdsL = m_ptmPepInstances.stream().map(ptmPepInst -> ptmPepInst.getPeptideInstance().getId()).toList();
             task.initLoadPeptides(getProjectId(), m_ptmDataset.getDataset(), parentPepInstanceIdsL.toArray(new Long[parentPepInstanceIdsL.size()]), m_masterQuantPeptideList, true);
             m_previousXICTaskId = task.getId();
             registerTask(task);

@@ -32,9 +32,10 @@ import fr.proline.core.orm.msi.dto.DPeptideSet;
 import fr.proline.core.orm.msi.dto.DSpectrum;
 import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
 import fr.proline.studio.dam.memory.TransientMemoryCacheManager;
-import fr.proline.studio.dam.memory.TransientMemoryClientInterface;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import fr.proline.studio.performancetest.PerformanceTest;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -65,7 +66,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
     public static final int SUB_TASK_COUNT = 4; // <<----- get in sync
     
     
-    private long m_projectId;
+    private final long m_projectId;
     private DProteinMatch m_proteinMatch = null;
     private ArrayList<DProteinMatch> m_proteinMatchArray = null;
     private ArrayList<ResultSummary> m_rsmList = null;
@@ -146,20 +147,27 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
 
     @Override
     public boolean fetchData() {
-        if (needToFetch()) {
-            switch (m_action) {
-                case LOAD_PEPTIDE_INSTANCE_FOR_PROTEIN_MATCH: {
-                    return fetchDataForProteinMatch();
+        try {
+            if (needToFetch()) {
+                switch (m_action) {
+                    case LOAD_PEPTIDE_INSTANCE_FOR_PROTEIN_MATCH: {
+                        return fetchDataForProteinMatch();
+                    }
+                    case LOAD_PEPTIDE_INSTANCES_FOR_RSM: {
+                        return fetchDataForRsm();
+                    }
+
                 }
-                case LOAD_PEPTIDE_INSTANCES_FOR_RSM: {
-                    return fetchDataForRsm();
-                }
-                
+                return false; // should not happen
+            } else {
+                // fetch data of SubTasks
+                return fetchDataSubTask();
             }
-            return false; // should not happen
-        } else {
-            // fetch data of SubTasks
-            return fetchDataSubTask();
+        } finally {
+            m_logger.info("!!!! Display Perf !!! ");
+            PerformanceTest.displayTimeCurrentThread();  //VDS for debug only !
+            PerformanceTest.clearTimeCurrentThread();
+            m_logger.info("!!!! Display Perf DONE !!! ");
         }
     }
     
@@ -383,9 +391,9 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
         try {
 
             entityManagerMSI.getTransaction().begin();
-
             int size = m_rsmList.size();
             for (int i = 0; i < size; i++) {
+                PerformanceTest.startTime("fetchDataForProteinMatch-1");
                 ResultSummary rsm = m_rsmList.get(i);
                 DProteinMatch pm = (m_proteinMatchArray != null) ? m_proteinMatchArray.get(i) : m_proteinMatch;
                 if (!needToFetch(pm, rsm)) {
@@ -393,10 +401,9 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
                 }
 
                 fetchPeptideDataForProteinMatch(entityManagerMSI, rsm, pm, peptideMap);
+                PerformanceTest.stopTime("fetchDataForProteinMatch-1");
             }
-
             DatabasePTMsTask.fillPeptidePTMForPeptides(entityManagerMSI, peptideMap, null);
-            
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
@@ -420,18 +427,22 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
         // Retrieve peptideSet of a proteinMatch
         DPeptideSet peptideSet = proteinMatch.getPeptideSet(rsm.getId());
         if (peptideSet == null) {
-            TypedQuery<DPeptideSet> peptideSetQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DPeptideSet(ps.id, ps.score, ps.sequenceCount, ps.peptideCount, ps.peptideMatchCount, ps.resultSummaryId) FROM PeptideSet ps, PeptideSetProteinMatchMap ps_to_pm WHERE ps_to_pm.id.proteinMatchId=:proteinMatchId AND ps_to_pm.id.peptideSetId=ps.id AND ps_to_pm.resultSummary.id=:rsmId", DPeptideSet.class);
+            PerformanceTest.startTime("fetchPeptideDataForProteinMatch-1");
+            TypedQuery<DPeptideSet> peptideSetQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DPeptideSet(ps.id, ps.score, ps.sequenceCount, ps.peptideCount, ps.peptideMatchCount, ps.resultSummaryId) "
+                    +" FROM PeptideSet ps, PeptideSetProteinMatchMap ps_to_pm "
+                    +" WHERE ps_to_pm.id.proteinMatchId=:proteinMatchId AND ps_to_pm.id.peptideSetId=ps.id AND ps_to_pm.resultSummary.id=:rsmId", DPeptideSet.class);
             peptideSetQuery.setParameter("proteinMatchId", proteinMatch.getId());
             peptideSetQuery.setParameter("rsmId", rsm.getId());
             peptideSet = peptideSetQuery.getSingleResult();
             proteinMatch.setPeptideSet(rsm.getId(), peptideSet);
-            
+            PerformanceTest.stopTime("fetchPeptideDataForProteinMatch-1");
         }
 
-        //JPM.TODO : speed up the peptidesQuery
-
+//        PerformanceTest.startTime("fetchPeptideDataForProteinMatch-2");
         // Retrieve the list of PeptideInstance, PeptideMatch, Peptide, MSQuery, Spectrum of a PeptideSet
-        Query peptidesQuery = entityManagerMSI.createQuery("SELECT pi, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, p, sm, ms.id, ms.initialId, pm.cdPrettyRank, pm.sdPrettyRank, sp.firstTime, sp.precursorIntensity, sp.title, pm.serializedProperties FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem ps_to_pi, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.SequenceMatch as sm, fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp WHERE ps_to_pi.peptideSet.id=:peptideSetId AND ps_to_pi.peptideInstance.id=pi.id AND pi.bestPeptideMatchId=pm.id AND pm.peptideId=p.id AND sm.id.proteinMatchId=:proteinMatchId AND sm.id.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp ORDER BY pm.score DESC");
+        Query peptidesQuery = entityManagerMSI.createQuery("SELECT pi, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, p, sm, ms.id, ms.initialId, pm.cdPrettyRank, pm.sdPrettyRank, sp.firstTime, sp.precursorIntensity, sp.title, pm.serializedProperties "
+                +" FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem ps_to_pi, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.SequenceMatch as sm, fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp "
+                +" WHERE ps_to_pi.peptideSet.id=:peptideSetId AND ps_to_pi.peptideInstance.id=pi.id AND pi.bestPeptideMatchId=pm.id AND pm.peptideId=p.id AND sm.id.proteinMatchId=:proteinMatchId AND sm.id.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp ORDER BY pm.score DESC");
 
         peptidesQuery.setParameter("peptideSetId", peptideSet.getId());
         peptidesQuery.setParameter("proteinMatchId", proteinMatch.getId());
@@ -441,6 +452,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
         ArrayList<DPeptideInstance> peptideInstanceList = new ArrayList<>();
         List l = peptidesQuery.getResultList(); 
         Iterator<Object[]> itPeptidesQuery = l.iterator();
+//        PerformanceTest.stopTime("fetchPeptideDataForProteinMatch-2");
         while (itPeptidesQuery.hasNext()) {
             Object[] resCur = itPeptidesQuery.next();
             PeptideInstance pi = (PeptideInstance) resCur[0];
@@ -465,7 +477,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
             spectrum.setFirstTime(firstTime);
             spectrum.setPrecursorIntensity(precursorIntensity);
             spectrum.setTitle(title);
-            //JPM.TODO ?
+
             DPeptideMatch pm = new DPeptideMatch(pmId, pmRank, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId, pmCdPrettyRank, pmSdPrettyRank, pmSerializedProp);
             pm.setRetentionTime(firstTime);
             
@@ -500,13 +512,17 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseSlicerTas
             peptideMap.put(peptideInstances[i].getPeptideId(), (peptideInstances[i].getBestPeptideMatch()).getPeptide());
         }
 
+        PerformanceTest.startTime("fetchPeptideDataForProteinMatch-3");
         // Retrieve the list of Protein Sets of Peptides
         // typical ProteinMatch is loaded in the same time, to avoid lazy fetch 
-        Query proteinGroupsQuery = entityManagerMSI.createQuery("SELECT ps.id, p, pm.id, pm.accession, pm.score, pm.peptideCount, pm.description, pm.geneName, pm.serializedProperties FROM fr.proline.core.orm.msi.ProteinMatch pm, fr.proline.core.orm.msi.ProteinSet ps, fr.proline.core.orm.msi.SequenceMatch sm, fr.proline.core.orm.msi.Peptide p WHERE ps.representativeProteinMatchId=pm.id AND pm.id=sm.id.proteinMatchId AND p.id=sm.id.peptideId AND p.id IN (:peptideIds) AND sm.resultSetId=:rsetId AND ps.resultSummary.id=:rsmId AND ps.isValidated=true");
+        Query proteinGroupsQuery = entityManagerMSI.createQuery("SELECT ps.id, p, pm.id, pm.accession, pm.score, pm.peptideCount, pm.description, pm.geneName, pm.serializedProperties "
+                +" FROM fr.proline.core.orm.msi.ProteinMatch pm, fr.proline.core.orm.msi.ProteinSet ps, fr.proline.core.orm.msi.SequenceMatch sm, fr.proline.core.orm.msi.Peptide p "
+                +" WHERE ps.representativeProteinMatchId=pm.id AND pm.id=sm.id.proteinMatchId AND p.id=sm.id.peptideId AND p.id IN (:peptideIds) AND sm.resultSetId=:rsetId AND ps.resultSummary.id=:rsmId AND ps.isValidated=true");
         proteinGroupsQuery.setParameter("rsmId", rsm.getId());
         proteinGroupsQuery.setParameter("rsetId", rsm.getResultSet().getId());
         proteinGroupsQuery.setParameter("peptideIds", peptideMap.keySet());
         l = proteinGroupsQuery.getResultList();
+        PerformanceTest.stopTime("fetchPeptideDataForProteinMatch-3");
         Iterator<Object[]> itProteinGroupsQuery = l.iterator();
         while (itProteinGroupsQuery.hasNext()) {
             Object[] resCur = itProteinGroupsQuery.next();

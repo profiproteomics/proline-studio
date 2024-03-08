@@ -1050,7 +1050,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             int nb = peptideMatchArray.length;
             m_peptideMatchIds = new ArrayList<>(nb);
             m_peptideMatchMap = new HashMap<>();
-            //VDS TODO integrate this with previous loop
+            //VDS TODO integrate this with previous loop (ToArray method)
             for (int i = 0; i < nb; i++) {
                 DPeptideMatch pm = peptideMatchArray[i];
                 pm.setValidated(false);

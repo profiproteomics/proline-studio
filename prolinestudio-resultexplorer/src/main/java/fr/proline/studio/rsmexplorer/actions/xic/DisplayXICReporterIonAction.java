@@ -73,8 +73,14 @@ public class DisplayXICReporterIonAction extends AbstractRSMAction {
             setEnabled(false);
             return;
         }
+        AbstractNode anode = selectedNodes[0];
+        // must be a dataset
+        if (anode.getType() != AbstractNode.NodeTypes.DATA_SET) {
+            setEnabled(false);
+            return;
+        }
 
-        DataSetNode node = (DataSetNode) selectedNodes[0];
+        DataSetNode node = (DataSetNode) anode;
 
         // the node must not be in changing state
         if (node.isChanging()) {

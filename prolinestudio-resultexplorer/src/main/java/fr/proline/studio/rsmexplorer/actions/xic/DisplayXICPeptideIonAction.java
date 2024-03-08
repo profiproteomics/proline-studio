@@ -73,7 +73,7 @@ public class DisplayXICPeptideIonAction extends AbstractRSMAction {
             return;
         }
 
-        AbstractNode node = (AbstractNode) selectedNodes[0];
+        AbstractNode node = selectedNodes[0];
 
         // the node must not be in changing state
         if (node.isChanging()) {

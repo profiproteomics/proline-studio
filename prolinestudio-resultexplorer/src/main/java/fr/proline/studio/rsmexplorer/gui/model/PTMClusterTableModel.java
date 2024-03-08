@@ -21,6 +21,7 @@ import fr.proline.core.orm.msi.dto.*;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.dam.data.SelectLevelEnum;
 import fr.proline.studio.dam.tasks.DatabaseDatasetPTMsTask;
+import fr.proline.studio.dam.tasks.data.ptm.AggregatedMasterQuantPeptide;
 import fr.proline.studio.dam.tasks.data.ptm.ComparableList;
 import fr.proline.studio.dam.tasks.data.ptm.PTMCluster;
 import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
@@ -101,7 +102,7 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
   private String m_modificationInfo = "";
   
   private final ScoreRenderer m_scoreRenderer = new ScoreRenderer();
-  private RendererMouseCallback m_selectLevelRendererCallback; // To be called by renderer  whenmouse action
+  private final RendererMouseCallback m_selectLevelRendererCallback; // To be called by renderer  when mouse action
 
   public PTMClusterTableModel(LazyTable table, RendererMouseCallback callback) {
     super(table);
@@ -168,7 +169,7 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
   
   
   public List<Integer> getDefaultColumnsToHide() {  
-    List<Integer> listIds = new ArrayList();
+    List<Integer> listIds = new ArrayList<>();
     listIds.add(COLTYPE_PROTEIN_ID);
     listIds.add(COLTYPE_PTM_CLUSTER_CONFIDENCE);
     listIds.add(COLTYPE_CLUSTER_NOTATION);
@@ -374,6 +375,15 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
         return lazyData;        
       }
 
+      //VDS DEV
+//      case COLTYPE_QUANT_SELLEVEL: {
+//        AggregatedMasterQuantPeptide masterQuantPep = ptmCluster.getRepresentativeMQPepMatch();
+//        if(masterQuantPep != null)
+//          return masterQuantPep.getGenericSelectionLevel();
+//        else
+//          return -5;
+//      }
+
       default: 
         // Quant Channel columns       
         if (ptmCluster.getRepresentativeMQPepMatch() == null) {
@@ -382,18 +392,15 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
             return lazyData;
         }  
         
-        DMasterQuantPeptide masterQuantPep = ptmCluster.getRepresentativeMQPepMatch();
+        AggregatedMasterQuantPeptide masterQuantPep = ptmCluster.getRepresentativeMQPepMatch();
         int dynQchIndex = col - (COLTYPE_START_QUANT_INDEX); 
         int nbQc = dynQchIndex / m_columnNamesQC.length;
         int id = dynQchIndex - (nbQc * m_columnNamesQC.length);                        
         Map<Long, DQuantPeptide> quantPeptideByQchIds = masterQuantPep.getQuantPeptideByQchIds();   
         if (quantPeptideByQchIds == null) {
             switch (id) {
-                case COLTYPE_RAW_ABUNDANCE:
-                    lazyData.setData(Float.valueOf(0));
-                    break;
-                case COLTYPE_ABUNDANCE:
-                    lazyData.setData(Float.valueOf(0));
+                case COLTYPE_RAW_ABUNDANCE, COLTYPE_ABUNDANCE:
+                    lazyData.setData(0f);
                     break;
             }
         } else {
@@ -401,13 +408,10 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
             DQuantPeptide quantPeptide = quantPeptideByQchIds.get(qcinfo.getQuantChannels()[nbQc].getId());
             if (quantPeptide == null) {
                 switch (id) {
-                    case COLTYPE_RAW_ABUNDANCE:
-                        lazyData.setData(Float.valueOf(0));
+                    case COLTYPE_RAW_ABUNDANCE, COLTYPE_ABUNDANCE:
+                        lazyData.setData(0f);
                         break;
-                    case COLTYPE_ABUNDANCE:
-                        lazyData.setData(Float.valueOf(0));
-                        break;
-                }   
+                }
             } else {
                 switch (id) {
                     case COLTYPE_ABUNDANCE:
@@ -489,7 +493,7 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
             }
                 
         } else if (isQuandDS) {
-            m_isQuantitationDS = isQuandDS;
+            m_isQuantitationDS = true;
             m_quantChannelNumber = qcInfo.getQuantChannels().length;            
             m_quantChannels = qcInfo.getQuantChannels(); 
             structChanged = true;
@@ -561,8 +565,7 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
 
   @Override
   public int[] getKeysColumn() {
-    int[] keys = {COLTYPE_PROTEIN_NAME};
-    return keys;
+    return new int[]{COLTYPE_PROTEIN_NAME};
   }
 
   @Override
@@ -586,15 +589,11 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
     filtersMap.put(COLTYPE_PTM_CLUSTER_ID, new LongFilter(getColumnName(COLTYPE_PTM_CLUSTER_ID), null, COLTYPE_PTM_CLUSTER_ID));
     filtersMap.put(COLTYPE_PROTEIN_NAME, new StringDiffFilter(getColumnName(COLTYPE_PROTEIN_NAME), null, COLTYPE_PROTEIN_NAME));
 
-    ConvertValueInterface peptideConverter = new ConvertValueInterface() {
-      @Override
-      public Object convertValue(Object o) {
-        if (o == null) {
-          return null;
-        }
-        return ((DPeptideMatch) o).getPeptide().getSequence();
+    ConvertValueInterface peptideConverter = o -> {
+      if (o == null) {
+        return null;
       }
-
+      return ((DPeptideMatch) o).getPeptide().getSequence();
     };
     filtersMap.put(COLTYPE_PEPTIDE_NAME, new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_NAME), peptideConverter, COLTYPE_PEPTIDE_NAME));
     filtersMap.put(COLTYPE_PEPTIDE_SCORE, new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_SCORE), null, COLTYPE_PEPTIDE_SCORE));
@@ -779,7 +778,7 @@ public class PTMClusterTableModel extends LazyTableModel implements GlobalTableM
     return columnIndex == COLTYPE_PTM_CLUSTER_SELECTION_LEVEL;
   }
 
-    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
+    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap<>();
 
   @Override
   public GlobalTableModelInterface getFrozzenModel() {

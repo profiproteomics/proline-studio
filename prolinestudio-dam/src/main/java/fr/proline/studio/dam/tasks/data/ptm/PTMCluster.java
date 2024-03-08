@@ -54,7 +54,7 @@ public class PTMCluster implements Comparable<PTMCluster>{
     private DProteinMatch m_proteinMatch;    
     private DMasterQuantProteinSet m_masterQuantProteinSet;
     private DPeptideMatch m_representativePepMatch;
-    private DMasterQuantPeptide m_representativeMQPepMatch;
+    private AggregatedMasterQuantPeptide m_representativeMQPepMatch;
     private List<PTMPeptideInstance> m_parentPTMPeptideInstances;
     private List<PTMPeptideInstance> m_leafPTMPeptideInstances;
     private List<DPeptideInstance> m_parentPeptideInstances;
@@ -162,17 +162,14 @@ public class PTMCluster implements Comparable<PTMCluster>{
             m_peptideIds.remove(pepId);
 
             //Recalculated MQPep if needed
-            DMasterQuantPeptide finalClusterMQpep = getRepresentativeMQPepMatch();
-            if (finalClusterMQpep != null && finalClusterMQpep instanceof AggregatedMasterQuantPeptide) {
+            AggregatedMasterQuantPeptide finalClusterMQpep = getRepresentativeMQPepMatch();
+            if (finalClusterMQpep != null) {
                 Map<Long, DMasterQuantPeptide> mqPepByPepInstId = new HashMap<>();
                 ((AggregatedMasterQuantPeptide) finalClusterMQpep).getAggregatedMQPeptides().forEach(mqPep -> {
                     if(m_peptideIds.contains(mqPep.getPeptideInstance().getPeptideId()))
                         mqPepByPepInstId.put(mqPep.getPeptideInstanceId(), mqPep);
                 });
                 setRepresentativeMQPepMatch(m_ptmDataset.getRepresentativeMQPeptideForCluster(this, mqPepByPepInstId));
-            } else if(finalClusterMQpep != null ) {
-                //Should not occur
-                m_logger.warn(" ERROR. PTM Cluster in Quantitation do not used AggregatedMasterQuantPeptide. Unable to create new quantiation values ");
             }
 
             m_parentPTMPeptideInstances = null;
@@ -204,7 +201,7 @@ public class PTMCluster implements Comparable<PTMCluster>{
         return m_representativePepMatch;
     }
     
-    public void setRepresentativeMQPepMatch(DMasterQuantPeptide quantPeptideMatch) {
+    public void setRepresentativeMQPepMatch(AggregatedMasterQuantPeptide quantPeptideMatch) {
         m_representativeMQPepMatch = quantPeptideMatch;
     }
 
@@ -212,7 +209,7 @@ public class PTMCluster implements Comparable<PTMCluster>{
         return m_localizationConfidence;
     }
 
-    public DMasterQuantPeptide getRepresentativeMQPepMatch() {
+    public AggregatedMasterQuantPeptide getRepresentativeMQPepMatch() {
         return m_representativeMQPepMatch;
     }
 

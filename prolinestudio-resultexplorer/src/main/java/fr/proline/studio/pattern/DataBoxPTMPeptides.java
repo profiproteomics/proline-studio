@@ -243,7 +243,6 @@ public class DataBoxPTMPeptides extends AbstractDataBoxPTMPeptides {
 
                                 Map<Long, DMasterQuantPeptide> qpepByPepId = new HashMap<>();
                                 for (DMasterQuantPeptide masterQPep : m_masterQuantPeptideList) {
-                                    masterQPep.getPeptideInstanceId();//VDS 2keep ?
                                     qpepByPepId.put(masterQPep.getPeptideInstanceId(), masterQPep);
                                 }
                                 //m_logger.debug(" DB PTM peptide : DatabaseLoadLcMSTask run m_quantChannelInfo defined CALL setData ");                                

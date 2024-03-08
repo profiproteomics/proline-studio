@@ -238,10 +238,12 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
          m_columnsIdsToHide.add(COLTYPE_PEPTIDE_ID);
          int startQChColIndex = m_columnNames.length+m_ptmSiteCount;
          if (m_isXicResult){
-            QuantChannelInfo qcInfo = (QuantChannelInfo)getSingleValue(QuantChannelInfo.class);            
-            for (int i = qcInfo.getQuantChannels().length - 1; i >= 0; i--) {
-                m_columnsIdsToHide.add(startQChColIndex + DYNAMIC_COLTYPE_RAW_ABUNDANCE + (i * m_columnNamesQC.length));
-                m_columnsIdsToHide.add(startQChColIndex + DYNAMIC_COLTYPE_SELECTION_LEVEL + (i * m_columnNamesQC.length));
+            QuantChannelInfo qcInfo = (QuantChannelInfo)getSingleValue(QuantChannelInfo.class);
+            if(qcInfo != null) {
+                for (int i = qcInfo.getQuantChannels().length - 1; i >= 0; i--) {
+                    m_columnsIdsToHide.add(startQChColIndex + DYNAMIC_COLTYPE_RAW_ABUNDANCE + (i * m_columnNamesQC.length));
+                    m_columnsIdsToHide.add(startQChColIndex + DYNAMIC_COLTYPE_SELECTION_LEVEL + (i * m_columnNamesQC.length));
+                }
             }
          } else
              m_columnsIdsToHide.add(COLTYPE_SELECTION_LEVEL);
@@ -416,8 +418,9 @@ public class PTMPeptidesTableModel extends LazyTableModel implements GlobalTable
             case COLTYPE_SELECTION_LEVEL: {
                 if(m_isXicResult){
                     DMasterQuantPeptide qPep = m_quantPeptidesByPepInsId.get(ptmPepInstance.getPeptideInstance().getId());
+                    SelectLevelEnum globalLevel = qPep != null ? SelectLevelEnum.valueOf(qPep.getSelectionLevel()) : SelectLevelEnum.UNKNOWN;
                     SelectLevelEnum selLevel = m_ptmPepInstancesAsRow.get(rowIndex).getSelectLevelInContext();
-                    return new XicStatusRenderer.SelectLevel(selLevel, SelectLevelEnum.valueOf(qPep.getSelectionLevel()));
+                    return new XicStatusRenderer.SelectLevel(selLevel, globalLevel);
                 } else {
                     return new XicStatusRenderer.SelectLevel(SelectLevelEnum.SELECTED_AUTO, SelectLevelEnum.SELECTED_AUTO);
                 }

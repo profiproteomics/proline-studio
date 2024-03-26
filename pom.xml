@@ -6,11 +6,11 @@
     <parent>
         <artifactId>profi-pom</artifactId>
         <groupId>fr.proline</groupId>
-        <version>1.2.0-SNAPSHOT</version>
+        <version>1.3.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>prolinestudio-parent</artifactId>
-    <version>2.3.0-SNAPSHOT</version> <!-- ProlineStudio version -->
+    <version>2.4.0-SNAPSHOT</version> <!-- ProlineStudio version -->
     <packaging>pom</packaging>
 
     <name>ProlineStudio-parent</name>
@@ -28,10 +28,10 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <brandingToken>prolinestudio</brandingToken>
-        <core.version>2.3.0-SNAPSHOT</core.version>
-        <server.version>2.3.0-SNAPSHOT</server.version>
-        <util.version>1.2.0-SNAPSHOT</util.version>
-        <mzdb.version>1.2.1-SNAPSHOT</mzdb.version>
+        <core.version>2.4.0-SNAPSHOT</core.version>
+        <server.version>2.4.0-SNAPSHOT</server.version>
+        <util.version>1.3.0-SNAPSHOT</util.version>
+        <mzdb.version>1.3.0-SNAPSHOT</mzdb.version>
         <sqlite4java.version>1.0.392</sqlite4java.version>
     </properties>
 

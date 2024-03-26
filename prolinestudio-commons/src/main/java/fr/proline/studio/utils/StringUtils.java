@@ -92,6 +92,41 @@ public class StringUtils {
         return builder.toString();
     }
 
+    public static String formatFloatArray(Float[] floats, int digits) {
+        if (floats == null)
+            return "null";
+
+        int iMax = floats.length - 1;
+        if (iMax == -1)
+            return "[]";
+
+        StringBuilder b = new StringBuilder();
+        b.append('[');
+        for (int i = 0; ; i++) {
+            b.append(DataFormat.format(floats[i], digits));
+            if (i == iMax)
+                return b.append(']').toString();
+            b.append(", ");
+        }
+    }
+
+    public static String formatFloatList(List<Float> floats, int digits) {
+        if (floats == null)
+            return "null";
+
+        if(floats.isEmpty())
+            return "[]";
+
+        StringBuilder b = new StringBuilder();
+        b.append('[');
+        for (int i = 0; ; i++) {
+            b.append(DataFormat.format(floats.get(i), digits));
+            if (i == (floats.size()-1))
+                return b.append(']').toString();
+            b.append(", ");
+        }
+    }
+
     /**
      * compile a Pattern with regex
      *

@@ -17,19 +17,21 @@
 package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.model.*;
-import fr.proline.mzscope.model.IChromatogram;
-import fr.proline.mzscope.utils.MzScopeCallback;
 import fr.proline.mzscope.ui.event.AxisRangeChromatogramListener;
 import fr.proline.mzscope.utils.ButtonTabComponent;
 import fr.proline.mzscope.utils.Display;
+import fr.proline.mzscope.utils.MzScopeCallback;
 import fr.proline.studio.tabs.IWrappedPanel;
 import fr.proline.studio.tabs.TabsPanel;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.IconManager;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -39,17 +41,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import javax.swing.AbstractButton;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
-import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
-import javax.swing.SwingWorker;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -86,7 +77,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     private Double zoomXLevel = Double.NaN;
     private Double relativeYValue = Double.NaN;
     private Double zoomYLevel = Double.NaN;
-    
+    private boolean forceFittedToCentroid;
     
     public TabbedMultiRawFilePanel(List<IRawFile> rawfiles) {
         super();
@@ -275,11 +266,17 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
                 }
             }
         }
-        return null;
+        // else return the first one
+        return this.rawfiles.get(0);
     }
 
     @Override
-    public void extractAndDisplayChromatogram(final MsnExtractionRequest params, Display display, MzScopeCallback callback) {
+    public List<IRawFile> getAllRawfiles() {
+        return rawfiles;
+    }
+
+    @Override
+    public void extractAndDisplay(final ExtractionRequest params, Display display, MzScopeCallback callback) {
         // in this implementation displayMode is ignored : always REPLACE since we will extract one IChromatogram per RawFile
         SwingWorker worker = new SwingWorker<Integer, IChromatogram>() {
             int count = 0;
@@ -366,7 +363,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     public void displayScan(long index) {
         IRawFile selectedRawFile = getCurrentRawfile();
         if (selectedRawFile != null && ((currentScan == null) || (index != currentScan.getIndex()) )) {
-            currentScan = selectedRawFile.getSpectrum((int) index);
+            currentScan = selectedRawFile.getSpectrum((int) index, forceFittedToCentroid);
             if (currentScan != null) {
                 spectrumContainerPanel.displayScan(currentScan);
             }
@@ -378,8 +375,8 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     }
 
     @Override
-    public void setReferenceSpectrum(Spectrum spectrum) {
-        spectrumContainerPanel.displayReferenceSpectrum(spectrum);
+    public void setReferenceSpectrum(Spectrum spectrum, Float scaleFactor) {
+        spectrumContainerPanel.setReferenceSpectrum(spectrum, scaleFactor);
     }
 
     private IRawFile getRawFile(String fileName) {
@@ -647,6 +644,16 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFileViewer {
     @Override
     public Display.Mode getChromatogramDisplayMode() {
         return xicDisplayMode;
+    }
+
+    @Override
+    public Spectrum getCurrentSpectrum() {
+        return currentScan;
+    }
+
+    @Override
+    public void changeForceFittedToCentroid() {
+        forceFittedToCentroid = !forceFittedToCentroid;
     }
 
 }

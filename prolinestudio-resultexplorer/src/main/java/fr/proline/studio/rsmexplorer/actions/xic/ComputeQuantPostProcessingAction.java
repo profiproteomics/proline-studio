@@ -18,7 +18,9 @@ package fr.proline.studio.rsmexplorer.actions.xic;
 
 import fr.proline.core.orm.msi.PtmSpecificity;
 import fr.proline.core.orm.uds.Project;
+import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
@@ -137,7 +139,12 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
     public static boolean quantificationProfile(final ResultCallback resultCallback, int posX, int posY, Long pID, ArrayList<DataSetNode> nodeList, DDataset paramsFromdataset) {
         ArrayList<PtmSpecificity> ptms = fetchPtmsFromDAM(nodeList);
         boolean isAggregation = isAllAggregation(nodeList, posX, posY);
-        QuantPostProcessingDialog dialog = new QuantPostProcessingDialog(WindowManager.getDefault().getMainWindow(), ptms, isAggregation, paramsFromdataset);
+
+        DDatasetType.QuantitationMethodInfo qMethodInfo = nodeList.get(0).getDataset().getQuantMethodInfo();
+        QuantitationMethod quantMethod = nodeList.get(0).getDataset().getQuantitationMethod();
+        QuantPostProcessingDialog dialog = new QuantPostProcessingDialog(WindowManager.getDefault().getMainWindow(), ptms, isAggregation, quantMethod, qMethodInfo, paramsFromdataset);
+//        dialog = new QuantPostProcessingDialog(WindowManager.getDefault().getMainWindow(), ptms, isAggregation, paramsFromdataset);
+
         dialog.setLocation(posX, posY);
         dialog.setVisible(true);
 
@@ -172,7 +179,7 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
 
                 List<DMasterQuantitationChannel> listMasterQuantChannels = dataset.getMasterQuantitationChannels();
                 if (listMasterQuantChannels != null && !listMasterQuantChannels.isEmpty()) {
-                    Long masterQuantChannelId = new Long(listMasterQuantChannels.get(0).getId());
+                    Long masterQuantChannelId = Long.valueOf(listMasterQuantChannels.get(0).getId());
                     // CallBack for Xic Quantitation Service
                     //one callback by datasetNode
                     AbstractJMSCallback xicCallback = new AbstractJMSCallback() {
@@ -280,7 +287,12 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
             return;
         }
 
+        boolean first = true;
+        DDatasetType.QuantitationMethodInfo methodInfo = DDatasetType.QuantitationMethodInfo.NONE;
         for (AbstractNode node : selectedNodes) {
+
+            DataSetNode datasetNode = (DataSetNode) node;
+
             // the node must not be in changing state
             if (node.isChanging()) {
                 setEnabled(false);
@@ -293,10 +305,17 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
                 return;
             }
 
-            DataSetNode datasetNode = (DataSetNode) node;
-
             // must be a quantitation XIC
             if (!datasetNode.isQuantXIC()) {
+                setEnabled(false);
+                return;
+            }
+
+            //must be same quanti type
+            if(first){
+                methodInfo = datasetNode.getDataset().getQuantMethodInfo();
+                first = false;
+            } else if(! datasetNode.getDataset().getQuantMethodInfo().equals(methodInfo)){
                 setEnabled(false);
                 return;
             }

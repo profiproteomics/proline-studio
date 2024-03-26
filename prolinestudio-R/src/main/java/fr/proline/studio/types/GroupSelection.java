@@ -31,7 +31,7 @@ public class GroupSelection {
     private final ArrayList<ArrayList<Integer>> m_groups;
     
     public GroupSelection() {
-        m_groups = new ArrayList();
+        m_groups = new ArrayList<>();
     }
     
     public void addGroup(ArrayList<Integer> group) {

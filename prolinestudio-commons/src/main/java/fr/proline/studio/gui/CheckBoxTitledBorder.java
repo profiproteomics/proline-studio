@@ -111,7 +111,7 @@ public class CheckBoxTitledBorder extends AbstractBorder implements MouseListene
       pt.translate(-5, 0);
       m_checkBox.setBounds(m_rectangle);
       m_checkBox.dispatchEvent(new MouseEvent(m_checkBox, me.getID(),
-              me.getWhen(), me.getModifiers(), pt.x, pt.y, me.getClickCount(), me.isPopupTrigger(), me.getButton()));
+              me.getWhen(), me.getModifiersEx(), pt.x, pt.y, me.getClickCount(), me.isPopupTrigger(), me.getButton()));
       if (!m_checkBox.isValid() && (m_container != null))  {
         m_container.repaint();
       }

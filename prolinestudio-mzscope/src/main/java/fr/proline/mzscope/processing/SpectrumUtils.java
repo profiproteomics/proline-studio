@@ -16,24 +16,27 @@
  */
 package fr.proline.mzscope.processing;
 
+import com.google.common.primitives.Doubles;
+import com.google.common.primitives.Floats;
+import fr.profi.ms.model.TheoreticalIsotopePattern;
 import fr.profi.mzdb.algo.signal.filtering.SavitzkyGolaySmoother;
 import fr.profi.mzdb.algo.signal.filtering.SavitzkyGolaySmoothingConfig;
+import fr.profi.mzdb.model.DataMode;
 import fr.profi.mzdb.model.Peakel;
+import fr.profi.mzdb.model.SpectrumData;
 import fr.profi.mzdb.model.SpectrumHeader;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.IntStream;
-
 import fr.profi.mzdb.peakeldb.PeakelDbHelper;
-import fr.proline.mzscope.model.Signal;
+import fr.proline.mzscope.model.Spectrum;
+import fr.proline.mzscope.ui.SpectrumPanel;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Tuple2;
+
+import java.util.*;
+import java.util.stream.IntStream;
 
 /**
  *
@@ -44,6 +47,24 @@ public class SpectrumUtils {
     private static final Logger logger = LoggerFactory.getLogger(SpectrumUtils.class);
 
     public static final double MIN_CORRELATION_SCORE = 0.5;
+
+    static class Peak {
+
+        final double mass;
+        final float intensity;
+        final int index;
+        boolean used = false;
+
+        public Peak(Peak peak) {
+            this(peak.mass, peak.intensity, peak.index);
+        }
+
+        public Peak(double mass, float intensity, int index) {
+            this.mass = mass;
+            this.intensity = intensity;
+            this.index = index;
+        }
+    }
 
     /**
      * sort spectrumHeader by mz
@@ -264,4 +285,132 @@ public class SpectrumUtils {
         return new ImmutablePair(a1, a2);
     }
 
+
+    public static Spectrum buildSpectrum(double[] mzList, float[] intensityList, double fwhm, DataMode mode) {
+
+        List<Float> xAxisData = new ArrayList<>(mzList.length);
+        List<Float> yAxisData = new ArrayList<>(mzList.length);
+        double[] leftSigma = new double[mzList.length];
+        double[] rightSigma = new double[mzList.length];
+
+        for (int count = 0; count < mzList.length; count++) {
+            if (fwhm > 0 && !mode.equals(DataMode.PROFILE)) {
+                leftSigma[count] = 2.0 * fwhm / 2.35482;
+                double x = mzList[count] - 4.0 * leftSigma[count];
+                //search for the first left value less than x
+                if (!xAxisData.isEmpty()) {
+                    int k = xAxisData.size() - 1;
+                    while (k >= 0 && xAxisData.get(k) >= x) {
+                        k--;
+                    }
+                    k++;
+                    for (; k < xAxisData.size(); k++) {
+                        x = xAxisData.get(k);
+                        double y = getGaussianPoint(x, mzList[count], intensityList[count], leftSigma[count]);
+                        yAxisData.set(k, yAxisData.get(k) + (float) y);
+                    }
+                }
+                for (; x < mzList[count]; x += leftSigma[count] / 2.0) {
+                    double y = getGaussianPoint(x, mzList[count], intensityList[count], leftSigma[count]);
+                    xAxisData.add((float) x);
+                    yAxisData.add((float) y);
+                }
+            }
+            xAxisData.add((float) mzList[count]);
+            yAxisData.add(intensityList[count]);
+            if (fwhm > 0 && !mode.equals(DataMode.PROFILE)) {
+                rightSigma[count] = 2.0 * fwhm / 2.35482;
+                double x = mzList[count] + rightSigma[count] / 2.0;
+                if (!xAxisData.isEmpty()) {
+                    int k = xAxisData.size() - 1;
+                    while (k >= 0 && xAxisData.get(k) > x) {
+                        k--;
+                    }
+                    k++;
+                    for (; k < xAxisData.size(); k++) {
+                        x = xAxisData.get(k);
+                        double y = getGaussianPoint(x, mzList[count], intensityList[count], rightSigma[count]);
+                        yAxisData.set(k, yAxisData.get(k) + (float) y);
+                    }
+                }
+                for (; x < mzList[count] + 4.0 * rightSigma[count]; x += rightSigma[count] / 2.0) {
+                    double y = getGaussianPoint(x, mzList[count], intensityList[count], rightSigma[count]);
+                    xAxisData.add((float) x);
+                    yAxisData.add((float) y);
+                }
+            }
+        }
+        Spectrum.ScanType scanType = (mode.equals(DataMode.CENTROID)) ?  Spectrum.ScanType.CENTROID : Spectrum.ScanType.PROFILE;
+        Spectrum spectrum = new Spectrum(0, 0.0f, Doubles.toArray(xAxisData), Floats.toArray(yAxisData), 1, scanType);
+        spectrum.setPrecursorMz(null);
+        spectrum.setPrecursorCharge(null);
+
+        return spectrum;
+    }
+
+    private static double getGaussianPoint(double mz, double peakMz, double intensity, double sigma) {
+        return intensity * Math.exp(-((mz - peakMz) * (mz - peakMz)) / (2.0 * sigma * sigma));
+    }
+
+    public static Spectrum deisotopeCentroidSpectrum(Spectrum spectrum) {
+        double tolPpm = 20.0;
+        double[] masses = spectrum.getMasses();
+        float[] intensities = spectrum.getIntensities();
+        final SpectrumData spectrumData = spectrum.getSpectrumData();
+        List<Peak> peaks = new ArrayList<>(spectrumData.getPeaksCount());
+        List<Peak> result = new ArrayList<>(spectrumData.getPeaksCount());
+        Map<Integer, Peak> peaksByIndex = new HashMap<>();
+        for (int k = 0; k < masses.length; k++) {
+            Peak p = new Peak(masses[k], intensities[k], k);
+            peaks.add(p);
+            peaksByIndex.put(p.index, p);
+        }
+
+        peaks.sort((o1, o2) -> Float.compare(o2.intensity, o1.intensity));
+
+        for (int k = 0; k < peaks.size(); k++) {
+            Peak p = peaks.get(k);
+            if (!p.used) {
+                Tuple2<Object, TheoreticalIsotopePattern> prediction = IsotopicPatternUtils.predictIsotopicPattern(spectrumData, p.mass, tolPpm);
+                if ( (1e6*(prediction._2.monoMz() - p.mass)/p.mass) <= tolPpm ) {
+                    float intensity = 0;
+                    int charge = prediction._2.charge();
+                    for (Tuple2 t : prediction._2.mzAbundancePairs()) {
+                        Double mz = (Double) t._1;
+                        Float ab = (Float) t._2;
+                        int peakIdx = SpectrumUtils.getPeakIndex(spectrumData.getMzList(), mz, tolPpm);
+                        if ((peakIdx != -1) && (spectrumData.getIntensityList()[peakIdx] <= p.intensity)) {
+                            intensity+= spectrumData.getIntensityList()[peakIdx];
+                            peaksByIndex.get(peakIdx).used = true;
+                        } else {
+                            break;
+                        }
+                    }
+                    if ( (charge == 1) || (intensity == p.intensity) ) {
+                        Peak newPeak = new Peak(p.mass, intensity, p.index);
+                        result.add(newPeak);
+                    } else {
+                        Peak newPeak = new Peak(p.mass*charge - (charge-1)*1.00728, intensity, p.index);
+                        logger.info("Move peak ({},{}) to ({},{})", p.mass, p.intensity, newPeak.mass, newPeak.intensity);
+                        result.add(newPeak);
+                    }
+                } else {
+                    p.used = true;
+                    result.add(new Peak(p));
+                }
+            }
+        }
+
+        result.sort(Comparator.comparingDouble(o -> o.mass));
+        masses = new double[result.size()];
+        intensities = new float[result.size()];
+        int k = 0;
+        for (Peak p : result) {
+            masses[k] = p.mass;
+            intensities[k++] = p.intensity;
+        }
+        Spectrum newSpectrum = new Spectrum(-1, spectrum.getRetentionTime() , masses, intensities, spectrum.getMsLevel(), Spectrum.ScanType.CENTROID);
+
+        return newSpectrum;
+    }
 }

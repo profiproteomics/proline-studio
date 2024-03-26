@@ -32,22 +32,17 @@ import org.slf4j.LoggerFactory;
 public class PeptideAreaCtrl {
 
     private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-    PeptideAreaModel m_mgr;
+    PeptideAreaModel m_pepAreaModel;
     PeptideSetView m_pepSetView;
 
     public PeptideAreaCtrl() {
-        m_mgr = new PeptideAreaModel();
+        m_pepAreaModel = new PeptideAreaModel();
         m_pepSetView = new PeptideSetView();
     }
 
-    public void setData(List<PTMSitePeptideInstance> ptmSitePeptide) {
-        m_mgr.setPTM(ptmSitePeptide);
-        m_pepSetView.setPeptideViewList(m_mgr.getViewPeptideList());
-    }
-
     public void setPTMPepInstanceData(List<PTMPeptideInstance> ptmSitePeptide) {
-        m_mgr.setPTMPeptides(ptmSitePeptide);
-        m_pepSetView.setPeptideViewList(m_mgr.getViewPeptideList());
+        m_pepAreaModel.setPTMPeptides(ptmSitePeptide);
+        m_pepSetView.setPeptideViewList(m_pepAreaModel.getViewPeptideList());
     }
 
     public void setBeginPoint(int x, int y) {
@@ -66,16 +61,15 @@ public class PeptideAreaCtrl {
      * @return -1 when no found
      */
     public int getSelectedIndex(int x, int y) {
-        int index = this.m_pepSetView.getSelectedItemIndex(x, y);
-        return index;
+        return this.m_pepSetView.getSelectedItemIndex(x, y);
     }
 
     public void setSelectedIndex(int i) {
-        this.m_mgr.setSelectedIndex(i);
+        this.m_pepAreaModel.setSelectedIndex(i);
     }
 
     public int getSelectedIndex() {
-        return this.m_mgr.getSelectedIndex();
+        return this.m_pepAreaModel.getSelectedIndex();
     }
 
     public String getToolTipText(int x, int y) {
@@ -83,7 +77,7 @@ public class PeptideAreaCtrl {
     }
 
     public void setRelativeSelected(int relative) {
-        this.m_mgr.setRelativeSelected(relative);
+        this.m_pepAreaModel.setRelativeSelected(relative);
     }
 
 }

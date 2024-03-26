@@ -64,7 +64,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
     }
 
     public List<String> getBackwardCompatiblePrefixes(){
-        return new ArrayList(m_backwardCompatiblePrefixes);
+        return new ArrayList<>(m_backwardCompatiblePrefixes);
     }
     
     public ParametersPanel getPanel() {

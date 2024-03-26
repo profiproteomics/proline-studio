@@ -16,52 +16,36 @@
  */
 package fr.proline.studio.rsmexplorer.gui.tasklog;
 
-import fr.proline.studio.extendedtablemodel.ExtraDataType;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
-import fr.proline.studio.dpm.data.JMSNotificationMessage;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
+import fr.proline.studio.dpm.data.JMSNotificationMessage;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.CancelTask;
 import fr.proline.studio.dpm.task.jms.PurgeConsumer;
 import fr.proline.studio.export.ExportFontData;
-import fr.proline.studio.filter.ConvertValueInterface;
-import fr.proline.studio.filter.Filter;
-import fr.proline.studio.filter.FilterButton;
-import fr.proline.studio.filter.IntegerFilter;
-import fr.proline.studio.filter.ValueFilter;
+import fr.proline.studio.extendedtablemodel.CompoundTableModel;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
+import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.rsmexplorer.gui.dialog.GetSystemInfoButtonAction;
 import fr.proline.studio.rsmexplorer.gui.renderer.PercentageRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
-import fr.proline.studio.table.AbstractTableAction;
-import fr.proline.studio.extendedtablemodel.CompoundTableModel;
-import fr.proline.studio.table.DecoratedMarkerTable;
-import fr.proline.studio.table.DecoratedTableModel;
-import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
-import fr.proline.studio.filter.StringDiffFilter;
-import fr.proline.studio.table.LazyData;
-import fr.proline.studio.table.TablePopupMenu;
-import fr.proline.studio.utils.IconManager;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import fr.proline.studio.table.*;
+import org.jdesktop.swingx.renderer.DefaultTableRenderer;
+
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.*;
+import java.awt.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.*;
-import org.jdesktop.swingx.renderer.DefaultTableRenderer;
-import fr.proline.studio.WindowManager;
 
 /**
  * Panel used to display all logged tasks
@@ -76,15 +60,7 @@ public class TasksPanel extends AbstractTasksPanel {
          
     public TasksPanel() {
         super();
-        setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-        
-        c.weightx = 1;
-        c.weighty = 1;
-        add(createToolbarPanel(), c);
+
     }
     
     
@@ -125,22 +101,9 @@ public class TasksPanel extends AbstractTasksPanel {
     protected void stopOtherDataCollecting(){
     }
 
-    private JPanel createToolbarPanel() {
-        JPanel toolbarPanel = new JPanel();
 
-        toolbarPanel.setLayout(new BorderLayout());
-
-        JPanel internalPanel = createInternalPanel();
-        toolbarPanel.add(internalPanel, BorderLayout.CENTER);
-
-        JToolBar toolbar = initToolbar();
-        toolbarPanel.add(toolbar, BorderLayout.WEST);
-
-        return toolbarPanel;
-
-    }
-
-    private JPanel createInternalPanel() {
+    @Override
+    protected JPanel createInternalPanel() {
 
         JPanel internalPanel = new JPanel();
         
@@ -204,26 +167,26 @@ public class TasksPanel extends AbstractTasksPanel {
         return internalPanel;
 
     }
-    
-    private JToolBar initToolbar() {
-        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
-        toolbar.setFloatable(false);
-        
-        FilterButton filterButton = new FilterButton(((CompoundTableModel) m_logTable.getModel())) {
 
-            @Override
-            protected void filteringDone() {
-            }
-            
-        };
-        EraserButton taskEraserButton = new EraserButton();
-        GetSystemInfoButtonAction systemInfoButton = new GetSystemInfoButtonAction();
-        toolbar.add(filterButton);
-        toolbar.add(taskEraserButton);        
-        toolbar.add(systemInfoButton);
-        
-        return toolbar;
+    @Override
+    protected JToolBar initToolbar() {
+       return  super.initToolbar();
+
+
     }
+
+    @Override
+    protected  FilterTableModelInterface getTaskTableModel(){
+       return  ((CompoundTableModel) m_logTable.getModel());
+    }
+
+    @Override
+    protected void clearActionPerformed() {
+        TaskInfoManager.getTaskInfoManager().clear();
+        m_firstDisplay = true;
+        updateData();
+    }
+
 
     public void updateData() {
 
@@ -281,7 +244,7 @@ public class TasksPanel extends AbstractTasksPanel {
     }
     
 
-    private class LogTable extends DecoratedMarkerTable {
+    protected class LogTable extends DecoratedMarkerTable {
 
         private boolean m_isUpdating = false;
 
@@ -494,7 +457,7 @@ public class TasksPanel extends AbstractTasksPanel {
                     if (o == null) {
                         return null;
                     }
-                    return Integer.valueOf(((TaskInfo) o).getPublicState());
+                    return ((TaskInfo) o).getPublicState();
                 }
 
             };
@@ -665,7 +628,7 @@ public class TasksPanel extends AbstractTasksPanel {
 
     }
 
-    public class TaskInfoStepRenderer extends DefaultTableCellRenderer {
+    public static class TaskInfoStepRenderer extends DefaultTableCellRenderer {
 
         public TaskInfoStepRenderer() {
         }
@@ -683,7 +646,7 @@ public class TasksPanel extends AbstractTasksPanel {
         }
     }
     
-    public class TaskInfoImportanceRenderer extends DefaultTableCellRenderer {
+    public static class TaskInfoImportanceRenderer extends DefaultTableCellRenderer {
 
         public TaskInfoImportanceRenderer() {
         }
@@ -721,7 +684,7 @@ public class TasksPanel extends AbstractTasksPanel {
                 l.setHorizontalAlignment(JLabel.LEFT);
 
                 TaskInfo taskInfo = m_table.getTaskInfo(row);
-                if (taskInfo.hasTaskError()) {
+                if (taskInfo!=null && taskInfo.hasTaskError()) {
                     l.setForeground(Color.red);
                 } else {
                     if (isSelected) {
@@ -734,24 +697,6 @@ public class TasksPanel extends AbstractTasksPanel {
             }
 
             return c;
-        }
-    }
-    
-    public class EraserButton extends JButton implements ActionListener {
-
-        public EraserButton() {
-
-            setIcon(IconManager.getIcon(IconManager.IconType.ERASER));
-            setToolTipText("Erase All Finished Tasks");
-
-            addActionListener(this);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            TaskInfoManager.getTaskInfoManager().clear();
-            m_firstDisplay = true;
-            updateData();
         }
     }
     

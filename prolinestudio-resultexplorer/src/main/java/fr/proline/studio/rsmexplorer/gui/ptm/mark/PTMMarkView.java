@@ -22,6 +22,8 @@ import fr.proline.studio.rsmexplorer.gui.ptm.ViewPtmAbstract;
 import fr.proline.studio.rsmexplorer.gui.ptm.ViewSetting;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,26 +34,76 @@ import org.slf4j.LoggerFactory;
  */
 public class PTMMarkView extends ViewPtmAbstract {
 
-    private static Logger m_logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
+    private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
 
     private PTMMark m_mark;
+    private final List<PTMMark> m_aaLocMarks;
+    private final List<PTMMark> m_cOrNtermMarks;
+
+    private boolean hasMultipleAAPTMSpecif; // Multiple PTM on AA Specificity should be represented
+    private boolean hasMultipleCorNPTMSpecif; // Multiple PTM on C/N term Specificity should be represented
+
     /**
      * One letter
      */
-    private String m_symbol;
-    private Color m_color;    
+    private final String m_symbol;
+    private final Color m_color;
     
-    public PTMMarkView(PTMMark mark) {
-        m_mark = mark;
-        this.m_color = ViewSetting.getColor(mark);
-        this.m_symbol = Character.toString(mark.getPtmSymbol());
+    public PTMMarkView(List<PTMMark> marks) {
+        if(marks == null || marks.isEmpty())
+            throw new RuntimeException("Empty PTMMark list !!");
+        m_cOrNtermMarks = new ArrayList<>();
+        m_aaLocMarks = new ArrayList<>();
+        m_mark = null;
 
+        boolean samePtmSpecifId = true;
+        boolean sameCorNTermPtmSpecifId = true;
+        Long prevAAPtmSpecifId = null;
+        Long prevCorNtermSpecifId = null;
+        for(PTMMark pm : marks){
+            if(pm.isPTMNorCterm()) {
+                m_cOrNtermMarks.add(pm);
+                if (prevCorNtermSpecifId == null)
+                    prevCorNtermSpecifId = pm.getPtmSpecificityId();
+                else sameCorNTermPtmSpecifId = prevCorNtermSpecifId.equals(pm.getPtmSpecificityId());
+            } else {
+                m_aaLocMarks.add(pm);
+                if (prevAAPtmSpecifId == null)
+                    prevAAPtmSpecifId = pm.getPtmSpecificityId();
+                else samePtmSpecifId = prevAAPtmSpecifId.equals(pm.getPtmSpecificityId());
+                if(m_mark == null)
+                    m_mark = pm;
+            }
+        }
+
+        if(m_mark ==null)
+            m_mark = marks.get(0); //No none N/C term PTM, get first one as reference
+        hasMultipleAAPTMSpecif = !samePtmSpecifId;
+        hasMultipleCorNPTMSpecif = ! sameCorNTermPtmSpecifId;
+
+        if(!m_aaLocMarks.isEmpty() && hasMultipleAAPTMSpecif) {
+            this.m_color = ViewSetting.getMultiPTMColor();
+            this.m_symbol = "*";
+        } else if(!m_aaLocMarks.isEmpty() && !hasMultipleAAPTMSpecif) {
+            this.m_color = ViewSetting.getColor(m_mark);
+            this.m_symbol = Character.toString(m_mark.getPtmSymbol());
+        } else if(!m_cOrNtermMarks.isEmpty() && hasMultipleCorNPTMSpecif) {
+            this.m_color = ViewSetting.getMultiPTMColor();
+            this.m_symbol = "*";
+        } else { // if(!m_cOrNtermMarks.isEmpty() && !hasMultipleCorNPTMSpecif) {
+            this.m_color = ViewSetting.getColor(m_mark);
+            this.m_symbol = Character.toString(m_mark.getPtmSymbol());
+        }
     }
 
     @Override
     public void setBeginPoint(int x, int y) {
         this.m_x = x;
         this.m_y = y;
+    }
+
+    public boolean isNCTerm(){
+        return !m_cOrNtermMarks.isEmpty(); //m_mark.isPTMNorCterm();
     }
 
     public int getLocationProtein() {
@@ -63,7 +115,10 @@ public class PTMMarkView extends ViewPtmAbstract {
     }
 
     public String getPTMShortName() {
-        return m_mark.getPtmShortName();
+        if(hasMultipleAAPTMSpecif)
+            return "Multiple PTMs";
+        else
+            return m_mark.getPtmShortName();
     }
     
     /**
@@ -87,13 +142,17 @@ public class PTMMarkView extends ViewPtmAbstract {
         int xWidthAA = x0+ViewSetting.WIDTH_AA;
         int yHeightAA = y0 + ViewSetting.HEIGHT_AA;
         int yBottom = (int) (y0 + ViewSetting.HEIGHT_AA * 1.5);
-        int xCenter = (int) (x0 + ViewSetting.WIDTH_AA / 2);
-        
+//        int xWidth3On4AA = x0+(ViewSetting.WIDTH_AA*3/4);
+//        int yUpPtm = (int)(y0 + (ViewSetting.HEIGHT_AA * 0.5));
+//        int yCenterAddPtm = (int)(y0 + (ViewSetting.HEIGHT_AA * 1.25));
+        int xCenter = x0 + ViewSetting.WIDTH_AA / 2;
         g.setColor(m_color);        
-        //TEST CODE
-        if(m_mark.isPTMNorCterm()){        
-            int[] xPtm = {x0, xWidthAA, x0+ViewSetting.WIDTH_AA/2};
-            int[] yPtm = {yHeightAA, yHeightAA, (int)(y0 + (ViewSetting.HEIGHT_AA*1.5))};
+
+        if(m_aaLocMarks.isEmpty()){
+            int[] xPtm = {x0, xWidthAA, xCenter };
+            int[] yPtm = {yHeightAA, yHeightAA, yBottom};
+//            int[] xPtm = {xWidth3On4AA, x0, xWidth3On4AA/*, x0+ViewSetting.WIDTH_AA/2*/};
+//            int[] yPtm = {yUpPtm, yHeightAA, yBottom};/*yHeightAA, (int)(y0 + (ViewSetting.HEIGHT_AA*1.5))};*/
             g.fillPolygon(xPtm, yPtm, yPtm.length);
         } else {
             //draw the box
@@ -102,9 +161,23 @@ public class PTMMarkView extends ViewPtmAbstract {
             g.drawLine(xWidthAA, y0, xWidthAA, yHeightAA);
             g.drawLine(xWidthAA, yHeightAA, x0, yHeightAA);
             g.drawLine(x0, yHeightAA, x0, y0);
-            
-            g.drawLine(xCenter, yHeightAA, xCenter, yBottom);
-            g.drawLine(x0, yBottom, xWidthAA, yBottom);
+
+            if(isNCTerm()){
+                Color aaColor = g.getColor();
+                Color cnTermColor = ViewSetting.getMultiPTMColor();
+                if(!hasMultipleCorNPTMSpecif){
+                    cnTermColor=ViewSetting.getColor(m_cOrNtermMarks.get(0));
+                }
+
+                g.setColor(cnTermColor);
+                int[] xPtm = {x0, xWidthAA, xCenter};
+                int[] yPtm = {yHeightAA, yHeightAA, yBottom};
+                g.fillPolygon(xPtm, yPtm, yPtm.length);
+                g.setColor(aaColor);
+            } else {
+                g.drawLine(xCenter, yHeightAA, xCenter, yBottom);
+                g.drawLine(x0, yBottom, xWidthAA, yBottom);
+            }
 
             //draw PTM Type in the box
             g.setFont(ViewSetting.FONT_PTM);
@@ -115,7 +188,7 @@ public class PTMMarkView extends ViewPtmAbstract {
         
         //draw the location number upper
         //g.setColor(CyclicColorPalette.GRAY_TEXT_DARK);
-        if(!m_mark.isPTMNorCterm() ||(m_mark.isPTMNorCterm() && viewContext.isNCtermIndexShown()) ){
+        if( !m_aaLocMarks.isEmpty() || (m_aaLocMarks.isEmpty() && viewContext.isNCtermIndexShown()) ){
             g.setColor(Color.BLACK);
             g.setFont(ViewSetting.FONT_NUMBER);
             fm = g.getFontMetrics(ViewSetting.FONT_NUMBER);

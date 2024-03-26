@@ -36,8 +36,9 @@ import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -721,6 +722,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
         putFilter(COLTYPE_PEPTIDE_MISSED_CLIVAGE, IntegerFilter.class, null, filtersMap);
         putFilter(COLTYPE_PEPTIDE_RANK, IntegerFilter.class, null, filtersMap);
         putFilter(COLTYPE_PEPTIDE_RETENTION_TIME, DoubleFilter.class, null, filtersMap);
+        putFilter(COLTYPE_PEPTIDE_PTM, StringDiffFilter.class, null, filtersMap);
 
         if (m_forRSM) {
             putFilter(COLTYPE_PEPTIDE_PROTEIN_SET_COUNT, IntegerFilter.class, null, filtersMap);
@@ -895,7 +897,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
             case COLTYPE_PEPTIDE_RETENTION_TIME: {
-                renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4);
+                renderer = new FloatRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 4);
                 break;
             }
             case COLTYPE_PEPTIDE_MSQUERY: {
@@ -907,7 +909,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
                 break;
             }
             case COLTYPE_PEPTIDE_PPM: {
-                renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
+                renderer = new FloatRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT));
                 break;
             }
             case COLTYPE_PEPTIDE_START:
@@ -916,7 +918,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
             case COLTYPE_PEPTIDE_CHARGE:
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE:
             case COLTYPE_PEPTIDE_PROTEIN_SET_COUNT: {
-                renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class), JLabel.RIGHT);
                 break;
             }
             case COLTYPE_PEPTIDE_IS_DECOY:

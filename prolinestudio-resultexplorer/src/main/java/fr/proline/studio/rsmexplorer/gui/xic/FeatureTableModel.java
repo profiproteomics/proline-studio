@@ -32,8 +32,7 @@ import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.mzscope.MzScopeInterface;
 import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
-import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FontRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.TimeRenderer;
@@ -54,6 +53,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 
 /**
@@ -86,7 +86,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
     private static final String[] m_columnNames = {"Id", "Map", "Quant. Channel", "m/z", "Calibrated MoZ", "Charge", "RT", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "Predicted RT", "#Peakels"};
     private static final String[] m_toolTipColumns = {"Feature Id","Map name","Quantitation Channel ",  "Mass to Charge Ratio", "Calibrated Mass to Charge Ratio", "Charge", "Retention Time in minutes", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "Predicted Retention time in min", "Peakels count"};
     private static final String[] m_columnNamesForExport = {"Id", "Map", "Quantitation Channel", "m/z", "Calibrated MoZ", "Charge", "Elution Time (sec)", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "Predicted Retention Time (sec)", "Peakels Count"};
-    
+
     private DMasterQuantPeptideIon m_quantPeptideIon = null;
     private List<DFeature> m_features = null;
     private QuantChannelInfo m_quantChannelInfo = null;
@@ -297,12 +297,12 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                     Object o = prop.get(SERIALIZED_PROP_PREDICTED_ELUTION_TIME);
                     if (o != null && o instanceof Double) {
                         Double predictedElutionTime = (Double)o;
-                        lazyData.setData(new Float(predictedElutionTime));
+                        lazyData.setData(Float.valueOf(predictedElutionTime.floatValue()));
                     }else{
-                        lazyData.setData(new Float(feature.getPredictedElutionTime()));
+                        lazyData.setData( Float.valueOf((float)feature.getPredictedElutionTime()));
                     }
                 }else{
-                    lazyData.setData(new Float(feature.getPredictedElutionTime()));
+                    lazyData.setData( Float.valueOf((float)feature.getPredictedElutionTime()));
                 }
                 return lazyData;
             }
@@ -543,7 +543,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                         return (Double)o;
                     }
                 }
-                return new Float(feature.getPredictedElutionTime());
+                return Float.valueOf((float) feature.getPredictedElutionTime());
             }
             case COLTYPE_FEATURE_PEAKELS_COUNT: {
                 return feature.getPeakelCount();
@@ -768,7 +768,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
         listIds.add(COLTYPE_FEATURE_IS_OVERLAPPING);
         listIds.add(COLTYPE_FEATURE_QUALITY_SCORE);
         listIds.add(COLTYPE_FEATURE_CALIBRATED_MOZ);
-        return listIds; 
+        return listIds;
     }
     
 
@@ -870,28 +870,28 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
             case COLTYPE_FEATURE_MAP_NAME:
             case COLTYPE_FEATURE_QC:
             case COLTYPE_FEATURE_IS_OVERLAPPING: {
-                renderer = new FontRenderer( new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)) );
+                renderer = new FontRenderer( new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.LEFT) );
                 break;
             }
             case COLTYPE_FEATURE_CALIBRATED_MOZ:
             case COLTYPE_FEATURE_MOZ: {
-                renderer = new FontRenderer( new DoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4 ));
+                renderer = new FontRenderer( new DoubleRenderer( new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 4 ));
                 break;
             }
             case COLTYPE_FEATURE_APEX_INTENSITY:
             case COLTYPE_FEATURE_INTENSITY:
             case COLTYPE_FEATURE_DURATION: {
-                renderer = new FontRenderer( new BigFloatOrDoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0 ));
+                renderer = new FontRenderer( new BigFloatOrDoubleRenderer( new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 0 ));
                 break;
             }
             case COLTYPE_FEATURE_RETENTION_TIME:
             case COLTYPE_FEATURE_PREDICTED_RETENTION_TIME: {
-                renderer = new FontRenderer( new TimeRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class))));
+                renderer = new FontRenderer( new TimeRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT)));
                 break;
             }
             case COLTYPE_FEATURE_CHARGE:
             case COLTYPE_FEATURE_PEAKELS_COUNT: {
-                renderer = new FontRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class)));
+                renderer = new FontRenderer( new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class), JLabel.RIGHT));
                 break;
             }
         }

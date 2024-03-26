@@ -17,14 +17,15 @@
 package fr.proline.mzscope.ui.model;
 
 import fr.proline.mzscope.model.Spectrum;
+import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
+import fr.proline.studio.graphics.PlotDataSpec;
 import fr.proline.studio.graphics.PlotInformation;
-import java.awt.Color;
+
+import javax.swing.table.AbstractTableModel;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Map;
-import javax.swing.table.AbstractTableModel;
-import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
-import fr.proline.studio.graphics.PlotDataSpec;
 
 /**
  * data for scan
@@ -39,16 +40,21 @@ public class ScanTableModel extends AbstractTableModel implements ExtendedTableM
     public static final int COLTYPE_SCAN_MSLEVEL = 3;
     
     private Spectrum scan;
-    
+    private float scaleFactor;
     private String m_modelName;
     
     private Color scanColor;
     
-    public ScanTableModel(Spectrum scan) {
+    public ScanTableModel(Spectrum scan, float scaleFactor) {
         this.scan = scan;
+        this.scaleFactor = scaleFactor;
     }
-    
-    @Override
+
+  public ScanTableModel(Spectrum scan) {
+    this(scan, 1.0f);
+  }
+
+  @Override
     public int getRowCount() {
         return scan.getMasses().length;
     }
@@ -71,7 +77,7 @@ public class ScanTableModel extends AbstractTableModel implements ExtendedTableM
                 return scan.getMasses()[rowIndex];
             }
             case COLTYPE_SCAN_INTENSITIES:{
-                return scan.getIntensities()[rowIndex];
+                return scan.getIntensities()[rowIndex]*scaleFactor;
             }
             case COLTYPE_SCAN_RETENTION_TIME:{
                 return scan.getRetentionTime() / 60;

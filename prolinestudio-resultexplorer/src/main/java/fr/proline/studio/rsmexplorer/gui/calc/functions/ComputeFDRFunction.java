@@ -55,7 +55,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.LockedDataGraphicsModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.TableDefaultRendererManager;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.types.LogInfo;
 import fr.proline.studio.types.LogRatio;
@@ -67,9 +67,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import javax.swing.JComponent;
-import javax.swing.JSpinner;
-import javax.swing.JTextField;
+import javax.swing.*;
+
 import org.python.core.PyFloat;
 
 /**
@@ -317,7 +316,7 @@ public class ComputeFDRFunction extends AbstractFunction {
                                     ColDoubleData col = (ColDoubleData) var.getValue();
                                     // give a specific column name
                                     col.setColumnName(columnNameSb3.toString());
-                                    sourceTable.addColumn(col, new PvalueAdjusted(), new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true));
+                                    sourceTable.addColumn(col, new PvalueAdjusted(), new DoubleRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 4, true, true));
 
                                 }
                             }
@@ -525,7 +524,7 @@ public class ComputeFDRFunction extends AbstractFunction {
         
 
         m_verticalCursor = new VerticalCursor(basePlotPanel, 0);
-        m_verticalCursor.setMinValue(new Double(0));
+        m_verticalCursor.setMinValue(Double.valueOf(0));
         m_verticalCursor.setColor(Color.blue);
         m_verticalCursor.setStroke(AbstractCursor.LINE2_STROKE);
         m_mirrorVerticalCursor = new VerticalCursor(basePlotPanel, 0);
@@ -534,7 +533,7 @@ public class ComputeFDRFunction extends AbstractFunction {
         
 
         m_horizontalCursor = new HorizontalCursor(basePlotPanel, 0);
-        m_horizontalCursor.setMinValue(new Double(0));
+        m_horizontalCursor.setMinValue(Double.valueOf(0));
         m_horizontalCursor.setColor(Color.blue);
         m_horizontalCursor.setStroke(AbstractCursor.LINE2_STROKE);
 

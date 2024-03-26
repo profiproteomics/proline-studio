@@ -91,6 +91,8 @@ public class IconManager {
         QUANT,
         QUANT_SC,
         QUANT_XIC,
+        QUANT_TMT,
+        QUANT_AGGREGATION_TMT,
         QUANT_AGGREGATION_XIC,
         CHART,
         BOOK,
@@ -99,6 +101,9 @@ public class IconManager {
         BIG_HELP,
         BIG_WARNING,
         BIG_INFO,
+        HELP_30,
+        WARNING_30,
+        INFO_30,
         SERVER_ON,
         MSN_SET,
         WAVE,
@@ -238,7 +243,8 @@ public class IconManager {
         TIC_MS1,
         BPC,
         MS2,
-        MERGE_PTM;
+        MERGE_PTM,
+        FITTED_2_CENTROID;
     }
     
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -486,6 +492,10 @@ public class IconManager {
                 return "fr/proline/studio/images/chart-quant.png";
             case QUANT_XIC:
                 return "fr/proline/studio/images/dataset-quant-xic.png";
+            case QUANT_TMT:
+                return "fr/proline/studio/images/dataset-tmt.png";
+            case QUANT_AGGREGATION_TMT:
+                return "fr/proline/studio/images/dataset-tmtA.png";
             case QUANT_SC:
                 return "fr/proline/studio/images/dataset-quant-sc.png";
             case QUANT_AGGREGATION_XIC:
@@ -502,6 +512,12 @@ public class IconManager {
                 return "fr/proline/studio/images/big-warning.png";
             case BIG_INFO:
                 return "fr/proline/studio/images/big-info.png";
+            case HELP_30:
+                return "fr/proline/studio/images/help-30.png";
+            case WARNING_30:
+                return "fr/proline/studio/images/warning-30.png";
+            case INFO_30:
+                return "fr/proline/studio/images/info-30.png";
             case SERVER_ON:
                 return "fr/proline/studio/images/server-on.png";
             case MSN_SET:
@@ -778,6 +794,8 @@ public class IconManager {
                 return "fr/proline/studio/images/ms2.png";
             case MERGE_PTM:
                 return "fr/proline/studio/images/merge_ptm.png";
+            case FITTED_2_CENTROID:
+                return "fr/proline/studio/images/fittedTocentroid.png";
         }
 
         return null; // can not happen

@@ -31,8 +31,7 @@ import fr.proline.studio.export.ExportModelUtilities;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.MsQueryRenderer;
@@ -49,6 +48,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 
 /**
@@ -589,7 +589,7 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
             case COLTYPE_PEPTIDE_NEXT_AA:
             case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES:
             case COLTYPE_PEPTIDE_PTM: {
-                renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
+                renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.LEFT);
                 break;
             }
             case COLTYPE_PEPTIDE_NAME: {
@@ -602,11 +602,11 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
                 break;
             }
             case COLTYPE_PEPTIDE_PPM: {
-                renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
+                renderer = new FloatRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT));
                 break;
             }
             case COLTYPE_PEPTIDE_RETENTION_TIME: {
-                renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4);
+                renderer = new FloatRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 4);
                 break;
             }
             case COLTYPE_PEPTIDE_START:
@@ -615,12 +615,12 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE:
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
             case COLTYPE_PEPTIDE_PROTEIN_SET_COUNT: {
-                renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class), JLabel.RIGHT);
                 break;
             }
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ: {
-                renderer = new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
+                renderer = new DoubleRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT));
                 break;
             }
             case COLTYPE_PEPTIDE_MSQUERY: {

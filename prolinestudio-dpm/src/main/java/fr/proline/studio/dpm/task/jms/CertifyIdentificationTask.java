@@ -16,23 +16,18 @@
  */
 package fr.proline.studio.dpm.task.jms;
 
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Message;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import fr.proline.studio.dpm.AccessJMSManagerThread;
-import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
+
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.TextMessage;
 
 /**
  * Task to verify result files integrity for importation.
@@ -40,12 +35,12 @@ import javax.jms.TextMessage;
  */
 public class CertifyIdentificationTask extends AbstractJMSTask {
 
-    private String m_parserId;
-    private HashMap<String, String> m_parserArguments;
+    private final String m_parserId;
+    private final HashMap<String, String> m_parserArguments;
     
-    private String[] m_pathArray;
-    private long m_projectId;
-    private String[] m_certifyErrorMessage = null;
+    private final String[] m_pathArray;
+    private final long m_projectId;
+    private String[] m_certifyErrorMessage;
 
     
     public CertifyIdentificationTask(AbstractJMSCallback callback, String parserId, HashMap<String, String> parserArguments, String[] pathArray, long projectId, String[] certifyErrorMessage) {
@@ -86,7 +81,7 @@ public class CertifyIdentificationTask extends AbstractJMSTask {
         params.put("project_id", m_projectId);
 
         // Result Files Parameter
-        List args = new ArrayList();
+        List<Map<String, Object>> args = new ArrayList<>();
         for (String m_pathArray1 : m_pathArray) {
             // add the file to parse
             Map<String, Object> resultfile = new HashMap<>();
@@ -102,55 +97,30 @@ public class CertifyIdentificationTask extends AbstractJMSTask {
 
         return params;
     }
-    
-  
+
+
     @Override
-    public void taskDone(Message jmsMessage) throws Exception {
-       
-        final TextMessage textMessage = (TextMessage) jmsMessage;
-        final String jsonString = textMessage.getText();
+    public void processWithResult(JSONRPC2Response jsonResponse) throws Exception {
 
-        
-        final JSONRPC2Message jsonMessage = JSONRPC2Message.parse(jsonString);
-        if(jsonMessage instanceof JSONRPC2Notification) {
-            m_loggerProline.warn("JSON Notification method: " + ((JSONRPC2Notification) jsonMessage).getMethod()+" instead of JSON Response");
-            throw new Exception("Invalid JSONRPC2Message type");
-            
-        } else if (jsonMessage instanceof JSONRPC2Response)  {
-            
-            final JSONRPC2Response jsonResponse = (JSONRPC2Response) jsonMessage;
-	    m_loggerProline.debug("JSON Response Id: " + jsonResponse.getID());
-
-	    final JSONRPC2Error jsonError = jsonResponse.getError();
-
-	    if (jsonError != null) {
-		m_loggerProline.error("JSON Error code {}, message : \"{}\"", jsonError.getCode(), jsonError.getMessage());
-		m_loggerProline.error("JSON Throwable", jsonError);
-                throw jsonError;
-	    }
-
-	    final String returnedResult = (String) jsonResponse.getResult();
+        final String returnedResult = (String) jsonResponse.getResult();
 
 	    if (returnedResult == null || (returnedResult.isEmpty())) {
-		m_loggerProline.debug("Invalid result");
-                throw new Exception("null or empty result "+returnedResult);
+		    m_loggerProline.debug("Invalid result");
+            throw new Exception("null or empty result "+returnedResult);
 	    } else {
-		m_loggerProline.debug("Result :\n" + returnedResult);
-                if (returnedResult.equalsIgnoreCase("OK")) {
-                    m_certifyErrorMessage[0] = null;
-                } else {
-                    m_certifyErrorMessage[0] = returnedResult;
-                        
-                    String errorMessage = returnedResult;
-                    m_taskError = new TaskError(errorMessage);
+		    m_loggerProline.debug("Result :\n" + returnedResult);
+            if (returnedResult.equalsIgnoreCase("OK")) {
+                m_certifyErrorMessage[0] = null;
+            } else {
+                m_certifyErrorMessage[0] = returnedResult;
 
-                    m_loggerProline.error(getClass().getSimpleName() + " failed : returnedResult");
-                    throw new Exception(errorMessage);
-                }
+                String errorMessage = returnedResult;
+                m_taskError = new TaskError(errorMessage);
+
+                m_loggerProline.error(getClass().getSimpleName() + " failed : returnedResult");
+                throw new Exception(errorMessage);
+            }
 	    }
-        }
-        
-        m_currentState = JMSState.STATE_DONE;
     }
     
 }

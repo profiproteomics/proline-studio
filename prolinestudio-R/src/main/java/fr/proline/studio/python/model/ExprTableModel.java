@@ -16,28 +16,26 @@
  */
 package fr.proline.studio.python.model;
 
-import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportFontData;
+import fr.proline.studio.extendedtablemodel.ChildModelInterface;
+import fr.proline.studio.extendedtablemodel.ExtraDataType;
+import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.filter.BooleanFilter;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.extendedtablemodel.ChildModelInterface;
-import fr.proline.studio.table.DecoratedTableModel;
-import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.python.data.Col;
+import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TableDefaultRendererManager;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
+
+import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.TableCellRenderer;
+import java.util.*;
 
 
 /**
@@ -50,15 +48,15 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
 
     private GlobalTableModelInterface m_parentModel;
     
-    public static DoubleRenderer DOUBLE_RENDERER = new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true);
+    public static DoubleRenderer DOUBLE_RENDERER = new DoubleRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 4, true, true);
 
     // for a column Index gives back a Map of values according to a class
     private HashMap<Integer, HashMap<Class, Object>> m_colValueMap = null;
     
     private HashMap<Integer, Col> m_modifiedColumns = null;
 
-    private final ArrayList<Col> m_extraColumns = new ArrayList();
-    private final ArrayList<TableCellRenderer> m_extraColumnRenderers = new ArrayList();
+    private final ArrayList<Col> m_extraColumns = new ArrayList<>();
+    private final ArrayList<TableCellRenderer> m_extraColumnRenderers = new ArrayList<>();
     
     
     private int m_bestXAxisColIndex = -1;

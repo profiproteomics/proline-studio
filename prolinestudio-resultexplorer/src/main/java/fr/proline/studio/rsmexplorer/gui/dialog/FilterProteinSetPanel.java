@@ -38,10 +38,10 @@ public class FilterProteinSetPanel extends JPanel {
         for (FilterProteinSetsTask.Filter filter : FilterProteinSetsTask.Filter.values()) {
             String filterKey = keyPrefix + filter.key;
             if (filter == FilterProteinSetsTask.Filter.SCORE) {
-                parameters[index] = new DoubleParameter(filterKey, filter.name, new JTextField(6), new Double(10), new Double(1), null);
+                parameters[index] = new DoubleParameter(filterKey, filter.name, new JTextField(6), Double.valueOf(10), Double.valueOf(1), null);
                 parameters[index].setAssociatedData(">=");
             }  else {
-                parameters[index] = new IntegerParameter(filterKey, filter.name, new JTextField(6), new Integer(1), new Integer(1), null);
+                parameters[index] = new IntegerParameter(filterKey, filter.name, new JTextField(6), Integer.valueOf(1), Integer.valueOf(1), null);
                 parameters[index].setAssociatedData(">=");
             }
 

@@ -19,7 +19,7 @@ package fr.proline.studio.dam.tasks;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -85,6 +85,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
     private final static int SAVE_PTMDATASET = 2;
 
     public final static String ERROR_PTM_CLUSTER_LOADING = "PTM Cluster Loading Error";
+    public final static String ERROR_PTM_DATASET_OLD_VERSION = "Older PTM Dataset version";
     public final static String ERROR_PTM_CLUSTER_SAVING = "Error Saving Annotated PTM Dataset";
 
     public DatabaseDatasetPTMsTask(AbstractDatabaseCallback callback) {
@@ -176,7 +177,10 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
             }
         }
         } finally {
-            PerformanceTest.displayTimeAllThreads();
+//            m_logger.info("!!!! Display Perf !!! ");
+//            PerformanceTest.displayTimeCurrentThread();  //VDS for debug only !
+//            PerformanceTest.clearTimeCurrentThread();
+//            m_logger.info("!!!! Display Perf DONE !!! ");
         }
         return true; // should not happen                
     }
@@ -199,9 +203,11 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
                 case LOAD_PTMDATASETPAIR:
                     switch (slice.getSubTaskId()) {
                         case SUB_TASK_PTMSITE_PEPTIDES:
+                            m_logger.info("CALL DatabaseDatasetPTMsTask fetchDataSubTaskFor fetchSiteBestPeptideMatches");
                             fetchSiteBestPeptideMatches(slice, entityManagerMSI);
                             break;
                         case SUB_TASK_PTMCLUSTER_PEPTIDES:
+                            m_logger.info("CALL DatabaseDatasetPTMsTask fetchDataSubTaskFor fetchClusterBestPeptideMatches");
                             fetchClusterBestPeptideMatches(slice, entityManagerMSI);
                             break;
                     }
@@ -209,6 +215,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
                 case FILL_ALL_PTM_SITES_PEPINFO:
                     switch (slice.getSubTaskId()) {
                         case SUB_TASK_PTMSITE_PEPINSTANCES:
+                            m_logger.info("CALL DatabaseDatasetPTMsTask fetchDataSubTaskFor fetchPTMSitesPepInstances");
                             fetchPTMSitesPepInstances(slice, entityManagerMSI);
                             break;
                     }
@@ -243,10 +250,12 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
 
             //--- Create cluster PTMDataset
             m_clusterPtmDataset = new PTMDataset(m_dataset);
+            m_clusterPtmDataset.setModelVersion(jsonDS.version);
             m_clusterPtmDataset.setLeafResultSummaryIds(Arrays.asList(jsonDS.leafResultSummaryIds));
 
             //--- Create site PTMDataset
             m_sitePtmDataset = new PTMDataset(m_dataset);
+            m_sitePtmDataset.setModelVersion(jsonDS.version);
             m_sitePtmDataset.setLeafResultSummaryIds(Arrays.asList(jsonDS.leafResultSummaryIds));
 
             m_ptmDatasetPairOutput.add(new PTMDatasetPair(m_sitePtmDataset,m_clusterPtmDataset));
@@ -256,7 +265,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
 
             for (Long i : jsonDS.ptmIds) {
                 List<DInfoPTM> ptmSpecificities = DInfoPTM.getInfoPTMForPTM(i);
-                if(ptmSpecificities.size()>0){
+                if(!ptmSpecificities.isEmpty()){
                     ptmSpecificities.forEach(dInfoPTM -> {
                         m_clusterPtmDataset.addInfoPTM(dInfoPTM);
                         m_sitePtmDataset.addInfoPTM(dInfoPTM);
@@ -264,7 +273,6 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
                 }
             }
             createPTMDatasetPTMClusters(jsonDS, entityManagerMSI);
-
 
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
@@ -282,7 +290,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
             entityManagerMSI.close();
         }
 
-        PerformanceTest.stopTime("fetchPTMDatasetMainTask");
+        PerformanceTest.stopTime("fetchPTMDatasetSetMainTask");
 
 
         return true;
@@ -392,7 +400,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         }
         ObjectTree ot = entityManagerMSI.find(ObjectTree.class, rsm.getObjectTreeIdByName().get(schemaName));
         ObjectMapper mapper = new ObjectMapper();
-        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
         return mapper.readValue(ot.getClobData(), JSONPTMDataset.class);
     }
@@ -427,7 +435,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         int readAccessionCount = 0;
         while(readAccessionCount < accessions.size()){
             
-            PerformanceTest.startTime("createPTMDatasetPTMSites-STEP1");
+//            PerformanceTest.startTime("createPTMDatasetPTMSites-STEP1"); //VDS for debug only !
             
             Query protMatchQuery = entityManagerMSI.createQuery("SELECT pm.id, pm.accession FROM ProteinMatch pm, ResultSummary rsm WHERE pm.accession IN (:accList) AND rsm.resultSet.id = pm.resultSet.id AND rsm.id in (:rsmIds) ");
             int lastIndex = Math.min((readAccessionCount + bufferSize), accessions.size());
@@ -445,7 +453,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
             }
             readAccessionCount = lastIndex;
             
-            PerformanceTest.stopTime("createPTMDatasetPTMSites-STEP1");
+//            PerformanceTest.stopTime("createPTMDatasetPTMSites-STEP1"); //VDS for debug only !
         }
         m_clusterPtmDataset.setLeafProtMatchesIdPerAccession(allProtMatchesIdPerAccession);
         m_sitePtmDataset.setLeafProtMatchesIdPerAccession(allProtMatchesIdPerAccession);
@@ -457,25 +465,27 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         m_ptmSiteIdsByBestPepMatchId = new HashMap<>();
         //---- Create the list of PTMSites            
         Map<Long, DProteinMatch> proteinMatchMap = typicalProteinMatchesArray.stream().collect(Collectors.toMap(DProteinMatch::getId, item -> item));
-        PerformanceTest.startTime("createPTMDatasetPTMSites-STEP2");
+        ArrayList<Long> validSiteBestPepMatchIds = new ArrayList<>();
+//        PerformanceTest.startTime("createPTMDatasetPTMSites-STEP2"); //VDS for debug only !
         for (JSONPTMSite2 jsonSite : jsonDataset.ptmSites) {
 
-            PTMSite site = new PTMSite(jsonSite, proteinMatchMap.get(jsonSite.proteinMatchId));
-            site.setPTMSpecificity(DInfoPTM.getInfoPTMMap().get(jsonSite.ptmDefinitionId));
-            if (site.getProteinMatch() != null) {
+            if(proteinMatchMap.containsKey(jsonSite.proteinMatchId)) {
+                PTMSite site = new PTMSite(jsonSite, proteinMatchMap.get(jsonSite.proteinMatchId));
+                site.setPTMSpecificity(DInfoPTM.getInfoPTMMap().get(jsonSite.ptmDefinitionId));
                 ptmSites.add(site);
-            }
 
-            PTMSite clusterSite = new PTMSite(jsonSite, proteinMatchMap.get(jsonSite.proteinMatchId));
-            clusterSite.setPTMSpecificity(DInfoPTM.getInfoPTMMap().get(jsonSite.ptmDefinitionId));
-            if (clusterSite.getProteinMatch() != null) {
+                PTMSite clusterSite = new PTMSite(jsonSite, proteinMatchMap.get(jsonSite.proteinMatchId));
+                clusterSite.setPTMSpecificity(DInfoPTM.getInfoPTMMap().get(jsonSite.ptmDefinitionId));
                 clusterPtmSites.add(clusterSite);
+
+                if(!validSiteBestPepMatchIds.contains(jsonSite.bestPeptideMatchId))
+                    validSiteBestPepMatchIds.add(jsonSite.bestPeptideMatchId);
             }
 
             m_ptmSiteIdsByBestPepMatchId.computeIfAbsent(jsonSite.bestPeptideMatchId, k -> new ArrayList<>());
             m_ptmSiteIdsByBestPepMatchId.get(jsonSite.bestPeptideMatchId).add(jsonSite.id);
         }
-        PerformanceTest.stopTime("createPTMDatasetPTMSites-STEP2");
+//        PerformanceTest.stopTime("createPTMDatasetPTMSites-STEP2"); //VDS for debug only !
         m_clusterPtmDataset.setPTMSites(clusterPtmSites);
         m_sitePtmDataset.setPTMSites(ptmSites);
 
@@ -484,7 +494,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         
         //---- Runs subtasks to get peptide matches
         //Get Best Peptide MatchesProteinMatches
-        m_bestSitesPepMatchIds = Arrays.stream(jsonDataset.ptmSites).map(site -> site.bestPeptideMatchId).distinct().collect(Collectors.toList());
+        m_bestSitesPepMatchIds = validSiteBestPepMatchIds; Arrays.stream(jsonDataset.ptmSites).map(site -> site.bestPeptideMatchId).distinct().collect(Collectors.toList());
         SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_PTMSITE_PEPTIDES, m_bestSitesPepMatchIds.size(), SLICE_SIZE);
         fetchSiteBestPeptideMatches(subTask, entityManagerMSI); //get first slice
     }
@@ -558,43 +568,38 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
 
         PerformanceTest.startTime("fetchBestPeptideMatches");
         
-        PerformanceTest.startTime("fetchBestPeptideMatches-STEP1");
-        
-        Query peptidesQuery = entityManagerMSI.createQuery("SELECT pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank, pm.serializedProperties, sp.firstTime, sp.precursorIntensity, sp.title, p, ms.id, ms.initialId, ptmString\n"
-                + "   FROM fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.PeptideReadablePtmString ptmString, fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp  \n"
-                + "   WHERE pipm.id.peptideMatchId IN (:peptideMatchList) AND pipm.id.peptideInstanceId=pi.id AND pipm.id.peptideMatchId=pm.id AND pm.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp AND pi.resultSummary.id in (:rmsIds) AND ptmString.peptide=p AND ptmString.resultSet.id=pm.resultSet.id");
+//        PerformanceTest.startTime("fetchBestPeptideMatches-STEP1"); //VDS for debug only !
+
+        Query peptidesQuery = entityManagerMSI.createQuery("SELECT pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, "
+                + " pm.cdPrettyRank, pm.sdPrettyRank, pm.serializedProperties, sp.firstTime, sp.precursorIntensity, sp.title, p, ms.id, ms.initialId, ptmString "
+                + " FROM fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstance pi, "
+                + " fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.PeptideReadablePtmString ptmString, fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp "
+                + " WHERE pipm.id.peptideMatchId IN (:peptideMatchList) AND pipm.id.peptideInstanceId=pi.id AND pipm.id.peptideMatchId=pm.id AND pm.peptideId=p.id "
+                + " AND pm.msQuery=ms AND ms.spectrum=sp AND pi.resultSummary.id in (:rmsIds) AND ptmString.peptide=p AND ptmString.resultSet.id=pm.resultSet.id");
         peptidesQuery.setParameter("peptideMatchList", sliceOfPeptideMatchIds);
         List<Long> rsmIds = m_clusterPtmDataset.getLeafResultSummaryIds();
         rsmIds.add(m_clusterPtmDataset.getDataset().getResultSummaryId());
         peptidesQuery.setParameter("rmsIds", rsmIds);
 
         ObjectMapper mapper = new ObjectMapper();
-        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
-        List<Object[]> l = peptidesQuery.getResultList();
-        Iterator<Object[]> itPeptidesQuery = l.iterator();
+        Iterator<Object[]> itPeptidesQuery = peptidesQuery.getResultList().iterator();
         List<DPeptideMatch> allPepMatches = new ArrayList<>();
-        //Create List of DPeptideMatch (linked to DSpectrum + DMsQuery) from query resumlt 
-        
-        PerformanceTest.stopTime("fetchBestPeptideMatches-STEP1");
-        
+
+        //Create List of DPeptideMatch (linked to DSpectrum + DMsQuery) from query resumlt
+//        PerformanceTest.stopTime("fetchBestPeptideMatches-STEP1"); //VDS for debug only !
+
         while (itPeptidesQuery.hasNext()) {
             
-            PerformanceTest.startTime("fetchBestPeptideMatches-STEP2");
+//            PerformanceTest.startTime("fetchBestPeptideMatches-STEP2"); //VDS for debug only !
             
             Object[] resCur = itPeptidesQuery.next();
 
             Long pmId = (Long) resCur[0];
-            Integer pmRank = (Integer) resCur[1];
-            Integer pmCharge = (Integer) resCur[2];
-            Float pmDeltaMoz = (Float) resCur[3];
-            Double pmExperimentalMoz = (Double) resCur[4];
-            Integer pmMissedCleavage = (Integer) resCur[5];
-            Float pmScore = (Float) resCur[6];
-            Long pmResultSetId = (Long) resCur[7];
 
-            Integer pmCdPrettyRank = (Integer) resCur[8];
-            Integer pmSdPrettyRank = (Integer) resCur[9];
+            DPeptideMatch pm = new DPeptideMatch( pmId, (Integer) resCur[1],  (Integer) resCur[2],  (Float) resCur[3], (Double) resCur[4], (Integer) resCur[5],
+                    (Float) resCur[6], (Long)resCur[7], (Integer) resCur[8], (Integer) resCur[9]);
             String serializedProperties = (String) resCur[10];
             Float firstTime = (Float) resCur[11];
             Float precursorIntensity = (Float) resCur[12];
@@ -605,11 +610,10 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
             spectrum.setPrecursorIntensity(precursorIntensity);
             spectrum.setTitle(title);
 
-            PerformanceTest.stopTime("fetchBestPeptideMatches-STEP2");
+//            PerformanceTest.stopTime("fetchBestPeptideMatches-STEP2"); //VDS for debug only !
             
-            PerformanceTest.startTime("fetchBestPeptideMatches-STEP3");
-            
-            DPeptideMatch pm = new DPeptideMatch(pmId, pmRank, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId, pmCdPrettyRank, pmSdPrettyRank);
+//            PerformanceTest.startTime("fetchBestPeptideMatches-STEP3"); //VDS for debug only !
+
             pm.setRetentionTime(firstTime);
             pm.setSerializedProperties(serializedProperties);
 
@@ -623,9 +627,9 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
                 Exceptions.printStackTrace(ex);
             }
             
-            PerformanceTest.stopTime("fetchBestPeptideMatches-STEP3");
+//            PerformanceTest.stopTime("fetchBestPeptideMatches-STEP3"); //VDS for debug only !
             
-            PerformanceTest.startTime("fetchBestPeptideMatches-STEP4");
+//            PerformanceTest.startTime("fetchBestPeptideMatches-STEP4"); //VDS for debug only !
 
             Peptide p = (Peptide) resCur[14];
             Long msqId = (Long) resCur[15];
@@ -640,9 +644,9 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
             pm.setPeptide(p);
             pm.setMsQuery(msq);
 
-            PerformanceTest.stopTime("fetchBestPeptideMatches-STEP4");
+//            PerformanceTest.stopTime("fetchBestPeptideMatches-STEP4"); //VDS for debug only !
             
-            PerformanceTest.startTime("fetchBestPeptideMatches-STEP5");
+//            PerformanceTest.startTime("fetchBestPeptideMatches-STEP5"); //VDS for debug only !
             
             if (isSite) {
                 List<Long> siteIds = m_ptmSiteIdsByBestPepMatchId.get(pmId);
@@ -666,11 +670,11 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
             }
             allPepMatches.add(pm);
             
-            PerformanceTest.stopTime("fetchBestPeptideMatches-STEP5");
+//            PerformanceTest.stopTime("fetchBestPeptideMatches-STEP5"); //VDS for debug only !
         }
 
 
-        PerformanceTest.startTime("fetchBestPeptideMatches-STEP6");
+//        PerformanceTest.startTime("fetchBestPeptideMatches-STEP6"); //VDS for debug only !
 
         //--  fetch Specific PTM Data for the Peptides Found
         List<Long> pepId = allPepMatches.stream().map(peM -> peM.getPeptide().getId()).collect(Collectors.toList());
@@ -691,7 +695,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
             }
         }
 
-        PerformanceTest.stopTime("fetchBestPeptideMatches-STEP6");
+//        PerformanceTest.stopTime("fetchBestPeptideMatches-STEP6"); //VDS for debug only !
         PerformanceTest.stopTime("fetchBestPeptideMatches");
     }
 
@@ -706,11 +710,10 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         PerformanceTest.startTime("fetchPTMSitesPepInstances");
 
         long start = System.currentTimeMillis();
-        m_logger.debug(" @@ START fetchPTMSitesPepInstances SUBTASK ");
+//        m_logger.debug(" @@ START fetchPTMSitesPepInstances SUBTASK "); //VDS for debug only !
         ObjectMapper mapper = new ObjectMapper();
-        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
-        int nbrPepIds = sliceOfPeptideIds.size();
         Long rsetId = m_dataset.getResultSetId();
         if(rsetId == null && m_dataset.getResultSummary() != null && m_dataset.getResultSummary().getResultSet() != null)
             rsetId = m_dataset.getResultSummary().getResultSet().getId();
@@ -724,7 +727,7 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
             allRsmIds.add(dsRsmId);
         }
 
-        PerformanceTest.startTime("peptidesQuery");
+//        PerformanceTest.startTime("peptidesQuery"); //VDS for debug only !
 
         Query peptidesQuery = entityManagerMSI.createQuery("SELECT pi.id FROM fr.proline.core.orm.msi.PeptideInstance pi"
                 + "   WHERE pi.peptide.id IN (:peptideIdsList) AND pi.resultSummary.id in (:rmsIds)");
@@ -738,15 +741,13 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
             peptideInstanceIds.add(resCur);
         }
 
-        int nbrPepInstIds = peptideInstanceIds.size();
+//        PerformanceTest.stopTime("peptidesQuery"); //VDS for debug only !
+//
+//        long end = System.currentTimeMillis();
+//        m_logger.debug(" @@ fetchPTMSitesPepInstances: Read "+nbrPepInstIds+" pep instances corresponding to " + nbrPepIds+" peptides in "+(end-start)+" ms" );
+//        start = end;
 
-        PerformanceTest.stopTime("peptidesQuery");
-
-        long end = System.currentTimeMillis();
-        m_logger.debug(" @@ fetchPTMSitesPepInstances: Read "+nbrPepInstIds+" pep instances corresponding to " + nbrPepIds+" peptides in "+(end-start)+" ms" );
-        start = end;
-
-        PerformanceTest.startTime("dataQuery");
+//        PerformanceTest.startTime("dataQuery"); //VDS for debug only !
 
         HashMap<Long, Peptide> allPeptidesMap = new HashMap<>();
         HashMap<Long, DPeptideInstance> leafPeptideInstancesById = new HashMap<>();
@@ -754,8 +755,8 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         Map<Long, DPeptideInstance> parentPeptideInstancesByPepId = new HashMap<>();
 
         //---- Load Peptide Match + Spectrum / MSQuery information for all peptideInstance of PTMSite
-        Query dataQuery = entityManagerMSI.createQuery("SELECT pm, pi, sm, sp.firstTime, sp.precursorIntensity, sp.title, "
-                + " msq.id, msq.initialId "
+        Query dataQuery = entityManagerMSI.createQuery("SELECT  pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, "
+                + " pm.sdPrettyRank, pm.isDecoy, pm.serializedProperties, pi, sm, sp.firstTime, sp.precursorIntensity, sp.title, msq.id, msq.initialId "
                 + "  FROM fr.proline.core.orm.msi.PeptideInstancePeptideMatchMap pipm, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.PeptideInstance pi, "
                 + " fr.proline.core.orm.msi.SequenceMatch sm , fr.proline.core.orm.msi.MsQuery msq , fr.proline.core.orm.msi.Spectrum sp "
                 + "  WHERE pipm.id.peptideInstanceId IN ( :peptideInstanceList ) AND pipm.id.peptideInstanceId=pi.id AND pipm.id.peptideMatchId=pm.id "
@@ -763,78 +764,75 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
         dataQuery.setParameter("peptideInstanceList", new ArrayList<>(peptideInstanceIds));
         List<Object[]> l = dataQuery.getResultList();
         Iterator<Object[]> itPeptidesMatchesQuery = l.iterator();
-
-        PerformanceTest.stopTime("dataQuery");
+//        PerformanceTest.stopTime("dataQuery"); //VDS for debug only !
 
         //---- Create List of DPeptideMatch (linked to DSpectrum + DMsQuery) from query resumlt
-        end = System.currentTimeMillis();
-        m_logger.debug(" @@ fetchPTMSitesPepInstances: query result size " + l.size()+" in "+(end-start)+" ms" );
-        start= end;
+//        end = System.currentTimeMillis();
+////        m_logger.debug(" @@ fetchPTMSitesPepInstances: query result size " + l.size()+" in "+(end-start)+" ms" );
+//        start= end;
 
-        PerformanceTest.startTime("itPeptidesMatchesQuery loop");
+//        PerformanceTest.startTime("itPeptidesMatchesQuery loop"); //VDS for debug only !
 
         while (itPeptidesMatchesQuery.hasNext()) {
 
 
-            PerformanceTest.startTime("STEP1");
+//            PerformanceTest.startTime("STEP1"); //VDS for debug only !
 
             Object[] resCur = itPeptidesMatchesQuery.next();
 
-            PeptideMatch pm = (PeptideMatch) resCur[0];
-            PeptideInstance pi = (PeptideInstance) resCur[1];
-            SequenceMatch sm =  (SequenceMatch) resCur[2];
-            Float firstTime = (Float) resCur[3];
-            Float precursorIntensity = (Float) resCur[4];
-            String spectrumTitle = (String) resCur[5];
-            Long msQueryId = (Long) resCur[6];
-            Integer msQueryInitialId = (Integer) resCur[7];
+            DPeptideMatch pepInstPeptideMatch = new fr.proline.core.orm.msi.dto.DPeptideMatch((Long) resCur[0], (Integer) resCur[1],(Integer)resCur[2],(Float) resCur[3],(Double)resCur[4],
+                    (Integer)resCur[5],(Float) resCur[6],(Long) resCur[7], (Integer) resCur[8],(Integer) resCur[9],(Boolean) resCur[10],(String) resCur[11]);
+            PeptideInstance pi = (PeptideInstance) resCur[12];
+            SequenceMatch sm =  (SequenceMatch) resCur[13];
+            Float firstTime = (Float) resCur[14];
+            Float precursorIntensity = (Float) resCur[15];
+            String spectrumTitle = (String) resCur[16];
+            Long msQueryId = (Long) resCur[17];
+            Integer msQueryInitialId = (Integer) resCur[18];
 
+//            PerformanceTest.stopTime("STEP1"); //VDS for debug only !
 
-            PerformanceTest.stopTime("STEP1");
-
-            PerformanceTest.startTime("STEP2");
+//            PerformanceTest.startTime("STEP2"); //VDS for debug only !
 
             DSpectrum spectrum = new DSpectrum();
             spectrum.setFirstTime(firstTime);
             spectrum.setPrecursorIntensity(precursorIntensity);
             spectrum.setTitle(spectrumTitle);
 
-            PerformanceTest.stopTime("STEP2");
+//            PerformanceTest.stopTime("STEP2"); //VDS for debug only !
 
-            PerformanceTest.startTime("STEP3");
+//            PerformanceTest.startTime("STEP3"); //VDS for debug only !
 
-            DPeptideMatch dpm = new DPeptideMatch(pm.getId(), pm.getRank(), pm.getCharge(), pm.getDeltaMoz(), pm.getExperimentalMoz(), pm.getMissedCleavage(), pm.getScore(), pm.getResultSet().getId(), pm.getCDPrettyRank(), pm.getSDPrettyRank());
-            dpm.setRetentionTime(spectrum.getFirstTime());
-            dpm.setSerializedProperties(pm.getSerializedProperties());
-            dpm.setSequenceMatch(sm);
+            pepInstPeptideMatch.setRetentionTime(spectrum.getFirstTime());
+            pepInstPeptideMatch.setSequenceMatch(sm);
 
-            PerformanceTest.stopTime("STEP3");
+//            PerformanceTest.stopTime("STEP3"); //VDS for debug only !
 
-            PerformanceTest.startTime("STEP4");
-            JsonNode node = mapper.readTree(dpm.getSerializedProperties());
+//            PerformanceTest.startTime("STEP4"); //VDS for debug only !
+            JsonNode node = mapper.readTree(pepInstPeptideMatch.getSerializedProperties());
             JsonNode child = node.get("ptm_site_properties");
             DPtmSiteProperties properties = mapper.treeToValue(child, DPtmSiteProperties.class);
-            dpm.setPtmSiteProperties(properties);
-            PerformanceTest.stopTime("STEP4");
+            pepInstPeptideMatch.setPtmSiteProperties(properties);
+//            PerformanceTest.stopTime("STEP4"); //VDS for debug only !
 
 
 
 
-            PerformanceTest.startTime("STEP5");
+//            PerformanceTest.startTime("STEP5"); //VDS for debug only !
             Peptide p = pi.getPeptide();
             p.getTransientData().setPeptideReadablePtmStringLoaded();
             allPeptidesMap.put(p.getId(), p);
 
-            DMsQuery msq = new DMsQuery(pm.getId(), msQueryId, msQueryInitialId, spectrum.getPrecursorIntensity());
+            DMsQuery msq = new DMsQuery(pepInstPeptideMatch.getId(), msQueryId, msQueryInitialId, spectrum.getPrecursorIntensity());
             msq.setDSpectrum(spectrum);
 
-            dpm.setPeptide(p);
-            dpm.setMsQuery(msq);
+            pepInstPeptideMatch.setPeptide(p);
+            pepInstPeptideMatch.setMsQuery(msq);
 
-            PerformanceTest.stopTime("STEP5");
+//            PerformanceTest.stopTime("STEP5"); //VDS for debug only !
 
 
-            PerformanceTest.startTime("STEP6");
+//            PerformanceTest.startTime("STEP6"); //VDS for debug only !
 
             //TEST IF Leaf or Parent
             if(dsRsmId.equals(pi.getResultSummary().getId()) ) {
@@ -847,10 +845,10 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
                     parentPeptideInstancesByPepId.put(p.getId(), dpi);
                 }
 
-                if (pi.getBestPeptideMatchId() == dpm.getId()) {
-                    parentPeptideInstancesByPepId.get(p.getId()).setBestPeptideMatch(dpm);
+                if (pi.getBestPeptideMatchId() == pepInstPeptideMatch.getId()) {
+                    parentPeptideInstancesByPepId.get(p.getId()).setBestPeptideMatch(pepInstPeptideMatch);
                 }
-                parentPeptideInstancesByPepId.get(p.getId()).getPeptideMatches().add(dpm);
+                parentPeptideInstancesByPepId.get(p.getId()).getPeptideMatches().add(pepInstPeptideMatch);
 
             }
             if( (!dsRsmId.equals(pi.getResultSummary().getId())) || datasetIsLeaf ) {
@@ -874,57 +872,55 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
                     pepInsts.add(dpi);
                 }
 
-                if (pi.getBestPeptideMatchId() == dpm.getId()) {
-                    leafPeptideInstancesById.get(pi.getId()).setBestPeptideMatch(dpm);
+                if (pi.getBestPeptideMatchId() == pepInstPeptideMatch.getId()) {
+                    leafPeptideInstancesById.get(pi.getId()).setBestPeptideMatch(pepInstPeptideMatch);
                 }
-                leafPeptideInstancesById.get(pi.getId()).getPeptideMatches().add(dpm);
+                leafPeptideInstancesById.get(pi.getId()).getPeptideMatches().add(pepInstPeptideMatch);
             }
 
-            PerformanceTest.stopTime("STEP6");
+//            PerformanceTest.stopTime("STEP6"); //VDS for debug only !
         }
 
 
 
-        PerformanceTest.stopTime("itPeptidesMatchesQuery loop");
+//        PerformanceTest.stopTime("itPeptidesMatchesQuery loop"); //VDS for debug only !
 
-        end = System.currentTimeMillis();
-        m_logger.debug(" @@ fetchPTMSitesPepInstances: Created leafPeptideInstancesById. Nbr : " + leafPeptideInstancesById.size()+" in "+(end-start)+" ms");
-        start= end;
+//        end = System.currentTimeMillis();
+////        m_logger.debug(" @@ fetchPTMSitesPepInstances: Created leafPeptideInstancesById. Nbr : " + leafPeptideInstancesById.size()+" in "+(end-start)+" ms");
+//        start= end;
 
         //--- Retrieve PeptideReadablePtmString
 
-        PerformanceTest.startTime("ptmStingQuery");
+//        PerformanceTest.startTime("ptmStingQuery"); //VDS for debug only !
         DatabasePTMsTask.fillReadablePTMDataForPeptides(entityManagerMSI,rsetId,allPeptidesMap, null);
 
-        PerformanceTest.stopTime("ptmStingQuery");
+//        PerformanceTest.stopTime("ptmStingQuery"); //VDS for debug only !
 
-        PerformanceTest.startTime("fetchGenericPTMData");
+//        PerformanceTest.startTime("fetchGenericPTMData"); //VDS for debug only !
 
         // fetch Generic PTM Data
         DatabasePTMsTask.fetchGenericPTMData(entityManagerMSI);
 
-        PerformanceTest.stopTime("fetchGenericPTMData");
+//        PerformanceTest.stopTime("fetchGenericPTMData"); //VDS for debug only !
 
 
-        PerformanceTest.startTime("fetchPeptidePTMForPeptides");
+//        PerformanceTest.startTime("fetchPeptidePTMForPeptides");
 
         //--- fetch Specific Data for the Peptides Found
         HashMap<Long, ArrayList<DPeptidePTM>> ptmMap = DatabasePTMsTask.fetchPeptidePTMForPeptides(entityManagerMSI, new ArrayList<>(allPeptidesMap.keySet()));
 
-        PerformanceTest.stopTime("fetchPeptidePTMForPeptides");
+//        PerformanceTest.stopTime("fetchPeptidePTMForPeptides"); //VDS for debug only !
 
-        PerformanceTest.startTime("parentPeptideInstancesByPepId.values().stream().flatMap");
 
         List<DPeptideMatch> allpeptideMatches = leafPeptideInstancesById.values().stream().flatMap(pi -> pi.getPeptideMatches().stream()).collect(Collectors.toList());
         allpeptideMatches.addAll(parentPeptideInstancesByPepId.values().stream().flatMap(pi -> pi.getPeptideMatches().stream()).collect(Collectors.toList()));
 
-        PerformanceTest.stopTime("parentPeptideInstancesByPepId.values().stream().flatMap");
 
-        end = System.currentTimeMillis();
-        m_logger.debug(" @@ fetchPTMSitesPepInstances got PTM info  for all peptideMatches . nbr " + allpeptideMatches.size()+" in "+(end-start)+" ms");
-        start= end;
+//        end = System.currentTimeMillis();
+////        m_logger.debug(" @@ fetchPTMSitesPepInstances got PTM info  for all peptideMatches . nbr " + allpeptideMatches.size()+" in "+(end-start)+" ms");
+//        start= end;
 
-        PerformanceTest.startTime("allpeptideMatches loop");
+//        PerformanceTest.startTime("allpeptideMatches loop"); //VDS for debug only !
 
         for (DPeptideMatch pm : allpeptideMatches) {
             Peptide p = pm.getPeptide();
@@ -941,12 +937,12 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
             }
         }
 
-        PerformanceTest.stopTime("allpeptideMatches loop");
+//        PerformanceTest.stopTime("allpeptideMatches loop"); //VDS for debug only !
 
-        m_logger.info(" @@ {} peptides matching to {} peptide matches retrieved", allPeptidesMap.size(), allpeptideMatches.size());
-        m_logger.info(" @@ {} peptide instances retrieved", parentPeptideInstancesByPepId.size());
+//        m_logger.info(" @@ {} peptides matching to {} peptide matches retrieved", allPeptidesMap.size(), allpeptideMatches.size());
+//        m_logger.info(" @@ {} peptide instances retrieved", parentPeptideInstancesByPepId.size());
 
-        PerformanceTest.startTime("m_ptmSitesOutput loop");
+//        PerformanceTest.startTime("m_ptmSitesOutput loop"); //VDS for debug only !
         for (PTMSite site : m_ptmSitesOutput) {
             //Verify if PTM site has at least one pep in this 'subtask'
             List<DPeptideInstance> leafPeptideInstances = new ArrayList<>();
@@ -965,10 +961,10 @@ public class DatabaseDatasetPTMsTask extends AbstractDatabaseSlicerTask {
             }
         }
 
-        PerformanceTest.stopTime("m_ptmSitesOutput loop");
+//        PerformanceTest.stopTime("m_ptmSitesOutput loop"); //VDS for debug only !
 
-        end = System.currentTimeMillis();
-        m_logger.debug(" @@ END fetchPTMSitesPepInstances subtask "+" in "+(end-start)+" ms");
+//        end = System.currentTimeMillis();
+//        m_logger.debug(" @@ END fetchPTMSitesPepInstances subtask "+" in "+(end-start)+" ms");
 
         PerformanceTest.stopTime("fetchPTMSitesPepInstances");
 

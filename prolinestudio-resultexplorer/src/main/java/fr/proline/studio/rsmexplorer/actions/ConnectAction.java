@@ -113,7 +113,7 @@ public class ConnectAction  extends AbstractAction {
             
             // check if there is tasks being done which ask not to disconnect/close the application
             if (TaskInfoManager.getTaskInfoManager().askBeforeExitingApp()) {
-                InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "You should not disconnect. Important tasks are being done.\nAre you sure you want to disconnect ?");
+                InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "You should not disconnect. Important tasks are being done.\nAre you sure you want to disconnect ?", true);
                 exitDialog.setButtonName(DefaultDialog.BUTTON_OK, "Yes");
                 exitDialog.setButtonName(DefaultDialog.BUTTON_CANCEL, "No");
                 exitDialog.centerToWindow(WindowManager.getDefault().getMainWindow());

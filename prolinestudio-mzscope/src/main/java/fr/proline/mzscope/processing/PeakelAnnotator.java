@@ -38,7 +38,7 @@ public class PeakelAnnotator implements IAnnotator {
   }
 
   @Override
-  public AnnotatedChromatogram annotate(IRawFile rawFile, IChromatogram chromatogram, MsnExtractionRequest request, Integer expectedCharge) {
+  public AnnotatedChromatogram annotate(IRawFile rawFile, IChromatogram chromatogram, ExtractionRequest request, Integer expectedCharge) {
     if (annotators == null) {
       ExtractionParamsDialog dialog = new ExtractionParamsDialog(null, true, false);
       dialog.setExtractionParamsTitle("Detect Peakels Parameters");
@@ -83,7 +83,7 @@ class PeakelAnnotatorImpl {
     return featuresByNominalMass;
   }
 
-  public AnnotatedChromatogram annotate(IChromatogram chromatogram, MsnExtractionRequest request, Integer expectedCharge) {
+  public AnnotatedChromatogram annotate(IChromatogram chromatogram, ExtractionRequest request, Integer expectedCharge) {
     List<IPeakel> peakels = getPeakels().get((int)request.getMz());
 
     if (peakels == null)

@@ -19,7 +19,6 @@ package fr.proline.studio.dam.tasks.xic;
 import fr.proline.core.orm.lcms.*;
 import fr.proline.core.orm.lcms.Map;
 import fr.proline.core.orm.lcms.dto.DFeature;
-import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
@@ -831,14 +830,14 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                 Double bestChildElutionTime = Double.NaN;
                 Map sourceMap = null;
                 Float maxIntensity = Float.NaN;
-                List<Long> childFeatureIdsForCluster = new ArrayList();
+                List<Long> childFeatureIdsForCluster = new ArrayList<>();
                 for (MasterFeatureItem mfi : resultMFIList) {
                     allFeature.add(mfi.getChildFeature());
                     listOfRawMapsId.add(mfi.getChildFeature().getMap().getId());
 
                     if (mfi.getIsBestChild()) {
                         bestChild = mfi.getChildFeature();
-                        bestChildElutionTime = new Double(bestChild.getElutionTime());
+                        bestChildElutionTime = Double.valueOf(bestChild.getElutionTime());
                         sourceMap = bestChild.getMap();
                     }
                     // if child feature is in a processed map => search into cluster feature
@@ -892,7 +891,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                             if (!hasPredElTime && (maxIntensity.isNaN() || feature.getApexIntensity() > maxIntensity)) {
                                 maxIntensity = feature.getApexIntensity();
                                 bestChild = feature;
-                                bestChildElutionTime = new Double(bestChild.getElutionTime());
+                                bestChildElutionTime = Double.valueOf(bestChild.getElutionTime());
                                 sourceMap = bestChild.getMap();
                             }
                         }
@@ -1017,7 +1016,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
     }
 
     public static TaskError fetchDataMainTaskAlignmentForXic(Long projectId, DDataset dataset) {
-        
+        long start = System.currentTimeMillis();
         EntityManager entityManagerLCMS = DStoreCustomPoolConnectorFactory.getInstance().getLcMsDbConnector(projectId).createEntityManager();
         try {
             entityManagerLCMS.getTransaction().begin();
@@ -1100,6 +1099,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
             entityManagerLCMS.getTransaction().rollback();
             return taskError;
         } finally {
+            m_logger.info("fetchDataMainTaskAlignmentForXic took " + (System.currentTimeMillis() - start) + " ms");
             entityManagerLCMS.close();
         }
 

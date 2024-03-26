@@ -68,25 +68,25 @@ public class MapAlignmentConverterTest {
     
     @Before
     public void setUp() {
-        listMapAlignment = new ArrayList();
+        listMapAlignment = new ArrayList<>();
         ProcessedMap refMap = new ProcessedMap();
-        refMap.setId(new Long(29));
+        refMap.setId(Long.valueOf(29));
         refMap.setIsAlnReference(true);
         ProcessedMap destMap = new ProcessedMap();
-        destMap.setId(new Long(27));
+        destMap.setId(Long.valueOf(27));
         destMap.setIsAlnReference(false);
         MapSet mapSet = new MapSet();
-        mapSet.setId(new Long(7));
+        mapSet.setId(Long.valueOf(7));
         mapSet.setAlnReferenceMap(refMap);
         m2927 = new MapAlignment();
         MapAlignmentPK pk = new MapAlignmentPK();
-        pk.setFromMapId(new Long(29));
-        pk.setToMapId(new Long(27));
+        pk.setFromMapId(Long.valueOf(29));
+        pk.setToMapId(Long.valueOf(27));
         m2927.setId(pk);
         m2927.setMapSet(mapSet);
         m2927.setSourceMap(refMap);
         m2927.setDestinationMap(destMap);
-        List<MapTime> mapTimeList = new ArrayList();
+        List<MapTime> mapTimeList = new ArrayList<>();
         for (int i = 0; i < time.length; i++) {
             MapTime mapTime= new MapTime(time[i], deltaTime[i]);
             mapTimeList.add(mapTime);

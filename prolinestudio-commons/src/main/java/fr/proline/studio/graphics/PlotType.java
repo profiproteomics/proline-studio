@@ -34,7 +34,7 @@ public enum PlotType {
     public static PlotType[] ALL_PLOTS = {HISTOGRAM_PLOT, SCATTER_PLOT, VENN_DIAGRAM_PLOT, PARALLEL_COORDINATES_PLOT};
     public static PlotType[] LINEAR_PLOTS = {LINEAR_PLOT};
 
-    private PlotType(String name, boolean illimitedAxis, String xLabel, String yLabel, String zLabel) {
+    PlotType(String name, boolean illimitedAxis, String xLabel, String yLabel, String zLabel) {
         m_name = name;
         m_illimitedAxis = illimitedAxis;
         m_xLabel = xLabel;
@@ -83,7 +83,7 @@ public enum PlotType {
 
     public HashSet<Class> getAcceptedXValues() {
 
-        HashSet<Class> acceptedValues = new HashSet(3);
+        HashSet<Class> acceptedValues = new HashSet<>(3);
 
         switch (this) {
             case VENN_DIAGRAM_PLOT:
@@ -108,7 +108,7 @@ public enum PlotType {
 
     public HashSet<Class> getAcceptedValuesAsParam() {
 
-        HashSet<Class> acceptedValues = new HashSet(2);
+        HashSet<Class> acceptedValues = new HashSet<>(2);
 
         switch (this) {
             case VENN_DIAGRAM_PLOT:

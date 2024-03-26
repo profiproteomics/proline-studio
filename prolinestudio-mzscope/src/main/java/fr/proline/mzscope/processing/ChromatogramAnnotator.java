@@ -16,93 +16,142 @@
  */
 package fr.proline.mzscope.processing;
 
+import fr.profi.mzdb.model.SpectrumHeader;
 import fr.proline.mzscope.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.Int;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ChromatogramAnnotator implements IAnnotator {
 
   final private static Logger logger = LoggerFactory.getLogger(ChromatogramAnnotator.class);
+  public static final double EPSILON_TIME = 0.01;
 
   public ChromatogramAnnotator() {
 
   }
 
   @Override
-  public AnnotatedChromatogram annotate(IRawFile rawFile, IChromatogram chromatogram, MsnExtractionRequest request, Integer expectedCharge) {
+  public AnnotatedChromatogram annotate(IRawFile rawFile, IChromatogram chromatogram, ExtractionRequest request, Integer expectedCharge) {
 
     try {
-      int maxConsecutiveGaps = 3;
 
-      double[] refTime = rawFile.getElutionTimes(request.getMsLevel());
+      if (chromatogram == null)
+        return null;
 
-      double[] intensities = chromatogram.getIntensities();
-      double[] time = chromatogram.getTime();
-      int rtIndex = ~Arrays.binarySearch(refTime, request.getElutionTime());
-      int cRtIndex = ~Arrays.binarySearch(time, request.getElutionTime());
-      int cIndex = cRtIndex;
+      final int maxConsecutiveGaps = 3;
+      double[] globalTime = getElutionTimes(rawFile, request);
 
-      if (rtIndex != -1) {
+      double[] chromatogramIntensities = chromatogram.getIntensities();
+      double[] chromatogramTime = chromatogram.getTime();
+      int globalRtIndex = ~Arrays.binarySearch(globalTime, request.getElutionTime());
+      int chromatogramRtIndex = ~Arrays.binarySearch(chromatogramTime, request.getElutionTime());
+      chromatogramRtIndex = (chromatogramRtIndex < chromatogramTime.length) ? chromatogramRtIndex : chromatogramTime.length - 1;
+      int chromatogramIndex = chromatogramRtIndex;
+      List<Integer> peakelIndexes = new ArrayList<>(chromatogramTime.length);
+
+      if (globalRtIndex != -1) {
         // search for signal before and after rtIndex
         int consecutiveGaps = 0;
-        int cEndIdx = cIndex;
-        int cStartIdx = cIndex;
-        int startIdx = rtIndex;
-        int endIdx = rtIndex;
+        int cEndIdx = chromatogramIndex;
+        int cStartIdx = chromatogramIndex;
+        int startIdx = globalRtIndex;
+        int endIdx = globalRtIndex;
 
         double maxIntensity = -1.0;
 
-        for (int k = rtIndex; (k < refTime.length) && (consecutiveGaps <= maxConsecutiveGaps); k++) {
-          if (Math.abs(refTime[k] - time[cIndex]) < 0.01) {
-            if (intensities[cIndex] > 0) {
+        for (int k = globalRtIndex; (k < globalTime.length) && (chromatogramIndex < chromatogramTime.length) && (consecutiveGaps <= maxConsecutiveGaps); k++) {
+          if (Math.abs(globalTime[k] - chromatogramTime[chromatogramIndex]) < EPSILON_TIME) {
+            if (chromatogramIntensities[chromatogramIndex] > 0) {
               consecutiveGaps = 0;
-              cEndIdx = cIndex;
+              cEndIdx = chromatogramIndex;
               endIdx = k;
-              maxIntensity = Math.max(maxIntensity, intensities[cIndex]);
+              maxIntensity = Math.max(maxIntensity, chromatogramIntensities[chromatogramIndex]);
+              peakelIndexes.add(chromatogramIndex);
             } else {
               consecutiveGaps++;
             }
-            cIndex++;
+            chromatogramIndex++;
           } else {
             consecutiveGaps++;
           }
         }
 
         consecutiveGaps = 0;
-        cIndex = cRtIndex;
-        for (int k = rtIndex; (k > 0) && (consecutiveGaps <= maxConsecutiveGaps); k--) {
-          if (Math.abs(refTime[k] - time[cIndex]) < 0.01) {
-            if (intensities[cIndex] > 0) {
+        chromatogramIndex = chromatogramRtIndex;
+        for (int k = globalRtIndex; (k >= 0) && (chromatogramIndex >= 0) && (consecutiveGaps <= maxConsecutiveGaps); k--) {
+          if (Math.abs(globalTime[k] - chromatogramTime[chromatogramIndex]) < EPSILON_TIME) {
+            if (chromatogramIntensities[chromatogramIndex] > 0) {
               consecutiveGaps = 0;
-              cStartIdx = cIndex;
+              cStartIdx = chromatogramIndex;
               startIdx = k;
-              maxIntensity = Math.max(maxIntensity, intensities[cIndex]);
+              maxIntensity = Math.max(maxIntensity, chromatogramIntensities[chromatogramIndex]);
+              peakelIndexes.add(chromatogramIndex);
             } else {
               consecutiveGaps++;
             }
-            cIndex--;
+            chromatogramIndex--;
           } else {
             consecutiveGaps++;
           }
         }
 
-  //TODO : redetermine elution-time as apex time instead of requested retention time
-          BasePeakel feature = new BasePeakel(
+        double area = -1.0;
+        if (!peakelIndexes.isEmpty()) {
+          peakelIndexes.sort(Integer::compareTo);
+          area = 0.0;
+          for (int k = 1; k < peakelIndexes.size(); k++) {
+            int prevIdx = peakelIndexes.get(k - 1);
+            int currIdx = peakelIndexes.get(k);
+            area += (chromatogramIntensities[prevIdx] + chromatogramIntensities[currIdx]) * (chromatogramTime[currIdx] - chromatogramTime[prevIdx]) / 2.0;
+          }
+          if (startIdx > 1) {
+            int firstIdx = peakelIndexes.get(0);
+            area += chromatogramIntensities[firstIdx] * (chromatogramTime[firstIdx] - globalTime[startIdx - 1]) / 2.0;
+          }
+          if (endIdx < globalTime.length - 2) {
+            int lastIdx = peakelIndexes.get(peakelIndexes.size() - 1);
+            area += chromatogramIntensities[lastIdx] * (globalTime[endIdx + 1] - chromatogramTime[lastIdx]) / 2.0;
+          }
+        }
+  //TODO : redetermine elution time as apex time instead of requested retention time
+          BasePeakel peakel = new BasePeakel(
                   (chromatogram.getMaxMz() + chromatogram.getMinMz()) / 2.0,
-                  (float) time[cRtIndex]*60.0f,
-                  (float) time[cStartIdx]*60.0f,
-                  (float) time[cEndIdx]*60.0f,
+                  (float) chromatogramTime[chromatogramRtIndex]*60.0f,
+                  (float) chromatogramTime[cStartIdx]*60.0f,
+                  (float) chromatogramTime[cEndIdx]*60.0f,
                   rawFile,
                   request.getMsLevel());
-          feature.setApexIntensity((float) maxIntensity);
-          feature.setMs1Count(endIdx - startIdx + 1);
-          return new AnnotatedChromatogram(chromatogram, feature);
+          if (maxIntensity > 0)
+            peakel.setApexIntensity((float) maxIntensity);
+          if (area > 0)
+            peakel.setArea((float)area);
+          if ((endIdx-startIdx) > 0)
+            peakel.setScanCount(endIdx - startIdx + 1);
+          if (request.getMsLevel() > 1) {
+            peakel.setParentMz(request.getMz());
+          }
+          return new AnnotatedChromatogram(chromatogram, peakel);
       }
     } catch (Exception e) {
       logger.error("Annotation failed", e);
     }
     return new AnnotatedChromatogram(chromatogram, null);
+  }
+
+  private double[] getElutionTimes(IRawFile rawFile, ExtractionRequest request) {
+    if (!rawFile.isDIAFile() || request.getMsLevel() == 1)
+      return rawFile.getElutionTimes(request.getMsLevel());
+
+    final Map<SpectrumHeader, IsolationWindow> selection = rawFile.getIsolationWindowByMs2Headers().entrySet().stream()
+            .filter(e -> e.getValue().contains(request.getMz()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    return selection.keySet().stream().mapToDouble(h -> h.getElutionTime()/60.0).sorted().toArray();
   }
 }

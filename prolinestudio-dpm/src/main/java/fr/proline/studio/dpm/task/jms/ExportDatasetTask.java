@@ -16,24 +16,19 @@
  */
 package fr.proline.studio.dpm.task.jms;
 
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Message;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.data.CVParam;
-import fr.proline.studio.dpm.AccessJMSManagerThread;
-import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
+
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.TextMessage;
 
 /**
  *Task to export a dataset (it could be identification, XIC or SC...) It uses a
@@ -48,16 +43,17 @@ public class ExportDatasetTask extends AbstractJMSTask {
         TEMPLATED,
         SPECTRA_LIST,
         MZIDENTML
-    };
-    private static String m_serviceName = "proline/dps/msi/ExportResultSummary";
+    }
+
+    private static final String m_serviceName = "proline/dps/msi/ExportResultSummary";
     private static final String m_version = "2.0";
     
-    private List<DDataset> m_datasetList;
-    private List<String> m_filePathResult;
-    private HashMap<String, Object> m_exportParams;
-    private ExporterFormat m_exportFormat;
-    private String m_configStr;
-    private List<String> m_JMSNodeID;
+    private final List<DDataset> m_datasetList;
+    private final List<String> m_filePathResult;
+    private final HashMap<String, Object> m_exportParams;
+    private final ExporterFormat m_exportFormat;
+    private final String m_configStr;
+    private final List<String> m_JMSNodeID;
 
     public ExportDatasetTask(AbstractJMSCallback callback, List<DDataset> listDataset, String configStr, List<String> filePathInfo, List<String> jmsNodeID) {
         super(callback, new TaskInfo("Export Dataset for " + listDataset.size() + " datasets", true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
@@ -103,50 +99,28 @@ public class ExportDatasetTask extends AbstractJMSTask {
     }
 
     @Override
-    public void taskDone(Message jmsMessage) throws Exception {
-        final TextMessage textMessage = (TextMessage) jmsMessage;
-        final String jsonString = textMessage.getText();
+    public void processWithResult(JSONRPC2Response jsonResponse) throws Exception {
 
-        final JSONRPC2Message jsonMessage = JSONRPC2Message.parse(jsonString);
-        if(jsonMessage instanceof JSONRPC2Notification) {
-            m_loggerProline.warn("JSON Notification method: " + ((JSONRPC2Notification) jsonMessage).getMethod()+" instead of JSON Response");
-            throw new Exception("Invalid JSONRPC2Message type");
-            
-        } else if (jsonMessage instanceof JSONRPC2Response)  {
-            final JSONRPC2Response jsonResponse = (JSONRPC2Response) jsonMessage;
-	    m_loggerProline.debug("JSON Response Id: " + jsonResponse.getID());
-            
-            final JSONRPC2Error jsonError = jsonResponse.getError();
-
-	    if (jsonError != null) {
-		m_loggerProline.error("JSON Error code {}, message : \"{}\"", jsonError.getCode(), jsonError.getMessage());
-		m_loggerProline.error("JSON Throwable", jsonError);
-                throw jsonError;
-	    }
-            
-            // FOR STREAM ONLY !
-            final Object result = jsonResponse.getResult();
-            if ((result == null) || (! HashMap.class.isInstance(result)))  {
-                m_loggerProline.error(getClass().getSimpleName() + " failed : No valid file path / information returned :"+result);
-                throw new Exception("No  file path returned : "+result);
-            }
-            
-            HashMap returnedValues = (HashMap) result;  
-            ArrayList exportedFilePathList = (ArrayList)returnedValues.get("file_paths");
-            if (exportedFilePathList == null || exportedFilePathList.isEmpty()) {
-                m_loggerProline.error(getClass().getSimpleName() + " failed : No file path returned :"+result);
-                throw new Exception("No  file path returned : "+result);
-            }
-            // in case of TSV format, we have different files to download
-            for (Object filePath : exportedFilePathList) {
-                m_filePathResult.add((String) filePath);
-                m_JMSNodeID.add((String) returnedValues.get(JMSConnectionManager.PROLINE_NODE_ID_KEY));
-            } 
+        // FOR STREAM ONLY !
+        final Object result = jsonResponse.getResult();
+        if ((result == null) || (!HashMap.class.isInstance(result))) {
+            m_loggerProline.error(getClass().getSimpleName() + " failed : No valid file path / information returned :" + result);
+            throw new Exception("No  file path returned : " + result);
         }
-               
-        m_currentState = JMSState.STATE_DONE;
+
+        HashMap returnedValues = (HashMap) result;
+        ArrayList exportedFilePathList = (ArrayList) returnedValues.get("file_paths");
+        if (exportedFilePathList == null || exportedFilePathList.isEmpty()) {
+            m_loggerProline.error(getClass().getSimpleName() + " failed : No file path returned :" + result);
+            throw new Exception("No  file path returned : " + result);
+        }
+        // in case of TSV format, we have different files to download
+        for (Object filePath : exportedFilePathList) {
+            m_filePathResult.add((String) filePath);
+            m_JMSNodeID.add((String) returnedValues.get(JMSConnectionManager.PROLINE_NODE_ID_KEY));
+        }
     }
-    
+
     private HashMap<String, Object> createParams() {
         HashMap<String, Object> params = new HashMap<>();
         params.put("file_format", m_exportFormat.toString());
@@ -161,9 +135,8 @@ public class ExportDatasetTask extends AbstractJMSTask {
                 break;
             }
             case PRIDE: {
-               
-                HashMap<String, Object> finalExportParams = new HashMap<>();
-                finalExportParams.putAll(m_exportParams);
+
+                HashMap<String, Object> finalExportParams = new HashMap<>(m_exportParams);
                 if (m_exportParams.containsKey("sample_additional")) {
                     finalExportParams.remove("sample_additional");
                     List<CVParam> additionals = (List<CVParam>) m_exportParams.get("sample_additional");
@@ -195,7 +168,7 @@ public class ExportDatasetTask extends AbstractJMSTask {
         }
 
 
-        List<Map<String, Object>> rsmIdents = new ArrayList();
+        List<Map<String, Object>> rsmIdents = new ArrayList<>();
         for (DDataset dataset : m_datasetList) {
             Map<String, Object> rsmIdent = new HashMap<>();
             rsmIdent.put("project_id", dataset.getProject().getId());

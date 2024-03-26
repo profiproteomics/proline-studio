@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import fr.proline.core.orm.msi.PtmSpecificity;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.studio.dam.tasks.DatabasePTMsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
@@ -27,8 +28,7 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.LabelFreeMSParamsCompletePanel;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.QuantPostProcessingPanel;
+import fr.proline.studio.rsmexplorer.gui.dialog.xic.*;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
@@ -59,7 +59,8 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
     private QuantExperimentalDesignTree m_expDesignTree;
     private ExportButton m_exportButton;
     private JTabbedPane m_tabbedPane;
-    private QuantPostProcessingPanel m_profilizerParamPanel;
+//    private QuantPostProcessingPanel m_profilizerParamPanel;
+    private QuantSimplifiedPostProcessingPanel m_postProcessingParamPanel;
     private JPanel m_confPanel;
     private JPanel m_lowlevelConfPanel;
 
@@ -70,11 +71,14 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
     private boolean m_displayLowLevel = false;
     private boolean m_displayQuantParam = true;
 
+    private DDatasetType.QuantitationMethodInfo m_quantMethodInfo;
+
     private static String TAB_POST_PROCESSING_TITLE = "Compute Post Processing";
     private static String TAB_LOW_LEVEL_TITLE = "Low Level";
 
-    public ExperimentalDesignPanel() {
+    public ExperimentalDesignPanel(DDatasetType.QuantitationMethodInfo quantMethodInfo) {
         super();
+        m_quantMethodInfo = quantMethodInfo;
         initComponents();
     }
 
@@ -196,11 +200,44 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
                 m_tabbedPane.remove(m_confPanel);
             } else {
                 if (m_dataset.getQuantProcessingConfig() != null) {
-                    LabelFreeMSParamsCompletePanel xicParamPanel = new LabelFreeMSParamsCompletePanel(true, false);
-                    m_confPanel.removeAll();
-                    xicParamPanel.resetScrollbar();
-                    m_confPanel.add(xicParamPanel, BorderLayout.CENTER);
-                    xicParamPanel.setQuantParams(m_dataset.getQuantProcessingConfigAsMap());
+                    switch (m_quantMethodInfo) {
+                        case FEATURES_EXTRACTION -> {
+                            Map<String,Object>  quantCfg = m_dataset.getQuantProcessingConfigAsMap();
+                            String cfgVersion = quantCfg.containsKey("config_version") ? quantCfg.get("config_version").toString() : "1.0";
+                            LabelFreeMSParamsCompletePanel xicParamPanel = new LabelFreeMSParamsCompletePanel(true, false, cfgVersion);
+                            m_confPanel.removeAll();
+                            xicParamPanel.resetScrollbar();
+                            m_confPanel.add(xicParamPanel, BorderLayout.CENTER);
+                            xicParamPanel.setQuantParams(quantCfg);
+                        }
+                        case ISOBARIC_TAGGING -> {
+                            Map<String,Object> tmtParams = m_dataset.getQuantProcessingConfigAsMap();
+                            if(tmtParams.containsKey("label_free_quant_config")) {
+                                IsobaricMethodParamsPanel tmtParamPanel = new IsobaricMethodParamsPanel(m_dataset.getQuantitationMethod(), true);
+                                m_confPanel.removeAll();
+                                m_confPanel.add(tmtParamPanel, BorderLayout.NORTH);
+                                tmtParamPanel.setQuantParams(tmtParams);
+
+                                Map<String,Object>  quantCfg = (Map<String,Object>) tmtParams.get("label_free_quant_config");
+                                String cfgVersion = quantCfg.containsKey("config_version") ? quantCfg.get("config_version").toString() : "1.0";
+                                LabelFreeMSParamsCompletePanel xicParamPanel = new LabelFreeMSParamsCompletePanel(true, false, cfgVersion);
+                                xicParamPanel.resetScrollbar();
+                                m_confPanel.add(xicParamPanel, BorderLayout.CENTER);
+                                xicParamPanel.setQuantParams(quantCfg);
+
+                            } else {
+                                IsobaricMethodParamsPanel tmtParamPanel = new IsobaricMethodParamsPanel(m_dataset.getQuantitationMethod(), true);
+                                m_confPanel.removeAll();
+                                m_confPanel.add(tmtParamPanel, BorderLayout.CENTER);
+                                tmtParamPanel.setQuantParams(tmtParams);
+                            }
+
+                        }
+                        default -> {
+                            m_confPanel.removeAll();
+                            m_confPanel.add(new JLabel("no configuration available"), BorderLayout.CENTER);
+                        }
+                    }
                 } else {
                     m_confPanel.removeAll();
                     m_confPanel.add(new JLabel("no configuration available"), BorderLayout.CENTER);
@@ -218,9 +255,9 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
                     m_displayPostProcessing = true;
                 }
                 Map<Long, String> ptmName = getPtmSpecificityNameById();
-                m_profilizerParamPanel = new QuantPostProcessingPanel(true, ptmName);//read only
-                m_refinedPanel.add(m_profilizerParamPanel, BorderLayout.CENTER);
-                m_profilizerParamPanel.setRefinedParams(m_dataset.getPostQuantProcessingConfigAsMap());
+                m_postProcessingParamPanel = new QuantSimplifiedPostProcessingPanel(true, m_dataset.getQuantitationMethod(), m_quantMethodInfo, ptmName);//read only
+                m_refinedPanel.add(m_postProcessingParamPanel, BorderLayout.CENTER);
+                m_postProcessingParamPanel.setRefinedParams(m_dataset.getPostQuantProcessingConfigAsMap());
 
             } else {
                 if (m_displayPostProcessing) {

@@ -236,7 +236,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         
         layeredPane.add(peptideMatch, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(m_infoToggleButton.getInfoPanel(), JLayeredPane.PALETTE_LAYER);  
-        layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER+1));
+        layeredPane.add(m_searchToggleButton.getSearchPanel(), Integer.valueOf(JLayeredPane.PALETTE_LAYER+1));
 
     }
     

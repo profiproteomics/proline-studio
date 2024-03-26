@@ -20,6 +20,7 @@ import fr.proline.core.orm.msi.Peaklist;
 import fr.proline.core.orm.uds.RawFile;
 import fr.proline.core.orm.uds.Run;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.RunInfoData;
@@ -34,7 +35,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import javax.swing.ImageIcon;
+import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
@@ -69,7 +70,7 @@ public class XICRunNode extends AbstractNode {
     //  Managing Listeners
     //
     /**
-     * Adds a XICRunNodeInitListener that's notified when XICRunNode has been initialize 
+     * Adds a XICRunNodeInitListener that's notified when XICRunNode has been initialized
      *
      * @param   l   the XICRunNodeInitListener
      */
@@ -79,11 +80,11 @@ public class XICRunNode extends AbstractNode {
 
     /**
      * Removes a XICRunNodeInitListener from the list that's notified when 
-     * XICRunNode has been initialize 
+     * XICRunNode has been initialized
      *
      * @param   l   the XICRunNodeInitListener
      */
-    public void removeTableModelListener(XICRunNodeInitListener l) {
+    public void removeXICRunNodeInitListener(XICRunNodeInitListener l) {
         listenerList.remove( l);
     }
 
@@ -344,11 +345,12 @@ public class XICRunNode extends AbstractNode {
     public void setRawFile(final File selectedFile, ActionListener doneCallback) {
 
         // we search the raw file in the database, if we found it, we set this one
-        // if we do not find it, we use the one choosed by the user
+        // if we do not find it, we use the one chose by the user
         setIsChanging(true);
         m_treeModel.nodeChanged(this);
 
         String searchString = selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.'));
+        String userFilePath = selectedFile.getParentFile().getAbsolutePath();
 
         final HashMap<String, RawFile> m_rawFilesMap = new HashMap<>();
         final TreeNode _this = this;
@@ -370,6 +372,18 @@ public class XICRunNode extends AbstractNode {
                     RawFile rawFile = m_rawFilesMap.values().iterator().next();
                     runInfoData.setSelectedRawFile(rawFile);
                     runInfoData.setRun(rawFile.getRuns().get(0));
+                    //verify if it's the same as user file : same path
+                    String foundPath = rawFile.getMzDbFileDirectory();
+
+                    m_logger.debug(" FOUND MZDB with path : "+foundPath+" USER Path was   "+userFilePath);
+                    if(!userFilePath.equals(foundPath)){
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "WARNING: Selected mzDB file is already registered WITH ANOTHER PATH !!\n Previous file (from "+foundPath+") will be used.","mzDB File ERROR", JOptionPane.ERROR_MESSAGE);
+                            }
+                        });
+                    }
 
                 } else {
                     runInfoData.setRawFileOnDisk(selectedFile);

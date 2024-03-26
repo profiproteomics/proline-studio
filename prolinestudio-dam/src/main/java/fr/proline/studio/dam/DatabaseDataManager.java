@@ -17,14 +17,15 @@
 package fr.proline.studio.dam;
 
 import fr.proline.core.orm.uds.*;
-import fr.proline.module.seq.DatabaseAccess;
-import fr.proline.repository.IDatabaseConnector;
+import fr.proline.core.orm.uds.repository.ExternalDbRepository;
+import fr.proline.core.orm.util.DStoreCustomPoolConnectorFactory;
+import fr.proline.repository.ProlineDatabaseType;
 import fr.proline.studio.Exceptions;
 import fr.proline.studio.dam.tasks.data.ptm.PTMDataset;
 import fr.proline.studio.dam.tasks.data.ptm.PTMDatasetPair;
 
+import javax.persistence.EntityManager;
 import java.util.*;
-
 /**
  * Static reference of the several UDS values : project, instruments ....
  * @author jm235353
@@ -32,7 +33,8 @@ import java.util.*;
 public class DatabaseDataManager  {
     
     private static DatabaseDataManager m_singleton = null;
-    
+
+    private Boolean m_checkDatabaseExists = null;
     private InstrumentConfiguration[] m_instruments;
     private FragmentationRuleSet[] m_fragmentationRuleSets;
     private FragmentationRule[] m_fragmentationRules;
@@ -41,11 +43,10 @@ public class DatabaseDataManager  {
     private UserAccount m_loggedUser;
     private String m_jdbcURL;
     private String m_jdbcDriver;
-    private HashMap<Object, Object> m_serverConnectionProperties;
     private Project m_currentProject;
 
-    private HashMap<Long, PTMDatasetPair> m_ptmDatasetSetPerDatasetId;
-    private HashMap<Long, PTMDatasetPair> m_ptmAnnotatedDatasetSetPerDatasetId;
+    private final HashMap<Long, PTMDatasetPair> m_ptmDatasetSetPerDatasetId;
+    private final HashMap<Long, PTMDatasetPair> m_ptmAnnotatedDatasetSetPerDatasetId;
 
     private HashMap<Aggregation.ChildNature, Aggregation> m_aggregationMap = null;
     
@@ -61,10 +62,10 @@ public class DatabaseDataManager  {
         return m_singleton;
     }
     
-    public void setServerConnectionProperties(HashMap<Object, Object> connProperties){
-        this.m_serverConnectionProperties = connProperties;
-    }
-    
+//    public void setServerConnectionProperties(HashMap<Object, Object> connProperties){
+//        this.m_serverConnectionProperties = connProperties;
+//    }
+//
     public void setIntruments(List<InstrumentConfiguration> l) {
         m_instruments = l.toArray(new InstrumentConfiguration[0]);
     }
@@ -183,10 +184,7 @@ public class DatabaseDataManager  {
     public void setAggregationList(List<Aggregation> l) {
         
         m_aggregationMap = new HashMap<>();
-        
-        Iterator<Aggregation> it = l.iterator();
-        while (it.hasNext()) {
-            Aggregation aggregation = it.next();
+        for (Aggregation aggregation : l) {
             m_aggregationMap.put(aggregation.getChildNature(), aggregation);
         }
     }
@@ -234,15 +232,12 @@ public class DatabaseDataManager  {
     }
 
     public void removeAllPTMDatasetsForDS(Long dsId){
-        if (m_ptmDatasetSetPerDatasetId.containsKey(dsId))
-            m_ptmDatasetSetPerDatasetId.remove(dsId);
-        if (m_ptmAnnotatedDatasetSetPerDatasetId.containsKey(dsId))
-            m_ptmAnnotatedDatasetSetPerDatasetId.remove(dsId);
+        m_ptmDatasetSetPerDatasetId.remove(dsId);
+        m_ptmAnnotatedDatasetSetPerDatasetId.remove(dsId);
     }
 
     public void removeAnnotatedPTMDatasetsForDS(Long dsId){
-        if (m_ptmAnnotatedDatasetSetPerDatasetId.containsKey(dsId))
-            m_ptmAnnotatedDatasetSetPerDatasetId.remove(dsId);
+        m_ptmAnnotatedDatasetSetPerDatasetId.remove(dsId);
     }
 
     public PTMDatasetPair getPTMDatasetSetForDS(Long dsId){
@@ -296,6 +291,7 @@ public class DatabaseDataManager  {
     public void setUdsJdbcDriver(String jdbcDriver) {
         m_jdbcDriver = jdbcDriver;
     }
+
     public String getUdsJdbcDriver() {
         return m_jdbcDriver;
     }
@@ -309,30 +305,16 @@ public class DatabaseDataManager  {
     }
     
     public boolean isSeqDatabaseExists() {
-        
-        if (m_checkDatabaseExists == null) {
-        
-            try {
-                IDatabaseConnector seqDatabaseConnector;
-                if(m_serverConnectionProperties != null && !m_serverConnectionProperties.isEmpty())
-                    seqDatabaseConnector = DatabaseAccess.getSEQDatabaseConnector(false,m_serverConnectionProperties);
-                else
-                    seqDatabaseConnector =DatabaseAccess.getSEQDatabaseConnector(false);
-                
-                if (seqDatabaseConnector == null) {
-                    m_checkDatabaseExists = Boolean.FALSE;
-                } else {
-                    m_checkDatabaseExists = Boolean.TRUE;
-                }
-            } catch (Throwable e) {
-                m_checkDatabaseExists = Boolean.FALSE;
-            }
-        }
 
+        if(m_checkDatabaseExists == null) {
+            EntityManager udsEM = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
+            ExternalDb seqDb = ExternalDbRepository.findExternalByType(udsEM, ProlineDatabaseType.SEQ);
+            m_checkDatabaseExists = (seqDb != null);
+        }
         return m_checkDatabaseExists;
     }
-    private Boolean m_checkDatabaseExists = null;
-    
+
+
     public static boolean isAdmin(UserAccount userAccount) {
         boolean isAdmin = false;
         try {

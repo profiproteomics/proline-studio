@@ -20,6 +20,7 @@ import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
 import fr.proline.mzscope.model.*;
 import fr.proline.mzscope.ui.peakels.DetectedFeaturesPanel;
+import fr.proline.mzscope.ui.peakels.PeakelsComparePanel;
 import fr.proline.mzscope.ui.peakels.PeakelsPanel;
 import fr.proline.mzscope.utils.ButtonTabComponent;
 import com.google.common.base.Strings;
@@ -79,7 +80,7 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
     private JTabbedPane featuresTabPane = null;
 
     private IRawFileViewer selectedRawFilePanel;
-    private XICExtractionPanel extractionPanel = null;
+    private ExtractionToolbar extractionPanel = null;
     private EventListenerList listenerList = new EventListenerList();
     private Map<IRawFile, List<AbstractRawFilePanel>> mapRawFilePanelRawFile;
 
@@ -95,9 +96,9 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
         this.add(getMainComponent(), BorderLayout.CENTER);
     }
 
-    private XICExtractionPanel getExtractionPanel() {
+    private ExtractionToolbar getExtractionPanel() {
         if (extractionPanel == null) {
-            extractionPanel = new XICExtractionPanel(this);
+            extractionPanel = new ExtractionToolbar(this);
         }
         return extractionPanel;
     }
@@ -115,7 +116,7 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
         return this.mainSplitPane;
     }
 
-    public JTabbedPane getFeaturesTabPane() {
+    private JTabbedPane getFeaturesTabPane() {
         if (this.featuresTabPane == null) {
             this.featuresTabPane = new JTabbedPane();
         }
@@ -139,10 +140,9 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
     private void viewersTabPaneStateChanged(ChangeEvent evt) {
         Component c = viewersTabPane.getSelectedComponent();
         if ( (c != null) &&  IRawFileViewer.class.isAssignableFrom(c.getClass())) {
+            IRawFileViewer oldViewer = this.selectedRawFilePanel;
             this.selectedRawFilePanel = (IRawFileViewer) c;
-            if (selectedRawFilePanel != null && selectedRawFilePanel.getCurrentRawfile() != null) {
-                getExtractionPanel().setDIAEnabled(selectedRawFilePanel.getCurrentRawfile().isDIAFile());
-            }
+            firePropertyChange(IMzScopeController.CURRENT_RAWFILE_VIEWER, oldViewer, this.selectedRawFilePanel);
         }
     }
 
@@ -195,11 +195,11 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
         if (!fileAlreadyOpen) {
             displayRaw(rawfile, false);
         }
-        MsnExtractionRequest params = MsnExtractionRequest.builder().setMzTolPPM(MzScopePreferences.getInstance().getMzPPMTolerance()).setMz(moz).build();
+        ExtractionRequest params = ExtractionRequest.builder(this).setMzTolPPM(MzScopePreferences.getInstance().getMzPPMTolerance()).setMz(moz).build();
         list = mapRawFilePanelRawFile.get(rawfile);
         for (final AbstractRawFilePanel p : list) {
             if (p instanceof SingleRawFilePanel) {
-                p.extractAndDisplayChromatogram(params, new Display(Display.Mode.REPLACE), new MzScopeCallback() {
+                p.extractAndDisplay(params, new Display(Display.Mode.REPLACE), new MzScopeCallback() {
                     @Override
                     public void callback(boolean success) {
                         p.displayPeakel(new BasePeakel(moz, (float) elutionTime, (float) firstScanTime, (float) lastScanTime, rawfile, 1));
@@ -381,6 +381,20 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
         }
     }
 
+    public void comparePeakels(List<IRawFile> rawfiles) {
+        boolean isDIA = isDIAFiles(rawfiles);
+        ExtractionParamsDialog dialog = new ExtractionParamsDialog(this.parentFrame, true, isDIA);
+        dialog.setExtractionParamsTitle("Compare Peakels Parameters");
+        dialog.setLocationRelativeTo(this);
+        dialog.showExtractionParamsDialog();
+        FeaturesExtractionRequest.Builder builder = dialog.getExtractionParams();
+        if (builder != null) {
+            builder.setExtractionMethod(FeaturesExtractionRequest.ExtractionMethod.DETECT_PEAKELS);
+            FeaturesExtractionRequest params = builder.build();
+            startPeakelsExtractionsAndCompare(rawfiles, params);
+        }
+    }
+
     public void extractFeaturesFromMS2(List<IRawFile> rawfiles) {
         boolean isDIA = isDIAFiles(rawfiles);
         ExtractionParamsDialog dialog = new ExtractionParamsDialog(this.parentFrame, true, isDIA);
@@ -453,6 +467,215 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
         logger.debug("Peakels extraction running ... ");
     }
 
+    private void startPeakelsExtractionsAndCompare(List<IRawFile> rawfiles, FeaturesExtractionRequest params) {
+        final PeakelsComparePanel peakelsComparePanel = new PeakelsComparePanel(this);
+        final ButtonTabComponent tabComp = addFeatureTab(getName(rawfiles), peakelsComparePanel, params.getExtractionParamsString());
+        tabComp.setWaitingState(true);
+        fireExtractionEvent(new ExtractionEvent(this, ExtractionEvent.EXTRACTION_STARTED));
+        final long start = System.currentTimeMillis();
+
+        final double maxMzPpm = 2; //JPM.TODO
+        final double maxRTDistance = 3; //JPM.TODO
+        final double maxApexDistance = 1; //JPM.TODO
+        SwingWorker worker = new SwingWorker<Integer, List<IPeakel>>() {
+            int count = 0;
+
+            List<IPeakel> listPeakel1;
+            List<IPeakel> listPeakel2;
+
+            ArrayList<PairedPeakel> pairedPeakelArrayList;
+
+            @Override
+            protected Integer doInBackground() throws Exception {
+
+                /*ArrayList<List<IPeakel>> peakelsArrayList = new ArrayList<>(2);
+
+                for (IRawFile rawFile : rawfiles) {
+                    List<IPeakel> listF = rawFile.extractPeakels(params);
+                    count++;
+                    publish(listF);
+
+                    peakelsArrayList.add(listF);
+                }*/
+
+                // do the comparison
+                IRawFile r1 = rawfiles.get(0);
+                IRawFile r2 = rawfiles.get(1);
+                //FeaturesExtractionRequest params =  FeaturesExtractionRequest.builder().build();
+
+                listPeakel1 = r1.extractPeakels(params);
+                listPeakel2 = r2.extractPeakels(params);
+
+                // for TESTING the algo : we modify peakels to add differencies
+                /*Random r = new Random(0);
+                int error = 10;
+                for (int i=0;i<error;i++) {
+                    try {
+                        int j = Math.abs(r.nextInt()) % listPeakel1.size();
+                        IPeakel peakelCur = listPeakel1.get(j);
+                        BasePeakel bp = new BasePeakel(peakelCur.getMz() * 1.01, peakelCur.getElutionTime(), peakelCur.getFirstElutionTime(), peakelCur.getLastElutionTime(), r1, 0);
+                        listPeakel1.set(j, bp);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                for (int i=0;i<error;i++) {
+                    int j = Math.abs(r.nextInt()) % listPeakel1.size();
+                    IPeakel peakelCur = listPeakel1.get(j);
+                    BasePeakel bp = new BasePeakel(peakelCur.getMz(), peakelCur.getElutionTime()*1.01f, peakelCur.getFirstElutionTime()*1.01f, peakelCur.getLastElutionTime()*1.01f, r1, 0);
+                    listPeakel1.set(j, bp);
+                }
+                for (int i=0;i<error;i++) {
+                    int j = Math.abs(r.nextInt()) % listPeakel1.size();
+                    IPeakel peakelCur = listPeakel1.get(j);
+                    BasePeakel bp = new BasePeakel(peakelCur.getMz(), peakelCur.getElutionTime(), peakelCur.getFirstElutionTime(), peakelCur.getLastElutionTime(), r1, 0);
+                    bp.setApexIntensity(peakelCur.getApexIntensity()+3);
+                    listPeakel1.set(j, bp);
+                }*/
+
+                Comparator<IPeakel> peakelComparator = new Comparator<IPeakel>() {
+                    @Override
+                    public int compare(IPeakel o1, IPeakel o2) {
+
+                        if (Math.abs(o1.getMz() - o2.getMz()) > 0) {
+                            return o1.getMz()<o2.getMz() ?  -1 : 1;
+                        }
+
+                        if (Math.abs(o1.getElutionTime() - o2.getElutionTime()) > 0) {
+                            return o1.getElutionTime()<o2.getElutionTime() ?  -1 : 1;
+                        }
+
+                        return (o1.getApexIntensity()<o2.getApexIntensity()) ? -1 : 1;
+
+
+                    }
+                };
+                listPeakel1.sort(peakelComparator);
+                listPeakel2.sort(peakelComparator);
+
+                // we must have listPeakel1.size <= listPeakel2.size
+                int size1 = listPeakel1.size();
+                int size2 = listPeakel2.size();
+
+                boolean listExchanged = size1>size2;
+                if (listExchanged) {
+                    List<IPeakel> swap = listPeakel1;
+                    listPeakel1 = listPeakel2;
+                    listPeakel2 = swap;
+                    int swapSize = size1;
+                    size1 = size2;
+                    size2 = swapSize;
+                }
+
+                pairedPeakelArrayList = new ArrayList<>(size2);
+
+
+                HashSet<IPeakel> pairedInListPeakel2Set = new HashSet<>();
+
+                // pair peaks between two lists.
+                int minJ = 0;
+
+                for (int i=0;i<size1;i++) {
+
+                    IPeakel p1 = listPeakel1.get(i);
+                    double bestDistance = Double.MAX_VALUE;
+                    int bestPairingJ = -1;
+
+
+                    for (int j = minJ; j < size2; j++) {
+
+                        IPeakel p2 = listPeakel2.get(j);
+
+
+                        double mzDistance = Math.abs(p1.getMz() - p2.getMz());
+                        double ppm = (mzDistance/p1.getMz())*1000000;
+                        if (ppm > maxMzPpm) {
+                            if (p1.getMz()>p2.getMz()) {
+                                minJ = j;
+                            } else {
+                                break;
+                            }
+                        } else {
+                            double rtDistance = Math.abs(p1.getElutionTime() - p2.getElutionTime());
+                            if (rtDistance > maxRTDistance) {
+                                continue;
+                            }
+
+
+                            double distance = Math.pow(ppm/maxMzPpm, 2) + Math.pow(rtDistance / maxRTDistance, 2);
+                            if (distance < bestDistance) {
+                                bestDistance = distance;
+                                bestPairingJ = j;
+                                minJ = j;
+                            }
+                        }
+
+                    }
+
+                    if (bestPairingJ != -1) {
+                        IPeakel pairingPeakel = listPeakel2.get(bestPairingJ);
+
+                        PairedPeakel.PairedPeakelStatus status = PairedPeakel.PairedPeakelStatus.PAIRING;
+
+                        double apexDistance = Math.abs(p1.getApexIntensity() - listPeakel2.get(bestPairingJ).getApexIntensity());
+                        if (apexDistance > maxApexDistance) {
+                            status = PairedPeakel.PairedPeakelStatus.PAIRING_APEX_PROBLEM;
+                        }
+                        if (pairedInListPeakel2Set.contains(pairingPeakel)) {
+                            // multipairing
+                            status = PairedPeakel.PairedPeakelStatus.MULTI_PAIRING;
+                        }
+
+                        PairedPeakel pairedPeakel = new PairedPeakel();
+                        pairedPeakel.set(p1, pairingPeakel, status);
+                        pairedPeakelArrayList.add(pairedPeakel);
+
+                        pairedInListPeakel2Set.add(pairingPeakel);
+
+                    } else {
+                        PairedPeakel pairedPeakel = new PairedPeakel();
+                        pairedPeakel.set(p1, null, PairedPeakel.PairedPeakelStatus.NO_PAIRING);
+                        pairedPeakelArrayList.add(pairedPeakel);
+
+                    }
+                }
+
+                for (int j=0;j<size2;j++) {
+                    IPeakel p2 = listPeakel2.get(j);
+                    if (!pairedInListPeakel2Set.contains(p2)) {
+                        PairedPeakel pairedPeakel = new PairedPeakel();
+                        pairedPeakel.set(null, p2, PairedPeakel.PairedPeakelStatus.NO_PAIRING);
+                        pairedPeakelArrayList.add(pairedPeakel);
+                    }
+                }
+
+                Collections.sort(pairedPeakelArrayList);
+
+                return count;
+            }
+
+            @Override
+            protected void process(List<List<IPeakel>> list) {
+                List<IPeakel> listF = list.stream().flatMap(l -> l.stream()).collect(Collectors.toList());
+                logger.info("{} peakels extracted in {}", listF.size(), (System.currentTimeMillis() - start) / 1000.0);
+
+            }
+
+            @Override
+            protected void done() {
+                logger.info("All peakels extracted in {}", (System.currentTimeMillis() - start) / 1000.0);
+                featuresTabPane.setSelectedComponent(peakelsComparePanel);
+                tabComp.setWaitingState(false);
+
+                peakelsComparePanel.setPeakels(pairedPeakelArrayList);
+
+                fireExtractionEvent(new ExtractionEvent(this, ExtractionEvent.EXTRACTION_DONE));
+            }
+        };
+
+        worker.execute();
+        logger.debug("Peakels extraction running ... ");
+    }
 
 
     private void startFeaturesExtractions(List<IRawFile> rawfiles, FeaturesExtractionRequest params) {
@@ -610,7 +833,7 @@ public class MzScopePanel extends JPanel implements IMzScopeController {
         if ((rawFiles != null) && rawFiles.size() > 0) {
             PropertiesPanel propertiesPanel = new PropertiesPanel(rawFiles);
             String title = rawFiles.size() == 1 ? "Properties" : new StringBuilder().append("Properties ").append(rawFiles.get(0).getName()).toString();
-            addTab(viewersTabPane, title, propertiesPanel, "Raw file properties panel");
+            addTab(viewersTabPane, title, propertiesPanel, "mzDb file properties panel");
             return propertiesPanel;
         }
         return null;

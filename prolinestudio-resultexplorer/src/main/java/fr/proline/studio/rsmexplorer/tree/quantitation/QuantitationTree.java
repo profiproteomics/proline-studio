@@ -246,8 +246,6 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
                     QuantifyAction quantifyAction = new QuantifyAction(this);
                     m_rootActions.add(quantifyAction);
-                    //CreateXICAction createXICAction = new CreateQuantitationAction(false);
-                    //m_rootActions.add(createXICAction);
 
                     AddQuantitationFolderAction addFolderAction = new AddQuantitationFolderAction(this);
                     m_rootActions.add(addFolderAction);

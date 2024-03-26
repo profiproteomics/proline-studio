@@ -138,38 +138,38 @@ public class Export2MzIdentMLParamPanel extends JPanel {
         m_parameterList = new ParameterList(Export2MzIdentMLDialog.MZIDENT_SETTINGS_KEY);
                 
         m_contactFirstName = new JTextField(20);
-        StringParameter contactFirstNameParameter = new StringParameter(m_contact_FN_key, "Contact First Name", m_contactFirstName, "", new Integer(2), null);
+        StringParameter contactFirstNameParameter = new StringParameter(m_contact_FN_key, "Contact First Name", m_contactFirstName, "", Integer.valueOf(2), null);
         contactFirstNameParameter.setUsed(false);
         contactFirstNameParameter.setCompulsory(true);
         m_parameterList.add(contactFirstNameParameter);
         
         m_contactLastName = new JTextField(20);
-        StringParameter contactLastNameParameter = new StringParameter(m_contact_LN_key, "Contact Last Name", m_contactLastName, "", new Integer(2), null);
+        StringParameter contactLastNameParameter = new StringParameter(m_contact_LN_key, "Contact Last Name", m_contactLastName, "", Integer.valueOf(2), null);
         contactLastNameParameter.setUsed(false);
         contactLastNameParameter.setCompulsory(true);
         m_parameterList.add(contactLastNameParameter);
         
         m_contactURL  = new JTextField(20);
-        StringParameter contactURLParameter = new StringParameter(m_contact_URL_key, "Contact URL", m_contactURL, "", new Integer(5), null);
+        StringParameter contactURLParameter = new StringParameter(m_contact_URL_key, "Contact URL", m_contactURL, "", Integer.valueOf(5), null);
         contactURLParameter.setUsed(false);
         contactURLParameter.setCompulsory(false);
         m_parameterList.add(contactURLParameter);
         
         m_contactEmail  = new JTextField(20);
-        StringParameter contactEmailParameter = new StringParameter(m_contact_Mail_key, "Contact eMail", m_contactEmail, "", new Integer(5), null);
+        StringParameter contactEmailParameter = new StringParameter(m_contact_Mail_key, "Contact eMail", m_contactEmail, "", Integer.valueOf(5), null);
         contactEmailParameter.setUsed(false);
         contactEmailParameter.setCompulsory(false);
         m_parameterList.add(contactEmailParameter);
         
         
         m_orgName = new JTextField(20);
-        StringParameter orgNameParameter = new StringParameter(m_org_name_key, "Organization Name", m_orgName, "", new Integer(2), null);
+        StringParameter orgNameParameter = new StringParameter(m_org_name_key, "Organization Name", m_orgName, "", Integer.valueOf(2), null);
         orgNameParameter.setUsed(false);
         orgNameParameter.setCompulsory(true);
         m_parameterList.add(orgNameParameter);
         
         m_orgURL  = new JTextField(20);
-        StringParameter orgURLParameter = new StringParameter(m_org_url_key, "Organization URL", m_orgURL, "", new Integer(5), null);
+        StringParameter orgURLParameter = new StringParameter(m_org_url_key, "Organization URL", m_orgURL, "", Integer.valueOf(5), null);
         orgURLParameter.setUsed(false);
         orgURLParameter.setCompulsory(false);
         m_parameterList.add(orgURLParameter);

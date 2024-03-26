@@ -107,7 +107,7 @@ public class DatabaseAdminTask extends AbstractDatabaseTask {
             
             FragmentationRuleSet frs = new FragmentationRuleSet();
             frs.setName(m_name);
-            frs.setFragmentationRules(new HashSet(m_fragmentationRules));
+            frs.setFragmentationRules(new HashSet<>(m_fragmentationRules));
                
             entityManagerUDS.persist(frs);
             reloadFragmentationRuleSets(entityManagerUDS);

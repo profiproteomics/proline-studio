@@ -19,13 +19,9 @@ package fr.proline.studio.pattern;
 import fr.proline.core.orm.msi.ResultSet;
 import java.util.HashMap;
 
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.studio.gui.SplittedPanelContainer;
-import fr.proline.studio.pattern.xic.DataboxChildFeature;
-import fr.proline.studio.pattern.xic.DataboxExperimentalDesign;
-import fr.proline.studio.pattern.xic.DataboxMapAlignment;
-import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
-import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
-import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
+import fr.proline.studio.pattern.xic.*;
 import fr.proline.studio.rsmexplorer.DataBoxViewerManager;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Image;
@@ -36,7 +32,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
-import fr.proline.studio.pattern.xic.DataboxXicParentsPeptideIon;
 
 /**
  *
@@ -44,6 +39,7 @@ import fr.proline.studio.pattern.xic.DataboxXicParentsPeptideIon;
  */
 public class WindowBoxFactory {
 
+    //VDS TODO : use QuantMethodInfo instead odf isXic
     public static WindowBox getUserDefinedWindowBox(String dataName, String windowName, AbstractDataBox databox, boolean isDecoy, boolean isXIC, char windowType) {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = databox;
@@ -308,7 +304,6 @@ public class WindowBoxFactory {
         AbstractDataBox[] boxes = new AbstractDataBox[4];
         boxes[0] = new DataBoxPTMClusters(viewSites, isAnnotated);
         boxes[0].setDataName(dataName);
-        ((DataBoxPTMClusters) boxes[0]).setXicResult(false);
         boxes[1] = new DataBoxPTMPeptidesGraphic();
         boxes[2] = new DataBoxPTMPeptides(false, false);
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
@@ -332,7 +327,7 @@ public class WindowBoxFactory {
         AbstractDataBox[] boxes = new AbstractDataBox[7];
         boxes[0] = new DataBoxPTMClusters(viewSites, isAnnotated);
         boxes[0].setDataName(dataName);
-        ((DataBoxPTMClusters) boxes[0]).setXicResult(true);
+        ((DataBoxPTMClusters) boxes[0]).setQuantitationMethodInfo(DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION);
         boxes[1] = new DataBoxPTMPeptides(true, false);
         boxes[2] = new DataBoxPTMPeptides(false,true);
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);        
@@ -497,82 +492,154 @@ public class WindowBoxFactory {
      *
      * @param dataName
      * @param fullName
-     * @param xicMode
+     * @param methodInfo : {@link fr.proline.core.orm.uds.dto.DDatasetType.QuantitationMethodInfo} used for this dataset
      * @return
      */
-    public static WindowBox getXicQuantProteinSetWindowBox(String dataName, String fullName, boolean xicMode, boolean aggregatedQuantiPeptideIon) {
+    public static WindowBox getQuantificationProteinSetWindowBox(String dataName, String fullName, DDatasetType.QuantitationMethodInfo methodInfo, boolean aggregatedQuantiPeptideIon) {
 
-        // create boxes
-        int nbBoxes = xicMode ? ((aggregatedQuantiPeptideIon) ? 7 : 6) : 3;
+    // create boxes
+        int nbBoxes;
+        IconManager.IconType iconType;
+
+        switch (methodInfo) {
+            case SPECTRAL_COUNTING -> {
+                nbBoxes = 3;
+                iconType = IconManager.IconType.QUANT_XIC;
+            }
+            case ISOBARIC_TAGGING ->  {
+                if(aggregatedQuantiPeptideIon){
+                    nbBoxes=5;
+                    iconType = IconManager.IconType.QUANT_AGGREGATION_TMT;
+                }else {
+                    nbBoxes = 5;
+                    iconType = IconManager.IconType.QUANT_TMT;
+                }
+            }
+            case FEATURES_EXTRACTION -> {
+                if(aggregatedQuantiPeptideIon){
+                    nbBoxes=7;
+                    iconType = IconManager.IconType.QUANT_AGGREGATION_XIC;
+                }
+                else {
+                    nbBoxes = 6;
+                    iconType = IconManager.IconType.QUANT_XIC;
+                }
+            }
+
+            default -> {//should not occur !
+                nbBoxes = (aggregatedQuantiPeptideIon) ? 7 : 6;
+                iconType = IconManager.IconType.QUANT_XIC;
+            }
+        }
 
         AbstractDataBox[] boxes = new AbstractDataBox[nbBoxes];
         boxes[0] = new DataboxXicProteinSet();
         boxes[0].setDataName(dataName);
-        ((DataboxXicProteinSet) boxes[0]).setXICMode(xicMode);
+        ((DataboxXicProteinSet) boxes[0]).setQuantitationMethodInfo(methodInfo);
         boxes[1] = new DataboxXicPeptideSet();
-        ((DataboxXicPeptideSet) boxes[1]).setXICMode(xicMode);        
+        ((DataboxXicPeptideSet) boxes[1]).setQuantitationMethodInfo(methodInfo);
         boxes[2] = new DataboxMultiGraphics(false,true,true);
         ((DataboxMultiGraphics)boxes[2]).setHideButton(true);
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
-        if (xicMode) {
+        if (!methodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING)) {
             boxes[3] = new DataboxXicPeptideIon();
-            ((DataboxXicPeptideIon) boxes[3]).setXICMode(xicMode);
+            ((DataboxXicPeptideIon) boxes[3]).setQuantitationMethodInfo(methodInfo);
             boxes[3].setLayout(SplittedPanelContainer.PanelLayout.VERTICAL);
 
             if (aggregatedQuantiPeptideIon) {
-                boxes[4] = new DataboxXicParentsPeptideIon();
-                boxes[4].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
-                boxes[5] = new DataboxChildFeature();
-                boxes[5].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
-                boxes[6] = new DataboxMultiGraphics(false, false);
-                boxes[6].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+                int  nb = 4;
+                if (!methodInfo.equals(DDatasetType.QuantitationMethodInfo.ISOBARIC_TAGGING)) {
+                    boxes[nb] = new DataboxXicParentsPeptideIon();
+                    boxes[nb].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+                    nb++;
+                    boxes[nb] = new DataboxChildFeature();
+                    boxes[nb].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+                    nb++;
+                    boxes[nb] = new DataboxMultiGraphics(false, false);
+                    boxes[nb].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+                } else {
+                    boxes[nb] = new DataboxXicReporterIon();
+                }
             } else {
-
-                boxes[4] = new DataboxChildFeature();
-                boxes[4].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
-                boxes[5] = new DataboxMultiGraphics(false, false);
-                boxes[5].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+                if (methodInfo.equals(DDatasetType.QuantitationMethodInfo.ISOBARIC_TAGGING)) {
+                    boxes[4] = new DataboxXicReporterIon();
+//                    boxes[4].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+                } else{
+                    boxes[4] = new DataboxChildFeature();
+                    boxes[4].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+                    boxes[5] = new DataboxMultiGraphics(false, false);
+                    boxes[5].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+                }
             }
         }
 
-        IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
-        if (!xicMode) {
-            iconType = IconManager.IconType.QUANT_SC;
-        }
         return new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
 
-    public static WindowBox getXicQuantPeptideSetWindowBox(String dataName, String fullName, boolean xicMode) {
-
-        // create boxes
-        int nbBoxes = xicMode ? 2 : 1;
+    public static WindowBox getQuantificationPeptideSetWindowBox(String dataName, String fullName, DDatasetType.QuantitationMethodInfo methodInfo) {
+        int nbBoxes = 0;
+        IconManager.IconType iconType;
+        switch (methodInfo) {
+            case SPECTRAL_COUNTING -> {
+                nbBoxes = 1;
+                iconType = IconManager.IconType.QUANT_SC;
+            }
+            case FEATURES_EXTRACTION, RESIDUE_LABELING -> {
+                nbBoxes = 2;
+                iconType = IconManager.IconType.QUANT_XIC;
+            }
+            case ISOBARIC_TAGGING -> {
+                nbBoxes = 2;
+                iconType = IconManager.IconType.QUANT_TMT;
+            }
+            default ->  throw new RuntimeException("Unsupported Quant method "+methodInfo); //should  not occur
+        }
         AbstractDataBox[] boxes = new AbstractDataBox[nbBoxes];
         boxes[0] = new DataboxXicPeptideSet();
         boxes[0].setDataName(dataName);
-        ((DataboxXicPeptideSet) boxes[0]).setXICMode(xicMode);
-        if (xicMode) {
+        ((DataboxXicPeptideSet) boxes[0]).setQuantitationMethodInfo(methodInfo);;
+        if (nbBoxes>1) {
             boxes[1] = new DataboxXicPeptideIon();
-            ((DataboxXicPeptideIon) boxes[1]).setXICMode(xicMode);
+            ((DataboxXicPeptideIon) boxes[1]).setQuantitationMethodInfo(methodInfo);
         }
 
-        IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
-        if (!xicMode) {
-            iconType = IconManager.IconType.QUANT_SC;
+        return new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+    }
+
+    public static WindowBox getQuantificationReporterIonWindowBox(String dataName, String fullName, DDatasetType.QuantitationMethodInfo methodInfo) {
+
+        // create boxes
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        boxes[0] = new DataboxXicReporterIon();
+        boxes[0].setDataName(dataName);
+        ((DataboxXicReporterIon) boxes[0]).setQuantitationMethodInfo(methodInfo);
+
+        IconManager.IconType iconType;
+        switch (methodInfo) {
+            case SPECTRAL_COUNTING -> iconType = IconManager.IconType.QUANT_SC;
+            case FEATURES_EXTRACTION -> iconType = IconManager.IconType.QUANT_XIC;
+            case ISOBARIC_TAGGING -> iconType = IconManager.IconType.QUANT_TMT;
+            case RESIDUE_LABELING -> iconType = IconManager.IconType.QUANT_XIC;
+            default ->  throw new RuntimeException("Unsupported Quant method "+methodInfo);//should  not occur
         }
         return new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
 
-    public static WindowBox getXicQuantPeptideIonWindowBox(String dataName, String fullName, boolean xicMode) {
+    public static WindowBox getQuantificationPeptideIonWindowBox(String dataName, String fullName, DDatasetType.QuantitationMethodInfo methodInfo) {
 
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataboxXicPeptideIon();
         boxes[0].setDataName(dataName);
-        ((DataboxXicPeptideIon) boxes[0]).setXICMode(xicMode);
+        ((DataboxXicPeptideIon) boxes[0]).setQuantitationMethodInfo(methodInfo);
 
-        IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
-        if (!xicMode) {
-            iconType = IconManager.IconType.QUANT_SC;
+        IconManager.IconType iconType;
+        switch (methodInfo) {
+            case SPECTRAL_COUNTING -> iconType = IconManager.IconType.QUANT_SC;
+            case FEATURES_EXTRACTION -> iconType = IconManager.IconType.QUANT_XIC;
+            case ISOBARIC_TAGGING -> iconType = IconManager.IconType.QUANT_TMT;
+            case RESIDUE_LABELING -> iconType = IconManager.IconType.QUANT_XIC;
+            default ->  throw new RuntimeException("Unsupported Quant method "+methodInfo);//should  not occur
         }
         return new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
@@ -586,12 +653,13 @@ public class WindowBoxFactory {
         return winBox;
     }
 
-    public static WindowBox getExperimentalDesignWindowBox(String dataName, String fullName) {
+    public static WindowBox getExperimentalDesignWindowBox(String dataName, String fullName, DDatasetType.QuantitationMethodInfo methodInfo) {
 
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataboxExperimentalDesign();
         boxes[0].setDataName(dataName);
+        ((DataboxExperimentalDesign) boxes[0]).setQuantitationMethodInfo(methodInfo);
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
         return new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }

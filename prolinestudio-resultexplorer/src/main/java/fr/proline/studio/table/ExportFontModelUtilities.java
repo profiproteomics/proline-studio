@@ -63,17 +63,17 @@ public class ExportFontModelUtilities extends fr.proline.studio.export.ExportMod
 
                         if (nTerOrCterModification && aminoAcidModification) {
 
-                            ExportFontData newSubStringFont = new ExportFontData(i, i + 1, HSSFColor.VIOLET.index);
+                            ExportFontData newSubStringFont = new ExportFontData(i, i + 1, HSSFColor.HSSFColorPredefined.VIOLET.getIndex());
                             ExportFontDatas.add(newSubStringFont);
 
                         } else if (nTerOrCterModification) {
 
-                            ExportFontData newSubStringFont = new ExportFontData(i, i + 1, HSSFColor.GREEN.index);
+                            ExportFontData newSubStringFont = new ExportFontData(i, i + 1, HSSFColor.HSSFColorPredefined.GREEN.getIndex());
                             ExportFontDatas.add(newSubStringFont);
 
                         } else if (aminoAcidModification) {
 
-                            ExportFontData newSubStringFont = new ExportFontData(i, i + 1, HSSFColor.ORANGE.index);
+                            ExportFontData newSubStringFont = new ExportFontData(i, i + 1, HSSFColor.HSSFColorPredefined.ORANGE.getIndex());
                             ExportFontDatas.add(newSubStringFont);
                         }
 
@@ -107,13 +107,13 @@ public class ExportFontModelUtilities extends fr.proline.studio.export.ExportMod
                 stop = start + id.length();
                 switch (status) {
                     case ARCHIVED:
-                        colorIndex = HSSFColor.GREY_50_PERCENT.index;
+                        colorIndex = HSSFColor.HSSFColorPredefined.GREY_50_PERCENT.getIndex();
                         break;
                     case INACTIVE:
-                        colorIndex = HSSFColor.BLUE.index;
+                        colorIndex = HSSFColor.HSSFColorPredefined.BLUE.getIndex();
                         break;
                     default:
-                        colorIndex = HSSFColor.BLACK.index;
+                        colorIndex = HSSFColor.HSSFColorPredefined.BLACK.getIndex();
                         break;
                 }
                 exportFontDatas.add(new ExportFontData(start, stop, colorIndex));

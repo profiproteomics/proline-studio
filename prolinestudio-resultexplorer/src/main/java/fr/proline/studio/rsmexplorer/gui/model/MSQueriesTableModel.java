@@ -30,8 +30,7 @@ import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.pattern.MsQueryInfoRsm;
 import fr.proline.studio.pattern.MsQueryInfoRset;
-import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
@@ -45,6 +44,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 
 /**
@@ -250,21 +250,21 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
             case COLTYPE_MSQUERY_FIRST_SCAN:
             case COLTYPE_MSQUERY_LAST_SCAN:
             {
-                renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class), JLabel.RIGHT);
                 break;
             }
             case COLTYPE_MSQUERY_MOZ:{
-                renderer = new DoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4 );
+                renderer = new DoubleRenderer( new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 4 );
                 break;
             }
             case COLTYPE_MSQUERY_FIRST_TIME:
             case COLTYPE_MSQUERY_LAST_TIME:    
             {
-                renderer = new FloatRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4 );
+                renderer = new FloatRenderer( new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 4 );
                 break;
             }
             case COLTYPE_MSQUERY_SPECTRUM_TITLE: {
-                renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
+                renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.LEFT);
                 break;
             }
         }

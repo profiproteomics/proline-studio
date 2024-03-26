@@ -25,7 +25,7 @@ import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.TablePopupMenu;
-import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
@@ -322,6 +322,10 @@ public class UserAccountsPanel extends JPanel {
         
         @Override
         public Class getColumnClass(int col) {
+
+            if (col == COLTYPE_NAME)
+                    return UserAccount.class;
+
             return String.class;
         }
         
@@ -345,7 +349,7 @@ public class UserAccountsPanel extends JPanel {
             
             switch (columnIndex) {
                 case COLTYPE_NAME: {
-                    return user.getLogin();
+                    return user;
                 }
                 case COLTYPE_GROUP: {
                     return DatabaseDataManager.isAdmin(user) ? "Admin" : "User";
@@ -380,7 +384,7 @@ public class UserAccountsPanel extends JPanel {
                 break;
             }
             case COLTYPE_GROUP: {
-                renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
+                renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.LEFT);
                 break;
             }
 
@@ -419,8 +423,8 @@ public class UserAccountsPanel extends JPanel {
                 label.setText(userAccount.getLogin());
                 
                 boolean isAdmin = DatabaseDataManager.isAdmin(userAccount);
-                
-                
+
+
                 label.setIcon(IconManager.getIcon(isAdmin ? IconManager.IconType.USER_ADMIN : IconManager.IconType.USER));
                 //userAccount.get
             }

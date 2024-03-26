@@ -25,6 +25,7 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -42,7 +43,7 @@ import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.SecondAxisTableModelInterface;
 import fr.proline.studio.pattern.extradata.GraphicExtraData;
 import fr.proline.studio.rsmexplorer.gui.xic.XICComparePeptideTableModel;
-import fr.proline.studio.rsmexplorer.gui.xic.XicAbundanceProteinTableModel;
+import fr.proline.studio.rsmexplorer.gui.xic.SecondAxisProteinAbundanceTableModel;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -61,7 +62,8 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     private List<DMasterQuantPeptide> m_masterQuantPeptideList;
     private QuantChannelInfo m_quantChannelInfo;
 
-    private boolean m_isXICMode = true;
+    private DDatasetType.QuantitationMethodInfo m_quantMethodInfo;
+
     //Display only a subList of peptides instances not all from Peptide/ProteinSet
     private boolean m_displayPeptidesSubList = false;
     
@@ -73,7 +75,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
 
     public DataboxXicPeptideSet(boolean displayPeptidesSubList) {
         super((displayPeptidesSubList ? DataboxType.DataboxXicPeptideSetShortList : DataboxType.DataboxXicPeptideSet), DataboxStyle.STYLE_XIC);
-
+        m_quantMethodInfo = DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION;
         m_displayPeptidesSubList = displayPeptidesSubList;
 
         // Name of this databox
@@ -100,7 +102,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         outParameter.addParameter(ResultSummary.class);
         
         outParameter.addParameter(DMasterQuantPeptide.class);
-        outParameter.addParameter(XicMode.class);
+        outParameter.addParameter(DDatasetType.QuantitationMethodInfo.class);
         
         outParameter.addParameter(QuantChannelInfo.class);
         outParameter.addParameter(DPeptideMatch.class);
@@ -117,15 +119,11 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
 
     }
 
-    public boolean isXICMode() {
-        return m_isXICMode;
-    }
-
-    public void setXICMode(boolean isXICMode) {
-        m_isXICMode = isXICMode;
-        m_style = (m_isXICMode) ? DataboxStyle.STYLE_XIC : DataboxStyle.STYLE_SC;
+    public void setQuantitationMethodInfo(DDatasetType.QuantitationMethodInfo quantMethodInfo) {
+        m_quantMethodInfo = quantMethodInfo;
+        m_style = (m_quantMethodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING)) ? DataboxStyle.STYLE_SC : DataboxStyle.STYLE_XIC;
         if (getDataBoxPanelInterface() != null) {
-            getDataBoxPanelInterface().addSingleValue(new XicMode((isXICMode)));
+            getDataBoxPanelInterface().addSingleValue(m_quantMethodInfo);
         }
     }
 
@@ -147,12 +145,12 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
 
     @Override
     public void createPanel() {
-        XicPeptidePanel p = new XicPeptidePanel(false, m_isXICMode);
+        XicPeptidePanel p = new XicPeptidePanel(false, m_quantMethodInfo);
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);
 
-        getDataBoxPanelInterface().addSingleValue(new XicMode((m_isXICMode)));
+        getDataBoxPanelInterface().addSingleValue(m_quantMethodInfo);
     }
 
     @Override
@@ -175,7 +173,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                 return;
             }
 
-            m_isXICMode = ((XicMode) m_previousDataBox.getData(XicMode.class)).isXicMode();
+            m_quantMethodInfo = (DDatasetType.QuantitationMethodInfo) m_previousDataBox.getData(DDatasetType.QuantitationMethodInfo.class);
             m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(QuantChannelInfo.class);
             if (m_quantChannelInfo == null) {
                 throw new RuntimeException("Xic PeptideSet : Can't get QuantChannelInfo from previous databox");
@@ -204,14 +202,14 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
             public void run(boolean success, final long taskId, SubTask subTask, boolean finished) {
                 if (subTask == null) {
                     if (!allPeptides && m_quantChannelInfo != null) {
-                        ((XicPeptidePanel) getDataBoxPanelInterface()).setData(taskId, m_masterQuantProteinSet, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideList, m_isXICMode, finished);
+                        ((XicPeptidePanel) getDataBoxPanelInterface()).setData(taskId, m_masterQuantProteinSet, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideList, m_quantMethodInfo, finished);
 
                     } else {
 
                         m_quantChannelInfo = new QuantChannelInfo(m_dataset);
                         getDataBoxPanelInterface().addSingleValue(m_quantChannelInfo);
 
-                        ((XicPeptidePanel) getDataBoxPanelInterface()).setData(taskId, m_masterQuantProteinSet, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideList, m_isXICMode, finished);
+                        ((XicPeptidePanel) getDataBoxPanelInterface()).setData(taskId, m_masterQuantProteinSet, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideList, m_quantMethodInfo, finished);
 
                     }
                 } else {
@@ -232,14 +230,16 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
 
         // ask asynchronous loading of data
         m_masterQuantPeptideList = new ArrayList<>();
+        boolean isNotSC = !m_quantMethodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING);
+        //VDS TODO ? change DatabaseLoadXicMasterQuantTask to take QuantitationMethodInfo instead of boolean.
         DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
         if (allPeptides) {
-            task.initLoadPeptides(getProjectId(), m_dataset, m_masterQuantPeptideList, isXICMode());
+            task.initLoadPeptides(getProjectId(), m_dataset, m_masterQuantPeptideList, isNotSC);
         } else if (pepInstances != null && !pepInstances.isEmpty()) {
             List<Long> parentPepInstanceIdsL = pepInstances.stream().map(pi -> pi.getId()).collect(Collectors.toList());
-            task.initLoadPeptides(getProjectId(), m_dataset, parentPepInstanceIdsL.toArray(new Long[parentPepInstanceIdsL.size()]), m_masterQuantPeptideList, isXICMode());
+            task.initLoadPeptides(getProjectId(), m_dataset, parentPepInstanceIdsL.toArray(new Long[parentPepInstanceIdsL.size()]), m_masterQuantPeptideList, isNotSC);
         } else {
-            task.initLoadPeptides(getProjectId(), m_dataset, m_masterQuantProteinSet, m_masterQuantPeptideList, isXICMode());
+            task.initLoadPeptides(getProjectId(), m_dataset, m_masterQuantProteinSet, m_masterQuantPeptideList, isNotSC);
         }
         registerTask(task);
 
@@ -286,16 +286,16 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                 if (parameterType.equals(CrossSelectionInterface.class)) {
                     return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
                 }
-                if (parameterType.equals(XicMode.class)) {
-                    return new XicMode(isXICMode());
+                if (parameterType.equals(DDatasetType.QuantitationMethodInfo.class)) {
+                    return m_quantMethodInfo;
                 }
                 
                 if (parameterType.equals(SecondAxisTableModelInterface.class)) {
                     if (m_quantChannelInfo == null || m_masterQuantProteinSet == null) {
                         return null;
                     }
-                    XicAbundanceProteinTableModel protTableModel = new XicAbundanceProteinTableModel();
-                    protTableModel.setData(m_quantChannelInfo.getQuantChannels(), m_masterQuantProteinSet);
+                    SecondAxisProteinAbundanceTableModel protTableModel = new SecondAxisProteinAbundanceTableModel();
+                    protTableModel.setData(m_quantChannelInfo.getQuantChannels(), m_masterQuantProteinSet, m_quantMethodInfo);
                     protTableModel.setName("Protein");
                     return protTableModel;
                 }
@@ -345,7 +345,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     @Override
     public Object getExtraData(Class parameterType) {
         if (parameterType.equals(ExtendedTableModelInterface.class)) {
-            return new GraphicExtraData(m_keepZoom, new Double(0)); // Keep Zoom - minimal value of min Y value
+            return new GraphicExtraData(m_keepZoom, Double.valueOf(0)); // Keep Zoom - minimal value of min Y value
         }
         
         return super.getExtraData(parameterType);
@@ -377,7 +377,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
 
                 DMasterQuantPeptide quantPeptide = m_masterQuantPeptideList.get(i);
                 XICComparePeptideTableModel peptideData = new XICComparePeptideTableModel();
-                peptideData.setData(m_quantChannelInfo.getQuantChannels(), quantPeptide, m_isXICMode);
+                peptideData.setData(m_quantChannelInfo.getQuantChannels(), quantPeptide, m_quantMethodInfo);
                 list.add(peptideData);
             }
         }

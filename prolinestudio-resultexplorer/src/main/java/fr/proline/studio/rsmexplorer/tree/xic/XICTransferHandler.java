@@ -16,8 +16,7 @@
  */
 package fr.proline.studio.rsmexplorer.tree.xic;
 
-import fr.proline.core.orm.uds.Aggregation;
-import fr.proline.core.orm.uds.Dataset;
+
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.parameter.BooleanParameter;
@@ -26,7 +25,6 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.dnd.DropTargetDragEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -49,16 +47,28 @@ import org.slf4j.LoggerFactory;
  */
 public class XICTransferHandler extends AbstractTreeTransferHandler {
 
-    private Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-    private ParameterList m_parameterList;
-    private BooleanParameter m_parameter;
+    private final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+    private final ParameterList m_parameterList;
+    private final BooleanParameter m_parameter;
     private static final String GENERAL_APPLICATION_SETTINGS = "General Application Settings";
-    private AbstractTree m_tree;
-    private boolean m_restrictToDnDToItself;
+    protected final AbstractTree m_tree;
+    private final boolean m_restrictToDnDToItself;
+
+    private boolean m_forceNoImport = false;
+
+    public XICTransferHandler(boolean isSelectionTree, boolean forceNoImport, AbstractTree tree) {
+        this(isSelectionTree, tree, false);
+        m_forceNoImport = forceNoImport;
+    }
 
     public XICTransferHandler(boolean isSelectionTree, AbstractTree tree) {
         this(isSelectionTree, tree, false);
     }
+    public XICTransferHandler(boolean isSelectionTree, boolean forceNoImport, AbstractTree tree, boolean restrictToDnDToItself) {
+        this(isSelectionTree, tree, restrictToDnDToItself);
+        m_forceNoImport = forceNoImport;
+    }
+
     public XICTransferHandler(boolean isSelectionTree, AbstractTree tree, boolean restrictToDnDToItself) {
         super(isSelectionTree, tree.getId());
         m_tree = tree;
@@ -72,7 +82,8 @@ public class XICTransferHandler extends AbstractTreeTransferHandler {
 
     @Override
     public boolean canImport(TransferHandler.TransferSupport support) {
-
+        if(m_forceNoImport)
+            return false;
 
         if (!m_isIdentificationSelectionTree) {
 
@@ -181,7 +192,7 @@ public class XICTransferHandler extends AbstractTreeTransferHandler {
             childIndex = dropRSMNode.getChildCount();
         }
 
-        ArrayList<DataSetNode> datasetList = (ArrayList<DataSetNode>) data.getDatasetList();
+        ArrayList<DataSetNode> datasetList = data.getDatasetList();
         if (datasetList != null) {
 
             m_tree.expandNodeIfNeeded(dropRSMNode);
@@ -372,6 +383,170 @@ public class XICTransferHandler extends AbstractTreeTransferHandler {
             }
         }
         return true;
+
+    }
+
+
+    public void importDirectNodeToQuant(AbstractNode dropRSMNode, XICSelectionTransferable.TransferData data) {
+
+        DefaultTreeModel treeModel = (DefaultTreeModel) m_tree.getModel();
+        int childIndex =  dropRSMNode.getChildCount();
+
+        ArrayList<DataSetNode> datasetList = data.getDatasetList();
+        if (datasetList != null) {
+
+            m_tree.expandNodeIfNeeded(dropRSMNode);
+
+            String suffix = Integer.toString(dropRSMNode.getChildCount() + 1);
+
+            // Issue 11312: if the dragged node is a merged node, we use its name as suffix
+            if (!datasetList.isEmpty()) {
+
+                // all dataset are in the same merged dataset parent
+                DDataset parentNode = datasetList.get(0).getParentMergedDataset();
+                AbstractNode ancestorNode = datasetList.get(0).getLowestAncestor();
+
+                if (parentNode != null) {
+
+                    int nb = datasetList.size();
+
+                    boolean sameParent = true;
+                    boolean sameAncestor = true;
+
+                    for (int i = 1; i < nb; i++) {
+
+                        AbstractNode a = datasetList.get(i).getLowestAncestor();
+
+                        DDataset p = datasetList.get(i).getParentMergedDataset();
+
+                        if (p != null && p.getId() != parentNode.getId()) {
+                            sameParent = false;
+                        }
+
+                        if(a == null || a != ancestorNode){
+                            sameAncestor = false;
+                        }
+
+                    }
+                    if (sameParent) {
+                        suffix = parentNode.getName();
+                    }else if(sameAncestor){
+                        suffix = ancestorNode.toString();
+                    }
+                }
+            } //END datasetList NOT Empty Issue 11312:
+
+            if (dropRSMNode instanceof DataSetNode) {
+                // top node, we create a group now
+
+                String groupName = "Group " + suffix;
+                XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(DataSetData.createTemporaryAggregate(groupName)); //new DataSetData(groupName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+                treeModel.insertNodeInto(biologicalGroupNode, dropRSMNode, childIndex);
+
+                childIndex = 0;
+
+                dropRSMNode = biologicalGroupNode;
+                m_tree.expandNodeIfNeeded(dropRSMNode);
+            }
+
+            m_parameterList.loadParameters(NbPreferences.root());
+            boolean retainStructure = (boolean) m_parameter.getObjectValue();
+
+            if (retainStructure) {
+
+                //<--------------------------------------------------------------------------------->
+                //Here I must intervene so that the mechanism changes!
+                if (dropRSMNode instanceof XICBiologicalGroupNode) {
+
+                    //Here I divide Leafs into teams depending on their father (Luke I am your father!)
+                    Hashtable<String, ArrayList<DataSetNode>> samplesHashtable = new Hashtable<>();
+
+                    LinkedHashSet<String> order = new LinkedHashSet<>();
+
+                    for (DataSetNode node : datasetList) {
+
+                        String currentParent = (node.getParent() == null) ? "null" : node.getParent().toString();
+
+                        order.add(currentParent);
+
+                        if (samplesHashtable.containsKey(currentParent)) {
+                            samplesHashtable.get(currentParent).add(node);
+                        } else {
+                            ArrayList<DataSetNode> newSample = new ArrayList<>();
+                            newSample.add(node);
+                            samplesHashtable.put(currentParent, newSample);
+                        }
+
+                    }
+
+
+                    for (String key : order) {
+                        ArrayList<DataSetNode> currentSampleList = samplesHashtable.get(key);
+
+                        suffix = (key.contains("Identifications")) ? String.valueOf(dropRSMNode.getChildCount() + 1) : key;
+
+                        String sampleName = "Sample " + suffix;
+
+                        XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(DataSetData.createTemporaryAggregate(sampleName)); //new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+                        treeModel.insertNodeInto(biologicalSampleNode, dropRSMNode, childIndex);
+
+                        childIndex = 0;
+                        m_tree.expandNodeIfNeeded(biologicalSampleNode);
+
+                        for (DataSetNode dataSetNode : currentSampleList) {
+
+                            // create the new node
+                            XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(dataSetNode.getData());
+
+                            // add to new parent
+                            treeModel.insertNodeInto(sampleAnalysisNode, biologicalSampleNode, childIndex);
+                            childIndex++;
+
+                        }
+
+                        childIndex -= currentSampleList.size() - 1;
+
+                    }
+                }
+
+                //<--------------------------------------------------------------------------------->
+            } else {
+
+                if (dropRSMNode instanceof XICBiologicalGroupNode) {
+                    // Group Node, we create a sample node
+                    String sampleName = "Sample " + suffix;
+                    XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(DataSetData.createTemporaryAggregate(sampleName)); //new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+                    treeModel.insertNodeInto(biologicalSampleNode, dropRSMNode, childIndex);
+                    dropRSMNode = biologicalSampleNode;
+                    childIndex = 0;
+                    m_tree.expandNodeIfNeeded(dropRSMNode);
+                }
+
+            }
+        } else { //datalist == null  ==> isDesignData
+            ArrayList<AbstractNode> rsmList = data.getDesignList();
+            int nbNodes = rsmList.size();
+            for (AbstractNode node : rsmList) {
+                // specific case when the node is moved in its parent
+                int indexChild;
+                if (dropRSMNode.isNodeChild(node)) {
+                    // we are moving the node in its parent
+                    indexChild = dropRSMNode.getIndex(node);
+                    if (indexChild < childIndex) {
+                        childIndex--;
+                    }
+                }
+
+                // remove from parent (required when drag and dropped in the same parent)
+                treeModel.removeNodeFromParent(node);
+
+                // add to new parent
+                treeModel.insertNodeInto(node, dropRSMNode, childIndex);
+
+                childIndex++;
+
+            }
+        }
 
     }
 

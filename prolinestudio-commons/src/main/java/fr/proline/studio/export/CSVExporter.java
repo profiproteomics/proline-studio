@@ -16,10 +16,11 @@
  */
 package fr.proline.studio.export;
 
+import org.apache.commons.text.StringEscapeUtils;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
  * Export data to CSV
@@ -68,7 +69,7 @@ public class CSVExporter implements ExporterInterface {
             m_fw.write(CSV_SEPARATOR);
         }
         m_curCell++;
-        m_fw.write(StringEscapeUtils.escapeCsv(t));
+        m_fw.write((t == null) ? "" : StringEscapeUtils.escapeCsv(t));
     }
     
     @Override

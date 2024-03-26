@@ -22,6 +22,7 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.msi.dto.DQuantProteinSet;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
@@ -34,7 +35,7 @@ import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
 import fr.proline.studio.table.ExportTableSelectionInterface;
@@ -57,6 +58,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 
 /**
@@ -99,30 +101,34 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
 
     private String m_modelName;
 
-    private boolean m_isXICMode;
+    private DDatasetType.QuantitationMethodInfo m_quantMethodInfo;
 
     public QuantProteinSetTableModel(LazyTable table) {
         super(table);
+        m_quantMethodInfo = DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION;
     }
 
+    private boolean isSpectralCountQuant(){
+        return m_quantMethodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING);
+    }
     @Override
     public int getColumnCount() {
         if (m_quantChannels == null) {
             return m_columnNames.length;
-        } else if (m_isXICMode) {
-            return m_columnNames.length + m_quantChannelNumber * m_columnNamesQC.length;
-        } else {
+        } else if (isSpectralCountQuant()) {
             return m_columnNames.length + m_quantChannelNumber * m_columnNamesQC_SC.length;
+        } else {
+            return m_columnNames.length + m_quantChannelNumber * m_columnNamesQC.length;
         }
     }
 
     private int getColumnPerQCCount() {
         if (m_quantChannels == null) {
             return 0;
-        } else if (m_isXICMode) {
-            return m_columnNamesQC.length;
-        } else {
+        } else if (isSpectralCountQuant()) {
             return m_columnNamesQC_SC.length;
+        } else {
+            return m_columnNamesQC.length;
         }
     }
 
@@ -137,10 +143,10 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             StringBuilder sb = new StringBuilder();
             String rsmHtmlColor = CyclicColorPalette.getHTMLColor(nbQc);
             sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
-            if (m_isXICMode) {
-                sb.append(m_columnNamesQC[id]);
-            } else {
+            if (isSpectralCountQuant()) {
                 sb.append(m_columnNamesQC_SC[id]);
+            } else {
+                sb.append(m_columnNamesQC[id]);
             }
             sb.append("<br/>");
             sb.append(m_quantChannels[nbQc].getName());
@@ -155,7 +161,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         } else if (m_quantChannels != null) {
             int nbQc = (col - m_columnNames.length) / getColumnPerQCCount();
             int id = col - m_columnNames.length - (nbQc * getColumnPerQCCount());
-            return m_isXICMode ? m_columnNamesQC[id] : m_columnNamesQC_SC[id];
+            return isSpectralCountQuant() ?  m_columnNamesQC_SC[id] :m_columnNamesQC[id];
         } else {
             return ""; // should not happen
         }
@@ -170,10 +176,10 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             int id = col - m_columnNames.length - (nbQc * getColumnPerQCCount());
 
             StringBuilder sb = new StringBuilder();
-            if (m_isXICMode) {
-                sb.append(m_columnNamesQC[id]);
-            } else {
+            if (isSpectralCountQuant()) {
                 sb.append(m_columnNamesQC_SC[id]);
+            } else {
+                sb.append(m_columnNamesQC[id]);
             }
             sb.append(" ");
             sb.append(m_quantChannels[nbQc].getName());
@@ -188,7 +194,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     @Override
     public String getToolTipForHeader(int col) {
         if (col == COLTYPE_OVERVIEW) {
-            return m_toolTipColumns[col] + " on " + (m_isXICMode ? m_toolTipQC[m_overviewType] : m_toolTipQC_SC[m_overviewType]);
+            return m_toolTipColumns[col] + " on " + (isSpectralCountQuant() ? m_toolTipQC_SC[m_overviewType] : m_toolTipQC[m_overviewType]);
         }
         if (col <= LAST_STATIC_COLUMN) {
             return m_toolTipColumns[col];
@@ -200,10 +206,10 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             StringBuilder sb = new StringBuilder();
             String rsmHtmlColor = CyclicColorPalette.getHTMLColor(nbQc);
             sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
-            if (m_isXICMode) {
-                sb.append(m_toolTipQC[id]);
-            } else {
+            if (isSpectralCountQuant()) {
                 sb.append(m_toolTipQC_SC[id]);
+            } else {
+                sb.append(m_toolTipQC[id]);
             }
             sb.append("<br/>");
             sb.append(m_quantChannels[nbQc].getFullName());
@@ -259,7 +265,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                 LazyData lazyData = getLazyData(row, col);
 
                 // Retrieve typical Protein Match
-                DProteinMatch proteinMatch = null;
+                DProteinMatch proteinMatch;
                 if (proteinSet.getProteinSet() != null) {
                     proteinMatch = proteinSet.getProteinSet().getTypicalProteinMatch();
                     if (proteinMatch == null) {
@@ -379,7 +385,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                 LazyData lazyData = getLazyData(row, col);
 
                 // Retrieve typical Protein Match
-                DProteinMatch proteinMatch = null;
+                DProteinMatch proteinMatch;
                 if (proteinSet.getProteinSet() != null) {
                     proteinMatch = proteinSet.getProteinSet().getTypicalProteinMatch();
                     if (proteinMatch == null) {
@@ -473,14 +479,14 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                             }
                         } else {
                             Map<Long, String> quantStatusByQCIds = proteinSet.getQuantStatusByQchIds();
-                            String status = proteinSet.getQuantStatusByQchIds().getOrDefault(m_quantChannels[nbQc].getId(), "");
-                            Integer pepNumber = proteinSet.getQuantPeptideNumberByQchIds().get(m_quantChannels[nbQc].getId());
+                            String status = quantStatusByQCIds.getOrDefault(m_quantChannels[nbQc].getId(), "");
+                            Integer pepNumber = quantProteinSet.getPeptidesCount();
                             if (pepNumber == null || pepNumber < 0) {
                                 pepNumber = 0;
                             }
                             switch (id) {
                                 case COLTYPE_PEP_NUMBER:
-                                    lazyData.setData((quantProteinSet.getPeptidesCount()== null || quantProteinSet.getPeptidesCount()== 0 ) ? pepNumber : quantProteinSet.getPeptidesCount());
+                                    lazyData.setData(pepNumber);
                                     break;
                                 case COLTYPE_SELECTION_LEVEL:
                                     lazyData.setData(quantProteinSet.getSelectionLevel());
@@ -510,8 +516,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     public DMasterQuantProteinSet getMasterQuantProteinSet(int row) {
 
         // Retrieve QuantProtein Set
-        DMasterQuantProteinSet quantProteinSet = m_proteinSets.get(row);
-        return quantProteinSet;
+        return m_proteinSets.get(row);
     }
 
     public DProteinSet getProteinSet(int row) {
@@ -521,12 +526,11 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         return quantProteinSet.getProteinSet();
     }
 
-    public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<DMasterQuantProteinSet> proteinSets, boolean isXICMode) {
+    public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<DMasterQuantProteinSet> proteinSets, DDatasetType.QuantitationMethodInfo quantitationMethodInfo) {
         m_quantChannels = quantChannels;
         m_quantChannelNumber = quantChannels.length;
         m_proteinSets = proteinSets;
-        m_isXICMode = isXICMode;
-
+        m_quantMethodInfo = quantitationMethodInfo;
         m_taskId = taskId;
 
         fireTableStructureChanged();
@@ -683,7 +687,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     }
 
     public String getByQCMColumnName(int index) {
-        return m_isXICMode ? m_columnNamesQC[index] : m_columnNamesQC_SC[index];
+        return isSpectralCountQuant() ? m_columnNamesQC_SC[index] :  m_columnNamesQC[index];
     }
 
     public int getQCNumber(int col) {
@@ -724,7 +728,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         if (m_quantChannels != null) {
             for (int i = m_quantChannels.length - 1; i >= 0; i--) {
                 listIds.add(m_columnNames.length + COLTYPE_SELECTION_LEVEL + (i * getColumnPerQCCount()));
-                if (m_isXICMode) {
+                if (!isSpectralCountQuant()) {
                     listIds.add(m_columnNames.length + COLTYPE_RAW_ABUNDANCE + (i * getColumnPerQCCount()));
                     listIds.add(m_columnNames.length + COLTYPE_PEP_NUMBER + (i * getColumnPerQCCount()));
                 }
@@ -737,7 +741,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     public HashSet exportSelection(int[] rows) {
 
         int nbRows = rows.length;
-        HashSet selectedObjects = new HashSet();
+        HashSet<Long> selectedObjects = new HashSet<>();
         for (int i = 0; i < nbRows; i++) {
 
             int row = rows[i];
@@ -759,10 +763,10 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             int id = col - m_columnNames.length - (nbQc * getColumnPerQCCount());
 
             StringBuilder sb = new StringBuilder();
-            if (m_isXICMode) {
-                sb.append(m_columnNamesQC[id]);
-            } else {
+            if (isSpectralCountQuant()) {
                 sb.append(m_columnNamesQC_SC[id]);
+            } else {
+                sb.append(m_columnNamesQC[id]);
             }
             sb.append(' ');
             sb.append(m_quantChannels[nbQc].getName());
@@ -871,7 +875,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             }
             case COLTYPE_PROTEIN_SET_NAME: {
                 // Retrieve typical Protein Match
-                DProteinMatch proteinMatch = null;
+                DProteinMatch proteinMatch;
                 if (proteinSet.getProteinSet() != null) {
                     proteinMatch = proteinSet.getProteinSet().getTypicalProteinMatch();
                     if (proteinMatch == null) {
@@ -981,10 +985,10 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                                     return "";
                             }
                         } else {                            
-                            Integer pepNumber = proteinSet.getQuantPeptideNumberByQchIds().get(m_quantChannels[nbQc].getId());
+                            Integer pepNumber = quantProteinSet.getPeptidesCount();
                             if (pepNumber == null || pepNumber < 0) {
                                 pepNumber = 0;
-                            }                            
+                            }
                             switch (id) {
                                 case COLTYPE_PEP_NUMBER:
                                     return ( (quantProteinSet.getPeptidesCount()== null || quantProteinSet.getPeptidesCount()== 0) ? Integer.toString(pepNumber) : Integer.toString(quantProteinSet.getPeptidesCount()));
@@ -997,8 +1001,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                                 case COLTYPE_PSM:
                                     return (quantProteinSet.getPeptideMatchesCount() == null ? Integer.toString(0) : Integer.toString(quantProteinSet.getPeptideMatchesCount()));
                                 case COLTYPE_STATUS: //should only occur for spectral count
-                                    String status = proteinSet.getQuantStatusByQchIds().get(m_quantChannels[nbQc].getId());
-                                    return status;
+                                    return proteinSet.getQuantStatusByQchIds().getOrDefault(m_quantChannels[nbQc].getId(), "");
                             }
                         }
                     }
@@ -1024,7 +1027,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     }
 
     public Boolean containsModifiedQuantProteinSet() {
-        Boolean containsModifed = false;
+        boolean containsModifed = false;
         try {
             int nbRow = getRowCount();
             for (int i = 0; i < nbRow; i++) {
@@ -1079,8 +1082,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         try {
             Map<String, Object> pmqSerializedMap = proteinSet.getSerializedPropertiesAsMap();
             grayed = ((pmqSerializedMap != null) && (pmqSerializedMap.containsKey(DMasterQuantProteinSet.MASTER_QUANT_PROTEINSET_WITH_PEPTIDE_MODIFIED)) && pmqSerializedMap.get(DMasterQuantProteinSet.MASTER_QUANT_PROTEINSET_WITH_PEPTIDE_MODIFIED).equals(Boolean.TRUE));
-        } catch (Exception e) {
-
+        } catch (Exception ignored) {
         }
 
         if (grayed) {
@@ -1109,7 +1111,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             }
             case COLTYPE_NB_PEPTIDE:
             case COLTYPE_NB_QUANT_PEPTIDE: {
-                renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class), JLabel.RIGHT);
                 break;
             }
             default: {
@@ -1117,35 +1119,35 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                 int id = col - m_columnNames.length - (nbQc * getColumnPerQCCount());
                 switch (id) {
                     case COLTYPE_PEP_NUMBER:
-                        renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                        renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class), JLabel.RIGHT);
 //                        if (m_isXICMode) {
 //                            renderer = new GrayedRenderer(renderer);
 //                        }
                         break;
                     case COLTYPE_SELECTION_LEVEL:
                     case COLTYPE_PSM: {
-                        renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                        renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class), JLabel.RIGHT);
                         break;
                     }
                     case COLTYPE_ABUNDANCE: {
-                        if (m_isXICMode) {
-                            renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
+                        if (isSpectralCountQuant()) {
+                            renderer = new FloatRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 2);
                         } else {
-                            renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
+                            renderer = new BigFloatOrDoubleRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 0);
                         }
                         break;
                     }
                     case COLTYPE_RAW_ABUNDANCE: {
-                        if (m_isXICMode) {
-                            renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
+                        if (isSpectralCountQuant()) {
+                            renderer = new FloatRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 0);
                         } else {
-                            renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
+                            renderer = new BigFloatOrDoubleRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 0);
                         }
                         break;
                     }
 //                    case COLTYPE_STATUS:
 //                        if (m_isXICMode) {
-//                            renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
+//                            renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
 //                            renderer = new GrayedRenderer(renderer);
 //                        }
 //                        break;                    
@@ -1165,8 +1167,8 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
 
         return renderer;
     }
-    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
-    private final HashMap<Integer, TableCellRenderer> m_rendererMapGrayed = new HashMap();
+    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap<>();
+    private final HashMap<Integer, TableCellRenderer> m_rendererMapGrayed = new HashMap<>();
 
     @Override
     public GlobalTableModelInterface getFrozzenModel() {
@@ -1221,14 +1223,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             } else {
                 int nbQc = (col - m_columnNames.length) / getColumnPerQCCount();
                 int id = col - m_columnNames.length - (nbQc * getColumnPerQCCount());
-                if (m_isXICMode) {
-                    switch (id) {
-                        case COLTYPE_ABUNDANCE:
-                            return QuantitationType.getQuantitationType(QuantitationType.ABUNDANCE);
-                        case COLTYPE_RAW_ABUNDANCE:
-                            return QuantitationType.getQuantitationType(QuantitationType.RAW_ABUNDANCE);
-                    }
-                } else {
+                if (isSpectralCountQuant()) {
                     switch (id) {
                         case COLTYPE_PSM:
                             return QuantitationType.getQuantitationType(QuantitationType.BASIC_SC);
@@ -1236,6 +1231,13 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                             return QuantitationType.getQuantitationType(QuantitationType.SPECIFIC_SC);
                         case COLTYPE_ABUNDANCE:
                             return QuantitationType.getQuantitationType(QuantitationType.WEIGHTED_SC);
+                    }
+                } else {
+                    switch (id) {
+                        case COLTYPE_ABUNDANCE:
+                            return QuantitationType.getQuantitationType(QuantitationType.ABUNDANCE);
+                        case COLTYPE_RAW_ABUNDANCE:
+                            return QuantitationType.getQuantitationType(QuantitationType.RAW_ABUNDANCE);
                     }
                 }
 

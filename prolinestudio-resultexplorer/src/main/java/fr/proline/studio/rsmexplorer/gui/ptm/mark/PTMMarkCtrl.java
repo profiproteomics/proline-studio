@@ -21,6 +21,7 @@ import fr.proline.studio.rsmexplorer.gui.ptm.ViewContext;
 
 import java.awt.Graphics2D;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,17 +32,17 @@ import java.util.Map;
 public class PTMMarkCtrl {
 
     PTMMarkSetView m_view;
-    Map<Integer, PTMMarkView> m_ptmMarkViewMap;
+    Map<Integer, PTMMarkView> m_ptmMarkViewByLocation;
 
     public PTMMarkCtrl() {
         m_view = new PTMMarkSetView();
-        m_ptmMarkViewMap = new HashMap();
+        m_ptmMarkViewByLocation = new HashMap();
 
     }
 
-    public void setData(Map<Integer, PTMMark> ptmMarks) {
+    public void setData(Map<Integer, List<PTMMark>> ptmMarks) {
         this.setPTM(ptmMarks);
-        m_view.setPtmMarkMap(m_ptmMarkViewMap);
+        m_view.setPtmMarkMap(m_ptmMarkViewByLocation);
     }
 
     public void setBeginPoint(int x, int y) {
@@ -57,13 +58,12 @@ public class PTMMarkCtrl {
 
     }
 
-
-    public void setPTM(Map<Integer, PTMMark> ptmMarks) {
-        m_ptmMarkViewMap = new HashMap();
+    private void setPTM(Map<Integer,  List<PTMMark>> ptmMarks) {
+        m_ptmMarkViewByLocation = new HashMap();
         for (int i : ptmMarks.keySet()) {
-            PTMMark pa = ptmMarks.get(i);
-            PTMMarkView p = new PTMMarkView(pa);
-            m_ptmMarkViewMap.put(i, p);
+           List<PTMMark> pms = ptmMarks.get(i);
+            PTMMarkView p = new PTMMarkView(pms);
+            m_ptmMarkViewByLocation.put(i, p);
         }
     }
 }

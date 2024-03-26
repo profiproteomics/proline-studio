@@ -18,6 +18,7 @@ package fr.proline.studio.pattern;
 
 import fr.proline.studio.pattern.xic.*;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
@@ -69,13 +70,17 @@ public class DataboxManager {
         new DataBoxPTMPeptides(true, true),    // Quanti PTMs Peptides Matches
         new DataBoxPTMPeptidesGraphic(),
         new DataboxXicParentsPeptideIon(),
-        new DataBoxPTMClustersSites(),
-        new DataBoxPTMClustersSites(true)
+        new DataboxXicReporterIon()
     };
 
     public static AbstractDataBox getDataboxNewInstance(AbstractDataBox sourceDB) throws IllegalAccessException, InstantiationException {
 
-        AbstractDataBox newGenericDatabox = sourceDB.getClass().newInstance(); // copy the databox
+        AbstractDataBox newGenericDatabox = null; // copy the databox
+        try {
+            newGenericDatabox = sourceDB.getClass().getDeclaredConstructor().newInstance();
+        } catch (InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+        }
 
         //Some databox must be specifically configured ...
         // FIXME VDS : To be more generic ?!
@@ -87,8 +92,6 @@ public class DataboxManager {
             newGenericDatabox = new DataBoxPTMPeptides(((DataBoxPTMPeptides) sourceDB).isMS1LabelFreeQuantitation(), ((DataBoxPTMPeptides) sourceDB).isAllPSMsDisplayed());
         } else  if(DataBoxPTMClusters.class.equals(newGenericDatabox.getClass())) {
             newGenericDatabox = new DataBoxPTMClusters( ((DataBoxPTMClusters)sourceDB).m_type.equals(AbstractDataBox.DataboxType.DataBoxPTMSiteAsClusters) );
-        } else  if(DataBoxPTMClustersSites.class.equals(newGenericDatabox.getClass())) {
-            newGenericDatabox = new DataBoxPTMClustersSites( ((DataBoxPTMClustersSites)sourceDB).m_type.equals(AbstractDataBox.DataboxType.DataBoxXicPTMClustersSites) );
         }
 
         return  newGenericDatabox;

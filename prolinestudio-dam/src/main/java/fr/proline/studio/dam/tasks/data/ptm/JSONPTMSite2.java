@@ -28,5 +28,9 @@ public class JSONPTMSite2 extends AbstractJSONPTMSite {
 
     //List of PepidesInstances which don't match this PTM but with same mass
     public Long[] isomericPeptideIds;
-    
+
+    public Boolean isCTerminal;
+
+    public Boolean isNTerminal;
+
 }

@@ -77,6 +77,9 @@ public class ViewSetting {
         return getColor(site.getPTMSpecificity().getIdPtmSpecificity());
     }
 
+    public static final Color getMultiPTMColor(){
+        return CyclicColorPalette.GRAY_TEXT_LIGHT;
+    }
     /**
      * get Color by PTM id
      * @param specificityId

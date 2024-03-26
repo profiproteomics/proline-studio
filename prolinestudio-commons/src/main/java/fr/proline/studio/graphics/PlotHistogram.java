@@ -70,7 +70,7 @@ public class PlotHistogram extends PlotXYAbstract {
     
     private final ColorParameter m_colorParameter;
     private final IntegerParameter m_binsParameter;
-    private ArrayList<ParameterList> m_parameterListArray = null;
+    private ArrayList<ParameterList> m_parameterListArray;
     
     private final LinkedList<GraphicDataGroup> m_dataGroup = new LinkedList<>();
     private final HashMap<GraphicDataGroup, LinkedHashMap<Integer, Double>> m_graphicDataGroupToIndex = new HashMap<>();
@@ -111,7 +111,7 @@ public class PlotHistogram extends PlotXYAbstract {
 
 
     public static HashSet<Class> getAcceptedYValues() {
-        HashSet<Class> acceptedValues = new HashSet();
+        HashSet<Class> acceptedValues = new HashSet<>();
         return acceptedValues;
     }
     
@@ -193,7 +193,7 @@ public class PlotHistogram extends PlotXYAbstract {
     @Override
     public ArrayList<Long> getSelectedIds() {
         
-        ArrayList<Long> selectedIds = new ArrayList();
+        ArrayList<Long> selectedIds = new ArrayList<>();
         
         int size = m_values.getRowCount();
         for (int i=0;i<size;i++) {
@@ -370,7 +370,7 @@ public class PlotHistogram extends PlotXYAbstract {
         
         double[] data = new double[size];
         m_ids = new long[size];
-        m_idToIndex = new HashMap(size);
+        m_idToIndex = new HashMap<>(size);
         for (int i=0;i<data.length;i++) {
             data[i] = m_values.getValue(i);
             m_ids[i] = m_values.row2UniqueId(i);
@@ -553,12 +553,10 @@ public class PlotHistogram extends PlotXYAbstract {
     @Override
     public JPopupMenu getPopupMenu(double x, double y) {
 
-        boolean onPoint = false;
         boolean onSelection = false;
         GraphicDataGroup onGroup = null;
         int index = findPoint(x, y);
         if (index != -1) {
-            onPoint = true;
             double yData1 = m_asPercentage ? m_dataY[index] : m_dataCountY[index];
             if (m_selected[index] > 0) {
                 

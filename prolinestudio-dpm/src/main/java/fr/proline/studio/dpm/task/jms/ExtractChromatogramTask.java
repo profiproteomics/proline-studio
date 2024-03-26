@@ -20,23 +20,18 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Message;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.proline.core.orm.lcms.Peak;
 import fr.proline.core.orm.lcms.dto.DFeature;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
+
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-
 import java.util.HashMap;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.TextMessage;
 
 /**
  * Get full XIC Chromatogram for a m/z with tolerance ppm Task JMS
@@ -96,51 +91,28 @@ public class ExtractChromatogramTask extends AbstractJMSTask {
     }
 
     @Override
-    public void taskDone(final Message jmsMessage) throws Exception {
+    public void processWithResult(JSONRPC2Response jsonResponse) throws Exception {
+        final Object result = jsonResponse.getResult();
+        if (result == null || !String.class.isInstance(result)) {
+            m_loggerProline.debug("Invalid result: No Chromatogram returned");
+            throw new Exception("Invalid result " + result);
+        } else {
+            m_loggerProline.debug("Result :\n" + result);
 
-        final TextMessage textMessage = (TextMessage) jmsMessage;
-        final String jsonString = textMessage.getText();
-
-        final JSONRPC2Message jsonMessage = JSONRPC2Message.parse(jsonString);
-        if (jsonMessage instanceof JSONRPC2Notification) {
-            m_loggerProline.warn("JSON Notification method: " + ((JSONRPC2Notification) jsonMessage).getMethod() + " instead of JSON Response");
-            throw new Exception("Invalid JSONRPC2Message type");
-
-        } else if (jsonMessage instanceof JSONRPC2Response) {
-
-            final JSONRPC2Response jsonResponse = (JSONRPC2Response) jsonMessage;
-            m_loggerProline.debug("JSON Response Id: " + jsonResponse.getID());
-
-            final JSONRPC2Error jsonError = jsonResponse.getError();
-
-            if (jsonError != null) {
-                m_loggerProline.error("JSON Error code {}, message : \"{}\"", jsonError.getCode(), jsonError.getMessage());
-                m_loggerProline.error("JSON Throwable", jsonError);
-                throw jsonError;
-            }
-
-            final Object result = jsonResponse.getResult();
-            if (result == null || !String.class.isInstance(result)) {
-                m_loggerProline.debug("Invalid result: No Chromatogram returned");
-                throw new Exception("Invalid result " + result);
-            } else {
-                m_loggerProline.debug("Result :\n" + result);
-                
-                Gson gson = new GsonBuilder()
+            Gson gson = new GsonBuilder()
                     .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                     .create();
-                
-                Type peakArrayListType = new TypeToken<ArrayList<Peak[]>>(){}.getType();
-                
-                ArrayList<Peak[]> peakArray = gson.fromJson((String)result, peakArrayListType);
 
-                for (int i=0;i<peakArray.size();i++) {
-                    m_features.get(i).addPeakArray(peakArray.get(i));
-                }
-  
+            Type peakArrayListType = new TypeToken<ArrayList<Peak[]>>() {
+            }.getType();
+
+            ArrayList<Peak[]> peakArray = gson.fromJson((String) result, peakArrayListType);
+
+            for (int i = 0; i < peakArray.size(); i++) {
+                m_features.get(i).addPeakArray(peakArray.get(i));
             }
+
         }
-        m_currentState = JMSState.STATE_DONE;
 
     }
 

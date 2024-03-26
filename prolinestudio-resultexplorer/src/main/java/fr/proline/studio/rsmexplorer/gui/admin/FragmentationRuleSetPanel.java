@@ -30,7 +30,7 @@ import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.TablePopupMenu;
-import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.utils.IconManager;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
@@ -38,14 +38,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JToolBar;
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 
 /**
@@ -219,7 +212,7 @@ public class FragmentationRuleSetPanel extends JPanel {
         public FragmentationRuleSetTableModel(FragmentationRuleSet[] fragmentationRuleSets) {
             m_fragmentationRuleSetArray = new ArrayList<>(fragmentationRuleSets.length);
             m_fragmentationRuleSetArray.addAll(Arrays.asList(fragmentationRuleSets));
-            m_renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
+            m_renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.LEFT);
         }
         
         

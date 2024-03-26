@@ -107,6 +107,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private final static int CREATE_QUANTITATION_FOLDER = 16;
     private final static int CREATE_IDENTIFICATION_FOLDER = 17;
     private final static int PASTE_DATASET = 18;
+    private final static int UPDATE_RSET_OF_DATASET = 19;
 
     private static final Object WRITE_DATASET_LOCK = new Object();
 
@@ -159,6 +160,29 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         m_action = LOAD_RSET_AND_RSM_OF_DATASET;
     }
 
+    /**
+     * Update Rset of a dataset
+     *
+     * @param dataset
+     */
+    public void initUpdateRset(DDataset dataset) {
+        setTaskInfo(new TaskInfo("Update Search Result for Dataset " + dataset.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
+        m_dataset = dataset;
+
+        m_action = UPDATE_RSET_OF_DATASET;
+    }
+
+    /**
+     * Update Rset of datasets
+     *
+     * @param datasetList
+     */
+    public void initUpdateRset(ArrayList<DDataset> datasetList) {
+        setTaskInfo(new TaskInfo("Update Search Result for multiple Dataset (" + datasetList.size()+" datasets)", false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
+        m_datasetList = datasetList;
+
+        m_action = UPDATE_RSET_OF_DATASET;
+    }
     /**
      * Load Quantitation of a dataset
      *
@@ -376,6 +400,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             case LOAD_QUANTITATION:
             case CREATE_QUANTITATION_FOLDER:
             case CREATE_IDENTIFICATION_FOLDER:
+            case UPDATE_RSET_OF_DATASET:
                 return true; // done one time
 
         }
@@ -436,6 +461,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 return createDatasetFolder(false);
             case CREATE_IDENTIFICATION_FOLDER:
                 return createDatasetFolder(true);
+            case UPDATE_RSET_OF_DATASET:
+                return updateDatasetsRset();
         }
 
         return false; // should never happen
@@ -505,8 +532,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             Iterator<DDataset> it = datasetListSelected.iterator();
             while (it.hasNext()) {
                 DDataset datasetCur = it.next();
-                boolean isQuantiXIC = datasetCur.isQuantitation() && datasetCur.getQuantMethodInfo() == QuantitationMethodInfo.FEATURES_EXTRACTION;
-                if (isQuantiXIC) {
+                boolean isQuantiWithChild = datasetCur.isQuantitation() && (datasetCur.getQuantMethodInfo() == QuantitationMethodInfo.FEATURES_EXTRACTION || datasetCur.getQuantMethodInfo() == QuantitationMethodInfo.ISOBARIC_TAGGING );
+                if (isQuantiWithChild) {
                     datasetCur.setChildrenCount(1);
                 }
                 if (datasetCur.isTrash()) {
@@ -514,7 +541,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 } else {
                     DataSetData dsData = new DataSetData(datasetCur);
                     
-                    if (isQuantiXIC) {
+                    if (isQuantiWithChild) {
                         dsData.setHasChildren(true);
                     }
                     m_list.add(dsData);
@@ -732,7 +759,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         for (Map.Entry<Long, DDataset> entrySet : ddatasetById.entrySet()) {
             DDataset ds = entrySet.getValue();
             if (ds.isQuantitation()){
-                if(ds.getQuantMethodInfo() == QuantitationMethodInfo.FEATURES_EXTRACTION) {
+                if(ds.getQuantMethodInfo() == QuantitationMethodInfo.FEATURES_EXTRACTION || ds.getQuantMethodInfo().equals(QuantitationMethodInfo.ISOBARIC_TAGGING)) {
                     ds.setChildrenCount(1);
                 }
                 //Load ObjectTree linked to the dataset
@@ -850,6 +877,66 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         return true;
     }
 
+    public boolean updateDatasetsRset(){
+        long projectId = -1;
+        if (m_dataset != null) {
+            projectId = m_dataset.getProject().getId();
+        } else if (m_datasetList != null) {
+            projectId = m_datasetList.get(0).getProject().getId();
+        }
+
+        boolean result = true;
+        EntityManager entityManagerMSI = DStoreCustomPoolConnectorFactory.getInstance().getMsiDbConnector(projectId).createEntityManager();
+        try {
+
+            if (m_datasetList != null) {
+                int nbDataset = m_datasetList.size();
+                for (int i = 0; i < nbDataset; i++) {
+                    result = result && updateDatasetRset(entityManagerMSI, m_datasetList.get(i));
+                }
+
+            } else if (m_dataset != null) {
+                result = updateDatasetRset(entityManagerMSI, m_dataset);
+            }
+
+        } catch (Exception e) {
+            m_logger.error(getClass().getSimpleName() + " failed", e);
+            m_taskError = new TaskError(e);
+            return false;
+        } finally {
+            entityManagerMSI.close();
+        }
+
+        return result;
+    }
+
+    private boolean updateDatasetRset(EntityManager entityManagerMSI, DDataset d) {
+        Long rsetId = d.getResultSetId();
+        if (rsetId != null) {
+            ResultSet rsetFound = entityManagerMSI.find(ResultSet.class, rsetId);
+
+            // force initialization of lazy data (data will be needed for the display of properties)
+            MsiSearch msiSearch = rsetFound.getMsiSearch();
+            if (msiSearch != null) {
+                SearchSetting searchSetting = msiSearch.getSearchSetting();
+                Set<Enzyme> enzymeSet = searchSetting.getEnzymes();
+                Iterator<Enzyme> it = enzymeSet.iterator();
+                while (it.hasNext()) {
+                    it.next();
+                }
+
+                Set<SearchSettingsSeqDatabaseMap> searchSettingsSeqDatabaseMapSet = searchSetting.getSearchSettingsSeqDatabaseMaps();
+                Iterator<SearchSettingsSeqDatabaseMap> itSeqDbMap = searchSettingsSeqDatabaseMapSet.iterator();
+                while (itSeqDbMap.hasNext()) {
+                    itSeqDbMap.next();
+
+                }
+            }
+            d.setResultSet(rsetFound);
+        }
+        return true;
+    }
+
     public boolean fetchRsetAndRsm() {
 
         long projectId = -1;
@@ -955,30 +1042,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
     private void fetchRsetAndRsmForOneDataset(EntityManager entityManagerMSI, DDataset d) {
 
-        Long rsetId = d.getResultSetId();
-        if (rsetId != null) {
-            ResultSet rsetFound = entityManagerMSI.find(ResultSet.class, rsetId);
-
-            // force initialization of lazy data (data will be needed for the display of properties)
-            MsiSearch msiSearch = rsetFound.getMsiSearch();
-            if (msiSearch != null) {
-                SearchSetting searchSetting = msiSearch.getSearchSetting();
-                Set<Enzyme> enzymeSet = searchSetting.getEnzymes();
-                Iterator<Enzyme> it = enzymeSet.iterator();
-                while (it.hasNext()) {
-                    it.next();
-                }
-
-                Set<SearchSettingsSeqDatabaseMap> searchSettingsSeqDatabaseMapSet = searchSetting.getSearchSettingsSeqDatabaseMaps();
-                Iterator<SearchSettingsSeqDatabaseMap> itSeqDbMap = searchSettingsSeqDatabaseMapSet.iterator();
-                while (itSeqDbMap.hasNext()) {
-                    itSeqDbMap.next();
-
-                }
-            }
-            
-            d.setResultSet(rsetFound);
-        }
+        updateDatasetRset(entityManagerMSI, d);
 
         Long rsmId = d.getResultSummaryId();
         if (rsmId != null) {

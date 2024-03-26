@@ -114,7 +114,7 @@ public class EditClusterDialog extends DefaultDialog {
       if (m_ptmPeptidesTable.getSelectedRowCount() == 1) {
         removeSelectedPeptide();
       } else {
-        InfoDialog err = new InfoDialog(WindowManager.getDefault().getMainWindow(),InfoDialog.InfoType.INFO, "Remove Peptide" ,"At least one, and only one, peptide should be selected.");
+        InfoDialog err = new InfoDialog(WindowManager.getDefault().getMainWindow(),InfoDialog.InfoType.INFO, "Remove Peptide" ,"At least one, and only one, peptide should be selected.", false);
         err.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
         err.setButtonName(InfoDialog.BUTTON_OK, "OK");
         err.centerToWindow(WindowManager.getDefault().getMainWindow());
@@ -175,7 +175,7 @@ public class EditClusterDialog extends DefaultDialog {
     DPeptideMatch repPepMatch = ptmPep.getRepresentativePepMatch(clusters);
     DPeptideMatch clusterPepMatch = m_editedCluster.getRepresentativePepMatch();
     if(repPepMatch != null && clusterPepMatch.getId() == repPepMatch.getId()){
-      InfoDialog id = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Remove Peptide Error", "Can not remove representative peptide from cluster" );
+      InfoDialog id = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Remove Peptide Error", "Can not remove representative peptide from cluster",false);
       id.setButtonName(DefaultDialog.BUTTON_OK, "OK");
       id.setButtonVisible(DefaultDialog.BUTTON_CANCEL, false);
       id.centerToWindow(WindowManager.getDefault().getMainWindow());

@@ -35,12 +35,13 @@ public class PTMDataset {
     
     protected static final Logger LOG = LoggerFactory.getLogger("ProlineStudio.DAM.Task");
 
-    private DDataset m_dataset;
+    private String m_modelVersion;
+    private final DDataset m_dataset;
 
     private List<PTMSite> m_proteinPTMSites;
 
     private List<Long> m_leafRSMIds; // Ids of the Leaf RSM where PTM info are read
-    private List<DInfoPTM> m_ptmOfInterest; // Specified PTM to consider 
+    private final List<DInfoPTM> m_ptmOfInterest; // Specified PTM to consider
     private List<PTMCluster> m_ptmClusters;
 
     //Lists of all PTMPeptideInstance for a specific Peptide and Protein Match : For parent RSM and leaf RSM
@@ -104,10 +105,7 @@ public class PTMDataset {
 
     public PTMCluster getPTMCluster(Long clusterId) {
         Optional<PTMCluster> clusterOp =  m_ptmClusters.stream().filter(c -> c.getId().equals(clusterId)).findFirst();
-        if(clusterOp.isPresent())
-            return  clusterOp.get();
-        else
-            return null;
+        return clusterOp.orElse(null);
     }
 
 
@@ -276,7 +274,7 @@ public class PTMDataset {
         if(registeredPtmPepInsts == null)
             registeredPtmPepInsts = new ArrayList<>();
         
-        List<PTMPeptideInstance> potentialPtmPepInsts = registeredPtmPepInsts.stream().filter(ptmPepInst ->( protPosition >= ptmPepInst.getStartPosition() &&  protPosition <=ptmPepInst.getStopPosition())).collect(Collectors.toList());
+        List<PTMPeptideInstance> potentialPtmPepInsts = registeredPtmPepInsts.stream().filter(ptmPepInst ->( protPosition >= ptmPepInst.getStartPosition() &&  protPosition <=ptmPepInst.getStopPosition())).toList();
         
         if (potentialPtmPepInsts.isEmpty()) {
             foundPtmPepIns = new PTMPeptideInstance(peptideInstance);
@@ -284,7 +282,7 @@ public class PTMDataset {
             
             //Get correct start position           
             if(peptideInstance.getPeptideMatches() != null){
-                List<SequenceMatch> pepInsSequenceMatches = peptideInstance.getPeptideMatches().stream().map(DPeptideMatch::getSequenceMatch).collect(Collectors.toList());
+                List<SequenceMatch> pepInsSequenceMatches = peptideInstance.getPeptideMatches().stream().map(DPeptideMatch::getSequenceMatch).toList();
                 for(SequenceMatch sm : pepInsSequenceMatches){
                     if(protPosition >= sm.getId().getStart() && protPosition <= sm.getId().getStop()){
                         //found correct sm
@@ -333,14 +331,14 @@ public class PTMDataset {
 
     public List<PTMCluster> getColocatedClusters(PTMCluster cluster){
 
-        ArrayList<PTMCluster> colocatedClusters = new ArrayList();
+        ArrayList<PTMCluster> colocatedClusters = new ArrayList<>();
         DProteinMatch pmatch = cluster.getProteinMatch();
 
         int minStart = -1;
         int maxEnd = -1;
         try {
-            minStart = cluster.getParentPTMPeptideInstances().stream().map(pi -> pi.getStartPosition()).min(Comparator.naturalOrder()).get();
-            maxEnd = cluster.getParentPTMPeptideInstances().stream().map(pi -> pi.getStopPosition()).max(Comparator.naturalOrder()).get();
+            minStart = cluster.getParentPTMPeptideInstances().stream().map(PTMPeptideInstance::getStartPosition).min(Comparator.naturalOrder()).get();
+            maxEnd = cluster.getParentPTMPeptideInstances().stream().map(PTMPeptideInstance::getStopPosition).max(Comparator.naturalOrder()).get();
         }catch (NoSuchElementException e){
             LOG.error("Errpr getting peptides min/max bounds for cluster",e );
             return  colocatedClusters;
@@ -349,8 +347,8 @@ public class PTMDataset {
         for(PTMCluster c : this.m_ptmClusters){
             if(c.getProteinMatch().equals(pmatch)) {
                 if(c.getParentPTMPeptideInstances() != null) {
-                    int clMinStart = c.getParentPTMPeptideInstances().stream().map(pi -> pi.getStartPosition()).min(Comparator.naturalOrder()).get();
-                    int clMaxEnd = c.getParentPTMPeptideInstances().stream().map(pi -> pi.getStopPosition()).max(Comparator.naturalOrder()).get();
+                    int clMinStart = c.getParentPTMPeptideInstances().stream().map(PTMPeptideInstance::getStartPosition).min(Comparator.naturalOrder()).get();
+                    int clMaxEnd = c.getParentPTMPeptideInstances().stream().map(PTMPeptideInstance::getStopPosition).max(Comparator.naturalOrder()).get();
                     if( ( minStart <= clMinStart && clMinStart < maxEnd ) ||  ( minStart <= clMaxEnd && clMaxEnd <= maxEnd ) || ( clMinStart <= minStart && minStart < clMaxEnd ))
                         colocatedClusters.add(c);
                 }
@@ -371,16 +369,16 @@ public class PTMDataset {
         int minStart = -1;
         int maxEnd = -1;
         try {
-            minStart = firstCluster.getParentPTMPeptideInstances().stream().map(pi -> pi.getStartPosition()).min(Comparator.naturalOrder()).get();
-            maxEnd = firstCluster.getParentPTMPeptideInstances().stream().map(pi -> pi.getStopPosition()).max(Comparator.naturalOrder()).get();
+            minStart = firstCluster.getParentPTMPeptideInstances().stream().map(PTMPeptideInstance::getStartPosition).min(Comparator.naturalOrder()).get();
+            maxEnd = firstCluster.getParentPTMPeptideInstances().stream().map(PTMPeptideInstance::getStopPosition).max(Comparator.naturalOrder()).get();
         }catch (NoSuchElementException e){
             LOG.error("Error getting peptides min/max bounds for cluster",e );
             return  false;
         }
 
         if(secondCluster.getParentPTMPeptideInstances() != null) {
-            int clMinStart = secondCluster.getParentPTMPeptideInstances().stream().map(pi -> pi.getStartPosition()).min(Comparator.naturalOrder()).get();
-            int clMaxEnd = secondCluster.getParentPTMPeptideInstances().stream().map(pi -> pi.getStopPosition()).max(Comparator.naturalOrder()).get();
+            int clMinStart = secondCluster.getParentPTMPeptideInstances().stream().map(PTMPeptideInstance::getStartPosition).min(Comparator.naturalOrder()).get();
+            int clMaxEnd = secondCluster.getParentPTMPeptideInstances().stream().map(PTMPeptideInstance::getStopPosition).max(Comparator.naturalOrder()).get();
             if( ( minStart <= clMinStart && clMinStart < maxEnd ) ||  ( minStart <= clMaxEnd && clMaxEnd <= maxEnd ) || ( clMinStart <= minStart && minStart < clMaxEnd ))
                 return  true;
         }
@@ -421,14 +419,11 @@ public class PTMDataset {
         //Warning : assume cluster representative MQPepMatch is an AggregatedMasterQuantPeptide !
         Map<Long, DMasterQuantPeptide> mqPepByPepInstId = new HashMap<>();
         if(isQuantitation()) {
-            DMasterQuantPeptide finalClusterMQpep = firstCluster.getRepresentativeMQPepMatch();
-            if (finalClusterMQpep instanceof AggregatedMasterQuantPeptide) {
-                ((AggregatedMasterQuantPeptide) finalClusterMQpep).getAggregatedMQPeptides().forEach(mqPep -> {
+            AggregatedMasterQuantPeptide finalClusterMQpep = firstCluster.getRepresentativeMQPepMatch();
+            if (finalClusterMQpep !=null) {
+                finalClusterMQpep.getAggregatedMQPeptides().forEach(mqPep -> {
                     mqPepByPepInstId.put(mqPep.getPeptideInstanceId(), mqPep);
                 });
-            } else {
-                //Should not occur
-                mqPepByPepInstId.put(finalClusterMQpep.getPeptideInstanceId(), finalClusterMQpep);
             }
         }
 
@@ -477,15 +472,12 @@ public class PTMDataset {
 
             // If Quanti data get quant information to calculated new adundance
             if(isQuantitation()) {
-                DMasterQuantPeptide nextClusterMQpep = nextCluster.getRepresentativeMQPepMatch();
-                if (nextClusterMQpep instanceof AggregatedMasterQuantPeptide) {
-                    ((AggregatedMasterQuantPeptide) nextClusterMQpep).getAggregatedMQPeptides().forEach(mqPep -> {
+                AggregatedMasterQuantPeptide nextClusterMQpep = nextCluster.getRepresentativeMQPepMatch();
+                if (nextClusterMQpep !=null ) {
+                     nextClusterMQpep.getAggregatedMQPeptides().forEach(mqPep -> {
                         if (!mqPepByPepInstId.containsKey(mqPep.getPeptideInstance().getPeptideId()))
                             mqPepByPepInstId.put(mqPep.getPeptideInstanceId(), mqPep);
                     });
-                } else {
-                    //Should not occur
-                    mqPepByPepInstId.put(nextClusterMQpep.getPeptideInstanceId(), nextClusterMQpep);
                 }
             }
 
@@ -501,9 +493,17 @@ public class PTMDataset {
         return true;
     }
 
+    public String getModelVersion() {
+        return m_modelVersion;
+    }
+
+    public void setModelVersion(String modelVersion) {
+        this.m_modelVersion = modelVersion;
+    }
+
     public JSONPTMDataset createJSONPTMDataset() throws IllegalAccessException {
         JSONPTMDataset ptmDS = new JSONPTMDataset();
-
+        ptmDS.version = m_modelVersion;
         List<DInfoPTM> ptmInfos = getInfoPTMs();
         List<Long> ptmInfoIds = new ArrayList<>();
         for(int i=0 ; i<ptmInfos.size();i++){
@@ -567,8 +567,8 @@ public class PTMDataset {
         return ptmDS;
     }
 
-    public DMasterQuantPeptide getRepresentativeMQPeptideForCluster(PTMCluster cluster, Map<Long, DMasterQuantPeptide> mqPepByPepInstId ){
-        DMasterQuantPeptide bestMQPep = null;
+    public AggregatedMasterQuantPeptide getRepresentativeMQPeptideForCluster(PTMCluster cluster, Map<Long, DMasterQuantPeptide> mqPepByPepInstId ){
+        AggregatedMasterQuantPeptide bestMQPep = null;
 
         if (cluster.getMasterQuantProteinSet() != null) {
 
@@ -578,7 +578,7 @@ public class PTMDataset {
             //
             // Sum of peptides
             List<DMasterQuantPeptide> mqPeps = parentPeptideInstances.stream().map(parentPepI -> mqPepByPepInstId.get(parentPepI.getId())).filter(Objects::nonNull).collect(Collectors.toList());
-            bestMQPep = new AggregatedMasterQuantPeptide(mqPeps, m_dataset.getMasterQuantitationChannels().get(0));
+            bestMQPep = new AggregatedMasterQuantPeptide(mqPeps, m_dataset.getMasterQuantitationChannels().get(0), cluster.getMasterQuantProteinSet());
         }
         return bestMQPep;
     }

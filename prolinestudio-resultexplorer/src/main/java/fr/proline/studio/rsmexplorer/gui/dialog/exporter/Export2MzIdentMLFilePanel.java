@@ -24,11 +24,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.prefs.Preferences;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import fr.proline.studio.NbPreferences;
@@ -43,15 +42,19 @@ public class Export2MzIdentMLFilePanel extends JPanel {
 
     private JTextField m_fileTextField;
     private JFileChooser m_fchooser;
-    protected String errorMsg;
+    private boolean m_isFileMode;
 
     public Export2MzIdentMLFilePanel(DefaultDialog parent) {
+        this(parent, true);
+    }
+
+    public Export2MzIdentMLFilePanel(DefaultDialog parent, boolean fileMode) {
         m_parent = parent;
         setLayout(new BorderLayout());
+        m_isFileMode = fileMode;
         add(createMainPanel(), BorderLayout.CENTER);
 
     }
-
     private JPanel createMainPanel() {
         JPanel exportPanel = new JPanel();
         String defaultExportPath;
@@ -68,6 +71,7 @@ public class Export2MzIdentMLFilePanel extends JPanel {
         c.gridwidth = 2;
         m_fileTextField = new JTextField(30);
         m_fileTextField.setText(defaultExportPath);
+        m_fileTextField.setEditable(false);
         exportPanel.add(m_fileTextField, c);
          
         final JButton addFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
@@ -76,21 +80,52 @@ public class Export2MzIdentMLFilePanel extends JPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-            m_fchooser = new JFileChooser();
+            m_fchooser = new JFileChooser(defaultExportPath);
+            if(m_isFileMode){
+                m_fchooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            } else{
+                m_fchooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            }
+
             m_fchooser.setFileFilter(new FileNameExtensionFilter("MzIdent file", "mzid", "MZID"));
                              
-                int result = m_fchooser.showOpenDialog(addFileButton);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    File file = m_fchooser.getSelectedFile();
-                    
-                    String absolutePath = file.getAbsolutePath();
-                    String fileName = file.getName();
-                    if (fileName.indexOf('.') == -1) {
-                        absolutePath += "."+"mzid";
-                    }
-                    m_fileTextField.setText(absolutePath);
-                }            
+            int result = m_fchooser.showOpenDialog(addFileButton);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File file = m_fchooser.getSelectedFile();
+                File parentDir = file.getParentFile();
+                boolean folderSpecified = false;
+                if(!file.exists()){
+                    folderSpecified = false;
+                } else {
+                    folderSpecified = file.isDirectory();
+                }
+
+                if(m_isFileMode && folderSpecified){
+                    JOptionPane.showMessageDialog(m_parent, "You should specify a file name.", "Select File Error", JOptionPane.ERROR_MESSAGE);
+                    m_fileTextField.setText("");
+                    return;
+                }
+
+                if(!m_isFileMode && folderSpecified) {
+                    m_fileTextField.setText(file.getAbsolutePath());
+                    return;
+                }
+
+                if(!m_isFileMode && !folderSpecified) {
+                    m_fileTextField.setText(parentDir.getAbsolutePath());
+                    return;
+                }
+
+                //is a file and in filemode
+                String absolutePath = file.getAbsolutePath();
+                String fileName = file.getName();
+                if(!FilenameUtils.getExtension(fileName).equalsIgnoreCase("mzid")){
+                    absolutePath += ".mzid";
+                }
+                m_fileTextField.setText(absolutePath);
             }
+        }
+
         });
         
         c.gridx+=2;

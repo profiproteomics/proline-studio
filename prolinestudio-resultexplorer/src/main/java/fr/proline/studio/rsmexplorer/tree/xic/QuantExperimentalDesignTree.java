@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 /**
@@ -78,7 +79,7 @@ public class QuantExperimentalDesignTree extends AbstractTree {
 
         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        XICTransferHandler handler = new XICTransferHandler(false, this, restrictToDnDToItself);
+        XICTransferHandler handler = new XICTransferHandler(false, !canImport, this, restrictToDnDToItself);
         super.setTransferHandler(handler);
 
         if (canImport) {
@@ -404,17 +405,17 @@ public class QuantExperimentalDesignTree extends AbstractTree {
      * Extract from ExperimentalDesignTree the Ids of all the RSMs that will be quantified.
      * @param node : root node containing XIC Experimental Design nodes 
      */
-    public static List<Long> getQuantifiedRsmIds(AbstractNode node) {
+    public List<Long> getQuantifiedRsmIds(AbstractNode node) {
         final List<Long> rsmIds = new ArrayList<>();
-        Enumeration xicGrps = node.children();
+        Enumeration<TreeNode> xicGrps = node.children();
         while (xicGrps.hasMoreElements()) {
             AbstractNode grpNode = (AbstractNode) xicGrps.nextElement();
             if (XICBiologicalGroupNode.class.isAssignableFrom(grpNode.getClass())) {
                 //Iterate over Samples
-                Enumeration grpSpls = grpNode.children();
+                Enumeration<TreeNode> grpSpls = grpNode.children();
                 while (grpSpls.hasMoreElements()) {
                     AbstractNode splNode = (AbstractNode) grpSpls.nextElement();
-                    Enumeration identRSMs = splNode.children();
+                    Enumeration<TreeNode> identRSMs = splNode.children();
                     while (identRSMs.hasMoreElements()) {
                         AbstractNode identNode = (AbstractNode) identRSMs.nextElement();
                         if (XICBiologicalSampleAnalysisNode.class.isAssignableFrom(identNode.getClass())) {
@@ -572,8 +573,8 @@ public class QuantExperimentalDesignTree extends AbstractTree {
         masterQuantChannelParams.put("name", node.getData().getName());
         masterQuantChannelParams.put("quant_channels", quantChanneList);
         if (refDataset != null) {
-            masterQuantChannelParams.put("ident_dataset_id", (refRsmId != null) ? refRsmId : refDataset.getId());
-            masterQuantChannelParams.put("ident_result_summary_id", refDataset.getResultSummaryId());
+            masterQuantChannelParams.put("ident_dataset_id", refDataset.getId());
+            masterQuantChannelParams.put("ident_result_summary_id",  (refRsmId != null) ? refRsmId : (refRsmId != null) ? refRsmId : refDataset.getResultSummaryId());
         }
         masterQuantChannelsList.add(masterQuantChannelParams);
         experimentalDesignParams.put("master_quant_channels", masterQuantChannelsList);

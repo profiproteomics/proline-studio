@@ -489,7 +489,7 @@ public class ExportDialog extends DefaultDialog {
                     PrintWriter pw = new PrintWriter(sw);
                     e.printStackTrace(pw);
                     String message = sw.toString();
-                    InfoDialog errorDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Error", message);
+                    InfoDialog errorDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Error", message, true);
                     errorDialog.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
                     errorDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
                     errorDialog.setVisible(true);

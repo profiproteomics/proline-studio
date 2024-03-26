@@ -31,10 +31,6 @@ import java.awt.RenderingHints;
 public class ProteinSequence extends ViewPtmAbstract {
 
     String m_sequence;
-    /**
-     * the PTM Site Position on the proteine sequence
-     */
-    private int m_ptmSeqPos;
 
     public ProteinSequence() {
         this.x0 = 0;
@@ -61,41 +57,19 @@ public class ProteinSequence extends ViewPtmAbstract {
     public void paint(Graphics2D g, ViewContext viewContext) {
         if (m_sequence == null)
             return;
-        int aaWidth = ViewSetting.WIDTH_AA;
-        int aaHeight = ViewSetting.HEIGHT_AA;
 
-        // For debug only
-//        g.setColor(Color.lightGray);
-//        for (int i = 0; i < _sequenceView.length(); i++){
-//            String letter = Character.toString(_sequenceView.charAt(i));
-//            g.drawRect((int)(x0 + aaWidth *(i+1)), y0, (int)(aaWidth), ViewSetting.HEIGHT_AA);
-//        }
         g.setFont(ViewSetting.FONT_SEQUENCE);
         g.setColor(ViewSetting.SEQUENCE_COLOR);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        g.drawString(m_sequence, (x0 + aaWidth), y0 + ViewSetting.HEIGHT_AA); //x, y are base line begin x, y
+        g.drawString(m_sequence, (x0 + ViewSetting.WIDTH_AA), y0 + ViewSetting.HEIGHT_AA); //x, y are base line begin x, y
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-        //g.drawRect(x0+aaWidth*(this._pTMSeqPos-adjuste), y0, aaWidth, ViewSetting.HEIGHT_AA);
-        if (m_ptmSeqPos >= 0) {
-            int xPtmA = x0 + aaWidth * (this.m_ptmSeqPos);
-            g.setColor(Color.red);
-            int[] xPtm = {xPtmA, xPtmA + aaWidth, xPtmA + aaWidth / 2};
-            int yPtmA = y0 + aaHeight + 2;
-            int[] yPtm = {yPtmA, yPtmA, yPtmA + aaHeight / 2};
-            g.fillPolygon(xPtm, yPtm, yPtm.length);
-        }
+
     }
 
-    public void setPTMSequencePosition(int i) {
-        this.m_ptmSeqPos = i;
-    }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(m_sequence);
-        if (m_ptmSeqPos >= 0) {
-            sb.append("PTMSite @ " + m_ptmSeqPos);
-        }
         return sb.toString();
     }
 }

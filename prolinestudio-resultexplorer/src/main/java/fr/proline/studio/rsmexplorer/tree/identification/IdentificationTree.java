@@ -129,11 +129,12 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
         Preferences preferences = NbPreferences.root();
         String naming = preferences.get(ImportManager.DEFAULT_SEARCH_RESULT_NAME_SOURCE_KEY, ImportManager.MSI_SEARCH_FILE_NAME_SOURCE);
 
-        Enumeration<AbstractNode> e = root.depthFirstEnumeration();
+        Enumeration<TreeNode> e = root.depthFirstEnumeration();
 
         while (e.hasMoreElements()) {
 
-            AbstractNode currentElement = e.nextElement();
+            // TODO avoid this cast due to AbstractNode API modification (jdk13)
+            AbstractNode currentElement = (AbstractNode)e.nextElement();
 
             if (currentElement.getType() == AbstractNode.NodeTypes.DATA_SET) {
 
@@ -705,7 +706,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 // create the actions
                 Boolean showHiddenFunctionnality = false; // JPM.TODO : completely removed for the moment preferences.getBoolean("Profi", false);
 
-                m_mainActions = new ArrayList<>(27);  // <--- get in sync
+                m_mainActions = new ArrayList<>(24);  // <--- get in sync
 
 
                 DisplayRsetAction displayRsetAction = new DisplayRsetAction(this);

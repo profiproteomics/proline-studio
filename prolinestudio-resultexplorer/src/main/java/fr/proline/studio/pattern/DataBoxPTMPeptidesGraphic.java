@@ -24,13 +24,11 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
-import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
 import fr.proline.studio.rsmexplorer.gui.ptm.PTMGraphicCtrlPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class is very similaire as DataBoxPTMSitePeptides
@@ -65,7 +63,7 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
 
     @Override
     public void createPanel() {
-        PTMGraphicCtrlPanel p = new PTMGraphicCtrlPanel(true);
+        PTMGraphicCtrlPanel p = new PTMGraphicCtrlPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);
@@ -97,6 +95,10 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
                     ((PTMGraphicCtrlPanel) getDataBoxPanelInterface()).setSelectedProtein(proteinMatch);
                 }
                 if (finished) {
+                    resetPrevPTMTaskId();
+                    ((PTMGraphicCtrlPanel) getDataBoxPanelInterface()).setData(m_ptmPepInstances);
+                    addDataChanged(PTMPeptideInstance.class, null);  //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
+                    propagateDataChanged();
                     unregisterTask(taskId);
                 }
             }
@@ -121,19 +123,8 @@ public class DataBoxPTMPeptidesGraphic extends AbstractDataBoxPTMPeptides {
             graphicView.setData(null);
             return;
         }
-        loadPeptidesInstances();
-//        final List<PTMSite> notLoadedPtmSite = getNotLoadedPTMSite();
-//
-//        if (notLoadedPtmSite.isEmpty()) {
-            resetPrevPTMTaskId();
-            graphicView.setData(m_ptmPepInstances);
-            addDataChanged(PTMPeptideInstance.class, null);  //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
-            propagateDataChanged();
 
-//        } else {
-//
-//            loadPtmSite(notLoadedPtmSite);
-//        }
+        loadPeptidesInstances();
 
     }
 

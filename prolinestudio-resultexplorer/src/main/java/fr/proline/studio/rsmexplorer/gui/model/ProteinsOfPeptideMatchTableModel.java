@@ -30,7 +30,7 @@ import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.HashMap;
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 
 /**
@@ -135,7 +136,7 @@ public class ProteinsOfPeptideMatchTableModel extends DecoratedTableModel implem
             case COLTYPE_PROTEIN_MASS:               
                 DBioSequence bioSequence = proteinMatch.getDBioSequence();
                 if (bioSequence != null) {                    
-                    return new Float(bioSequence.getMass());
+                    return Float.valueOf((float) bioSequence.getMass());
                 } else 
                     return Float.NaN; // unknown
             }
@@ -351,11 +352,11 @@ public class ProteinsOfPeptideMatchTableModel extends DecoratedTableModel implem
                 break;
             }
             case COLTYPE_PROTEIN_MASS: {
-                renderer = new FloatRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)) );
+                renderer = new FloatRenderer( new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class) , JLabel.RIGHT));
                 break;
             }
             case COLTYPE_PROTEIN_PEPTIDES_COUNT: {
-                renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class), JLabel.RIGHT);
                 break;
             }
 

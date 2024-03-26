@@ -970,8 +970,8 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
 
         if (m_moveGesture.isMoving()) {
 
-            int modifier = e.getModifiers();
-            boolean isCtrlOrShiftDown = ((modifier & (InputEvent.SHIFT_MASK | InputEvent.CTRL_MASK)) != 0);
+            int modifier = e.getModifiersEx();
+            boolean isCtrlOrShiftDown = ((modifier & (InputEvent.SHIFT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK)) != 0);
 
             m_moveGesture.stopMoving(x, y, isCtrlOrShiftDown);
             setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
@@ -980,8 +980,8 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         } else if (m_selectionGesture.isSelecting()) {
             m_selectionGesture.stopSelection(x, y);
 
-            int modifier = e.getModifiers();
-            boolean isCtrlOrShiftDown = ((modifier & (InputEvent.SHIFT_MASK | InputEvent.CTRL_MASK)) != 0);
+            int modifier = e.getModifiersEx();
+            boolean isCtrlOrShiftDown = ((modifier & (InputEvent.SHIFT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK)) != 0);
 
             int action = m_selectionGesture.getAction();
             if (action == SelectionGestureLasso.ACTION_CLICK) {
@@ -1625,8 +1625,8 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         boolean zoomY = false;
         boolean zoomYRight  = false;
         
-        int modifier = e.getModifiers();
-        boolean isCtrlOrShiftDown = ((modifier & (InputEvent.SHIFT_MASK | InputEvent.CTRL_MASK)) != 0);
+        int modifier = e.getModifiersEx();
+        boolean isCtrlOrShiftDown = ((modifier & (InputEvent.SHIFT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK)) != 0);
             
         if (insidePlotArea(e.getX(), e.getY())) {
             zoomX = true;

@@ -104,12 +104,17 @@ public class DatabaseRsummaryProperties extends AbstractDatabaseTask {
         // Count peptide instances 
         TypedQuery<Long> countPeptidesQuery = entityManagerMSI.createQuery("SELECT count(pi) FROM PeptideInstance pi WHERE pi.resultSummary.id=:rsmId AND pi.validatedProteinSetCount > 0", Long.class);
         countPeptidesQuery.setParameter("rsmId", rsmId);
-        rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).setNumberOfPeptides(countPeptidesQuery.getSingleResult().intValue());
-        
-        // Count peptide matches 
-        TypedQuery<Long> countPeptideMatchesQuery = entityManagerMSI.createQuery("SELECT  sum(pi.peptideMatchCount) FROM PeptideInstance pi WHERE pi.resultSummary.id=:rsmId AND pi.validatedProteinSetCount > 0", Long.class);
-        countPeptideMatchesQuery.setParameter("rsmId", rsmId);
-        rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).setNumberOfPeptideMatches(countPeptideMatchesQuery.getSingleResult().intValue());
+        Long nbPepInst = countPeptidesQuery.getSingleResult();
+        rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).setNumberOfPeptides(nbPepInst.intValue());
+
+        Long nbPepMatch = 0l;
+        if(nbPepInst >0) {
+            // Count peptide matches
+            TypedQuery<Long> countPeptideMatchesQuery = entityManagerMSI.createQuery("SELECT  sum(pi.peptideMatchCount) FROM PeptideInstance pi WHERE pi.resultSummary.id=:rsmId AND pi.validatedProteinSetCount > 0", Long.class);
+            countPeptideMatchesQuery.setParameter("rsmId", rsmId);
+            nbPepMatch = countPeptideMatchesQuery.getSingleResult();
+        }
+        rsm.getTransientData(TransientMemoryCacheManager.getSingleton()).setNumberOfPeptideMatches(nbPepMatch.intValue());
 
     }
 }

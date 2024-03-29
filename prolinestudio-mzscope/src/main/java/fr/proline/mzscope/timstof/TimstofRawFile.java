@@ -201,8 +201,8 @@ public class TimstofRawFile implements IRawFile{
                     spectrum.setTitle(ms1Frame.getId()+"_empty_scan_"+indexInFrameSpectra);
                 }
             } else {
-                //TODO VDS TO TEST if correct to fix  SpectrumGeneratingMethod.SMOOTH  or ask user...
-                fr.profi.bruker.timstof.model.Spectrum tfSp = tf.getSingleSpectrum(SpectrumGeneratingMethod.SMOOTH);
+                //TODO VDS TO TEST if correct to fix  SpectrumGeneratingMethod.SMOOTH  or ask user... => if SMOOTH set to ScanMode centroid
+                fr.profi.bruker.timstof.model.Spectrum tfSp = tf.getSingleSpectrum(SpectrumGeneratingMethod.FULL);
                 spectrum  = new Spectrum(spectrumIndex, (float) tf.getTime(), tfSp.getMasses(), tfSp.getIntensities(), 1);
                 spectrum.setTitle(tfSp.getTitle());
             }

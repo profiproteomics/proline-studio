@@ -1747,8 +1747,14 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         //Get ProtMatches PepCount and Status in all Quant Channels RSMs
         if (dataset != null && dataset.getMasterQuantitationChannels() != null && !dataset.getMasterQuantitationChannels().isEmpty()) {
             listQC = dataset.getMasterQuantitationChannels().get(0).getQuantitationChannels();
-            List<Long> rsmsIds = listQC.stream().map(aQch -> aQch.getIdentResultSummaryId()).toList();
-            Map<Long, Long> qchIdsByrsmIds = listQC.stream().collect(Collectors.toMap(qch -> qch.getIdentResultSummaryId(), qch -> qch.getId()));
+            List<Long> rsmsIds = listQC.stream().map(aQch -> aQch.getIdentResultSummaryId()).distinct().toList();
+            Map<Long, ArrayList<Long>> qchIdsByRsmIds = new HashMap<>();
+            for(DQuantitationChannel nextQch : listQC){
+                Long rsmId  = nextQch.getIdentResultSummaryId();
+                if(!qchIdsByRsmIds.containsKey(rsmId))
+                    qchIdsByRsmIds.put(rsmId, new ArrayList<>());
+                qchIdsByRsmIds.get(rsmId).add(nextQch.getId());
+            }
 
             PerformanceTest.startTime("fetchProteinSetData queryProtSetStatus");
             queryProtSetStatus.setParameter("rsmIds", rsmsIds);
@@ -1777,10 +1783,12 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 if (!isProtSetValidated) {
                     protMatchStatus = "Invalid " + protMatchStatus;
                 }
-                Long qChId = qchIdsByrsmIds.get(rsmId);
-                if(!protMatchStatusByIdByQcId.containsKey(qChId))
-                    protMatchStatusByIdByQcId.put(qChId, new HashMap<>());
-                protMatchStatusByIdByQcId.get(qChId).put(proteinMatchId, protMatchStatus);
+                ArrayList<Long> qChIds = qchIdsByRsmIds.get(rsmId);
+                for(Long qChId : qChIds) {
+                    if (!protMatchStatusByIdByQcId.containsKey(qChId))
+                        protMatchStatusByIdByQcId.put(qChId, new HashMap<>());
+                    protMatchStatusByIdByQcId.get(qChId).put(proteinMatchId, protMatchStatus);
+                }
             }
             PerformanceTest.stopTime("fetchProteinSetData queryProtSetStatus");
 

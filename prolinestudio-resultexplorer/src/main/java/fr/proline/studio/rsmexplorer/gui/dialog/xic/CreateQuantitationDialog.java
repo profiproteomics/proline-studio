@@ -632,9 +632,10 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog implements Q
                 preferences.putBoolean(AbstractLabelFreeMSParamsPanel.XIC_SIMPLIFIED_PARAMS, LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().isSimplifiedPanel());
 
                 // Save Quant Method  Parameters if exist
-                if(m_quantMethodParamsPanel!=null) {
+                if(m_quantMethodParamsPanel!=null ) {
                     ParameterList qMethodParameterList = m_quantMethodParamsPanel.getParameterList();
-                    qMethodParameterList.saveParameters(preferences);
+                    if(qMethodParameterList!=null)
+                        qMethodParameterList.saveParameters(preferences);
                 }
                 return true;
         }

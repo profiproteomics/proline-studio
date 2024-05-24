@@ -51,7 +51,7 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
     private BooleanParameter m_useLastPeakelDetectionParam = new BooleanParameter("useLastPeakelDetection", "Use last peakel detection", JCheckBox.class, Boolean.FALSE);
     private BooleanParameter m_alnIgnoreErrorsParameter = new BooleanParameter("ignoreErrors", "Ignore Alignment Errors", JCheckBox.class, Boolean.FALSE);
     private BooleanParameter m_crossAssignUseMozCalibrationParameter = new BooleanParameter("useMozCalibration", "Use Moz Calibration", JCheckBox.class, Boolean.TRUE);
-    private BooleanParameter m_crossAssignUseAutoTimeTolParameter = new BooleanParameter("useAutomaticTimeTol", "Use Automatic RT Tolerance", JCheckBox.class, Boolean.FALSE);
+    private BooleanParameter m_crossAssignUseAutoTimeTolParameter;// = new BooleanParameter("useAutomaticTimeTol", "Use Automatic RT Tolerance", JCheckBox.class, Boolean.FALSE);
 
     private JTextField m_extractionMoZTolTF;
     private JTextField m_psmMatchingMoZTolTF;
@@ -156,6 +156,9 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
         for (AbstractParameter param : m_parameterList) {
             param.setUsed(true);
         }
+        //Until available, force m_crossAssignFeatureMappUseAutoRTTolCB to disable
+        m_crossAssignFeatureMappUseAutoRTTolCB.setEnabled(false);
+        m_crossAssignFeatureMappUseAutoRTTolCB.setSelected(false);
 
     }
 
@@ -1175,7 +1178,8 @@ public class LabelFreeMSParamsCompletePanel extends AbstractLabelFreeMSParamsPan
 
     private void updateCrossAssignmentSettings() {
         //Until available, force m_crossAssignFeatureMappUseAutoRTTolCB to disable
-        m_crossAssignFeatureMappUseAutoRTTolCB.setEnabled(false);
+//        m_crossAssignFeatureMappUseAutoRTTolCB.setEnabled(false);
+//        m_crossAssignFeatureMappUseAutoRTTolCB.setSelected(false);
         boolean isAutoRT = m_crossAssignFeatureMappUseAutoRTTolCB.isSelected();
         m_crossAssignFeatureMappMinAutoRTTolTF.setVisible(isAutoRT);
         m_crossAssignFeatureMappMaxAutoRTTolTF.setVisible(isAutoRT);

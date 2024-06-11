@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui.xic;
 
+import fr.proline.core.orm.msi.MasterQuantComponent;
 import fr.proline.core.orm.msi.MasterQuantReporterIon;
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
@@ -187,8 +188,6 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
     public Class getColumnClass(int col) {
         if (col == COLTYPE_PEPTIDE_MATCH_REP_ION_ID)
             return Long.class;
-        else if(col == COLTYPE_PEPTIDE_MATCH_REP_ION_STATUS)
-            return XicStatusRenderer.SelectLevel.class;
         return LazyData.class;
     }
 
@@ -350,8 +349,16 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
 
             }
             case COLTYPE_PEPTIDE_MATCH_REP_ION_STATUS:{
-                SelectLevelEnum selectionLevel =  SelectLevelEnum.valueOf(psmReporterIon.getMasterQuantComponent().getSelectionLevel());
-                return new XicStatusRenderer.SelectLevel(selectionLevel, selectionLevel);
+                LazyData lazyData = getLazyData(row, col);
+                MasterQuantComponent mqc = psmReporterIon.getMasterQuantComponent();
+                if(mqc == null){
+                    lazyData.setData(null);
+                    givePriorityTo(m_taskId, row, col);
+                } else {
+                    SelectLevelEnum selectionLevel =  SelectLevelEnum.valueOf(psmReporterIon.getMasterQuantComponent().getSelectionLevel());
+                    lazyData.setData(new XicStatusRenderer.SelectLevel(selectionLevel, selectionLevel));
+                }
+                return lazyData;
             }
             default: {
                 // Quant Channel columns
@@ -637,14 +644,14 @@ public class QuantPepMatchReporterIonTableModel extends LazyTableModel implement
                     return StringUtils.getTimeInMinutes(peptideMatchReportertIon.getTransientData().getPeptideMatch().getRetentionTime(), 2);
                 }
             }
-            case  COLTYPE_PEPTIDE_MATCH_REP_ION_STATUS:{
-                XicStatusRenderer.SelectLevel selectLevel =(XicStatusRenderer.SelectLevel)  getValueAt(row, col);
-                return selectLevel.getDescription();
-//                Integer selectionLevel= (Integer)  getValueAt(row, col);
-//                switch (selectionLevel) {
-//                    case 1 : return  "invalid";
-//                    default: return "valid";
-//                }
+            case  COLTYPE_PEPTIDE_MATCH_REP_ION_STATUS: {
+                MasterQuantComponent mqc = peptideMatchReportertIon.getMasterQuantComponent();
+                if(mqc == null){
+                    return SelectLevelEnum.UNKNOWN.getDescription();
+                } else {
+                    SelectLevelEnum selectionLevel =  SelectLevelEnum.valueOf(mqc.getSelectionLevel());
+                    return selectionLevel.getDescription();
+                }
             }
             case COLTYPE_PEPTIDE_MATCH_PIF:{
                 DPeptideMatch peptideMatch = peptideMatchReportertIon.getTransientData().getPeptideMatch();

@@ -138,8 +138,7 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
 
         // save parameters
         Preferences preferences = NbPreferences.root();
-        m_quantPostProcessingPanel.getParameterList().saveParameters(preferences);
-
+      saveParameters(preferences);
         return true;
 
     }

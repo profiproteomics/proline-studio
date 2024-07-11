@@ -17,6 +17,7 @@
 package fr.proline.studio.rsmexplorer.actions.xic;
 
 import fr.proline.core.orm.uds.Project;
+import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
@@ -35,10 +36,8 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
@@ -75,6 +74,8 @@ public class AggregateQuantitationsAction extends AbstractRSMAction {
         final DDataset[] loadedQuantitations = new DDataset[selectedNodes.length];//to ensure the same order as selected node 
 
         m_nbLoadedQuanti = 0;
+        List<QuantitationMethod> m_quantMethods = new ArrayList<>();
+
         for (AbstractNode n : selectedNodes) {
             if (!n.isRoot() && DataSetNode.class.isInstance(n)) {
                 DataSetNode node = (DataSetNode) n;
@@ -93,11 +94,24 @@ public class AggregateQuantitationsAction extends AbstractRSMAction {
                             DDataset quantiDs = dataset.getDataset();
                             long idQuanti = quantiDs.getId();
                             int index = quantiId.indexOf(idQuanti);
+                            m_quantMethods.add(quantiDs.getQuantitationMethod());
                             loadedQuantitations[index] = quantiDs;
                             m_nbLoadedQuanti++;
                             if (m_nbLoadedQuanti == selectedNodes.length) {
-                                List<DDataset> loadedSelectedQuanti = Arrays.stream(loadedQuantitations).collect(Collectors.toList());
-                                createAggregationDialog(loadedSelectedQuanti, x, y);
+                                boolean launchAgregate = true;
+                                Set<String> qmNames = m_quantMethods.stream().map(qm -> qm.getName()).collect(Collectors.toSet());
+                                if(qmNames.size() > 1){
+                                    StringBuffer sb = new StringBuffer("You are about to aggregate different quantitation methods: ");
+                                    qmNames.forEach(e ->sb.append("\n- "+e));
+                                    sb.append("\n\nAre you sure you want to continue ?");
+                                    int response = JOptionPane.showConfirmDialog(WindowManager.getDefault().getMainWindow(), sb.toString(), "Aggregation Warning. ",JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                                    launchAgregate = response == JOptionPane.YES_OPTION;
+                                }
+
+                                if(launchAgregate) {
+                                    List<DDataset> loadedSelectedQuanti = Arrays.stream(loadedQuantitations).collect(Collectors.toList());
+                                    createAggregationDialog(loadedSelectedQuanti, x, y);
+                                }
                             }
                         }
                     }

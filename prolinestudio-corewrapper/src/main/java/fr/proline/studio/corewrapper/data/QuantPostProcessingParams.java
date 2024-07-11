@@ -69,8 +69,6 @@ public class QuantPostProcessingParams {
     public final static String USE_PURITY_CORRECTION_MATRIX= "use_purity_correction_matrix";
     public final static String PURITY_CORRECTION_MATRIX= "purity_correction_matrix";
 
-    public final static String PSM_ABUNDANCE_SUMMARIZING_METHOD_VALUE = "psm_ion_abundance_summarizing_method";
-
     public final static String PSM_ABUNDANCE_SUMMARIZING_METHOD_KEY = "reporter_ion_abundance_summarizing_method";
 
     public final static String PSM_ABUNDANCE_SUMMARIZING_SUM_METHOD_VALUE = "Sum";

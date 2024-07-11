@@ -22,8 +22,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.List;
 import java.util.*;
@@ -88,14 +86,16 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
 
     private final QuantitationMethod m_quantitationMethod;
     Map<Long, String> m_ptmSpecificityNameById;
+    boolean m_isValidLabeledQMethod;
 
 
-    public QuantSimplifiedPostProcessingPanel(boolean readOnly, QuantitationMethod quantitationMethod, DDatasetType.QuantitationMethodInfo quantitationMethodInfo, Map<Long, String> ptmSpecificityNameById) {
+    public QuantSimplifiedPostProcessingPanel(boolean readOnly, QuantitationMethod quantitationMethod, DDatasetType.QuantitationMethodInfo quantitationMethodInfo, Map<Long, String> ptmSpecificityNameById, boolean isValidLabeledQMethod) {
         super();
         m_readOnly = readOnly;
         m_ptmSpecificityNameById = ptmSpecificityNameById;
         m_quantitationMethodInfo = quantitationMethodInfo;
         m_quantitationMethod = quantitationMethod;
+        m_isValidLabeledQMethod = isValidLabeledQMethod;
         init();
     }
 
@@ -212,7 +212,6 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
 
 
         paramKey = QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.PSM_ABUNDANCE_SUMMARIZING_METHOD_KEY);
-        String paramName = QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.PSM_ABUNDANCE_SUMMARIZING_METHOD_VALUE);
         m_psmAbundanceSummarizingMethodCB = new JComboBox<>(QuantPostProcessingParams.getPSMAbundanceSummarizingMethodValues());
         m_psmAbundanceSummarizingMethodCB.setEnabled(!m_readOnly);
         String psmSummarizingLabel = "PSM Abundance Summarizing Method";
@@ -292,11 +291,11 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
 
             //redefine
             if(key.startsWith(filePrefix+QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.USE_PURITY_CORRECTION_MATRIX)) ){
-                usePurityMatrix =  filePreferences.getBoolean(key, false) &&  m_quantitationMethodInfo.equals(DDatasetType.QuantitationMethodInfo.ISOBARIC_TAGGING);
+                usePurityMatrix =  filePreferences.getBoolean(key, false) &&  m_quantitationMethodInfo.equals(DDatasetType.QuantitationMethodInfo.ISOBARIC_TAGGING) && m_isValidLabeledQMethod;
                 filePreferences.put(filePrefix+QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.USE_PURITY_CORRECTION_MATRIX), Boolean.toString(usePurityMatrix));
             }
 
-            if(key.startsWith(filePrefix+QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.PURITY_CORRECTION_MATRIX)) && m_quantitationMethodInfo.equals(DDatasetType.QuantitationMethodInfo.ISOBARIC_TAGGING)){
+            if(key.startsWith(filePrefix+QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.PURITY_CORRECTION_MATRIX)) && m_quantitationMethodInfo.equals(DDatasetType.QuantitationMethodInfo.ISOBARIC_TAGGING) && m_isValidLabeledQMethod){
                 m_purityMatrixValues = filePreferences.get(key, null);
                 if(m_purityMatrixValues != null && !m_purityMatrixValues.isEmpty())
                     purityMatrixDefined = true;
@@ -456,108 +455,6 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         JPanel psmPanel = new JPanel(new BorderLayout());
         psmPanel.setBorder(BorderFactory.createTitledBorder(" PSMs "));
 
-        JPanel psmMatrixPanel = new JPanel(new BorderLayout());
-        psmMatrixPanel.setBorder(m_usePurityCorrectionMatrixCBoxTitle);
-        if(! m_readOnly) {
-            m_psmMatrixPanel = new JPanel();
-            m_psmMatrixPanel.setLayout(new GridBagLayout());
-            GridBagConstraints c = new GridBagConstraints();
-            c.anchor = GridBagConstraints.WEST;
-            c.fill = GridBagConstraints.NONE;
-            c.weightx = 0;
-            c.weighty = 0;
-            c.insets = new Insets(5, 5, 5, 5);
-            c.gridx = 0;
-            c.gridy = 0;
-            JLabel psmMatrixFileLabel = new JLabel("Select Purity Correction Matrix file:");
-            m_psmMatrixPanel.add(psmMatrixFileLabel, c);
-
-            c.gridx++;
-            c.insets = new Insets(5, 5, 5, 2);
-            JButton fileChooser = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
-            fileChooser.setMargin(new Insets(5, 5, 5, 5));
-            fileChooser.addActionListener(e -> getPurityMatrixFile());
-            m_psmMatrixPanel.add(fileChooser, c);
-
-            c.gridx++;
-            c.weightx = 1;
-            c.insets = new Insets(5, 0, 5, 5);
-            m_psmFileMatrixStatus = new JLabel();
-            m_psmFileMatrixStatus.setIcon(IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));
-            m_psmFileMatrixStatus.setBorder(new EmptyBorder(new Insets(1, 1, 1, 1)));
-            m_psmMatrixPanel.add(m_psmFileMatrixStatus, c);
-
-
-            //add create Matrix access
-            c.gridx = 0;
-            c.gridy++;
-            c.weightx = 0;
-            JLabel label2 = new JLabel("Specify Purity Correction Matrix :");
-            m_psmMatrixPanel.add(label2, c);
-            c.gridx++;
-            c.weightx = 0;
-            c.insets = new Insets(5, 5, 5, 2);
-            JButton matrixAccess = new JButton(IconManager.getIcon(IconManager.IconType.GRID));
-            matrixAccess.setMargin(new Insets(5, 5, 5, 5));
-            matrixAccess.addActionListener(e -> openMatrixDialog());
-            m_psmMatrixPanel.add(matrixAccess, c);
-
-            c.gridx++;
-            c.weightx = 1;
-            c.insets = new Insets(5, 0, 5, 5);
-            m_psmTableMatrixStatus = new JLabel();
-            m_psmTableMatrixStatus.setIcon(IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));
-            m_psmTableMatrixStatus.setBorder(new EmptyBorder(new Insets(1, 1, 1, 1)));
-            m_psmMatrixPanel.add(m_psmTableMatrixStatus, c);
-
-            //Buttons
-            c.gridy++;
-            c.anchor = GridBagConstraints.EAST;
-            c.fill = GridBagConstraints.NONE;
-            c.gridx++;
-            c.weightx = 1;
-            c.insets = new Insets(5, 0, 5, 2);
-            m_psmMatrixPanel.add(Box.createHorizontalGlue(), c);
-
-            c.gridx++;
-
-            c.weightx = 0;
-            JButton matrixView = new JButton("View Matrix");
-            matrixView.setMargin(new Insets(5, 5, 5, 5));
-            matrixView.addActionListener(e -> viewMatrixDialog());
-            m_psmMatrixPanel.add(matrixView, c);
-
-            c.gridx++;
-            c.weightx = 0;
-            m_savePurityMatrix = new JButton("Save Matrix");
-            m_savePurityMatrix.setMargin(new Insets(5, 5, 5, 5));
-            m_savePurityMatrix.addActionListener(e -> saveMatrixDialog());
-            m_psmMatrixPanel.add(m_savePurityMatrix, c);
-
-        } else { //readOnly : display purityMatrix
-            m_psmMatrixPanel = new JPanel();
-            m_psmMatrixPanel.setLayout(new GridBagLayout());
-            GridBagConstraints c = new GridBagConstraints();
-            c.anchor = GridBagConstraints.WEST;
-            c.fill = GridBagConstraints.BOTH;
-            c.weightx = 1;
-            c.weighty = 1;
-            c.insets = new Insets(5, 5, 5, 5);
-            c.gridx = 0;
-            c.gridy = 0;
-
-            JScrollPane readOnlyTableScrollPane = new JScrollPane();
-            DecoratedTable purityCorrectionTable = createReadOnlyTable();
-            readOnlyTableScrollPane.setViewportView(purityCorrectionTable);
-            readOnlyTableScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-            readOnlyTableScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-            purityCorrectionTable.setFillsViewportHeight(true);
-
-            m_psmMatrixPanel.add(readOnlyTableScrollPane,c);
-        }
-        setEnabled(m_psmMatrixPanel, !m_readOnly);
-        psmMatrixPanel.add(m_psmMatrixPanel, BorderLayout.NORTH);
-
         JPanel pifPanel = new JPanel(new GridBagLayout());
         pifPanel.setBorder(m_usePIFCBoxTitle);
         GridBagConstraints c = new GridBagConstraints();
@@ -573,9 +470,112 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         c.weightx = 0.5;
         c.gridx++;
         pifPanel.add(m_discardPSMPIFValueTF,c);
-
         psmPanel.add(pifPanel, BorderLayout.NORTH);
-        psmPanel.add(psmMatrixPanel, BorderLayout.CENTER);
+
+        if(m_isValidLabeledQMethod) {
+            JPanel psmMatrixPanel = new JPanel(new BorderLayout());
+            psmMatrixPanel.setBorder(m_usePurityCorrectionMatrixCBoxTitle);
+            if (!m_readOnly) {
+                m_psmMatrixPanel = new JPanel();
+                m_psmMatrixPanel.setLayout(new GridBagLayout());
+                GridBagConstraints gbc = new GridBagConstraints();
+                gbc.anchor = GridBagConstraints.WEST;
+                gbc.fill = GridBagConstraints.NONE;
+                gbc.weightx = 0;
+                gbc.weighty = 0;
+                gbc.insets = new Insets(5, 5, 5, 5);
+                gbc.gridx = 0;
+                gbc.gridy = 0;
+                JLabel psmMatrixFileLabel = new JLabel("Select Purity Correction Matrix file:");
+                m_psmMatrixPanel.add(psmMatrixFileLabel, gbc);
+
+                gbc.gridx++;
+                gbc.insets = new Insets(5, 5, 5, 2);
+                JButton fileChooser = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
+                fileChooser.setMargin(new Insets(5, 5, 5, 5));
+                fileChooser.addActionListener(e -> getPurityMatrixFile());
+                m_psmMatrixPanel.add(fileChooser, gbc);
+
+                gbc.gridx++;
+                gbc.weightx = 1;
+                gbc.insets = new Insets(5, 0, 5, 5);
+                m_psmFileMatrixStatus = new JLabel();
+                m_psmFileMatrixStatus.setIcon(IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));
+                m_psmFileMatrixStatus.setBorder(new EmptyBorder(new Insets(1, 1, 1, 1)));
+                m_psmMatrixPanel.add(m_psmFileMatrixStatus, gbc);
+
+
+                //add create Matrix access
+                gbc.gridx = 0;
+                gbc.gridy++;
+                gbc.weightx = 0;
+                JLabel label2 = new JLabel("Specify Purity Correction Matrix :");
+                m_psmMatrixPanel.add(label2, gbc);
+                gbc.gridx++;
+                gbc.weightx = 0;
+                gbc.insets = new Insets(5, 5, 5, 2);
+                JButton matrixAccess = new JButton(IconManager.getIcon(IconManager.IconType.GRID));
+                matrixAccess.setMargin(new Insets(5, 5, 5, 5));
+                matrixAccess.addActionListener(e -> openMatrixDialog());
+                m_psmMatrixPanel.add(matrixAccess, gbc);
+
+                gbc.gridx++;
+                gbc.weightx = 1;
+                gbc.insets = new Insets(5, 0, 5, 5);
+                m_psmTableMatrixStatus = new JLabel();
+                m_psmTableMatrixStatus.setIcon(IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));
+                m_psmTableMatrixStatus.setBorder(new EmptyBorder(new Insets(1, 1, 1, 1)));
+                m_psmMatrixPanel.add(m_psmTableMatrixStatus, gbc);
+
+                //Buttons
+                gbc.gridy++;
+                gbc.anchor = GridBagConstraints.EAST;
+                gbc.fill = GridBagConstraints.NONE;
+                gbc.gridx++;
+                gbc.weightx = 1;
+                gbc.insets = new Insets(5, 0, 5, 2);
+                m_psmMatrixPanel.add(Box.createHorizontalGlue(), gbc);
+
+                gbc.gridx++;
+
+                gbc.weightx = 0;
+                JButton matrixView = new JButton("View Matrix");
+                matrixView.setMargin(new Insets(5, 5, 5, 5));
+                matrixView.addActionListener(e -> viewMatrixDialog());
+                m_psmMatrixPanel.add(matrixView, gbc);
+
+                gbc.gridx++;
+                gbc.weightx = 0;
+                m_savePurityMatrix = new JButton("Save Matrix");
+                m_savePurityMatrix.setMargin(new Insets(5, 5, 5, 5));
+                m_savePurityMatrix.addActionListener(e -> saveMatrixDialog());
+                m_psmMatrixPanel.add(m_savePurityMatrix, gbc);
+
+            } else { //readOnly : display purityMatrix
+                m_psmMatrixPanel = new JPanel();
+                m_psmMatrixPanel.setLayout(new GridBagLayout());
+                GridBagConstraints gbc = new GridBagConstraints();
+                gbc.anchor = GridBagConstraints.WEST;
+                gbc.fill = GridBagConstraints.BOTH;
+                gbc.weightx = 1;
+                gbc.weighty = 1;
+                gbc.insets = new Insets(5, 5, 5, 5);
+                gbc.gridx = 0;
+                gbc.gridy = 0;
+
+                JScrollPane readOnlyTableScrollPane = new JScrollPane();
+                DecoratedTable purityCorrectionTable = createReadOnlyTable();
+                readOnlyTableScrollPane.setViewportView(purityCorrectionTable);
+                readOnlyTableScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+                readOnlyTableScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+                purityCorrectionTable.setFillsViewportHeight(true);
+
+                m_psmMatrixPanel.add(readOnlyTableScrollPane, gbc);
+            }
+            setEnabled(m_psmMatrixPanel, !m_readOnly);
+            psmMatrixPanel.add(m_psmMatrixPanel, BorderLayout.NORTH);
+            psmPanel.add(psmMatrixPanel, BorderLayout.CENTER);
+        }
         return psmPanel;
     }
 
@@ -826,7 +826,7 @@ public class QuantSimplifiedPostProcessingPanel extends JPanel {
         errorMsg = "";
         errorCompo = null;
 
-        if(m_quantitationMethodInfo.equals(DDatasetType.QuantitationMethodInfo.ISOBARIC_TAGGING) && m_usePurityCorrectionMatrixCBoxTitle.isSelected()){
+        if(m_quantitationMethodInfo.equals(DDatasetType.QuantitationMethodInfo.ISOBARIC_TAGGING)  && m_isValidLabeledQMethod && m_usePurityCorrectionMatrixCBoxTitle.isSelected()){
           if(m_purityMatrixValues == null || m_purityMatrixValues.isEmpty()) {//  if(m_purityMatrixFile == null ||!m_purityMatrixFile.exists()) {
             errorMsg = "No (or invalid) purity matrix specified ";
             errorCompo = m_psmMatrixPanel; //m_usePurityCorrectionMatrixCBoxTitle.getInternalCheckBox();

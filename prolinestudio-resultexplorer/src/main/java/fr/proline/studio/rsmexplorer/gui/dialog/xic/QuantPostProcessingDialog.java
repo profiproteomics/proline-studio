@@ -50,7 +50,9 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
     DDatasetType.QuantitationMethodInfo m_quantitationMethodInfo;
     QuantitationMethod m_quantitationMethod;
 
-   public QuantPostProcessingDialog(Window parent, ArrayList<PtmSpecificity> ptms, boolean isAggregation, QuantitationMethod quantitationMethod, DDatasetType.QuantitationMethodInfo quantitationMethodInfo, DDataset paramsFromdataset) {
+    boolean m_isValidLabeledQMethod;
+
+   public QuantPostProcessingDialog(Window parent, ArrayList<PtmSpecificity> ptms, boolean isAggregation, QuantitationMethod quantitationMethod, DDatasetType.QuantitationMethodInfo quantitationMethodInfo, DDataset paramsFromdataset, boolean isValidLabeledQMethod) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         setTitle("Compute Post-Processing on Abundances");
         setDocumentationSuffix("id.thw4kt");
@@ -62,6 +64,7 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
         setPreferredSize(new Dimension(600,800));
         m_quantitationMethodInfo = quantitationMethodInfo;
         m_quantitationMethod = quantitationMethod;
+        m_isValidLabeledQMethod = isValidLabeledQMethod;
         init(ptms, isAggregation, paramsFromdataset);
         pack();
     }
@@ -152,7 +155,7 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
 
     private void init(ArrayList<PtmSpecificity> ptms, boolean isAggregation, DDataset dataset) {
         Map<Long, String> ptmSpecificityNameById = ptms.stream().collect(Collectors.toMap(ptmS -> ptmS.getId(), ptmS -> ptmS.toString()));
-        m_quantPostProcessingPanel = new QuantSimplifiedPostProcessingPanel(false, m_quantitationMethod, m_quantitationMethodInfo, ptmSpecificityNameById);
+        m_quantPostProcessingPanel = new QuantSimplifiedPostProcessingPanel(false, m_quantitationMethod, m_quantitationMethodInfo, ptmSpecificityNameById, m_isValidLabeledQMethod);
 //        m_quantPostProcessingPanel = new QuantPostProcessingPanel(false, ptmSpecificityNameById);
         try {
             if ((dataset != null) && (dataset.getQuantProcessingConfigAsMap() != null)) {

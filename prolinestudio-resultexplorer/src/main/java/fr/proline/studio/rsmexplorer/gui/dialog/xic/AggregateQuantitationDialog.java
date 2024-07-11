@@ -16,9 +16,9 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
-import fr.proline.core.orm.uds.BiologicalGroup;
-import fr.proline.core.orm.uds.BiologicalSample;
+import fr.proline.core.orm.uds.*;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.rsmexplorer.gui.TreeUtils;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -27,12 +27,9 @@ import fr.proline.studio.rsmexplorer.tree.xic.*;
 import java.awt.BorderLayout;
 import java.awt.Dialog;
 import java.awt.Window;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import javax.swing.*;
 
@@ -70,8 +67,15 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
      * initals Quantitations
      */
     private List<DDataset> m_quantitations;
+
     /**
-     * first Quantitation as reference
+     *  Specify if this aggregation is done with only labelled quantitation, of same type
+     */
+    private boolean m_sameLabelledQuantMethodInfo;
+    private boolean m_validLabelledQuant;
+    List<QuantitationMethod> quantMethods;
+    /**
+     * Identification dataset reference, if commons to all quantitation
      */
     private DDataset m_refDataset = null;
 
@@ -93,14 +97,12 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
             throw new IllegalAccessException("Design parameters have not been set.");
         }
 
-        Map<String, Object> experimentalDesignParams = QuantExperimentalDesignTree.toExperimentalDesignParameters(m_experimentalDesignNode, m_refDataset, null);
-        return experimentalDesignParams;
+      return QuantExperimentalDesignTree.toExperimentalDesignParameters(m_experimentalDesignNode, m_refDataset, null);
     }
 
     public Map<String, Object> getQuantiParameters() {
         Map<String, Object> aggregationConfig = new HashMap<>();
-        aggregationConfig.put("quantitation_ids", m_quantitations.stream().map(d -> d.getId()).toArray());
-        //TOTOCHE
+        aggregationConfig.put("quantitation_ids", m_quantitations.stream().map(DDataset::getId).toArray());
         aggregationConfig.put("quant_channels_mapping", m_experimentalDesignPanel.getQuantChannelsMatching());
         aggregationConfig.put("intensity_computation_method_name", "INTENSITY_SUM"); // change manually to MOST_INTENSE to test another summarization method
         return aggregationConfig;
@@ -118,8 +120,13 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
      */
     public void setQuantitationDatasets(List<DDataset> loadedQuantitations) {
         m_quantitations = loadedQuantitations;
+        quantMethods = loadedQuantitations.stream().map(DDataset::getQuantitationMethod).toList();
+        Set<DDatasetType.QuantitationMethodInfo> quantMethodInfos = loadedQuantitations.stream().map(DDataset::getQuantMethodInfo).collect(Collectors.toSet());
+        m_sameLabelledQuantMethodInfo = quantMethodInfos.size() == 1;
+        m_validLabelledQuant = m_sameLabelledQuantMethodInfo ? isAllQuantiLabelled() : false;
+
         //for each dataset in m_quantitations, get it's getIdentDataset of getMasterQuantitationChannels id, ds=DDataset, ids = IdentDataset
-        List<Long> refDatasetIds = m_quantitations.stream().map(ds -> ds.getMasterQuantitationChannels().get(0).getIdentDataset()).map(ids -> (ids == null) ? -1 : ids.getId()).distinct().collect(Collectors.toList());
+        List<Long> refDatasetIds = m_quantitations.stream().map(ds -> ds.getMasterQuantitationChannels().get(0).getIdentDataset()).map(ids -> (ids == null) ? -1 : ids.getId()).distinct().toList();
         // If all quantification datasets are using the same reference, set that reference to m_refDataset
         if (refDatasetIds.size() == 1 && refDatasetIds.get(0) != -1) {
             DDataset dataset = m_quantitations.get(0);
@@ -153,7 +160,7 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
                 + " &nbsp - &nbsp <b>Remove association</b> by using contextual menu or toolbar<br>"
                 + " &nbsp - &nbsp <b>Move</b> analyses up or down by using contextual menu or toolbar";
         this.setHelpHeader(step1Title, step1Help);
-        if (m_quantitations != null && m_quantitations.size() > 0) {
+        if (m_quantitations != null && !m_quantitations.isEmpty()) {
 
             setButtonVisible(BUTTON_LOAD, false);
             setButtonVisible(BUTTON_SAVE, false);
@@ -165,9 +172,7 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
                 m_designPanel = new JPanel();
                 m_designPanel.setBorder(BorderFactory.createTitledBorder(" Experimental Design "));
                 m_designPanel.setLayout(new BorderLayout());
-
-                m_experimentalDesignPanel = new QuantAggregateExperimentalTreePanel(m_experimentalDesignNode, m_quantitations);
-                
+                m_experimentalDesignPanel = new QuantAggregateExperimentalTreePanel(m_experimentalDesignNode, m_quantitations, m_validLabelledQuant);
                 m_designPanel.add(m_experimentalDesignPanel, BorderLayout.CENTER);
 
                 TreeUtils.expandTree(m_experimentalDesignPanel.getTree(), true);
@@ -185,6 +190,12 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
             return false;
         }
         if (!checkBiologicalGroupName(m_experimentalDesignPanel.getTree(), m_experimentalDesignNode)) {
+            return false;
+        }
+
+        if(! m_experimentalDesignPanel.checkQCMapping()){
+            setStatus(true, "Invalid Channel mapping");
+            highlight(m_experimentalDesignPanel.getChannelPanel());
             return false;
         }
 
@@ -228,77 +239,125 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
             }
         }
         rootNode.insert(refDatasetNode, childIndex++);
-        int qcIndex = 1;
-        List<String> sortedGroupList = new ArrayList();
-        List<BiologicalGroup> groupList;
-        XICBiologicalGroupNode biologicalGroupNode;
-        Map<String, List<String>> groupSamplesMap = new HashMap();
-        List<String> sampleNameList;
-        // create Map<GroupName, List<BiologicalGroup>> by "collect" (ds = dataSet) (bg = BiologicalGroup)
-        Map<String, List<BiologicalGroup>> groups = m_quantitations.stream()
-                .map(ds -> ds.getGroupSetup().getBiologicalGroups())
-                .flatMap(Collection::stream)
-                .collect(Collectors.groupingBy(bg -> bg.getName(), Collectors.toList()));
-        for (DDataset Quant : m_quantitations) {
-            //create group List according first quanti group compositon
-            groupList = Quant.getGroupSetup().getBiologicalGroups();
-            List<String> sortedSampleList = new ArrayList();
-            for (BiologicalGroup group : groupList) {
-                String groupName = group.getName();
-                int gIndex = sortedGroupList.indexOf(groupName);
-                if (gIndex == -1) {
-                    sortedGroupList.add(groupName);
-                    groupSamplesMap.put(groupName, new ArrayList());
-                    biologicalGroupNode = new XICBiologicalGroupNode(DataSetData.createTemporaryAggregate(groupName));
-                    rootNode.insert(biologicalGroupNode, childIndex++);
-                } else {
-                    biologicalGroupNode = (XICBiologicalGroupNode) rootNode.getChildAt(gIndex + 1);//first node is rootNode
-                }
-                List<BiologicalSample> sampleList = group.getBiologicalSamples();
-                for (BiologicalSample sample : sampleList) {
-                    String sampleName = sample.getName();
-                    sampleNameList = groupSamplesMap.get(groupName);
-                    XICBiologicalSampleNode biologicalSampleNode;
-                    int sIndex = sampleNameList.indexOf(sampleName);
-                    if (sIndex == -1) {
-                        sampleNameList.add(sampleName);
-                        String shortSampleName = shortenSampleName(groupName, sampleName);
-                        biologicalSampleNode = new XICBiologicalSampleNode(DataSetData.createTemporaryAggregate(shortSampleName));
-                        //create XICBiologicalSampleNode under biologicalGroupNode
-                        biologicalGroupNode.insert(biologicalSampleNode, sampleNameList.size() - 1);
+        boolean isInferred  = false;
+//        if (m_sameLabelledQuantMethodInfo) {
+//            isInferred =  inferExperimentalDesignFromQuantLabel(rootNode);
+//        }
 
-                        Map<String, List<BiologicalSample>> samples = groups.get(groupName).stream().map(bg -> bg.getBiologicalSamples()).flatMap(Collection::stream).collect(Collectors.groupingBy(s -> s.getName(), Collectors.toList()));
-                        int maxReplicates = 0;
-                        for (BiologicalSample bs : samples.get(sampleName)) {
-                            int replicates = bs.getQuantitationChannels().size();
-                            maxReplicates = Math.max(replicates, maxReplicates);
-                        }
+        if(!isInferred){
+            int qcIndex = 1;
+            List<String> sortedGroupList = new ArrayList<>();
+            List<BiologicalGroup> groupList;
+            XICBiologicalGroupNode biologicalGroupNode;
+            Map<String, List<String>> groupSamplesMap = new HashMap<>();
+            List<String> sampleNameList;
+            // create Map<GroupName, List<BiologicalGroup>> by "collect" (ds = dataSet) (bg = BiologicalGroup)
+            Map<String, List<BiologicalGroup>> allDSGroupsByName = m_quantitations.stream()
+                    .map(ds -> ds.getGroupSetup().getBiologicalGroups())
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.groupingBy(BiologicalGroup::getName, Collectors.toList()));
 
-                        for (int i = 0; i < maxReplicates; i++) {
-                            //for each channel, give it a name with a number order
-                            String name = "Channel " + Integer.toString(qcIndex++);
-                            //empty DataSetData, who has only name
-                            DataSetData dsData = DataSetData.createTemporaryIdentification(name);
-                            //create a ChannelNode, with empty DataSetData; 
-                            XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(dsData);
-                            sampleAnalysisNode.setQuantChannelName(name);
-                            // created XICBiologicalSampleAnalysisNode under biologicalSampleNode
-                            biologicalSampleNode.insert(sampleAnalysisNode, biologicalSampleNode.getChildCount());
-                        }
+            for (DDataset dDataset : m_quantitations) {
+                //create group List according first quanti group compositon
+                groupList = dDataset.getGroupSetup().getBiologicalGroups();
+                for (BiologicalGroup dsCurrentGroup : groupList) {
+                    String groupName = dsCurrentGroup.getName();
+                    //create or get tree group node with same name
+                    int gIndex = sortedGroupList.indexOf(groupName);
+                    if (gIndex == -1) {
+                        sortedGroupList.add(groupName);
+                        groupSamplesMap.put(groupName, new ArrayList<>());
+                        biologicalGroupNode = new XICBiologicalGroupNode(DataSetData.createTemporaryAggregate(groupName));
+                        rootNode.insert(biologicalGroupNode, childIndex++);
+                    } else {
+                        biologicalGroupNode = (XICBiologicalGroupNode) rootNode.getChildAt(gIndex + 1);//first node is rootNode
                     }
-                }
-            }
-        }
-        //rename all channel
-        int cIndex = 1;
-        for (int i = 0; i < rootNode.getChildCount(); i++) {
-            AbstractNode groupNode = (AbstractNode) rootNode.getChildAt(i);//groupe node
-            if (XICBiologicalGroupNode.class.isInstance(groupNode)) {
-                for (int j = 0; j < groupNode.getChildCount(); j++) {
-                    AbstractNode sampleNode = (AbstractNode) groupNode.getChildAt(j);
-                    for (int k = 0; k < sampleNode.getChildCount(); k++) {
-                        XICBiologicalSampleAnalysisNode cNode = (XICBiologicalSampleAnalysisNode) sampleNode.getChildAt(k);
-                        cNode.setQuantChannelName("Channel " + cIndex++);
+
+                    List<BiologicalSample> sampleList = dsCurrentGroup.getBiologicalSamples();
+                    for (BiologicalSample dsCurrentSample : sampleList) {
+                        String sampleName = dsCurrentSample.getName();
+                        sampleNameList = groupSamplesMap.get(groupName); //reset sample list to current group's samples : outside for ..???  VDS
+                        XICBiologicalSampleNode biologicalSampleNode;
+                        int sIndex = sampleNameList.indexOf(sampleName);
+                        if (sIndex == -1) { //first time this group->sample is seen. Create all needed sampleAnalysis node (for all datasets)
+                            sampleNameList.add(sampleName);
+                            String shortSampleName = shortenSampleName(groupName, sampleName);
+                            biologicalSampleNode = new XICBiologicalSampleNode(DataSetData.createTemporaryAggregate(shortSampleName));
+                            //create XICBiologicalSampleNode under biologicalGroupNode
+                            biologicalGroupNode.insert(biologicalSampleNode, sampleNameList.size() - 1);
+
+                            Map<String, List<BiologicalSample>> allDSSamplesBySplName = allDSGroupsByName.get(groupName).stream().map(BiologicalGroup::getBiologicalSamples).flatMap(Collection::stream).collect(Collectors.groupingBy(BiologicalSample::getName, Collectors.toList()));
+
+                            //-- count SplAnalysisNode for all existing DS sample of current group
+                            int maxReplicates = 0;
+                            Map<QuantitationLabel,Integer> nbReplicateByLabel =new HashMap<>();
+                            for (BiologicalSample bs : allDSSamplesBySplName.get(sampleName)) {
+                                if(m_validLabelledQuant) {
+                                    Map<QuantitationLabel, List<QuantitationChannel>> qChByLabel= bs.getQuantitationChannels().stream().collect(Collectors.groupingBy(QuantitationChannel::getQuantitationLabel, Collectors.toList()));
+                                    for(QuantitationLabel currentLabel : qChByLabel.keySet()){
+                                        if(!nbReplicateByLabel.containsKey(currentLabel))
+                                            nbReplicateByLabel.put(currentLabel,0);
+                                        int maxNblabel = nbReplicateByLabel.get(currentLabel);
+                                        if(maxNblabel<qChByLabel.get(currentLabel).size())
+                                            nbReplicateByLabel.put(currentLabel,qChByLabel.get(currentLabel).size());
+                                    }
+                                } else {
+                                    int replicates = bs.getQuantitationChannels().size();
+                                    maxReplicates = Math.max(replicates, maxReplicates);
+                                }
+                            }
+                            if(m_validLabelledQuant) {
+                                AtomicInteger labelMaxCount = new AtomicInteger(0);
+                                nbReplicateByLabel.values().forEach(nb -> labelMaxCount.addAndGet(nb));
+                                maxReplicates = labelMaxCount.get();
+                            }
+
+                            //-- create SplAnalysisNode
+                            List<QuantitationLabel> allLabels = nbReplicateByLabel.keySet().stream().sorted(Comparator.comparingInt(QuantitationLabel::getNumber)).toList();
+                            for (int i = 0; i < maxReplicates; i++) {
+                                String suffix = "";
+                                Long currentLabelId = null;
+                                if(m_validLabelledQuant) {
+                                    int nbCumulativeLabel = 0;
+                                    for(QuantitationLabel nextLabel : allLabels){
+                                        int nbCurrentLabel = nbReplicateByLabel.get(nextLabel);
+                                        nbCumulativeLabel = nbCumulativeLabel+nbCurrentLabel;
+                                        if(i<nbCumulativeLabel) {
+                                            suffix ="-("+ nextLabel.getName()+")";
+                                            currentLabelId = nextLabel.getId();
+                                            break;
+                                        }
+                                    }
+                                }
+                                //for each channel, give it a name with a number order
+                                String name = "Channel" +suffix +" "+ qcIndex++;
+                                //empty DataSetData, who has only name
+                                DataSetData dsData = DataSetData.createTemporaryIdentification(name);
+                                //create a ChannelNode, with empty DataSetData;
+                                XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(dsData);
+                                sampleAnalysisNode.setQuantChannelName(name);
+                                sampleAnalysisNode.setQuantLabelId(currentLabelId);
+                                // created XICBiologicalSampleAnalysisNode under biologicalSampleNode
+                                biologicalSampleNode.insert(sampleAnalysisNode, biologicalSampleNode.getChildCount());
+                            }
+                        }
+                    } // end for DS samples
+                } //end for DS groups
+            } //end for all DSquant
+
+            //For none labelled quanti, rename all channel if some channel are empty
+            if(!m_validLabelledQuant) {
+                int cIndex = 1;
+                for (int i = 0; i < rootNode.getChildCount(); i++) {
+                    AbstractNode groupNode = (AbstractNode) rootNode.getChildAt(i);//groupe node
+                    if (groupNode instanceof XICBiologicalGroupNode) {
+                        for (int j = 0; j < groupNode.getChildCount(); j++) {
+                            AbstractNode sampleNode = (AbstractNode) groupNode.getChildAt(j);
+                            for (int k = 0; k < sampleNode.getChildCount(); k++) {
+                                XICBiologicalSampleAnalysisNode cNode = (XICBiologicalSampleAnalysisNode) sampleNode.getChildAt(k);
+                                cNode.setQuantChannelName("Channel " + cIndex++);
+                            }
+                        }
                     }
                 }
             }
@@ -306,4 +365,209 @@ public class AggregateQuantitationDialog extends CheckDesignTreeDialog {
         return rootNode;
     }
 
+    private boolean isAllQuantiLabelled(){
+        boolean isOK = true;
+        for (DDataset dsQuanti : m_quantitations) {
+            if (dsQuanti.getQuantitationMethod().getLabels() == null || dsQuanti.getQuantitationMethod().getLabels().isEmpty()) {
+                isOK = false;
+                break;
+            }
+            AtomicBoolean labelFound = new AtomicBoolean(true);
+            dsQuanti.getMasterQuantitationChannels().get(0).getQuantitationChannels().forEach(qch ->{
+                if(qch.getQuantitationLabel() == null)
+                    labelFound.set(false); //Error in ds quant channels !
+            });
+            if(!labelFound.get()) {
+                m_validLabelledQuant = false;
+                isOK = false;
+                break;
+            }
+        }
+        return isOK;
+    }
+
+//    private Map<Long, Map<QuantitationLabel, Integer>> testAndGetLabelCountInfo(){
+//        m_validLabelledQuant = true;
+//        List<QuantitationLabel> labelForMethod = m_quantitations.get(0).getQuantitationMethod().getLabels();
+//        Map<Long, Map<QuantitationLabel, Integer>> nQChannelByLabelByQuant = new HashMap<>();
+//        for (DDataset dsQuanti : m_quantitations) {
+//            //Count labels (qch with label)
+//            Map<QuantitationLabel, Integer> nbQChannelByLabel = new HashMap<>();
+//            AtomicBoolean labelFound = new AtomicBoolean(true);
+//            dsQuanti.getMasterQuantitationChannels().get(0).getQuantitationChannels().forEach(qch ->{
+//                if(qch.getQuantitationLabel() == null || !labelForMethod.contains(qch.getQuantitationLabel()))
+//                    labelFound.set(false); //Error in ds quant channels !
+//                else {
+//                    int nbQtt = nbQChannelByLabel.getOrDefault(qch.getQuantitationLabel(), 0) + 1;
+//                    nbQChannelByLabel.put(qch.getQuantitationLabel(), nbQtt);
+//                }
+//            });
+//
+//            if(!labelFound.get()) {
+//                m_validLabelledQuant = false;
+//                break;
+//            }
+//
+//            nQChannelByLabelByQuant.put(dsQuanti.getId(), nbQChannelByLabel);
+//
+////            // set as max if it is the case ...
+////            for(QuantitationLabel label : nbQChannelByLabel.keySet()){
+////                int nbMax = maxNQChannelByLabel.getOrDefault(label,0);
+////                if(nbQChannelByLabel.get(label)>nbMax) {
+////                    maxNQChannelByLabel.put(label, nbQChannelByLabel.get(label));
+////                }
+////            }
+//        }
+//        return nQChannelByLabelByQuant;
+//    }
+
+//    private boolean inferExperimentalDesignFromQuantLabel(DataSetNode rootNode) {
+//        // -- Use label information to create exp design
+//
+//        //Create Map of (max) number of labels per quantitation
+//        Map<QuantitationLabel, Integer> maxNQChannelByLabel = new HashMap<>();
+//        Map<Long, Map<QuantitationLabel, Integer>> nQChannelByLabelByQuant = testAndGetLabelCountInfo();
+//
+//        // search max
+//        nQChannelByLabelByQuant.values().forEach( nbQChannelByLabel -> {
+//            for(QuantitationLabel label : nbQChannelByLabel.keySet()){
+//                int nbMax = maxNQChannelByLabel.getOrDefault(label,0);
+//                if(nbQChannelByLabel.get(label)>nbMax) {
+//                    maxNQChannelByLabel.put(label, nbQChannelByLabel.get(label));
+//                }
+//            }
+//        });
+//
+//
+//
+////        m_validLabelledQuant = true;
+////        for (DDataset dsQuanti : m_quantitations) {
+////            //Count labels (qch with label)
+////            Map<QuantitationLabel, Integer> nbQChannelByLabel = new HashMap<>();
+////            AtomicBoolean labelFound = new AtomicBoolean(true);
+////            dsQuanti.getMasterQuantitationChannels().get(0).getQuantitationChannels().forEach(qch ->{
+////                if(qch.getQuantitationLabel() == null || !labelForMethod.contains(qch.getQuantitationLabel()))
+////                    labelFound.set(false); //Error in ds quant channels !
+////                else {
+////                    int nbQtt = nbQChannelByLabel.getOrDefault(qch.getQuantitationLabel(), 0) + 1;
+////                    nbQChannelByLabel.put(qch.getQuantitationLabel(), nbQtt);
+////                }
+////            });
+////
+////            if(!labelFound.get()) {
+////                m_validLabelledQuant = false;
+////                break;
+////            }
+////
+////            nQChannelByLabelByQuant.put(dsQuanti.getId(), nbQChannelByLabel);
+////
+////            // set as max if it is the case ...
+////            for(QuantitationLabel label : nbQChannelByLabel.keySet()){
+////                int nbMax = maxNQChannelByLabel.getOrDefault(label,0);
+////                if(nbQChannelByLabel.get(label)>nbMax) {
+////                    maxNQChannelByLabel.put(label, nbQChannelByLabel.get(label));
+////                }
+////            }
+////        }
+//
+//        //test if a dataset contains all labels
+//        Long completeQChDSId = null;
+//        boolean dsAreHomogenous = true;
+//        String errMsg = "";
+//        if(!m_validLabelledQuant){
+//            errMsg = "- Dataset with no or invalid quant labels \n";
+//            m_logger.warn(errMsg);
+//        } else {
+//            Map<QuantitationLabel, Integer> lastDSnbQChannelByLabel = null;
+//            for (Long dsId : nQChannelByLabelByQuant.keySet()) {
+//                Map<QuantitationLabel, Integer> currentDSnbQChannelByLabel = nQChannelByLabelByQuant.get(dsId);
+//                if (currentDSnbQChannelByLabel.size() != maxNQChannelByLabel.size()) { //note same nb labels, can't contains all...
+//                    dsAreHomogenous = false; //missing some qlabels, so DS are not homogenous
+//                    continue;
+//                }
+//
+//                boolean isMax = true; //suppose current DS contains all qch/labels
+//                for (QuantitationLabel label : currentDSnbQChannelByLabel.keySet()) {
+//                    Integer currentLabelCount = currentDSnbQChannelByLabel.getOrDefault(label, 0);
+//                    if (!currentLabelCount.equals(maxNQChannelByLabel.get(label))) { //less qchannel for this label ...
+//                        isMax = false;
+//                        dsAreHomogenous = false;
+//                    } else if (lastDSnbQChannelByLabel != null && dsAreHomogenous) { //no difference found, test this one
+//                        dsAreHomogenous = lastDSnbQChannelByLabel.getOrDefault(label, 0).equals(currentLabelCount);
+//                    }
+//                }
+//                lastDSnbQChannelByLabel = currentDSnbQChannelByLabel;
+//                if (isMax) {
+//                    completeQChDSId = dsId; //last one will be used
+//                }
+//            }
+//
+//            if(maxNQChannelByLabel.keySet().size()<m_quantitations.get(0).getQuantitationMethod().getLabels().size()){
+//                errMsg = errMsg+"- There are missing labels\n ";
+//            }
+//        }
+//        if (!dsAreHomogenous) {
+//            errMsg = "- Not homogenous quant channel & labels \n";
+//            m_logger.warn(errMsg);
+//        }
+//
+//
+//        if(completeQChDSId != null){
+//            Long finalCompleteQChDSId = completeQChDSId;
+//            DDataset matchingDs = m_quantitations.stream().filter(ds -> (ds.getId() == finalCompleteQChDSId)).findFirst().get();
+//            if(!errMsg.isEmpty())
+//                errMsg = "Warning: \n"+errMsg;
+//            JOptionPane.showMessageDialog(this, " Use DS as template  "+matchingDs.getName()+" \n "+errMsg,"Found template DS", JOptionPane.INFORMATION_MESSAGE);
+//            createDatasetTree(matchingDs,rootNode);
+//
+//        } else{
+//            errMsg = "Warning: \n- No dataset found for template \n"+errMsg+" Default aggregation will be used";
+//            JOptionPane.showMessageDialog(this, errMsg,"Error DS Template", JOptionPane.ERROR_MESSAGE);
+//        }
+//
+//        return completeQChDSId != null;
+//    }
+
+//    private void createDatasetTree(DDataset dDataset,DataSetNode rootNode ){
+//        int childIndex = rootNode.getChildCount();
+//
+//        //create group List according first quanti group compositon
+//        List<BiologicalGroup> groupList = dDataset.getGroupSetup().getBiologicalGroups();
+//        Map<Long, Integer> countByLabelId = new HashMap<>();
+//        for (BiologicalGroup group : groupList) {
+//            String groupName = group.getName();
+//            XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(DataSetData.createTemporaryAggregate(groupName));
+//            rootNode.insert(biologicalGroupNode, childIndex++);
+//            int splIndex = 0;
+//            for (BiologicalSample sample : group.getBiologicalSamples()) {
+//                String sampleName = sample.getName();
+//                String shortSampleName = shortenSampleName(groupName, sampleName);
+//                XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(DataSetData.createTemporaryAggregate(shortSampleName));
+//                //create XICBiologicalSampleNode under biologicalGroupNode
+//                biologicalGroupNode.insert(biologicalSampleNode, splIndex);
+//                List<QuantitationChannel> replicates = sample.getQuantitationChannels();
+//
+//                for (QuantitationChannel replicate : replicates) {
+//                    QuantitationLabel label = replicate.getQuantitationLabel();
+//                    String indexStr = "";
+//                    int index =0;
+//                    if(countByLabelId.containsKey(label.getId())) {
+//                        index = countByLabelId.get(label.getId());
+//                        indexStr = "-" + ( index + 1);
+//                    }
+//                    countByLabelId.put(label.getId(), ++index);
+//                    //for each channel, give it a name with a number order
+//                    String name = "Channel_" + label.getName()+indexStr;
+//                    //empty DataSetData, who has only name
+//                    DataSetData dsData = DataSetData.createTemporaryIdentification(name);
+//                    //create a ChannelNode, with empty DataSetData;
+//                    XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(dsData);
+//                    sampleAnalysisNode.setQuantChannelName(name);
+//                    sampleAnalysisNode.setQuantLabelId(label.getId());
+//                    // created XICBiologicalSampleAnalysisNode under biologicalSampleNode
+//                    biologicalSampleNode.insert(sampleAnalysisNode, biologicalSampleNode.getChildCount());
+//                }
+//            } // end for samples
+//        } //end for groups
+//}
 }

@@ -38,12 +38,13 @@ public class XICBiologicalSampleAnalysisNode extends DataSetNode {
     }
 
     private String m_qcName; //Name of the quantChannel associated to this BiologicalSampleAnalysis
+    private Long m_quantLabelId; //Id of quant_Label associated to this BiologicalSampleAnalysis. Valid for Isobaric oer Residue labeling quantitation
     private XICRunNode m_xicRunNode;
     private SpectrumVerificationStatus m_verificationStatus;
 
     public XICBiologicalSampleAnalysisNode(AbstractData data) {
         super(AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS, data);
-        m_qcName = ((DataSetData) data).getName();
+        m_qcName = data.getName();
         m_verificationStatus = SpectrumVerificationStatus.NOT_VERIFIED;
     }
 
@@ -64,7 +65,7 @@ public class XICBiologicalSampleAnalysisNode extends DataSetNode {
    
     @Override
     public void add(MutableTreeNode newChild) {
-        if(!XICRunNode.class.isInstance(newChild))
+        if(!(newChild instanceof XICRunNode))
             throw new IllegalArgumentException("BiologicalSampleAnalysisNode only accept RunNode as child. (invalid "+newChild+" node )");
         m_xicRunNode = (XICRunNode) newChild;
         super.add(m_xicRunNode);    
@@ -80,6 +81,14 @@ public class XICBiologicalSampleAnalysisNode extends DataSetNode {
 
     public String getQuantChannelName() {
         return m_qcName;
+    }
+
+    public Long getQuantLabelId() {
+        return m_quantLabelId;
+    }
+
+    public void setQuantLabelId(Long quantLabelId) {
+        this.m_quantLabelId = quantLabelId;
     }
 
     @Override
@@ -106,10 +115,6 @@ public class XICBiologicalSampleAnalysisNode extends DataSetNode {
         return (dataSet.getResultSummaryId() != null);
     }
 
-    @Override
-    public Long getResultSummaryId() {
-        return ((DataSetData) getData()).getDataset().getResultSummaryId();
-    }
 
     @Override
     public ImageIcon getIcon(boolean expanded) {

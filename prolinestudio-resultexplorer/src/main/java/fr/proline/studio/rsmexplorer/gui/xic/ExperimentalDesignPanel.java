@@ -54,13 +54,9 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
     private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private AbstractDataBox m_dataBox;
 
-    private JScrollPane m_scrollPaneExpDesign;
     private JPanel m_expDesignPanel;
     private QuantExperimentalDesignTree m_expDesignTree;
-    private ExportButton m_exportButton;
     private JTabbedPane m_tabbedPane;
-//    private QuantPostProcessingPanel m_profilizerParamPanel;
-    private QuantSimplifiedPostProcessingPanel m_postProcessingParamPanel;
     private JPanel m_confPanel;
     private JPanel m_lowlevelConfPanel;
 
@@ -71,7 +67,7 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
     private boolean m_displayLowLevel = false;
     private boolean m_displayQuantParam = true;
 
-    private DDatasetType.QuantitationMethodInfo m_quantMethodInfo;
+    private final DDatasetType.QuantitationMethodInfo m_quantMethodInfo;
 
     private static String TAB_POST_PROCESSING_TITLE = "Compute Post Processing";
     private static String TAB_LOW_LEVEL_TITLE = "Low Level";
@@ -104,8 +100,8 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
     private JToolBar initToolbar() {
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
-        m_exportButton = new ExportButton("Exp. Design", m_expDesignPanel);
-        toolbar.add(m_exportButton);
+        ExportButton exportButton = new ExportButton("Exp. Design", m_expDesignPanel);
+        toolbar.add(exportButton);
         return toolbar;
     }
 
@@ -121,12 +117,12 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
         m_tabbedPane = new JTabbedPane();
 
         // create objects
-        m_scrollPaneExpDesign = new JScrollPane();
+        JScrollPane scrollPaneExpDesign = new JScrollPane();
         m_expDesignPanel = new JPanel();
         m_expDesignPanel.setLayout(new BorderLayout());
         m_expDesignTree = new QuantExperimentalDesignTree(QuantitationTree.getCurrentTree().copyCurrentNodeForSelection(), false, false);
         m_expDesignPanel.add(m_expDesignTree, BorderLayout.CENTER);
-        m_scrollPaneExpDesign.setViewportView(m_expDesignPanel);
+        scrollPaneExpDesign.setViewportView(m_expDesignPanel);
 
         m_confPanel = new JPanel();
         m_confPanel.setLayout(new BorderLayout());
@@ -137,7 +133,7 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
         m_lowlevelConfPanel = new JPanel();
         m_lowlevelConfPanel.setLayout(new BorderLayout());
 
-        m_tabbedPane.add("Exp.Design", m_scrollPaneExpDesign);
+        m_tabbedPane.add("Exp.Design", scrollPaneExpDesign);
         m_tabbedPane.add("Exp. Parameters", m_confPanel);
 
         c.gridx = 0;
@@ -146,7 +142,6 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
         c.weighty = 1;
         c.gridwidth = 3;
         internalPanel.add(m_tabbedPane, c);
-        //internalPanel.add(m_scrollPaneExpDesign, c);
         return internalPanel;
     }
 
@@ -255,9 +250,9 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
                     m_displayPostProcessing = true;
                 }
                 Map<Long, String> ptmName = getPtmSpecificityNameById();
-                m_postProcessingParamPanel = new QuantSimplifiedPostProcessingPanel(true, m_dataset.getQuantitationMethod(), m_quantMethodInfo, ptmName);//read only
-                m_refinedPanel.add(m_postProcessingParamPanel, BorderLayout.CENTER);
-                m_postProcessingParamPanel.setRefinedParams(m_dataset.getPostQuantProcessingConfigAsMap());
+                QuantSimplifiedPostProcessingPanel postProcessingParamPanel = new QuantSimplifiedPostProcessingPanel(true, m_dataset.getQuantitationMethod(), m_quantMethodInfo, ptmName, true);//read only
+                m_refinedPanel.add(postProcessingParamPanel, BorderLayout.CENTER);
+                postProcessingParamPanel.setRefinedParams(m_dataset.getPostQuantProcessingConfigAsMap());
 
             } else {
                 if (m_displayPostProcessing) {
@@ -304,6 +299,6 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
         DatabasePTMsTask task = new DatabasePTMsTask(null);
         task.initLoadUsedPTMs(m_dataset.getProject().getId(), m_dataset.getResultSummaryId(), ptms);
         task.fetchData();
-        return ptms.stream().collect(Collectors.toMap(ptmS -> ptmS.getId(), ptmS -> ptmS.toString()));
+        return ptms.stream().collect(Collectors.toMap(PtmSpecificity::getId, PtmSpecificity::toString));
     }
 }

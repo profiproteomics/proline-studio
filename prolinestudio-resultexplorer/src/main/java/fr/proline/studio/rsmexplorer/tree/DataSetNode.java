@@ -31,6 +31,7 @@ import fr.proline.studio.utils.IconManager;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import java.util.Enumeration;
 
 /**
@@ -41,7 +42,7 @@ import java.util.Enumeration;
 public class DataSetNode extends AbstractNode {
 
     private boolean m_isReference = false;
-    private boolean m_isRefined = false;
+//    private boolean m_isRefined = false;
     
     /**
      * combine with RSM.getSerializedProperties(), to determinate if this rsm isBioSequenceRetrived. 
@@ -168,9 +169,7 @@ public class DataSetNode extends AbstractNode {
                     return true;
                 }
             }
-        } else if (datasetType.isQuantitation()) {
-            return true; //rsType is Quantitation but, a SC or a XIC is necessarily a merge
-        }
+        } else return datasetType.isQuantitation(); //rsType is Quantitation but, a SC or a XIC is necessarily a merge
         return false;
     }
 
@@ -207,10 +206,7 @@ public class DataSetNode extends AbstractNode {
             return false;
         }
         DDatasetType datasetType = ((DataSetData) getData()).getDatasetType();
-        if (datasetType.isTrash()) {
-            return true;
-        }
-        return false;
+      return datasetType.isTrash();
     }
 
     public boolean isFolder() {
@@ -219,10 +215,7 @@ public class DataSetNode extends AbstractNode {
             return false;
         }
         DDatasetType datasetType = ((DataSetData) getData()).getDatasetType();
-        if (datasetType.isFolder()) {
-            return true;
-        }
-        return false;
+      return datasetType.isFolder();
     }
 
     public boolean hasResultSummary() {
@@ -286,7 +279,7 @@ public class DataSetNode extends AbstractNode {
             return false;
         }
 
-        Enumeration e = children();
+        Enumeration<TreeNode> e = children();
         while (e.hasMoreElements()) {
             AbstractNode child = (AbstractNode) e.nextElement();
             if (!child.canBeDeleted()) {
@@ -366,7 +359,7 @@ public class DataSetNode extends AbstractNode {
         };
 
         // ask asynchronous loading of data
-        // depending of the type
+        // depending on the type
         if (dataSet.isQuantitation()) {
             // Task 1 : Load Quantitation, MasterQuantitationChannels 
             DatabaseDataSetTask task1 = new DatabaseDataSetTask(dbCallback);

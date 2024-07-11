@@ -457,6 +457,7 @@ public class QuantExperimentalDesignTree extends AbstractTree {
         List _biologicalGroupList = new ArrayList();
         HashMap<String, Long> _rsmIdBySampleAnalysis = new HashMap<>();
         HashMap<Long, Long> _runIdByRSMId = new HashMap<>();
+        HashMap<String, Long> qLabelIdBySplAnalysisName = new HashMap<>();
         HashMap<String, ArrayList<String>> _samplesAnalysisBySample = new HashMap<>();
         Map<Integer, String> splNameByNbr = new HashMap<>();
         List<Long> rsmIdsToGetRunIdsFor = new ArrayList();
@@ -494,6 +495,7 @@ public class QuantExperimentalDesignTree extends AbstractTree {
                             break;
                         }
 
+                        qLabelIdBySplAnalysisName.put(quantChName,qChannelNode.getQuantLabelId());
                         if (qChannelNode.getData() != null && ((DataSetData) qChannelNode.getData()).getDataset() != null) {
                             Long rsmId = ((DataSetData) qChannelNode.getData()).getDataset().getResultSummaryId();
                             _rsmIdBySampleAnalysis.put(quantChName, rsmId);
@@ -561,6 +563,9 @@ public class QuantExperimentalDesignTree extends AbstractTree {
                 if (_rsmIdBySampleAnalysis.containsKey(nextSplAnalysis)) {
                     quantChannelParams.put("ident_result_summary_id", _rsmIdBySampleAnalysis.get(nextSplAnalysis));
                     quantChannelParams.put("run_id", _runIdByRSMId.get(_rsmIdBySampleAnalysis.get(nextSplAnalysis)));
+                }
+                if(qLabelIdBySplAnalysisName.containsKey(nextSplAnalysis)){
+                    quantChannelParams.put("quant_label_id", qLabelIdBySplAnalysisName.get(nextSplAnalysis));
                 }
                 quantChanneList.add(quantChannelParams);
             }

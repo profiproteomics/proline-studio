@@ -561,8 +561,9 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
         private static final int ROWTYPE_RAW_FILE_PATH = 2;
         private static final int ROWTYPE_MZDB_RAW_FILE_NAME = 3;
         private static final int ROWTYPE_IDENTIFICATION_RSM_ID = 4;
+        private static final int ROWTYPE_QUANTI_LABEL_NAME_ID= 5;
         
-        private static final int ROW_COUNT = 5; // get in sync
+        private static final int ROW_COUNT = 6; // get in sync
         private final Color GROUP_COLOR_BACKGROUND = new Color(153,122,141);
 
         private final int m_numberMaster;
@@ -587,6 +588,9 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
                     return new GroupObject("Mzdb Raw File Name", this);
                 case ROWTYPE_IDENTIFICATION_RSM_ID : 
                     return new GroupObject("Identification Summary Id", this);
+                case ROWTYPE_QUANTI_LABEL_NAME_ID:
+                    return new GroupObject("Quantitation Label (id)", this);
+
             }
 
             return null;
@@ -625,6 +629,9 @@ public class XICPropertiesTableModel extends AbstractPropertiesTableModel {
                     return new GroupObject(quantitationChannel.getMzdbFileName(), this);
                 case ROWTYPE_IDENTIFICATION_RSM_ID:
                     return new GroupObject(String.valueOf(quantitationChannel.getIdentResultSummaryId()), this);
+                case ROWTYPE_QUANTI_LABEL_NAME_ID:
+                    String value = quantitationChannel.getQuantitationLabel() == null ?  "" : quantitationChannel.getQuantitationLabel().getName() +" ("+quantitationChannel.getQuantitationLabel().getId()+") ";
+                    return new GroupObject(value, this);
             }
 
             return null;

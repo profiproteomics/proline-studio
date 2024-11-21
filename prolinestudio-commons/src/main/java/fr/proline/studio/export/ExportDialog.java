@@ -55,7 +55,7 @@ import org.jfree.graphics2d.svg.*;
  */
 public class ExportDialog extends DefaultDialog {
 
-    private static ExportDialog m_singletonImageDialog = null; //Exort directly an image dfrom Studio 
+    private static ExportDialog m_singletonImageDialog = null; //Export directly an image from Studio
     private static ExportDialog m_singletonExcelDialog = null; //Export directly from Studio table
     private static ExportDialog m_singletonServerDialog = null; //Run Server side export
 
@@ -83,7 +83,7 @@ public class ExportDialog extends DefaultDialog {
 
     private ExportManager m_exportManager = null;
 
-    //This method is called when exportind directly a table from Studio GUI
+    //This method is called when exporting directly a table from Studio GUI
     public static ExportDialog getDialog(Window parent, JXTable table, String exportName) {
         if (m_singletonExcelDialog == null) {
             m_singletonExcelDialog = new ExportDialog(parent, ExporterFactory.EXPORT_TABLE);
@@ -98,7 +98,7 @@ public class ExportDialog extends DefaultDialog {
         return m_singletonExcelDialog;
     }
 
-    //This method is called when exportind directly an image from Studio GUI
+    //This method is called when exporting directly an image from Studio GUI
     public static ExportDialog getDialog(Window parent, JPanel panel, String exportName) {
         if (m_singletonImageDialog == null) {
             m_singletonImageDialog = new ExportDialog(parent, ExporterFactory.EXPORT_IMAGE);
@@ -111,11 +111,11 @@ public class ExportDialog extends DefaultDialog {
         return m_singletonImageDialog;
     }
 
-    //This method is called when exportind an Identification RSM on server side
+    //This method is called when exporting an Identification RSM on server side
     public static ExportDialog getDialog(Window parent, Boolean showExportAllPSMsOption) {
         if (m_singletonServerDialog == null) {
             m_singletonServerDialog = new ExportDialog(parent, ExporterFactory.EXPORT_FROM_SERVER, showExportAllPSMsOption);
-        } else if (!m_singletonServerDialog.m_showExportAllPSMsChB.equals(showExportAllPSMsOption)) { //option has changed, create nex dialog
+        } else if (!m_singletonServerDialog.m_showExportAllPSMsChB.equals(showExportAllPSMsOption)) { //option has changed, create new dialog
             m_singletonServerDialog = new ExportDialog(parent, ExporterFactory.EXPORT_FROM_SERVER, showExportAllPSMsOption);
         }
 

@@ -31,7 +31,7 @@ public class PurityCorrectionMatrixTableModel extends AbstractCorrectionMatrixTa
         columnNames = new ArrayList<>();
         columnNames.add("Mass Reporter");
         for(QuantitationLabel l : m_quantMethod.getLabels()){
-            MassReporter nextMR =new MassReporter(getReporterLabel(l), m_nbrReporters+2, new int[0]);
+            MassReporter nextMR =new MassReporter(getReporterLabel(l), m_nbrReporters, new int[0]);
             massReporters.add(nextMR);
             columnNames.add(nextMR.getName());
         }

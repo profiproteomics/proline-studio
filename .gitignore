@@ -3,3 +3,4 @@
 *.iml
 .flattened-pom.xml
 nb-configuration.xml
+/prolinestudio-commons/src/main/java/fr/proline/studio/JavaVersion.java

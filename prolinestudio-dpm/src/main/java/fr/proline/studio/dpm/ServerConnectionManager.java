@@ -27,6 +27,7 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.AuthenticateUserTask;
 import fr.proline.studio.dpm.task.jms.GetDBConnectionTemplateTask;
+import fr.proline.studio.dpm.task.jms.IsRetrieveSeqAvailableTask;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.util.HashMap;
 import java.util.prefs.BackingStoreException;
@@ -59,13 +60,15 @@ public class ServerConnectionManager {
 
     private TaskError m_connectionError = null;
 
+    private Boolean m_isRetrieveSeqServiceAvailable = null;
+
     private String m_serverURL;
     private String m_projectUser;
     private String m_databasePassword;
     private String m_userPassword;
     private boolean m_passwordNeeded;
 
-    private HashMap<Object, Object> m_serverConnectionParam;
+//    private HashMap<Object, Object> m_serverConnectionParam;
 
     private static ServerConnectionManager m_connectionManager = null;
 
@@ -89,6 +92,12 @@ public class ServerConnectionManager {
 
         m_passwordNeeded = preferences.getBoolean(KEY_PASSWORD_NEEDED, false);
         //m_jmsServer = preferences.getBoolean(KEY_IS_JMSSERVER, false);
+    }
+
+    public boolean isRetrieveSeqServiceAvailable() {
+        if(m_isRetrieveSeqServiceAvailable == null)
+            m_isRetrieveSeqServiceAvailable = testSeqRepoAvailable();
+        return m_isRetrieveSeqServiceAvailable;
     }
 
     public void saveParameters() {
@@ -215,6 +224,39 @@ public class ServerConnectionManager {
 
     }
 
+    private boolean testSeqRepoAvailable(){
+        // check if we have SeqDb
+        Boolean[] isAvailable = new Boolean[1];
+        try {
+            final Object mutexGetAvailableDone = new Object();
+            synchronized (mutexGetAvailableDone) {
+                AbstractJMSCallback callback = new AbstractJMSCallback() {
+
+                    @Override
+                    public boolean mustBeCalledInAWT() {
+                        return false;
+                    }
+
+                    @Override
+                    public void run(boolean success) {
+
+                        synchronized (mutexGetAvailableDone) {
+                            mutexGetAvailableDone.notifyAll();
+                        }
+                    }
+                };
+                IsRetrieveSeqAvailableTask isServiceAvailableTask = new IsRetrieveSeqAvailableTask(callback, isAvailable);
+                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(isServiceAvailableTask);
+                mutexGetAvailableDone.wait(); //wait until response
+            }
+        } catch (InterruptedException ignored) {
+            // should not happen
+        }
+        boolean retrieveServiceAvailable = (isAvailable[0] != null && isAvailable[0]);
+        return retrieveServiceAvailable;
+
+    }
+
 
     private void getDBConnectionTemplate(final Runnable connectionCallback, final String projectUser, final String databasePassword) {
 
@@ -262,8 +304,8 @@ public class ServerConnectionManager {
 
                 if (success) {
                     // save connection parameters
-                    m_serverConnectionParam = databaseProperties;
-                    DatabaseDataManager.getDatabaseDataManager().setServerConnectionProperties(m_serverConnectionParam);
+//                    m_serverConnectionParam = databaseProperties;
+//                    DatabaseDataManager.getDatabaseDataManager().setServerConnectionProperties(m_serverConnectionParam);
                     saveParameters();
                     setConnectionState(CONNECTION_DONE);
 
@@ -288,9 +330,9 @@ public class ServerConnectionManager {
         AccessDatabaseThread.getAccessDatabaseThread().addTask(connectionTask);
     }
 
-    public HashMap<Object, Object> getConnectionParams() {
-        return m_serverConnectionParam;
-    }
+//    public HashMap<Object, Object> getConnectionParams() {
+//        return m_serverConnectionParam;
+//    }
 
     public String getServerURL() {
         return m_serverURL;

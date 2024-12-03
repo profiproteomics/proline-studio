@@ -18,6 +18,8 @@ package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.IRawFile;
+
+import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +28,11 @@ import java.util.Map;
  * @author CB205360
  */
 public interface IMzScopeController {
+
+    public static String CURRENT_RAWFILE_VIEWER = "currentRawFileViewer";
+    void addPropertyChangeListener(String propertyName, PropertyChangeListener listener);
+
+    void removePropertyChangeListener(String propertyName, PropertyChangeListener listener);
 
     IRawFileViewer getCurrentRawFileViewer();
 

@@ -6,6 +6,7 @@ import fr.proline.core.orm.uds.QuantitationChannel;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
+import fr.proline.studio.dam.tasks.data.ProjectInfo;
 import fr.proline.studio.gui.DefaultFloatingPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.aggregation.DQuantitationChannelMapping;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.event.*;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
@@ -42,8 +44,8 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
     private ActionListener m_moveUpAction;
     private ActionListener m_moveDownAction;
 
-    private List<DDataset> m_datasets;
-    private Map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping> m_parentQCMappings;
+    private final List<DDataset> m_datasets;
+    private final Map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping> m_parentQCMappings;
 
     private static final int COLUMN_WIDTH_MIN = 100;
     private static final int COLUMN_WIDTH_MAX = 300;
@@ -53,11 +55,15 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
     private static final BasicStroke STROKE_2 = new BasicStroke(2);
     private static final Color SELECTION_COLOR = javax.swing.UIManager.getColor("Table.selectionBackground");
 
-    public QuantAggregateExperimentalTreePanel(AbstractNode rootNode, List<DDataset> datasets) {
+    private final boolean m_useQMethodLabels;
+
+    private final HashMap<Long, DropZone> m_duplicatesChannel = new HashMap<>(); // Long is id of QuantitationChannel
+
+    public QuantAggregateExperimentalTreePanel(AbstractNode rootNode, List<DDataset> datasets,  boolean useLabel) {
 
         // prepare data
         m_datasets = datasets;
-
+        m_useQMethodLabels = useLabel;
         m_parentQCMappings = inferDefaultMapping(rootNode);
         JComponent treePanel = createTreePanel(rootNode);
 
@@ -246,6 +252,39 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
         return layeredPane;
     }
 
+    public boolean checkQCMapping(){
+
+        // collect channels node
+        LinkedHashSet<XICBiologicalSampleAnalysisNode> bioSampleAnalysisNodes = new LinkedHashSet<>();
+        collectBioSampleAnalysisNodes((AbstractNode) m_tree.getModel().getRoot(), bioSampleAnalysisNodes);
+
+        boolean foundInvalid =false;
+        StringBuilder errMsg = new StringBuilder();
+        if(m_useQMethodLabels) {
+            errMsg.append("Invalid quantitation channel alignment.\n Sample analysis from aggregated quantitation may not have same label as aggregation quantitation channel.");
+            for (XICBiologicalSampleAnalysisNode node : bioSampleAnalysisNodes) {
+                DQuantitationChannelMapping mapping = m_parentQCMappings.get(node);
+                Long splAnanlysisNodeqLabelId = (node.getQuantLabelId() == null ? -1L : node.getQuantLabelId());
+                for (QuantitationChannel ch : mapping.getMappedQuantChannels().values()) {
+                    if (ch != null && (ch.getQuantitationLabel() == null || !splAnanlysisNodeqLabelId.equals(ch.getQuantitationLabel().getId()))) {
+                    foundInvalid = true;
+                    errMsg.append("\n- ").append(node.getQuantChannelName());
+                    }
+                }
+            }
+        }
+
+        if(foundInvalid){
+            errMsg.append("\n\nQuantitation method & labels will be ignored. Standard Label Free on peptide ions abundances will be used. \n Do you want to continue ?  ");
+            int res = JOptionPane.showConfirmDialog(this, errMsg.toString(),"Aggregation Mapping Error", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if(res == JOptionPane.NO_OPTION){
+                return false;
+            } else
+                bioSampleAnalysisNodes.forEach( node -> node.setQuantLabelId(null) );
+        }
+        return true;
+    }
+
     public List<Map<String, Object>> getQuantChannelsMatching() {
 
         // we need to do some cleaning : due to deleted or added channels
@@ -310,27 +349,12 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
 
 
-        m_eraseAction = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                m_channelPanel.eraseDropZone();
-            }
-        };
+        m_eraseAction = e -> m_channelPanel.eraseDropZone();
 
 
-        m_moveUpAction = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                m_channelPanel.moveDropZone(true);
-            }
-        };
+        m_moveUpAction = e -> m_channelPanel.moveDropZone(true);
 
-        m_moveDownAction = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                m_channelPanel.moveDropZone(false);
-            }
-        };
+        m_moveDownAction = e -> m_channelPanel.moveDropZone(false);
 
 
         String[] actionText = {"", "", ""};
@@ -388,31 +412,72 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
      * @return
      */
     private Map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping> inferDefaultMapping(AbstractNode node) {
-
         Map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping> mappings = new HashMap<>();
-        Stream<Object> groupStream = Collections.list(node.children()).stream()
-                .filter(n -> (((AbstractNode) n).getType() == AbstractNode.NodeTypes.BIOLOGICAL_GROUP));
+//        boolean mappingDone = false;
+//        if(m_useQMethodLabels){
+//            Map<Long, Map<Long, List<DQuantitationChannel>>> qChannelsByLabelByQuantDS = new HashMap<>();
+//            for(DDataset nextDataset : m_datasets){
+//                Map<Long, List<DQuantitationChannel>> currentDSMap = new HashMap<>();
+//                nextDataset.getMasterQuantitationChannels().get(0).getQuantitationChannels().forEach(qch-> {
+//                    List<DQuantitationChannel> labelQChannels= currentDSMap.getOrDefault(qch.getQuantitationLabel().getId(), new ArrayList<>());
+//                    labelQChannels.add(qch);
+//                    currentDSMap.put(qch.getQuantitationLabel().getId(), labelQChannels);
+//                });
+//                qChannelsByLabelByQuantDS.put(nextDataset.getId(), currentDSMap);
+//            }
+//
+//            Map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping> qcsNodes = new HashMap<>();
+//            DefaultMutableTreeNode leafNode = node.getFirstLeaf();
+//            Map<Long, DDataset> dsById = m_datasets.stream().collect(Collectors.toMap(DDataset::getId, ds-> ds));
+//            int index = 0;
+//            while (leafNode != null) {
+//                if (leafNode instanceof XICBiologicalSampleAnalysisNode) {
+//                    DQuantitationChannelMapping currentMapping = new DQuantitationChannelMapping(index + 1);
+//                    Long nodeLabelId = ((XICBiologicalSampleAnalysisNode) leafNode).getQuantLabelId();
+//                    for (Long dsId : qChannelsByLabelByQuantDS.keySet()) {
+//                        if (qChannelsByLabelByQuantDS.get(dsId).containsKey(nodeLabelId)) {
+//                            List<DQuantitationChannel> qChannelForLabel = qChannelsByLabelByQuantDS.get(dsId).get(nodeLabelId);
+//                            currentMapping.put(dsById.get(dsId), qChannelForLabel.get(0));
+//                            qChannelForLabel.remove(0);
+//                            if (qChannelForLabel.isEmpty())
+//                                qChannelsByLabelByQuantDS.get(dsId).remove(nodeLabelId);
+//                            else
+//                                qChannelsByLabelByQuantDS.get(dsId).put(nodeLabelId, qChannelForLabel);
+//                        }
+//                    }
+//                    qcsNodes.put(((XICBiologicalSampleAnalysisNode) leafNode), currentMapping);
+//                    index++;
+//                }
+//                leafNode= leafNode.getNextLeaf();
+//            }
+//            mappings.putAll(qcsNodes);
+//            mappingDone = true;
+//        }
+
+//        if(!mappingDone) {
+        Stream<TreeNode> groupStream = Collections.list(node.children()).stream().filter(n -> (((AbstractNode) n).getType() == AbstractNode.NodeTypes.BIOLOGICAL_GROUP));
         AtomicInteger index = new AtomicInteger(1);
-        List<XICBiologicalGroupNode> groupNodes = groupStream.map(o -> ((XICBiologicalGroupNode) o)).collect(Collectors.toList());
+        List<XICBiologicalGroupNode> groupNodes = groupStream.map(o -> ((XICBiologicalGroupNode) o)).toList();
         for (XICBiologicalGroupNode groupNode : groupNodes) {
-            Stream<Object> sampleStream = Collections.list(groupNode.children()).stream()
-                    .filter(n -> (((AbstractNode) n).getType() == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE));
-            List<XICBiologicalSampleNode> sampleNodeList = sampleStream.map(s -> ((XICBiologicalSampleNode) s)).collect(Collectors.toList());
+            Stream<TreeNode> sampleStream = Collections.list(groupNode.children()).stream().filter(n -> (((AbstractNode) n).getType() == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE));
+            List<XICBiologicalSampleNode> sampleNodeList = sampleStream.map(s -> ((XICBiologicalSampleNode) s)).toList();
             for (XICBiologicalSampleNode sampleNode : sampleNodeList) {
                 //@KX for each group, create a  DQuantitationChannelMapping, the parentQCNumber of DQuantitationChannelMapping increse+1 at each time
                 //@KX so that each group has a map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping>, but the DQuantitationChannelMapping is empty
                 //@KX (x = XICBiologicalSampleAnalysisNode), empty mapping which has only channel number
                 //Map<ChannelNode, Mapping =(Aggregation channel, Map<Quanti-QuantiChannel>)
-                Stream<XICBiologicalSampleAnalysisNode> sampleNodeStream = parseSample(sampleNode);
-                Map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping> qcsNodes = sampleNodeStream.collect(
+                List<XICBiologicalSampleAnalysisNode> orderedSampleNodes= parseSample(sampleNode).toList();
+                Map<XICBiologicalSampleAnalysisNode, DQuantitationChannelMapping> qcsNodes = orderedSampleNodes.stream().collect(
                         Collectors.toMap(x -> x, x -> new DQuantitationChannelMapping(index.getAndIncrement())));
 
+                // For non labelled aggregation : use sortedMap. Do not initialize otherwise
                 //@KX obtain all DQuantitationChannelMapping(empty util now) sorted by parentQCNumber Quant Channel idNumber
                 //now fill the DQuantitationChannelMapping in qcNodes
-                List<DQuantitationChannelMapping> sortedMappings = qcsNodes.values()
+                List<DQuantitationChannelMapping> sortedMappings =  !m_useQMethodLabels ? qcsNodes.values()
                         .stream()
                         .sorted(Comparator.comparing(DQuantitationChannelMapping::getParentQCNumber))
-                        .collect(Collectors.toList());
+                        .toList() : new ArrayList<>();
+
                 //now, parse each (starting) Quantitation DataSet
                 for (DDataset ds : m_datasets) {
                     //for each  quntitation(DDataSet), find if it has a group who has a same name (bg = BiologicalGroup)
@@ -426,19 +491,41 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                                 .filter(bs -> bs.getName().equals(getCompletSampleName(group, sampleNode)))
                                 .findAny().orElse(null);
                         if (sample != null) {
-                            //retreive all QuantitationChannel in all of the sample (bs=getBiologicalSamples)
-                            List<QuantitationChannel> groupQcs = sample.getQuantitationChannels();
-                            //for each QuantitationChannel
-                            for (int k = 0; k < Math.min(groupQcs.size(), sortedMappings.size()); k++) {
-                                //fill each mapping
-                                sortedMappings.get(k).put(ds, groupQcs.get(k));
+
+                            if(m_useQMethodLabels){
+                                Map<Long, List<QuantitationChannel>> qChByLabel= sample.getQuantitationChannels().stream().collect(Collectors.groupingBy(qCh -> qCh.getQuantitationLabel().getId(), Collectors.toList()));
+
+                                for (XICBiologicalSampleAnalysisNode currentSplAnaNode : orderedSampleNodes) {
+                                    DQuantitationChannelMapping currentNodeMapping = qcsNodes.get(currentSplAnaNode);
+                                    if(!qChByLabel.containsKey( currentSplAnaNode.getQuantLabelId()))
+                                        continue;
+                                    List<QuantitationChannel> dsQChannelLabel = qChByLabel.get(currentSplAnaNode.getQuantLabelId());
+                                    dsQChannelLabel.sort(Comparator.comparingInt(QuantitationChannel::getNumber));
+
+                                    //fill each mapping
+                                    currentNodeMapping.put(ds, dsQChannelLabel.get(0));
+                                    dsQChannelLabel.remove(0);
+                                    if(dsQChannelLabel.isEmpty())
+                                        qChByLabel.remove(currentSplAnaNode.getQuantLabelId());
+                                    else
+                                        qChByLabel.put(currentSplAnaNode.getQuantLabelId(), dsQChannelLabel);
+                                }
+                            } else {
+                                //retreive all QuantitationChannel in all of the sample (bs=getBiologicalSamples)
+                                List<QuantitationChannel> groupQcs = sample.getQuantitationChannels();
+                                //for each QuantitationChannel
+                                for (int k = 0; k < Math.min(groupQcs.size(), sortedMappings.size()); k++) {
+                                    //fill each mapping
+                                    sortedMappings.get(k).put(ds, groupQcs.get(k));
+                                }
                             }
-                        }
-                    }
-                }
+                        }//end found current tree sample in child dataset
+                    } //end found current tree group in child dataset
+                } //end go through child dataset
                 mappings.putAll(qcsNodes);
             }
         }
+//        }
         return mappings;
     }
 
@@ -454,21 +541,21 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
         return sampleCompletName;
     }
 
-    /**
-     * from a Group, retrive all its Channel Nodes. Group->parse All
-     * Samples->retrive each Channel
-     *
-     * @param groupNode
-     * @return
-     */
-    private Stream<XICBiologicalSampleAnalysisNode> parseGroup(XICBiologicalGroupNode groupNode) {
-        Stream<Object> stream = Collections.list(groupNode.children())//sampleNode in list
-                .stream()
-                .flatMap(sampleNode -> Collections.list(
-                        ((AbstractNode) sampleNode).children()).stream()//XICBiologicalSampleAnalysisNode in stream
-                );
-        return stream.map(node -> ((XICBiologicalSampleAnalysisNode) node));//type cast
-    }
+//    /**
+//     * from a Group, retrive all its Channel Nodes. Group->parse All
+//     * Samples->retrive each Channel
+//     *
+//     * @param groupNode
+//     * @return
+//     */
+//    private Stream<XICBiologicalSampleAnalysisNode> parseGroup(XICBiologicalGroupNode groupNode) {
+//        Stream<Object> stream = Collections.list(groupNode.children())//sampleNode in list
+//                .stream()
+//                .flatMap(sampleNode -> Collections.list(
+//                        ((AbstractNode) sampleNode).children()).stream()//XICBiologicalSampleAnalysisNode in stream
+//                );
+//        return stream.map(node -> ((XICBiologicalSampleAnalysisNode) node));//type cast
+//    }
 
     /**
      * from a sample, retrive all its Channel Nodes.
@@ -477,7 +564,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
      * @return
      */
     private Stream<XICBiologicalSampleAnalysisNode> parseSample(XICBiologicalSampleNode sampleNode) {
-        Stream<Object> stream = Collections.list(sampleNode.children()).stream();
+        Stream<TreeNode> stream = Collections.list(sampleNode.children()).stream();
         return stream.map(node -> ((XICBiologicalSampleAnalysisNode) node));
     }
 
@@ -535,16 +622,16 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
         private int m_nbCols;
         private int m_nbRows;
 
-        private QuestionPanel m_question = new QuestionPanel();
+        private final QuestionPanel m_question = new QuestionPanel();
 
 
-        private ArrayList<DropZone> m_selectedDropZoneList = new ArrayList<>();
+        private final ArrayList<DropZone> m_selectedDropZoneList = new ArrayList<>();
         private MouseEvent m_mouseDragBegin;
 
         private Font m_font = null;
 
 
-        private TransferHandler m_transferHandler;
+        private final TransferHandler m_transferHandler;
 
         public ChannelPanel() {
 
@@ -639,12 +726,12 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                                                 if (nodesList != null && !nodesList.isEmpty()) {
                                                     AbstractData rootData = ((AbstractNode) nodesList.get(0).getRoot()).getData();
                                                     DDataset sourceDS = ((DataSetData) rootData).getDataset();
-                                                    if (sourceDS == null) {
-                                                        // happen for drag and drop from itself
-                                                        //sourceDS = dropZone.getSourceDataset();
-                                                    }
+//                                                    if (sourceDS == null) {
+//                                                        // happen for drag and drop from itself
+//                                                        //sourceDS = dropZone.getSourceDataset();
+//                                                    }
                                                     DDataset destDS = dropZone.getDataset();
-                                                    if (sourceDS.getId() == destDS.getId()) {
+                                                    if (sourceDS!= null && sourceDS.getId() == destDS.getId()) {
                                                         typeCompatible = true;
                                                     }
                                                 }
@@ -653,7 +740,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                                         }
 
 
-                                    } catch (UnsupportedFlavorException | IOException e) {
+                                    } catch (UnsupportedFlavorException | IOException ignored) {
 
                                     }
 
@@ -739,7 +826,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
 
 
-                                    } catch (UnsupportedFlavorException | IOException e) {
+                                    } catch (UnsupportedFlavorException | IOException ignored) {
 
                                     }
 
@@ -786,6 +873,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                     return false;
                 }
 
+                //VDS : always return false ???
                 private boolean importDataFromXic(TransferHandler.TransferSupport support) {
 
                     try {
@@ -841,6 +929,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                     return false;
                 }
 
+                //VDS : always return false ???
                 private boolean importDataFromDropNode(TransferHandler.TransferSupport support) {
 
                     try {
@@ -1090,7 +1179,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                         m_question.paint(g);
                     }
 
-                    DQuantitationChannelMapping mapping = m_parentQCMappings.get(node);
+                    DQuantitationChannelMapping mapping = m_parentQCMappings.get((XICBiologicalSampleAnalysisNode)node);
 
                     Map<DDataset, QuantitationChannel> map = mapping.getMappedQuantChannels();
 
@@ -1167,7 +1256,6 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
 
         }
-        private HashMap<Long, DropZone> m_duplicatesChannel = new HashMap<>(); // Long is id of QuantitationChannel
 
 
         @Override
@@ -1262,7 +1350,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                 m_selectedDropZoneList.clear();
             }
 
-            int modifier = e.getModifiers();
+            int modifier = e.getModifiersEx();
 
             if (overDropZone == null) {
                 // remove all selections
@@ -1278,7 +1366,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                     modifier = 0;
                 }
 
-                if ((modifier & (InputEvent.SHIFT_MASK | InputEvent.CTRL_MASK)) == 0) {
+                if ((modifier & (InputEvent.SHIFT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK)) == 0) {
                     // no modifier
 
                     if (overDropZone.isSelected()) {
@@ -1294,7 +1382,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                     }
 
 
-                } else if ((modifier & (InputEvent.CTRL_MASK)) != 0) {
+                } else if ((modifier & (InputEvent.CTRL_DOWN_MASK)) != 0) {
                     if (overDropZone.isSelected()) {
                         overDropZone.setSelected(false);
                         m_selectedDropZoneList.remove(overDropZone);
@@ -1302,7 +1390,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
                         overDropZone.setSelected(true);
                         m_selectedDropZoneList.add(overDropZone);
                     }
-                } else if ((modifier & (InputEvent.SHIFT_MASK)) != 0) {
+                } else if ((modifier & (InputEvent.SHIFT_DOWN_MASK)) != 0) {
                     // SHIFT KEY
                     // look for min and max row
                     int minRow = overDropZone.getRow();
@@ -1502,7 +1590,7 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
 
                 if (node.getType() == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
 
-                    DQuantitationChannelMapping mapping = m_parentQCMappings.get(node);
+                    DQuantitationChannelMapping mapping = m_parentQCMappings.get((XICBiologicalSampleAnalysisNode)node);
 
                     Map<DDataset, QuantitationChannel> map = mapping.getMappedQuantChannels();
 
@@ -1777,15 +1865,16 @@ public class QuantAggregateExperimentalTreePanel extends JPanel {
         int textHeight = (int) (rect.getHeight());
         int textWidth = (int) (rect.getWidth());
 
-        String subText = null;
+        StringBuilder subText = new StringBuilder(s.length()+2);
         int countSub = 1;
-        while (textWidth>=COLUMN_WIDTH_MAX) {
-            subText = ".."+s.substring(countSub++);
-            rect = fm.getStringBounds(s, g);
+        while (textWidth>=(COLUMN_WIDTH_MAX -2*PAD)) {
+            subText.setLength(0);
+            subText.append("..").append(s.substring(countSub++));
+            rect = fm.getStringBounds(subText.toString(), g);
             textWidth = (int) (rect.getWidth());
         }
-        if (subText != null) {
-            s = subText;
+        if (!subText.isEmpty()) {
+            s = subText.toString();
         }
 
         // Center text horizontally and vertically

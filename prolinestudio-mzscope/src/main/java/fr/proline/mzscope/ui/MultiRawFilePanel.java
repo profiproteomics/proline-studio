@@ -80,7 +80,12 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
     }
 
     @Override
-    public void extractAndDisplayChromatogram(final MsnExtractionRequest params, Display display, MzScopeCallback callback) {
+    public List<IRawFile> getAllRawfiles() {
+        return rawfiles;
+    }
+
+    @Override
+    public void extractAndDisplay(final ExtractionRequest params, Display display, MzScopeCallback callback) {
        // in this implementation display is ignored : always REPLACE since we will extract one IChromatogram per RawFile
         SwingWorker worker = new SwingWorker<Integer, IChromatogram>() {
             Display display = new Display(Display.Mode.SERIES);
@@ -107,6 +112,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             protected void done() {
                 try {
                     chromatogramPanel.setCurrentChromatogram(chromatogramByRawFile.get(currentRawFile));
+                    MzScopePreferences.getInstance().setLastExtractionRequest(params);
                     logger.info("{} TIC chromatogram extracted", get());
                 } catch (InterruptedException | ExecutionException e) {
                     logger.error("Error while reading chromatogram");
@@ -187,12 +193,14 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
     
     // override display feature to display all xic
     @Override
-    public void displayPeakel(final IPeakel f) {
+    public void displayPeakel(final IPeakel peakel) {
         double ppm = MzScopePreferences.getInstance().getMzPPMTolerance();
-        final double maxMz = f.getMz() + f.getMz() * ppm / 1e6;
-        final double minMz = f.getMz() - f.getMz() * ppm / 1e6;
+        final double maxMz = peakel.getMz() + peakel.getMz() * ppm / 1e6;
+        final double minMz = peakel.getMz() - peakel.getMz() * ppm / 1e6;
 
         final List<IRawFile> rawFiles = new ArrayList<>(rawfiles);
+        final ExtractionRequest extractionRequest = ExtractionRequest.builder(this).setMz(peakel.getMz()).setMzTolPPM((float)ppm).build();
+
         SwingWorker worker = new SwingWorker<Integer, IChromatogram>() {
             int count = 0;
             boolean isFirstProcessCall = true;
@@ -201,8 +209,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             protected Integer doInBackground() throws Exception {
                 //return getCurrentRawfile().getXIC(minMz, maxMz);
                 for (IRawFile rawFile : rawFiles) {
-                    MsnExtractionRequest params = MsnExtractionRequest.builder().setMaxMz(maxMz).setMinMz(minMz).build();
-                    IChromatogram c = rawFile.getXIC(params);
+                    IChromatogram c = rawFile.getXIC(extractionRequest);
                     count++;
                     publish(c);
                 }
@@ -213,20 +220,20 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             protected void process(List<IChromatogram> chunks) {
                 int k = 0;
                 Display display = new Display(Collections
-                    .singletonList(new IntervalMarker(null, Color.ORANGE, Color.RED, f.getFirstElutionTime(), f.getLastElutionTime())));
+                    .singletonList(new IntervalMarker(null, Color.ORANGE, Color.RED, peakel.getFirstElutionTime(), peakel.getLastElutionTime())));
                 if (isFirstProcessCall) {
                     logger.info("display first chromato");
                     isFirstProcessCall = false;
                     displayChromatogram(chunks.get(0), new Display(Display.Mode.REPLACE));
                     k = 1;
-                    displayScan(getCurrentRawfile().getSpectrumId(f.getElutionTime()));
-                    chromatogramPanel.displayFeature(f, display);
+                    displayScan(getCurrentRawfile().getSpectrumId(peakel.getElutionTime()));
+                    chromatogramPanel.displayFeature(peakel, display);
                 }
                 for (; k < chunks.size(); k++) {
                     logger.info("add additionnal chromato");
                     displayChromatogram(chunks.get(k), new Display(Display.Mode.OVERLAY));
-                    displayScan(getCurrentRawfile().getSpectrumId(f.getElutionTime()));
-                    chromatogramPanel.displayFeature(f, display);
+                    displayScan(getCurrentRawfile().getSpectrumId(peakel.getElutionTime()));
+                    chromatogramPanel.displayFeature(peakel, display);
                 }
             }
 
@@ -234,6 +241,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
             protected void done() {
                 try {
                     chromatogramPanel.setCurrentChromatogram(chromatogramByRawFile.get(currentRawFile));
+                    MzScopePreferences.getInstance().setLastExtractionRequest(extractionRequest);
                     logger.info("{} Display Feature", get());
                 } catch (InterruptedException | ExecutionException e) {
                     logger.error("Error while displaying feature");

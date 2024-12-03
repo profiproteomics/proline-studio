@@ -585,8 +585,9 @@ public class ProjectExplorerPanel extends JPanel {
             
             if ((projectItem != null) && (projectItem.isInactive())) {
                 SwingUtilities.invokeLater(() -> {
-                    InfoDialog infoDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Project Deleted", "Databases corresponding to this project have been deleted.\nAsk to your Administrator to restore them.");
+                    InfoDialog infoDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Project Deleted", "Databases corresponding to this project have been deleted.\nContact your Administrator to restore them.", true);
                     infoDialog.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
+                    infoDialog.setButtonName(InfoDialog.BUTTON_OK, "OK");
                     infoDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
                     infoDialog.setVisible(true);
                 });
@@ -638,13 +639,11 @@ public class ProjectExplorerPanel extends JPanel {
                         l.setIcon(IconManager.getIconWithHourGlass(IconManager.IconType.PROJECT));
                     } else {
                         Project project = projectItem.getProjectIdentificationData().getProject();
-                        
-                        JsonParser parser = new JsonParser();
-                        
+
                         String serializedProperties = project.getSerializedProperties();
                         boolean isActive = true;
                         if (serializedProperties != null) {
-                            JsonObject jsonObject = parser.parse(serializedProperties).getAsJsonObject();
+                            JsonObject jsonObject = JsonParser.parseString(serializedProperties).getAsJsonObject();
                             JsonPrimitive isActiveObject = jsonObject.getAsJsonPrimitive("is_active");
                             if(isActiveObject != null)
                                 isActive = isActiveObject.getAsBoolean();

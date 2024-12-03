@@ -17,21 +17,19 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.core.orm.uds.QuantitationMethod;
-import static fr.proline.studio.rsmexplorer.gui.dialog.xic.AbstractLabelFreeMSParamsPanel.DEFAULT_ALIGN_VALUE;
+import fr.proline.studio.NbPreferences;
+import fr.proline.studio.parameter.BooleanParameter;
+import fr.proline.studio.parameter.DoubleParameter;
+import fr.proline.studio.parameter.ObjectParameter;
+import fr.proline.studio.parameter.ParameterList;
+
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.HashMap;
 import java.util.Map;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 /**
  *
@@ -39,19 +37,80 @@ import javax.swing.JTextField;
  */
 public class IsobaricMethodParamsPanel extends AbstractParamsPanel {
 
-    private final QuantitationMethod m_quantMethod;
-    private JTextField m_extractionMoZTolTF;   
+    private JTextField m_extractionMoZTolTF;
     private JComboBox<String> m_reporterSourceCbx;
     private JCheckBox m_rescaleAbundancestoMS1CB;
-        
+    public final static String ISOBARIC_PARAMS_PREFIX = "IsobaricParameters";
+    private final boolean m_readOnly;
+
+    protected final static Double DEFAULT_ISOBARIC_EXTRACTION_MOZTOL_VALUE = 25.0;
+    protected final static String DEFAULT_MOZTOL_UNIT = "PPM";
+    enum ReporterSources {
+        PROLINE_SPECTRUM("Proline spectrum"),
+        MZDB_MS2_SPECTRUM("mzdb MS2 spectrum"),
+        MZDB_MS3_SPECTRUM("mzdb MS3 spectrum");
+
+        private  String m_displayValue;
+         ReporterSources(String displayValue){
+            this.m_displayValue = displayValue;
+        }
+
+        public String getDisplayValue(){
+             return  m_displayValue;
+        }
+
+        public static ReporterSources getResourceSourcesForDisplay(String displayValue){
+             for(ReporterSources rs : ReporterSources.values()){
+                 if(rs.getDisplayValue().equals(displayValue))
+                     return rs;
+             }
+             return null;
+        }
+    }
+
     public IsobaricMethodParamsPanel(QuantitationMethod method) {
-        m_quantMethod = method;
-        
+        this(method, false);
+    }
+
+    public IsobaricMethodParamsPanel(QuantitationMethod method, boolean readOnly) {
+        m_readOnly = readOnly;
+        m_parameterList = new ParameterList(ISOBARIC_PARAMS_PREFIX);
+        createParameters();
         setLayout(new BorderLayout());
         JPanel mainPanel = createMainPanel();
         add(mainPanel, BorderLayout.CENTER);
+        m_parameterList.updateValues(NbPreferences.root());
+
     }
-    
+
+    private void createParameters(){
+        m_extractionMoZTolTF = new JTextField();
+        DoubleParameter extractionMoZTolParameter = new DoubleParameter("extractionMoZTol", "Extraction moz tolerance", m_extractionMoZTolTF, DEFAULT_ISOBARIC_EXTRACTION_MOZTOL_VALUE, Double.valueOf(0), null);
+        m_extractionMoZTolTF.setEnabled(!m_readOnly);
+        m_parameterList.add(extractionMoZTolParameter);
+
+        m_rescaleAbundancestoMS1CB = new JCheckBox("Rescale reporter abundances to MS1 signal", false);
+        BooleanParameter rescaleAbundanceParameter = new BooleanParameter("RescaleAb2MS1", "Rescale Abundance to MS1", m_rescaleAbundancestoMS1CB, false);
+        m_rescaleAbundancestoMS1CB.setEnabled(!m_readOnly);
+        m_parameterList.add(rescaleAbundanceParameter);
+
+
+
+        String[] rscValue = new String[ReporterSources.values().length];
+        String[] rscKeys = new String[ReporterSources.values().length];
+        int index= 0;
+        for(ReporterSources rs : ReporterSources.values()) {
+            rscValue[index]= rs.getDisplayValue();
+            rscKeys[index++] = rs.name();
+        }
+        m_reporterSourceCbx = new JComboBox<>(rscValue);
+        m_reporterSourceCbx.setEnabled(!m_readOnly);
+        ObjectParameter reporterSourceParameter = new ObjectParameter<>("reporterSource", "Reporter extract source", m_reporterSourceCbx, rscValue, rscKeys, 0, null);
+        m_parameterList.add(reporterSourceParameter);
+
+    }
+
+
     private JPanel createMainPanel() {
         JPanel mainPanel = new JPanel(new GridBagLayout());
         mainPanel.setBorder(BorderFactory.createTitledBorder("Isobaric tagging parameters"));
@@ -85,15 +144,12 @@ public class IsobaricMethodParamsPanel extends AbstractParamsPanel {
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
         JLabel extractionMoZTolLabel = new JLabel("Reporter ions will be extracted from:");
+        extractionMoZTolLabel.setEnabled(!m_readOnly);
         c.gridx = 0;
         c.gridy = 0;
         c.gridwidth=1;
         panel.add(extractionMoZTolLabel, c);
 
-        m_reporterSourceCbx = new JComboBox<>();
-        m_reporterSourceCbx.addItem("Proline spectrum");
-        m_reporterSourceCbx.addItem("mzdb MS2 spectrum");
-        m_reporterSourceCbx.addItem("mzdb MS3 spectrum");
         c.gridx++;
         c.weightx = 0;
         panel.add(m_reporterSourceCbx, c);
@@ -113,12 +169,12 @@ public class IsobaricMethodParamsPanel extends AbstractParamsPanel {
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
         JLabel extractionMoZTolLabel = new JLabel("Reporter ions m/z tolerance (ppm):");
+        extractionMoZTolLabel.setEnabled(!m_readOnly);
         c.gridx = 0;
         c.gridy = 0;
         c.gridwidth=1;
         panel.add(extractionMoZTolLabel, c);
 
-        m_extractionMoZTolTF = new JTextField(10);
         c.gridx++;
         c.weightx = 0;
         panel.add(m_extractionMoZTolTF, c);
@@ -137,10 +193,13 @@ public class IsobaricMethodParamsPanel extends AbstractParamsPanel {
         Map<String,Object> params = new HashMap<>();
         Map<String,Object> extractionParams = new HashMap<>();
         extractionParams.put("moz_tol", m_extractionMoZTolTF.getText());
-        extractionParams.put("moz_tol_unit", "PPM");
+        extractionParams.put("moz_tol_unit", DEFAULT_MOZTOL_UNIT);
         params.put("extraction_params", extractionParams);
+
         String sourceValue = (String)m_reporterSourceCbx.getSelectedItem();
-        params.put("reporter_ion_data_source", sourceValue.replaceAll(" ", "_").toUpperCase());
+        ReporterSources rs = ReporterSources.getResourceSourcesForDisplay(sourceValue);
+        params.put("reporter_ion_data_source", rs.name());
+
         //temporary put this value into "label_free_quant_config". If true this value will be replaced
         // by the label_free configuration, if false it will be removed from the params
         params.put("label_free_quant_config", m_rescaleAbundancestoMS1CB.isSelected());
@@ -149,7 +208,29 @@ public class IsobaricMethodParamsPanel extends AbstractParamsPanel {
 
     @Override
     public void setQuantParams(Map<String, Object> quantParams) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if(quantParams == null || quantParams.isEmpty()){
+            resetValues();
+        } else {
+            try {
+                String extractParamVal = ((Map<String, Object>) quantParams.get("extraction_params")).getOrDefault("moz_tol","").toString();
+                m_extractionMoZTolTF.setText(extractParamVal);
+
+                String reporterDS = (String) quantParams.get("reporter_ion_data_source");
+                m_reporterSourceCbx.setSelectedItem(ReporterSources.valueOf(reporterDS).getDisplayValue());
+
+                m_rescaleAbundancestoMS1CB.setSelected(quantParams.containsKey("label_free_quant_config"));
+
+            } catch (NullPointerException | ClassCastException exep){
+                resetValues();
+            }
+
+        }
+    }
+
+    private void resetValues(){
+        m_extractionMoZTolTF.setText("");
+        m_reporterSourceCbx.setSelectedIndex(0);
+        m_rescaleAbundancestoMS1CB.setSelected(false);
     }
 
   private Component createRescalePanel() {
@@ -160,8 +241,7 @@ public class IsobaricMethodParamsPanel extends AbstractParamsPanel {
     c.gridx = 0;
     c.gridy = 0;
     
-    m_rescaleAbundancestoMS1CB = new JCheckBox("Rescale reporter abundances to MS1 signal", false);
-    panel.add(m_rescaleAbundancestoMS1CB, c);
+   panel.add(m_rescaleAbundancestoMS1CB, c);
     
     c.gridx++;
     c.weightx = 1;

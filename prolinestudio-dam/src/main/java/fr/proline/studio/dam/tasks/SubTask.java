@@ -26,9 +26,9 @@ import java.util.List;
  */
 public class SubTask implements Comparable<SubTask> {
 
-    private int m_subTaskId;
-    private int m_startIndex;
-    private int m_stopIndex;
+    private final int m_subTaskId;
+    private final int m_startIndex;
+    private final int m_stopIndex;
     private boolean m_highPriority = false;
 
 

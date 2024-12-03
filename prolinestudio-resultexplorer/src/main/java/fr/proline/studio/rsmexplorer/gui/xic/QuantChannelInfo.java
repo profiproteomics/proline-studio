@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Map quantChannel info and map info, especilaly to maintain the same colors between the maps and the quantChannels
+ * Map quantChannel info and map info, especially to maintain the same colors between the maps and the quantChannels
  * @author MB243701
  */
 public class QuantChannelInfo {

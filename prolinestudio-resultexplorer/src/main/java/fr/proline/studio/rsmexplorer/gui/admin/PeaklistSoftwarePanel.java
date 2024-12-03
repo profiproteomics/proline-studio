@@ -28,7 +28,7 @@ import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.TablePopupMenu;
-import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.utils.IconManager;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
@@ -232,7 +232,7 @@ public class PeaklistSoftwarePanel extends JPanel {
                 parse(sb, StringUtils.defaultIfEmpty(selectedPS.getSpecTitleParsingRule().getFirstTime(), ""), "First Time :", spectrumTitle);
                 parse(sb, StringUtils.defaultIfEmpty(selectedPS.getSpecTitleParsingRule().getLastTime(), ""), "Last Time :", spectrumTitle);
 
-                InfoDialog parseResultDialog = new InfoDialog(m_dialogOwner, InfoDialog.InfoType.NO_ICON, "Spectrum Title Parsing Result", sb.toString());
+                InfoDialog parseResultDialog = new InfoDialog(m_dialogOwner, InfoDialog.InfoType.NO_ICON, "Spectrum Title Parsing Result", sb.toString(), false);
                 parseResultDialog.setButtonVisible(InfoDialog.BUTTON_OK, false);
                 parseResultDialog.setButtonName(BUTTON_CANCEL, "Close");
                 parseResultDialog.centerToWindow(m_dialogOwner);
@@ -443,11 +443,11 @@ public class PeaklistSoftwarePanel extends JPanel {
             switch (col) {
 
                 case COLTYPE_NAME: {
-                    renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
+                    renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.LEFT);
                     break;
                 }
                 case COLTYPE_VERSION: {
-                    renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
+                    renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.LEFT);
                     break;
                 }
 

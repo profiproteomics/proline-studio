@@ -76,7 +76,7 @@ public class MSDiag_BoxChart extends HourglassPanel {
         rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits()); // create integer ticks unit. (whatever data is)
         final BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer(); //BarRenderer();
 
-        renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator()); // info bulles on bars
+        renderer.setDefaultToolTipGenerator(new StandardCategoryToolTipGenerator()); // info bulles on bars
         //renderer.setSeriesFillPaint(0, new Color(128,60,60));
         //renderer.setSeriesOutlinePaint(0, new Color(128,60,60));
 
@@ -97,10 +97,10 @@ public class MSDiag_BoxChart extends HourglassPanel {
         //renderer.setBaseOutlinePaint(Color.blue, true);
         renderer.setItemMargin(0.20);
         renderer.setMaximumBarWidth(1.0);
-        renderer.setBaseLegendShape(new Rectangle2D.Double(-4.0, -4.0, 8.0, 8.0));
+        renderer.setDefaultLegendShape(new Rectangle2D.Double(-4.0, -4.0, 8.0, 8.0));
 
         rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-        renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator()); // info bulles on bars
+        renderer.setDefaultToolTipGenerator(new StandardCategoryToolTipGenerator()); // info bulles on bars
 
         renderer.setSeriesPaint(0, Color.red);
         renderer.setSeriesPaint(0, Color.blue);

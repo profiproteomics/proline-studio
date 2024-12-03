@@ -347,14 +347,14 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
 
                 if (m_matrix[row][col].contains("ABC")) {
                      ArrayList<ExportFontData> ExportFontDatas = new ArrayList<>();
-                    ExportFontData newSubStringFont = new ExportFontData(0, exportString.length(), HSSFColor.LIGHT_BLUE.index, Font.BOLD);
+                    ExportFontData newSubStringFont = new ExportFontData(0, exportString.length(), HSSFColor.HSSFColorPredefined.LIGHT_BLUE.getIndex(), Font.BOLD);
                     ExportFontDatas.add(newSubStringFont);   
                     return ExportFontDatas;
 
                 } else if (m_matrix[row][col].contains("XYZ")) {
                     ArrayList<ExportFontData> ExportFontDatas = new ArrayList<>();
 
-                    ExportFontData newSubStringFont = new ExportFontData(0, exportString.length(), HSSFColor.RED.index, Font.BOLD);
+                    ExportFontData newSubStringFont = new ExportFontData(0, exportString.length(), HSSFColor.HSSFColorPredefined.RED.getIndex(), Font.BOLD);
                     ExportFontDatas.add(newSubStringFont);    
                     return ExportFontDatas;
                     
@@ -464,14 +464,18 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
                 textToExport = "";
             }
 
-            if (m_selectMatrix[row][column] != null) {
+            int modelRow = table.convertRowIndexToModel(row);
+            int modelCol = table.convertColumnIndexToModel(column);
+
+
+            if (m_selectMatrix[modelRow][modelCol] != null) {
                 
                 m_stringBuilder.append("<HTML>");
 
-                if (m_selectMatrix[row][column].contains("ABC")) {                        
+                if (m_selectMatrix[modelRow][modelCol].contains("ABC")) {
                     m_stringBuilder.append("<span style='color:").append((isSelected) ? GlobalValues.HTML_COLOR_EXTRA_LIGHT_BLUE : GlobalValues.HTML_COLOR_LIGHT_BLUE).append("'>").append("<b>").append(textToExport).append("</b>").append("</span>");
 
-                } else if (m_selectMatrix[row][column].contains("XYZ")) {               
+                } else if (m_selectMatrix[modelRow][modelCol].contains("XYZ")) {
                     m_stringBuilder.append("<span style='color:").append((isSelected) ? GlobalValues.HTML_COLOR_EXTRA_LIGHT_RED : GlobalValues.HTML_COLOR_LIGHT_RED).append("'>").append("<b>").append(textToExport).append("</b>").append("</span>");                
                 }
                 

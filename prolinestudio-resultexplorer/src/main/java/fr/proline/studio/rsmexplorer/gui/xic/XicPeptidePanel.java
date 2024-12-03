@@ -18,6 +18,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.dam.data.SelectLevelEnum;
 import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
@@ -91,7 +92,6 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
-import javax.swing.JRadioButton;
 import javax.swing.border.EmptyBorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,7 +116,7 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
     //private boolean m_displayForProteinSet;
     private DMasterQuantProteinSet m_proteinSetToDisplayFor;
     private DQuantitationChannel[] m_quantChannels;
-    private boolean m_isXICMode;
+    private DDatasetType.QuantitationMethodInfo m_quantMethodInfo;
 
     private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
@@ -131,18 +131,19 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
 
     private static final String OVERVIEW_KEY = "OVERVIEW_KEY";
 
-    public XicPeptidePanel(boolean canGraph, boolean xicMode) {
+    public XicPeptidePanel(boolean canGraph, DDatasetType.QuantitationMethodInfo quantMethodInfo) {
         m_canGraph = canGraph;
-        initComponents(xicMode);
+        m_quantMethodInfo = quantMethodInfo;
+        initComponents();
     }
 
-    private void initComponents(boolean xicMode) {
+    private void initComponents() {
         setLayout(new BorderLayout());
 
         ToolTipManager.sharedInstance().setInitialDelay(0);
         ToolTipManager.sharedInstance().setDismissDelay(5000);
 
-        final JPanel peptidePanel = createPeptidePanel(xicMode);
+        final JPanel peptidePanel = createPeptidePanel();
         final JLayeredPane layeredPane = new JLayeredPane();
 
         layeredPane.addComponentListener(new ComponentListener() {
@@ -172,17 +173,17 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
         add(layeredPane, BorderLayout.CENTER);
 
         layeredPane.add(peptidePanel, JLayeredPane.DEFAULT_LAYER);
-        layeredPane.add(m_infoToggleButton.getInfoPanel(), new Integer(JLayeredPane.PALETTE_LAYER + 1));
-        layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER + 2));
+        layeredPane.add(m_infoToggleButton.getInfoPanel(), Integer.valueOf(JLayeredPane.PALETTE_LAYER + 1));
+        layeredPane.add(m_searchToggleButton.getSearchPanel(), Integer.valueOf(JLayeredPane.PALETTE_LAYER + 2));
     }
 
-    private JPanel createPeptidePanel(boolean xicMode) {
+    private JPanel createPeptidePanel() {
 
         JPanel peptidePanel = new JPanel();
         peptidePanel.setBounds(0, 0, 500, 400);
         peptidePanel.setLayout(new BorderLayout());
 
-        JPanel internalPanel = createInternalPanel(xicMode);
+        JPanel internalPanel = createInternalPanel();
 
         JToolBar toolbar = initToolbar();
         peptidePanel.add(toolbar, BorderLayout.WEST);
@@ -290,7 +291,7 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
         return modifyStatusButtonAction;
     }
 
-    private JPanel createInternalPanel(boolean xicMode) {
+    private JPanel createInternalPanel() {
 
         JPanel internalPanel = new JPanel();
 
@@ -304,7 +305,7 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
         m_peptideScrollPane = new JScrollPane();
 
         m_quantPeptideTable = new QuantPeptideTable();
-        m_quantPeptideTableModel = new QuantPeptideTableModel((LazyTable) m_quantPeptideTable, this, xicMode);
+        m_quantPeptideTableModel = new QuantPeptideTableModel((LazyTable) m_quantPeptideTable, this, m_quantMethodInfo);
         m_quantPeptideTable.setModel(new CompoundTableModel(m_quantPeptideTableModel, true));
         
         XicStatusRenderer renderer = (XicStatusRenderer) m_quantPeptideTableModel.getRenderer(0, QuantPeptideTableModel.COLTYPE_MQPEPTIDE_SELECTION_LEVEL);
@@ -315,7 +316,7 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
         m_quantPeptideTable.setColumnControl(customColumnControl);
         // hide the id column
         m_quantPeptideTable.getColumnExt(m_quantPeptideTable.convertColumnIndexToView(QuantPeptideTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
-        if (!xicMode) {
+        if (m_quantMethodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING)) {
             m_quantPeptideTable.getColumnExt(m_quantPeptideTable.convertColumnIndexToView(QuantPeptideTableModel.COLTYPE_MQPEPTIDE_SELECTION_LEVEL)).setVisible(false);
         }
 
@@ -337,7 +338,7 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
         return internalPanel;
     }
 
-    public void setData(Long taskId, DMasterQuantProteinSet proteinSetToDisplayFor, DQuantitationChannel[] quantChannels, List<DMasterQuantPeptide> peptides, boolean isXICMode, boolean finished) {
+    public void setData(Long taskId, DMasterQuantProteinSet proteinSetToDisplayFor, DQuantitationChannel[] quantChannels, List<DMasterQuantPeptide> peptides, DDatasetType.QuantitationMethodInfo quantitationMethodInfo, boolean finished) {
         boolean qcChanged = true;
         if (m_quantChannels != null && m_quantChannels.length == quantChannels.length) {
             for (int q = 0; q < m_quantChannels.length; q++) {
@@ -345,11 +346,11 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
             }
         }
         m_quantChannels = quantChannels;
-        m_isXICMode = isXICMode;
+        m_quantMethodInfo = quantitationMethodInfo;
         m_proteinSetToDisplayFor = proteinSetToDisplayFor;
-        m_quantPeptideTableModel.setData(taskId, m_dataBox.getProjectId(), quantChannels, peptides, m_proteinSetToDisplayFor, m_isXICMode);
+        m_quantPeptideTableModel.setData(taskId, m_dataBox.getProjectId(), quantChannels, peptides, m_proteinSetToDisplayFor, m_quantMethodInfo);
 
-        if (!m_isXICMode) {
+        if (m_quantMethodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING)) {
             m_quantPeptideTableModel.setOverviewType(QuantPeptideTableModel.COLTYPE_RAW_ABUNDANCE);
         }
         // select the first row
@@ -402,7 +403,7 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
         if (columnVisible) {
             m_quantPeptideTable.getColumnExt(m_quantPeptideTable.convertColumnIndexToView(QuantPeptideTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
         }
-        if (!m_isXICMode) {
+        if (m_quantMethodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING)) {
             // hide Validate/Unvalidate peptide column for SC 
             columnVisible = ((TableColumnExt) columns.get(QuantPeptideTableModel.COLTYPE_MQPEPTIDE_SELECTION_LEVEL)).isVisible();
             if (columnVisible) {
@@ -497,7 +498,8 @@ public class XicPeptidePanel extends HourglassPanel implements RendererMouseCall
 
             ParameterList overviewParameterList = new ParameterList("Overview Parameters");
 
-            String[] overviewDisplay = {m_isXICMode ? "Overview on Pep. Match Count" : "Overview on Basic SC", "Overview on Abundance", m_isXICMode ? "Overview on Raw Abundance" : "Overview on Specific SC"};
+            boolean isSC = m_quantMethodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING);
+            String[] overviewDisplay = {!isSC ? "Overview on Pep. Match Count" : "Overview on Basic SC", "Overview on Abundance", !isSC ? "Overview on Raw Abundance" : "Overview on Specific SC"};
             Integer[] overviewValues = {0, 1, 2};
 
             List<TableColumn> columns = getColumns(true);

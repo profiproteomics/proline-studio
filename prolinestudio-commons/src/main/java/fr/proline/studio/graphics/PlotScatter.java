@@ -169,7 +169,7 @@ public class PlotScatter extends PlotXYAbstract implements Axis.EnumXInterface, 
         m_logAlgoParameter = new ObjectParameter(PlotScatter.LOG_ALGO_KEY, PlotScatter.LOG_ALGO_NAME, comboBox, logOptions, objectTable, PlotScatter.DEFAULT_LOG_ALGO, null);
         plotParameterList.add(m_logAlgoParameter);
 
-        m_replaceValue = new DoubleParameter(PlotScatter.DEFAULT_LOG_REPLACE_VALUE_KEY, PlotScatter.DEFAULT_LOG_REPLACE_VALUE_NAME, JTextField.class, new Double(1), new Double(10e-14), new Double(10e14));
+        m_replaceValue = new DoubleParameter(PlotScatter.DEFAULT_LOG_REPLACE_VALUE_KEY, PlotScatter.DEFAULT_LOG_REPLACE_VALUE_NAME, JTextField.class, Double.valueOf(1), Double.valueOf(10e-14), Double.valueOf(10e14));
         plotParameterList.add(m_replaceValue);
 
         plotParameterList.loadParameters(NbPreferences.root());

@@ -24,18 +24,15 @@ public class Spectrum {
 
       CENTROID, PROFILE
    }
-   private String title;
-   private Integer index;
-   private int msLevel;
-   private ScanType dataType;
-   private float retentionTime;
-   private double[] masses;
-   private float[] intensities;
-   private SpectrumData spectrumData;
-
+   protected String title;
+   protected Integer index;
+   protected int msLevel;
+   protected ScanType dataType;
+   protected float retentionTime;
+   protected SpectrumData spectrumData;
    // msLevel2 only
-   private Double precursorMz;
-   private Integer precursorCharge;
+   protected Double precursorMz;
+   protected Integer precursorCharge;
 
 
    public Spectrum(Integer index, float rt, double[] masses, float[] intensities, int msLevel) {
@@ -43,21 +40,23 @@ public class Spectrum {
    }
 
    public Spectrum(Integer index, float rt, double[] masses, float[] intensities, int msLevel, ScanType type) {
+      this(index, rt, new SpectrumData(masses, intensities), msLevel, type);
+   }
+
+   public Spectrum(Integer index, float rt, SpectrumData spectrumData, int msLevel, ScanType type) {
       this.index = index;
-      this.masses = masses;
-      this.intensities = intensities;
       this.retentionTime = rt;
       this.msLevel = msLevel;
       this.dataType = type;
-      this.spectrumData = new SpectrumData(this.masses, this.intensities);
+      this.spectrumData = spectrumData;
    }
 
    public double[] getMasses() {
-      return this.masses;
+      return spectrumData.getMzList();
    }
 
    public float[] getIntensities() {
-      return this.intensities;
+      return spectrumData.getIntensityList();
    }
 
    public Integer getIndex() {
@@ -84,10 +83,12 @@ public class Spectrum {
       return spectrumData;
    }
 
-   public void setSpectrumData(SpectrumData spectrumData) {
-      this.spectrumData = spectrumData;
+   public boolean hasIonMobilitySeparation() {
+// TODO use mzdb-access ion_mobility branch to enable this feature
+//      return spectrumData.getMobilityIndexList() != null && spectrumData.getMobilityIndexList().length > 0;
+      return false;
    }
-   
+
    /**
     * Returns the data type : CENTROID or PROFILE
     *

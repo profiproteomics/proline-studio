@@ -16,8 +16,8 @@
  */
 package fr.proline.studio.rsmexplorer.adjacencymatrix.ordering;
 
-import ch.usi.inf.sape.hac.experiment.DissimilarityMeasure;
-import ch.usi.inf.sape.hac.experiment.Experiment;
+import org.opencompare.hac.experiment.DissimilarityMeasure;
+import org.opencompare.hac.experiment.Experiment;
 
 public class dissimilarityValue implements DissimilarityMeasure {
 

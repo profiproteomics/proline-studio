@@ -16,26 +16,27 @@
  */
 package fr.proline.studio.rsmexplorer.gui.tasklog;
 
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.dpm.data.JMSNotificationMessage;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.PurgeConsumer;
 import fr.proline.studio.dpm.task.util.ConnectionListener;
-import static fr.proline.studio.dpm.task.util.ConnectionListener.CONNECTION_DONE;
-import static fr.proline.studio.dpm.task.util.ConnectionListener.CONNECTION_FAILED;
-import static fr.proline.studio.dpm.task.util.ConnectionListener.NOT_CONNECTED;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.dpm.task.util.ServiceNotificationListener;
+import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.filter.FilterTableModelInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.rsmexplorer.gui.dialog.GetSystemInfoButtonAction;
 import fr.proline.studio.utils.IconManager;
-import java.awt.event.ActionListener;
-import javax.swing.ImageIcon;
-import javax.swing.JOptionPane;
-import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionListener;
 
 /**
  *
@@ -58,18 +59,78 @@ public abstract class AbstractTasksPanel extends HourglassPanel implements DataB
 
     public AbstractTasksPanel(){
         this.m_isConnected = false;
-        initListener(); //calling it in constructor is incorrect: it calls overriden methods
+        initListener(); //calling it in constructor is incorrect: it calls override methods
+        setLayout(new GridBagLayout());
+
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+
+        c.weightx = 1;
+        c.weighty = 1;
+        add(createToolbarPanel(), c);
     }
-    
-   
+
+    protected  JPanel createToolbarPanel() {
+        JPanel toolbarPanel = new JPanel();
+
+        toolbarPanel.setLayout(new BorderLayout());
+
+        JPanel internalPanel = createInternalPanel();
+        toolbarPanel.add(internalPanel, BorderLayout.CENTER);
+
+        JToolBar toolbar = initToolbar();
+        toolbarPanel.add(toolbar, BorderLayout.WEST);
+
+        return toolbarPanel;
+
+    }
+
+    protected JButton getEraseButton(){
+        JButton b = new JButton();
+        b.setIcon(IconManager.getIcon(IconManager.IconType.ERASER));
+        b.setToolTipText("Clear Tasks list");
+        return b;
+    }
+
+    protected abstract JPanel createInternalPanel();
+    protected abstract void clearActionPerformed();
+
+    protected abstract FilterTableModelInterface getTaskTableModel();
+    protected JToolBar initToolbar(){
+        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
+        toolbar.setFloatable(false);
+
+        FilterButton filterButton = new FilterButton( getTaskTableModel()) {
+
+            @Override
+            protected void filteringDone() {
+            }
+
+        };
+
+        toolbar.add(filterButton);
+
+        JButton clearBtn = getEraseButton();
+        clearBtn.addActionListener(e -> clearActionPerformed());
+        toolbar.add(clearBtn);
+
+        GetSystemInfoButtonAction systemInfoButton = new GetSystemInfoButtonAction();
+        toolbar.add(systemInfoButton);
+
+
+        return toolbar;
+    }
     protected boolean isMonitoringConnected(){
         return m_isConnected;
     }
-    
+
+
     /**
      * Listener of JMS Connection state change : to connect/disconnect from topic
      */
-    public void initListener(){
+    public final void initListener(){
         JMSConnectionManager.getJMSConnectionManager().addConnectionListener(this);
         int currentState =  JMSConnectionManager.getJMSConnectionManager().getConnectionState();
         connectionStateChanged(currentState);

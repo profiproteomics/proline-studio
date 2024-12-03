@@ -49,8 +49,8 @@ public class LabelFreeMSParamsSimplifiedPanel extends AbstractLabelFreeMSParamsP
     private JTextField m_alignmentFeatureMapTimeToleranceTF;
     protected JCheckBox m_alignRTCB;
 
-    public LabelFreeMSParamsSimplifiedPanel() {
-        super(false);
+    public LabelFreeMSParamsSimplifiedPanel(String labelFreeParamVersion) {
+        super(false,labelFreeParamVersion);
 
         createParameters();
         m_parameterList.updateValues(NbPreferences.root());
@@ -81,7 +81,7 @@ public class LabelFreeMSParamsSimplifiedPanel extends AbstractLabelFreeMSParamsP
     private void createParameters() {
 
         m_extractionMoZTolTF = new JTextField();
-        DoubleParameter extractionMoZTolParameter = new DoubleParameter("extractionMoZTol", "Extraction moz tolerance", m_extractionMoZTolTF, DEFAULT_EXTRACTION_MOZTOL_VALUE, new Double(0), null);
+        DoubleParameter extractionMoZTolParameter = new DoubleParameter("extractionMoZTol", "Extraction moz tolerance", m_extractionMoZTolTF, DEFAULT_EXTRACTION_MOZTOL_VALUE, Double.valueOf(0), null);
         m_parameterList.add(extractionMoZTolParameter);
 
         m_crossAssignCBoxTitle = new CheckBoxTitledBorder("Cross Assignment", DEFAULT_CROSS_ASSIGN_VALUE);
@@ -94,7 +94,7 @@ public class LabelFreeMSParamsSimplifiedPanel extends AbstractLabelFreeMSParamsP
         m_parameterList.add(m_crossAssignStrategyParameter);
 
         m_crossAssignFeatureMapRTTolTF = new JTextField();
-        DoubleParameter featureMappingTimeTolParameter = new DoubleParameter("featureTimeTol", "RT tolerance", m_crossAssignFeatureMapRTTolTF, DEFAULT_CA_FEATMAP_RTTOL_VALUE, new Double(0), null);
+        DoubleParameter featureMappingTimeTolParameter = new DoubleParameter("featureTimeTol", "RT tolerance", m_crossAssignFeatureMapRTTolTF, DEFAULT_CA_FEATMAP_RTTOL_VALUE, Double.valueOf(0), null);
         m_parameterList.add(featureMappingTimeTolParameter);
 
         m_alignRTCB = new JCheckBox("Align RT", DEFAULT_ALIGN_VALUE);
@@ -103,7 +103,7 @@ public class LabelFreeMSParamsSimplifiedPanel extends AbstractLabelFreeMSParamsP
         m_parameterList.add(alignRTParameter);
 
         m_alignmentFeatureMapTimeToleranceTF = new JTextField();
-        DoubleParameter alignmentFeatureMappingTimeToleranceParameter = new DoubleParameter("featureMappingTimeTolerance", "Feature Mapping Time Tolerance", m_alignmentFeatureMapTimeToleranceTF, DEFAULT_ALIGN_FEATMAP_TIMETOL_VALUE, new Double(1), null);
+        DoubleParameter alignmentFeatureMappingTimeToleranceParameter = new DoubleParameter("featureMappingTimeTolerance", "Feature Mapping Time Tolerance", m_alignmentFeatureMapTimeToleranceTF, DEFAULT_ALIGN_FEATMAP_TIMETOL_VALUE, Double.valueOf(1), null);
         m_parameterList.add(alignmentFeatureMappingTimeToleranceParameter);
 
     }
@@ -128,7 +128,7 @@ public class LabelFreeMSParamsSimplifiedPanel extends AbstractLabelFreeMSParamsP
     @Override
     public Map<String, Object> getQuantParams() {
         Map<String, Object> params = new HashMap<>();
-        params.put("config_version", "2.0");
+        params.put("config_version", AbstractLabelFreeMSParamsPanel.CURRENT_QUANT_PARAM_VERSION);
 
         Map<String, Object> extractionParams = new HashMap<>();
         extractionParams.put("moz_tol", m_extractionMoZTolTF.getText());
@@ -144,7 +144,6 @@ public class LabelFreeMSParamsSimplifiedPanel extends AbstractLabelFreeMSParamsP
         clusteringParams.put("intensity_computation", DEFAULT_CLUSTER_INTENSITYCOMPUT_VALUE);
         params.put("clustering_params", clusteringParams);
 
-        //should specify default params... (JSON String deserialization => set all to None/null/false...)
         params.put("detection_method_name", DETECTION_METHOD_KEYS[0]);
         Map<String, Object> detectionParams = new HashMap<>();
         Map<String, Object> detectionToleranceParams = new HashMap<>();
@@ -157,12 +156,15 @@ public class LabelFreeMSParamsSimplifiedPanel extends AbstractLabelFreeMSParamsP
 
         if (m_crossAssignCBoxTitle.isSelected()) { // Param defined only if CrossAssignement enabled
             Map<String, Object> crossAssignmentConfig = new HashMap<>();
-            crossAssignmentConfig.put("method_name", m_crossAssignStrategyParameter.getStringValue());
+            crossAssignmentConfig.put(QUANT_CONFIG_METHOD_NAME, m_crossAssignStrategyParameter.getStringValue());
             crossAssignmentConfig.put("restrain_to_reliable_features", DEFAULT_CA_USE_RELIABLE_FEAT);
             Map<String, Object> ftMappingParams = new HashMap<>();
             ftMappingParams.put("moz_tol", m_extractionMoZTolTF.getText());
             ftMappingParams.put("moz_tol_unit", DEFAULT_MOZTOL_UNIT);
             ftMappingParams.put("time_tol", m_crossAssignFeatureMapRTTolTF.getText());
+            ftMappingParams.put("use_moz_calibration", true);
+            ftMappingParams.put("use_automatic_time_tol", false);
+
             crossAssignmentConfig.put("ft_mapping_params", ftMappingParams);
             Map<String, Object> ftParams = new HashMap<>();
             ftParams.put("name", DEFAULT_CA_FILTER_NAME_VALUE);
@@ -173,18 +175,19 @@ public class LabelFreeMSParamsSimplifiedPanel extends AbstractLabelFreeMSParamsP
 
             if (m_alignRTCB.isSelected()) {
                 Map<String, Object> alignmentConfig = new HashMap<>();
-                alignmentConfig.put(AbstractLabelFreeMSParamsPanel.ALIGNMENT_METHOD_NAME, ALIGNMENT_METHOD_KEYS[0]);
-                alignmentConfig.put("smoothing_method_name", ALIGNMENT_SMOOTHING_METHOD_KEYS[0]);
+                alignmentConfig.put(AbstractLabelFreeMSParamsPanel.QUANT_CONFIG_METHOD_NAME, ALIGNMENT_METHOD_KEYS[0]);
+                alignmentConfig.put(AbstractLabelFreeMSParamsPanel.ALIGNMENT_SMOOTHING_METHOD_NAME, ALIGNMENT_SMOOTHING_METHOD_KEYS[0]);
                 alignmentConfig.put("ft_mapping_method_name", FEATURE_MAPPING_METHOD_KEYS[0]);
                 Map<String, Object> alnFtParams = new HashMap<>();
                 alnFtParams.put("time_tol", m_alignmentFeatureMapTimeToleranceTF.getText());
-                alignmentConfig.put("ft_mapping_method_params", alnFtParams);
+                alignmentConfig.put("ft_mapping_params", alnFtParams);
                 alignmentConfig.put("ignore_errors", false);
                 params.put(AbstractLabelFreeMSParamsPanel.ALIGNMENT_CONFIG, alignmentConfig);
             }
 
         }
-
+        // Moz Calibration
+        params.put("moz_calibration_smoothing_method", MOZ_CALIBRATION_SMOOTHING_METHOD_KEYS[0]);
         return params;
     }
 

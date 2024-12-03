@@ -31,6 +31,7 @@ import fr.proline.studio.utils.IconManager;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import java.util.Enumeration;
 
 /**
@@ -41,7 +42,7 @@ import java.util.Enumeration;
 public class DataSetNode extends AbstractNode {
 
     private boolean m_isReference = false;
-    private boolean m_isRefined = false;
+//    private boolean m_isRefined = false;
     
     /**
      * combine with RSM.getSerializedProperties(), to determinate if this rsm isBioSequenceRetrived. 
@@ -120,16 +121,29 @@ public class DataSetNode extends AbstractNode {
             if (dataset == null || datasetType.getQuantMethodInfo() == QuantitationMethodInfo.NONE) {
                 return getIcon(IconManager.IconType.QUANT_XIC);
             }
-            if (dataset.getQuantMethodInfo() == QuantitationMethodInfo.FEATURES_EXTRACTION) { // XIC
-                if (datasetType.isAggregation()) {
-                    return getIcon(IconManager.IconType.QUANT_AGGREGATION_XIC);
+            QuantitationMethodInfo methodInfo = dataset.getQuantMethodInfo();
+            switch (methodInfo){
+                case FEATURES_EXTRACTION -> {
+                    if (datasetType.isAggregation()) {
+                        return getIcon(IconManager.IconType.QUANT_AGGREGATION_XIC);
+                    }
+                    return getIcon(IconManager.IconType.QUANT_XIC);
                 }
-                return getIcon(IconManager.IconType.QUANT_XIC);
-            } else if (dataset.getQuantMethodInfo() == QuantitationMethodInfo.SPECTRAL_COUNTING) { // Spectral count
-                return getIcon(IconManager.IconType.QUANT_SC);
-            } else {
-                return getIcon(IconManager.IconType.QUANT);
+                case SPECTRAL_COUNTING -> {
+                    return getIcon(IconManager.IconType.QUANT_SC);
+                }
+                case ISOBARIC_TAGGING -> {
+                    if (datasetType.isAggregation()) {
+                        return getIcon(IconManager.IconType.QUANT_AGGREGATION_TMT);
+                    }
+                    return getIcon(IconManager.IconType.QUANT_TMT);
+                }
+                default -> {
+                    return getIcon(IconManager.IconType.QUANT);
+                }
+
             }
+
         }
 
         return getIcon(IconManager.IconType.QUANT);// sould not happen
@@ -155,9 +169,7 @@ public class DataSetNode extends AbstractNode {
                     return true;
                 }
             }
-        } else if (datasetType.isQuantitation()) {
-            return true; //rsType is Quantitation but, a SC or a XIC is necessarily a merge
-        }
+        } else return datasetType.isQuantitation(); //rsType is Quantitation but, a SC or a XIC is necessarily a merge
         return false;
     }
 
@@ -194,10 +206,7 @@ public class DataSetNode extends AbstractNode {
             return false;
         }
         DDatasetType datasetType = ((DataSetData) getData()).getDatasetType();
-        if (datasetType.isTrash()) {
-            return true;
-        }
-        return false;
+      return datasetType.isTrash();
     }
 
     public boolean isFolder() {
@@ -206,10 +215,7 @@ public class DataSetNode extends AbstractNode {
             return false;
         }
         DDatasetType datasetType = ((DataSetData) getData()).getDatasetType();
-        if (datasetType.isFolder()) {
-            return true;
-        }
-        return false;
+      return datasetType.isFolder();
     }
 
     public boolean hasResultSummary() {
@@ -273,7 +279,7 @@ public class DataSetNode extends AbstractNode {
             return false;
         }
 
-        Enumeration e = children();
+        Enumeration<TreeNode> e = children();
         while (e.hasMoreElements()) {
             AbstractNode child = (AbstractNode) e.nextElement();
             if (!child.canBeDeleted()) {
@@ -353,7 +359,7 @@ public class DataSetNode extends AbstractNode {
         };
 
         // ask asynchronous loading of data
-        // depending of the type
+        // depending on the type
         if (dataSet.isQuantitation()) {
             // Task 1 : Load Quantitation, MasterQuantitationChannels 
             DatabaseDataSetTask task1 = new DatabaseDataSetTask(dbCallback);
@@ -432,7 +438,7 @@ public class DataSetNode extends AbstractNode {
     public boolean isQuantXIC() {
         if (isQuantitation()) {
             DDataset d = ((DataSetData) getData()).getDataset();
-            return d.getQuantMethodInfo() == DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION;
+            return (d.getQuantMethodInfo() == DDatasetType.QuantitationMethodInfo.ISOBARIC_TAGGING || d.getQuantMethodInfo() == DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION);
         } else {
             return false;
         }

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>prolinestudio-parent</artifactId>
         <groupId>fr.proline</groupId>
-        <version>2.2.0</version>
+        <version>2.3.2-SNAPSHOT</version>
     </parent>
 
     <groupId>fr.proline</groupId>
@@ -16,28 +16,38 @@
 
     <properties>
         <assembly.file.path>${project.basedir}/src/main/resources/assembly.xml</assembly.file.path>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <sqlite4java.version>1.0.392</sqlite4java.version>
         <sqlite4java.library.path>${project.build.directory}/sqlite4java</sqlite4java.library.path>
     </properties>
-    
-<!--    <repositories>-->
-<!--        -->
-<!--        <repository>-->
-<!--            <id>nexus-ebi-release-repo</id>-->
-<!--            <url>http://www.ebi.ac.uk/Tools/maven/repos/content/groups/ebi-repo/</url>-->
-<!--        </repository>-->
-<!--        <repository>-->
-<!--            <id>nexus-ebi-snapshot-repo</id>-->
-<!--            <url>http://www.ebi.ac.uk/Tools/maven/repos/content/groups/ebi-snapshots/</url>-->
-<!--        </repository>-->
-<!--    </repositories>-->
+
 
     <dependencies>
 
-
-
-        <!-- ProlineStudio dependencies -->
+        <!-- Proline dependencies -->
+        <dependency>
+            <groupId>fr.proline</groupId>
+            <artifactId>proline-databases</artifactId>
+            <version>${core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>fr.proline</groupId>
+            <artifactId>proline-orm</artifactId>
+            <version>${core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>fr.profi</groupId>
+            <artifactId>mzdb-access_${scala.compat.version}</artifactId>
+            <version>${mzdb.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>fr.profi</groupId>
+            <artifactId>mzdb-processing_${scala.compat.version}</artifactId>
+            <version>${mzdb.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>fr.profi.util</groupId>
+            <artifactId>profi-commons-java</artifactId>
+            <version>${util.version}</version>
+        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>prolinestudio-commons</artifactId>
@@ -54,12 +64,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>prolinestudio-logger</artifactId>
-            <version>${project.version}</version>
-            <type>pom</type>
-        </dependency>
-        <dependency>
             <groupId>fr.proline</groupId>
             <artifactId>prolinestudio-dpm</artifactId>
             <version>${project.version}</version>
@@ -70,47 +74,50 @@
             <artifactId>prolinestudio-mzscope</artifactId>
             <version>${project.version}</version>
             <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.8.1</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jfreechart</artifactId>
+                    <groupId>jfree</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>prolinestudio-R</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
-        
+
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+
+        <!--  JFree  -->
         <dependency>
             <groupId>org.jfree</groupId>
             <artifactId>jfreechart</artifactId>
-            <version>1.0.19</version>
+            <version>1.5.3</version>
+            <scope>compile</scope>
         </dependency>
-        <!--  JFree common -->
         <dependency>
             <groupId>org.jfree</groupId>
             <artifactId>jcommon</artifactId>
-            <version>1.0.23</version>
+            <version>1.0.24</version>
         </dependency>
         <dependency>
             <groupId>org.jfree</groupId>
             <artifactId>jfreesvg</artifactId>
-            <version>3.0</version>
         </dependency>
-        
-        <dependency> 
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>  
-            <!-- Version inherited from ProFI-Pom -->
-        </dependency>  
+
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+        </dependency>
       
         <dependency>
             <groupId>org.swinglabs.swingx</groupId>
             <artifactId>swingx-all</artifactId>
-            <version>1.6.5-1</version>
-            <type>jar</type>
         </dependency>
         
         <dependency>
@@ -120,25 +127,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>
             <artifactId>hibernate-jpa-2.1-api</artifactId>
-            <version>1.0.0.Final</version>
         </dependency>
-        <!-- <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-            <version>4.2.13.Final</version>
-        </dependency> -->
 
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -149,63 +140,61 @@
         <dependency>
             <groupId>org.python</groupId>
             <artifactId>jython</artifactId>
-            <version>2.2</version>
+            <version>2.7.2</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
         </dependency>
 
+<!--        <dependency>-->
+<!--            <groupId>sape.inf.usi.ch</groupId>-->
+<!--            <artifactId>hac</artifactId> -->
+<!--            <version>2015-04</version> -->
+<!--        </dependency> -->
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>       
-            <version>4.5.2</version>
-            <scope>runtime</scope>
+            <groupId>org.opencompare</groupId>
+            <artifactId>hac</artifactId>
+            <version>1.0.0</version>
         </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.10</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>uk.ac.ebi.pride.toolsuite</groupId>
-            <artifactId>ols-dialog</artifactId>
-            <version>3.4.13-EDyP</version>
-            
-        </dependency>
-
-        <dependency> 
-            <groupId>sape.inf.usi.ch</groupId> 
-            <artifactId>hac</artifactId> 
-            <version>2015-04</version> 
-        </dependency> 
 
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
         </dependency>
-        
+
+        <dependency>
+            <groupId>com.almworks.sqlite4java</groupId>
+            <artifactId>sqlite4java</artifactId>
+            <version>${sqlite4java.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
             <version>1.1.1</version>
         </dependency>
+
         <dependency>
             <groupId>fr.proline</groupId>
             <artifactId>log-parser</artifactId>
-            <version>2.2.0</version>
-            <type>jar</type>
+            <version>2.3.0</version>
         </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>org.jboss.spec.javax.jms</groupId>-->
+<!--            <artifactId>jboss-jms-api_2.0_spec</artifactId>-->
+<!--            <version>1.0.2.Final</version>-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>
-
         <plugins>
 
             <plugin>

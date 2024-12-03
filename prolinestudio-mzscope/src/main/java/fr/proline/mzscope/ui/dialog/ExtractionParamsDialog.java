@@ -307,10 +307,6 @@ public class ExtractionParamsDialog extends JDialog {
                 JOptionPane.showMessageDialog(this, "max m/z value is incorrect: " + ms1MzBoundsPanel.getMaxMzTF().getText());
                 return;
             }
-            if (ms1MzBoundsPanel.getMzBoundsRB().isSelected() && extractionParams.getMinMz() > extractionParams.getMaxMz()) {
-                JOptionPane.showMessageDialog(this, "The min m/z value must be lower than max m/z");
-                return;
-            }
             if (ms1MzBoundsPanel.getMzRB().isSelected()) {
                 try {
                     double m = Double.parseDouble(ms1MzBoundsPanel.getMzTF().getText());
@@ -320,11 +316,17 @@ public class ExtractionParamsDialog extends JDialog {
                     return;
                 }
             }
+
+            FeaturesExtractionRequest request = extractionParams.build();
+            if (ms1MzBoundsPanel.getMzBoundsRB().isSelected() && request.getMinMz() > request.getMaxMz()) {
+                JOptionPane.showMessageDialog(this, "The min m/z value must be lower than max m/z");
+                return;
+            }
+
         }
 
         extractionParams.setRemoveBaseline(removeBaselineCB.isSelected());
         extractionParams.setUseSmoothing(useSmoothingCB.isSelected());
-
         extractionParams.setMsLevel(getMsLevelCB().getSelectedIndex()+1);
         
         if (showMS2Option && getMsLevelCB().getSelectedItem().equals(MS2)) {
@@ -478,10 +480,6 @@ class MS2MzBoundsPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "max m/z value is incorrect: " + fragmentMzBoundsPanel.getMaxMzTF().getText());
             return;
         }
-        if (fragmentMzBoundsPanel.getMzBoundsRB().isSelected() && extractionParams.getFragmentMinMz() > extractionParams.getFragmentMaxMz()) {
-            JOptionPane.showMessageDialog(this, "The min m/z value must be lower than max m/z");
-            return;
-        }
         if (fragmentMzBoundsPanel.getMzRB().isSelected()) {
             try {
                 extractionParams.setFragmentMz(Double.parseDouble(fragmentMzBoundsPanel.getMzTF().getText()));
@@ -490,6 +488,13 @@ class MS2MzBoundsPanel extends JPanel {
                 return;
             }
         }
+
+        FeaturesExtractionRequest request = extractionParams.build();
+        if (fragmentMzBoundsPanel.getMzBoundsRB().isSelected() && request.getFragmentMinMz() > request.getFragmentMaxMz()) {
+            JOptionPane.showMessageDialog(this, "The min m/z value must be lower than max m/z");
+            return;
+        }
+
     }
 
 }

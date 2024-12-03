@@ -1053,7 +1053,7 @@ public class ValidationDialog extends DefaultStorableDialog {
 
         if (getArguments().isEmpty() && !m_psmFdrCheckbox.isSelected() && !m_proteinFdrCheckbox.isSelected()) {
 
-            InfoDialog emptyArgumentsDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "You should not validate. Important arguments are not set.\nAre you sure you want to validate?");
+            InfoDialog emptyArgumentsDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "You should not validate. Important arguments are not set.\nAre you sure you want to validate?", false);
             emptyArgumentsDialog.setButtonName(DefaultDialog.BUTTON_OK, "Yes");
             emptyArgumentsDialog.setButtonName(DefaultDialog.BUTTON_CANCEL, "No");
             emptyArgumentsDialog.centerToWindow(m_singletonDialog);

@@ -53,7 +53,7 @@ public class ExporterFactory {
         MGF, 
         TSV,
         MZID
-    };
+    }
        
     public static  ArrayList<ExporterInfo> getList(int exportType) {
         
@@ -136,7 +136,7 @@ public class ExporterFactory {
             m_listMzIdent.add(new ExporterInfo(ExporterType.MZID, "MzIdentML (.mzid)","mzid"));
             return m_listMzIdent; 
         }
-        return new ArrayList(); // should not happen
+        return new ArrayList<>(); // should not happen
     }
     
     public static class ExporterInfo {

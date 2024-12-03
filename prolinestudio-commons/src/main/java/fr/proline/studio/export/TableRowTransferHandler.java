@@ -40,7 +40,7 @@ public class TableRowTransferHandler extends TransferHandler {
     @Override
     protected Transferable createTransferable(JComponent c) {
         assert (c == table);
-        return new DataHandler(new Integer(table.getSelectedRow()), localObjectFlavor.getMimeType());
+        return new DataHandler(Integer.valueOf(table.getSelectedRow()), localObjectFlavor.getMimeType());
     }
 
     @Override

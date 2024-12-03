@@ -16,23 +16,17 @@
  */
 package fr.proline.studio.dpm.task.jms;
 
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Message;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import fr.proline.studio.dpm.AccessJMSManagerThread;
-import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
-//import static fr.proline.studio.dpm.task.jms.ValidationTask.RANK_FILTER_KEY;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
+
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.TextMessage;
 
 /**
  * Task to import identifications from files
@@ -41,16 +35,16 @@ import javax.jms.TextMessage;
  */
 public class ImportIdentificationTask extends AbstractJMSTask {
 
-    private String m_parserId;
-    private HashMap<String, String> m_parserArguments;
-    private String m_filePath;
-    private String m_decoyRegex;
-    private long m_instrumentId;
-    private long m_peaklistSoftwareId;
-    private long m_projectId;
-    private long m_fragmentRuleSetId;
-    private boolean m_saveSpectrumMatches;
-    private Long[] m_resultSetId = null;
+    private final String m_parserId;
+    private final HashMap<String, String> m_parserArguments;
+    private final String m_filePath;
+    private final String m_decoyRegex;
+    private final long m_instrumentId;
+    private final long m_peaklistSoftwareId;
+    private final long m_projectId;
+    private final long m_fragmentRuleSetId;
+    private final boolean m_saveSpectrumMatches;
+    private final Long[] m_resultSetId;
 
     public ImportIdentificationTask(AbstractJMSCallback callback, String parserId, HashMap<String, String> parserArguments, String filePath, String decoyRegex, long instrumentId, long peaklistSoftwareId, boolean saveSpectrumMatches, long fragmRuleSetId, long projectId, Long[] resultSetId) {
         super(callback, new TaskInfo("Import Identification " + filePath, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
@@ -116,7 +110,7 @@ public class ImportIdentificationTask extends AbstractJMSTask {
         HashMap<String, Object> params = new HashMap<>();
         params.put("project_id", m_projectId);
 //        params.put("use_decoy_regexp", true); //For ImportValidateGenerateSpectrumMatches test
-        List args = new ArrayList();
+        List<Map<String, Object> > args = new ArrayList<>();
 
         // add the file to parse
         Map<String, Object> resultfile = new HashMap<>();
@@ -154,48 +148,24 @@ public class ImportIdentificationTask extends AbstractJMSTask {
     }
 
     @Override
-    public void taskDone(final Message jmsMessage) throws Exception {
+    public void processWithResult(JSONRPC2Response jsonResponse) throws Exception {
 
-        final TextMessage textMessage = (TextMessage) jmsMessage;
-        final String jsonString = textMessage.getText();
-
-        final JSONRPC2Message jsonMessage = JSONRPC2Message.parse(jsonString);
-        if (jsonMessage instanceof JSONRPC2Notification) {
-            m_loggerProline.warn("JSON Notification method: " + ((JSONRPC2Notification) jsonMessage).getMethod() + " instead of JSON Response");
-            throw new Exception("Invalid JSONRPC2Message type");
-
-        } else if (jsonMessage instanceof JSONRPC2Response) {
-            final JSONRPC2Response jsonResponse = (JSONRPC2Response) jsonMessage;
-            m_loggerProline.debug("JSON Response Id: " + jsonResponse.getID());
-
-            final JSONRPC2Error jsonError = jsonResponse.getError();
-
-            if (jsonError != null) {
-                m_loggerProline.error("JSON Error code {}, message : \"{}\"", jsonError.getCode(), jsonError.getMessage());
-                m_loggerProline.error("JSON Throwable", jsonError);
-                throw jsonError;
-            }
-
-            final Object result = jsonResponse.getResult();
-            if ((result == null) || (!ArrayList.class.isInstance(result))) {
-                m_loggerProline.error(getClass().getSimpleName() + " failed : No returned values");
-                throw new Exception("Invalid result " + result);
-            }
-
-            ArrayList returnedValues = (ArrayList) result;
-            HashMap returnedValuesMap = (HashMap) returnedValues.get(0);
-
-            // retrieve resultSet id
-            Long resultSetIdBD = (Long) returnedValuesMap.get("target_result_set_id");
-            if (resultSetIdBD == null) {
-                m_loggerProline.error(getClass().getSimpleName() + " failed : No returned ResultSet Id");
-                throw new Exception("Import result error : No returned ResultSet Id");
-            }
-
-            m_resultSetId[0] = resultSetIdBD;
+        final Object result = jsonResponse.getResult();
+        if ((result == null) || (!ArrayList.class.isInstance(result))) {
+            m_loggerProline.error(getClass().getSimpleName() + " failed : No returned values");
+            throw new Exception("Invalid result " + result);
         }
 
-        m_currentState = JMSState.STATE_DONE;
+        HashMap returnedValuesMap = (HashMap) ((ArrayList) result).get(0);
+
+        // retrieve resultSet id
+        Long resultSetIdBD = (Long) returnedValuesMap.get("target_result_set_id");
+        if (resultSetIdBD == null) {
+            m_loggerProline.error(getClass().getSimpleName() + " failed : No returned ResultSet Id");
+            throw new Exception("Import result error : No returned ResultSet Id");
+        }
+
+        m_resultSetId[0] = resultSetIdBD;
     }
 
 }

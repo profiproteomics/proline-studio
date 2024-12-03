@@ -136,7 +136,6 @@ public class CreateQuantitationAction extends AbstractRSMAction {
     }
 
     private void createQuantitationDialog(DDataset dataset, int x, int y) {
-        Long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
         CreateQuantitationDialog dialog = CreateQuantitationDialog.getDialog(WindowManager.getDefault().getMainWindow());
         IdentificationTree childTree = null;
         DDataset refDataset = null;
@@ -155,78 +154,98 @@ public class CreateQuantitationAction extends AbstractRSMAction {
         }
 
         dialog.initializeExperimentalDesignTree(existingDataset, refDataset, childTree, m_quantitationType);
-
         dialog.setLocation(x, y);
         dialog.setVisible(true);
-        final Long[] _xicQuantiDataSetId = new Long[1];
 
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
 
-            //User specified experimental design dataset
-            DataSetData _quantiDS = null;
-            Map<String, Object> expParams = null;
-
+            //-- Checks Params:
             StringBuffer errorMsg = new StringBuffer("");
-
             Map<String, Object> quantParams = dialog.getQuantiParameters();
             if (quantParams == null) {
                 errorMsg.append("Null Quantitation parameters !  ");
             }
-
             if (dialog.getQuantitationDataset() == null) {
                 errorMsg.append("No experimental design defined  ");
-
             } else {
-
                 String registerErrMsg = dialog.registerRawFiles();
                 if(registerErrMsg != null && !registerErrMsg.isEmpty())
                     errorMsg.append( registerErrMsg);
-
-                //*** Get experimental design values                
-                _quantiDS = dialog.getQuantitationDataset();
-
-                try {
-                    expParams = dialog.getExperimentalDesignParameters();
-                } catch (IllegalAccessException iae) {
-                    errorMsg.append(iae.getMessage());
-                }
             }
-
             if (!errorMsg.toString().isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, errorMsg, "Warning", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            m_logger.debug(" Will Compute Quantitation on " + ((List) expParams.get("biological_samples")).size() + "samples.");
-
-            final QuantitationTree tree = QuantitationTree.getCurrentTree();
-            final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-            final DataSetNode[] _quantitationNode = { QuantitationTree.getCurrentTree().createQuantitationNode(_quantiDS.getName()) };
-            
-            // CallBack for Xic Quantitation Service
-            AbstractJMSCallback quantCallback = new AbstractJMSCallback() {
-
-                @Override
-                public boolean mustBeCalledInAWT() {
-                    return true;
+            if(dialog.isMultipleQuantDefined()) {
+                //Get User specified experimental design dataset & param -  for 1 or x quantitation(s)
+                List<DataSetData> dsDatas = dialog.getQuantitationDatasets();
+                List<Map<String, Object>> expParams;
+                try {
+                    //Get experimental design values
+                    expParams = dialog.getExperimentalDesignsParameters();
+                } catch (IllegalAccessException iae) {
+                    errorMsg.append(iae.getMessage());
+                    JOptionPane.showMessageDialog(dialog, errorMsg, "Warning", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
 
-                @Override
-                public void run(boolean success) {
-                    if (success) {
-                        m_logger.debug(" Quantitation SUCCESS : " + _xicQuantiDataSetId[0]);
-                        QuantitationTree.getCurrentTree().loadDataSet(_xicQuantiDataSetId[0], _quantitationNode[0]);
-                    } else {
-                        m_logger.debug(" Quantitation ERROR ");
-                        treeModel.removeNodeFromParent(_quantitationNode[0]);
-                    }
+                Long methodId = dialog.getQuantMethodId();
+                for(int i =0; i<dsDatas.size(); i++){
+                    runQuantitationTasks(expParams.get(i), dsDatas.get(i), quantParams,methodId);
                 }
-            };
-           
-            RunQuantitationTask task = new RunQuantitationTask(quantCallback, pID, _quantiDS.getName(), quantParams, expParams, dialog.getQuantMethodId(), _xicQuantiDataSetId);
-            AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
-           
-        } //End OK entered      
+
+            } else {
+
+                //Get User specified experimental design dataset & param -  for 1 or x quantitation(s)
+                Map<String, Object> expParams;
+                //Get experimental design values
+                try {
+                    expParams = dialog.getExperimentalDesignParameters();
+                } catch (IllegalAccessException iae) {
+                    errorMsg.append(iae.getMessage());
+                    JOptionPane.showMessageDialog(dialog, errorMsg, "Warning", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                runQuantitationTasks(expParams, dialog.getQuantitationDataset(), quantParams, dialog.getQuantMethodId());
+            }
+        } //End OK entered
+    }
+
+    private void runQuantitationTasks(Map<String, Object>  expParams, DataSetData quantiDS,  Map<String, Object> quantParams, Long methodId){
+        m_logger.debug(" Will Compute Quantitation on " + ((List) expParams.get("biological_samples")).size() + "samples.");
+        Long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
+
+        final QuantitationTree tree = QuantitationTree.getCurrentTree();
+        final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+        final DataSetNode[] _quantitationNode = { QuantitationTree.getCurrentTree().createQuantitationNode(quantiDS.getName()) };
+
+        final Long[] _xicQuantiDataSetId = new Long[1];
+
+        // CallBack for Xic Quantitation Service
+        AbstractJMSCallback quantCallback = new AbstractJMSCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success) {
+                if (success) {
+                    m_logger.debug(" Quantitation SUCCESS : " + _xicQuantiDataSetId[0]);
+                    QuantitationTree.getCurrentTree().loadDataSet(_xicQuantiDataSetId[0], _quantitationNode[0]);
+                } else {
+                    m_logger.debug(" Quantitation ERROR ");
+                    treeModel.removeNodeFromParent(_quantitationNode[0]);
+                }
+            }
+        };
+
+        RunQuantitationTask task = new RunQuantitationTask(quantCallback, pID, quantiDS.getName(), quantParams, expParams, methodId, _xicQuantiDataSetId);
+        AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+
     }
 
     @Override
@@ -246,7 +265,7 @@ public class CreateQuantitationAction extends AbstractRSMAction {
                 return;
             }
 
-            AbstractNode node = (AbstractNode) selectedNodes[0];
+            AbstractNode node = selectedNodes[0];
 
             // the node must not be in changing state
             if (node.isChanging()) {
@@ -261,9 +280,9 @@ public class CreateQuantitationAction extends AbstractRSMAction {
             }
 
             DataSetNode datasetNode = (DataSetNode) node;
-
-            // must be a quantitation XIC
-            if (!datasetNode.isQuantXIC()) {
+            DDataset dataset = datasetNode.getDataset();
+            // must be a labelFree quantitation
+            if (!datasetNode.isQuantXIC() || !dataset.getQuantitationMethod().getType().equals(QuantitationMethod.Type.LABEL_FREE.toString())) {
                 setEnabled(false);
                 return;
             }

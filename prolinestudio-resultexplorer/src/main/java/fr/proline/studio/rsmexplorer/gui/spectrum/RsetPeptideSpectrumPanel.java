@@ -36,7 +36,7 @@ import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYPointerAnnotation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.Range;
-import org.jfree.ui.TextAnchor;
+import org.jfree.chart.ui.TextAnchor;
 import fr.proline.studio.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

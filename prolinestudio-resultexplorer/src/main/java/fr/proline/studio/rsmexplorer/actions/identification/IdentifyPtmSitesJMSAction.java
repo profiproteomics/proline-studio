@@ -93,7 +93,7 @@ public class IdentifyPtmSitesJMSAction extends AbstractRSMAction {
         //Alert user : previous modification view (Site/Cluster) should be closed in order to load new data
         StringBuilder msg = isPTMDatasetLoaded ? new StringBuilder("Be sure to close all previous Modification Site/Cluster view !\n\n") : new StringBuilder();
         msg.append("Warning: Previously saved Annotated Modification Dataset will be deleted ! \nAre you sure you want to continue ?");
-        InfoDialog id = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING,"Run Identify Modification Sites",msg.toString());
+        InfoDialog id = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING,"Run Identify Modification Sites",msg.toString(),false);
         id.setButtonName(DefaultDialog.BUTTON_OK, "Yes");
         id.setButtonName(DefaultDialog.BUTTON_CANCEL, "No");
         id.centerToWindow(WindowManager.getDefault().getMainWindow());
@@ -131,7 +131,7 @@ public class IdentifyPtmSitesJMSAction extends AbstractRSMAction {
           Long projectId = dataset.getProject().getId();
           Long resultSummaryId = dataset.getResultSummaryId();
           IdentifyPtmSitesTask task;
-          task = new IdentifyPtmSitesTask(callback, dataset.getName(), projectId, resultSummaryId, null, "2.0", dialog.getPtms(), dialog.getClusteringMethodName());
+          task = new IdentifyPtmSitesTask(callback, dataset.getName(), projectId, resultSummaryId, null, "3.0", dialog.getPtms(), dialog.getClusteringMethodName());
           AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
         }
       }

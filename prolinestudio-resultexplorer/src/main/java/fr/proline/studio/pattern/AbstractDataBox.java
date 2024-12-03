@@ -152,8 +152,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxPTMPeptidesGraphic(57),
         DataboxXicParentsPeptideIon(58),
         DataBoxPTMSiteAsClusters(59),
-        DataBoxPTMClustersSites(60),
-        DataBoxXicPTMClustersSites(61)
+        DataboxXicReporterIon(62)
         ;
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -270,10 +269,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataboxXicParentsPeptideIon();
                 case DataBoxPTMSiteAsClusters:
                     return new DataBoxPTMClusters(true);
-                case DataBoxPTMClustersSites:
-                    return new DataBoxPTMClustersSites();
-                case DataBoxXicPTMClustersSites:
-                    return new DataBoxPTMClustersSites(true);
+                case DataboxXicReporterIon:
+                    return new DataboxXicReporterIon();
 
             }
             return null; // should not happen

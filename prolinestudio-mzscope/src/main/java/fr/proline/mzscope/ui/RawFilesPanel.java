@@ -16,19 +16,17 @@
  */
 package fr.proline.mzscope.ui;
 
+import fr.proline.mzscope.model.EmptyRawFile;
 import fr.proline.mzscope.ui.model.RawFileListModel;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.utils.IPopupMenuDelegate;
+
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.util.List;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +35,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author MB243701
  */
-public class RawFilesPanel extends JPanel {
+public class RawFilesPanel extends JPanel implements ListCellRenderer {
 
    final private static Logger logger = LoggerFactory.getLogger(RawFilesPanel.class);
 
@@ -48,7 +46,7 @@ public class RawFilesPanel extends JPanel {
    private JLabel openedRawFilesLabel;
    private final IPopupMenuDelegate popupMenuDelegate;
 
-
+   private  ListCellRenderer defaultListCellRenderer;
    /**
     * Creates new form RawFilesPanel
     * 
@@ -83,6 +81,8 @@ public class RawFilesPanel extends JPanel {
             rawFilesListMousePressed(evt);
          }
       });
+      defaultListCellRenderer = rawFilesList.getCellRenderer();
+      rawFilesList.setCellRenderer(this);
       scrollPane.setViewportView(rawFilesList);
 
       javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -147,4 +147,12 @@ public class RawFilesPanel extends JPanel {
       rawFilesListModel.removeAllFiles();
    }
 
+   @Override
+   public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+
+      Component c = defaultListCellRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+      if(value instanceof EmptyRawFile )
+         c.setEnabled(false);
+      return c;
+   }
 }

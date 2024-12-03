@@ -96,7 +96,6 @@ public abstract class AbstractPeakelsPanel extends JPanel  {
     JPanel tablePanel = new JPanel();
     tablePanel.setLayout(new BorderLayout());
 
-
     JScrollPane jScrollPane = new JScrollPane();
     m_table = new FeatureTable();
     m_compoundTableModel = buildTableModel();

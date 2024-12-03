@@ -52,7 +52,6 @@ public class QuantPostProcessingParams {
     //-- MODIFIED_PEPTIDE_FILTERING methods and keys
     public final static String DISCARD_MODIFIED_PEPTIDES = "discard_modified_peptides"; //V2&3
     public final static String DISCARD_OXIDIZED_PEPTIDES = "discard_oxidized_peptides"; //V1
-    
     public final static String PTM_DEFINITION_IDS_TO_DISCARD = "ptm_definition_ids_to_discard"; 
     public final static String MODIFIED_PEPTIDE_FILTERING_METHOD = "modified_peptide_filtering_method";
     public final static String MODIFIED_PEPTIDE_FILTER_CONFIG = "modified_peptide_filter_config";    
@@ -65,7 +64,21 @@ public class QuantPostProcessingParams {
     private final static String[] MODIFIED_PEPTIDE_FILTERING_METHOD_VALUES = {MODIFIED_PEPTIDE_FILTERING_DISCARD_ALL_FORMS_METHOD_VALUE, MODIFIED_PEPTIDE_FILTERING_DISCARD_MODIFIED_FORMS_METHOD_VALUE};
     private final static String[] MODIFIED_PEPTIDE_FILTERING_METHOD_KEYS = {MODIFIED_PEPTIDE_FILTERING_DISCARD_ALL_FORMS_METHOD_KEY, MODIFIED_PEPTIDE_FILTERING_DISCARD_MODIFIED_FORMS_METHOD_KEY};
     //--
-    
+
+    //-- PSMs methods and keys
+    public final static String USE_PURITY_CORRECTION_MATRIX= "use_purity_correction_matrix";
+    public final static String PURITY_CORRECTION_MATRIX= "purity_correction_matrix";
+
+    public final static String PSM_ABUNDANCE_SUMMARIZING_METHOD_KEY = "reporter_ion_abundance_summarizing_method";
+
+    public final static String PSM_ABUNDANCE_SUMMARIZING_SUM_METHOD_VALUE = "Sum";
+    public final static String PSM_ABUNDANCE_SUMMARIZING_SUM_METHOD_KEY = "SUM";
+    public final static String PSM_ABUNDANCE_SUMMARIZING_MEDIAN_METHOD_VALUE = "Median";
+    public final static String PSM_ABUNDANCE_SUMMARIZING_MEDIAN_METHOD_KEY = "MEDIAN";
+    private final static String[] PSM_ABUNDANCE_SUMMARIZING_METHOD_VALUES = {PSM_ABUNDANCE_SUMMARIZING_SUM_METHOD_VALUE, PSM_ABUNDANCE_SUMMARIZING_MEDIAN_METHOD_VALUE};  ;
+    private final static String[] PSM_ABUNDANCE_SUMMARIZING_METHOD_KEYS = {PSM_ABUNDANCE_SUMMARIZING_SUM_METHOD_KEY,PSM_ABUNDANCE_SUMMARIZING_MEDIAN_METHOD_KEY};  ;
+    //--
+
     //-- IONS ABUNDANCE_SUMMARIZING methods and keys
     public final static String PEP_ION_ABUNDANCE_SUMMARIZING_METHOD = "pep_ion_abundance_summarizing_method";
     public final static String ION_ABUNDANCE_SUMMARIZING_BEST_ION_METHOD_VALUE = "Best Ion";
@@ -73,8 +86,8 @@ public class QuantPostProcessingParams {
     public final static String ION_ABUNDANCE_SUMMARIZING_SUM_METHOD_VALUE = "Sum";
     public final static String ION_ABUNDANCE_SUMMARIZING_SUM_METHOD_KEY = "SUM";    
     
-    private final static String[] ION_ABUNDANCE_SUMMARIZING_METHOD_VALUES = {ION_ABUNDANCE_SUMMARIZING_BEST_ION_METHOD_VALUE, ION_ABUNDANCE_SUMMARIZING_SUM_METHOD_VALUE};
-    private final static String[] ION_ABUNDANCE_SUMMARIZING_METHOD_KEYS = {ION_ABUNDANCE_SUMMARIZING_BEST_ION_METHOD_KEY,ION_ABUNDANCE_SUMMARIZING_SUM_METHOD_KEY};
+    private final static String[] ION_ABUNDANCE_SUMMARIZING_METHOD_VALUES = {ION_ABUNDANCE_SUMMARIZING_SUM_METHOD_VALUE, ION_ABUNDANCE_SUMMARIZING_BEST_ION_METHOD_VALUE};
+    private final static String[] ION_ABUNDANCE_SUMMARIZING_METHOD_KEYS = {ION_ABUNDANCE_SUMMARIZING_SUM_METHOD_KEY, ION_ABUNDANCE_SUMMARIZING_BEST_ION_METHOD_KEY};
     //--
     
     // --PEPTIDES_SELECTION methods and keys
@@ -92,6 +105,10 @@ public class QuantPostProcessingParams {
     private final static String[] PEPTIDES_SELECTION_METHOD_KEYS = {PEPTIDES_SELECTION_SPECIFIC_METHOD_KEY,PEPTIDES_SELECTION_RAZOR_AND_SPECIFIC_METHOD_KEY , PEPTIDES_SELECTION_ALL_PEPTIDES_METHOD_KEY};
         
     // -- other params
+    public final static String DISCARD_PIF_PEPTIDE_MATCHES = "discard_peptide_matches_pif";  //V3
+    public final static String DISCARD_PIF_PEPTIDE_MATCHES_VALUE = "discard_peptide_matches_pif_value";  //V3
+    public final static Float DEFAULT_PIF_FILTER_VALUE = Float.valueOf("0.80") ;  //V3
+
     public final static String DISCARD_MISS_CLEAVED_PEPTIDES = "discard_miss_cleaved_peptides";  //V3
     public final static String DISCARD_MISS_CLEAVED_PEPTIDES_PREV = "discard_missed_cleaved_peptides";//V1&2
     public final static String DISCARD_PEPTIDES_SHARING_PEAKELS = "discard_peptides_sharing_peakels";//V1&2
@@ -133,7 +150,13 @@ public class QuantPostProcessingParams {
     public static  final String[] getPepIonAbundanceSummarizingMethodValues(){
         return ION_ABUNDANCE_SUMMARIZING_METHOD_VALUES;
     }
-    
+
+    public static  final String[] getPSMAbundanceSummarizingMethodValues(){
+        return PSM_ABUNDANCE_SUMMARIZING_METHOD_VALUES;
+    }
+    public static  final String[] getPSMAbundanceSummarizingMethodKeys(){
+        return PSM_ABUNDANCE_SUMMARIZING_METHOD_KEYS;
+    }
     public static final String[] getPepIonAbundanceSummarizingMethodKeys(){
         return ION_ABUNDANCE_SUMMARIZING_METHOD_KEYS;
     }        

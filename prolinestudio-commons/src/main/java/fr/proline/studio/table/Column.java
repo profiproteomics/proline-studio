@@ -1,10 +1,10 @@
 package fr.proline.studio.table;
 
 import fr.proline.studio.filter.*;
-import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -13,9 +13,9 @@ import java.util.List;
 
 public class Column {
 
-  public static TableCellRenderer DOUBLE_5DIGITS_RIGHT = new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 5);
-  public static TableCellRenderer DOUBLE_2DIGITS_RIGHT = new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
-  public static TableCellRenderer STRING_LEFT = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
+  public static TableCellRenderer DOUBLE_5DIGITS_RIGHT = new DoubleRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 5);
+  public static TableCellRenderer DOUBLE_2DIGITS_RIGHT = new DoubleRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 2);
+  public static TableCellRenderer STRING_LEFT = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.LEFT);
   private String name;
   private String tooltip;
   private Class type;

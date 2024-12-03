@@ -83,7 +83,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
     private int m_mouseDragX;
     private int m_mouseDragY;
 
-    private final ArrayList<AbstractConnectedGraphObject> m_selectedObjectsArray = new ArrayList();
+    private final ArrayList<AbstractConnectedGraphObject> m_selectedObjectsArray = new ArrayList<>();
     private AbstractConnectedGraphObject m_overObject = null;
     private GraphConnector m_selectedConnector = null;
     private GraphLink m_selectedLink = null;
@@ -97,8 +97,6 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
 
     private final Dimension m_preferredSize = new Dimension(DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT); // minimum size at the beginning
 
-    private Timer m_timer;
-
     public GraphPanel(DataAnalyzerPanel dataAnalyzerPanel) {
 
         setLayout(null);
@@ -107,7 +105,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         addMouseMotionListener(this);
         setTransferHandler(new DataTreeTransferHandler(this));
 
-        m_timer = new Timer(20, this);
+        Timer m_timer = new Timer(20, this);
         m_timer.setInitialDelay(200);
         m_timer.start();
 
@@ -226,7 +224,6 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                 }
             }
             if ((firstNode) && (position == null)) {
-                position = new Point();
                 firstNode = false;
                 position = getNextGraphNodePosition(graphNode);
                 if (position.x < GraphNode.WIDTH * 1.4) {
@@ -373,12 +370,12 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
 
                     case GRAPH_NODE: {
                         
-                        int modifiers = e.getModifiers();
+                        int modifiers = e.getModifiersEx();
                         
                         m_deselectionIfNoMoveNoPopup = false;
                         
                         if (!overObject.isSelected()) {
-                            if (((modifiers & KeyEvent.CTRL_MASK) == 0) && ((modifiers & KeyEvent.SHIFT_MASK) == 0)) {
+                            if (((modifiers & KeyEvent.CTRL_DOWN_MASK) == 0) && ((modifiers & KeyEvent.SHIFT_DOWN_MASK) == 0)) {
                                 clearGraphNodeSelection();
                             }
                             m_selectedObjectsArray.add((AbstractConnectedGraphObject) overObject);
@@ -492,7 +489,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                     popup.show((JComponent) e.getSource(), e.getX(), e.getY());
                 }
                 m_selectedLink = null;
-            } else if (m_selectedObjectsArray.isEmpty() && m_selectedConnector == null && m_selectedLink == null) {
+            } else { //Condition is always true ! : if (m_selectedObjectsArray.isEmpty() && m_selectedConnector == null && m_selectedLink == null) {
                 JPopupMenu popup = createPanelPopup();
                 popup.show((JComponent) e.getSource(), e.getX(), e.getY());
             }
@@ -545,8 +542,8 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
 
                     Path2D.Double selectionShape = m_selectionGesture.getSelectionPath();
 
-                    int modifier = e.getModifiers();
-                    boolean isCtrlOrShiftDown = ((modifier & (InputEvent.SHIFT_MASK | InputEvent.CTRL_MASK)) != 0);
+                    int modifier = e.getModifiersEx();
+                    boolean isCtrlOrShiftDown = ((modifier & (InputEvent.SHIFT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK)) != 0);
                     if (!isCtrlOrShiftDown) {
                         clearGraphNodeSelection();
                     }
@@ -583,7 +580,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                 
                 if ((m_deselectionIfNoMoveNoPopup) && (!m_hasMovedOrPopup)) {
                     clearGraphNodeSelection();
-                    m_selectedObjectsArray.add((AbstractConnectedGraphObject) m_overObject);
+                    m_selectedObjectsArray.add(m_overObject);
                     m_overObject.setSelected(true);
                 }
 
@@ -623,7 +620,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
 
                 int x = e.getX();
                 int y = e.getY();
-                AbstractGraphObject overObject = (AbstractGraphObject) graphNode.inside(x, y);
+                AbstractGraphObject overObject = graphNode.inside(x, y);
                 if (overObject != null) {
                     //noOverObject = false;
                     AbstractConnectedGraphObject.TypeGraphObject type = overObject.getType();
@@ -846,7 +843,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         while (it.hasNext()) {
             GraphNode graphNode = it.next();
 
-            AbstractGraphObject overObject = (AbstractGraphObject) graphNode.inside(x, y);
+            AbstractGraphObject overObject = graphNode.inside(x, y);
             if (overObject != null) {
                 return overObject.getTooltip(x, y);
             }

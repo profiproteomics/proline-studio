@@ -17,7 +17,9 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.core.orm.msi.PtmSpecificity;
+import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.studio.NbPreferences;
 import fr.proline.studio.corewrapper.data.QuantPostProcessingParams;
 import fr.proline.studio.gui.DefaultStorableDialog;
@@ -42,23 +44,29 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
 
     private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
-    private QuantPostProcessingPanel m_quantPostProcessingPanel;
+//    private AbstractQuantPostProcessingPanel m_quantPostProcessingPanel;
+      private QuantSimplifiedPostProcessingPanel m_quantPostProcessingPanel;
 
+    DDatasetType.QuantitationMethodInfo m_quantitationMethodInfo;
+    QuantitationMethod m_quantitationMethod;
 
-    //public QuantPostProcessingMultipleDialog(Window parent, ArrayList<DataSetNode> nodeList) {
-    public QuantPostProcessingDialog(Window parent, ArrayList<PtmSpecificity> ptms, boolean isAggregation, DDataset paramsFromdataset) {
+    boolean m_isValidLabeledQMethod;
+
+   public QuantPostProcessingDialog(Window parent, ArrayList<PtmSpecificity> ptms, boolean isAggregation, QuantitationMethod quantitationMethod, DDatasetType.QuantitationMethodInfo quantitationMethodInfo, DDataset paramsFromdataset, boolean isValidLabeledQMethod) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-        setTitle("Compute Post-Processing on Proteins Sets Abundances");
-
+        setTitle("Compute Post-Processing on Abundances");
         setDocumentationSuffix("id.thw4kt");
 
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);
 
         setResizable(true);
-
+        setPreferredSize(new Dimension(600,800));
+        m_quantitationMethodInfo = quantitationMethodInfo;
+        m_quantitationMethod = quantitationMethod;
+        m_isValidLabeledQMethod = isValidLabeledQMethod;
         init(ptms, isAggregation, paramsFromdataset);
-
+        pack();
     }
 
     @Override
@@ -83,8 +91,13 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
     @Override
     protected void loadParameters(Preferences filePreferences) throws Exception {
 
-        String version = filePreferences.get(QuantPostProcessingParams.PARAM_VERSION_KEY, null);
-        boolean modifiedPepParamExist = (filePreferences.get(QuantPostProcessingParams.SETTINGS_KEY+"."+QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.DISCARD_MODIFIED_PEPTIDES), null) != null);
+        String version = getPropertiesVersion(filePreferences);
+        m_quantPostProcessingPanel.loadParameters(filePreferences, version);
+    }
+
+    private String getPropertiesVersion(Preferences pref){
+        String version = pref.get(QuantPostProcessingParams.PARAM_VERSION_KEY, null);
+        boolean modifiedPepParamExist = (pref.get(QuantPostProcessingParams.SETTINGS_KEY+"."+QuantPostProcessingParams.getSettingKey(QuantPostProcessingParams.DISCARD_MODIFIED_PEPTIDES), null) != null);
         if(version == null){
             if(modifiedPepParamExist)
                 version = "2.0";
@@ -95,8 +108,7 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
             String msg = "Try loading Post Processing parameters ("+ QuantPostProcessingParams.CURRENT_VERSION + ") from file with version "+version+". All parameters may not have been taken into account !";
             JOptionPane.showMessageDialog(this, msg, "Load Post Processing parameters error", JOptionPane.ERROR_MESSAGE);
         }
-
-        m_quantPostProcessingPanel.loadParameters(filePreferences, version);
+        return version;
     }
 
     @Override
@@ -106,6 +118,13 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
         if (error != null) {
             setStatus(true, error.getErrorMessage());
             highlight(error.getParameterComponent());
+            return false;
+        }
+
+        //more generic tests
+        if(!m_quantPostProcessingPanel.checkQuantPostProcessingParam()){
+            setStatus(true, m_quantPostProcessingPanel.getCheckErrorMessage());
+            highlight(m_quantPostProcessingPanel.getCheckErrorComponent());
             return false;
         }
 
@@ -122,8 +141,7 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
 
         // save parameters
         Preferences preferences = NbPreferences.root();
-        m_quantPostProcessingPanel.getParameterList().saveParameters(preferences);
-
+      saveParameters(preferences);
         return true;
 
     }
@@ -136,8 +154,8 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
 
     private void init(ArrayList<PtmSpecificity> ptms, boolean isAggregation, DDataset dataset) {
         Map<Long, String> ptmSpecificityNameById = ptms.stream().collect(Collectors.toMap(ptmS -> ptmS.getId(), ptmS -> ptmS.toString()));
-        m_quantPostProcessingPanel = new QuantPostProcessingPanel(false, ptmSpecificityNameById);
-
+        m_quantPostProcessingPanel = new QuantSimplifiedPostProcessingPanel(false, m_quantitationMethod, m_quantitationMethodInfo, ptmSpecificityNameById, m_isValidLabeledQMethod);
+//        m_quantPostProcessingPanel = new QuantPostProcessingPanel(false, ptmSpecificityNameById);
         try {
             if ((dataset != null) && (dataset.getQuantProcessingConfigAsMap() != null)) {
 
@@ -145,7 +163,8 @@ public class QuantPostProcessingDialog extends DefaultStorableDialog {
 
             } else {
                 Preferences preferences = NbPreferences.root();
-                m_quantPostProcessingPanel.getParameterList().loadParameters(preferences);
+//                m_quantPostProcessingPanel.getParameterList().loadParameters(preferences);
+                  m_quantPostProcessingPanel.loadParameters(preferences, getPropertiesVersion(preferences));
             }
         } catch (Exception ex) {
             m_logger.error("error while settings quanti params " + ex);

@@ -18,6 +18,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DQuantProteinSet;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.export.ExportModelUtilities;
@@ -32,10 +33,11 @@ import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.table.renderer.BigFloatOrDoubleRenderer;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 
 /**
@@ -60,10 +62,15 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
 
     private String m_modelName;
 
-    private boolean m_isXICMode = true;
+    private DDatasetType.QuantitationMethodInfo m_quantMethodInfo;
 
     public ProteinQuantTableModel(LazyTable table) {
         super(table);
+        m_quantMethodInfo = DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION;
+    }
+
+    private boolean isSpectralCountQuant(){
+        return m_quantMethodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING);
     }
 
     @Override
@@ -73,7 +80,7 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
 
     @Override
     public String getColumnName(int col) {
-        return m_isXICMode ? m_columnNames[col] : m_columnNames_SC[col];
+        return isSpectralCountQuant() ? m_columnNames_SC[col] :  m_columnNames[col];
     }
 
     @Override
@@ -137,10 +144,10 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
         return null; // should never happen
     }
 
-    public void setData(DQuantitationChannel[] quantChannels, DMasterQuantProteinSet proteinSet, boolean isXICMode) {
+    public void setData(DQuantitationChannel[] quantChannels, DMasterQuantProteinSet proteinSet, DDatasetType.QuantitationMethodInfo quantitationMethodInfo) {
         this.m_quantChannels = quantChannels;
         this.m_quantProtein = proteinSet;
-        this.m_isXICMode = isXICMode;
+        this.m_quantMethodInfo = quantitationMethodInfo;
 
         fireTableDataChanged();
 
@@ -169,7 +176,7 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
 
     @Override
     public String getDataColumnIdentifier(int columnIndex) {
-        return m_isXICMode ? m_columnNames[columnIndex] : m_columnNames_SC[columnIndex];
+        return isSpectralCountQuant() ? m_columnNames_SC[columnIndex] :  m_columnNames[columnIndex];
     }
 
     @Override
@@ -181,9 +188,7 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
             case COLTYPE_QC_NAME: {
                 return String.class;
             }
-            case COLTYPE_ABUNDANCE: {
-                return Float.class;
-            }
+            case COLTYPE_ABUNDANCE:
             case COLTYPE_RAW_ABUNDANCE: {
                 return Float.class;
             }
@@ -281,18 +286,18 @@ public class ProteinQuantTableModel extends LazyTableModel implements GlobalTabl
         switch (col) {
 
             case COLTYPE_ABUNDANCE:
-                if(m_isXICMode){
-                    renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
+                if(isSpectralCountQuant()){
+                    renderer = new FloatRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 2);
                 }else{
-                    renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 2);
+                    renderer = new BigFloatOrDoubleRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 0);
                 }
                 break;
 
             case COLTYPE_RAW_ABUNDANCE:
-                if (m_isXICMode) {
-                    renderer = new BigFloatOrDoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
+                if (isSpectralCountQuant()) {
+                    renderer = new FloatRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 0);
                 } else {
-                    renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
+                    renderer = new BigFloatOrDoubleRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 0);
                 }
                 break;
 

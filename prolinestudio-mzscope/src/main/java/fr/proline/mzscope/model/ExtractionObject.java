@@ -35,12 +35,12 @@ public class ExtractionObject {
       NONE, REQUESTED, DONE
    };
 
-   private MsnExtractionRequest request;
+   private ExtractionRequest request;
    private Integer expectedCharge;
    private Map<IRawFile, AnnotatedChromatogram> chromatograms;
    private Status status = Status.NONE;
 
-   public ExtractionObject(MsnExtractionRequest request, Integer expectedCharge) {
+   public ExtractionObject(ExtractionRequest request, Integer expectedCharge) {
       this.request = request;
       this.expectedCharge = expectedCharge;
    }
@@ -105,7 +105,7 @@ public class ExtractionObject {
       return ((chromatograms != null) && (chromatograms.containsKey(rawFile))) ? chromatograms.get(rawFile) : null;
    }
 
-   public MsnExtractionRequest getRequest() {
+   public ExtractionRequest getRequest() {
       return request;
    }
    

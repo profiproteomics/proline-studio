@@ -21,6 +21,7 @@ import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
@@ -50,7 +51,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
     private DDataset m_dataset;
     private QuantChannelInfo m_quantChannelInfo;
     private List<DMasterQuantProteinSet> m_masterQuantProteinSetList;
-    private boolean m_isXICMode = true;
+    private DDatasetType.QuantitationMethodInfo m_quantMethodInfo;
 
     public DataboxXicProteinSet() {
         super(DataboxType.DataboxXicProteinSet, DataboxStyle.STYLE_XIC);
@@ -58,6 +59,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         // Name of this databox
         m_typeName = "Quanti Protein Sets";
         m_description = "All Protein Sets of a Quantitation";
+        m_quantMethodInfo = DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION;
 
         // Register in parameters
         ParameterList inParameter = new ParameterList();
@@ -73,7 +75,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         outParameter.addParameter(DProteinSet.class);
         outParameter.addParameter(DMasterQuantProteinSet.class);
         outParameter.addParameter(QuantChannelInfo.class);
-        outParameter.addParameter(XicMode.class);
+        outParameter.addParameter(DDatasetType.QuantitationMethodInfo.class);
 
         outParameter.addParameter(ExtendedTableModelInterface.class);
         outParameter.addParameter(ExtendedTableModelInterface.class, ParameterSubtypeEnum.LIST_DATA);
@@ -83,15 +85,12 @@ public class DataboxXicProteinSet extends AbstractDataBox {
 
     }
 
-    public boolean isXICMode() {
-        return m_isXICMode;
-    }
+    public void setQuantitationMethodInfo(DDatasetType.QuantitationMethodInfo quantMethodInfo) {
+        m_quantMethodInfo = quantMethodInfo;
 
-    public void setXICMode(boolean isXICMode) {
-        m_isXICMode = isXICMode;
-        m_style = (m_isXICMode) ? DataboxStyle.STYLE_XIC : DataboxStyle.STYLE_SC;
+        m_style = (m_quantMethodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING)) ? DataboxStyle.STYLE_SC : DataboxStyle.STYLE_XIC;
         if (getDataBoxPanelInterface() != null) {
-            getDataBoxPanelInterface().addSingleValue(new XicMode((isXICMode)));
+            getDataBoxPanelInterface().addSingleValue(m_quantMethodInfo);
         }
     }
 
@@ -118,7 +117,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         p.setDataBox(this);
         setDataBoxPanelInterface(p);
 
-        getDataBoxPanelInterface().addSingleValue(new XicMode((m_isXICMode)));
+        getDataBoxPanelInterface().addSingleValue(m_quantMethodInfo);
     }
 
     @Override
@@ -145,7 +144,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
                     // proteins set 
                     //DMasterQuantProteinSet[] masterQuantProteinSetArray = new DMasterQuantProteinSet[m_masterQuantProteinSetList.size()];
                     //m_masterQuantProteinSetList.toArray(masterQuantProteinSetArray);
-                    ((XicProteinSetPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantProteinSetList, m_isXICMode, finished);
+                    ((XicProteinSetPanel) getDataBoxPanelInterface()).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantProteinSetList, m_quantMethodInfo, finished);
 
                     addDataChanged(ExtendedTableModelInterface.class, null);  //JPM.DATABOX : put null, because I don't know which subtype has been change : null means all. So it works as previously
                     propagateDataChanged();
@@ -226,8 +225,8 @@ public class DataboxXicProteinSet extends AbstractDataBox {
                 if (parameterType.equals(CrossSelectionInterface.class)) {
                     return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getCrossSelectionInterface();
                 }
-                if (parameterType.equals(XicMode.class)) {
-                    return new XicMode(isXICMode());
+                if (parameterType.equals(DDatasetType.QuantitationMethodInfo.class)) {
+                    return m_quantMethodInfo;
                 }
             }
             
@@ -240,9 +239,6 @@ public class DataboxXicProteinSet extends AbstractDataBox {
                     return getCrossSelectionInterfaceList();
                 }
             }
-            
-
-            
 
         }
         
@@ -276,7 +272,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
 
     private ProteinQuantPanel getProteinQuantTableModelList() {
         ProteinQuantPanel aProtPanel = new ProteinQuantPanel();
-        aProtPanel.setData(m_quantChannelInfo.getQuantChannels(), ((XicProteinSetPanel) getDataBoxPanelInterface()).getSelectedMasterQuantProteinSet(), m_isXICMode);
+        aProtPanel.setData(m_quantChannelInfo.getQuantChannels(), ((XicProteinSetPanel) getDataBoxPanelInterface()).getSelectedMasterQuantProteinSet(), m_quantMethodInfo);
         return aProtPanel;
     }
 

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2019
  *
  * This program is free software; you can redistribute it and/or
@@ -21,15 +21,14 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptidePTM;
 import fr.proline.core.orm.msi.dto.DPtmSiteProperties;
 import fr.proline.studio.dam.tasks.data.ptm.PTMPeptideInstance;
-import fr.proline.studio.dam.tasks.data.ptm.PTMSite;
-import fr.proline.studio.dam.tasks.data.ptm.PTMSitePeptideInstance;
 import fr.proline.studio.rsmexplorer.gui.ptm.*;
 import fr.proline.studio.utils.CyclicColorPalette;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,69 +41,22 @@ public class PeptideView extends ViewPtmAbstract {
     private static Logger logger = LoggerFactory.getLogger("ProlineStudio.rsmexplorer.ptm");
 
     protected int m_length;
-     // VDS FIXME: One or the other may be specified : PTMPeptideInstance or PTMSitePeptideInstance
-    private boolean isPtmSiteView;
-    private PTMSitePeptideInstance m_ptmSitePeptideInst;
+
     private PTMPeptideInstance m_ptmPeptideInst; 
     protected boolean m_isSelected;
     protected int m_beginIndex;
+    Boolean hasNTermPtm = null;
+    Boolean hasCTermPtm = null;
 
-    public PeptideView(PTMSitePeptideInstance pep) {
-        isPtmSiteView = true;
-        this.x0 = 0;
-        this.y0 = 0;
-        this.m_ptmSitePeptideInst = pep;
-        m_ptmPeptideInst = pep.getParentPTMPeptideInstance();
-        String sequence = m_ptmPeptideInst.getSequence();
-        if (sequence != null) {
-            this.m_length = m_ptmPeptideInst.getSequence().length();
-        } else {
-            this.m_length = 0;
-        }
-        this.m_beginIndex = m_ptmPeptideInst.getStartPosition();
-        if ((m_beginIndex == 1) && (pep.getSite().isProteinNTermWithOutM())) {
-            m_beginIndex = 0;
-        }
-        m_isSelected = false;
-    }
-    
-    public PeptideView(PTMPeptideInstance pep) {
-        isPtmSiteView = false;
-        x0 = 0;
-        y0 = 0;
-        m_isSelected = false;
-        m_ptmPeptideInst = pep;
-        m_ptmSitePeptideInst = null;
-        m_length = 0;
-        m_beginIndex = 0;
-        
-        if (pep != null ) {
-            if(pep.getSequence()!=null) 
-                m_length = pep.getSequence().length();
-                    
-            m_beginIndex = pep.getStartPosition();
-            boolean isProteinNTerm = false;
-            Iterator<PTMSite> allSites = pep.getPTMSites().iterator();
-            while (allSites.hasNext()) {
-                PTMSite site = allSites.next();
-                if(site.isProteinNTermWithOutM()) {
-                    isProteinNTerm = true;
-                    break;
-                }
-            }
-            if ((m_beginIndex == 1) && isProteinNTerm)  
-                m_beginIndex = 0;   
-        }
-        m_isSelected = false;
-    }
-    
+
+
+
+
     public PeptideView(PTMPeptideInstance pep, boolean displayProtWithOutNtermM) {
-        isPtmSiteView = false;
         x0 = 0;
         y0 = 0;
         m_isSelected = false;
         m_ptmPeptideInst = pep;
-        m_ptmSitePeptideInst = null;
         m_length = 0;
         m_beginIndex = 0;
         
@@ -115,19 +67,40 @@ public class PeptideView extends ViewPtmAbstract {
             m_beginIndex = pep.getStartPosition();
 
             if ((m_beginIndex == 1) && displayProtWithOutNtermM)
-                m_beginIndex = 0;   
+                m_beginIndex = 0;
         }
-        m_isSelected = false;
+        setHasNorCTermModif();
     }
-    
-    private Map<Integer, DPeptidePTM> getPosPtmMap() {
-        return m_ptmPeptideInst.getPeptideInstance().getPeptide().getTransientData().getDPeptidePtmMap();
+
+    private void setHasNorCTermModif(){
+        hasNTermPtm = false;
+        hasCTermPtm = false;
+        if(m_ptmPeptideInst != null) {
+            m_ptmPeptideInst.getPTMSites().forEach(site -> {
+                if (site.isNterm())
+                    this.hasNTermPtm = Boolean.TRUE;
+                if (site.isCterm())
+                    this.hasCTermPtm = Boolean.TRUE;
+            });
+        }
+    }
+
+    private Map<Integer, DPeptidePTM> getPtmPerPosition() {
+        Map<Integer, DPeptidePTM> map = m_ptmPeptideInst.getPeptideInstance().getPeptide().getTransientData().getDPeptidePtmMap();
+        Map<Integer, DPeptidePTM> correctedMap = new HashMap<>(map.size());
+        for (Map.Entry<Integer, DPeptidePTM> ptmPerPos : map.entrySet()) {
+            int loc = ptmPerPos.getKey();
+            if(hasNTermPtm && loc ==0)
+                loc = 1;
+            if(hasCTermPtm && loc == -1)
+                loc = m_length;
+            correctedMap.put(loc, ptmPerPos.getValue());
+        }
+        return correctedMap;
+
     }
 
     protected float getScore() {
-        if(isPtmSiteView)
-            return m_ptmSitePeptideInst.getRepresentativePepMatch().getScore();
-        else
             return m_ptmPeptideInst.getRepresentativePepMatch().getScore();
     }
     
@@ -148,12 +121,13 @@ public class PeptideView extends ViewPtmAbstract {
         Color c = getColorWithProbability(ViewSetting.PEPTIDE_COLOR, (float) Math.min(Math.max(getScore(),15f) / 100.0, 1.0));
         g.setColor(c);
         g.fillRoundRect(x0, y0, width, height, aaWidth, ViewSetting.HEIGHT_AA);
-        Map<Integer, DPeptidePTM> map = getPosPtmMap();
+
+        Map<Integer, DPeptidePTM> map = getPtmPerPosition();
         for (Map.Entry<Integer, DPeptidePTM> modifyA : map.entrySet()) {
             paintPtm(g, modifyA.getValue(), modifyA.getKey(), y0);
         }
 
-        if (m_isSelected == true) {
+        if (m_isSelected) {
             g.setColor(ViewSetting.SELECTED_PEPTIDE_COLOR);
             g.setStroke(ViewSetting.STROKE_PEP);
             g.drawRoundRect(x0, y0, width, height, aaWidth, ViewSetting.HEIGHT_AA);
@@ -213,7 +187,7 @@ public class PeptideView extends ViewPtmAbstract {
      * @return
      */
     public Float getProbability(DPeptidePTM ptm) {
-        DPeptideMatch pepMatch =  isPtmSiteView ? m_ptmSitePeptideInst.getRepresentativePepMatch() : m_ptmPeptideInst.getRepresentativePepMatch();
+        DPeptideMatch pepMatch =  m_ptmPeptideInst.getRepresentativePepMatch();
         DPtmSiteProperties properties = pepMatch.getPtmSiteProperties();
         if (properties != null) {
             String readablePtm = DInfoPTM.getInfoPTMMap().get(ptm.getIdPtmSpecificity()).toReadablePtmString((int) ptm.getSeqPosition());
@@ -237,7 +211,7 @@ public class PeptideView extends ViewPtmAbstract {
      * @return 
      */
     private String getReadablePtmString(DPeptidePTM ptm) {
-        DPeptideMatch pepMatch =  isPtmSiteView ? m_ptmSitePeptideInst.getRepresentativePepMatch() : m_ptmPeptideInst.getRepresentativePepMatch();
+        DPeptideMatch pepMatch =  m_ptmPeptideInst.getRepresentativePepMatch();
         DPtmSiteProperties properties = pepMatch.getPtmSiteProperties();
         if (properties != null) {
             String readablePtm = DInfoPTM.getInfoPTMMap().get(ptm.getIdPtmSpecificity()).toReadablePtmString((int) ptm.getSeqPosition());
@@ -253,8 +227,8 @@ public class PeptideView extends ViewPtmAbstract {
             int xRangA = x - this.x0;
 
             int position = xRangA / ViewSetting.WIDTH_AA + 1;
-            Map<Integer, DPeptidePTM> map = getPosPtmMap();
-            DPeptidePTM ptm = (DPeptidePTM) map.get(position);
+            Map<Integer, DPeptidePTM> ptmPerPosition = getPtmPerPosition();
+            DPeptidePTM ptm = ptmPerPosition.get(position);
             if (ptm != null) {
                 float prob = getProbability(ptm)*100;
                 String readable = getReadablePtmString(ptm);

@@ -16,98 +16,61 @@
  */
   package fr.proline.mzscope.ui;
 
-import fr.proline.mzscope.ui.dialog.IsotopicPredictionParamDialog;
-import fr.proline.mzscope.ui.model.ScanTableModel;
-import fr.profi.ms.model.TheoreticalIsotopePattern;
-import fr.profi.mzdb.algo.DotProductPatternScorer;
 import fr.profi.mzdb.algo.signal.filtering.ISignalSmoother;
 import fr.profi.mzdb.algo.signal.filtering.PartialSavitzkyGolaySmoother;
 import fr.profi.mzdb.algo.signal.filtering.SavitzkyGolaySmoother;
 import fr.profi.mzdb.algo.signal.filtering.SavitzkyGolaySmoothingConfig;
 import fr.profi.mzdb.util.math.DerivativeAnalysis;
-import fr.proline.mzscope.model.MsnExtractionRequest;
-import fr.proline.mzscope.ui.model.MzScopePreferences;
-import fr.proline.mzscope.model.Spectrum;
-import fr.proline.mzscope.model.Signal;
-import fr.proline.mzscope.ui.event.ScanHeaderListener;
-import fr.proline.mzscope.processing.IsotopicPatternUtils;
+import fr.proline.mzscope.model.*;
 import fr.proline.mzscope.processing.SpectrumUtils;
 import fr.proline.mzscope.ui.dialog.SmoothingParamDialog;
+import fr.proline.mzscope.ui.event.ScanHeaderListener;
+import fr.proline.mzscope.ui.model.MobilogramTableModel;
+import fr.proline.mzscope.ui.model.MzScopePreferences;
+import fr.proline.mzscope.ui.model.ScanTableModel;
 import fr.proline.mzscope.utils.Display;
 import fr.proline.studio.WindowManager;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.graphics.PlotXYAbstract;
-import fr.proline.studio.graphics.PlotLinear;
-import fr.proline.studio.graphics.BasePlotPanel;
-import fr.proline.studio.graphics.PlotPanel;
-import fr.proline.studio.graphics.PlotPanelListener;
-import fr.proline.studio.graphics.PlotStick;
-import fr.proline.studio.graphics.marker.AbstractMarker;
+import fr.proline.studio.graphics.*;
 import fr.proline.studio.graphics.marker.IntervalMarker;
-import fr.proline.studio.graphics.marker.LabelMarker;
-import static fr.proline.studio.graphics.marker.LabelMarker.ORIENTATION_XY_MIDDLE;
-import fr.proline.studio.graphics.marker.LineMarker;
-import fr.proline.studio.graphics.marker.PointMarker;
-import fr.proline.studio.graphics.marker.coordinates.DataCoordinates;
 import fr.proline.studio.graphics.measurement.IntegralMeasurement;
 import fr.proline.studio.graphics.measurement.WidthMeasurement;
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.IconManager;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import javax.swing.AbstractSpinnerModel;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
-import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Tuple2;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.util.List;
+import java.util.*;
 
 /**
  * contains the scan panel
  *
  * @author MB243701
  */
-public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPanelListener {
+public class SpectrumPanel extends AbstractSpectrumPanel implements ScanHeaderListener {
 
    private static final Logger logger = LoggerFactory.getLogger(SpectrumPanel.class);
-   private static final int OVERLAY_KEY = KeyEvent.CTRL_MASK;
+   private static final int OVERLAY_KEY = KeyEvent.CTRL_DOWN_MASK;
    
-   private final IRawFileViewer rawFilePanel;
    private ScanHeaderPanel headerSpectrumPanel;
-   protected BasePlotPanel spectrumPlotPanel;
    protected JToolBar spectrumToolbar;
-   
-   protected PlotXYAbstract scanPlot;
-   protected LineMarker positionMarker;
-
-   protected Spectrum currentScan;   
-   protected Spectrum referenceSpectrum;
-
    private boolean keepSameMsLevel = true;
-   private boolean autoZoom = false;
-   private List<AbstractMarker> ipMarkers = new ArrayList();
    private ScansSpinnerModel spinnerModel;
-   
-   private JButton m_editSignalBtn;
-   private JButton m_showCentroidBtn;
-   private JToggleButton m_freezeSpectrumBtn;
+  private JToggleButton m_freezeSpectrumBtn;
 
-   private static final DecimalFormat df = new DecimalFormat("#.###");
+
+  private JToggleButton viewMobilogramBtn;
+  private final BasePlotPanel mobilogramPlotPanel;
+  private Mobilogram mobilogram;
+
+  private MobilitySpectrum mobilitySpectrum;
 
   class ScansSpinnerModel extends AbstractSpinnerModel {
 
@@ -121,7 +84,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
         if (((Integer)value).intValue() != ((Integer)getValue()).intValue()) {
             // the supplied index is not the index of the currentScan : force display (the modification came from the spinner itself)
             // the display starts from the rawFilePanel to update markers in chromatogram display
-            rawFilePanel.displayScan((Integer)value);
+            rawFileViewer.displayScan((Integer)value);
         }
         // allow GUI update by firing the event.
         fireStateChanged();
@@ -137,31 +100,18 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
         return (currentScan == null) ? 0 :  getPreviousScanIndex(currentScan.getIndex());
     }
     
-}
-
+  }
 
    public SpectrumPanel(IRawFileViewer rawFilePanel) {
-      super();
-      this.rawFilePanel = rawFilePanel;
+    
+     super(rawFilePanel);
+     PlotPanel plotPanel = new PlotPanel();
+     mobilogramPlotPanel = plotPanel.getBasePlotPanel();
+     mobilogramPlotPanel.setDrawCursor(true);
+     mobilogramPlotPanel.setVisible(false);
    }
 
-   public void initComponents() {
-      // Create Scan Charts
-      PlotPanel plotPanel = new PlotPanel();
-      spectrumPlotPanel = plotPanel.getBasePlotPanel();
-      spectrumPlotPanel.addListener(this);
-      spectrumPlotPanel.setDrawCursor(true);
-
-      positionMarker = new LineMarker(spectrumPlotPanel, 0.0, LineMarker.ORIENTATION_VERTICAL, Color.BLUE, false);
-      
-      spectrumPlotPanel.repaint();
-
-      this.removeAll();
-      this.add(plotPanel, BorderLayout.CENTER);
-      this.add(getSpectrumToolbar(), BorderLayout.NORTH);
-   }
-
-   private JToolBar getSpectrumToolbar() {
+   protected JToolBar getSpectrumToolbar() {
       spectrumToolbar = new JToolBar(JToolBar.HORIZONTAL);
       spectrumToolbar.setFloatable(false);
       
@@ -171,84 +121,110 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
       JButton displayIPBtn = new JButton();
       displayIPBtn.setIcon(IconManager.getIcon(IconManager.IconType.ISOTOPES_PREDICTION));
       displayIPBtn.setToolTipText("Display Isotopic Patterns");
-      displayIPBtn.addActionListener(new ActionListener() {
-         @Override
-         public void actionPerformed(ActionEvent e) {
-           displayIsotopicPrediction(positionMarker.getValue());
-         }
-      });
+      displayIPBtn.addActionListener(e -> displayIsotopicPrediction(positionMarker.getValue()));
       
       spectrumToolbar.add(displayIPBtn);
 
       m_freezeSpectrumBtn = new JToggleButton(IconManager.getIcon(IconManager.IconType.PIN));
-      m_freezeSpectrumBtn.addActionListener(new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-              JToggleButton tBtn = (JToggleButton)e.getSource();
-            if (tBtn.isSelected()) {
-               _displayReferenceSpectrum(currentScan);
-            } else {
-               clearReferenceSpectrumData();
-            }
-          }
+      m_freezeSpectrumBtn.addActionListener(e -> {
+        JToggleButton tBtn = (JToggleButton)e.getSource();
+        if (tBtn.isSelected()) {
+          setReferenceSpectrum(currentScan, 1.0f);
+        } else {
+           clearReferenceSpectrumData();
+        }
       });
       
       spectrumToolbar.add(m_freezeSpectrumBtn);
       
        JToggleButton autoZoomBtn = new JToggleButton();
        autoZoomBtn.setIcon(IconManager.getIcon(IconManager.IconType.AUTO_ZOOM));
-       autoZoomBtn.addActionListener(new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-              autoZoom = ((JToggleButton)e.getSource()).isSelected();
-          }
-      });
+       autoZoomBtn.addActionListener(e -> autoZoom = ((JToggleButton)e.getSource()).isSelected());
       
       spectrumToolbar.add(autoZoomBtn);
       
       spectrumToolbar.addSeparator();
-      
-      m_showCentroidBtn = new JButton();
-      m_showCentroidBtn.setEnabled(false);
+
+     JButton m_showCentroidBtn = new JButton();
       m_showCentroidBtn.setIcon(IconManager.getIcon(IconManager.IconType.CENTROID_SPECTRA));
       m_showCentroidBtn.setToolTipText("Compute and show centroid peaks");
-      m_showCentroidBtn.addActionListener(new ActionListener() {
-         @Override
-         public void actionPerformed(ActionEvent e) {
-            showCentroid();
-         }
-      });        
+      m_showCentroidBtn.addActionListener(e -> showCentroid());
       spectrumToolbar.add(m_showCentroidBtn);
 
-      m_editSignalBtn = new JButton();
-      m_editSignalBtn.setEnabled(false);
+     JButton m_editSignalBtn = new JButton();
       m_editSignalBtn.setIcon(IconManager.getIcon(IconManager.IconType.SIGNAL));
       m_editSignalBtn.setToolTipText("Spectrum signal processing dialog");
-      m_editSignalBtn.addActionListener(new ActionListener() {
-         @Override
-         public void actionPerformed(ActionEvent e) {
-            editSignal();
-         }
-      });
+      m_editSignalBtn.addActionListener(e -> editSignal());
       spectrumToolbar.add(m_editSignalBtn);
-      
-      spectrumToolbar.addSeparator();
 
-      spinnerModel = new ScansSpinnerModel(); 
-      
+     JButton testBtn = new JButton("iso");
+     testBtn.setToolTipText("de-isotope centroid spectrum");
+     testBtn.addActionListener(e -> processMS2Spectrum());
+     spectrumToolbar.add(testBtn);
+
+     viewMobilogramBtn = new JToggleButton("IM");
+     viewMobilogramBtn.setToolTipText("View mobilogram");
+     viewMobilogramBtn.setEnabled(false);
+     viewMobilogramBtn.addActionListener(e -> toggleMobilogramPlot());
+     spectrumToolbar.add(viewMobilogramBtn);
+
+       spectrumToolbar.addSeparator();
+       JButton m_forceCentroidBtn = new JButton();
+       m_forceCentroidBtn.setIcon(IconManager.getIcon(IconManager.IconType.FITTED_2_CENTROID));
+       m_forceCentroidBtn.setToolTipText("Force Fitted to Centroid");
+       m_forceCentroidBtn.addActionListener(e -> {
+           rawFileViewer.changeForceFittedToCentroid();
+       });
+       spectrumToolbar.add(m_forceCentroidBtn);
+
+     spectrumToolbar.addSeparator();
+
+      spinnerModel = new ScansSpinnerModel();
       headerSpectrumPanel = new ScanHeaderPanel(null, spinnerModel);
       headerSpectrumPanel.addScanHeaderListener(this);
       spectrumToolbar.add(headerSpectrumPanel);
 
-      return spectrumToolbar;
+     return spectrumToolbar;
    }
 
-    
-   protected void updateToolbar() {
-       m_editSignalBtn.setEnabled(true);
-       m_showCentroidBtn.setEnabled(true);
+  private void toggleMobilogramPlot() {
+    if (splitPane.getRightComponent() == null) {
+      if (currentScan != null) {
+        mobilogramPlotPanel.setPlot(buildMobilogramPlot());
+      }
+      mobilogramPlotPanel.setVisible(true);
+      splitPane.setRightComponent(mobilogramPlotPanel);
+      splitPane.setDividerSize(3);
+      splitPane.setDividerLocation(0.80);
+    } else {
+      mobilogramPlotPanel.setVisible(false);
+      splitPane.setRightComponent(null);
+      splitPane.setDividerLocation(1.0);
+      splitPane.setDividerSize(0);
     }
-   
+  }
+
+  protected PlotXYAbstract buildMobilogramPlot() {
+    Color plotColor = rawFileViewer.getPlotColor(rawFileViewer.getCurrentRawfile() == null ? null : rawFileViewer.getCurrentRawfile().getName());
+    MobilogramTableModel model = new MobilogramTableModel(mobilogram);
+    PlotXYAbstract plot = null;
+    model.setColor(plotColor);
+    plot = new PlotLinear(mobilogramPlotPanel, model, null, ScanTableModel.COLTYPE_SCAN_MASS, ScanTableModel.COLTYPE_SCAN_INTENSITIES);
+    plot.addMeasurement(new IntegralMeasurement(plot));
+    plot.addMeasurement(new WidthMeasurement(plot));
+    ((PlotLinear) plot).setStrokeFixed(true);
+    ((PlotLinear) plot).setPlotInformation(model.getPlotInformation());
+    plot.setIsPaintMarker(true);
+    return plot;
+  }
+
+  private void processMS2Spectrum() {
+    if (currentScan.getDataType() == Spectrum.ScanType.CENTROID) {
+      Spectrum newSpectrum = SpectrumUtils.deisotopeCentroidSpectrum(currentScan);
+      setReferenceSpectrum(newSpectrum, -1.0f);
+    }
+  }
+
     private void showCentroid() {
         
         Signal signal = getSignal();
@@ -279,17 +255,17 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
                     break;                    
             }
             
-            //Call specified smoother using specieifed nbr points.
+            //Call specified smoother using specified nbr points.
             List<Tuple2> input = signal.toScalaArrayTuple(false);
             Tuple2[] param = input.toArray(new Tuple2[input.size()]);
             long step1a = System.currentTimeMillis();  //VDS time calc
             Tuple2[] result = smoother.smoothTimeIntensityPairs(param);
             long step1 = System.currentTimeMillis();  //VDS time calc
-            int resultLenght = result.length;
-            logger.debug("Smooting: signal length after smoothing = "+resultLenght+" vs before "+input.size()+". TIME: "+(step1-start)+" which "+(step1a-start)+" for arrays");
-            double[] x = new double[resultLenght];
-            double[] y = new double[resultLenght];
-            for (int k = 0; k < resultLenght; k++) {
+            int resultLength = result.length;
+            logger.debug("Smoothing: signal length after smoothing = "+resultLength+" vs before "+input.size()+". TIME: "+(step1-start)+" which "+(step1a-start)+" for arrays");
+            double[] x = new double[resultLength];
+            double[] y = new double[resultLength];
+            for (int k = 0; k < resultLength; k++) {
                x[k] = (Double)result[k]._1;
                y[k] = (Double)result[k]._2;
             }
@@ -322,8 +298,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
             Spectrum newSpectrum = new Spectrum(-1, currentScan.getRetentionTime() , Arrays.copyOfRange(newSpMasses, 0, realLenght), Arrays.copyOfRange(newSpIntensities, 0, realLenght), currentScan.getMsLevel(), Spectrum.ScanType.CENTROID);
             long step4 = System.currentTimeMillis();
             logger.debug("Create CentroidSignal values + display markers.Nbr real points = "+realLenght+". TIME: "+(step4-step3)+ "TOTAL == "+(step4-start));
-            referenceSpectrum = newSpectrum;
-            _displayReferenceSpectrum(newSpectrum);
+            setReferenceSpectrum(newSpectrum, 1.0f);
             m_freezeSpectrumBtn.setSelected(true);
 
         }
@@ -350,123 +325,134 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
       return currentSignal;
     }
 
-  public void displayIsotopicPrediction(double mozToPredict) {
-
-    Spectrum spectrum = currentScan;
-
-    if (referenceSpectrum != null) {
-      IsotopicPredictionParamDialog dialog = new IsotopicPredictionParamDialog(WindowManager.getDefault().getMainWindow());
-      dialog.pack();
-      dialog.setVisible(true);
-      if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
-        spectrum = (dialog.getSpectrum() == IsotopicPredictionParamDialog.CURRENT_SPECTRUM) ? currentScan : referenceSpectrum;
-      }
-    }
-
-    ipMarkers.stream().forEach((m) -> {
-      scanPlot.removeMarker(m);
-    });
-    ipMarkers = new ArrayList();
-    float ppmTol = MzScopePreferences.getInstance().getMzPPMTolerance();
-
-    //IsotopicPatternUtils.compareIsotopicPatternPredictions(currentScan.getSpectrumData(), positionMarker.getValue(), ppmTol);
-
-    Tuple2<Object, TheoreticalIsotopePattern> prediction = IsotopicPatternUtils.predictIsotopicPattern(spectrum.getSpectrumData(), mozToPredict, ppmTol);
-    displayIsotopes(spectrum, mozToPredict, prediction, ppmTol, 5);
-
-//    // display alternative scoring before prediction re-ranking
-//    Tuple2<Object, TheoreticalIsotopePattern>[] putativePatterns = DotProductPatternScorer.calcIsotopicPatternHypotheses(spectrum.getSpectrumData(), mozToPredict, ppmTol);
-//
-//    if ((putativePatterns[0]._2.charge() != prediction._2.charge()) || (1e6*(Math.abs(putativePatterns[0]._2.monoMz() - prediction._2.monoMz())/putativePatterns[0]._2.monoMz()) > ppmTol)) {
-//      displayIsotopes(spectrum, mozToPredict, putativePatterns[0], ppmTol, 2);
-//    } else if ((putativePatterns[1]._2.charge() != prediction._2.charge()) || (1e6*(Math.abs(putativePatterns[1]._2.monoMz() - prediction._2.monoMz())/putativePatterns[1]._2.monoMz()) > ppmTol)) {
-//      displayIsotopes(spectrum, mozToPredict, putativePatterns[1], ppmTol, 2);
-//    }
-    
-    spectrumPlotPanel.repaintUpdateDoubleBuffer();
-  }
-
-  private void displayIsotopes(Spectrum spectrum, double mozToPredict, Tuple2<Object, TheoreticalIsotopePattern> scoredPattern, float ppmTol, int colorIndex) {
-    // search for the index of the user selected mz value
-    int referenceMzIdx = 0;
-    TheoreticalIsotopePattern pattern = scoredPattern._2;
-    int idx = SpectrumUtils.getNearestPeakIndex(spectrum.getSpectrumData().getMzList(), mozToPredict);
-    for (Tuple2 t : pattern.mzAbundancePairs()) {
-      if (1e6 * (Math.abs(spectrum.getSpectrumData().getMzList()[idx] - (double) t._1) / spectrum.getSpectrumData().getMzList()[idx]) < ppmTol) {
-        break;
-      }
-      referenceMzIdx++;
-    }
-
-    if (referenceMzIdx < pattern.isotopeCount()) {
-      float abundance = spectrum.getSpectrumData().getIntensityList()[idx];
-      float normAbundance = (Float) pattern.mzAbundancePairs()[referenceMzIdx]._2;
-      for (Tuple2 t : pattern.mzAbundancePairs()) {
-        Double mz = (Double) t._1;
-        Float ab = (Float) t._2;
-        PointMarker m = new PointMarker(spectrumPlotPanel, new DataCoordinates(mz, ab * abundance / normAbundance), CyclicColorPalette.getColor(0));
-        ipMarkers.add(m);
-        scanPlot.addMarker(m);
-        int peakIdx = SpectrumUtils.getPeakIndex(spectrum.getSpectrumData().getMzList(), mz, ppmTol);
-        if ((peakIdx != -1) && (spectrum.getSpectrumData().getIntensityList()[peakIdx] < 2.0 * ab * abundance / normAbundance)) {
-          logger.info("Peak found mz= " + mz + " expected= " + (ab * abundance / normAbundance) + " observed= " + spectrum.getSpectrumData().getIntensityList()[peakIdx]);
-          PointMarker pm = new PointMarker(spectrumPlotPanel, new DataCoordinates(spectrum.getSpectrumData().getMzList()[peakIdx], spectrum.getSpectrumData().getIntensityList()[peakIdx]), CyclicColorPalette.getColor(colorIndex));
-          ipMarkers.add(pm);
-          scanPlot.addMarker(pm);
-        }
-      }
-      Double mz = 0.1 + ((Double) pattern.mzAbundancePairs()[0]._1 + (Double) pattern.mzAbundancePairs()[1]._1) / 2.0;
-      Float ab = (Float) pattern.mzAbundancePairs()[0]._2 * 0.75f;
-      StringBuilder labelTxt = new StringBuilder("charge ");
-      labelTxt.append(pattern.charge()).append("+").append("(").append(df.format(scoredPattern._1)).append(")");
-      LabelMarker label = new LabelMarker(spectrumPlotPanel, new DataCoordinates(mz, ab * abundance / normAbundance), labelTxt.toString(), ORIENTATION_XY_MIDDLE, ORIENTATION_XY_MIDDLE, CyclicColorPalette.getColor(0));
-      ipMarkers.add(label);
-      scanPlot.addMarker(label);
-    }
-  }
-
         
     @Override
-    public void plotPanelMouseClicked(MouseEvent e, double xValue, double yValue) {
-        if (e.getClickCount() == 2) {
-            if ((e.getModifiers() & OVERLAY_KEY) == 0 && rawFilePanel.getChromatogramDisplayMode() != Display.Mode.OVERLAY) {
-                scanPlot.clearMarkers();
-                scanPlot.addMarker(positionMarker);
-            }
-                positionMarker.setValue(xValue);
-                positionMarker.setVisible(true);
-                double mz = xValue;
-                float ppmTol = (currentScan.getMsLevel() == 1) ? MzScopePreferences.getInstance().getMzPPMTolerance() :  MzScopePreferences.getInstance().getFragmentMzPPMTolerance();  
-                double maxMz = mz + mz * ppmTol / 1e6;
-                double minMz = mz - mz * ppmTol / 1e6;
-                scanPlot.addMarker(new IntervalMarker(spectrumPlotPanel, Color.orange, Color.RED, minMz, maxMz));
-                MsnExtractionRequest.Builder builder = MsnExtractionRequest.builder();
-                if (currentScan.getMsLevel() == 1) {
-                    builder.setMinMz(minMz).setMaxMz(maxMz);
-                } else {
-                    builder.setMz(currentScan.getPrecursorMz()).setFragmentMz(mz).setFragmentMzTolPPM(ppmTol);
-                }
-                if ((e.getModifiers() & OVERLAY_KEY) != 0) {
-                    rawFilePanel.extractAndDisplayChromatogram(builder.build(), new Display(Display.Mode.OVERLAY), null);
-                } else {
-                    rawFilePanel.extractAndDisplayChromatogram(builder.build(), new Display(rawFilePanel.getChromatogramDisplayMode()), null);
-                }
-
-        } else if (SwingUtilities.isLeftMouseButton(e)) {
-            positionMarker.setValue(xValue);
-            positionMarker.setVisible(true);
+    public void plotPanelMouseClicked(MouseEvent e, double mz, double yValue) {
+      if (e.getClickCount() == 2) {
+        if ((e.getModifiersEx() & OVERLAY_KEY) == 0 && rawFileViewer.getChromatogramDisplayMode() != Display.Mode.OVERLAY) {
+          scanPlot.clearMarkers();
+          scanPlot.addMarker(positionMarker);
         }
+        positionMarker.setValue(mz);
+        positionMarker.setVisible(true);
+        float ppmTol = (currentScan.getMsLevel() == 1) ? MzScopePreferences.getInstance().getMzPPMTolerance() : MzScopePreferences.getInstance().getFragmentMzPPMTolerance();
+        double maxMz = mz + mz * ppmTol / 1e6;
+        double minMz = mz - mz * ppmTol / 1e6;
+        scanPlot.addMarker(new IntervalMarker(spectrumPlotPanel, Color.orange, Color.RED, minMz, maxMz));
+        ExtractionRequest.Builder builder = ExtractionRequest.builder(this);
+        if (currentScan.getMsLevel() == 1) {
+          builder.setMz(mz).setMzTolPPM(ppmTol);
+        } else {
+          builder.setMz(currentScan.getPrecursorMz()).setFragmentMz(mz).setFragmentMzTolPPM(ppmTol);
+        }
+
+        // clone last request mobility query.
+        // TODO move to ExtractionRequest.Builder.cloneMobility(ExtractionRequest r)
+        final ExtractionRequest lastExtractionRequest = MzScopePreferences.getInstance().getLastExtractionRequest();
+        if (lastExtractionRequest != null && !lastExtractionRequest.getMobilityRequestType().equals(ExtractionRequest.Type.NONE)) {
+          if (lastExtractionRequest.getMobilityRequestType().equals(ExtractionRequest.Type.CENTERED)) {
+            builder.setMobility(lastExtractionRequest.getMobility());
+            builder.setMobilityTol(lastExtractionRequest.getMobilityTol());
+          } else {
+            builder.setMinMobility(lastExtractionRequest.getMinMobility());
+            builder.setMaxMobility(lastExtractionRequest.getMaxMobility());
+          }
+        }
+
+        final ExtractionRequest extractionRequest = builder.build();
+        if ((e.getModifiersEx() & OVERLAY_KEY) != 0) {
+          rawFileViewer.extractAndDisplay(extractionRequest, new Display(Display.Mode.OVERLAY), null);
+        } else {
+          rawFileViewer.extractAndDisplay(extractionRequest, new Display(rawFileViewer.getChromatogramDisplayMode()), null);
+        }
+
+        updateMzRange(extractionRequest.getMinMz(), extractionRequest.getMaxMz());
+
+      } else if (SwingUtilities.isLeftMouseButton(e)) {
+        positionMarker.setValue(mz);
+        positionMarker.setVisible(true);
+      }
     }
 
-   @Override
-   public void updateScanIndex(Integer scanIndex) {
-      rawFilePanel.displayScan(scanIndex);
+
+  @Override
+  public void propertyChange(PropertyChangeEvent evt) {
+    if (evt.getPropertyName().equals(IRawFileViewer.LAST_EXTRACTION_REQUEST) ) {
+      ExtractionRequest request = (ExtractionRequest)evt.getNewValue();
+      if (request.getSource() != this) {
+
+        logger.info("IRawFileViewer last extraction applied was " + request);
+
+        if (mobilitySpectrum != null) {
+          if (!request.getMobilityRequestType().equals(ExtractionRequest.Type.NONE)) {
+            updateMobilityRange(request.getMinMobility(), request.getMaxMobility());
+          } else if (rawFileViewer.getCurrentRawfile() != null) {
+            final IonMobilityIndex mobilityIndex = rawFileViewer.getCurrentRawfile().getIonMobilityIndex();
+            updateMobilityRange(mobilityIndex.getMinValue(), mobilityIndex.getMaxValue());
+          }
+        }
+
+        // WARN : must be done after potential ion mobility scan update
+        if (currentScan != null) {
+          if (!request.getMzRequestType().equals(ExtractionRequest.Type.NONE)) {
+            if (rawFileViewer.getChromatogramDisplayMode() != Display.Mode.OVERLAY) {
+              scanPlot.clearMarkers();
+              scanPlot.addMarker(positionMarker);
+            }
+            positionMarker.setValue(request.getMz());
+            positionMarker.setVisible(true);
+            scanPlot.addMarker(new IntervalMarker(spectrumPlotPanel, Color.orange, Color.RED, request.getMinMz(), request.getMaxMz()));
+            spectrumPlotPanel.repaint();
+          }
+        }
+
+        if ((mobilitySpectrum != null) && mobilogramPlotPanel.isVisible()) {
+          if (request.getMzRequestType().equals(ExtractionRequest.Type.NONE)) {
+            updateMzRange(Double.MIN_VALUE, Double.MAX_VALUE);
+          } else {
+            updateMzRange(request.getMinMz(), request.getMaxMz());
+          }
+          mobilogramPlotPanel.getPlots().get(0).clearMarkers();
+          if (!request.getMobilityRequestType().equals(ExtractionRequest.Type.NONE)) {
+            mobilogramPlotPanel.getPlots().get(0).addMarker(new IntervalMarker(mobilogramPlotPanel, Color.orange, Color.RED, request.getMinMobility(), request.getMaxMobility()));
+          }
+          mobilogramPlotPanel.repaint();
+        }
+
+      } else {
+        logger.debug("Event ignored : "+ evt);
+      }
+    }
+  }
+
+   public void updateMobilityRange(double min, double max) {
+      if ((mobilitySpectrum.getMsLevel() == 1)) {
+        Spectrum spectrum = mobilitySpectrum.applyMobilityFilterbySum(min, max);
+        _displayScan(spectrum);
+      }
    }
 
-   @Override
+  public void updateMzRange(double min, double max) {
+    if (mobilogramPlotPanel.isVisible() && mobilogram != null) {
+      mobilogram.setMzFilter(min, max);
+      mobilogramPlotPanel.getPlots().get(0).update();
+      mobilogramPlotPanel.repaint();
+    }
+  }
+
+
+  private MobilitySpectrum asMobilitySpectrum(Spectrum scan) {
+    if (MobilitySpectrum.class.isAssignableFrom(scan.getClass())) {
+      return (MobilitySpectrum)scan;
+    } else {
+      return new MobilitySpectrum(scan, rawFileViewer.getCurrentRawfile().getIonMobilityIndex());
+    }
+  }
+
+  @Override
    public void updateRetentionTime(float retentionTime) {
-      int scanIdx = rawFilePanel.getCurrentRawfile().getSpectrumId(retentionTime);
-      rawFilePanel.displayScan(scanIdx);
+      int scanIdx = rawFileViewer.getCurrentRawfile().getSpectrumId(retentionTime);
+      rawFileViewer.displayScan(scanIdx);
    }
 
    @Override
@@ -477,133 +463,53 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
    public void addMarkerRange(double minMz, double maxMz) {
       scanPlot.addMarker(new IntervalMarker(spectrumPlotPanel, Color.orange, Color.RED, minMz, maxMz));
    }
-   
-   public void displayScan(Spectrum scan) {
 
-      double xMin = 0.0, xMax = 0.0, yMin = 0.0, yMax = 0.0;
+  public void displayScan(Spectrum scan) {
+    if ((scan != null) && !MobilitySpectrum.class.isAssignableFrom(scan.getClass())) {
 
-      if ((currentScan != null) && (currentScan.getMasses().length > 0)){
-         xMin = spectrumPlotPanel.getXAxis().getMinValue();
-         xMax = spectrumPlotPanel.getXAxis().getMaxValue();
-         yMin = spectrumPlotPanel.getYAxis().getMinValue();
-         yMax = spectrumPlotPanel.getYAxis().getMaxValue();
-      }
-
-      if (scan != null && scan.getMasses().length > 0) {    
-        
-//         logger.info("display scan id = {}, masses length = {} ", scan.getIndex(), scan.getMasses().length);
-         Color plotColor = rawFilePanel.getPlotColor(rawFilePanel.getCurrentRawfile().getName());
-         ScanTableModel scanModel = new ScanTableModel(scan);
-         scanModel.setColor(plotColor);
-         scanPlot = buildPlot(scan, plotColor);
-         spectrumPlotPanel.setPlot(scanPlot);
-         spectrumPlotPanel.lockMinXValue();
-         spectrumPlotPanel.lockMinYValue();
-
-         if ((currentScan != null) && (currentScan.getMasses().length > 0) && (currentScan.getMsLevel() == scan.getMsLevel())) {
-            if (!autoZoom) { 
-                spectrumPlotPanel.getXAxis().setRange(xMin, xMax);
-                spectrumPlotPanel.getYAxis().setRange(yMin, yMax);
-            } else {
-                spectrumPlotPanel.getXAxis().setRange(xMin, xMax);                
-            }
-         }
-         
-         if ((currentScan != null) && (currentScan.getMsLevel() != scan.getMsLevel())) {
-            positionMarker.setVisible(false);
-         }
-         
-         scanPlot.addMarker(positionMarker);
-         _displayReferenceSpectrum(referenceSpectrum);
-         spectrumPlotPanel.repaint();
-         headerSpectrumPanel.setMzdbFileName(rawFilePanel.getCurrentRawfile().getName());
-         currentScan = scan;
-         spinnerModel.setValue(currentScan.getIndex());
-         headerSpectrumPanel.setScan(currentScan);
-      } else if (scan != null) {
-        logger.info("display scan id = {},contains no data ", scan.getIndex());
-         currentScan = scan;
-         spinnerModel.setValue(currentScan.getIndex());
-         headerSpectrumPanel.setScan(currentScan);
-         spectrumPlotPanel.clearPlotsWithRepaint();
+      Spectrum wScan = scan;
+      if (scan.hasIonMobilitySeparation()) {
+        mobilitySpectrum =  asMobilitySpectrum(scan);
+        mobilogram = new Mobilogram(mobilitySpectrum);
+        wScan = mobilitySpectrum.applyMobilityFilterbySum(Double.MIN_VALUE, Double.MAX_VALUE);
       } else {
-        spectrumPlotPanel.clearPlotsWithRepaint();
+        mobilitySpectrum = null;
+        mobilogram = null;
       }
+
+      _displayScan(wScan);
+      headerSpectrumPanel.setMzdbFileName(rawFileViewer.getCurrentRawfile().getName());
+      spinnerModel.setValue(currentScan.getIndex());
+      headerSpectrumPanel.setScan(currentScan);
+      viewMobilogramBtn.setEnabled(mobilitySpectrum != null);
+
+      if (mobilogramPlotPanel.isVisible() && mobilogram != null) {
+        mobilogramPlotPanel.setPlot(buildMobilogramPlot());
+        mobilogramPlotPanel.repaint();
+      }
+
+    } else {
+      _displayScan(scan);
+      viewMobilogramBtn.setEnabled((scan != null) && scan.hasIonMobilitySeparation());
+    }
    }
 
-    private void _displayReferenceSpectrum(Spectrum spectrum) {
-        if (spectrum != null) {
-            
-            double xMin = 0.0, xMax = 0.0, yMin = 0.0, yMax = 0.0;
-            
-            if (currentScan != null) {
-               xMin = spectrumPlotPanel.getXAxis().getMinValue();
-               xMax = spectrumPlotPanel.getXAxis().getMaxValue();
-               yMin = spectrumPlotPanel.getYAxis().getMinValue();
-               yMax = spectrumPlotPanel.getYAxis().getMaxValue();
-            }
 
-            PlotXYAbstract plot = buildPlot(spectrum, CyclicColorPalette.getColor(5));                        
-            spectrumPlotPanel.addPlot(plot, true);
-            
-            if (currentScan != null) {
-                spectrumPlotPanel.getXAxis().setRange(xMin, xMax);
-                spectrumPlotPanel.getYAxis().setRange(yMin, yMax);
-            } 
-            
-            referenceSpectrum = spectrum;
-            spectrumPlotPanel.repaint();
-        }
-    }
-
-    
-    private PlotXYAbstract buildPlot(Spectrum scan, Color plotColor) {
-        ScanTableModel scanModel = new ScanTableModel(scan);
-        PlotXYAbstract plot = null;
-        scanModel.setColor(plotColor);
-        if (scan.getDataType() == Spectrum.ScanType.CENTROID) {
-            //stick plot
-            plot = new PlotStick(spectrumPlotPanel, scanModel, null, ScanTableModel.COLTYPE_SCAN_MASS, ScanTableModel.COLTYPE_SCAN_INTENSITIES);
-            ((PlotStick) plot).setStrokeFixed(true);
-            ((PlotStick) plot).setPlotInformation(scanModel.getPlotInformation());
-        } else {
-            plot = new PlotLinear(spectrumPlotPanel, scanModel, null, ScanTableModel.COLTYPE_SCAN_MASS, ScanTableModel.COLTYPE_SCAN_INTENSITIES);
-            plot.addMeasurement(new IntegralMeasurement(plot));
-            plot.addMeasurement(new WidthMeasurement(plot));
-            ((PlotLinear) plot).setStrokeFixed(true);
-            ((PlotLinear) plot).setPlotInformation(scanModel.getPlotInformation());
-        }
-        plot.setIsPaintMarker(true);
-        return plot;
-    }
-   
-    public void clearReferenceSpectrumData() {
-        if (referenceSpectrum != null) {
-            referenceSpectrum = null;
-            displayScan(currentScan);
-        }
-    }
-
-    public void displayReferenceSpectrum(Spectrum spectrum) {
-      referenceSpectrum = spectrum;
-      displayScan(currentScan);
-    }
+  private void _displayScan(Spectrum scan) {
+      super.displayScan(scan);
+  }
 
     public int getNextScanIndex(Integer spectrumIndex) {
       if (keepSameMsLevel) 
-         return (rawFilePanel.getCurrentRawfile().getNextSpectrumId(spectrumIndex, currentScan.getMsLevel()));
-      return Math.min(currentScan.getIndex() + 1, rawFilePanel.getCurrentRawfile().getSpectrumCount()-1);
+         return (rawFileViewer.getCurrentRawfile().getNextSpectrumId(spectrumIndex, currentScan.getMsLevel()));
+      return Math.min(currentScan.getIndex() + 1, rawFileViewer.getCurrentRawfile().getSpectrumCount()-1);
    } 
 
    public int getPreviousScanIndex(Integer spectrumIndex) {
       if (keepSameMsLevel) 
-         return (rawFilePanel.getCurrentRawfile().getPreviousSpectrumId(spectrumIndex, currentScan.getMsLevel()));
+         return (rawFileViewer.getCurrentRawfile().getPreviousSpectrumId(spectrumIndex, currentScan.getMsLevel()));
       return Math.max(1, currentScan.getIndex() - 1);
    } 
 
-    @Override
-    public void updateAxisRange(double[] oldX, double[] newX,  double[] oldY,  double[] newY) {
-        
-    }
 
 }

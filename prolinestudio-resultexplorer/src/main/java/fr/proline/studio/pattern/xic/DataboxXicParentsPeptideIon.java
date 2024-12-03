@@ -68,7 +68,6 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
         inParameter.addParameter(DDataset.class, ParameterSubtypeEnum.SINGLE_DATA, false /* not compulsory */);
         inParameter.addParameter(QuantChannelInfo.class, ParameterSubtypeEnum.SINGLE_DATA, false /* not compulsory */);
         inParameter.addParameter(DMasterQuantPeptideIon.class); // parent DMasterQuantPeptideIon.class of the aggregation
-        //inParameter.addParameter(XicMode.class);
         
         registerInParameter(inParameter);
 
@@ -201,7 +200,7 @@ public class DataboxXicParentsPeptideIon extends AbstractDataBox {
         
      
         if (parameterType != null) {
-            
+
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
 
                 if (parameterType.equals(DMasterQuantPeptideIon.class)) {

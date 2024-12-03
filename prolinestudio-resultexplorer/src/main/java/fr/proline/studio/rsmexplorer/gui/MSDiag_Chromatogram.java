@@ -74,7 +74,7 @@ public class MSDiag_Chromatogram extends HourglassPanel {
         numberaxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
         NumberAxis numberaxis1 = new NumberAxis("Y");
         StackedXYBarRenderer renderer = new StackedXYBarRenderer(0);    // put space between bars in parameter.0,...
-        renderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
+        renderer.setDefaultToolTipGenerator(new StandardXYToolTipGenerator());
         renderer.setDrawBarOutline(false);
         renderer.setBarPainter(new StandardXYBarPainter());
 

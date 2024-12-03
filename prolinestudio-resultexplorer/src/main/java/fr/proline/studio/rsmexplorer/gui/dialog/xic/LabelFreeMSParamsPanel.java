@@ -55,7 +55,7 @@ public class LabelFreeMSParamsPanel extends JPanel {
     }
 
     public String getParamsVersion() {
-        return "2.0";
+        return AbstractLabelFreeMSParamsPanel.CURRENT_QUANT_PARAM_VERSION;
     }
 
     public AbstractLabelFreeMSParamsPanel getParamsPanel() {
@@ -85,7 +85,7 @@ public class LabelFreeMSParamsPanel extends JPanel {
 
                 // check if user also wants to erase locally
                 String infoText = m_completePanel ? "Switching to short XIC Parameters panel will reset the filled values." : "Switching to complete XIC Parameters panel will reset the filled values.";
-                InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "XIC Parameters Reset", infoText);
+                InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "XIC Parameters Reset", infoText, false);
                 exitDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
                 exitDialog.setVisible(true);
 
@@ -134,9 +134,9 @@ public class LabelFreeMSParamsPanel extends JPanel {
         m_completePanel = completePanel;
         updateButton(m_completePanel);
         if (m_completePanel) {
-            return new LabelFreeMSParamsCompletePanel(false, readValues);
+            return new LabelFreeMSParamsCompletePanel(false, readValues, getParamsVersion());
         } else {
-            return new LabelFreeMSParamsSimplifiedPanel();
+            return new LabelFreeMSParamsSimplifiedPanel(getParamsVersion());
         }
     }
 

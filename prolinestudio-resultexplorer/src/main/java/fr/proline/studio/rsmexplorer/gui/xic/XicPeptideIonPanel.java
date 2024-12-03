@@ -16,6 +16,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui.xic;
 
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.extendedtablemodel.AddDataAnalyzerButton;
 import fr.proline.studio.extendedtablemodel.GlobalTabelModelProviderInterface;
@@ -80,7 +81,7 @@ public class XicPeptideIonPanel extends HourglassPanel implements DataBoxPanelIn
     private MarkerContainerPanel m_markerContainerPanel;
 
     private DQuantitationChannel[] m_quantChannels;
-    private boolean m_isXICMode;
+    private DDatasetType.QuantitationMethodInfo m_quantMethodInfo;
 
     private SettingsButton m_settingsButton;
     private FilterButton m_filterButton;
@@ -135,7 +136,7 @@ public class XicPeptideIonPanel extends HourglassPanel implements DataBoxPanelIn
 
         layeredPane.add(peptideIonPanel, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(m_infoToggleButton.getInfoPanel(), JLayeredPane.PALETTE_LAYER);
-        layeredPane.add(m_searchToggleButton.getSearchPanel(), new Integer(JLayeredPane.PALETTE_LAYER + 1));
+        layeredPane.add(m_searchToggleButton.getSearchPanel(), Integer.valueOf(JLayeredPane.PALETTE_LAYER + 1));
 
     }
 
@@ -218,7 +219,7 @@ public class XicPeptideIonPanel extends HourglassPanel implements DataBoxPanelIn
         m_peptideIonScrollPane = new JScrollPane();
 
         m_quantPeptideIonTable = new QuantPeptideIonTable();
-        m_quantPeptideIonTable.setModel(new CompoundTableModel(new QuantPeptideIonTableModel((LazyTable) m_quantPeptideIonTable), true));
+        m_quantPeptideIonTable.setModel(new CompoundTableModel(new QuantPeptideIonTableModel(m_quantPeptideIonTable, m_quantMethodInfo), true));
         CustomColumnControlButton customColumnControl = new CustomColumnControlButton(m_quantPeptideIonTable);
         m_quantPeptideIonTable.setColumnControl(customColumnControl);
 
@@ -240,7 +241,7 @@ public class XicPeptideIonPanel extends HourglassPanel implements DataBoxPanelIn
         return internalPanel;
     }
 
-    public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<DMasterQuantPeptideIon> peptideIons, boolean isXICMode, boolean finished) {
+    public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<DMasterQuantPeptideIon> peptideIons, DDatasetType.QuantitationMethodInfo quantitationMethodInfo, boolean finished) {
         boolean qcChanged = true;
         if (m_quantChannels != null && m_quantChannels.length == quantChannels.length) {
             for (int q = 0; q < m_quantChannels.length; q++) {
@@ -248,8 +249,9 @@ public class XicPeptideIonPanel extends HourglassPanel implements DataBoxPanelIn
             }
         }
         m_quantChannels = quantChannels;
-        m_isXICMode = isXICMode;
-        ((QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel()).setData(taskId, quantChannels, peptideIons, m_isXICMode);
+        m_quantMethodInfo = quantitationMethodInfo;
+
+        ((QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel()).setData(taskId, quantChannels, peptideIons, m_quantMethodInfo);
         //m_quantPeptideIonTable.setColumnControlVisible(((QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel()).getColumnCount() < XicProteinSetPanel.NB_MAX_COLUMN_CONTROL);     
 
         // select the first row
@@ -369,7 +371,7 @@ public class XicPeptideIonPanel extends HourglassPanel implements DataBoxPanelIn
             if (selectionWillBeRestored) {
                 return;
             }
-            
+
             if (e.getValueIsAdjusting()) {
                 // value is adjusting, so valueChanged will be called again
                 return;

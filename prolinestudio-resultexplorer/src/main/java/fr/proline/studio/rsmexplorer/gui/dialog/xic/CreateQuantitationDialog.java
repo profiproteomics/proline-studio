@@ -20,7 +20,7 @@ import fr.proline.core.orm.msi.PtmSpecificity;
 import fr.proline.studio.Exceptions;
 import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.dock.gui.InfoLabel;
-import fr.proline.studio.rsmexplorer.tree.xic.QuantExperimentalDesignTree;
+import fr.proline.studio.rsmexplorer.tree.xic.*;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.QuantitationLabel;
 import fr.proline.core.orm.uds.QuantitationMethod;
@@ -41,9 +41,6 @@ import fr.proline.studio.rsmexplorer.gui.dialog.LoadWaitingDialog;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
-import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
-import fr.proline.studio.rsmexplorer.tree.xic.DatasetReferenceNode;
-import fr.proline.studio.rsmexplorer.tree.xic.XICRunNode;
 import fr.proline.studio.settings.FilePreferences;
 import fr.proline.studio.settings.SettingsDialog;
 import fr.proline.studio.settings.SettingsUtils;
@@ -61,6 +58,8 @@ import javax.persistence.EntityManager;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.tree.TreeNode;
+
 import fr.proline.studio.NbPreferences;
 import fr.proline.studio.WindowManager;
 import fr.proline.studio.utils.StudioResourceBundle;
@@ -72,7 +71,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author JM235353
  */
-public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
+public class CreateQuantitationDialog extends CheckDesignTreeDialog implements QuantExpDesignTreeListener {
 
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
@@ -85,7 +84,6 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
     private static final String SETTINGS_KEY = "XIC";
     private static CreateQuantitationDialog m_singletonDialog = null;
 
-    private IdentificationTree m_selectionTree = null;
     private AbstractNode m_experimentalDesignNode = null;
     private QuantitationMethod.Type m_quantitationType;
     private DDataset m_refIdentDataset = null;
@@ -95,7 +93,6 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
     private DatabaseVerifySpectrumFromResultSets m_spectrumTask;
     private List<PtmSpecificity> m_identifiedPtms = null;
     private QuantExperimentalDesignPanel m_experimentalDesignPanel;
-
 
     public static CreateQuantitationDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
@@ -115,6 +112,10 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
 
     }
 
+    public boolean isMultipleQuantDefined(){
+        return  m_experimentalDesignPanel.isMultiQuantPanel();
+    }
+
     /**
      * for step 1 Initialize this dialog with the specified parameters.
      * existingQuantDataset can be null when this dialog is created to build a
@@ -128,19 +129,19 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
      * @param quantitationType : the quantification type
      */
     public void initializeExperimentalDesignTree(DDataset existingQuantDataset, DDataset refIdentDataset, IdentificationTree selectionTree, QuantitationMethod.Type quantitationType) {
-        m_selectionTree = selectionTree;
         m_refIdentDataset = refIdentDataset;
         m_identifiedPtms = null;
         m_quantitationType = quantitationType;
         DataSetNode rootNode = new DataSetNode(DataSetData.createTemporaryQuantitation("Quant"));
-        m_experimentalDesignPanel = new QuantExperimentalDesignPanel(rootNode, m_selectionTree, quantitationType);
+        m_experimentalDesignPanel = new QuantExperimentalDesignPanel(rootNode, selectionTree, quantitationType);
         QuantExperimentalDesignTree experimentalDesignTree = m_experimentalDesignPanel.getExperimentalDesignTree();
+        m_experimentalDesignPanel.addQuantExpDesignTreeListener(this);
         if (existingQuantDataset != null) {
             QuantExperimentalDesignTree.displayExperimentalDesign(existingQuantDataset, rootNode, experimentalDesignTree, false, false);
             experimentalDesignTree.renameXicTitle(existingQuantDataset.getName() + "-Copy");
             if (rootNode.getChildCount() > 0) {
                 AbstractNode firstChildNode = (AbstractNode) rootNode.getChildAt(0);
-                if (DatasetReferenceNode.class.isInstance(firstChildNode)) {
+                if (firstChildNode instanceof DatasetReferenceNode) {
                     if (((DatasetReferenceNode) firstChildNode).isInvalidReference()) {
                         //Save previous RSM associated to reference dataset to use the same one !
                         m_refResultSummaryId = existingQuantDataset.getMasterQuantitationChannels().get(0).getIdentResultSummaryId();
@@ -151,7 +152,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
 
             try {
                 Map<String, Object> quantConfig = existingQuantDataset.getQuantProcessingConfigAsMap();
-                if (quantConfig.containsKey("config_version") && quantConfig.get("config_version").equals("2.0")) {
+                if (quantConfig.containsKey("config_version") && quantConfig.get("config_version").equals(AbstractLabelFreeMSParamsPanel.CURRENT_QUANT_PARAM_VERSION)) {
                     LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().setIsSimplifiedPanel(false); //to view all config 
                     LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().setQuantParams(quantConfig);
                 } else {
@@ -178,7 +179,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
             m_selectRawFilePanel.resetDropZonePanel();
         }
 
-        displayExperimentalDesignPanel(rootNode);
+        displayExperimentalDesignPanel((AbstractNode) experimentalDesignTree.getModel().getRoot());
     }
 
     //for step 1
@@ -281,7 +282,8 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
                 repaint();
             }
         } else if (m_quantitationType == QuantitationMethod.Type.ISOBARIC_TAGGING) {
-            m_quantMethodParamsPanel = new IsobaricMethodParamsPanel(m_experimentalDesignPanel.getQuantitationMethod());
+            if(m_quantMethodParamsPanel == null)
+                m_quantMethodParamsPanel = new IsobaricMethodParamsPanel(m_experimentalDesignPanel.getQuantitationMethod());
             setHelpHeader("<html><b>Step 1.a:</b> Specify isobaric quantitation method parameters.</html>", null);
             replaceInternalComponent(m_quantMethodParamsPanel);
             revalidate();
@@ -318,6 +320,28 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
         return (m_experimentalDesignNode == null) ? null : (DataSetData) m_experimentalDesignNode.getData();
     }
 
+    public List<DataSetData> getQuantitationDatasets() {
+        ArrayList<DataSetData> allQuantDS= new ArrayList<>();
+        if(isMultipleQuantDefined()){
+            if (m_experimentalDesignNode == null)
+                allQuantDS = null;
+            else {
+
+                Enumeration<TreeNode> enumeration = m_experimentalDesignNode.children();
+                while (enumeration.hasMoreElements()) {
+                    allQuantDS.add((DataSetData) ((AbstractNode) enumeration.nextElement()).getData());
+                }
+            }
+        } else {
+            if (m_experimentalDesignNode == null)
+                allQuantDS = null;
+            else
+                allQuantDS.add((DataSetData) m_experimentalDesignNode.getData());
+        }
+
+        return allQuantDS;
+    }
+
     private void updatePeaklist(RunInfoData runInfoData, long projectID, long resultSetID) {
         if (runInfoData.getStatus() == Status.LINKED_IN_DATABASE || runInfoData.getStatus() == Status.USER_DEFINED || runInfoData.getStatus() == Status.SYSTEM_PROPOSED) {
 
@@ -338,90 +362,22 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
 
         long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
 
-        Project project;
         String errorMsg = null;
         EntityManager entityManagerUDS = DStoreCustomPoolConnectorFactory.getInstance().getUdsDbConnector().createEntityManager();
 
         try {
-            project = entityManagerUDS.find(Project.class, pID);
+            Project project = entityManagerUDS.find(Project.class, pID);
 
             final Object mutexFileRegistered = new Object();
-
-            Enumeration xicGroups = m_experimentalDesignNode.children();
-
-            while (xicGroups.hasMoreElements() && errorMsg == null) {
-                AbstractNode grpNode = (AbstractNode) xicGroups.nextElement();
-
-                //Iterate over Samples
-                Enumeration groupSamples = grpNode.children();
-                while (groupSamples.hasMoreElements() && errorMsg == null) {
-
-                    AbstractNode groupSampleNode = (AbstractNode) groupSamples.nextElement();
-
-                    //Iterate over SampleAnalysis
-                    Enumeration identiResultSummaries = groupSampleNode.children();
-
-                    while (identiResultSummaries.hasMoreElements()) {
-
-                        AbstractNode biologicalSampleAnalysisNode = (AbstractNode) identiResultSummaries.nextElement();
-                        Long rsID = ((DataSetNode) biologicalSampleAnalysisNode).getDataset().getResultSetId();
-                        Enumeration runNodes = biologicalSampleAnalysisNode.children();
-
-                        while (runNodes.hasMoreElements()) {
-
-                            XICRunNode runNode = (XICRunNode) runNodes.nextElement();
-                            RunInfoData runData = (RunInfoData) runNode.getData();
-                            if (!runData.isRunInfoInDatabase()) {
-                                // RawFile does not exists, create it
-                                try {
-                                    synchronized (mutexFileRegistered) {
-                                        // TODO : get the right instrumentId !!! 
-                                        long instrumentID = 1;
-
-                                        AbstractJMSCallback registerRawFileCallback = new AbstractJMSCallback() {
-
-                                            @Override
-                                            public boolean mustBeCalledInAWT() {
-                                                return false;
-                                            }
-
-                                            @Override
-                                            public void run(boolean success) {
-                                                if (success) {
-                                                    updatePeaklist(runData, pID, rsID);
-                                                }
-                                                synchronized (mutexFileRegistered) {
-                                                    mutexFileRegistered.notifyAll();
-                                                }
-                                            }
-                                        };
-
-                                        fr.proline.studio.dpm.task.jms.RegisterRawFileTask task = new fr.proline.studio.dpm.task.jms.RegisterRawFileTask(registerRawFileCallback, instrumentID, project.getOwner().getId(), runData);
-                                        AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
-
-                                        // wait until the files are loaded
-                                        mutexFileRegistered.wait();
-                                    }
-
-                                } catch (InterruptedException ie) {
-                                    // should not happen
-                                    m_logger.error("", ie);
-                                }
-                            } else {
-                                this.updatePeaklist(runData, pID, rsID);
-                            }
-
-                            //  then map IdentificationDataset to RawFile and Run
-                            if (runData.getRun().getId() > -1) { // case runId = -1 when coming from an existing xic, no need to register again the run_identification
-                                DatabaseRunsTask registerRunIdsTask = new DatabaseRunsTask(null);
-                                registerRunIdsTask.initRegisterIdentificationDatasetRun(((DataSetData) biologicalSampleAnalysisNode.getData()).getDataset().getId(), runData.getSelectedRawFile(), runData.getRun());
-                                registerRunIdsTask.fetchData();
-                            }
-                        }
-                    }
+            if(isMultipleQuantDefined()){
+                Enumeration<TreeNode> childEnum = m_experimentalDesignNode.children();
+                while (childEnum.hasMoreElements()){
+                    AbstractNode nextQttNode =(AbstractNode) childEnum.nextElement();
+                    registerExpDesignRawFiles(nextQttNode, pID, project, mutexFileRegistered);
                 }
-            } //End go through group's sample
-
+            } else {
+                registerExpDesignRawFiles(m_experimentalDesignNode, pID, project, mutexFileRegistered);
+            }
         } catch (Exception e) {
             errorMsg = "Raw File(s) Registration Failed.";
             LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(getClass().getSimpleName() + " failed", e);
@@ -432,11 +388,92 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
         return errorMsg;
     }
 
+    private void registerExpDesignRawFiles(AbstractNode quantNode, long pID, Project project, Object mutexFileRegistered) {
+        Enumeration<TreeNode> xicGroups = quantNode.children();
+
+        while (xicGroups.hasMoreElements() ) {
+            AbstractNode grpNode = (AbstractNode) xicGroups.nextElement();
+
+            //Iterate over Samples
+            Enumeration<TreeNode> groupSamples = grpNode.children();
+            while (groupSamples.hasMoreElements()) {
+
+                AbstractNode groupSampleNode = (AbstractNode) groupSamples.nextElement();
+
+                //Iterate over SampleAnalysis
+                Enumeration<TreeNode> identiResultSummaries = groupSampleNode.children();
+
+                while (identiResultSummaries.hasMoreElements()) {
+
+                    AbstractNode biologicalSampleAnalysisNode = (AbstractNode) identiResultSummaries.nextElement();
+                    Long rsID = ((DataSetNode) biologicalSampleAnalysisNode).getDataset().getResultSetId();
+                    Enumeration<TreeNode> runNodes = biologicalSampleAnalysisNode.children();
+
+                    while (runNodes.hasMoreElements()) {
+
+                        XICRunNode runNode = (XICRunNode) runNodes.nextElement();
+                        RunInfoData runData = (RunInfoData) runNode.getData();
+                        if (!runData.isRunInfoInDatabase()) {
+                            // RawFile does not exists, create it
+                            try {
+                                synchronized (mutexFileRegistered) {
+                                    // TODO : get the right instrumentId !!!
+                                    long instrumentID = 1;
+
+                                    AbstractJMSCallback registerRawFileCallback = new AbstractJMSCallback() {
+
+                                        @Override
+                                        public boolean mustBeCalledInAWT() {
+                                            return false;
+                                        }
+
+                                        @Override
+                                        public void run(boolean success) {
+                                            if (success) {
+                                                updatePeaklist(runData, pID, rsID);
+                                            }
+                                            synchronized (mutexFileRegistered) {
+                                                mutexFileRegistered.notifyAll();
+                                            }
+                                        }
+                                    };
+
+                                    fr.proline.studio.dpm.task.jms.RegisterRawFileTask task = new fr.proline.studio.dpm.task.jms.RegisterRawFileTask(registerRawFileCallback, instrumentID, project.getOwner().getId(), runData);
+                                    AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+
+                                    // wait until the files are loaded
+                                    mutexFileRegistered.wait();
+                                }
+
+                            } catch (InterruptedException ie) {
+                                // should not happen
+                                m_logger.error("", ie);
+                            }
+                        } else {
+                            this.updatePeaklist(runData, pID, rsID);
+                        }
+
+                        //  then map IdentificationDataset to RawFile and Run
+                        if (runData.getRun().getId() > -1) { // case runId = -1 when coming from an existing xic, no need to register again the run_identification
+                            DatabaseRunsTask registerRunIdsTask = new DatabaseRunsTask(null);
+                            registerRunIdsTask.initRegisterIdentificationDatasetRun(((DataSetData) biologicalSampleAnalysisNode.getData()).getDataset().getId(), runData.getSelectedRawFile(), runData.getRun());
+                            registerRunIdsTask.fetchData();
+                        }
+                    }
+                }
+            }
+        } //End go through group's sample
+    }
+
     public Map<String, Object> getExperimentalDesignParameters() throws IllegalAccessException {
         if (m_experimentalDesignNode == null) {
             throw new IllegalAccessException("Design parameters have not been set.");
         }
-        Map<String, Object> experimentalDesignParams = QuantExperimentalDesignTree.toExperimentalDesignParameters(m_experimentalDesignNode, m_refIdentDataset, m_refResultSummaryId);
+        Map<String, Object> experimentalDesignParams;
+        if(! isMultipleQuantDefined())
+            experimentalDesignParams = QuantExperimentalDesignTree.toExperimentalDesignParameters(m_experimentalDesignNode, m_refIdentDataset, m_refResultSummaryId);
+        else
+            experimentalDesignParams = QuantExperimentalDesignTree.toExperimentalDesignParameters((AbstractNode) m_experimentalDesignNode.getChildAt(0), m_refIdentDataset, m_refResultSummaryId);
 
         // Hack : modify experimentalDesignParams for SILAC / TMT methods
         if (m_quantitationType != QuantitationMethod.Type.LABEL_FREE) {
@@ -445,9 +482,9 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
             int nbQcs = qcs.size();
             ArrayList<Object> newQcs = new ArrayList<>(nbQcs * method.getLabels().size());
             for (Object o : qcs) {
-                Map qc = (Map) o;
+                Map<String,Object> qc = (Map<String,Object>) o;
                 for (QuantitationLabel label : method.getLabels()) {
-                    Map newQc = new HashMap(qc);
+                    Map<String,Object> newQc = new HashMap<>(qc);
                     newQc.put("quant_label_id", label.getId());
                     newQc.put("name", qc.get("name") + "." + label.getName());
                     newQc.put("number", newQcs.size() + 1);
@@ -459,6 +496,45 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
         }
 
         return experimentalDesignParams;
+    }
+
+    public List<Map<String, Object>> getExperimentalDesignsParameters() throws IllegalAccessException {
+        if (m_experimentalDesignPanel == null) {
+            throw new IllegalAccessException("Design parameters have not been set.");
+        }
+        ArrayList<Map<String, Object>> expDesigns = new ArrayList<>();
+        if(! isMultipleQuantDefined()){
+            expDesigns.add(getExperimentalDesignParameters());
+            return expDesigns;
+        } else {
+            Enumeration<TreeNode> childs = m_experimentalDesignNode.children();
+            while (childs.hasMoreElements()) {
+                AbstractNode aQuantRoot = (AbstractNode) childs.nextElement();
+                Map<String, Object> experimentalDesignParams = QuantExperimentalDesignTree.toExperimentalDesignParameters(aQuantRoot, m_refIdentDataset, m_refResultSummaryId);
+
+                // Hack : modify experimentalDesignParams for SILAC / TMT methods
+                if (m_quantitationType != QuantitationMethod.Type.LABEL_FREE) {
+                    QuantitationMethod method = m_experimentalDesignPanel.getQuantitationMethod();
+                    ArrayList<Object> qcs = (ArrayList) ((Map) ((List) experimentalDesignParams.get("master_quant_channels")).get(0)).get("quant_channels");
+                    int nbQcs = qcs.size();
+                    ArrayList<Object> newQcs = new ArrayList<>(nbQcs * method.getLabels().size());
+                    for (Object o : qcs) {
+                        Map<String,Object> qc = (Map<String,Object>) o;
+                        for (QuantitationLabel label : method.getLabels()) {
+                            Map<String,Object> newQc = new HashMap<>(qc);
+                            newQc.put("quant_label_id", label.getId());
+                            newQc.put("name", qc.get("name") + "." + label.getName());
+                            newQc.put("number", newQcs.size() + 1);
+                            newQcs.add(newQc);
+                        }
+                    }
+                    qcs.clear();
+                    qcs.addAll(newQcs);
+                }
+                expDesigns.add(experimentalDesignParams);
+            } // end for each root quant
+        }
+        return expDesigns;
     }
 
     public Long getQuantMethodId() {
@@ -502,6 +578,15 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
         }
     }
 
+    private boolean checkQuantMethod(){
+        if(m_experimentalDesignPanel.getQuantitationMethod() == null){
+            setStatus(true, "Specify Quantitation Method");
+            highlight(m_experimentalDesignPanel.getQuantMethodComponent());
+            return false;
+        }
+    return true;
+    }
+
     @Override
     protected boolean okCalled() {
 
@@ -510,7 +595,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
                 //verify sample, group name length
                 //VDS: Can't checkDesignStructure and checkBiologicalGroupName be merged !!
                 if ((checkDesignStructure(m_experimentalDesignPanel.getExperimentalDesignTree(), m_experimentalDesignNode, new HashSet<>())) &&
-                    (checkBiologicalGroupName(m_experimentalDesignPanel.getExperimentalDesignTree(), m_experimentalDesignNode))) {
+                    (checkBiologicalGroupName(m_experimentalDesignPanel.getExperimentalDesignTree(), m_experimentalDesignNode)) && checkQuantMethod()) {
                   //Will call displayLinkRawFilesPanel if Spectrum are OK !
                   checkSpectrum();
                 }
@@ -523,12 +608,18 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
                   if (isQuantConfigPanelNeeded()) {
                     displayNextPanel();
                   } else {
-                    // LINK_RAW_FILE was the last panel, hide tje dialog by returning true
+                    // LINK_RAW_FILE was the last panel, hide the dialog by returning true
+                      // Save Quant Method  Parameters if exist
+                      if(m_quantMethodParamsPanel!=null) {
+                          Preferences preferences = NbPreferences.root();
+                          ParameterList qMethodParameterList = m_quantMethodParamsPanel.getParameterList();
+                          qMethodParameterList.saveParameters(preferences);
+                      }
                     return true;
                   }
                 }
                 return false;
-            default:
+            default: //STEP_PANEL_LABEL_FREE_PARAMS
 
                 if (!checkQuantParameters()) {
                     return false;
@@ -540,6 +631,12 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
                 parameterList.saveParameters(preferences);
                 preferences.putBoolean(AbstractLabelFreeMSParamsPanel.XIC_SIMPLIFIED_PARAMS, LabelFreeMSParamsPanel.getLabelFreeMSQuantParamsPanel().getParamsPanel().isSimplifiedPanel());
 
+                // Save Quant Method  Parameters if exist
+                if(m_quantMethodParamsPanel!=null ) {
+                    ParameterList qMethodParameterList = m_quantMethodParamsPanel.getParameterList();
+                    if(qMethodParameterList!=null)
+                        qMethodParameterList.saveParameters(preferences);
+                }
                 return true;
         }
 
@@ -633,7 +730,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
     /**
      * step back
      *
-     * @return
+     * @return always false to stay in Dialog
      */
     @Override
     protected boolean backCalled() {
@@ -665,7 +762,7 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
 
     private Map<Long, DataSetNode> getSampleAnalysisNodesPerRsId(AbstractNode parentNode) {
         Map<Long, DataSetNode> spectraNodesPerRsId = new HashMap<>();
-        Enumeration children = parentNode.children();
+        Enumeration<TreeNode> children = parentNode.children();
         //Iterate over Groups
         while (children.hasMoreElements()) {
             AbstractNode currentChild = (AbstractNode) children.nextElement();
@@ -744,15 +841,14 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
                                 } else if (failedRSIds.size() == 1) {
                                     DataSetNode dsNode = spectraNodesPerRsId.get(failedRSIds.get(0));
                                     showErrorOnNode(m_experimentalDesignPanel.getExperimentalDesignTree(), dsNode, dsNode.getDataset().getName() + " at least one of the following attributes {First Time, First Scan, First Cycle} must be initialized. Remove the highlighted node from your design.");
-                                } else if (failedRSIds.size() > 1) {
+                                } else {
                                     ArrayList<String> failedNodes = new ArrayList<>();
 
                                     for (Long failedRSId : failedRSIds) {
                                         failedNodes.add(spectraNodesPerRsId.get(failedRSId).toString());
                                     }
 
-                                    JList failedList = new JList(failedNodes.toArray());
-
+                                    JList<String> failedList = new JList<>(failedNodes.toArray(new String[0]));
                                     JOptionPane.showMessageDialog(rootPane, failedList, "The following datasets failed spectrum check.", JOptionPane.ERROR_MESSAGE);
                                 }
                             }
@@ -789,4 +885,8 @@ public class CreateQuantitationDialog extends CheckDesignTreeDialog  {
         return true;
     }
 
+    @Override
+    public void experiementalTreeChange(QuantExperimentalDesignTree newQuantExperimentalTree) {
+        m_experimentalDesignNode = (AbstractNode) newQuantExperimentalTree.getModel().getRoot();
+    }
 }

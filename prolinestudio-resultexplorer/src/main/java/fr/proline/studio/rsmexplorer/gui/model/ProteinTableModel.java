@@ -25,8 +25,7 @@ import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.progress.ProgressInterface;
-import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.SamesetRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ScoreRenderer;
@@ -40,6 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 
 /**
@@ -177,7 +177,7 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
             case PROTEIN_MASS:
                 DBioSequence bioSequence = proteinMatch.getDBioSequence();
                 if (bioSequence != null) {
-                    return new Float(bioSequence.getMass());
+                    return Float.valueOf((float) bioSequence.getMass());
                 }
                 return null;
         }
@@ -413,7 +413,7 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
                 break;
             }
             case PROTEIN_DESCRIPTION: {
-                renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
+                renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.LEFT);
                 break;
             }
             case SAMESET_SUBSET: {
@@ -425,13 +425,13 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
                 break;
             }
             case PROTEIN_MASS: {
-                renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
+                renderer = new FloatRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT));
                 break;
             }
             case OBSERVABLE_PEPTIDES:
             case PROTEIN_PEPTIDES_COUNT:
             case PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT: {
-                renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class), JLabel.RIGHT);
                 break;
             }
 

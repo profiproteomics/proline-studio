@@ -27,7 +27,8 @@ import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.TableDefaultRendererManager;
-import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 
 /**
@@ -140,7 +142,7 @@ public class DataClearProjectTableModel extends DecoratedTableModel implements G
             case COLTYPE_DATA_PEAKLIST_PATH:
             case COLTYPE_DATA_MSI_SEARCH_FILENAME:
             case COLTYPE_DATA_MSI_SEARCH_DIRECTORY:{
-                renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
+                renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.LEFT);
                 break;
             }
             case COLTYPE_DATA_MSI_SEARCH_DATE: {

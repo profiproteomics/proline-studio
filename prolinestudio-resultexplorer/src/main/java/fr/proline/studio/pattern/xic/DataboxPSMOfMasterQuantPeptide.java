@@ -28,7 +28,7 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
-import fr.proline.studio.rsmexplorer.gui.xic.XicPeptideMatchPanel;
+import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelPeptideMatchPanel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,7 +53,7 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
         super(DataboxType.DataboxPSMOfMasterQuantPeptide, DataboxStyle.STYLE_XIC);
 
         // Name of this databox
-        m_typeName = "PSM / Quanti. Peptide";
+        m_typeName = "PSM of Quanti. Peptide";
         m_description = "All PSM of a Quanti. Peptide";
 
         // Register in parameters
@@ -73,7 +73,7 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
 
     @Override
     public void createPanel() {
-        XicPeptideMatchPanel p = new XicPeptideMatchPanel();
+        QuantChannelPeptideMatchPanel p = new QuantChannelPeptideMatchPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
         setDataBoxPanelInterface(p);
@@ -87,7 +87,7 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
         m_quantChannelInfo = (QuantChannelInfo) getData(QuantChannelInfo.class);
 
         if (m_masterQuantPeptide == null) {
-            ((XicPeptideMatchPanel) getDataBoxPanelInterface()).setData((long)-1, null, m_quantChannelInfo, null, null, true);
+            ((QuantChannelPeptideMatchPanel) getDataBoxPanelInterface()).setData((long)-1, null, m_quantChannelInfo, null, null, true);
             return;
         }
         final int loadingId = setLoading();
@@ -112,9 +112,9 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
                 listQuantChannel.toArray(quantitationChannelArray);
 
                 if (subTask == null) {
-                    ((XicPeptideMatchPanel) getDataBoxPanelInterface()).setData(taskId, quantitationChannelArray, m_quantChannelInfo, m_peptideMatchList, m_peptideMatchIdListPerQC, finished);
+                    ((QuantChannelPeptideMatchPanel) getDataBoxPanelInterface()).setData(taskId, quantitationChannelArray, m_quantChannelInfo, m_peptideMatchList, m_peptideMatchIdListPerQC, finished);
                 } else {
-                    ((XicPeptideMatchPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
+                    ((QuantChannelPeptideMatchPanel) getDataBoxPanelInterface()).dataUpdated(subTask, finished);
                 }
 
                 setLoaded(loadingId);
@@ -142,7 +142,7 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
         if (parameterType != null) {
             if (parameterSubtype == ParameterSubtypeEnum.SINGLE_DATA) {
                 if (parameterType.equals(DPeptideMatch.class)) {
-                    return ((XicPeptideMatchPanel) getDataBoxPanelInterface()).getSelectedPSM();
+                    return ((QuantChannelPeptideMatchPanel) getDataBoxPanelInterface()).getSelectedPSM();
                 }
                 if (parameterType.equals(ExtendedTableModelInterface.class)) {
                     return ((GlobalTabelModelProviderInterface) getDataBoxPanelInterface()).getGlobalTableModelInterface();

@@ -26,13 +26,6 @@ import java.util.EventListener;
 public interface ScanHeaderListener extends EventListener {
 
     /**
-     * update the scan index value
-     *
-     * @param scanIndex new scanIndex value
-     */
-    public void updateScanIndex(Integer scanIndex);
-
-    /**
      * update the retention time value (in sec)
      *
      * @param retentionTime the new retention time value (in sec)

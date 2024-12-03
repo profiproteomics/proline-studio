@@ -17,6 +17,7 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.core.orm.uds.UserAccount;
+import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dock.AbstractTopPanel;
@@ -30,11 +31,11 @@ import fr.proline.studio.rsmexplorer.TaskLogTopPanel;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.TreeUtils;
 import fr.proline.studio.rsmexplorer.gui.calc.DataAnalyzerPanel;
-import java.awt.Window;
+
+import javax.swing.*;
+import java.awt.*;
 import java.util.Iterator;
 import java.util.Set;
-import javax.swing.*;
-import fr.proline.studio.WindowManager;
 
 /**
  * Dialog to Connect to the server
@@ -161,7 +162,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
                     JOptionPane.showMessageDialog(m_singletonDialog, connectionError.getErrorTitle(), "Database Connection Error", JOptionPane.ERROR_MESSAGE);
                 } else if (serverManager.isConnectionDone()) {
 
-                    m_serverURLTextField.setText(serverManager.getServerURL()); // could have been automaticaly changed
+                    m_serverURLTextField.setText(serverManager.getServerURL()); // could have been automatically changed
 
                     storeDefaults();
                     setVisible(false);
@@ -179,17 +180,11 @@ public class ServerConnectionDialog extends ConnectionDialog {
                         });
                     }
 
-                    // check if we have SeqDb
-                    if (SeqDBInfoDialog.showAtStart() && !DatabaseDataManager.getDatabaseDataManager().isSeqDatabaseExists()) {
-                        SwingUtilities.invokeLater(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                SeqDBInfoDialog seqDBInfoDialog = new SeqDBInfoDialog(WindowManager.getDefault().getMainWindow());
-                                seqDBInfoDialog.centerToScreen();
-                                seqDBInfoDialog.setVisible(true);
-                            }
-                        });
+                    //Test isRetrieveSeqServiceAvailable to init boolean which will be tested in action...
+                    if (!ServerConnectionManager.getServerConnectionManager().isRetrieveSeqServiceAvailable() && SeqDBInfoDialog.showAtStart() /*!DatabaseDataManager.getDatabaseDataManager().isSeqDatabaseExists()*/) {
+                        SeqDBInfoDialog seqDBInfoDialog = new SeqDBInfoDialog(WindowManager.getDefault().getMainWindow());
+                        seqDBInfoDialog.centerToScreen();
+                        seqDBInfoDialog.setVisible(true);
                     }
 
                     if (changingUser) {
@@ -197,16 +192,22 @@ public class ServerConnectionDialog extends ConnectionDialog {
                         DatabaseDataManager udsMgr = DatabaseDataManager.getDatabaseDataManager();
                         UserAccount[] projectUsers = udsMgr.getProjectUsersArray();
                         int nb = projectUsers.length;
+                        boolean foundUser = false;
                         for (int i = 0; i < nb; i++) {
                             UserAccount account = projectUsers[i];
                             if (projectUser.compareToIgnoreCase(account.getLogin()) == 0) {
                                 udsMgr.setLoggedUser(account);
+                                foundUser=true;
                                 break;
                             }
                         }
 
-                        // start to load the data for the new user
-                        ProjectExplorerPanel.getProjectExplorerPanel().startLoadingProjects();
+                        if(!foundUser){
+                            setStatus(true,"No user found with login "+projectUser);
+                            JOptionPane.showMessageDialog(m_singletonDialog, "No user found with login "+projectUser, "Connection Error", JOptionPane.ERROR_MESSAGE);
+                        } else
+                            // start to load the data for the new user
+                            ProjectExplorerPanel.getProjectExplorerPanel().startLoadingProjects();
 
                     }
 
@@ -219,7 +220,6 @@ public class ServerConnectionDialog extends ConnectionDialog {
                         
                     }
                 }
-
             }
 
         };

@@ -70,7 +70,7 @@ public class XICExtractor {
       }
       logger.info("search in :: " + (System.currentTimeMillis() - start) + " ms");
       logger.info("average iterations :: " + (bs.getIterations() / (float) scans.size()));
-      logger.info("nb of failed prediction" + (bs.getFails()));
+      logger.info("nb of failed prediction :: " + (bs.getFails()));
 
       // WARN : setting rawFilename of Chromato to null is not recommanded : becareful to set a real rawFilename
       
@@ -85,7 +85,7 @@ public class XICExtractor {
 
    static double summary(float[] masses, float[] intensities, int index, float vmax) {
       double result = 0.0;
-      int index2 = (index == 0) ? 1 : index;
+      int index2 = (index <= 0) ? 1 : index;
       while ((index2 < (masses.length - 1)) && (masses[index2] < vmax)) {
          if ((intensities[index2] > intensities[index2 - 1]) && (intensities[index2] >= intensities[index2 + 1])) {
             result += intensities[index2++];

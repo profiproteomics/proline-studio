@@ -24,10 +24,9 @@ import fr.proline.mzscope.utils.Display;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.JButton;
@@ -65,20 +64,22 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
       return rawfile;
    }
 
+   @Override
+   public List<IRawFile> getAllRawfiles() {
+      if (rawfile == null) {
+         return null;
+      }
+
+      return Collections.singletonList(rawfile);
+   }
+
    protected JToolBar updateToolbar() {
       chromatogramToolbar.addSeparator();
       JButton editFeatureBtn = new JButton();
       editFeatureBtn.setIcon(IconManager.getIcon(IconManager.IconType.SIGNAL));
       editFeatureBtn.setToolTipText("IChromatogram signal processing dialog");
-      editFeatureBtn.addActionListener(new ActionListener() {
-         @Override
-         public void actionPerformed(ActionEvent e) {
-            editFeature();
-         }
-      });
-
+      editFeatureBtn.addActionListener(e -> editFeature());
       chromatogramToolbar.add(editFeatureBtn);
-      spectrumContainerPanel.updateToolbar();
       return chromatogramToolbar;
    }
 

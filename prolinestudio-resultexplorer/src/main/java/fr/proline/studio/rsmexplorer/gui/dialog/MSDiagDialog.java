@@ -284,7 +284,7 @@ public class MSDiagDialog extends DefaultStorableDialog {
     private ParameterList createMSDiagSettings() {
         ParameterList parameterList = new ParameterList(SETTINGS_KEY);
         parameterList.add(new StringParameter("score.windows", "Score windows (ex: 20-40-60)", JTextField.class, "20-40-60", null, null));
-        parameterList.add(new IntegerParameter("max.rank", "Max rank", JTextField.class, new Integer(1), new Integer(0), null));
+        parameterList.add(new IntegerParameter("max.rank", "Max rank", JTextField.class, Integer.valueOf(1),  Integer.valueOf(0), null));
         //parameterList.add(new IntegerParameter("scan.groups.size", "Scan groups size", JTextField.class, new Integer(1), new Integer(0), new Integer(0)));
 
         return parameterList;

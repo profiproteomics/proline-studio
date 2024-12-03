@@ -52,12 +52,18 @@ public class PTMSite {
     
     private PTMDataset m_dataset;
 
+    private Optional<Boolean> isNtermSite = Optional.empty();
+    private Optional<Boolean> isCtermSite = Optional.empty();
+
     public PTMSite(AbstractJSONPTMSite jsonSite, DProteinMatch proteinMatch) {
         m_site = jsonSite;
         this.m_proteinMatch = proteinMatch;
         m_id = -1l;
-        if(JSONPTMSite2.class.isInstance(m_site))
-            m_id = ((JSONPTMSite2)m_site).id;
+        if(m_site instanceof JSONPTMSite2) {
+            m_id = ((JSONPTMSite2) m_site).id;
+            isCtermSite = Optional.ofNullable( ((JSONPTMSite2) m_site).isCTerminal);
+            isNtermSite =  Optional.ofNullable( ((JSONPTMSite2) m_site).isNTerminal);
+        }
     }
 
     public Long getId(){
@@ -293,6 +299,14 @@ public class PTMSite {
 
     public Integer getPositionOnProtein() {
         return m_site.seqPosition;
+    }
+
+    public boolean isNterm(){
+        return this.isNtermSite.orElseGet(() -> m_ptmSpecificity.getLocationSpecificity().toLowerCase().endsWith("n-term"));
+    }
+
+    public boolean isCterm(){
+        return this.isCtermSite.orElseGet(() -> m_ptmSpecificity.getLocationSpecificity().toLowerCase().endsWith("c-term"));
     }
 
     public boolean isProteinNTerm() {

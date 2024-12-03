@@ -262,33 +262,33 @@ public class DiffDataModel extends AbstractJoinDataModel {
         
         if (value1 instanceof Double) {
             if (value2 instanceof Double) {
-               return new Double(((Double) value1)-((Double) value2)); 
+               return Double.valueOf(((Double) value1)-((Double) value2));
             } else if  (value2 instanceof Float) {
-               return new Double(((Double) value1)-((Float) value2)); 
+               return Double.valueOf(((Double) value1)-((Float) value2));
             }
         }
         
         if (value1 instanceof Float) {
             if (value2 instanceof Double) {
-               return new Float(((Float) value1)-((Double) value2)); 
+               return Float.valueOf((float) (((Float) value1)-((Double) value2)));
             } else if  (value2 instanceof Float) {
-               return new Float(((Float) value1)-((Float) value2)); 
+               return Float.valueOf(((Float) value1)-((Float) value2));
             }
         }
         
         if (value1 instanceof Long) {
             if (value2 instanceof Long) {
-                return new Long(((Long) value1) - ((Long) value2));
+                return Long.valueOf(((Long) value1) - ((Long) value2));
             } else if (value2 instanceof Integer) {
-                return new Long(((Long) value1) - ((Integer) value2));
+                return Long.valueOf(((Long) value1) - ((Integer) value2));
             }
         }
 
         if (value1 instanceof Integer) {
             if (value2 instanceof Long) {
-                return new Integer( (int) (((Integer) value1) - ((Long) value2)) );
+                return Integer.valueOf( (int) (((Integer) value1) - ((Long) value2)) );
             } else if (value2 instanceof Integer) {
-                return new Integer(((Integer) value1) - ((Integer) value2));
+                return Integer.valueOf(((Integer) value1) - ((Integer) value2));
             }
         }
 

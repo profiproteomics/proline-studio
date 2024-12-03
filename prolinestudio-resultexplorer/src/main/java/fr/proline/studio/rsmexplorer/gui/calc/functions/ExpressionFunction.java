@@ -37,11 +37,13 @@ import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.TableDefaultRendererManager;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import java.util.ArrayList;
 import org.python.core.PyFloat;
 import org.python.core.PyInteger;
+
+import javax.swing.*;
 
 /**
  *
@@ -119,7 +121,7 @@ public class ExpressionFunction extends AbstractFunction {
                                     if (res instanceof ColDoubleData) {
                                         ColDoubleData col = (ColDoubleData) var.getValue();
                                         col.setColumnName(m_expressionParameter.getHumanExpression());
-                                        sourceTable.addColumn(col, null, new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4, true, true));
+                                        sourceTable.addColumn(col, null, new DoubleRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT), 4, true, true));
                                         model = sourceTable.getModel();
                                     } else if (res instanceof ColBooleanData) {
                                         ColBooleanData col = (ColBooleanData) var.getValue();

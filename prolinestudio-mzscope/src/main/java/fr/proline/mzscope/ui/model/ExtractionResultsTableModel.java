@@ -51,17 +51,18 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
 
     final private static Logger logger = LoggerFactory.getLogger(ExtractionResultsTableModel.class);
     
-    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
+    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap<>();
     private List<IRawFile> m_rawFiles = new ArrayList<>();
 
     public enum EColumn {
         INTENSITY,
-        SCANS_COUNT
+        SCANS_COUNT,
+        AREA
     }
 
     public enum Column {
 
-        MZ(0, "m/z", "m/z extration value"),
+        MZ(0, "m/z", "m/z extraction value"),
         STATUS(1, "status", "Extraction status : NONE, REQUESTED or DONE");
 
         private final String name;
@@ -115,7 +116,7 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
         int rawFileIdx = (columnIndex - cCount) / eCount;
         int columnIdx = (columnIndex - cCount - rawFileIdx*eCount) % eCount;
 
-        return new ImmutablePair(m_rawFiles.get(rawFileIdx), EColumn.values()[columnIdx]);
+        return new ImmutablePair<>(m_rawFiles.get(rawFileIdx), EColumn.values()[columnIdx]);
     }
 
     @Override
@@ -133,7 +134,7 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
         if (column < Column.values().length)
             return Column.values()[column].getName();
         Pair<IRawFile, EColumn> index = getColumnContent(column);
-        return index.getLeft().getName()+"-"+index.getRight().name();
+        return index.getLeft().getName()+"."+index.getRight().name().toLowerCase();
     }
 
     @Override
@@ -144,7 +145,7 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
             return Status.class;
         }
         Pair<IRawFile, EColumn> index = getColumnContent(col);
-        if (index.getRight() == EColumn.INTENSITY)
+        if ((index.getRight() == EColumn.INTENSITY) || (index.getRight() == EColumn.AREA))
             return Double.class;
         return Integer.class;
     }
@@ -169,9 +170,14 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
                     return chromatogram.getAnnotation().getApexIntensity();
 
                 return chromatogram.getMaxIntensity();
-            } else {
+            } else if (index.getRight() == EColumn.SCANS_COUNT) {
                 if (chromatogram.getAnnotation() != null)
                     return chromatogram.getAnnotation().getScanCount();
+                else
+                    return null;
+            } else if (index.getRight() == EColumn.AREA) {
+                if (chromatogram.getAnnotation() != null)
+                    return chromatogram.getAnnotation().getArea();
                 else
                     return null;
             }
@@ -256,8 +262,7 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
 
     @Override
     public int[] getKeysColumn() {
-        int[] keys = {Column.MZ.id};
-        return keys;
+        return new int[]{Column.MZ.id};
     }
 
     @Override

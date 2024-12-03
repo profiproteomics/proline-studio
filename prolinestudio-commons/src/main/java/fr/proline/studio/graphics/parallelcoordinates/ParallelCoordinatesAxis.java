@@ -25,7 +25,9 @@ import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;   
+import java.util.HashMap;
+import java.util.HashSet;
+
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 
 
@@ -134,9 +136,23 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
         
         m_columnName = compareDataInterface.getDataColumnIdentifier(colId);
 
-        for (int i=0;i<m_values.size();i++) {
-            m_values.get(i).setIndex(i);
+        if (dataClass.equals(String.class)) {
+            int iDiff = 0;
+            String prev = null;
+            for (int i = 0; i < m_values.size(); i++) {
+                String v = ((StringValue) m_values.get(i)).toString();
+                if ((prev!=null) && (! prev.equals(v))) {
+                    iDiff++;
+                }
+                prev = v;
+                m_values.get(i).setIndex(iDiff);
+            }
+        } else {
+            for (int i=0;i<m_values.size();i++) {
+                m_values.get(i).setIndex(i);
+            }
         }
+
 
     }
     
@@ -531,7 +547,11 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
                 return (int) ((1d - ((value - min) / (max - min))) * m_heightTotal);
             }
         } else {
-           return (int) Math.round(   ((double)v.getIndex())/((double)(m_values.size()-1)) *m_heightTotal);
+            int maxIndex = m_values.get(m_values.size()-1).getIndex();
+            if (maxIndex == 0) {
+                maxIndex = 1;
+            }
+           return (int) Math.round(   ((double)v.getIndex())/((double)maxIndex) *m_heightTotal);
         }
 
     }
@@ -559,7 +579,7 @@ public class ParallelCoordinatesAxis implements MoveableInterface {
         for (int i = 0; i < nbRows; i++) {
             String value = (String) compareDataInterface.getDataValueAt(i, colId);
             if (value == null) {
-                value = ""; // null values are considerez as empty string
+                value = ""; // null values are considered as empty string
             }
             StringValue nValue = new StringValue(value, i);
             m_values.add(nValue);

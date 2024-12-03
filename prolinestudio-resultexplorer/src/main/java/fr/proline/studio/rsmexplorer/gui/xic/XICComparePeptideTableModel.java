@@ -19,6 +19,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DQuantPeptide;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.extendedtablemodel.ExtendedTableModelInterface;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
@@ -50,26 +51,52 @@ public class XICComparePeptideTableModel implements ExtendedTableModelInterface,
     public static final int COLTYPE_RAW_ABUNDANCE = 3;
     public static final int COLTYPE_PSM = 4;
     protected static final String[] m_columnNames = {"Id", "Quant. Channel", "Abundance", "Raw Abundance", "Pep. match count"};
-    protected static final String[] m_columnNames_SC = {"Id", "Quant. Channel", "Abundance", "Specific SC", "Basic SC"};
+    protected static final String[] m_columnNames_SC = {"Id", "Quant. Channel",  "[W. SC]", "Specific SC", "Basic SC"};
+    protected final ArrayList<Integer> m_colUsed = new ArrayList<>();
 
     private DMasterQuantPeptide m_quantPeptide = null;
     protected DQuantitationChannel[] m_quantChannels = null;
 
     protected String m_modelName;
 
-    protected boolean m_isXICMode = true;
+    protected DDatasetType.QuantitationMethodInfo m_quantMethodInfo;
     protected HashMap<Class, Object> m_extraValues = null;
     private boolean m_isSelected;
+
+    public XICComparePeptideTableModel() {
+        m_quantMethodInfo = DDatasetType.QuantitationMethodInfo.FEATURES_EXTRACTION;
+        setColUsed();
+    }
+
+    protected boolean isSpectralCountQuant(){
+        return  m_quantMethodInfo.equals(DDatasetType.QuantitationMethodInfo.SPECTRAL_COUNTING);
+    }
+
+    protected void setColUsed(){
+        m_colUsed.clear();
+        if(isSpectralCountQuant()){
+            m_colUsed.add(COLTYPE_QC_ID);
+            m_colUsed.add(COLTYPE_QC_NAME);
+            m_colUsed.add(COLTYPE_RAW_ABUNDANCE);
+            m_colUsed.add(COLTYPE_PSM);
+        }else{
+            m_colUsed.add(COLTYPE_QC_ID);
+            m_colUsed.add(COLTYPE_QC_NAME);
+            m_colUsed.add(COLTYPE_ABUNDANCE);
+            m_colUsed.add(COLTYPE_RAW_ABUNDANCE);
+            m_colUsed.add(COLTYPE_PSM);
+        }
+    }
 
     public void setSelected(boolean isSelected) {
         m_isSelected = isSelected;
     }
 
-    public void setData(DQuantitationChannel[] quantChannels, DMasterQuantPeptide peptide, boolean isXICMode) {
+    public void setData(DQuantitationChannel[] quantChannels, DMasterQuantPeptide peptide, DDatasetType.QuantitationMethodInfo quantitationMethodInfo) {
         this.m_quantChannels = quantChannels;
         this.m_quantPeptide = peptide;
-        this.m_isXICMode = isXICMode;
-
+        this.m_quantMethodInfo = quantitationMethodInfo;
+        setColUsed();
         fireTableDataChanged();
     }
 
@@ -109,34 +136,18 @@ public class XICComparePeptideTableModel implements ExtendedTableModelInterface,
 
     @Override
     public int getColumnCount() {
-        return m_columnNames.length;
+        return m_colUsed.size();
     }
 
     @Override
     public String getDataColumnIdentifier(int columnIndex) {
-        return m_isXICMode ? m_columnNames[columnIndex] : m_columnNames_SC[columnIndex];
+        return getColumnName(columnIndex);
+
     }
 
     @Override
     public Class getDataColumnClass(int columnIndex) {
-        switch (columnIndex) {
-            case COLTYPE_QC_ID: {
-                return Long.class;
-            }
-            case COLTYPE_QC_NAME: {
-                return String.class;
-            }
-            case COLTYPE_ABUNDANCE: {
-                return Float.class;
-            }
-            case COLTYPE_RAW_ABUNDANCE: {
-                return Float.class;
-            }
-            case COLTYPE_PSM: {
-                return Integer.class;
-            }
-        }
-        return null;
+        return getColumnClass(columnIndex);
     }
 
     @Override
@@ -281,12 +292,13 @@ public class XICComparePeptideTableModel implements ExtendedTableModelInterface,
 
     public Object getValueAt(int row, int col) {
 
+        int realCol = m_colUsed.get(col);
         // Retrieve QuantChannel
         DQuantitationChannel qc = m_quantChannels[row];
         // retrieve quantPeptide for the quantChannelId
         Map<Long, DQuantPeptide> quantPeptideByQchIds = m_quantPeptide.getQuantPeptideByQchIds();
         DQuantPeptide quantPeptide = quantPeptideByQchIds.get(qc.getId());
-        switch (col) {
+        switch (realCol) {
             case COLTYPE_QC_ID: {
                 return qc.getId();
             }
@@ -297,7 +309,12 @@ public class XICComparePeptideTableModel implements ExtendedTableModelInterface,
                 if (quantPeptide == null || quantPeptide.getAbundance() == null) {
                     return null;
                 }
-                return quantPeptide.getAbundance().isNaN() ? null : quantPeptide.getAbundance();
+
+                if(isSpectralCountQuant()) {
+                    return quantPeptide.getRawAbundance().isNaN() ? null : quantPeptide.getRawAbundance();
+                } else {
+                    return quantPeptide.getAbundance().isNaN() ? null : quantPeptide.getAbundance();
+                }
             }
             case COLTYPE_RAW_ABUNDANCE: {
                 if (quantPeptide == null || quantPeptide.getRawAbundance() == null) {
@@ -317,13 +334,14 @@ public class XICComparePeptideTableModel implements ExtendedTableModelInterface,
 
     //@Override
     public String getColumnName(int columnIndex) {
-        return m_isXICMode ? m_columnNames[columnIndex] : m_columnNames_SC[columnIndex];
+        return isSpectralCountQuant() ? m_columnNames_SC[m_colUsed.get(columnIndex)] :  m_columnNames[m_colUsed.get(columnIndex)];
 
     }
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-        switch (columnIndex) {
+        int realColumnIndex = m_colUsed.get(columnIndex);
+        switch (realColumnIndex) {
             case COLTYPE_QC_ID: {
                 return Long.class;
             }
@@ -334,6 +352,8 @@ public class XICComparePeptideTableModel implements ExtendedTableModelInterface,
                 return Float.class;
             }
             case COLTYPE_RAW_ABUNDANCE: {
+                if(isSpectralCountQuant())
+                    return Integer.class;
                 return Float.class;
             }
             case COLTYPE_PSM: {
@@ -369,13 +389,26 @@ public class XICComparePeptideTableModel implements ExtendedTableModelInterface,
         return PlotType.LINEAR_PLOT;
     }
 
+    protected int convertColToColUsed(int col) {
+        for (int i = 0; i < m_colUsed.size(); i++) {
+            if (col == m_colUsed.get(i)) {
+                return i;
+            }
+        }
+        return -1; // should not happen
+    }
+
     @Override
     public int[] getBestColIndex(PlotType plotType) {
         switch (plotType) {
             case LINEAR_PLOT: {
                 int[] cols = new int[2];
-                cols[0] = COLTYPE_QC_NAME;
-                cols[1] = COLTYPE_ABUNDANCE;
+                cols[0] = convertColToColUsed(COLTYPE_QC_NAME);
+                if(isSpectralCountQuant()){
+                    cols[1] = convertColToColUsed(COLTYPE_RAW_ABUNDANCE);
+                } else {
+                    cols[1] = convertColToColUsed(COLTYPE_ABUNDANCE);
+                }
                 return cols;
             }
         }

@@ -33,7 +33,7 @@ import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.rserver.dialog.ImageViewerTopComponent;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.DataTree;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.TableDefaultRendererManager;
@@ -60,27 +60,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
-import javax.swing.InputMap;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTextField;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextPane;
-import javax.swing.JToolBar;
-import javax.swing.KeyStroke;
-import javax.swing.ListModel;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -257,7 +237,7 @@ public class CalcDialog extends JDialog {
                     if (o instanceof ColDoubleData) {
                         ColDoubleData col = (ColDoubleData) o;
                         Table t = col.getTable();
-                        t.addColumn(col, null, new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)),4,true,true));
+                        t.addColumn(col, null, new DoubleRenderer(new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT),4,true,true));
                     } else if (o instanceof Table) {
                         WindowBox windowBox = WindowBoxFactory.getGenericWindowBox(null, resultVariable.getName(), IconManager.IconType.CHALKBOARD, false);
                         

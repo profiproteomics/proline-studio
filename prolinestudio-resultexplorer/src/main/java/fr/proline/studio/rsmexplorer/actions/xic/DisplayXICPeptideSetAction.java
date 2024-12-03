@@ -54,7 +54,7 @@ public class DisplayXICPeptideSetAction extends AbstractRSMAction {
 
         final DDataset dataset = ((DataSetData) dataSetNode.getData()).getDataset();
 
-        WindowBox wbox = WindowBoxFactory.getXicQuantPeptideSetWindowBox(dataset.getName(), dataset.getName() + " Peptides", dataSetNode.isQuantitation() && !dataSetNode.isQuantSC());
+        WindowBox wbox = WindowBoxFactory.getQuantificationPeptideSetWindowBox(dataset.getName(), dataset.getName() + " Peptides", ((DataSetData) dataSetNode.getData()).getDatasetType().getQuantMethodInfo());
         wbox.setEntryData(dataset.getProject().getId(), dataset);
 
         // open a window to display the window box

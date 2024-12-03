@@ -23,8 +23,8 @@ import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
+
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.List;
 import javax.swing.JPanel;
@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
  */
 public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface, SplittedPanelContainer.UserActions {
 
-    private static final Logger m_logger = LoggerFactory.getLogger(PeptideOnProteinOverviewPanel.class);
     DProteinMatch m_selectedProteinMatch;
     List<PTMPeptideInstance> m_ptmPeptideInstances;
 
@@ -52,18 +51,16 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
         SEQUENCE
     }
 
-    private static Logger logger = LoggerFactory.getLogger(PTMGraphicCtrlPanel.class);
-    private PTMPeptidesGraphicView m_ptmPeptideAreaCtrl;
-    private PeptideOnProteinOverviewPanel m_proteinOverviewCtrl;
+    private static final Logger m_logger = LoggerFactory.getLogger(PTMGraphicCtrlPanel.class);
+    private final PTMPeptidesGraphicView m_ptmPeptideAreaCtrl;
+    private final PeptideOnProteinOverviewPanel m_proteinOverviewCtrl;
 
     protected AbstractDataBox m_dataBox;
 
-    public PTMGraphicCtrlPanel(boolean isClusterData) {
+    public PTMGraphicCtrlPanel() {
         super();
-        m_ptmPeptideAreaCtrl = new PTMPeptidesGraphicView(isClusterData);
-        if (isClusterData) {
-            m_ptmPeptideAreaCtrl.setSuperCtrl(this);
-        }
+        m_ptmPeptideAreaCtrl = new PTMPeptidesGraphicView();
+        m_ptmPeptideAreaCtrl.setSuperCtrl(this);
         m_proteinOverviewCtrl = new PeptideOnProteinOverviewPanel(this);
 
         initComponents();
@@ -100,7 +97,6 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
 
     public void setSelectedProtein(DProteinMatch proteinMatch) {
         m_selectedProteinMatch = proteinMatch;
-        setData(m_ptmPeptideInstances);
     }
 
     public void setData(List<PTMPeptideInstance> ptmPepInstances) {
@@ -109,7 +105,6 @@ public class PTMGraphicCtrlPanel extends JPanel implements DataBoxPanelInterface
         }
         m_ptmPeptideAreaCtrl.setData(ptmPepInstances);
         m_ptmPeptideInstances = ptmPepInstances;
-        //m_dataBox.getData(DPeptideInstance.class);  //JPM.DATABOX strange : get data without doing something of it
 
         if (m_selectedProteinMatch == null) {
             return;

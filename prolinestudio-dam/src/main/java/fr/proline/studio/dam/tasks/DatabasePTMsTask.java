@@ -132,7 +132,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
             }
         }
         } finally {
-            PerformanceTest.displayTimeAllThreads();
+//            PerformanceTest.displayTimeAllThreads(); //VDS For debug Only !
         }
         return true; // should not happen                
     }
@@ -228,11 +228,11 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
 
     static protected void fetchGenericPTMData(EntityManager entityManagerMSI) {
 
-        PerformanceTest.startTime("fetchGenericPTMData");
+//        PerformanceTest.startTime("fetchGenericPTMData");
         
         HashMap<Long, DInfoPTM> infoPTMMAp = DInfoPTM.getInfoPTMMap();
         if (!infoPTMMAp.isEmpty()) {
-            PerformanceTest.stopTime("fetchGenericPTMData");
+//            PerformanceTest.stopTime("fetchGenericPTMData");
             return; // already loaded
         }
 
@@ -247,7 +247,7 @@ public class DatabasePTMsTask extends AbstractDatabaseSlicerTask {
             DInfoPTM.addInfoPTM(infoPTM);
         }
 
-        PerformanceTest.stopTime("fetchGenericPTMData");
+//        PerformanceTest.stopTime("fetchGenericPTMData");
     }
 
     protected static HashMap<Long, ArrayList<DPeptidePTM>> fetchPeptidePTMForPeptides(EntityManager entityManagerMSI, ArrayList<Long> allPeptidesIds) {

@@ -54,8 +54,7 @@ public class DisplayXICPeptideIonAction extends AbstractRSMAction {
         
         final DDataset dataset = ((DataSetData) dataSetNode.getData()).getDataset();
 
-
-        WindowBox wbox = WindowBoxFactory.getXicQuantPeptideIonWindowBox(dataset.getName(), dataset.getName()+" Peptides Ions", dataSetNode.isQuantitation() && !dataSetNode.isQuantSC());
+        WindowBox wbox = WindowBoxFactory.getQuantificationPeptideIonWindowBox(dataset.getName(), dataset.getName()+" Peptides Ions", ((DataSetData) dataSetNode.getData()).getDatasetType().getQuantMethodInfo());
             wbox.setEntryData(dataset.getProject().getId(), dataset);
 
 
@@ -74,7 +73,7 @@ public class DisplayXICPeptideIonAction extends AbstractRSMAction {
             return;
         }
 
-        AbstractNode node = (AbstractNode) selectedNodes[0];
+        AbstractNode node = selectedNodes[0];
 
         // the node must not be in changing state
         if (node.isChanging()) {

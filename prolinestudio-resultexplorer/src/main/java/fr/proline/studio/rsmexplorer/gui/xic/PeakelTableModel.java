@@ -18,7 +18,6 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.lcms.Feature;
 import fr.proline.core.orm.lcms.Peakel;
-import fr.proline.core.orm.lcms.dto.DFeature;
 import fr.proline.studio.extendedtablemodel.ExtraDataType;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.export.ExportModelUtilities;
@@ -28,8 +27,7 @@ import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.table.renderer.DefaultLeftAlignRenderer;
-import fr.proline.studio.table.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.table.renderer.DefaultAlignRenderer;
 import fr.proline.studio.table.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.extendedtablemodel.CompoundTableModel;
@@ -45,6 +43,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 
 /**
@@ -499,7 +498,7 @@ public class PeakelTableModel extends LazyTableModel implements GlobalTableModel
 
         switch (col) {
             case COLTYPE_PEAKEL_MOZ: {
-                renderer = new DoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)) );
+                renderer = new DoubleRenderer( new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT) );
                 break;
             }
             case COLTYPE_PEAKEL_ELUTION_TIME:
@@ -507,16 +506,16 @@ public class PeakelTableModel extends LazyTableModel implements GlobalTableModel
             case COLTYPE_PEAKEL_AREA:
             case COLTYPE_PEAKEL_DURATION:
             case COLTYPE_PEAKEL_FWHM: {
-                renderer = new FloatRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)) );
+                renderer = new FloatRenderer( new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.RIGHT) );
                 break;
             }
             case COLTYPE_PEAKEL_IS_OVERLAPPING: {
-                renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
+                renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class), JLabel.LEFT);
                 break;
             }
             case COLTYPE_PEAKEL_FEATURE_COUNT:
             case COLTYPE_PEAKEL_PEAK_COUNT: {
-                renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                renderer = new DefaultAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class), JLabel.RIGHT);
                 break;
             }
         }

@@ -18,7 +18,10 @@ package fr.proline.studio.rsmexplorer.actions.xic;
 
 import fr.proline.core.orm.msi.PtmSpecificity;
 import fr.proline.core.orm.uds.Project;
+import fr.proline.core.orm.uds.QuantitationChannel;
+import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DDatasetType;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
@@ -101,7 +104,6 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
                         m_nbLoadedQuanti++;
                         
                         if (m_nbLoadedQuanti == selectedNodes.length) {//Last one is loaded, all loaded
-                            
                             if (!computedList.isEmpty()) {
                                 String[] options = {"Compute All", "Skip already computed"};
                                 String computedNodeName = computedList.stream().map(node->node.getDataset().getName()).collect(Collectors.joining(","));
@@ -112,11 +114,8 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
                                 yesNoDialog.setLocation(posX, posY);
                                 yesNoDialog.setVisible(true);
 
-                                if (yesNoDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {                                
-                                    for (AbstractNode an : computedList) {
-                                        DataSetNode dn = ((DataSetNode) an);
-                                        selectedDatasetNodeList.add(dn);
-                                    }
+                                if (yesNoDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+                                    selectedDatasetNodeList.addAll(computedList);
                                 }
                             }//else all no computed, 
                             if (!selectedDatasetNodeList.isEmpty()) {
@@ -137,7 +136,13 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
     public static boolean quantificationProfile(final ResultCallback resultCallback, int posX, int posY, Long pID, ArrayList<DataSetNode> nodeList, DDataset paramsFromdataset) {
         ArrayList<PtmSpecificity> ptms = fetchPtmsFromDAM(nodeList);
         boolean isAggregation = isAllAggregation(nodeList, posX, posY);
-        QuantPostProcessingDialog dialog = new QuantPostProcessingDialog(WindowManager.getDefault().getMainWindow(), ptms, isAggregation, paramsFromdataset);
+
+        boolean isValidLabelQuant = isQuantLabelValid(nodeList);
+
+        DDatasetType.QuantitationMethodInfo qMethodInfo = nodeList.get(0).getDataset().getQuantMethodInfo();
+        QuantitationMethod quantMethod = nodeList.get(0).getDataset().getQuantitationMethod();
+        QuantPostProcessingDialog dialog = new QuantPostProcessingDialog(WindowManager.getDefault().getMainWindow(), ptms, isAggregation, quantMethod, qMethodInfo, paramsFromdataset,isValidLabelQuant);
+
         dialog.setLocation(posX, posY);
         dialog.setVisible(true);
 
@@ -156,23 +161,21 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
                 return false;
             }
             // set all node in color grey = in processing
-            if (nodeList != null) {
-                for (DataSetNode node : nodeList) {
-                    node.setIsChanging(true);
-                    QuantitationTree tree = QuantitationTree.getCurrentTree();
-                    DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-                    treeModel.nodeChanged(node);
-                }
-            }
+          for (DataSetNode node : nodeList) {
+            node.setIsChanging(true);
+            QuantitationTree tree = QuantitationTree.getCurrentTree();
+            DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+            treeModel.nodeChanged(node);
+          }
 
-            for (DataSetNode node : nodeList) {
+          for (DataSetNode node : nodeList) {
                 // dataset name
                 DDataset dataset = node.getDataset();
                 final String xicName = dataset.getName();
 
                 List<DMasterQuantitationChannel> listMasterQuantChannels = dataset.getMasterQuantitationChannels();
                 if (listMasterQuantChannels != null && !listMasterQuantChannels.isEmpty()) {
-                    Long masterQuantChannelId = new Long(listMasterQuantChannels.get(0).getId());
+                    Long masterQuantChannelId = listMasterQuantChannels.get(0).getId();
                     // CallBack for Xic Quantitation Service
                     //one callback by datasetNode
                     AbstractJMSCallback xicCallback = new AbstractJMSCallback() {
@@ -185,13 +188,11 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
                         @Override
                         public void run(boolean success) {
 
-                            if (node != null) {
-                                QuantitationTree tree = QuantitationTree.getCurrentTree();
-                                DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-                                node.setIsChanging(false);
-                                treeModel.nodeChanged(node);
-                            }
-                            if (resultCallback != null) {
+                          QuantitationTree tree = QuantitationTree.getCurrentTree();
+                          DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+                          node.setIsChanging(false);
+                          treeModel.nodeChanged(node);
+                          if (resultCallback != null) {
                                 resultCallback.run(success);
                             }
 
@@ -205,6 +206,28 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
             return true;
         }
         return false;
+    }
+
+    private static boolean isQuantLabelValid(ArrayList<DataSetNode> nodeList) {
+        boolean isValidLabelQuant = true;
+        List<QuantitationMethod> nodeMethods = nodeList.stream().map(node -> node.getDataset().getQuantitationMethod()).distinct().toList();
+        if(nodeMethods.size() != 1) //method are not homogenous
+            isValidLabelQuant = false;
+        else { //verify quant Channels defines quantLabel
+            QuantitationMethod commonMethod = nodeMethods.get(0);
+            for (DataSetNode node : nodeList) {
+                DDataset dataSet = ((DataSetData) node.getData()).getDataset();
+                for (QuantitationChannel nextQCh : dataSet.getMasterQuantitationChannels().get(0).getQuantitationChannels()) {
+                    if (!commonMethod.getLabels().contains(nextQCh.getQuantitationLabel())) {
+                        isValidLabelQuant = false;
+                        break;
+                    }
+                }
+                if (!isValidLabelQuant)
+                    break;
+            }
+        }
+        return isValidLabelQuant;
     }
 
     public static boolean quantificationProfile(final ResultCallback resultCallback, int posx, int posy, Long pID, DDataset paramsFromdataSet) {
@@ -280,7 +303,12 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
             return;
         }
 
+        boolean first = true;
+        DDatasetType.QuantitationMethodInfo methodInfo = DDatasetType.QuantitationMethodInfo.NONE;
         for (AbstractNode node : selectedNodes) {
+
+            DataSetNode datasetNode = (DataSetNode) node;
+
             // the node must not be in changing state
             if (node.isChanging()) {
                 setEnabled(false);
@@ -293,10 +321,17 @@ public class ComputeQuantPostProcessingAction extends AbstractRSMAction {
                 return;
             }
 
-            DataSetNode datasetNode = (DataSetNode) node;
-
             // must be a quantitation XIC
             if (!datasetNode.isQuantXIC()) {
+                setEnabled(false);
+                return;
+            }
+
+            //must be same quanti type
+            if(first){
+                methodInfo = datasetNode.getDataset().getQuantMethodInfo();
+                first = false;
+            } else if(! datasetNode.getDataset().getQuantMethodInfo().equals(methodInfo)){
                 setEnabled(false);
                 return;
             }

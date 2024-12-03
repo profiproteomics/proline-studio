@@ -34,8 +34,10 @@ public class BasePeakel implements IPeakel {
    private float elutionTime;
    private float firstElutionTime;
    private float lastElutionTime;
-   private int ms1Count = 0;
+   private int scanCount = 0;
    private double mz;
+
+   private double parentMz;
    private IRawFile rawFile;
    private int msLevel;
    
@@ -94,11 +96,11 @@ public class BasePeakel implements IPeakel {
 
    @Override
    public int getScanCount() {
-      return ms1Count;
+      return scanCount;
    }
 
-   public void setMs1Count(int ms1Count) {
-      this.ms1Count = ms1Count;
+   public void setScanCount(int scanCount) {
+      this.scanCount = scanCount;
    }
 
    @Override
@@ -133,8 +135,12 @@ public class BasePeakel implements IPeakel {
 
     @Override
     public double getParentMz() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return parentMz;
     }
+
+   public void setParentMz(double parentMz) {
+      this.parentMz = parentMz;
+   }
 
    @Override
    public Peakel getPeakel() {

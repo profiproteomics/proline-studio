@@ -19,16 +19,16 @@ package fr.proline.studio.rsmexplorer.adjacencymatrix.ordering;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import ch.usi.inf.sape.hac.HierarchicalAgglomerativeClusterer;
-import ch.usi.inf.sape.hac.agglomeration.AgglomerationMethod;
-import ch.usi.inf.sape.hac.agglomeration.AverageLinkage;
-import ch.usi.inf.sape.hac.dendrogram.Dendrogram;
-import ch.usi.inf.sape.hac.dendrogram.DendrogramBuilder;
-import ch.usi.inf.sape.hac.dendrogram.DendrogramNode;
-import ch.usi.inf.sape.hac.dendrogram.MergeNode;
-import ch.usi.inf.sape.hac.dendrogram.ObservationNode;
-import ch.usi.inf.sape.hac.experiment.DissimilarityMeasure;
-import ch.usi.inf.sape.hac.experiment.Experiment;
+import org.opencompare.hac.HierarchicalAgglomerativeClusterer;
+import org.opencompare.hac.agglomeration.AgglomerationMethod;
+import org.opencompare.hac.agglomeration.AverageLinkage;
+import org.opencompare.hac.dendrogram.Dendrogram;
+import org.opencompare.hac.dendrogram.DendrogramBuilder;
+import org.opencompare.hac.dendrogram.DendrogramNode;
+import org.opencompare.hac.dendrogram.MergeNode;
+import org.opencompare.hac.dendrogram.ObservationNode;
+import org.opencompare.hac.experiment.DissimilarityMeasure;
+import org.opencompare.hac.experiment.Experiment;
 
 import fr.proline.studio.dam.tasks.data.LightPeptideMatch;
 import fr.proline.studio.dam.tasks.data.LightProteinMatch;

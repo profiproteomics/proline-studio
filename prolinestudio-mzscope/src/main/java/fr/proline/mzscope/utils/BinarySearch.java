@@ -53,7 +53,7 @@ public class BinarySearch {
 		
 	}
 
-        public int searchIndex(double[] values, double key, int imin, int imax) {
+  public int searchIndex(double[] values, double key, int imin, int imax) {
 		int imid = 0;
 		if ((key < values[0]) || (key > values[values.length-1])) return -1;
 		while (imax >= imin) {

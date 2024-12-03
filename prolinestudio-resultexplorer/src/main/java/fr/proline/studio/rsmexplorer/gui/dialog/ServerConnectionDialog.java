@@ -162,7 +162,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
                     JOptionPane.showMessageDialog(m_singletonDialog, connectionError.getErrorTitle(), "Database Connection Error", JOptionPane.ERROR_MESSAGE);
                 } else if (serverManager.isConnectionDone()) {
 
-                    m_serverURLTextField.setText(serverManager.getServerURL()); // could have been automaticaly changed
+                    m_serverURLTextField.setText(serverManager.getServerURL()); // could have been automatically changed
 
                     storeDefaults();
                     setVisible(false);
@@ -192,16 +192,22 @@ public class ServerConnectionDialog extends ConnectionDialog {
                         DatabaseDataManager udsMgr = DatabaseDataManager.getDatabaseDataManager();
                         UserAccount[] projectUsers = udsMgr.getProjectUsersArray();
                         int nb = projectUsers.length;
+                        boolean foundUser = false;
                         for (int i = 0; i < nb; i++) {
                             UserAccount account = projectUsers[i];
                             if (projectUser.compareToIgnoreCase(account.getLogin()) == 0) {
                                 udsMgr.setLoggedUser(account);
+                                foundUser=true;
                                 break;
                             }
                         }
 
-                        // start to load the data for the new user
-                        ProjectExplorerPanel.getProjectExplorerPanel().startLoadingProjects();
+                        if(!foundUser){
+                            setStatus(true,"No user found with login "+projectUser);
+                            JOptionPane.showMessageDialog(m_singletonDialog, "No user found with login "+projectUser, "Connection Error", JOptionPane.ERROR_MESSAGE);
+                        } else
+                            // start to load the data for the new user
+                            ProjectExplorerPanel.getProjectExplorerPanel().startLoadingProjects();
 
                     }
 

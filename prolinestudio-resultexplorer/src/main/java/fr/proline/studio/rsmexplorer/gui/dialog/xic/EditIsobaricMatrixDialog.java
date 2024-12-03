@@ -29,7 +29,10 @@ public class EditIsobaricMatrixDialog extends DefaultDialog {
             AbstractCorrectionMatrixTableModel.TMT_10PLEX_METHOD,
             AbstractCorrectionMatrixTableModel.TMT_11PLEX_METHOD,
             AbstractCorrectionMatrixTableModel.TMT_16PLEX_METHOD,
-            AbstractCorrectionMatrixTableModel.TMT_18PLEX_METHOD};
+            AbstractCorrectionMatrixTableModel.TMT_18PLEX_METHOD,
+            AbstractCorrectionMatrixTableModel.TMT_16PLEX_DEUT_METHOD,
+            AbstractCorrectionMatrixTableModel.TMT_35PLEX_METHOD
+    };
     private static final String KNOWN_HELP_MESSAGE ="Enter values as given by Thermo for this TMT Plex";
     private static final String UNKNOWN_HELP_MESSAGE ="Enter the matrix specifying purity correction to use";
     private static final String READ_ONLY_HELP_MESSAGE ="NO modification can be done here...";

@@ -43,7 +43,7 @@ public class InfoDialog extends DefaultDialog {
     private String m_showAtStartKey;
 
     private boolean m_useArea;
-    
+
     public InfoDialog(Window parent, InfoType type, String title, String message, boolean useBigIcon) {
         this(parent, type, title, message, null, useBigIcon, false);
     }

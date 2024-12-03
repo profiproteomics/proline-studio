@@ -86,7 +86,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
     private static final String[] m_columnNames = {"Id", "Map", "Quant. Channel", "m/z", "Calibrated MoZ", "Charge", "RT", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "Predicted RT", "#Peakels"};
     private static final String[] m_toolTipColumns = {"Feature Id","Map name","Quantitation Channel ",  "Mass to Charge Ratio", "Calibrated Mass to Charge Ratio", "Charge", "Retention Time in minutes", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "Predicted Retention time in min", "Peakels count"};
     private static final String[] m_columnNamesForExport = {"Id", "Map", "Quantitation Channel", "m/z", "Calibrated MoZ", "Charge", "Elution Time (sec)", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "Predicted Retention Time (sec)", "Peakels Count"};
-    
+
     private DMasterQuantPeptideIon m_quantPeptideIon = null;
     private List<DFeature> m_features = null;
     private QuantChannelInfo m_quantChannelInfo = null;
@@ -768,7 +768,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
         listIds.add(COLTYPE_FEATURE_IS_OVERLAPPING);
         listIds.add(COLTYPE_FEATURE_QUALITY_SCORE);
         listIds.add(COLTYPE_FEATURE_CALIBRATED_MOZ);
-        return listIds; 
+        return listIds;
     }
     
 

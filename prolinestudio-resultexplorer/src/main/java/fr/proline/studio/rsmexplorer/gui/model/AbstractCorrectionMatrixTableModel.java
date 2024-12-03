@@ -31,7 +31,8 @@ public abstract class AbstractCorrectionMatrixTableModel extends DecoratedTableM
     public final static String TMT_11PLEX_METHOD = "TMT 11plex";
     public final static String TMT_16PLEX_METHOD = "TMT 16plex";
     public final static String TMT_18PLEX_METHOD = "TMT 18plex";
-
+    public final static String TMT_16PLEX_DEUT_METHOD = "TMT 16plex-Deuterated";
+    public final static String TMT_35PLEX_METHOD = "TMT 35plex";
 
     public int getCenterColIndex(){
         return (columnNames.size()/2);

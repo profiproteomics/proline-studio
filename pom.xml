@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>prolinestudio-parent</artifactId>
-    <version>2.3.2-SNAPSHOT</version> <!-- ProlineStudio version -->
+    <version>2.3.2</version> <!-- ProlineStudio version -->
     <packaging>pom</packaging>
 
     <name>ProlineStudio-parent</name>

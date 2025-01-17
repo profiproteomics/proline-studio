@@ -19,6 +19,7 @@ package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 import fr.proline.core.orm.msi.PtmSpecificity;
 import fr.proline.core.orm.uds.QuantitationLabel;
 import fr.proline.core.orm.uds.QuantitationMethod;
+import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -47,12 +48,14 @@ public class ResidueMethodParamsPanel extends AbstractParamsPanel {
 
     private final QuantitationMethod m_quantMethod;
     private final List<PtmSpecificity> m_ptms;
+    public final static String RESIDUE_PARAMS_PREFIX = "IsobaricParameters";
     private Map<QuantitationLabel, List<JComboBox<PtmSpecificity>>> m_comboBoxesByTags; 
             
     public ResidueMethodParamsPanel(QuantitationMethod method, List<PtmSpecificity> ptms) {
         m_quantMethod = method;
         m_ptms = ptms;
-        
+        m_parameterList = new ParameterList(RESIDUE_PARAMS_PREFIX);
+
         setLayout(new BorderLayout());
         JPanel mainPanel = createMainPanel();
         add(mainPanel, BorderLayout.CENTER);

@@ -280,6 +280,14 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                     PeptideReadablePtmString ptmString = peptideInstance.getPeptide().getTransientData().getPeptideReadablePtmString();
                     if (ptmString != null) {
                         ptm = ptmString.getReadablePtmString();
+                    } else {
+                        String tmpPtm =peptideInstance.getPeptide().getPtmString();
+                        if(tmpPtm != null && !tmpPtm.isEmpty()) {
+                            tmpPtm = tmpPtm.replace("]", "];");
+                            if(tmpPtm.endsWith("];"))
+                                tmpPtm = tmpPtm.substring(0,tmpPtm.length()-1);
+                        }
+                        ptm = tmpPtm;
                     }
 
                     return ptm;
@@ -369,15 +377,17 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             case COLTYPE_PEPTIDE_CLUSTER: {
                 if (peptideInstance == null) {
                     return "";
-                } else {
-                    DCluster cluster = peptide.getCluster();
-                    if (cluster == null) {
-                        return "";
-                    } else {
-                        return Integer.toString(cluster.getClusterId());
-                    }
+                } else if (peptideInstance.getProperties() != null && peptideInstance.getProperties().containsKey("comment")) {
+                    return peptideInstance.getProperties().get("comment").toString();
                 }
-            }
+                return "";
+//                    DCluster cluster = peptide.getCluster();
+//                    if (cluster == null) {
+//                        return "";
+//                    } else {
+//                        return Integer.toString(cluster.getClusterId());
+//                    }
+                }
             default: {
                 // Quant Channel columns 
                 int nbQc;
@@ -814,6 +824,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                     PeptideReadablePtmString ptmString = peptideInstance.getPeptide().getTransientData().getPeptideReadablePtmString();
                     if (ptmString != null) {
                         ptm = ptmString.getReadablePtmString();
+                    } else {
+                        ptm = peptideInstance.getPeptide().getPtmString();
                     }
 
                     lazyData.setData(ptm);
@@ -1003,14 +1015,24 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, row, col);
                 } else {
-                    DCluster cluster = peptide.getCluster();
-                    if (cluster == null) {
+                    if (peptideInstance.getProperties() != null && peptideInstance.getProperties().containsKey("comment")) {
+                        lazyData.setData(peptideInstance.getProperties().get("comment").toString());
+                    } else
                         lazyData.setData("");
-                    } else {
-                        lazyData.setData(String.valueOf(cluster.getClusterId()));
-                    }
                 }
             }
+//                if (peptideInstance == null) {
+//                    lazyData.setData(null);
+//                    givePriorityTo(m_taskId, row, col);
+//                } else {
+//                    DCluster cluster = peptide.getCluster();
+//                    if (cluster == null) {
+//                        lazyData.setData("");
+//                    } else {
+//                        lazyData.setData(String.valueOf(cluster.getClusterId()));
+//                    }
+//                }
+//            }
             default: {
                 // Quant Channel columns 
                 LazyData lazyData = getLazyData(row, col);

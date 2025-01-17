@@ -75,9 +75,10 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
     public static final int COLTYPE_PEPTIDE_MSQUERY = 21;
     public static final int COLTYPE_SRC_DAT_FILE = 22;
     public static final int COLTYPE_SPECTRUM_TITLE = 23;
+    public static final int COLTYPE_PROP = 24;
 
-    private static final String[] m_columnNames = {"Id", "Prev. AA", "Peptide", "Next AA", "Length", "PTMs", "Score", "Start", "Stop", "Calc. Mass", "Exp. MoZ", "Ppm", "Charge", "Missed Cl.", "Rank", "RT", "Protein Set Count", "Protein Sets", "Ion Parent Int.", "Decoy", "Validated", "MsQuery", ".dat File", "Spectrum Title"};
-    private static final String[] m_columnTooltips = {"PeptideMatch Id", "Previous Amino Acid", "Peptide", "Next Amino Acid", "Length", "Post Translational Modifications", "Score", "Start", "Stop", "Calculated Mass", "Experimental Mass to Charge Ratio", "parts-per-million", "Charge", "Missed Clivage", "Pretty Rank", "Retention Time (min)", "Potein Set Count", "Protein Sets", "Ion Parent Intensity", "Is Decoy", "Is Validated", "MsQuery", ".dat file of best PSM", "Spectrum Title"};
+    private static final String[] m_columnNames = {"Id", "Prev. AA", "Peptide", "Next AA", "Length", "PTMs", "Score", "Start", "Stop", "Calc. Mass", "Exp. MoZ", "Ppm", "Charge", "Missed Cl.", "Rank", "RT", "Protein Set Count", "Protein Sets", "Ion Parent Int.", "Decoy", "Validated", "MsQuery", ".dat File", "Spectrum Title", "Property"};
+    private static final String[] m_columnTooltips = {"PeptideMatch Id", "Previous Amino Acid", "Peptide", "Next Amino Acid", "Length", "Post Translational Modifications", "Score", "Start", "Stop", "Calculated Mass", "Experimental Mass to Charge Ratio", "parts-per-million", "Charge", "Missed Clivage", "Pretty Rank", "Retention Time (min)", "Potein Set Count", "Protein Sets", "Ion Parent Intensity", "Is Decoy", "Is Validated", "MsQuery", ".dat file of best PSM", "Spectrum Title","Property"};
 
     private final ArrayList<Integer> m_colUsed = new ArrayList<>();
 
@@ -142,6 +143,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
             m_colUsed.add(COLTYPE_SRC_DAT_FILE);
         }
         m_colUsed.add(COLTYPE_SPECTRUM_TITLE);
+        m_colUsed.add(COLTYPE_PROP);
 
     }
 
@@ -205,6 +207,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
             case COLTYPE_PEPTIDE_LENGTH:
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
             case COLTYPE_PEPTIDE_PTM:
+            case COLTYPE_PROP:
             case COLTYPE_PEPTIDE_START:
             case COLTYPE_PEPTIDE_STOP:
                 return DatabaseLoadPeptideMatchTask.SUB_TASK_PEPTIDE;
@@ -457,6 +460,16 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
                 return lazyData;
 
             }
+            case COLTYPE_PROP: {
+
+                if (peptideMatch.getPropertiesAsMap() != null && peptideMatch.getPropertiesAsMap().containsKey("comment")) {
+                    lazyData.setData(peptideMatch.getPropertiesAsMap().get("comment").toString());
+                } else
+                    lazyData.setData("");
+
+                return lazyData;
+
+            }
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY: {
 
                 if (!peptideMatch.isMsQuerySet()) {
@@ -495,6 +508,8 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
                 PeptideReadablePtmString ptmString = peptide.getTransientData().getPeptideReadablePtmString();
                 if (ptmString != null) {
                     ptm = ptmString.getReadablePtmString();
+                } else {
+                    ptm = peptide.getPtmString();
                 }
 
                 lazyData.setData(ptm);
@@ -768,6 +783,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
             case COLTYPE_PEPTIDE_PTM:
             case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES:
             case COLTYPE_SPECTRUM_TITLE:
+            case COLTYPE_PROP:
                 return String.class;
             case COLTYPE_PEPTIDE_SCORE:
             case COLTYPE_PEPTIDE_CALCULATED_MASS:

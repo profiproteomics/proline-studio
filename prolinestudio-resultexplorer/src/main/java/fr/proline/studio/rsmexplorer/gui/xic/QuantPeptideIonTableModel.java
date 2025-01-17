@@ -82,10 +82,11 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
     public static final int COLTYPE_PEPTIDE_ION_RETENTION_TIME = 8;
     public static final int COLTYPE_PEPTIDE_PROTEIN_SET_COUNT = 9;
     public static final int COLTYPE_PEPTIDE_PROTEIN_SET_NAMES = 10;
-    public static final int LAST_STATIC_COLUMN = COLTYPE_PEPTIDE_PROTEIN_SET_NAMES;
-    private static final String[] m_columnNames = {"Peptide Id", "QPeptideIon Id", "Peptide Sequence", "Status", "PTMs", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets"};
-    private static final String[] m_columnNamesForFilter = {"Peptide Id", "QPeptideIon Id", "Peptide Sequence", "Status", "PTMs", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets"};
-    private static final String[] m_toolTipColumns = {"Peptide Id", "MasterQuantPeptideIon Id", "Identified Peptide Sequence", "Peptide ion status: invalid, valid, valid and used for peptide abundance calculation, valid but not used for peptide abundance calculation.", "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Retention time (min)", "Protein Set Count", "Protein Sets"};
+    public static final int COLTYPE_PEPTIDE_ION_CLUSTER = 11;
+    public static final int LAST_STATIC_COLUMN = COLTYPE_PEPTIDE_ION_CLUSTER;
+    private static final String[] m_columnNames = {"Peptide Id", "QPeptideIon Id", "Peptide Sequence", "Status", "PTMs", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets","Fake ?"};
+    private static final String[] m_columnNamesForFilter = {"Peptide Id", "QPeptideIon Id", "Peptide Sequence", "Status", "PTMs", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets","Fake"};
+    private static final String[] m_toolTipColumns = {"Peptide Id", "MasterQuantPeptideIon Id", "Identified Peptide Sequence", "Peptide ion status: invalid, valid, valid and used for peptide abundance calculation, valid but not used for peptide abundance calculation.", "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Retention time (min)", "Protein Set Count", "Protein Sets"," is Fake "};
 
     public static final int COLTYPE_SELECTION_LEVEL = 0;
     public static final int COLTYPE_PSM = 1;
@@ -305,12 +306,28 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                         PeptideReadablePtmString ptmString = peptideInstance.getBestPeptideMatch().getPeptide().getTransientData().getPeptideReadablePtmString();
                         if (ptmString != null) {
                             ptm = ptmString.getReadablePtmString();
+                        } else {
+                            ptm = peptideInstance.getPeptide().getPtmString();
                         }
 
                         lazyData.setData(ptm);
                     }
                 } else {
                     lazyData.setData("");
+                }
+                return lazyData;
+            }
+            case COLTYPE_PEPTIDE_ION_CLUSTER: {
+                LazyData lazyData = getLazyData(row, col);
+                DPeptideMatch peptideMatch = peptideIon.getBestPeptideMatch();
+                if (peptideMatch == null) {
+                    lazyData.setData(null);
+                    givePriorityTo(m_taskId, row, col);
+                } else {
+                    if (peptideMatch.getPropertiesAsMap() != null && peptideMatch.getPropertiesAsMap().containsKey("comment")) {
+                        lazyData.setData(peptideMatch.getPropertiesAsMap().get("comment").toString());
+                    } else
+                        lazyData.setData("");
                 }
                 return lazyData;
             }
@@ -688,6 +705,14 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                     PeptideReadablePtmString ptmString = peptideInstance.getPeptide().getTransientData().getPeptideReadablePtmString();
                     if (ptmString != null) {
                         ptm = ptmString.getReadablePtmString();
+                    } else {
+                        String tmpPtm =peptideInstance.getPeptide().getPtmString();
+                        if(tmpPtm != null && !tmpPtm.isEmpty()) {
+                            tmpPtm = tmpPtm.replace("]", "];");
+                            if(tmpPtm.endsWith("];"))
+                                tmpPtm = tmpPtm.substring(0,tmpPtm.length()-1);
+                        }
+                        ptm = tmpPtm;
                     }
 
                     return ptm;
@@ -763,6 +788,15 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                     return StringUtils.getTimeInMinutes(peptideIon.getElutionTime(), 2);
                 }
 
+            }
+            case COLTYPE_PEPTIDE_ION_CLUSTER:{
+                DPeptideMatch peptideMatch = peptideIon.getBestPeptideMatch();
+                if (peptideMatch == null) {
+                    return "";
+                } else if (peptideMatch.getPropertiesAsMap() != null && peptideMatch.getPropertiesAsMap().containsKey("comment")) {
+                    return peptideMatch.getPropertiesAsMap().get("comment").toString();
+                }
+                return "";
             }
             default: {
                 // Quant Channel columns
@@ -869,6 +903,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                 return Float.class;
             }
             case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES:
+            case COLTYPE_PEPTIDE_ION_CLUSTER:
             case COLTYPE_PEPTIDE_PTM: {
                 return String.class;
             }

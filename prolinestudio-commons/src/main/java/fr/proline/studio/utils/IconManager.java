@@ -244,7 +244,9 @@ public class IconManager {
         BPC,
         MS2,
         MERGE_PTM,
-        FITTED_2_CENTROID;
+        FITTED_2_CENTROID,
+        VIEW_EYE,
+        VIEW_2;
     }
     
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -796,6 +798,10 @@ public class IconManager {
                 return "fr/proline/studio/images/merge_ptm.png";
             case FITTED_2_CENTROID:
                 return "fr/proline/studio/images/fittedTocentroid.png";
+            case VIEW_EYE:
+                return "fr/proline/studio/images/view_blue.png";
+            case VIEW_2:
+                return "fr/proline/studio/images/view_2.png";
         }
 
         return null; // can not happen

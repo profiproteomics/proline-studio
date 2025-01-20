@@ -117,8 +117,8 @@ public class FeaturesPanel extends AbstractPeakelsPanel {
 
   @Override
   protected List<IPeakel> getSelectedIPeakels() {
-    if ((m_features != null) && (!m_features.isEmpty()) && (m_table.getSelectedRowCount() > 0)) {
-      int[] selectedRows = m_table.getSelectedRows();
+    if ((m_features != null) && (!m_features.isEmpty()) && (m_featureTable.getSelectedRowCount() > 0)) {
+      int[] selectedRows = m_featureTable.getSelectedRows();
       List<IPeakel> selectedPeakels = Arrays.stream(selectedRows).mapToObj(r -> m_features.get(getModelRowId(r))).collect(Collectors.toList());
       return selectedPeakels;
     }
@@ -127,8 +127,8 @@ public class FeaturesPanel extends AbstractPeakelsPanel {
 
   @Override
   protected List<Peakel> getSelectedPeakels() {
-    if ((m_features != null) && (!m_features.isEmpty()) && (m_table.getSelectedRowCount() > 0)) {
-      int[] selectedRows = m_table.getSelectedRows();
+    if ((m_features != null) && (!m_features.isEmpty()) && (m_featureTable.getSelectedRowCount() > 0)) {
+      int[] selectedRows = m_featureTable.getSelectedRows();
       List<Peakel> selectedPeakels = Arrays.stream(selectedRows).mapToObj(r -> m_features.get(getModelRowId(r))).flatMap(f-> Arrays.stream(f.getPeakels())).collect(Collectors.toList());
       return selectedPeakels;
     }
@@ -148,7 +148,7 @@ public class FeaturesPanel extends AbstractPeakelsPanel {
     ((FeaturesTableModel)m_compoundTableModel.getBaseModel()).setFeatures(m_features);
     m_markerContainerPanel.setMaxLineNumber(m_features.size());
     // hide RawFileName column
-    m_table.getColumnExt(m_table.convertColumnIndexToView(FeaturesTableModel.COLTYPE_FEATURE_RAWFILE.getIndex())).setVisible(displayRawFileColumn);
+    m_featureTable.getColumnExt(m_featureTable.convertColumnIndexToView(FeaturesTableModel.COLTYPE_FEATURE_RAWFILE.getIndex())).setVisible(displayRawFileColumn);
   }
 
 

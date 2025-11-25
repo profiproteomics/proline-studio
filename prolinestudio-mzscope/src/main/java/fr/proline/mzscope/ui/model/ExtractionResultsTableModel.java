@@ -30,11 +30,8 @@ import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.extendedtablemodel.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import javax.swing.table.TableCellRenderer;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -62,8 +59,7 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
 
     public enum Column {
 
-        MZ(0, "m/z", "m/z extraction value"),
-        STATUS(1, "status", "Extraction status : NONE, REQUESTED or DONE");
+        STATUS(0, "status", "Extraction status : NONE, REQUESTED or DONE");
 
         private final String name;
         private final String tooltip;
@@ -116,7 +112,7 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
         int rawFileIdx = (columnIndex - cCount) / eCount;
         int columnIdx = (columnIndex - cCount - rawFileIdx*eCount) % eCount;
 
-        return new ImmutablePair<>(m_rawFiles.get(rawFileIdx), EColumn.values()[columnIdx]);
+        return m_rawFiles.isEmpty() ? null : new ImmutablePair<>(m_rawFiles.get(rawFileIdx), EColumn.values()[columnIdx]);
     }
 
     @Override
@@ -139,9 +135,7 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
 
     @Override
     public Class getColumnClass(int col) {
-        if (col == Column.MZ.id) {
-            return Double.class;
-        } else if (col == Column.STATUS.id) {
+        if (col == Column.STATUS.id) {
             return Status.class;
         }
         Pair<IRawFile, EColumn> index = getColumnContent(col);
@@ -154,12 +148,9 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
     public Object getValueAt(int rowIndex, int columnIndex) {
         int valuesCount = Column.values().length;
         if (columnIndex < valuesCount) {
-        switch (Column.values()[columnIndex]) {
-            case MZ:
-                return m_extractionObjects.get(rowIndex).getMz();
-            case STATUS:
-                return m_extractionObjects.get(rowIndex).getStatus();
-        }
+          if (Objects.requireNonNull(Column.values()[columnIndex]) == Column.STATUS) {
+            return m_extractionObjects.get(rowIndex).getStatus();
+          }
         } else {
             Pair<IRawFile, EColumn> index = getColumnContent(columnIndex);
             AnnotatedChromatogram chromatogram = (AnnotatedChromatogram) m_extractionObjects.get(rowIndex).getChromatogram(index.getLeft());
@@ -262,12 +253,12 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
 
     @Override
     public int[] getKeysColumn() {
-        return new int[]{Column.MZ.id};
+        return new int[]{Column.STATUS.id};
     }
 
     @Override
     public int getInfoColumn() {
-        return Column.MZ.id;
+        return Column.STATUS.id;
     }
 
     @Override

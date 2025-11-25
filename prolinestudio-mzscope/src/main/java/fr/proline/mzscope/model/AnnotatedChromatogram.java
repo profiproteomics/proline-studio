@@ -36,7 +36,7 @@ public class AnnotatedChromatogram implements IChromatogram {
 
   @Override
   public double getMaxIntensity() {
-    return chromatogram == null ? null : chromatogram.getMaxIntensity();
+    return chromatogram == null ? Double.NaN : chromatogram.getMaxIntensity();
   }
 
   @Override
@@ -51,12 +51,12 @@ public class AnnotatedChromatogram implements IChromatogram {
 
   @Override
   public double getMinMz() {
-    return chromatogram == null ? null : chromatogram.getMinMz();
+    return chromatogram == null ? Double.NaN : chromatogram.getMinMz();
   }
 
   @Override
   public double getMaxMz() {
-    return chromatogram == null ? null : chromatogram.getMaxMz();
+    return chromatogram == null ? Double.NaN : chromatogram.getMaxMz();
   }
 
   @Override
@@ -71,11 +71,11 @@ public class AnnotatedChromatogram implements IChromatogram {
 
   @Override
   public double getElutionStartTime() {
-    return chromatogram == null ? null : chromatogram.getElutionStartTime();
+    return chromatogram == null ? Double.NaN : chromatogram.getElutionStartTime();
   }
 
   @Override
   public double getElutionEndTime() {
-    return chromatogram == null ? null : chromatogram.getElutionEndTime();
+    return chromatogram == null ? Double.NaN : chromatogram.getElutionEndTime();
   }
 }

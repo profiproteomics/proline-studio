@@ -34,6 +34,7 @@ import fr.proline.studio.graphics.marker.LabelMarker;
 import fr.proline.studio.graphics.marker.PointMarker;
 import fr.proline.studio.graphics.marker.coordinates.DataCoordinates;
 import fr.proline.studio.graphics.marker.coordinates.PixelCoordinates;
+import fr.proline.studio.graphics.measurement.IntegralMeasurement;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.table.*;
 import org.slf4j.Logger;
@@ -244,6 +245,7 @@ public abstract class AbstractPeakelsPanel extends JPanel  {
           PlotLinear plot = new PlotLinear(m_graphPlot, wrapper, null, 0, 1);
           plot.setStrokeFixed(true);
           plot.setPlotInformation(wrapper.getPlotInformation());
+          plot.addMeasurement(new IntegralMeasurement(plot));
 
           final float[] elutionTimes = p.getElutionTimes();
           final float[] intensityValues = p.getIntensityValues();

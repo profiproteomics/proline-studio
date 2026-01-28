@@ -73,8 +73,8 @@ public class PeakelsComparePanel  extends AbstractPeakelsPanel  {
     }
 
     protected List<IPeakel> getSelectedIPeakels() {
-        if ((m_pairedPeakelArrayList != null) && (!m_pairedPeakelArrayList.isEmpty()) && (m_table.getSelectedRowCount() > 0)) {
-            int[] selectedRows = m_table.getSelectedRows();
+        if ((m_pairedPeakelArrayList != null) && (!m_pairedPeakelArrayList.isEmpty()) && (m_featureTable.getSelectedRowCount() > 0)) {
+            int[] selectedRows = m_featureTable.getSelectedRows();
             ArrayList<IPeakel> selectedPeakels = new ArrayList<>(selectedRows.length*2);
 
             for (int row : selectedRows) {
@@ -441,7 +441,7 @@ public class PeakelsComparePanel  extends AbstractPeakelsPanel  {
 
         m_markerContainerPanel.setMaxLineNumber(pairedPeakelArrayList.size());
         // hide RawFileName column
-        m_table.getColumnExt(m_table.convertColumnIndexToView(FeaturesTableModel.COLTYPE_FEATURE_RAWFILE.getIndex())).setVisible(true);
+        m_featureTable.getColumnExt(m_featureTable.convertColumnIndexToView(FeaturesTableModel.COLTYPE_FEATURE_RAWFILE.getIndex())).setVisible(true);
     }
 
 }

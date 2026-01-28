@@ -73,6 +73,9 @@ public class ProjectExplorerPanel extends JPanel {
     private JButton m_editProjectButton;
     private JButton m_propertiesProjectButton;
     private JButton m_clearProjectButton;
+    private JButton m_hideClosedProjectButton;
+    private boolean hideInactiveProjects;
+
     private JComboBox<ProjectItem> m_projectsComboBox;
     private JScrollPane m_identificationTreeScrollPane;
     private JScrollPane m_quantitationTreeScrollPane;
@@ -92,6 +95,7 @@ public class ProjectExplorerPanel extends JPanel {
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
+        hideInactiveProjects = true;
         // ---- Create Objects
         m_projectsComboBox = new JComboBox<>();
         m_projectsComboBox.setRenderer(new ProjectComboboxRenderer());
@@ -178,6 +182,11 @@ public class ProjectExplorerPanel extends JPanel {
         m_clearProjectButton.setToolTipText("Clean Up Project (Remove unused Search Result and Id. Summaries)...");
         m_clearProjectButton.setEnabled(false);
 
+        m_hideClosedProjectButton= new JButton(IconManager.getIcon(IconManager.IconType.VIEW_2));
+        m_hideClosedProjectButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        m_hideClosedProjectButton.setToolTipText("Hide Inactive Projects");
+        m_hideClosedProjectButton.setEnabled(false);
+
         c.gridx = 0;
         c.gridy = 0;
 
@@ -193,6 +202,8 @@ public class ProjectExplorerPanel extends JPanel {
         // uncomment this line to give access to clear rs/rsm project
         //buttonsPanel.add(m_clearProjectButton, c);
 
+        buttonsPanel.add(m_hideClosedProjectButton, c);
+
         // Interactions
         m_addProjectButton.addActionListener(e -> addProjectActionPerformed());
 
@@ -201,6 +212,8 @@ public class ProjectExplorerPanel extends JPanel {
         m_propertiesProjectButton.addActionListener(e -> showPropertiesProjectActionPerformed());
 
         m_clearProjectButton.addActionListener(e -> clearProjectActionPerformed());
+
+        m_hideClosedProjectButton.addActionListener(e -> hideInactiveProjectsActionPerformed());
 
         return buttonsPanel;
     }
@@ -383,6 +396,11 @@ public class ProjectExplorerPanel extends JPanel {
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
     }
+
+    private void hideInactiveProjectsActionPerformed(){
+        hideInactiveProjects = !hideInactiveProjects;
+        startLoadingProjects();
+    }
     
     /**
      * returns the list of rs/rsm opened in the application for a given project
@@ -492,7 +510,19 @@ public class ProjectExplorerPanel extends JPanel {
 
     }
     
-    
+    private boolean isProjectActive(ProjectIdentificationData identificationData){
+        Project project = identificationData.getProject();
+
+        String serializedProperties = project.getSerializedProperties();
+        boolean isActive = true;
+        if (serializedProperties != null) {
+            JsonObject jsonObject = JsonParser.parseString(serializedProperties).getAsJsonObject();
+            JsonPrimitive isActiveObject = jsonObject.getAsJsonPrimitive("is_active");
+            if(isActiveObject != null)
+                isActive = isActiveObject.getAsBoolean();
+        }
+        return (isActive);
+    }
 
     public void startLoadingProjects() {
 
@@ -521,16 +551,33 @@ public class ProjectExplorerPanel extends JPanel {
 
                         m_projectsComboBox.removeAllItems();
 
-                        int nbProjects = projectList.size();
-                        if (nbProjects > 0) {
+//                        int nbProjects = projectList.size();
+                        ArrayList<ProjectItem> shownProjectList = new ArrayList<>();
+
+                        //Initialize Project isActive
+                        projectList.forEach(prj -> {
+                            ProjectIdentificationData identificationData = (ProjectIdentificationData) prj;
+                            boolean isActive = isProjectActive(identificationData);
+                            if(!hideInactiveProjects || (hideInactiveProjects && isActive)) {
+                                ProjectItem pItem = new ProjectItem(identificationData, new ProjectQuantitationData(identificationData.getProject()));
+                                pItem.setIsActive(isActive);
+                                shownProjectList.add(pItem);
+                            }
+                        });
+
+//                        if (nbProjects > 0) {
+                        if(!shownProjectList.isEmpty()){
                             m_projectsComboBox.addItem(new ProjectItem(null, null)); // Null Project corresponds to Select a Project Item
                         }
-                        for (AbstractData abstractData : projectList) {
-                            ProjectIdentificationData identificationData = (ProjectIdentificationData) abstractData;
-                            m_projectsComboBox.addItem(new ProjectItem(identificationData, new ProjectQuantitationData(identificationData.getProject())));
-                        }
+//                        for (AbstractData abstractData : projectList) {
+//                            ProjectIdentificationData identificationData = (ProjectIdentificationData) abstractData;
+//                            m_projectsComboBox.addItem(new ProjectItem(identificationData, new ProjectQuantitationData(identificationData.getProject())));
+//                        }
+                        for(ProjectItem pi : shownProjectList)
+                            m_projectsComboBox.addItem(pi);
 
                         m_addProjectButton.setEnabled(true);
+                        m_hideClosedProjectButton.setEnabled(true);
 
                         m_projectsComboBox.addActionListener(e -> {
                             ProjectItem item = (ProjectItem) m_projectsComboBox.getSelectedItem();

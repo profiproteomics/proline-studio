@@ -44,6 +44,7 @@ public class TablePopupMenu extends JPopupMenu {
     public TablePopupMenu(boolean setDefaultActions) {
         if (setDefaultActions) {
             addAction(new CopyCellAction());
+            addAction(new CopyCellValueAction());
             addAction(new SelectAllAction());
             addAction(null);
         }
@@ -144,6 +145,30 @@ public class TablePopupMenu extends JPopupMenu {
             }
             return "";
         }
+    }
+
+    public static class CopyCellValueAction extends AbstractTableAction {
+
+        public CopyCellValueAction() {
+            super("Copy cell Value");
+        }
+
+        @Override
+        public void actionPerformed(int col, int row, int[] selectedRows, JTable table) {
+            TableCellRenderer renderer = table.getCellRenderer(row, col);
+            Component c = table.prepareRenderer(renderer, row, col);
+
+            Object value = table.getValueAt(row, col);
+
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(new StringSelection(value.toString()), null);
+        }
+
+        @Override
+        public void updateEnabled(int row, int col, int[] selectedRows, JTable table) {
+            setEnabled(row != -1);
+        }
+
     }
 
     public static class SelectAllAction extends AbstractTableAction {

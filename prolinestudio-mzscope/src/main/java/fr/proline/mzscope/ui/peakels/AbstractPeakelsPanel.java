@@ -17,6 +17,7 @@
 package fr.proline.mzscope.ui.peakels;
 
 import fr.profi.mzdb.model.Peakel;
+import fr.profi.mzdb.util.math.DerivativeAnalysis;
 import fr.proline.mzscope.model.BaseFeature;
 import fr.proline.mzscope.model.IPeakel;
 import fr.proline.mzscope.processing.SpectrumUtils;
@@ -30,11 +31,12 @@ import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.graphics.marker.LabelMarker;
+import fr.proline.studio.graphics.marker.PointMarker;
+import fr.proline.studio.graphics.marker.coordinates.DataCoordinates;
 import fr.proline.studio.graphics.marker.coordinates.PixelCoordinates;
+import fr.proline.studio.graphics.measurement.IntegralMeasurement;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
-import fr.proline.studio.table.AbstractTableAction;
-import fr.proline.studio.table.DecoratedMarkerTable;
-import fr.proline.studio.table.TablePopupMenu;
+import fr.proline.studio.table.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +54,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
+import java.util.stream.IntStream;
 
 /**
  * Panel presenting a list of peakels in a table
@@ -66,7 +69,10 @@ public abstract class AbstractPeakelsPanel extends JPanel  {
   private JFileChooser m_fchooser;
   protected int m_modelSelectedRowBeforeSort = -1;
 
-  protected DecoratedMarkerTable m_table;
+  protected DecoratedMarkerTable m_featureTable;
+  protected DecoratedMarkerTable m_peakTable;
+  protected DecoratedMarkerTable m_minmaxTable;
+
   protected CompoundTableModel m_compoundTableModel;
 
   protected IMzScopeController m_viewersController;
@@ -97,38 +103,98 @@ public abstract class AbstractPeakelsPanel extends JPanel  {
     tablePanel.setLayout(new BorderLayout());
 
     JScrollPane jScrollPane = new JScrollPane();
-    m_table = new FeatureTable();
+    m_featureTable = new FeatureTable();
     m_compoundTableModel = buildTableModel();
-    m_table.setModel(m_compoundTableModel);
+    m_featureTable.setModel(m_compoundTableModel);
 
-    m_table.addMouseListener(new MouseAdapter() {
+    m_featureTable.addMouseListener(new MouseAdapter() {
       @Override
       public void mouseClicked(MouseEvent evt) {
         tableMouseClicked(evt);
       }
     });
 
-    jScrollPane.setViewportView(m_table);
-    m_table.setFillsViewportHeight(true);
-    m_table.setViewport(jScrollPane.getViewport());
-    m_table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+    jScrollPane.setViewportView(m_featureTable);
+    m_featureTable.setFillsViewportHeight(true);
+    m_featureTable.setViewport(jScrollPane.getViewport());
+    m_featureTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
       @Override
       public void valueChanged(ListSelectionEvent e) {
-        updatePeakelsViewer(getSelectedPeakels());
+        if(! e.getValueIsAdjusting())
+          updatePeakelsViewer(getSelectedPeakels());
       }
     });
 
     JToolBar toolbar = initToolbar();
 
-    m_markerContainerPanel = new MarkerContainerPanel(jScrollPane, m_table);
+    m_markerContainerPanel = new MarkerContainerPanel(jScrollPane, m_featureTable);
 
     tablePanel.add(toolbar, BorderLayout.WEST);
     tablePanel.add(m_markerContainerPanel, BorderLayout.CENTER);
 
     JSplitPane splitPane = new JSplitPane();
     splitPane.setLeftComponent(tablePanel);
+
+    JTabbedPane plotPanel = new JTabbedPane();
+
     m_graphPlot = new BasePlotPanel();
-    splitPane.setRightComponent(m_graphPlot);
+    plotPanel.add("Plot", m_graphPlot);
+
+
+    jScrollPane = new JScrollPane();
+    m_peakTable = new DecoratedMarkerTable() {
+
+      @Override
+      public void addTableModelListener(TableModelListener l) {
+
+      }
+
+      @Override
+      public TablePopupMenu initPopupMenu() {
+        return new TablePopupMenu();
+      }
+
+      @Override
+      public void prepostPopupMenu() {
+
+      }
+
+    };
+
+    jScrollPane.setViewportView(m_peakTable);
+    m_peakTable.setFillsViewportHeight(true);
+    m_peakTable.setViewport(jScrollPane.getViewport());
+
+    plotPanel.add("Peaks", jScrollPane);
+
+    jScrollPane = new JScrollPane();
+    m_minmaxTable = new DecoratedMarkerTable() {
+
+      @Override
+      public void addTableModelListener(TableModelListener l) {
+
+      }
+
+      @Override
+      public TablePopupMenu initPopupMenu() {
+        return new TablePopupMenu();
+      }
+
+      @Override
+      public void prepostPopupMenu() {
+
+      }
+
+    };
+
+    jScrollPane.setViewportView(m_minmaxTable);
+    m_minmaxTable.setFillsViewportHeight(true);
+    m_minmaxTable.setViewport(jScrollPane.getViewport());
+
+
+    plotPanel.add("Min/Max", jScrollPane);
+
+    splitPane.setRightComponent(plotPanel);
 
     this.add(splitPane, BorderLayout.CENTER);
 
@@ -141,14 +207,14 @@ public abstract class AbstractPeakelsPanel extends JPanel  {
     JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
     toolbar.setFloatable(false);
 
-    FilterButton filterButton = new FilterButton(((CompoundTableModel) m_table.getModel())) {
+    FilterButton filterButton = new FilterButton(((CompoundTableModel) m_featureTable.getModel())) {
       @Override
       protected void filteringDone() {
         //
       }
     };
 
-    ExportButton exportButton = new ExportButton(((CompoundTableModel) m_table.getModel()), "Features-Peakels", m_table);
+    ExportButton exportButton = new ExportButton(((CompoundTableModel) m_featureTable.getModel()), "Features-Peakels", m_featureTable);
     toolbar.add(filterButton);
     toolbar.add(exportButton);
 
@@ -157,7 +223,7 @@ public abstract class AbstractPeakelsPanel extends JPanel  {
 
   protected void tableMouseClicked(MouseEvent evt) {
     List<IPeakel> peakels = getSelectedIPeakels();
-    updatePeakelsViewer(getSelectedPeakels());
+    //updatePeakelsViewer(getSelectedPeakels());
     if (evt.getClickCount() == 2 && peakels != null && peakels.size() > 0) {
       m_viewersController.getRawFileViewer(peakels.get(0).getRawFile(), true).displayPeakel(peakels.get(0));
     }
@@ -170,17 +236,47 @@ public abstract class AbstractPeakelsPanel extends JPanel  {
   private void updatePeakelsViewer(List<Peakel> peakels) {
     if (peakels != null) {
       m_graphPlot.clearPlots();
+
       float maxY = 0.0f;
       int index = 0;
       for (Peakel p : peakels) {
           maxY = Math.max(p.getApexIntensity(), maxY);
           PeakelWrapper wrapper = new PeakelWrapper(p, index++);
           PlotLinear plot = new PlotLinear(m_graphPlot, wrapper, null, 0, 1);
+          plot.setStrokeFixed(true);
           plot.setPlotInformation(wrapper.getPlotInformation());
-          m_graphPlot.addPlot(plot);
+          plot.addMeasurement(new IntegralMeasurement(plot));
+
+          final float[] elutionTimes = p.getElutionTimes();
+          final float[] intensityValues = p.getIntensityValues();
+          final List<Peak> peaks = new ArrayList<>(elutionTimes.length);
+
+          for(int k = 0; k < elutionTimes.length; k++) {
+            peaks.add(new Peak(elutionTimes[k]/60.0, Math.round(intensityValues[k])));
+          }
+
+          BeanTableModel<Peak> tableModel = new BeanTableModel<>(Peak.class);
+          tableModel.setData(peaks);
+          m_peakTable.setModel(tableModel);
+
+          double[] intensities = IntStream.range(0, intensityValues.length).mapToDouble(i -> intensityValues[i]).toArray();
+
+          final List<Peak> minMaxPeaks = new ArrayList<>(elutionTimes.length);
+          DerivativeAnalysis.ILocalDerivativeChange[] mm = DerivativeAnalysis.findSignificantMiniMaxi(intensities, 2, 0.75f);
+          for (int k = 0; k < mm.length; k++) {
+            final DataCoordinates dataCoordinates = new DataCoordinates(elutionTimes[mm[k].index()]/60.0, intensityValues[mm[k].index()]);
+            plot.addMarker(new PointMarker(m_graphPlot, dataCoordinates, plot.getPlotInformation().getPlotColor()));
+            minMaxPeaks.add(new Peak(elutionTimes[mm[k].index()]/60.0, Math.round(intensityValues[mm[k].index()])));
+          }
+
+        tableModel = new BeanTableModel<>(Peak.class);
+        tableModel.setData(minMaxPeaks);
+        m_minmaxTable.setModel(tableModel);
+
+        m_graphPlot.addPlot(plot);
       }
 
-      m_graphPlot.getPlots().get(0).clearMarkers();
+//      m_graphPlot.getPlots().get(0).clearMarkers();
 
       //for 2 peakels, compute and display correlation coefficient
       if (peakels.size() == 2) {
@@ -199,10 +295,10 @@ public abstract class AbstractPeakelsPanel extends JPanel  {
   }
 
   protected int getModelRowId(int rowId) {
-    CompoundTableModel compoundTableModel = (CompoundTableModel) m_table.getModel();
+    CompoundTableModel compoundTableModel = (CompoundTableModel) m_featureTable.getModel();
     if (compoundTableModel.getRowCount() != 0) {
       // convert according to the sorting
-      rowId = m_table.convertRowIndexToModel(rowId);
+      rowId = m_featureTable.convertRowIndexToModel(rowId);
       rowId = compoundTableModel.convertCompoundRowToBaseModelRow(rowId);
     }
     return rowId;
@@ -367,5 +463,25 @@ public abstract class AbstractPeakelsPanel extends JPanel  {
     }
 
   }
+
+  static public class Peak {
+    protected double elutionTime;
+    protected double intensity;
+
+    public Peak(double elutionTime, double intensity) {
+      this.elutionTime = elutionTime;
+      this.intensity = intensity;
+    }
+
+    public double getElutionTime() {
+      return elutionTime;
+    }
+
+    public double getIntensity() {
+      return intensity;
+    }
+  }
 }
+
+
 

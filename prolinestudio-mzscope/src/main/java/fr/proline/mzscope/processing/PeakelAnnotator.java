@@ -37,6 +37,16 @@ public class PeakelAnnotator implements IAnnotator {
 
   }
 
+  /**
+   * Annotates a given chromatogram by identifying a peakel that matches the requested parameters.
+   * If no matching peakel is found, the method attempts to use a predicted second isotope based on the provided charge state.
+   *
+   * @param rawFile the raw data file from which the chromatogram originates
+   * @param chromatogram the chromatogram to be annotated
+   * @param request the extraction request specifying the desired m/z and retention time
+   * @param expectedCharge the expected charge state to assist in peakel identification
+   * @return an AnnotatedChromatogram containing the annotated chromatogram and the matched peakel, or null if no match is found
+   */
   @Override
   public AnnotatedChromatogram annotate(IRawFile rawFile, IChromatogram chromatogram, ExtractionRequest request, Integer expectedCharge) {
     if (annotators == null) {

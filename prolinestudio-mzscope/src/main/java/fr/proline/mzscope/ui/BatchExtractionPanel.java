@@ -117,14 +117,15 @@ public class BatchExtractionPanel extends JPanel {
         JButton importCSVBtn = new JButton();
         importCSVBtn.setIcon(IconManager.getIcon(IconManager.IconType.TABLE_IMPORT));
         importCSVBtn.setToolTipText("Import m/z values from a csv file...");
-        importCSVBtn.addActionListener(e -> importCSVExtractions());
+        importCSVBtn.addActionListener(e -> importCSVFile());
         toolbar.add(importCSVBtn);
         
         JButton iRTBtn = new JButton("iRT");
         iRTBtn.setToolTipText("indexed Retention Time Standard");
         iRTBtn.addActionListener(e -> {
             m_importedTableModel = null;
-            setExtractions(buildIRTRequest(this), null);
+            importCSVExtractions(new File(BatchExtractionPanel.class.getResource("/irt.csv").getFile()));
+            //setExtractions(buildIRTRequest(this), null);
         });
         toolbar.add(iRTBtn);
         toolbar.addSeparator();
@@ -158,7 +159,7 @@ public class BatchExtractionPanel extends JPanel {
         m_importedTableModel = null;
     }
 
-    private void importCSVExtractions() {
+    private void importCSVFile() {
       Preferences prefs = Preferences.userNodeForPackage(this.getClass());
       String directory = prefs.get(LAST_DIR, m_fchooser.getCurrentDirectory().getAbsolutePath());
       m_fchooser.setCurrentDirectory(new File(directory));
@@ -171,45 +172,49 @@ public class BatchExtractionPanel extends JPanel {
                 return;
             }
             prefs.put(LAST_DIR, csvFile.getParentFile().getAbsolutePath());
-            m_importedTableModel = new ImportedDataTableModel();
-            ImportedDataTableModel.loadFile(m_importedTableModel, csvFile.getAbsolutePath(), ';', true, false);
-            int mzColumnIdx = findColumn(m_importedTableModel, new String[]{"moz", "m/z", "mz"});
-            int rtColumnIdx = findColumn(m_importedTableModel, new String[]{"rt", "retention_time", "retention time", "elution_time", "elution time", "time"});
-            int zColumnIdx = findColumn(m_importedTableModel, new String[]{"charge", "z"});
-            int fragColumnIdx = findColumn(m_importedTableModel, new String[]{"frag_mz", "frag_moz", "frag_m/z", "fragment_mz", "fragment_moz", "fragment_m/z"});
-
-            if (mzColumnIdx != -1) {
-                List<Double> mzValues = new ArrayList<>();
-                List<Double> rtValues = new ArrayList<>();
-                List<Integer> zValues = new ArrayList<>();
-                List<Double> fragMzValues = new ArrayList<>();
-                for (int k = 0; k < m_importedTableModel.getRowCount(); k++) {
-                    mzValues.add((Double) m_importedTableModel.getValueAt(k, mzColumnIdx));
-                    rtValues.add((rtColumnIdx != -1) ? (Double) m_importedTableModel.getValueAt(k, rtColumnIdx) : -1.0);
-                    zValues.add((zColumnIdx != -1) ? ((Long) m_importedTableModel.getValueAt(k, zColumnIdx)).intValue() : 0);
-                    fragMzValues.add((fragColumnIdx != -1) ? ((Double) m_importedTableModel.getValueAt(k, fragColumnIdx)) : -1.0);
-                }
-
-                float moztol = MzScopePreferences.getInstance().getMzPPMTolerance();
-                float fragMoztol = MzScopePreferences.getInstance().getFragmentMzPPMTolerance();
-                List<ExtractionRequest> requests = new ArrayList<>();
-                for (int k = 0; k < mzValues.size(); k++) {
-                    final ExtractionRequest.Builder<?> requestBuilder = ExtractionRequest.builder(this).setMzTolPPM(moztol).setMz(mzValues.get(k)).setElutionTime(rtValues.get(k).floatValue());
-                    if (fragColumnIdx == -1) {
-                        requests.add(requestBuilder.build());
-                    } else {
-                        requestBuilder.setMsLevel(2).setFragmentMzTolPPM(fragMoztol).setFragmentMz(fragMzValues.get(k));
-                        requests.add(requestBuilder.build());
-                    }
-                }
-                setExtractions(requests, zValues);
-            } else {
-                JOptionPane.showMessageDialog(this, "No column named \"mz\",\"moz\" or \"m/z\" detected in the imported file.\n Verify the column headers (the column separator must be \";\")", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
+        importCSVExtractions(csvFile);
+      }
     }
 
-    private int findColumn(AbstractTableModel tableModel, String[] alternativeNames) {
+  private void importCSVExtractions(File csvFile) {
+    m_importedTableModel = new ImportedDataTableModel();
+    ImportedDataTableModel.loadFile(m_importedTableModel, csvFile.getAbsolutePath(), ';', true, false);
+    int mzColumnIdx = findColumn(m_importedTableModel, new String[]{"moz", "m/z", "mz"});
+    int rtColumnIdx = findColumn(m_importedTableModel, new String[]{"rt", "retention_time", "retention time", "elution_time", "elution time", "time"});
+    int zColumnIdx = findColumn(m_importedTableModel, new String[]{"charge", "z"});
+    int fragColumnIdx = findColumn(m_importedTableModel, new String[]{"frag_mz", "frag_moz", "frag_m/z", "fragment_mz", "fragment_moz", "fragment_m/z"});
+
+    if (mzColumnIdx != -1) {
+        List<Double> mzValues = new ArrayList<>();
+        List<Double> rtValues = new ArrayList<>();
+        List<Integer> zValues = new ArrayList<>();
+        List<Double> fragMzValues = new ArrayList<>();
+        for (int k = 0; k < m_importedTableModel.getRowCount(); k++) {
+            mzValues.add((Double) m_importedTableModel.getValueAt(k, mzColumnIdx));
+            rtValues.add((rtColumnIdx != -1) ? (Double) m_importedTableModel.getValueAt(k, rtColumnIdx) : -1.0);
+            zValues.add((zColumnIdx != -1) ? ((Long) m_importedTableModel.getValueAt(k, zColumnIdx)).intValue() : 0);
+            fragMzValues.add((fragColumnIdx != -1) ? ((Double) m_importedTableModel.getValueAt(k, fragColumnIdx)) : -1.0);
+        }
+
+        float moztol = MzScopePreferences.getInstance().getMzPPMTolerance();
+        float fragMoztol = MzScopePreferences.getInstance().getFragmentMzPPMTolerance();
+        List<ExtractionRequest> requests = new ArrayList<>();
+        for (int k = 0; k < mzValues.size(); k++) {
+            final ExtractionRequest.Builder<?> requestBuilder = ExtractionRequest.builder(this).setMzTolPPM(moztol).setMz(mzValues.get(k)).setElutionTime(rtValues.get(k).floatValue());
+            if (fragColumnIdx == -1) {
+                requests.add(requestBuilder.build());
+            } else {
+                requestBuilder.setMsLevel(2).setFragmentMzTolPPM(fragMoztol).setFragmentMz(fragMzValues.get(k));
+                requests.add(requestBuilder.build());
+            }
+        }
+        setExtractions(requests, zValues);
+    } else {
+        JOptionPane.showMessageDialog(this, "No column named \"mz\",\"moz\" or \"m/z\" detected in the imported file.\n Verify the column headers (the column separator must be \";\")", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+  }
+
+  private int findColumn(AbstractTableModel tableModel, String[] alternativeNames) {
         int columnIdx = -1;
         for(String name : alternativeNames) {
             columnIdx = tableModel.findColumn(name);
@@ -386,22 +391,6 @@ public class BatchExtractionPanel extends JPanel {
 
     }
 
-    private static List<ExtractionRequest> buildIRTRequest(Object source) {
-        float moztol = MzScopePreferences.getInstance().getMzPPMTolerance();
-        List<ExtractionRequest> list = new ArrayList<>();
-        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(487.257).build());
-        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(547.297).build());
-        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(622.853).build());
-        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(636.869).build());
-        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(644.822).build());
-        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(669.838).build());
-        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(683.827).build());
-        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(683.853).build());
-        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(699.338).build());
-        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(726.835).build());
-        list.add(ExtractionRequest.builder(source).setMzTolPPM(moztol).setMz(776.929).build());
-        return list;
-    }
 }
 
 class BatchExtractionDialog extends DefaultDialog {

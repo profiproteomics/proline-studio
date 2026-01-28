@@ -923,25 +923,37 @@ public class PlotLinear extends PlotXYAbstract {
         return true;
     }
 
-    
     private void sortData() {
-        int dataSize = m_dataX == null ? 0 : m_dataX.length;
-        int j;
-        if (dataSize > 1) {
-            for (int i = 1; i < dataSize; i++) {
-                double el = m_dataX[i];
-                double elY = m_dataY[i];
-                PlotDataSpec spec = m_dataSpec[i];
-                for (j = i; j > 0 && m_dataX[j - 1] > el; j--) {
-                    m_dataX[j] = m_dataX[j - 1];
-                    m_dataY[j] = m_dataY[j - 1];
-                    m_dataSpec[j] = m_dataSpec[j - 1];
-                }
-                m_dataX[j] = el;
-                m_dataY[j] = elY;
-                m_dataSpec[j] = spec;
-            }
-        }
+      int dataSize = m_dataX == null ? 0 : m_dataX.length;
+      if (dataSize <= 1) {
+        return;
+      }
+
+      // Create an array of indices [0, 1, 2, ..., dataSize - 1]
+      Integer[] indices = new Integer[dataSize];
+      for (int i = 0; i < dataSize; i++) {
+        indices[i] = i;
+      }
+
+      // Sort indices based on values in m_dataX
+      // Using a Lambda with Arrays.sort on Integer[] is O(n log n)
+      java.util.Arrays.sort(indices, (a, b) -> Double.compare(m_dataX[a], m_dataX[b]));
+
+      // Reorder arrays based on sorted indices
+      double[] newX = new double[dataSize];
+      double[] newY = new double[dataSize];
+      PlotDataSpec[] newSpec = new PlotDataSpec[dataSize];
+
+      for (int i = 0; i < dataSize; i++) {
+        int oldIdx = indices[i];
+        newX[i] = m_dataX[oldIdx];
+        newY[i] = m_dataY[oldIdx];
+        newSpec[i] = m_dataSpec[oldIdx];
+      }
+
+      m_dataX = newX;
+      m_dataY = newY;
+      m_dataSpec = newSpec;
     }
 
     public void setPlotInformation(PlotInformation plotInformation) {

@@ -265,7 +265,7 @@ public class MzdbRawFile implements IRawFile {
                 int previousSpectrumId = (int) peaks[0].getLcContext().getSpectrumId();
                 for (Peak peak : peaks) {
                     int spectrumId = (int) peak.getLcContext().getSpectrumId();
-                    if ((msLevel == 1) && (previousSpectrumId != getPreviousSpectrumId(spectrumId, msLevel))) {
+                    if ((previousSpectrumId != getPreviousSpectrumId(spectrumId, msLevel))) {
                         // there is a gap between peaks, add 0 values after the previous peak and before this one
                         xAxisData.add(reader.getSpectrumHeaderById().get((long) getNextSpectrumId(previousSpectrumId, msLevel)).getElutionTime() / 60.0);
                         yAxisData.add(0.0);
@@ -698,15 +698,22 @@ public class MzdbRawFile implements IRawFile {
         return getNextSiblingSpectrumId(spectrumIndex, msLevel, -1);
     }
 
-    private int getNextSiblingSpectrumId(int spectrumIndex, int msLevel, int way) {
+    private int getNextSiblingSpectrumId(int spectrumIndex, int msLevel, int direction) {
         try {
             SpectrumHeader header = reader.getSpectrumHeaderById().get((long) spectrumIndex);
             int maxSpectrum = reader.getSpectraCount();
-            long k = Math.max(1, Math.min(maxSpectrum, header.getSpectrumId() + way));
-            for (; (k > 0) && (k < maxSpectrum); k += way) {
-                if (reader.getSpectrumHeaderById().get(k).getMsLevel() == msLevel) {
-                    break;
+            long k = Math.max(1, Math.min(maxSpectrum, header.getSpectrumId() + direction));
+            for (; (k > 0) && (k < maxSpectrum); k += direction) {
+              final SpectrumHeader nextHeader = reader.getSpectrumHeaderById().get(k);
+              if (msLevel == 1 || !isDIAFile) {
+                if (nextHeader.getMsLevel() == msLevel) {
+                  break;
                 }
+              } else {
+                if (nextHeader.getMsLevel() == msLevel && 1e6*Math.abs((nextHeader.getPrecursorMz() - header.getPrecursorMz())/header.getPrecursorMz()) < 5 ) {
+                  break;
+                }
+              }
             }
             return (int) k;
         } catch (SQLiteException e) {

@@ -78,7 +78,7 @@ class PeakelWrapper implements ExtendedTableModelInterface {
     if (m_plotInformation == null) {
       m_plotInformation = new PlotInformation();
       m_plotInformation.setPlotColor(CyclicColorPalette.getColor(1));
-      m_plotInformation.setPlotTitle("Elution peak\n");
+      m_plotInformation.setPlotTitle("Elution peak");
       m_plotInformation.setDrawPoints(false);
       m_plotInformation.setDrawGap(true);
       HashMap<String, String> plotInfo = new HashMap<>();

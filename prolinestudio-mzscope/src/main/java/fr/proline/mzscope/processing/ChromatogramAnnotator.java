@@ -20,7 +20,6 @@ import fr.profi.mzdb.model.SpectrumHeader;
 import fr.proline.mzscope.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.Int;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,6 +36,22 @@ public class ChromatogramAnnotator implements IAnnotator {
 
   }
 
+  /**
+   * Annotates the given chromatogram by detecting a peakel around the requested elution time.
+   * <p>
+   * This method identifies the peak boundaries by traversing the chromatogram intensities
+   * starting from the requested elution time index in both directions (forward and backward).
+   * It allows for a small number of consecutive gaps (zero intensities) during the search.
+   * Once the boundaries are determined, it calculates the peakel properties such as area,
+   * apex intensity, and scan count.
+   * </p>
+   *
+   * @param rawFile        the raw file associated with the chromatogram
+   * @param chromatogram   the chromatogram to annotate
+   * @param request        the extraction request containing the target elution time
+   * @param expectedCharge the expected charge (not used in this implementation)
+   * @return an {@link AnnotatedChromatogram} containing the detected peakel information
+   */
   @Override
   public AnnotatedChromatogram annotate(IRawFile rawFile, IChromatogram chromatogram, ExtractionRequest request, Integer expectedCharge) {
 
@@ -57,7 +72,7 @@ public class ChromatogramAnnotator implements IAnnotator {
       List<Integer> peakelIndexes = new ArrayList<>(chromatogramTime.length);
 
       if (globalRtIndex != -1) {
-        // search for signal before and after rtIndex
+        // search for signal before and after chromatogramRtIndex
         int consecutiveGaps = 0;
         int cEndIdx = chromatogramIndex;
         int cStartIdx = chromatogramIndex;
@@ -120,7 +135,7 @@ public class ChromatogramAnnotator implements IAnnotator {
             area += chromatogramIntensities[lastIdx] * (globalTime[endIdx + 1] - chromatogramTime[lastIdx]) / 2.0;
           }
         }
-  //TODO : redetermine elution time as apex time instead of requested retention time
+          //TODO : redetermine elution time as apex time instead of requested retention time
           BasePeakel peakel = new BasePeakel(
                   (chromatogram.getMaxMz() + chromatogram.getMinMz()) / 2.0,
                   (float) chromatogramTime[chromatogramRtIndex]*60.0f,

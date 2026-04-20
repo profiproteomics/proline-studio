@@ -784,7 +784,7 @@ public class ImportIdentificationDialog extends DefaultStorableDialog {
         ((ObjectParameter) m_sourceParameterList.getParameter("fragmentation_rule_set")).updateObjects(allFRS);
         ((ObjectParameter) m_sourceParameterList.getParameter("fragmentation_rule_set")).setValue(selectedFragmRuleSet);
 
-        //reinit FragmentationRuleSets
+        //reinit PeaklistSoftware
         PeaklistSoftware[] allPS = DatabaseDataManager.getDatabaseDataManager().getPeaklistSoftwaresWithNullArray();
         String selectedPeaklistSoft = ((ObjectParameter) m_sourceParameterList.getParameter("peaklist_software")).getStringValue();
         m_peaklistSoftwaresComboBox.removeAllItems();

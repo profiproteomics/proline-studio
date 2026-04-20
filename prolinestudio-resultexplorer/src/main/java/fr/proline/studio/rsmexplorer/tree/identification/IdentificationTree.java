@@ -28,6 +28,7 @@ import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.rsmexplorer.actions.xic.ImportDiaNNJMSAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.ChildFactory;
@@ -706,7 +707,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 // create the actions
                 Boolean showHiddenFunctionnality = false; // JPM.TODO : completely removed for the moment preferences.getBoolean("Profi", false);
 
-                m_mainActions = new ArrayList<>(24);  // <--- get in sync
+                m_mainActions = new ArrayList<>(25);  // <--- get in sync
 
 
                 DisplayRsetAction displayRsetAction = new DisplayRsetAction(this);
@@ -756,6 +757,9 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 ImportMaxQuantResultJMSAction importMaxQuant = new ImportMaxQuantResultJMSAction(this);
                 m_mainActions.add(importMaxQuant);
 //                    }
+                ImportDiaNNJMSAction importDiann = new ImportDiaNNJMSAction(this);
+                m_mainActions.add(importDiann);
+
                 ValidateJMSAction validateJMSAction = new ValidateJMSAction(this);
                 m_mainActions.add(validateJMSAction);
                 

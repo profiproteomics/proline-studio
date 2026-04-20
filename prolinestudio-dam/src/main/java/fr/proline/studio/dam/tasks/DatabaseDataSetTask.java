@@ -797,14 +797,17 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                     } else {
                         //result set from import or merge rs
                         String serializedProperties = (String)resCur[2];
-                        Map<String, Object> serializedPropertiesMap = JsonSerializer.getMapper().readValue(serializedProperties,Map.class);
-                        if(serializedPropertiesMap.containsKey("merge_mode")){
-                            String mergeType = serializedPropertiesMap.get("merge_mode").toString().toUpperCase();
-                            if(mergeType.equals(MergeMode.UNION.name()))
-                                mergeModeByRSId.put(rsetId,MergeMode.UNION);
-                            else
-                                mergeModeByRSId.put(rsetId,MergeMode.AGGREGATION);
-                        }
+                        if(serializedProperties != null && !serializedProperties.isEmpty()) {
+                            Map<String, Object> serializedPropertiesMap = JsonSerializer.getMapper().readValue(serializedProperties, Map.class);
+                            if (serializedPropertiesMap.containsKey("merge_mode")) {
+                                String mergeType = serializedPropertiesMap.get("merge_mode").toString().toUpperCase();
+                                if (mergeType.equals(MergeMode.UNION.name()))
+                                    mergeModeByRSId.put(rsetId, MergeMode.UNION);
+                                else
+                                    mergeModeByRSId.put(rsetId, MergeMode.AGGREGATION);
+                            }
+                        } else
+                            mergeModeByRSId.put(rsetId, MergeMode.NO_MERGE);
                     }
                 }
                 

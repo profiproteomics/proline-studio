@@ -5,6 +5,7 @@ import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -13,9 +14,9 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.ImportDiaNNTask;
-import fr.proline.studio.dpm.task.jms.ImportMaxQuantTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
+import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.ImportDiaNNDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
@@ -30,7 +31,6 @@ import javax.swing.*;
 import javax.swing.tree.DefaultTreeModel;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 public class ImportDiaNNJMSAction extends AbstractRSMAction  {
@@ -65,8 +65,6 @@ public class ImportDiaNNJMSAction extends AbstractRSMAction  {
         parentDataset = dataSetNode.getDataset();
       }
 
-//      final ArrayList<DataSetNode> allIdentificationNodes = new ArrayList<>();
-//      final ArrayList<String> allDatasetNames = new ArrayList<>();
       final DefaultTreeModel treeModel = (DefaultTreeModel) IdentificationTree.getCurrentTree().getModel();
       final long instrumentId = dialog.getInstrumentId();
       final long peaklistSoftwareId = dialog.getPeaklistSoftwareId();
@@ -78,12 +76,10 @@ public class ImportDiaNNJMSAction extends AbstractRSMAction  {
       if (indexOfDot != -1) {
         datasetName = datasetName.substring(0, indexOfDot);
       }
-//    allDatasetNames.add(datasetName);
 
-      DataSetData identificationData = DataSetData.createTemporaryAggregate(datasetName); // new DatasetData(datasetName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.BIOLOGICAL_GROUP);  //JPM.TODO
+      DataSetData identificationData = DataSetData.createTemporaryAggregate("_"+datasetName+"_"); // new DatasetData(datasetName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.BIOLOGICAL_GROUP);  //JPM.TODO
       final DataSetNode identificationNode = new DataSetNode(identificationData);
       identificationNode.setIsChanging(true);
-//    allIdentificationNodes.add(identificationNode);
 
       if (isParentAProject) {
         treeModel.insertNodeInto(identificationNode, n, n.getChildCount() - 1);
@@ -99,7 +95,7 @@ public class ImportDiaNNJMSAction extends AbstractRSMAction  {
 
   private void startImport(final String filePath, final Project project, final DataSetNode identificationNode, final DDataset parentDataset, final String datasetName, final DefaultTreeModel treeModel,final long instrumentId,final long peaklisSoftId) {
 
-    final Object[] _taskResults = new Object[2];
+    final Object[] _taskResults = new Object[3];
 
     AbstractJMSCallback callback = new AbstractJMSCallback() {
       @Override
@@ -111,8 +107,9 @@ public class ImportDiaNNJMSAction extends AbstractRSMAction  {
       public void run(boolean success) {
           if(success) {
             Map<String, Long> rsmIdByRsId =  (Map<String, Long>)_taskResults[0];
-            createDataset(identificationNode, project, parentDataset, datasetName, treeModel,  rsmIdByRsId, getTaskInfo());
-            Long quantDatasetId = (Long)_taskResults[1];
+            Long identDsId = (Long)_taskResults[1];
+            createDataset(identificationNode, project, parentDataset, datasetName, treeModel,  rsmIdByRsId,identDsId, getTaskInfo());
+            Long quantDatasetId = (Long)_taskResults[2];
             if (quantDatasetId != null) {
               createQuantDataset(quantDatasetId);
             }
@@ -127,7 +124,7 @@ public class ImportDiaNNJMSAction extends AbstractRSMAction  {
 
     logger.info(" WILL CALL ImportDiaNNTask ");
 
-    ImportDiaNNTask task =new ImportDiaNNTask(callback,filePath,instrumentId,peaklisSoftId,project.getId(), _taskResults);
+    ImportDiaNNTask task =new ImportDiaNNTask(callback,filePath,instrumentId,peaklisSoftId,project.getId(), parentDataset, _taskResults);
     AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
   }
@@ -149,7 +146,7 @@ public class ImportDiaNNJMSAction extends AbstractRSMAction  {
     QuantitationTree.getCurrentTree().loadDataSet(quantDatasetId, quantitationNode);
   }
 
-  private void createDataset(final DataSetNode identificationNode, Project project, DDataset parentDataset, String name, final DefaultTreeModel treeModel, Map<String, Long> rsmIdByRsId, TaskInfo taskInfo) {
+  private void createDataset(final DataSetNode identificationNode, Project project, DDataset parentDataset, String name, final DefaultTreeModel treeModel, Map<String, Long> rsmIdByRsId, Long identDsId, TaskInfo taskInfo) {
 
     identificationNode.setIsChanging(false);
     treeModel.nodeChanged(identificationNode);
@@ -181,11 +178,14 @@ public class ImportDiaNNJMSAction extends AbstractRSMAction  {
 
     // ask asynchronous loading of data
     DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-
-    task.initCreateDatasetAggregate(project, parentDataset, Aggregation.ChildNature.BIOLOGICAL_GROUP, name, createdDatasetList);
+    if(identDsId != null) {
+      task.initLoadDataset(identDsId, createdDatasetList);
+    } else
+      task.initCreateDatasetAggregate(project, parentDataset, Aggregation.ChildNature.BIOLOGICAL_GROUP, name, createdDatasetList);
     AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
   }
+
   private void createSubDataset(final DataSetNode parentNode, Project project, DDataset parentDataset, final DefaultTreeModel treeModel, Map<String, Long> rsmIdByRsId, TaskInfo taskInfo) {
 
     for(String rsIdAsStr : rsmIdByRsId.keySet()){
@@ -233,5 +233,63 @@ public class ImportDiaNNJMSAction extends AbstractRSMAction  {
   @Override
   public void updateEnabled(AbstractNode[] selectedNodes) {
 
+    // to execute this action, the user must be the owner of the project
+    Project selectedProject = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject();
+    if (!DatabaseDataManager.getDatabaseDataManager().ownProject(selectedProject)) {
+      setEnabled(false);
+      return;
+    }
+
+    int nbSelectedNodes = selectedNodes.length;
+
+    // identification must be added only in one parent node
+    if (nbSelectedNodes != 1) {
+      setEnabled(false);
+      return;
+    }
+
+    AbstractNode node = selectedNodes[0];
+
+    // parent node is being created, we can not add an identification
+    if (node.isChanging()) {
+      setEnabled(false);
+      return;
+    }
+
+    // we can always add an identification directly to a project
+    if ( node.getType() == AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) {
+      setEnabled(true);
+      return;
+    }
+
+   // we can add an identification only to a data set without a ResultSet or a ResultSummary
+    if (node.getType() == AbstractNode.NodeTypes.DATA_SET) {
+      DataSetNode dataSetNode = (DataSetNode) node;
+      setEnabled(!dataSetNode.hasResultSet() && !dataSetNode.hasResultSummary());
+      return;
+    }
+//    else { //Import Quant. Dataset should contains ident childs
+//        Enumeration<TreeNode> childsDataset = dataSetNode.children();
+//        while (childsDataset.hasMoreElements() ) {
+//          TreeNode dsNode = childsDataset.nextElement();
+//          if(dsNode instanceof DataSetNode) {
+//            DDataset dDataSet =((DataSetNode) dsNode).getDataset();
+//            if(dDataSet.getResultSetId() <=1 ||dDataSet.getResultSummaryId() <=1){
+//              setEnabled(false);
+//              return;
+//            }
+//
+//          } else {
+//            setEnabled(false);
+//            return;
+//          }
+//
+//        }
+//      }
+
+//      return;
+//    }
+
+    setEnabled(false);
   }
 }

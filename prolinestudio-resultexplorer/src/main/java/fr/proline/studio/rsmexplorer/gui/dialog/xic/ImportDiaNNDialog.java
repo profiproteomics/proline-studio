@@ -30,6 +30,8 @@ public class ImportDiaNNDialog extends DefaultStorableDialog {
 
   private final static String SETTINGS_KEY = "ImportDiaNNResult";
   private final static String PREFERENCE_PATH_KEY = "DefaultImportDiaNNPath";
+  private static final String[] FILTER_MODES = {"No filtering", "DiaNN MBR filtering", "DiaNN noMBR filtering"};
+  private static final String[] FILTER_MODES_KEYS = {"NONE", "MBR", "NOMBR"};
   private static ImportDiaNNDialog m_singletonDialog;
 
   private static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
@@ -38,6 +40,7 @@ public class ImportDiaNNDialog extends DefaultStorableDialog {
   private ParameterList m_importParameterList;
   private JComboBox<InstrumentConfiguration> m_instrumentsComboBox = null;
   private JComboBox<PeaklistSoftware> m_peaklistSoftwaresComboBox = null;
+  private JComboBox<String> m_filterModeComboBox = null;
   private JTextField m_filepathTF = null;
 
   private boolean m_rootPathError = false;
@@ -210,6 +213,19 @@ public class ImportDiaNNDialog extends DefaultStorableDialog {
     c.weightx = 1;
     allParametersPanel.add(m_peaklistSoftwaresComboBox, c);
 
+    c.gridx = 0;
+    c.gridwidth = 1;
+    c.weightx = 0;
+    c.gridy++;
+    JLabel filterModeLabel = new JLabel("Filtering Mode :");
+    filterModeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+    allParametersPanel.add(filterModeLabel, c);
+
+    c.gridx++;
+    c.gridwidth = 2;
+    c.weightx = 1;
+    allParametersPanel.add(m_filterModeComboBox, c);
+
     return allParametersPanel;
   }
 
@@ -255,6 +271,17 @@ public class ImportDiaNNDialog extends DefaultStorableDialog {
       @Override
       public void actionPerformed(ActionEvent e) {
         peaklistParameter.setUsed(true);   //JPM.WART : found a better fix (parameters not saved if it has never been set)
+      }
+    });
+
+    m_filterModeComboBox = new JComboBox<>(FILTER_MODES);
+    final ObjectParameter<String> filterModeParameter = new ObjectParameter<>("filter_mode", "Filtering Mode", m_filterModeComboBox, FILTER_MODES, FILTER_MODES_KEYS, 0, null);
+    parameterList.add(filterModeParameter);
+    m_filterModeComboBox.addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        filterModeParameter.setUsed(true);
       }
     });
 
@@ -317,6 +344,10 @@ public class ImportDiaNNDialog extends DefaultStorableDialog {
 
   public File getFile2Import(){
     return m_file2Import;
+  }
+
+  public String getFilterMode() {
+    return ((ObjectParameter<?>) m_importParameterList.getParameter("filter_mode")).getStringValue();
   }
 
   // -- DefaultStorableDialog implementation methods

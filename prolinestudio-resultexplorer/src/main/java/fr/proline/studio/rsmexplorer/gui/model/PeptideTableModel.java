@@ -80,7 +80,8 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
   public static final int COLTYPE_PEPTIDE_MSQUERY = 19;
   public static final int COLTYPE_SPECTRUM_TITLE = 20;
   public static final int COLTYPE_PEPTIDE_SCORE = 21;
-  public static final int COLTYPE_PEPTIDE_NONE_AMBIGUOUS_SEQ = 22;
+  public static final int COLTYPE_PEPTIDE_MATCH_PROPERTIES = 22;
+  public static final int COLTYPE_PEPTIDE_NONE_AMBIGUOUS_SEQ = 23;
 
 
 //  private static final TableColumn[] COLUMNS = new TableColumn[COLTYPE_PEPTIDE_SCORE+1];
@@ -108,6 +109,7 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
           .add(COLTYPE_PEPTIDE_MSQUERY,"MsQuery", "MsQuery", DMsQuery.class)
           .add(COLTYPE_SPECTRUM_TITLE, "Spectrum Title", "Spectrum Title", String.class)
           .add(COLTYPE_PEPTIDE_SCORE, "Score", "Peptide Score", Float.class)
+          .add(COLTYPE_PEPTIDE_MATCH_PROPERTIES, "Best Match Properties", "Properties from best peptide match", String.class)
           .add(COLTYPE_PEPTIDE_NONE_AMBIGUOUS_SEQ, "None Ambiguous Seq", "Peptide Sequence with Ambiguous AA substituted ", String.class).build();
 
     private DPeptideInstance[] m_peptideInstances = null;
@@ -390,6 +392,14 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
               return score.floatValue();
             }
 
+          case COLTYPE_PEPTIDE_MATCH_PROPERTIES: {
+            if(peptideMatch != null) {
+              Map<String, Object> propertiesAsMap = peptideMatch.getPropertiesAsMap();
+              return (propertiesAsMap == null) ? null : String.valueOf(propertiesAsMap);
+            }
+             return "";
+          }
+
           case COLTYPE_PEPTIDE_NONE_AMBIGUOUS_SEQ: {
             if (peptideMatch == null) {
               return "";
@@ -428,6 +438,7 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
         };
         filtersMap.put(COLTYPE_PEPTIDE_NAME, new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_NAME), peptideConverter, COLTYPE_PEPTIDE_NAME));
         filtersMap.put(COLTYPE_PEPTIDE_NONE_AMBIGUOUS_SEQ, new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_NONE_AMBIGUOUS_SEQ), null, COLTYPE_PEPTIDE_NONE_AMBIGUOUS_SEQ));
+        filtersMap.put(COLTYPE_PEPTIDE_MATCH_PROPERTIES, new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_MATCH_PROPERTIES), null, COLTYPE_PEPTIDE_MATCH_PROPERTIES));
 
         filtersMap.put(COLTYPE_PEPTIDE_NEXT_AA, new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_NEXT_AA), null, COLTYPE_PEPTIDE_NEXT_AA));
         filtersMap.put(COLTYPE_PEPTIDE_LENGTH, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_LENGTH), null, COLTYPE_PEPTIDE_LENGTH));

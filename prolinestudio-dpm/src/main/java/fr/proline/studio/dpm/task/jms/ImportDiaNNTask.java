@@ -20,6 +20,7 @@ public class ImportDiaNNTask extends AbstractJMSTask {
   private final DDataset m_dataset;
   private final Object[] m_resultData;
   private final String m_filePath;
+  private final String m_filterMode;
 
   /**
    * Call Import DiaNN Server Service using specified parameter.
@@ -34,7 +35,7 @@ public class ImportDiaNNTask extends AbstractJMSTask {
    * @param projectId Project  to import data to
    * @param resultData Object array to store result of server service call
    */
-  public ImportDiaNNTask(AbstractJMSCallback callback, String filePath , long instrumentId, long peaklistSoftwareId, long projectId, DDataset parentDS, Object[] resultData) {
+  public ImportDiaNNTask(AbstractJMSCallback callback, String filePath , long instrumentId, long peaklistSoftwareId, long projectId, DDataset parentDS, String filterMode, Object[] resultData) {
     super(callback, new TaskInfo("Import DiaNN Result "+filePath,true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
     if(resultData.length<3)
       throw new IllegalArgumentException(" Result data array should contains 3 entries ");
@@ -44,6 +45,7 @@ public class ImportDiaNNTask extends AbstractJMSTask {
     m_resultData = resultData;
     m_filePath = filePath;
     m_dataset= parentDS;
+    m_filterMode = (filterMode == null) ? "NONE" : filterMode;
   }
 
   @Override
@@ -90,6 +92,7 @@ public class ImportDiaNNTask extends AbstractJMSTask {
     params.put("result_files_dir",m_filePath );
     params.put("instrument_config_id", m_instrumentId);
     params.put("peaklist_software_id", m_peaklistSoftwareId);
+    params.put("filter_mode", m_filterMode);
     if(m_dataset == null)
       params.put("parent_dataset_id", -1L);
     else

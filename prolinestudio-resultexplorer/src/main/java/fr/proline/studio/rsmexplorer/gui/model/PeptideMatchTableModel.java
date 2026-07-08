@@ -75,9 +75,10 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
     public static final int COLTYPE_PEPTIDE_MSQUERY = 21;
     public static final int COLTYPE_SRC_DAT_FILE = 22;
     public static final int COLTYPE_SPECTRUM_TITLE = 23;
+    public static final int COLTYPE_PEPTIDE_MATCH_PROPERTIES = 24;
 
-    private static final String[] m_columnNames = {"Id", "Prev. AA", "Peptide", "Next AA", "Length", "PTMs", "Score", "Start", "Stop", "Calc. Mass", "Exp. MoZ", "Ppm", "Charge", "Missed Cl.", "Rank", "RT", "Protein Set Count", "Protein Sets", "Ion Parent Int.", "Decoy", "Validated", "MsQuery", ".dat File", "Spectrum Title"};
-    private static final String[] m_columnTooltips = {"PeptideMatch Id", "Previous Amino Acid", "Peptide", "Next Amino Acid", "Length", "Post Translational Modifications", "Score", "Start", "Stop", "Calculated Mass", "Experimental Mass to Charge Ratio", "parts-per-million", "Charge", "Missed Clivage", "Pretty Rank", "Retention Time (min)", "Potein Set Count", "Protein Sets", "Ion Parent Intensity", "Is Decoy", "Is Validated", "MsQuery", ".dat file of best PSM", "Spectrum Title"};
+    private static final String[] m_columnNames = {"Id", "Prev. AA", "Peptide", "Next AA", "Length", "PTMs", "Score", "Start", "Stop", "Calc. Mass", "Exp. MoZ", "Ppm", "Charge", "Missed Cl.", "Rank", "RT", "Protein Set Count", "Protein Sets", "Ion Parent Int.", "Decoy", "Validated", "MsQuery", ".dat File", "Spectrum Title", "Peptide Match Properties"};
+    private static final String[] m_columnTooltips = {"PeptideMatch Id", "Previous Amino Acid", "Peptide", "Next Amino Acid", "Length", "Post Translational Modifications", "Score", "Start", "Stop", "Calculated Mass", "Experimental Mass to Charge Ratio", "parts-per-million", "Charge", "Missed Clivage", "Pretty Rank", "Retention Time (min)", "Protein Set Count", "Protein Sets", "Ion Parent Intensity", "Is Decoy", "Is Validated", "MsQuery", ".dat file of best PSM", "Spectrum Title", "Properties from best peptide match"};
 
     private final ArrayList<Integer> m_colUsed = new ArrayList<>();
 
@@ -142,6 +143,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
             m_colUsed.add(COLTYPE_SRC_DAT_FILE);
         }
         m_colUsed.add(COLTYPE_SPECTRUM_TITLE);
+        m_colUsed.add(COLTYPE_PEPTIDE_MATCH_PROPERTIES);
 
     }
 
@@ -198,6 +200,8 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE: // no data read at all (we only have the id of the PeptideMatch)
             case COLTYPE_PEPTIDE_IS_DECOY:
             case COLTYPE_PEPTIDE_IS_VALIDATED:
+                return DatabaseLoadPeptideMatchTask.SUB_TASK_PEPTIDE_MATCH;
+            case COLTYPE_PEPTIDE_MATCH_PROPERTIES:
                 return DatabaseLoadPeptideMatchTask.SUB_TASK_PEPTIDE_MATCH;
             case COLTYPE_PEPTIDE_PREVIOUS_AA:
             case COLTYPE_PEPTIDE_NAME:
@@ -456,6 +460,11 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
                 }
                 return lazyData;
 
+            }
+            case COLTYPE_PEPTIDE_MATCH_PROPERTIES: {
+                Map<String, Object> propertiesAsMap = peptideMatch.getPropertiesAsMap();
+                lazyData.setData((propertiesAsMap == null) ? null : String.valueOf(propertiesAsMap));
+                return lazyData;
             }
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY: {
 
@@ -741,6 +750,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
             putFilter(COLTYPE_SRC_DAT_FILE, StringDiffFilter.class, null, filtersMap);
         }
         putFilter(COLTYPE_SPECTRUM_TITLE, StringDiffFilter.class, null, filtersMap);
+        putFilter(COLTYPE_PEPTIDE_MATCH_PROPERTIES, StringDiffFilter.class, null, filtersMap);
     }
 
     @Override
@@ -768,6 +778,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
             case COLTYPE_PEPTIDE_PTM:
             case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES:
             case COLTYPE_SPECTRUM_TITLE:
+            case COLTYPE_PEPTIDE_MATCH_PROPERTIES:
                 return String.class;
             case COLTYPE_PEPTIDE_SCORE:
             case COLTYPE_PEPTIDE_CALCULATED_MASS:

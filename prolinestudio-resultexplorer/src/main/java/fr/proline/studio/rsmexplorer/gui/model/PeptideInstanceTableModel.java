@@ -72,6 +72,7 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
     public static final int COLTYPE_SPECTRUM_TITLE = 15;
     public static final int COLTYPE_PEPTIDE_MATCH_COUNT = 16;
     public static final int COLTYPE_PEPTIDE_SCORE = 17;
+    public static final int COLTYPE_PEPTIDE_MATCH_PROPERTIES = 18;
 
     private static final TableColumn[] COLUMNS = new TableColumn.Builder()
             .add(COLTYPE_PEPTIDE_ID, "Id", "Peptide Id", Long.class)
@@ -91,7 +92,8 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
             .add(COLTYPE_PEPTIDE_MSQUERY,"MsQuery", "MsQuery", DMsQuery.class, true)
             .add(COLTYPE_SPECTRUM_TITLE, "Spectrum Title", "Spectrum Title", String.class, true)
             .add(COLTYPE_PEPTIDE_MATCH_COUNT, "PSM Count", "Number of Peptide Spectrum Matches matching this Peptide", Integer.class)
-            .add(COLTYPE_PEPTIDE_SCORE, "Score", "Peptide Score", Float.class).build();
+            .add(COLTYPE_PEPTIDE_SCORE, "Score", "Peptide Score", Float.class)
+            .add(COLTYPE_PEPTIDE_MATCH_PROPERTIES, "Best Match Properties", "Properties from best peptide match", String.class).build();
 
     private PeptideInstance[] m_peptideInstances = null;
 
@@ -292,6 +294,10 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
                 return null;
               }
             }
+            case COLTYPE_PEPTIDE_MATCH_PROPERTIES: {
+                Map<String, Object> propertiesAsMap = peptideMatch.getPropertiesAsMap();
+                return (propertiesAsMap == null) ? null : String.valueOf(propertiesAsMap);
+            }
         }
         return null; // should never happen
     }
@@ -426,6 +432,7 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
         };
         filtersMap.put(COLTYPE_PEPTIDE_MSQUERY, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_MSQUERY), msQueryConverter, COLTYPE_PEPTIDE_MSQUERY));
         filtersMap.put(COLTYPE_SPECTRUM_TITLE, new StringDiffFilter(getColumnName(COLTYPE_SPECTRUM_TITLE), null, COLTYPE_SPECTRUM_TITLE));
+        filtersMap.put(COLTYPE_PEPTIDE_MATCH_PROPERTIES, new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_MATCH_PROPERTIES), null, COLTYPE_PEPTIDE_MATCH_PROPERTIES));
     }
 
     @Override
@@ -451,6 +458,7 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
                 return Float.class;
             case COLTYPE_PEPTIDE_NAME:
             case COLTYPE_SPECTRUM_TITLE:
+            case COLTYPE_PEPTIDE_MATCH_PROPERTIES:
                 return String.class;
         }
 

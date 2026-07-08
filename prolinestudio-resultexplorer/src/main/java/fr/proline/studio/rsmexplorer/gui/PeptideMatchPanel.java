@@ -411,7 +411,9 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         //m_peptideMatchTable.displayColumnAsPercentage(peptideMatchTableModel.convertColToColUsed(PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE));
 
         m_peptideMatchTable.getColumnExt(m_peptideMatchTable.convertColumnIndexToView(PeptideMatchTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
-        
+        int colProp = peptideMatchTableModel.convertColToColUsed(PeptideMatchTableModel.COLTYPE_PEPTIDE_MATCH_PROPERTIES);
+        m_peptideMatchTable.getColumnExt(m_peptideMatchTable.convertColumnIndexToView(colProp)).setVisible(false);
+
         m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane, m_peptideMatchTable);
         
         m_scrollPane.setViewportView(m_peptideMatchTable);

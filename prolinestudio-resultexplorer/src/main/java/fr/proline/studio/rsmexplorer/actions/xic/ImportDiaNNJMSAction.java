@@ -68,6 +68,7 @@ public class ImportDiaNNJMSAction extends AbstractRSMAction  {
       final DefaultTreeModel treeModel = (DefaultTreeModel) IdentificationTree.getCurrentTree().getModel();
       final long instrumentId = dialog.getInstrumentId();
       final long peaklistSoftwareId = dialog.getPeaklistSoftwareId();
+      final String filterMode = dialog.getFilterMode();
       File diaNNFile = dialog.getFile2Import();
 
       // Create temporary nodes for the identifications
@@ -89,11 +90,11 @@ public class ImportDiaNNJMSAction extends AbstractRSMAction  {
 
       IdentificationTree.getCurrentTree().expandNodeIfNeeded(n);
 
-      startImport(diaNNFile.getPath(), project, identificationNode, parentDataset, datasetName, treeModel, instrumentId, peaklistSoftwareId);
+      startImport(diaNNFile.getPath(), project, identificationNode, parentDataset, datasetName, treeModel, instrumentId, peaklistSoftwareId, filterMode);
     }
   }
 
-  private void startImport(final String filePath, final Project project, final DataSetNode identificationNode, final DDataset parentDataset, final String datasetName, final DefaultTreeModel treeModel,final long instrumentId,final long peaklisSoftId) {
+  private void startImport(final String filePath, final Project project, final DataSetNode identificationNode, final DDataset parentDataset, final String datasetName, final DefaultTreeModel treeModel,final long instrumentId,final long peaklisSoftId, final String filterMode) {
 
     final Object[] _taskResults = new Object[3];
 
@@ -113,7 +114,7 @@ public class ImportDiaNNJMSAction extends AbstractRSMAction  {
             if (quantDatasetId != null) {
               createQuantDataset(quantDatasetId);
             }
-            JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), " Import DIANN Result OK !! ");
+            //JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), " Import DIANN Result OK !! ");
           } else {
             treeModel.removeNodeFromParent(identificationNode);
             JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), " Import DIANN Result ERROR !! "+getTaskError());
@@ -124,7 +125,7 @@ public class ImportDiaNNJMSAction extends AbstractRSMAction  {
 
     logger.info(" WILL CALL ImportDiaNNTask ");
 
-    ImportDiaNNTask task =new ImportDiaNNTask(callback,filePath,instrumentId,peaklisSoftId,project.getId(), parentDataset, _taskResults);
+    ImportDiaNNTask task =new ImportDiaNNTask(callback,filePath,instrumentId,peaklisSoftId,project.getId(), parentDataset, filterMode, _taskResults);
     AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
   }

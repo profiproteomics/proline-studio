@@ -99,10 +99,11 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     public static final int COLTYPE_PEPTIDE_PROTEIN_SET_COUNT = 8;
     public static final int COLTYPE_PEPTIDE_PROTEIN_SET_NAMES = 9;
     public static final int COLTYPE_OVERVIEW = 10;
-    public static final int COLTYPE_PEPTIDE_CLUSTER = 11;
+    public static final int COLTYPE_PEPTIDE_MATCH_PROPERTIES = 11;
+    public static final int COLTYPE_PEPTIDE_CLUSTER = 12;
     public static final int LAST_STATIC_COLUMN = COLTYPE_PEPTIDE_CLUSTER;
-    private static final String[] m_columnNames = {"Id", "Status", "Peptide Sequence", "PTMs", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets", "Overview", "Cluster"};
-    private static final String[] m_toolTipColumns = {"MasterQuantPeptide Id", "Peptide Status: Validated or Invalidated (manually or automatically)", "Identified Peptide Sequence", "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Retention Time (min)", "Number of Protein Set identified by this Peptide", "List of Protein Sets identified by this Peptide", "Overview", "Cluster Number"};
+    private static final String[] m_columnNames = {"Id", "Status", "Peptide Sequence", "PTMs", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets", "Overview", "Peptide Match Property","Cluster"};
+    private static final String[] m_toolTipColumns = {"MasterQuantPeptide Id", "Peptide Status: Validated or Invalidated (manually or automatically)", "Identified Peptide Sequence", "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Retention Time (min)", "Number of Protein Set identified by this Peptide", "List of Protein Sets identified by this Peptide", "Overview", "Properties from best peptide match", "Cluster Number"};
 
     public static final int COLTYPE_SELECTION_LEVEL = 0;
     public static final int COLTYPE_IDENT_PSM = 1;
@@ -823,6 +824,20 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
 
                 return lazyData;
             }
+            case COLTYPE_PEPTIDE_MATCH_PROPERTIES: {
+                LazyData lazyData = getLazyData(row, col);
+                if (peptideInstance == null) {
+                    lazyData.setData(null);
+                    givePriorityTo(m_taskId, row, col);
+                } else if (representPepMatch != null) {
+                    Map<String, Object> propertiesAsMap = representPepMatch.getPropertiesAsMap();
+                    String properties =  (propertiesAsMap == null) ? null : String.valueOf(propertiesAsMap);
+                    lazyData.setData(properties);
+                } else {
+                    lazyData.setData("");
+                }
+                return lazyData;
+            }
             case COLTYPE_PEPTIDE_SCORE: {
                 LazyData lazyData = getLazyData(row, col);
                 if (peptideInstance == null) {
@@ -1345,6 +1360,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
      */
     public List<Integer> getDefaultColumnsToHide() {
         List<Integer> listIds = new ArrayList<>();
+        listIds.add(COLTYPE_PEPTIDE_MATCH_PROPERTIES);
         if (m_quantChannels != null) {
             for (int i = m_quantChannels.length - 1; i >= 0; i--) {
 
@@ -1414,6 +1430,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             case COLTYPE_PEPTIDE_NAME:
             case COLTYPE_PEPTIDE_PTM:
             case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES:
+            case COLTYPE_PEPTIDE_MATCH_PROPERTIES:
             case COLTYPE_PEPTIDE_CLUSTER: {
                 return String.class;
             }

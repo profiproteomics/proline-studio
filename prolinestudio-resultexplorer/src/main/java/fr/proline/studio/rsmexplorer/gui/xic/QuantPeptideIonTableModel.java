@@ -82,10 +82,11 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
     public static final int COLTYPE_PEPTIDE_ION_RETENTION_TIME = 8;
     public static final int COLTYPE_PEPTIDE_PROTEIN_SET_COUNT = 9;
     public static final int COLTYPE_PEPTIDE_PROTEIN_SET_NAMES = 10;
-    public static final int LAST_STATIC_COLUMN = COLTYPE_PEPTIDE_PROTEIN_SET_NAMES;
-    private static final String[] m_columnNames = {"Peptide Id", "QPeptideIon Id", "Peptide Sequence", "Status", "PTMs", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets"};
-    private static final String[] m_columnNamesForFilter = {"Peptide Id", "QPeptideIon Id", "Peptide Sequence", "Status", "PTMs", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets"};
-    private static final String[] m_toolTipColumns = {"Peptide Id", "MasterQuantPeptideIon Id", "Identified Peptide Sequence", "Peptide ion status: invalid, valid, valid and used for peptide abundance calculation, valid but not used for peptide abundance calculation.", "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Retention time (min)", "Protein Set Count", "Protein Sets"};
+    public static final int COLTYPE_PEPTIDE_MATCH_PROPERTIES = 11;
+    public static final int LAST_STATIC_COLUMN = COLTYPE_PEPTIDE_MATCH_PROPERTIES;
+    private static final String[] m_columnNames = {"Peptide Id", "QPeptideIon Id", "Peptide Sequence", "Status", "PTMs", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets","Property"};
+    private static final String[] m_columnNamesForFilter = {"Peptide Id", "QPeptideIon Id", "Peptide Sequence", "Status", "PTMs", "Score", "Charge", "m/z", "RT", "Protein Set Count", "Protein Sets","Property"};
+    private static final String[] m_toolTipColumns = {"Peptide Id", "MasterQuantPeptideIon Id", "Identified Peptide Sequence", "Peptide ion status: invalid, valid, valid and used for peptide abundance calculation, valid but not used for peptide abundance calculation.", "Post Translational Modifications", "Score", "Charge", "Mass to Charge Ratio", "Retention time (min)", "Protein Set Count", "Protein Sets","Peptide Match Property"};
 
     public static final int COLTYPE_SELECTION_LEVEL = 0;
     public static final int COLTYPE_PSM = 1;
@@ -328,6 +329,19 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                 return lazyData;
 
             }
+            case COLTYPE_PEPTIDE_MATCH_PROPERTIES: {
+                LazyData lazyData = getLazyData(row, col);
+                DPeptideMatch peptideMatch = peptideIon.getBestPeptideMatch();
+                if (peptideMatch == null) {
+                    lazyData.setData(null);
+                    givePriorityTo(m_taskId, row, col);
+                } else {
+                    Map<String, Object> propertiesAsMap = peptideMatch.getPropertiesAsMap();
+                    String properties =  (propertiesAsMap == null) ? null : String.valueOf(propertiesAsMap);
+                    lazyData.setData(properties);
+                }
+                return lazyData;
+            }
             case COLTYPE_PEPTIDE_PROTEIN_SET_COUNT: {
                 LazyData lazyData = getLazyData(row, col);
                 DPeptideInstance peptideInstance = peptideIon.getPeptideInstance();
@@ -560,6 +574,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
         filtersMap.put(COLTYPE_PEPTIDE_ION_MOZ, new DoubleFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_MOZ), null, COLTYPE_PEPTIDE_ION_MOZ));
         filtersMap.put(COLTYPE_PEPTIDE_PROTEIN_SET_COUNT, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_PROTEIN_SET_COUNT), null, COLTYPE_PEPTIDE_PROTEIN_SET_COUNT));
         filtersMap.put(COLTYPE_PEPTIDE_PROTEIN_SET_NAMES, new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_PROTEIN_SET_NAMES), null, COLTYPE_PEPTIDE_PROTEIN_SET_NAMES));
+        filtersMap.put(COLTYPE_PEPTIDE_MATCH_PROPERTIES, new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_MATCH_PROPERTIES), null, COLTYPE_PEPTIDE_MATCH_PROPERTIES));
 
         ConvertValueInterface minuteConverter = new ConvertValueInterface() {
             @Override
@@ -626,6 +641,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
         List<Integer> listIds = new ArrayList();
         listIds.add(COLTYPE_PEPTIDE_ID);
         listIds.add(COLTYPE_PEPTIDE_ION_ID);
+        listIds.add(COLTYPE_PEPTIDE_MATCH_PROPERTIES);
         if (m_quantChannels != null) {
             for (int i = m_quantChannels.length - 1; i >= 0; i--) {
                 if (!isSpectralCountQuant()) {
@@ -738,6 +754,16 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                         m_sb.setLength(0);
                         return t;
                     }
+                }
+            }
+            case COLTYPE_PEPTIDE_MATCH_PROPERTIES: {
+                DPeptideMatch peptideMatch = peptideIon.getBestPeptideMatch();
+                if (peptideMatch == null) {
+                    return "";
+
+                } else {
+                    Map<String, Object> propertiesAsMap = peptideMatch.getPropertiesAsMap();
+                  return (propertiesAsMap == null) ? null : String.valueOf(propertiesAsMap);
                 }
             }
             case COLTYPE_PEPTIDE_ION_CHARGE: {
@@ -869,6 +895,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
                 return Float.class;
             }
             case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES:
+            case COLTYPE_PEPTIDE_MATCH_PROPERTIES:
             case COLTYPE_PEPTIDE_PTM: {
                 return String.class;
             }

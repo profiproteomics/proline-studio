@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.swing.*;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +72,9 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
 
     private static String TAB_POST_PROCESSING_TITLE = "Compute Post Processing";
     private static String TAB_LOW_LEVEL_TITLE = "Low Level";
+
+    private static String DIANN_CFG_KEY = "command_line";
+
 
     public ExperimentalDesignPanel(DDatasetType.QuantitationMethodInfo quantMethodInfo) {
         super();
@@ -198,12 +202,18 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
                     switch (m_quantMethodInfo) {
                         case FEATURES_EXTRACTION -> {
                             Map<String,Object>  quantCfg = m_dataset.getQuantProcessingConfigAsMap();
-                            String cfgVersion = quantCfg.containsKey("config_version") ? quantCfg.get("config_version").toString() : "1.0";
-                            LabelFreeMSParamsCompletePanel xicParamPanel = new LabelFreeMSParamsCompletePanel(true, false, cfgVersion);
-                            m_confPanel.removeAll();
-                            xicParamPanel.resetScrollbar();
-                            m_confPanel.add(xicParamPanel, BorderLayout.CENTER);
-                            xicParamPanel.setQuantParams(quantCfg);
+                            if(quantCfg.containsKey(DIANN_CFG_KEY)) {
+                                m_confPanel.removeAll();
+                                JPanel diannPanel = getDiannPanel(quantCfg);
+                                m_confPanel.add(diannPanel, BorderLayout.CENTER);
+                            } else {
+                                String cfgVersion = quantCfg.containsKey("config_version") ? quantCfg.get("config_version").toString() : "1.0";                             
+                                LabelFreeMSParamsCompletePanel xicParamPanel = new LabelFreeMSParamsCompletePanel(true, false, cfgVersion);
+                                m_confPanel.removeAll();
+                                xicParamPanel.resetScrollbar();
+                                m_confPanel.add(xicParamPanel, BorderLayout.CENTER);
+                                xicParamPanel.setQuantParams(quantCfg);
+                            }
                         }
                         case ISOBARIC_TAGGING -> {
                             Map<String,Object> tmtParams = m_dataset.getQuantProcessingConfigAsMap();
@@ -292,6 +302,20 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
             m_logger.error("error while settings quanti params " + ex);
         }
         m_tabbedPane.revalidate();
+    }
+
+    private static @NonNull JPanel getDiannPanel(Map<String, Object> quantCfg) {
+        JPanel diannPanel = new JPanel();
+        diannPanel.setLayout(new BorderLayout());
+        JLabel diannLabel = new JLabel("DiaNN command line");
+        diannPanel.add(diannLabel, BorderLayout.NORTH);
+        JTextArea commandLineArea = new JTextArea(quantCfg.get(DIANN_CFG_KEY).toString());
+        commandLineArea.setEditable(false);
+        commandLineArea.setLineWrap(true);
+        commandLineArea.setWrapStyleWord(true);
+        JScrollPane scrollPane = new JScrollPane(commandLineArea);
+        diannPanel.add(scrollPane, BorderLayout.CENTER);
+        return diannPanel;
     }
 
     private Map<Long, String> getPtmSpecificityNameById() {

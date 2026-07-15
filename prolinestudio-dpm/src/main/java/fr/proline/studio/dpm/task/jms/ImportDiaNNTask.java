@@ -8,9 +8,7 @@ import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class ImportDiaNNTask extends AbstractJMSTask {
 

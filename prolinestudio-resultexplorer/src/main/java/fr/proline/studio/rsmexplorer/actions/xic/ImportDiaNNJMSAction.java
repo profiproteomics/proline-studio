@@ -6,9 +6,11 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.WindowManager;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
+import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.AccessJMSManagerThread;
@@ -31,7 +33,6 @@ import javax.swing.*;
 import javax.swing.tree.DefaultTreeModel;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Map;
 
 public class ImportDiaNNJMSAction extends AbstractRSMAction  {
 
@@ -90,6 +91,7 @@ public class ImportDiaNNJMSAction extends AbstractRSMAction  {
 
       IdentificationTree.getCurrentTree().expandNodeIfNeeded(n);
 
+      assert project != null;
       startImport(diaNNFile.getPath(), project, identificationNode, parentDataset, datasetName, treeModel, instrumentId, peaklistSoftwareId, filterMode);
     }
   }
@@ -107,9 +109,8 @@ public class ImportDiaNNJMSAction extends AbstractRSMAction  {
       @Override
       public void run(boolean success) {
           if(success) {
-            Map<String, Long> rsmIdByRsId =  (Map<String, Long>)_taskResults[0];
             Long identDsId = (Long)_taskResults[1];
-            createDataset(identificationNode, project, parentDataset, datasetName, treeModel,  rsmIdByRsId,identDsId, getTaskInfo());
+            createDataset(identificationNode, project, parentDataset, datasetName, treeModel,  identDsId, getTaskInfo());
             Long quantDatasetId = (Long)_taskResults[2];
             if (quantDatasetId != null) {
               createQuantDataset(quantDatasetId);
@@ -147,7 +148,7 @@ public class ImportDiaNNJMSAction extends AbstractRSMAction  {
     QuantitationTree.getCurrentTree().loadDataSet(quantDatasetId, quantitationNode);
   }
 
-  private void createDataset(final DataSetNode identificationNode, Project project, DDataset parentDataset, String name, final DefaultTreeModel treeModel, Map<String, Long> rsmIdByRsId, Long identDsId, TaskInfo taskInfo) {
+  private void createDataset(final DataSetNode identificationNode, Project project, DDataset parentDataset, String name, final DefaultTreeModel treeModel, Long identDsId, TaskInfo taskInfo) {
 
     identificationNode.setIsChanging(false);
     treeModel.nodeChanged(identificationNode);
@@ -167,8 +168,9 @@ public class ImportDiaNNJMSAction extends AbstractRSMAction  {
         if (success) {
           DDataset dataset = createdDatasetList.get(0);
           identificationNode.setIsChanging(false);
-          ((DataSetData) identificationNode.getData()).setDataset(dataset);
-          createSubDataset(identificationNode, project, dataset, treeModel, rsmIdByRsId, taskInfo);
+          identificationNode.setDataset(dataset);
+
+          createChildDataset(identificationNode,  dataset, treeModel);
           treeModel.nodeChanged(identificationNode);
         } else {
           // should not happen
@@ -186,51 +188,35 @@ public class ImportDiaNNJMSAction extends AbstractRSMAction  {
     AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
   }
+  private void createChildDataset(final DataSetNode parentNode,  DDataset parentDataset, final DefaultTreeModel treeModel) {
+    int nbChild = parentDataset.getChildrenCount();
+    final ArrayList<AbstractData> childDatasetList = new ArrayList<>();
+    AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
-  private void createSubDataset(final DataSetNode parentNode, Project project, DDataset parentDataset, final DefaultTreeModel treeModel, Map<String, Long> rsmIdByRsId, TaskInfo taskInfo) {
+      @Override
+      public boolean mustBeCalledInAWT() {
+        return true;
+      }
 
-    for(String rsIdAsStr : rsmIdByRsId.keySet()){
-      Long associatedRsmId = rsmIdByRsId.get(rsIdAsStr);
-      Long rsId = Long.valueOf(rsIdAsStr);
-      String dsName = parentDataset.getName() + "." + associatedRsmId.toString();
-      DataSetData identificationData = DataSetData.createTemporaryIdentification(dsName); //new DataSetData(dsName, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS);  //JPM.TODO
-      final DataSetNode identificationNode = new DataSetNode(identificationData);
-      identificationNode.setIsChanging(true);
-      treeModel.insertNodeInto(identificationNode, parentNode, parentNode.getChildCount());
-
-
-      final ArrayList<DDataset> createdDatasetList = new ArrayList<>();
-
-      AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-        @Override
-        public boolean mustBeCalledInAWT() {
-          return true;
-        }
-
-        @Override
-        public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
-          if (success) {
-
-            DDataset dataset = createdDatasetList.get(0);
-            identificationNode.setIsChanging(false);
-            ((DataSetData) identificationNode.getData()).setDataset(dataset);
-            treeModel.nodeChanged(identificationNode);
-          } else {
-            // should not happen
-            treeModel.removeNodeFromParent(identificationNode);
+      @Override
+      public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+        if (success) {
+          if(nbChild != childDatasetList.size())
+            JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "Import DiaNN Missing ot to much child (dataset child "+nbChild+"  vs read child "+childDatasetList.size()+")");
+          else{
+            int index = 0;
+            for(AbstractData childDataset : childDatasetList){
+              final DataSetNode identificationNode = new DataSetNode(childDataset);
+              treeModel.insertNodeInto(identificationNode, parentNode, index++);
+            }
           }
         }
-      };
+      }
+    };
+    parentNode.getData().load(callback,childDatasetList, AbstractDatabaseTask.Priority.TOP, true);
 
-      // ask asynchronous loading of data
-      DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-      /* Long rmsId = null; // (rsmIdByRsId != null) && (rsmIdByRsId.containsKey(rsId.toString())) ?  rsmIdByRsId.get(rsId.toString()) : null;*/
-      task.initCreateDatasetForIdentification(project, parentDataset, Aggregation.ChildNature.SAMPLE_ANALYSIS, dsName, rsId, associatedRsmId, createdDatasetList, taskInfo);
-      AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-    }
   }
+
   @Override
   public void updateEnabled(AbstractNode[] selectedNodes) {
 

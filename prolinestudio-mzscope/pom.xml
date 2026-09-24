@@ -144,7 +144,20 @@
             <groupId>com.github.psambit9791</groupId>
             <artifactId>jdsp</artifactId>
             <version>2.0.1</version>
-
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.platform</groupId>
+                    <artifactId>junit-platform-surefire-provider</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.maven.surefire</groupId>
+                    <artifactId>surefire-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.maven.surefire</groupId>
+                    <artifactId>common-java5</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
